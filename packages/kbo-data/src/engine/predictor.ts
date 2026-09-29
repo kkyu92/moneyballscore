@@ -114,7 +114,8 @@ export function predict(input: PredictionInput, opts?: PredictOptions): Predicti
     : 0.5;
 
   // 11. park_weather (M-F1 cycle 1013 — shadow factor, production weight=0)
-  // weather/isDome 결측 시 0.5 neutral. shadow cohort 에서만 효과 발현.
+  // weather/isDome 결측 시 0.5 neutral. daily.ts PredictionInput 구성부 미배선 (cycle 2926 확인) —
+  // 항상 undefined → 이 factor 는 production/shadow 양쪽 모두 no-op (shadow-cohort.ts:34-36 도 동일 확인).
   const pwScore = scoreParkWeather(
     input.weather ?? null,
     input.parkFactor,
@@ -123,7 +124,8 @@ export function predict(input: PredictionInput, opts?: PredictOptions): Predicti
   factors.park_weather = parkWeatherFactor(pwScore);
 
   // 12. umpire_sz (M-F2 cycle 1013 — shadow factor, production weight=0)
-  // umpireSZScore 결측 시 0.5 neutral. predictor 동기 — DB lookup 은 외부 pipeline 에서 처리.
+  // umpireSZScore 결측 시 0.5 neutral. daily.ts PredictionInput 구성부 미배선 (types.ts:176-177,
+  // factors/umpire-sz.ts:16-18 와 동일 확인, cycle 2926) — 항상 undefined → 이 factor 는 no-op.
   factors.umpire_sz = input.umpireSZScore
     ? umpireSZFactor(input.umpireSZScore)
     : 0.5;
