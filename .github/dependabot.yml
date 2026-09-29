@@ -34,9 +34,17 @@ updates:
     # TypeError (contextOrFilename.getFilename is not a function) 로 깨짐 (cycle 2009 fix-incident 확인,
     # PR #2616/#2840 양쪽 CI 실패 재현). eslint-config-next 가 eslint-plugin-react 를 8.x 로 올리기 전까진
     # major bump PR 자체가 항상 실패 → dependabot 이 반복 생성하는 노이즈 차단.
+    # @types/node 21+: cloudflare-worker 의 tsconfig 가 "@cloudflare/workers-types" 만 types 로 등록.
+    # @types/node 20.x 까지는 node:url 의 URL/URLSearchParams 타입이 workers-types 의 global URL 과
+    # 구조적으로 호환됐으나, 21+ 부터 URLSearchParamsIterator 에 Symbol.dispose 요구사항이 추가돼
+    # workers-types 쪽 URL 과 타입 불일치 (error TS2345, cron-sync.test.ts) — PR #1942 CI 실패 확인
+    # (cycle 2925 fix-incident). @cloudflare/workers-types 가 이 iterator 인터페이스를 따라잡기 전까진
+    # major bump PR 자체가 항상 실패 → dependabot 이 반복 생성하는 노이즈 차단.
     ignore:
       - dependency-name: "eslint"
         versions: [">=10.0.0"]
+      - dependency-name: "@types/node"
+        versions: [">=21.0.0"]
 
   - package-ecosystem: github-actions
     directory: /
