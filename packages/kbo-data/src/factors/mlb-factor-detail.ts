@@ -25,7 +25,7 @@ function formatMlbFactorValue(key: string, value: number | null | undefined): st
   return value.toFixed(2);
 }
 
-export interface MlbFactorDetailRow {
+interface MlbFactorDetailRow {
   key: string;
   label: string;
   weightPct: number;

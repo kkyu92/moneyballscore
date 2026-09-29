@@ -19,7 +19,7 @@ import { ELO_DIVIDER, ELO_NEUTRAL, HOME_ELO_BONUS } from '@moneyball/shared';
 export const MLB_ELO_K = 4;
 export const MLB_ELO_K_POSTSEASON = 6;
 
-export interface MlbEloUpdateResult {
+interface MlbEloUpdateResult {
   home: number;
   away: number;
 }
@@ -72,7 +72,7 @@ export interface MlbFinalGameForElo {
   away_score: number | null;
 }
 
-export interface MlbTeamEloState {
+interface MlbTeamEloState {
   eloRating: number;
   gamesPlayed: number;
   season: number;
@@ -84,7 +84,7 @@ export interface MlbTeamEloState {
  * (predictions.home_elo/away_elo 가 매 경기 row 에 쌓여 시계열 자연 발생) 와 달리
  * historical 시계열이 없던 blocker(cycle 2082 발견) 를 해소.
  */
-export interface MlbEloHistoryEntry {
+interface MlbEloHistoryEntry {
   team_code: string;
   game_date: string;
   season: number;
