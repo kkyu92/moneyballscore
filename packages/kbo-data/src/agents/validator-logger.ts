@@ -1,6 +1,6 @@
 // validator_logs fire-and-forget insert 통합 lib
 //
-// team-agent / judge-agent 가 동일 path 재사용. migration 022 의 agent + passed 컬럼 박제.
+// team-agent / judge-agent / calibration-agent / postview 가 동일 path 재사용. migration 022 의 agent + passed 컬럼 박제.
 //
 // 정책:
 // - violations.length === 0 → skip (insert X)

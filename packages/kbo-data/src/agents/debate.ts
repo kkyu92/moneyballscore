@@ -9,8 +9,8 @@ import type { GameContext, DebateResult, TeamArgument, CalibrationHint } from '.
 /**
  * 경기별 에이전트 토론 실행
  *
- * Step 1: 홈/원정 팀 에이전트 + 회고 에이전트 3개 병렬 실행 (Promise.all)
- *   - runTeamAgent(home) / runTeamAgent(away) / runCalibrationAgent
+ * Step 1: 홈/원정 팀 에이전트 + 회고 에이전트 + rivalry 조회 4개 병렬 실행 (Promise.all)
+ *   - runTeamAgent(home) / runTeamAgent(away) / runCalibrationAgent / getRivalryBlock
  * Step 2: 심판 에이전트 순차 실행 (Step 1 결과 필요)
  *   - runJudgeAgent(homeArg, awayArg, calibration, ...)
  */

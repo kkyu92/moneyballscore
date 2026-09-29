@@ -5,6 +5,7 @@
  *   - team-agent: validateTeamArgument (홈/원정 team-agent JSON)
  *   - judge-agent: validateJudgeReasoning (심판 reasoning 자유 텍스트)
  *   - postview: validateJudgeReasoning + validateFactorAttribution (사후분석)
+ *   - calibration-agent: validateCalibrationHint (calibration hint 자유 텍스트)
  *   - 위반 reasoning 은 maskViolatedReasoning 으로 mask (사용자 가시 leak 차단)
  *   - notifyValidationViolations 가 Sentry tag 로 위반 capture (silent drift 사전 감지)
  *
