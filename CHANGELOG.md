@@ -1,3 +1,15 @@
+## v0.5.62.262 — 2026-09-29 (cycle 2934, polish-ui: MLB wild-card 랭크 배지 shape drift)
+
+### polish-ui: /mlb/wild-card + /en/mlb/wild-card 랭크 배지 shape drift 정정 (cycle 2934, SUCCESS — 2-chain lock fallback)
+
+- 진단: 직전8(2926-2933) distinct=1(review-code(heavy) 8연속) — 2-chain lock 조건 충족, 잠긴 chain(review-code 단독)이 fix-incident 아니라 lock 무시 X → review-code 후보 제외. fix-incident(gap9/20)/op-analysis(gap10/25)/info-arch(gap12/30)/lotto(chain-gap20/30) 전부 미도달. open issue 0, approved plan 0/23. `어떤 chain 도 trigger 없으면 → polish-ui 강제 발화` 룰 적용.
+- `~/lotto_picks/` legacy 디렉토리 기준으로는 9/26·10/3회 picks 부재로 보였으나 실제 프로덕션 경로(`apps/moneyball/data/lotto-picks/`)는 cron 자동화(`lotto-pick-update.yml` 등)로 10/3회까지 이미 최신 — false trigger 확인 후 제외.
+- DESIGN.md 토큰 감사(rounded-md/flat gray/text-[11px]/duration/AI배지 사이즈) 전부 clean — 기존 silent drift family 소진 재확인. general-purpose subagent 로 최근 활성화된 `/mlb/wild-card`+`/mlb/postseason`(KO+EN, 4파일) twin 비교 감사 위탁.
+- 확정 drift 1건: 랭크 배지(`w-9 h-7 rounded-full`)가 모든 행에 고정 — 실제로 리그당 12행 중 in-field 3행만 "WC{n}" 넓은 텍스트, 나머지 9행은 일반 숫자인데도 동일 oval 박스 사용. twin: `/mlb/standings` 랭크 배지는 동일 역할(순위 숫자)에 `w-7 h-7`(원형) 사용. inField 조건부로 정렬(KO+EN 2파일). PR #3116 merge(322ea50f).
+- tsc clean(kbo-data+moneyball), test 582/582파일 4564/4564 green.
+
+다음 사이클 추천 = review-code(heavy) 복귀 시 kbo-data pipeline/ 잔여 스코프(backtest-* 7파일 ~1860줄 또는 daily.ts/mlb-pipeline.ts 대형 단일파일) 계속 — 2-chain lock cooldown(N=1) 적용 중이라 바로 다음 사이클은 review-code 제외, op-analysis(11/25)/info-arch(13/30)/lotto(21/30) gap 자연 대기도 고려.
+
 ## v0.5.62.261 — 2026-09-29 (cycle 2933, review-code(heavy): kbo-data pipeline/ 유틸 9파일 감사)
 
 ### review-code(heavy): packages/kbo-data pipeline/ 소형 유틸 9파일(405줄) 감사 — dead export 1건 제거 (cycle 2933, SUCCESS)

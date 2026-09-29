@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — polish-ui: MLB wild-card 랭크 배지 shape drift 정정 (cycle 2934, 2026-09-29)
+
+진단: 직전8(2926-2933) distinct=1(review-code(heavy) 8연속) — 2-chain lock 충족(잠긴 chain=review-code 단독, fix-incident 아니라 lock 무시 X) → review-code 제외. fix-incident(gap9)/op-analysis(gap10)/info-arch(gap12)/lotto(chain-gap20) 전부 미도달. open issue 0, approved plan 0/23. "어떤 chain 도 trigger 없으면 → polish-ui 강제 발화" 룰 적용.
+
+`~/lotto_picks/` legacy 디렉토리만 보면 9/26·10/3회 picks 부재로 보였으나 실제 프로덕션 경로(`apps/moneyball/data/lotto-picks/`)는 cron 자동화로 10/3회까지 이미 최신 — false trigger 확인 후 lotto 제외. DESIGN.md 토큰(rounded-md/flat gray/duration 등) 전부 clean 재확인 — general-purpose subagent 로 최근 활성화된 `/mlb/wild-card`+`/mlb/postseason`(KO+EN) twin 비교 감사 위탁.
+
+확정 drift 1건: 랭크 배지(`w-9 h-7 rounded-full`)가 리그당 12행 전부 고정 폭 — in-field 3행만 "WC{n}" 넓은 텍스트, 나머지 9행은 일반 숫자인데도 동일 oval. twin `/mlb/standings` 랭크 배지(`w-7 h-7` 원형)와 정렬 — inField 조건부로 KO+EN 2파일 수정. PR #3116 merge(322ea50f).
+
+tsc clean(kbo-data+moneyball), test 582/582파일 4564/4564 green.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 적용 중이라 review-code 바로 복귀 X — op-analysis(11/25)/info-arch(13/30)/lotto(21/30) gap 자연 대기 또는 다른 trigger 자연 발화.
+
 ## 🟢 SUCCESS — review-code(heavy): kbo-data pipeline/ 유틸 9파일 감사, dead export 1건 (cycle 2933, 2026-09-29)
 
 진단: 직전8(2925-2932) distinct=2(review-code+fix-incident) — 2-chain lock 조건 충족하나 잠긴 chain 중 하나가 fix-incident 라 lock 무시(안전 우선 룰). fix-incident(gap8)/op-analysis(gap9)/info-arch(gap11)/lotto(gap19) 주기 trigger 전부 미도달. open issue 0, approved plan 0/23. review-code(heavy) 직전15 중 14회 dominance 지속 — 직전 cycle 추천대로 pipeline/(7950줄, 32파일) 첫 서브스코프로 소형 유틸 9파일(405줄) 선택.
