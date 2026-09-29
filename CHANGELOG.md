@@ -1,3 +1,13 @@
+## v0.5.62.256 — 2026-09-29 (cycle 2927, review-code(heavy): kbo-data context/ dead type export 11건 제거)
+
+### review-code(heavy): packages/kbo-data context/(1695줄) 감사 — dead export 11건 제거 + comment drift 3건 정정 (cycle 2927, SUCCESS)
+
+- 진단: 2-chain lock 미충족(직전8 distinct=4). open issue 0, unprocessed approved plan 0/23. 사용자 요청으로 본 세션 안 10 cycle 연속 진행(자동 체인 대신 수동).
+- general-purpose subagent 독립 검증(agent-context.ts+measurement.ts+domain.ts+metrics.ts, 배럴 외부 사용처까지 확인) — dead export 11건(타입/인터페이스만, 정의 파일+배럴 재export 외 어디서도 named import 없음, 테스트 파일 포함 재확인): MetricObservation/AgentGameMeta/HallucinationStats/TokenBudgetStats/BrierStats/ContextLayerBrierDelta/SeasonPhase/TimeWindowKey/MetricUnit/MetricSource/MetricDirection. export 키워드만 제거(index.ts 재export 라인도 제거), 값/함수 삭제 없음.
+- comment drift 3건 발견+정정(3파일 동일 근본원인): "7 agent(postview/judge/team/personas/debate/calibration/rivalry-memory) 소비" 서술이 실측 결과 personas.ts/debate.ts 미소비, validator.ts/retro.ts/predictor.ts 등 실사용처 누락 — 정확한 소비처로 정정.
+- KBO_DOMAIN_KB/getProductionMetrics/renderMetricForLLM 은 프로덕션 미사용이나 자체 테스트 사용 중이라 유지(기존 test-only export 패턴).
+- tsc clean(kbo-data+moneyball), test 94/94파일 1224/1224 green.
+
 ## v0.5.62.255 — 2026-09-29 (cycle 2926, review-code(heavy): kbo-data notify+engine comment drift 정정)
 
 ### review-code(heavy): packages/kbo-data notify+engine(526줄) 감사 — comment drift 2건 정정 (cycle 2926, SUCCESS)
