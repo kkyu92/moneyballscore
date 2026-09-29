@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — dimension-cycle: MLB wild-card JSON-LD 누락 보강 (cycle 2935, 2026-09-29)
+
+진단: 직전8(2927-2934) distinct=2(review-code(heavy)7+polish-ui1) — 2-chain lock 충족, 두 chain 모두 fix-incident 아니라 후보 제외. lock의 fallback(polish-ui) 자체가 잠긴 chain이라 적용 불가 — 최초 사례. gap trigger 4종(fix-incident 9/20·op-analysis 10/25·info-arch 12/30) 미도달, lotto는 이미 10/3회분까지 최신(false trigger). explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/DESIGN.md 26일=4주 미만) skip. incident 없음 확인.
+
+남은 옵션 없어 문서상 default fallback `dimension-cycle` 채택(2900+ cycle 사상 최초 실제 발화) — Agent Teams 대신 site/acquisition 차원 직접 진단.
+
+twin `/mlb/postseason`(KO+EN)은 WebPage JSON-LD 보유, 최근 추가된 `/mlb/wild-card`(KO+EN)는 metadata만 있고 구조화 데이터 누락 — postseason과 동일 패턴으로 KO+EN 2파일 정렬. PR #3117 merge.
+
+tsc clean, test 582/582파일 4564/4564 green.
+
+다음 사이클 추천 = lock cooldown(N=1)만이라 review-code/polish-ui 둘 다 다음 사이클 복귀 가능.
+
 ## 🟢 SUCCESS — polish-ui: MLB wild-card 랭크 배지 shape drift 정정 (cycle 2934, 2026-09-29)
 
 진단: 직전8(2926-2933) distinct=1(review-code(heavy) 8연속) — 2-chain lock 충족(잠긴 chain=review-code 단독, fix-incident 아니라 lock 무시 X) → review-code 제외. fix-incident(gap9)/op-analysis(gap10)/info-arch(gap12)/lotto(chain-gap20) 전부 미도달. open issue 0, approved plan 0/23. "어떤 chain 도 trigger 없으면 → polish-ui 강제 발화" 룰 적용.

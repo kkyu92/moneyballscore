@@ -1,3 +1,14 @@
+## v0.5.62.263 — 2026-09-29 (cycle 2935, dimension-cycle: MLB wild-card JSON-LD 누락 보강)
+
+### dimension-cycle: /mlb/wild-card + /en/mlb/wild-card JSON-LD structured data 누락 보강 (cycle 2935, SUCCESS — 2-chain lock double-exclusion → default fallback)
+
+- 진단: 직전8(2927-2934) distinct=2(review-code(heavy) 7 + polish-ui 1) — 2-chain lock 조건 충족, 두 잠긴 chain 모두 fix-incident 아님 → 둘 다 후보 제외. 이번엔 lock의 fallback(`polish-ui`) 자체가 잠긴 chain 중 하나라 적용 불가 — 최초 사례. fix-incident(gap9/20)/op-analysis(gap10/25)/info-arch(gap12/30)/lotto 전부 미도달(lotto는 실제로 이미 10/3회분까지 최신, false trigger). explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS 특이 backlog 없음/DESIGN.md 26일=4주 미만) organic idea 부재로 skip. `gh run list` 재확인 실제 incident 부재.
+- 남은 옵션 없어 문서상 default fallback인 `dimension-cycle`(2900+ cycle 사상 최초 실제 발화) 채택 — Agent Teams tmux 인프라(장기 미사용/사실상 폐기) 대신 site/acquisition 차원 직접 진단으로 실행.
+- twin 비교: `/mlb/postseason`(KO+EN)은 WebPage JSON-LD(`application/ld+json`, schema.org) 보유하는데 최근 추가된 `/mlb/wild-card`(KO+EN, cycle 2934가 배지만 수정)는 metadata(title/description/OG/twitter)만 있고 구조화 데이터 누락 확인 — SEO(acquisition) 차원 균열. postseason과 동일 WebPage schema 패턴(KO `inLanguage: ko-KR`, EN `inLanguage: en-US`)으로 2파일 정렬. PR #3117 merge(1e25e836).
+- tsc clean(moneyball), test 582/582파일 4564/4564 green.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1)이라 review-code/polish-ui 둘 다 바로 복귀 가능(단일 사이클만 제외) — review-code(heavy) apps/moneyball 잔여 미탐색 스코프 계속 또는 op-analysis(11/25)/info-arch(13/30) gap 자연 대기.
+
 ## v0.5.62.262 — 2026-09-29 (cycle 2934, polish-ui: MLB wild-card 랭크 배지 shape drift)
 
 ### polish-ui: /mlb/wild-card + /en/mlb/wild-card 랭크 배지 shape drift 정정 (cycle 2934, SUCCESS — 2-chain lock fallback)
