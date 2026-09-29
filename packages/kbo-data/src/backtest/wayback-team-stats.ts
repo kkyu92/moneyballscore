@@ -19,7 +19,7 @@
 import { MONEYBALL_BACKTEST_USER_AGENT, type TeamCode } from '@moneyball/shared';
 import { resolveTeamCode } from '../scrapers/fancy-stats';
 
-export interface SeasonTeamStat {
+interface SeasonTeamStat {
   woba: number;
   fip: number;
   sfr: number;
@@ -28,7 +28,7 @@ export interface SeasonTeamStat {
 export type SeasonStatsMap = Map<TeamCode, SeasonTeamStat>;
 
 /** 지원 시즌 → Wayback timestamp. */
-export const SEASON_SNAPSHOTS: Record<number, string> = {
+const SEASON_SNAPSHOTS: Record<number, string> = {
   2022: '20230131171734',
   2023: '20230926193445',
   2024: '20250124005908',
@@ -69,7 +69,7 @@ export function parseEloTable(html: string): SeasonStatsMap {
 }
 
 /** 주어진 시즌의 Wayback /elo/ 페이지 fetch → 파싱. */
-export async function fetchSeasonTeamStats(season: number): Promise<SeasonStatsMap> {
+async function fetchSeasonTeamStats(season: number): Promise<SeasonStatsMap> {
   const ts = SEASON_SNAPSHOTS[season];
   if (!ts) throw new Error(`No Wayback snapshot for season ${season}`);
   const url = `https://web.archive.org/web/${ts}/https://www.kbofancystats.com/elo/`;

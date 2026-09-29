@@ -13,7 +13,7 @@ import { resolveTeamCode } from '../scrapers/fancy-stats';
 
 const ELOHISTORY_URL = 'https://www.kbofancystats.com/elohistory/';
 
-export interface EloPoint {
+interface EloPoint {
   date: string; // YYYY-MM-DD
   elo: number;
 }

@@ -12,7 +12,7 @@ export {
   getEloAt,
   fetchEloHistory,
 } from './elo-history';
-export type { EloHistory, EloPoint } from './elo-history';
+export type { EloHistory } from './elo-history';
 
 export {
   modelCoinFlip,
@@ -30,11 +30,9 @@ export type { RunnerInput, RunnerOutput } from './runner';
 
 export {
   parseEloTable,
-  fetchSeasonTeamStats,
   fetchAllSeasonTeamStats,
-  SEASON_SNAPSHOTS,
 } from './wayback-team-stats';
-export type { SeasonTeamStat, SeasonStatsMap } from './wayback-team-stats';
+export type { SeasonStatsMap } from './wayback-team-stats';
 
 export {
   BASE_FACTORS,

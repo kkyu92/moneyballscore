@@ -21,6 +21,7 @@ interface TrainOptions {
   lr?: number; // learning rate (default 0.5)
   maxIter?: number; // default 5000
   tol?: number; // convergence threshold on loss change (default 1e-8)
+  featureNames?: string[]; // X 열 이름 — vectorizeExtended/V3 등 4열 초과 입력 시 필수
 }
 
 function sigmoid(z: number): number {
@@ -124,7 +125,7 @@ export function trainLogistic(
   if (X.length !== y.length) throw new Error('X.length !== y.length');
   if (X.length === 0) throw new Error('empty dataset');
 
-  const { lambda = 0.01, lr = 0.5, maxIter = 5000, tol = 1e-8 } = opts;
+  const { lambda = 0.01, lr = 0.5, maxIter = 5000, tol = 1e-8, featureNames } = opts;
   const d = X[0].length;
   const w = new Array(d).fill(0);
   let b = 0;
@@ -169,7 +170,11 @@ export function trainLogistic(
   return {
     weights: w,
     intercept: b,
-    featureNames: FEATURE_NAMES,
+    // FEATURE_NAMES(base 4) 는 d===4 일 때만 정확 — vectorizeExtended(7)/vectorizeV3(8)
+    // 처럼 d 가 다르면 호출자가 featureNames 를 명시해야 함 (cycle 2929, 기존에는 이 경우도
+    // 항상 FEATURE_NAMES 를 반환해 실제 열과 이름이 불일치하는 silent 버그였음 — 현재
+    // 소비자는 전부 이 필드를 읽지 않고 자체 이름 배열을 쓰므로 무해했으나 API 자체는 틀림).
+    featureNames: featureNames ?? (d === FEATURE_NAMES.length ? FEATURE_NAMES : Array.from({ length: d }, (_, i) => `feature_${i}`)),
     iterations: it,
     finalLoss: prevLoss,
   };

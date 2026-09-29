@@ -24,7 +24,7 @@
 
 import { ACTIVE_FACTOR_KEYS } from '@moneyball/shared';
 
-export type FactorKey = (typeof ACTIVE_FACTOR_KEYS)[number];
+type FactorKey = (typeof ACTIVE_FACTOR_KEYS)[number];
 export type FactorMap = Partial<Record<FactorKey, number>>;
 export type LearnedWeights = Record<FactorKey, number>;
 
