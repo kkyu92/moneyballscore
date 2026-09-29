@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): kbo-data notify+engine comment drift 정정 (cycle 2926, 2026-09-29)
+
+진단: /handoff load 세션 재개, N=50 자동 체인 launch 실패(timeout 2회 abort) 확인. cycle 2925 커밋만 되고 push/PR/R7 누락 방치를 발견해 완결(PR #3098) + retro commit 결손 retroactive backfill. 2-chain lock 미충족(직전8 distinct=5), review-code(heavy) dominance(13/20) 지속 인정.
+
+general-purpose subagent 독립 검증(notify/telegram.ts+engine/form.ts+engine/predictor.ts) — dead export 0건. comment drift 2건 발견+정정: predictor.ts 의 park_weather/umpire_sz 주석이 "shadow 에서만 효과 발현"/"외부 pipeline 처리" 라 적혀 있었으나 실제로는 daily.ts PredictionInput 구성부 미배선으로 항상 undefined — production/shadow 양쪽 no-op. types.ts/factors/umpire-sz.ts/shadow-cohort.ts 는 이미 정확히 기록 중이었는데 predictor.ts 자체만 누락.
+
+다음 사이클 추천 = review-code(heavy) packages/kbo-data 잔여 스코프(context/factors/backtest/scrapers/agents/pipeline) 계속 또는 info-architecture-review 또는 lotto.
+
 ## 🟢 SUCCESS — operational-analysis(lite): CE/비CE 격차 26회 연속 재확인 (cycle 2924, 2026-09-18)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2923 retro commit 9541b7c2) OK. 직전8(2916-2923) distinct=3 — 2-chain lock 미충족. op-analysis gap 정확히 25/25 도달(마지막 2899) — fix-incident 6/20·info-arch 2/30·lotto 10/30 모두 미근접.
