@@ -1,3 +1,11 @@
+## v0.5.62.255 — 2026-09-29 (cycle 2926, review-code(heavy): kbo-data notify+engine comment drift 정정)
+
+### review-code(heavy): packages/kbo-data notify+engine(526줄) 감사 — comment drift 2건 정정 (cycle 2926, SUCCESS)
+
+- 진단: /handoff load 세션 재개 — N=50 자동 체인 launch(02:01 UTC)가 iter-50 timeout 2회로 abort, chain idle 확인. cycle 2925(dependabot fix-incident) 커밋만 되고 push/PR/R7 누락 방치 발견 → push+PR #3098+자동머지 완결(33d0b285) + retro commit 결손 retroactive backfill(4f4129ce, 2차 방어선). 2-chain lock 미충족(직전8 distinct=5).
+- general-purpose subagent 독립 검증(notify/telegram.ts + engine/form.ts + engine/predictor.ts, 배럴 외부 사용처까지 확인) — dead export 0건, 전부 CONFIRMED_USED. comment drift 2건 발견: predictor.ts:117,126 의 park_weather/umpire_sz 가 "shadow cohort 에서만 효과 발현" / "외부 pipeline DB lookup" 이라 서술돼 있었으나, daily.ts PredictionInput 구성부가 weather/isDome/umpireSZScore 를 배선한 적이 없어 항상 undefined — production/shadow 양쪽 모두 no-op. types.ts/factors/umpire-sz.ts/shadow-cohort.ts 는 이미 이 사실을 정확히 기록 중이었는데 predictor.ts 자체 주석만 cycle 2822 정정 당시 누락.
+- 주석 2건 정정(commit d3a845ad → squash 2c170158), 코드 변경 없음. tsc clean(kbo-data+moneyball), test 3/3 pass.
+
 ## v0.5.62.254 — 2026-09-18 (cycle 2924, operational-analysis(lite): CE/비CE 격차 26회 연속 재확인)
 
 ### operational-analysis(lite): CE/비CE 격차 26회 연속 재확인 (cycle 2924, SUCCESS)
