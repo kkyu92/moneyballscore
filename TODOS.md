@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — explore-idea(heavy): MLB AI 인사이트 아카이브 Phase 1 MVP (cycle 2936, 2026-09-29)
+
+진단: 세션 시작 uncommitted 상태로 plan #30(cycle 2911 spec-only) Phase 1 구현물이 이미 존재 — 직전 세션이 구현 도중 중단(retro/commit 미도달)한 것으로 판단, 코드 read + 검증 후 이어서 완결.
+
+KBO 전용 `/insights`(reasoning 시계열 아카이브)의 MLB 대응 gap을 hub 페이지로 메움(KO+EN). `predictions(league='mlb')` → `mlb_schedule` 2-step join(plan #24 CRITICAL Part1/2 재발 방지 패턴). `selectTopFactors`/`insightsStatusBadge`/`presentJudgeReasoningWithFallback` league-agnostic 헬퍼 재사용(DRY). 헤더/푸터/sitemap/search 즉시 배선(cycle 2153 family 재발 차단).
+
+MLB reasoning 파이프라인 미연결(전량 NULL, cycle 2924 실측)이라 현재 빈 목록 표시 — 파이프라인 추가 시 자동 동작 설계. Phase 2/3([date]/series 서브페이지)는 plan #30 다음 fire carry-over.
+
+tsc clean, test 583/583파일 4583/4583 green. PR #3118 merge(91620941).
+
+다음 사이클 추천 = plan #30 Phase 2 또는 gap trigger(fix-incident/op-analysis/info-arch) 자연 대기.
+
 ## 🟢 SUCCESS — dimension-cycle: MLB wild-card JSON-LD 누락 보강 (cycle 2935, 2026-09-29)
 
 진단: 직전8(2927-2934) distinct=2(review-code(heavy)7+polish-ui1) — 2-chain lock 충족, 두 chain 모두 fix-incident 아니라 후보 제외. lock의 fallback(polish-ui) 자체가 잠긴 chain이라 적용 불가 — 최초 사례. gap trigger 4종(fix-incident 9/20·op-analysis 10/25·info-arch 12/30) 미도달, lotto는 이미 10/3회분까지 최신(false trigger). explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/DESIGN.md 26일=4주 미만) skip. incident 없음 확인.

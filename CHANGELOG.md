@@ -1,3 +1,15 @@
+## v0.5.62.264 — 2026-09-29 (cycle 2936, explore-idea(heavy): MLB AI 인사이트 아카이브 Phase 1 MVP)
+
+### explore-idea(heavy): /mlb/insights + /en/mlb/insights Phase 1 MVP — plan #30 착수 (cycle 2936, SUCCESS)
+
+- 진단: 세션 시작 시 uncommitted 상태로 이미 구현물 존재 확인(`apps/moneyball/src/app/{,en/}mlb/insights/` + Header/Footer/sitemap/search 배선) — 직전 세션이 plan #30(cycle 2911 spec-only) Phase 1 구현 도중 중단(retro/commit 미도달). 코드 read + 검증 후 이어서 완결.
+- KBO 전용이던 `/insights`(reasoning 시계열 아카이브)의 MLB 대응 라우트 0건 gap을 hub 페이지로 메움(KO+EN). `predictions(league='mlb')` → `mlb_schedule` 2-step join(games!inner 미사용, plan #24 CRITICAL Part1/2 재발 방지 패턴 재사용).
+- `selectTopFactors`/`insightsStatusBadge`/`presentJudgeReasoningWithFallback` league-agnostic 헬퍼 그대로 재사용(DRY, 신규 MLB 전용 파생 없음). 헤더 메가메뉴 + 푸터 컬럼 + sitemap + search 즉시 배선(cycle 2153 recurring gap family 재발 차단).
+- MLB reasoning 파이프라인이 아직 debate.ts 미연결(전량 NULL, cycle 2924 실측 — mlb-pipeline.ts가 LLM debate 미호출)이라 현재는 빈 목록 표시 — 파이프라인 추가 시 KBO와 동일 경로로 자동 동작하도록 설계. `[date]`/`series` 서브페이지(Phase 2/3)는 plan #30 다음 fire carry-over.
+- tsc clean, test 583/583파일 4583/4583 green(신규 8-case 회귀 가드 포함). PR #3118 merge(91620941).
+
+다음 사이클 추천 = plan #30 Phase 2([date] 아카이브, loader.ts 이식) 또는 gap trigger(fix-incident/op-analysis/info-arch) 자연 대기.
+
 ## v0.5.62.263 — 2026-09-29 (cycle 2935, dimension-cycle: MLB wild-card JSON-LD 누락 보강)
 
 ### dimension-cycle: /mlb/wild-card + /en/mlb/wild-card JSON-LD structured data 누락 보강 (cycle 2935, SUCCESS — 2-chain lock double-exclusion → default fallback)
