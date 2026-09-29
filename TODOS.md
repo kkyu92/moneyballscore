@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): kbo-data analytics/+features/ 감사, comment drift 1건 (cycle 2932, 2026-09-29)
+
+진단: 직전8 distinct=3(2-chain lock 미충족). fix-incident(gap7)/op-analysis(gap8)/info-arch(gap10)/lotto(gap18) 주기 trigger 전부 미도달. open issue 0, approved plan 0/23. review-code(heavy) 직전20 중 15회(75%) dominance 지속 — 직전 cycle 추천대로 pipeline/(7950줄) 유보하고 소규모 analytics/+features/ 번들 먼저 클린업.
+
+general-purpose subagent 독립 검증(stale-data-snapshot.ts+game-record-features.ts, 344줄) — dead export 0건(전 exported 심볼 외부 소비처 확인: scripts/update-stale-data.ts, backtest/loader.ts, pipeline/backtest-v3-run.ts). comment drift 1건: `getRecentTeamGames` "priorRecords 최신→과거 정렬 가정" 서술이 실제 코드(함수 내부에서 항상 재정렬 후 top-N 추출)와 불일치 — 정정. PR #3114 merge.
+
+tsc clean(kbo-data+moneyball), test 582/582파일 4564/4564 green.
+
+다음 사이클 추천 = review-code(heavy) kbo-data 잔여 최대 스코프 pipeline/(7950줄) — 서브디렉토리 단위 분할 필요(3회 연속 유보 누적, 다음 사이클엔 분할 계획 자체를 진단 단계에서 먼저 세울 것 권장). analytics/features 는 이번 사이클로 소진 완료.
+
 ## 🟢 SUCCESS — review-code(heavy): kbo-data agents/ 감사, dead export 2건 + comment drift 3건 (cycle 2931, 2026-09-29)
 
 진단: 직전8 distinct=3(2-chain lock 미충족). fix-incident/op-analysis/info-arch/lotto 주기 trigger 전부 미도달(gap 6~21). open issue 0, approved plan 0/23. 세션 시작 시 stale active-cycle 없음(정상 clean 시작 — cycle 2929 동시 실행 충돌 정황 재발 없음).

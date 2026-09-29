@@ -1,3 +1,11 @@
+## v0.5.62.260 — 2026-09-29 (cycle 2932, review-code(heavy): kbo-data analytics+features 감사)
+
+### review-code(heavy): packages/kbo-data analytics/+features/(344줄, 2파일) 감사 — comment drift 1건 정정 (cycle 2932, SUCCESS)
+
+- 진단: 직전8(2924-2931) distinct=3, 2-chain lock 미충족. open issue 0, approved plan 0/23. fix-incident(gap7)/op-analysis(gap8)/info-arch(gap10)/lotto(gap18) 주기 trigger 전부 미도달. review-code(heavy) 직전20 중 15회(75%) dominance 지속 — 직전 cycle 추천대로 pipeline/(7950줄, 분할 필요)은 유보하고 소규모 analytics/+features/ 번들 먼저 클린업.
+- general-purpose subagent 독립 검증(stale-data-snapshot.ts+game-record-features.ts, 배럴 재노출 없음 확인 + 전 exported 심볼 외부 소비처 grep) — dead export 0건(전부 scripts/backtest 실사용 확인). comment drift 1건: `getRecentTeamGames` 주석이 "priorRecords 최신→과거 정렬 가정"이라 서술했지만 실제로는 함수 내부에서 항상 최신순 재정렬 후 상위 N개 추출(입력 정렬 무관 안전) — 정정.
+- tsc clean(kbo-data+moneyball), test 582/582파일 4564/4564 green. PR #3114 merge 완료(12092fde).
+
 ## v0.5.62.259 — 2026-09-29 (cycle 2931, review-code(heavy): kbo-data agents/ 감사)
 
 ### review-code(heavy): packages/kbo-data agents/(4334줄, 11파일) 감사 — dead export 2건 제거 + comment drift 3건 정정 (cycle 2931, SUCCESS)
