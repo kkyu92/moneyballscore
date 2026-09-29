@@ -1,3 +1,11 @@
+## v0.5.62.259 — 2026-09-29 (cycle 2931, review-code(heavy): kbo-data agents/ 감사)
+
+### review-code(heavy): packages/kbo-data agents/(4334줄, 11파일) 감사 — dead export 2건 제거 + comment drift 3건 정정 (cycle 2931, SUCCESS)
+
+- 진단: 직전8(2923-2930) distinct=3, 2-chain lock 미충족. open issue 0, approved plan 0/23 (status: approved 조건 충족 0건). fix-incident/op-analysis/info-arch/lotto 주기 보정 trigger 전부 미도달(gap 6~21, 임계 20~30 미만). TODOS 추천대로 kbo-data 잔여 스코프 중 agents/(4334줄) 선택 — pipeline/(7950줄) 은 더 커서 다음 사이클로 유보.
+- general-purpose subagent 독립 검증(agents/ 11파일, 배럴 외부 사용처까지 확인) — dead export 2건: postview.ts `FactorError`/`TeamPostview` interface export 키워드 제거 (내부 전용, 외부 동명 타입은 독립 선언). comment drift 3건: validator-logger.ts 재사용처 목록 누락(calibration-agent/postview), validator.ts docstring 경로 누락(calibration-agent), debate.ts Step1 "3개 병렬" 서술이 실제 4개(getRivalryBlock 포함)와 불일치.
+- tsc clean(kbo-data+moneyball), test 94/94파일 1224/1224 green. PR #3113 merge 완료.
+
 ## v0.5.62.258 — 2026-09-29 (cycle 2930, review-code(heavy): kbo-data scrapers/ 감사)
 
 ### review-code(heavy): packages/kbo-data scrapers/(2983줄, 15파일) 감사 — dead export 1건 제거 (cycle 2930, SUCCESS)

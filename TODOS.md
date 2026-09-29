@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): kbo-data agents/ 감사, dead export 2건 + comment drift 3건 (cycle 2931, 2026-09-29)
+
+진단: 직전8 distinct=3(2-chain lock 미충족). fix-incident/op-analysis/info-arch/lotto 주기 trigger 전부 미도달(gap 6~21). open issue 0, approved plan 0/23. 세션 시작 시 stale active-cycle 없음(정상 clean 시작 — cycle 2929 동시 실행 충돌 정황 재발 없음).
+
+general-purpose subagent 독립 검증(agents/ 11파일, 4334줄) — dead export 2건(postview.ts `FactorError`/`TeamPostview` export 키워드) 제거, comment drift 3건(validator-logger.ts 재사용처 누락, validator.ts docstring 경로 누락, debate.ts "3개 병렬" → 실제 4개) 정정. PR #3113 merge.
+
+다음 사이클 추천 = review-code(heavy) kbo-data 잔여 최대 스코프 pipeline/(7950줄, 미감사) — 크기가 커서 단일 사이클 안 전체 커버 어려울 수 있음, 서브디렉토리 단위 분할 고려. 또는 analytics/(208줄)+features/(136줄) 소규모 스코프 먼저 클린업.
+
 ## 🟢 SUCCESS — review-code(heavy): kbo-data scrapers/ 감사, dead export 1건 제거 (cycle 2930, 2026-09-29)
 
 진단: 직전8 distinct=4(2-chain lock 미충족). fix-incident/op-analysis/info-arch/lotto 주기 trigger 전부 미도달. open issue 0, approved plan 0/23. 세션 시작 시 stale active-cycle(cycle 2929, pid 76050 idle 6.5h) 발견 — 진단해보니 실제 작업은 성공 완료(PR #3110/#3111 merged), retro 문서만 silent skip 된 것으로 판명해 backfill 완료.
