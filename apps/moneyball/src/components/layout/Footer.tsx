@@ -104,6 +104,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/mlb/standings", label: "AL/NL 순위", enLabel: "AL/NL Standings" },
       { href: "/mlb/team", label: "팀 프로필", enLabel: "Team Profiles" },
       { href: "/mlb/accuracy", label: "AI 적중 기록", enLabel: "Accuracy Track Record" },
+      { href: "/mlb/insights", label: "AI 인사이트", enLabel: "AI Insights" },
       { href: "/mlb/players", label: "Statcast 선수", enLabel: "Statcast Players" },
       { href: "/mlb/matchup", label: "매치업", enLabel: "Matchups" },
       { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터 가중치`, enLabel: `${MLB_FACTOR_COUNTS.total}-Factor Weights` },

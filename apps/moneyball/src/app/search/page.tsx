@@ -176,6 +176,7 @@ const STATIC_PAGES: Array<{
   { slug: '/mlb/postseason', label: 'MLB Postseason', keywords: 'mlb postseason ws lcs ds bracket' },
   { slug: '/mlb/predictions', label: 'MLB 예측', keywords: 'mlb predictions 예측 메이저리그' },
   { slug: '/mlb/accuracy', label: 'MLB 적중률', keywords: 'mlb accuracy hit-rate 정확도 메이저리그' },
+  { slug: '/mlb/insights', label: 'MLB 인사이트', keywords: 'mlb insights 인사이트 ai-judge 메이저리그' },
   { slug: '/mlb/methodology', label: 'MLB 방법론', keywords: 'mlb methodology 방법론 모델 메이저리그' },
   { slug: '/mlb/matchup', label: 'MLB 매치업', keywords: 'mlb matchup 매치업 vs 대결 메이저리그' },
   { slug: '/mlb/reviews', label: 'MLB 예측 리뷰', keywords: 'mlb reviews 리뷰 review 메이저리그' },
