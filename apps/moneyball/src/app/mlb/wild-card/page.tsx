@@ -155,10 +155,10 @@ export default async function MlbWildCardHub() {
                         <span
                           aria-hidden
                           className={
-                            "inline-flex items-center justify-center w-9 h-7 text-xs font-bold rounded-full shrink-0 " +
+                            "inline-flex items-center justify-center text-xs font-bold rounded-full shrink-0 " +
                             (inField
-                              ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
-                              : "bg-gray-100 dark:bg-[var(--color-surface-hover)] text-gray-500 dark:text-gray-400")
+                              ? "w-9 h-7 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
+                              : "w-7 h-7 bg-gray-100 dark:bg-[var(--color-surface-hover)] text-gray-500 dark:text-gray-400")
                           }
                         >
                           {inField ? `WC${idx + 1}` : idx + 1}
