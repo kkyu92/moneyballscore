@@ -1,3 +1,12 @@
+## (no version bump — 2026-09-29, cycle 2928, review-code(heavy): kbo-data factors/ 감사, clean)
+
+### review-code(heavy): packages/kbo-data factors/(958줄) 감사 — clean, 코드 변경 없음 (cycle 2928, SUCCESS retro-only)
+
+- 진단: 2-chain lock 미충족(직전8 distinct=4). open issue 0, unprocessed approved plan 0/23.
+- general-purpose subagent 독립 검증(mlb-form/mlb-elo/umpire-sz/park-weather/mlb-base/mlb-shadow-c/mlb-factor-detail/mlb-waterfall/mlb-overview, 9파일) — dead export 0건, comment drift 0건. umpire-sz.ts/park-weather.ts 는 cycle 2926 이 predictor.ts 에서 정정한 "shadow factor no-op" 서술을 자체 주석 기준으로 재검증 — 이미 정확히 서술 중, 재정정 불필요.
+- MLB 라우트(apps/moneyball/src/app/mlb/**, en/mlb/**) 실존 확인 — mlb-* 접두 파일들이 orphan 실험 코드가 아닌 실제 프로덕션 코드임을 재확인.
+- 코드 변경 없음, VERSION bump 없음.
+
 ## v0.5.62.256 — 2026-09-29 (cycle 2927, review-code(heavy): kbo-data context/ dead type export 11건 제거)
 
 ### review-code(heavy): packages/kbo-data context/(1695줄) 감사 — dead export 11건 제거 + comment drift 3건 정정 (cycle 2927, SUCCESS)

@@ -1,4 +1,10 @@
 
+## 🟢 SUCCESS(retro-only) — review-code(heavy): kbo-data factors/ 감사, clean (cycle 2928, 2026-09-29)
+
+진단: 2-chain lock 미충족(직전8 distinct=4). factors/(958줄, 9파일 mlb-*/park-weather/umpire-sz) 감사 — dead export 0건, comment drift 0건. umpire-sz.ts/park-weather.ts 자체 주석은 cycle 2926 predictor.ts 정정 내용과 이미 정합. 코드 변경 없음.
+
+다음 사이클 추천 = review-code(heavy) packages/kbo-data 잔여 스코프(backtest/scrapers/agents/pipeline) 계속.
+
 ## 🟢 SUCCESS — review-code(heavy): kbo-data context/ dead type export 11건 제거 (cycle 2927, 2026-09-29)
 
 진단: 2-chain lock 미충족(직전8 distinct=4). 사용자 요청으로 본 세션 안 10 cycle 연속 진행 중.
