@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — explore-idea(heavy): MLB AI 인사이트 [date] 아카이브 Phase 2 (cycle 2937, 2026-09-29)
+
+진단: 직전8 distinct=4, 2-chain lock 미충족. gap trigger 4종 전부 미근접, open issue 0건. plan #30이 cycle 2936 retro의 next_recommended_chain으로 명시적 carry-over — Phase 2 착수.
+
+MLB predictions는 mlb_game_date 컬럼을 직접 보유(games FK 없음)해 KBO games!inner 조인보다 단순한 모델로 `/mlb/insights/[date]` + `/en/mlb/insights/[date]` 신규 구현. `listMlbInsightsDates`/`getMlbInsightsForDate` 추가, 공통 매핑은 `mapMlbPredictionRows()`로 공유(DRY). DebateTimeline/FactorBreakdown이 KBO TeamCode 전용이라 재사용 불가 확인 후 hub와 동일하게 reasoningText+topFactors 미니 프리뷰로 스코프 축소.
+
+hub "전체 팩터 보기" 링크를 신규 아카이브 앵커로 연결. sitemap.ts KO/EN date 라우트 배선. 잠긴 테스트 갱신 + 신규 회귀 가드 10건 추가. PR #3119 merge.
+
+tsc clean, test 583/583파일 4593/4593 green.
+
+다음 사이클 추천 = plan #30 Phase 3(series/[topic] 아카이브, series.ts 토픽 taxonomy 확인 선행) 또는 gap trigger 자연 대기.
+
 ## 🟢 SUCCESS — explore-idea(heavy): MLB AI 인사이트 아카이브 Phase 1 MVP (cycle 2936, 2026-09-29)
 
 진단: 세션 시작 uncommitted 상태로 plan #30(cycle 2911 spec-only) Phase 1 구현물이 이미 존재 — 직전 세션이 구현 도중 중단(retro/commit 미도달)한 것으로 판단, 코드 read + 검증 후 이어서 완결.

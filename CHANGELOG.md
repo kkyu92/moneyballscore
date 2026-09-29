@@ -1,3 +1,17 @@
+## v0.5.62.265 — 2026-09-29 (cycle 2937, explore-idea(heavy): MLB AI 인사이트 [date] 아카이브 Phase 2)
+
+### explore-idea(heavy): /mlb/insights/[date] + /en/mlb/insights/[date] — plan #30 Phase 2 완결 (cycle 2937, SUCCESS)
+
+- 진단: 직전8(2930-2937 예정) distinct=4(review-code 5+polish-ui+dimension-cycle+explore-idea), 2-chain lock 미충족. gap trigger 4종(fix-incident 12/20·op-analysis 13/25·info-arch 15/30·lotto 23/30) 전부 미근접. open issue 0건. plan #30이 cycle 2936 retro의 next_recommended_chain으로 명시적 carry-over — Phase 2([date] 아카이브) 착수.
+- KBO `lib/insights/loader.ts`(games!inner 조인) 대신 MLB predictions가 `mlb_game_date` 컬럼을 직접 보유(games FK 없음, migration 038)해 조인 없이 바로 필터 — KBO보다 단순한 모델. `listMlbInsightsDates()`/`getMlbInsightsForDate()` 신규, 공통 매핑 로직은 `mapMlbPredictionRows()`로 추출해 hub와 공유(DRY).
+- 신규 [date] 페이지는 hub와 동일하게 DebateTimeline/FactorBreakdown(KBO TeamCode 전용 컴포넌트라 MLB 재사용 불가 확인) 없이 reasoningText+topFactors 미니 프리뷰로 스코프 축소 — KBO 대비 Tier 3 large 작업을 단일 사이클로 압축.
+- hub 페이지 "전체 팩터 보기 →" 링크를 topFactors 존재 시 새 아카이브 앵커(`#factor-breakdown-{gameId}`)로 연결(KBO hub 패턴 parity).
+- sitemap.ts에 KO/EN date 라우트 배선(우선순위 0.7/0.6, 기존 MLB 라우트 -0.05 EN 오프셋 컨벤션 정합).
+- 잠겨있던 mlb-insights-page.test.ts의 "Phase 2 보류" 단정 테스트를 Phase 2 도착에 맞게 갱신 + 신규 [date]/insights-data/sitemap 회귀 가드 10건 추가. PR #3119 merge(5f5bbe54).
+- tsc clean, test 583/583파일 4593/4593 green.
+
+다음 사이클 추천 = plan #30 Phase 3(series/[topic] 아카이브, series.ts 토픽 taxonomy KBO 전용 여부 확인 선행 필요) 또는 gap trigger 자연 대기.
+
 ## v0.5.62.264 — 2026-09-29 (cycle 2936, explore-idea(heavy): MLB AI 인사이트 아카이브 Phase 1 MVP)
 
 ### explore-idea(heavy): /mlb/insights + /en/mlb/insights Phase 1 MVP — plan #30 착수 (cycle 2936, SUCCESS)
