@@ -196,6 +196,14 @@ export default async function EnMlbInsightsHubPage() {
                   >
                     See all predictions for this date →
                   </Link>
+                  {topFactors.length > 0 && (
+                    <Link
+                      href={`/en/mlb/insights/${item.date}#factor-breakdown-${item.gameId}`}
+                      className="text-brand-600 dark:text-brand-300 hover:underline"
+                    >
+                      View all factors →
+                    </Link>
+                  )}
                 </div>
               </li>
             );

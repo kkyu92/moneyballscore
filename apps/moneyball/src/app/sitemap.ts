@@ -6,6 +6,7 @@ import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
 import { mlbAllPairs } from '@/lib/mlb/mlbCanonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
+import { listMlbInsightsDates } from '@/app/mlb/insights/insights-data';
 import { listSeriesTopics } from '@/lib/insights/series';
 import { listArchiveDates } from '@/lib/lotto/archive';
 import { computeCurrentKSTYear } from '@/lib/seasons/buildSeasonSummary';
@@ -301,6 +302,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     Sentry.captureException(e, { tags: { silent_drift_family: 'wave_174', component: 'sitemap', op: 'insights-dates-query' } });
   }
 
+  // plan #30 Phase 2 — /mlb/insights/[date] + /en/mlb/insights/[date] 아카이브 URL
+  const mlbInsightsDateRoutes: MetadataRoute.Sitemap = [];
+  const enMlbInsightsDateRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const mlbInsightsDates = await listMlbInsightsDates(90);
+    for (const d of mlbInsightsDates) {
+      mlbInsightsDateRoutes.push({
+        url: `${SITE_URL}/mlb/insights/${d}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.7,
+      });
+      enMlbInsightsDateRoutes.push({
+        url: `${SITE_URL}/en/mlb/insights/${d}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      });
+    }
+  } catch (e) {
+    console.warn('[sitemap] mlb insights dates query failed:', errMsg(e));
+    Sentry.captureException(e, { tags: { silent_drift_family: 'wave_179', component: 'sitemap', op: 'mlb-insights-dates-query' } });
+  }
+
   try {
     const supabase = createSitemapClient();
     // limit 5000 → 2500 (2023-2026 실제 ~1200 경기 + 여유). 선택 필드도 5개만.
@@ -453,6 +478,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...enMlbGameDateRoutes,
     ...enMlbGameDetailRoutes,
     ...insightsDateRoutes,
+    ...mlbInsightsDateRoutes,
+    ...enMlbInsightsDateRoutes,
     ...insightsSeriesRoutes,
     ...lottoArchiveRoutes,
   ];
