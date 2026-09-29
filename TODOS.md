@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): kbo-data context/ dead type export 11건 제거 (cycle 2927, 2026-09-29)
+
+진단: 2-chain lock 미충족(직전8 distinct=4). 사용자 요청으로 본 세션 안 10 cycle 연속 진행 중.
+
+general-purpose subagent 독립 검증(context/ 4파일, 배럴 외부 사용처까지 확인) — dead export 11건(타입/인터페이스) 제거. comment drift 3건 정정: "7 agent(postview/judge/team/personas/debate/calibration/rivalry-memory) 소비" 서술이 실측 결과 personas.ts/debate.ts 미소비 + validator.ts/retro.ts/predictor.ts 실사용처 누락 — 정확히 정정.
+
+다음 사이클 추천 = review-code(heavy) packages/kbo-data 잔여 스코프(factors/backtest/scrapers/agents/pipeline) 계속.
+
 ## 🟢 SUCCESS — review-code(heavy): kbo-data notify+engine comment drift 정정 (cycle 2926, 2026-09-29)
 
 진단: /handoff load 세션 재개, N=50 자동 체인 launch 실패(timeout 2회 abort) 확인. cycle 2925 커밋만 되고 push/PR/R7 누락 방치를 발견해 완결(PR #3098) + retro commit 결손 retroactive backfill. 2-chain lock 미충족(직전8 distinct=5), review-code(heavy) dominance(13/20) 지속 인정.
