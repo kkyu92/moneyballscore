@@ -72,8 +72,26 @@ export default async function MlbWildCardHub() {
   const divisionStandings = await buildMlbDivisionStandings();
   const wildcardStandings = buildMlbWildcardStandings(divisionStandings);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    inLanguage: "ko-KR",
+    name: "MLB Wild Card race",
+    description: `MLB AL/NL 양리그 Wild Card ${MLB_WILDCARD_COUNT}장 진출 경쟁 실시간 순위 + game-back + Magic Number. ${FACTOR_TOTAL}팩터 본선 base.`,
+    url: `${SITE_URL}/mlb/wild-card`,
+    isPartOf: {
+      "@type": "WebSite",
+      name: "MoneyBall Score",
+      url: SITE_URL,
+    },
+  };
+
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb
         items={[
           { href: "/mlb", label: "MLB 분석" },

@@ -75,8 +75,26 @@ export default async function MlbWildCardHubEn() {
   const divisionStandings = await buildMlbDivisionStandings();
   const wildcardStandings = buildMlbWildcardStandings(divisionStandings);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "MLB Wild Card Race",
+    description: `MLB AL/NL Wild Card race — ${MLB_WILDCARD_COUNT} spots per league, live standings + game-back + Magic Number. ${MLB_FACTOR_COUNTS.total}-factor model base.`,
+    url: `${SITE_URL}/en/mlb/wild-card`,
+    inLanguage: "en-US",
+    isPartOf: {
+      "@type": "WebSite",
+      name: "MoneyBall Score",
+      url: SITE_URL,
+    },
+  };
+
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb
         items={[
           { href: "/en/mlb", label: "MLB Analysis" },
