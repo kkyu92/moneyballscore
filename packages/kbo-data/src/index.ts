@@ -120,9 +120,6 @@ export {
 export type {
   MetricDefinition,
   MetricSlug,
-  MetricUnit,
-  MetricSource,
-  MetricDirection,
 } from './context/metrics';
 
 // LLM Agent KBO Domain KB (plan #23 Step 2, cycle 1226)
@@ -139,8 +136,6 @@ export {
 } from './context/domain';
 export type {
   ParkContext,
-  SeasonPhase,
-  TimeWindowKey,
 } from './context/domain';
 
 // LLM Agent 표준 ContextPayload (plan #23 Step 3, cycle 1227)
@@ -150,8 +145,6 @@ export {
 } from './context/agent-context';
 export type {
   AgentContext,
-  AgentGameMeta,
-  MetricObservation,
 } from './context/agent-context';
 
 // LLM Agent 회귀 가드 + 측정 harness (plan #23 Step 4, cycle 1228 / 1235 Brier delta)
@@ -164,11 +157,7 @@ export {
   measureContextLayerBrierDelta,
 } from './context/measurement';
 export type {
-  HallucinationStats,
-  TokenBudgetStats,
   JudgmentRecord,
-  BrierStats,
-  ContextLayerBrierDelta,
 } from './context/measurement';
 
 // 알림

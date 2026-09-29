@@ -5,8 +5,10 @@
  * 본 레지스트리를 참조해 metric 의미 / 단위 / bounds / validation 을 공유한다.
  *
  * 도입 동기:
- *   - LLM judge / team / postview / personas / debate / calibration / rivalry 7 agent 가
- *     inline prompt 안에서 "FIP = ..." 형태로 metric 의미를 반복 정의 → drift risk.
+ *   - agent-context.ts/postview.ts/team-agent.ts/judge-agent.ts/validator.ts/retro.ts/
+ *     engine/predictor.ts 등 다수 지점(cycle 2927 실사용 재확인 — personas.ts/debate.ts
+ *     는 미소비)이 inline prompt 안에서 "FIP = ..." 형태로 metric 의미를 반복 정의 →
+ *     drift risk.
  *   - LLM hallucination (예: judge verdict 안 FIP=15.5 = 실재 KBO bounds 초과)
  *     catch 부재 → validation 함수로 자동 reject + quant fallback.
  *
@@ -20,13 +22,13 @@
 import { DEFAULT_WEIGHTS, ELO_NEUTRAL, type WeightKey } from '@moneyball/shared';
 
 /** Metric 단위 카테고리. */
-export type MetricUnit = 'ratio' | 'rate' | 'count' | 'elo' | 'percent';
+type MetricUnit = 'ratio' | 'rate' | 'count' | 'elo' | 'percent';
 
 /** Metric data source — KBO 공식 / Fancy Stats / FanGraphs / 파생 (계산). */
-export type MetricSource = 'kbo' | 'fancystats' | 'fangraphs' | 'derived';
+type MetricSource = 'kbo' | 'fancystats' | 'fangraphs' | 'derived';
 
 /** 값이 클수록 좋은지 / 작을수록 좋은지. */
-export type MetricDirection = 'lower-better' | 'higher-better';
+type MetricDirection = 'lower-better' | 'higher-better';
 
 /**
  * Metric 단일 정의. LLM 이 직접 소비할 수 있는 형태.

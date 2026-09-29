@@ -1,9 +1,10 @@
 /**
  * LLM Agent 용 KBO Domain Knowledge Base — plan #23 Step 2 (cycle 1226, 2026-06-19).
  *
- * 단일 source-of-truth — LLM judge / team / postview / personas / debate / calibration /
- * rivalry-memory 7 agent 가 prompt 안에서 KBO 도메인 지식 (구장 특성, 시즌 단계,
- * 시간 윈도우, 라이벌리) 을 반복 정의하던 drift risk 차단.
+ * 단일 source-of-truth — agent-context.ts 경유(judge/postview/team/validator) +
+ * calibration-agent.ts 직접 소비(cycle 2927 실사용 재확인 — personas.ts/debate.ts
+ * 는 미소비)가 prompt 안에서 KBO 도메인 지식 (구장 특성, 시즌 단계, 시간 윈도우,
+ * 라이벌리) 을 반복 정의하던 drift risk 차단.
  *
  * 책임 분리:
  *   - 구장 보정 (`parkPf`) source = `@moneyball/shared` `KBO_TEAMS`. 본 모듈은 ratio
@@ -48,7 +49,7 @@ function buildParks(): Record<TeamCode, ParkContext> {
 export const KBO_PARKS: Readonly<Record<TeamCode, ParkContext>> = Object.freeze(buildParks());
 
 /** KBO 시즌 단계 (월 기준). */
-export type SeasonPhase = 'preseason' | 'early' | 'mid' | 'late' | 'postseason' | 'offseason';
+type SeasonPhase = 'preseason' | 'early' | 'mid' | 'late' | 'postseason' | 'offseason';
 
 /** 시즌 단계별 한글 라벨 + 월 범위. */
 export const SEASON_PHASES: Readonly<Record<SeasonPhase, { ko: string; months: ReadonlyArray<number> }>> = Object.freeze({
@@ -100,7 +101,7 @@ export const TIME_WINDOWS = Object.freeze({
   season: { days: 180, ko: '시즌 누적' },
 } as const);
 
-export type TimeWindowKey = keyof typeof TIME_WINDOWS;
+type TimeWindowKey = keyof typeof TIME_WINDOWS;
 
 /**
  * LLM prompt 안 직접 삽입 가능한 구장 한 줄.
