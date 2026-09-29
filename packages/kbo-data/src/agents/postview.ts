@@ -118,13 +118,13 @@ export interface OriginalPrediction {
   reasoning: string; // pre_game reasoning (블로그 글)
 }
 
-export interface FactorError {
+interface FactorError {
   factor: string;
   predictedBias: number; // pre_game 편향 (0.5 대비)
   diagnosis: string; // 왜 틀렸는지 한 줄
 }
 
-export interface TeamPostview {
+interface TeamPostview {
   team: TeamCode;
   summary: string; // 왜 이겼/졌는지 3-4문장
   keyFactor: string; // 가장 결정적이었던 factor
