@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): kbo-data scrapers/ 감사, dead export 1건 제거 (cycle 2930, 2026-09-29)
+
+진단: 직전8 distinct=4(2-chain lock 미충족). fix-incident/op-analysis/info-arch/lotto 주기 trigger 전부 미도달. open issue 0, approved plan 0/23. 세션 시작 시 stale active-cycle(cycle 2929, pid 76050 idle 6.5h) 발견 — 진단해보니 실제 작업은 성공 완료(PR #3110/#3111 merged), retro 문서만 silent skip 된 것으로 판명해 backfill 완료.
+
+general-purpose subagent 독립 검증(scrapers/ 15파일, 2983줄) — dead export 1건(`HistoricalGame` interface) 제거. comment drift 0건. PR #3112 merge.
+
+다음 사이클 추천 = review-code(heavy) kbo-data 잔여 스코프(agents/pipeline/analytics/features) 계속 — 단 **동시 실행 충돌 정황(cycle 2929 항목 참조) 사용자 확인 우선 권장**.
+
 ## 🟢 SUCCESS — review-code(heavy): kbo-data backtest/ + factors/ 재감사 — retro 결손 backfill (cycle 2929, 2026-09-29)
 
 경위: 세션 hang 으로 retro 미박제(active-cycle 마커만 잔존, pid 76050 idle 6.5h). 실제 작업은 정상 merge(PR #3110 backtest dead code 6건+trainLogistic 버그 수정, PR #3111 factors dead export 5건 추가 발견). cycle 2930 진단 단계서 발견해 backfill.

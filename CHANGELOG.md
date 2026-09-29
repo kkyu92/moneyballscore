@@ -1,3 +1,12 @@
+## v0.5.62.258 — 2026-09-29 (cycle 2930, review-code(heavy): kbo-data scrapers/ 감사)
+
+### review-code(heavy): packages/kbo-data scrapers/(2983줄, 15파일) 감사 — dead export 1건 제거 (cycle 2930, SUCCESS)
+
+- 진단: 직전8(2922-2929, 2929 backfill 반영) distinct=4, 2-chain lock 미충족. open issue 0, unprocessed approved plan 0/23. fix-incident/op-analysis/info-arch/lotto 주기 보정 trigger 전부 미도달(gap 5~16, 임계 20~30 미만).
+- 세션 시작 시 stale active-cycle 발견(cycle 2929, pid 76050 idle 6.5h) — 하지만 실제로는 정상 작업 완료 후 retro 만 silent skip 된 케이스로 판명, retroactive backfill 완료(PR #3110/#3111 은 이미 merge된 상태였음, 문서/기록만 보정) + 동시 실행 충돌 정황 CHANGELOG/TODOS 에 사용자 확인 요청 박제.
+- general-purpose subagent 독립 검증(scrapers/ 15파일, 배럴 외부 사용처까지 확인) — dead export 1건: `HistoricalGame`(interface, mlb-historical-bootstrap.ts) 제거. comment drift 0건(park factor/`_season` 무시/DB-first fallback/GAME_INN_NO 관련 주석 전수 재확인, 이미 정확).
+- tsc clean(kbo-data+moneyball). PR #3112 merge 완료.
+
 ## v0.5.62.257 — 2026-09-29 (cycle 2929, review-code(heavy): kbo-data backtest/ + factors/ 재감사 — retro 결손 backfill)
 
 ### review-code(heavy): backtest/ dead code 6건 제거 + trainLogistic 버그 수정, factors/ dead export 5건 추가 발견 (cycle 2929, SUCCESS — retro backfill)
