@@ -57,7 +57,7 @@ export function bullpenInningsLastNDays(
   return total;
 }
 
-/** 팀의 최근 N경기 (시즌 내) — priorRecords 최신 → 과거 정렬 가정. */
+/** 팀의 최근 N경기 (시즌 내) — 정렬 무관, 함수 내부에서 최신순 정렬 후 상위 N개 추출. */
 function getRecentTeamGames(
   priorRecords: GameRecordLite[],
   teamId: number,
