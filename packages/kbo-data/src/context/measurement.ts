@@ -28,7 +28,7 @@ import { renderContextForLLM, type AgentContext } from './agent-context';
  *   - `rate` = invalid / total (total=0 시 0)
  *   - `samples` = 잘못된 pair 디버그용 — slug + 추출된 값 + 원문 발췌
  */
-export interface HallucinationStats {
+interface HallucinationStats {
   total: number;
   invalid: number;
   rate: number;
@@ -36,7 +36,7 @@ export interface HallucinationStats {
 }
 
 /** Prompt token 추정 결과 + budget 검증. */
-export interface TokenBudgetStats {
+interface TokenBudgetStats {
   estimated_tokens: number;
   char_count: number;
   /** Budget 임계 (기본 1200 — plan #23 Step 4 명시). */
@@ -157,7 +157,7 @@ export interface JudgmentRecord {
 }
 
 /** 단일 cohort Brier 통계. */
-export interface BrierStats {
+interface BrierStats {
   n: number;
   brier_mean: number;
   accuracy: number;
@@ -172,7 +172,7 @@ export interface BrierStats {
  *   - plan #23 Step 4 기대치 = delta_brier ≤ 0 (회귀 X). 양수면 회귀 — 후속 cycle
  *     에서 context payload 축소 / agent prompt 재검토 trigger.
  */
-export interface ContextLayerBrierDelta {
+interface ContextLayerBrierDelta {
   pre: BrierStats;
   post: BrierStats;
   delta_brier: number;

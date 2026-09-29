@@ -1,10 +1,11 @@
 /**
  * LLM Agent 표준 ContextPayload — plan #23 Step 3 (cycle 1227, 2026-06-19).
  *
- * Step 1 (MetricRegistry) + Step 2 (KBO_DOMAIN_KB) 결합 → 7 agent (postview / judge /
- * team / personas / debate / calibration / rivalry-memory) 가 공통 소비할 단일 구조화
- * context. 기존 `GameContext` (raw 데이터 fetch 결과) 를 한 번 변환 → 메트릭별 정의
- * 동봉 + 도메인 지식 hint 동봉 형태로 박제.
+ * Step 1 (MetricRegistry) + Step 2 (KBO_DOMAIN_KB) 결합 → buildAgentContext/
+ * renderContextForLLM 직접 소비처(judge-agent.ts / postview.ts / team-agent.ts /
+ * validator.ts, cycle 2927 실사용 재확인 — personas.ts/debate.ts 는 미소비)가 공통
+ * 소비할 단일 구조화 context. 기존 `GameContext` (raw 데이터 fetch 결과) 를 한 번
+ * 변환 → 메트릭별 정의 동봉 + 도메인 지식 hint 동봉 형태로 박제.
  *
  * 책임 분리:
  *   - 데이터 source = 호출자 책임 (GameContext 가 이미 fetch 한 데이터를 그대로 변환).
@@ -27,7 +28,7 @@ import { MetricRegistry, type MetricDefinition, type MetricSlug } from './metric
  * `metric` 은 `MetricRegistry` 의 reference — 변경 X (Readonly). LLM 이 본 객체
  * 단위로 metric 의미 + 측정치를 한 번에 소비.
  */
-export interface MetricObservation {
+interface MetricObservation {
   /** 홈팀 측정치 (단위 = `metric.unit`). */
   home: number;
   /** 원정팀 측정치. */
@@ -37,7 +38,7 @@ export interface MetricObservation {
 }
 
 /** AgentContext 안 게임 메타데이터. */
-export interface AgentGameMeta {
+interface AgentGameMeta {
   /** 외부 KBO 게임 ID (`ScrapedGame.externalGameId`). */
   external_game_id: string;
   /** 경기 일자 (YYYY-MM-DD, KST). */
