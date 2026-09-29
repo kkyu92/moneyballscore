@@ -72,11 +72,9 @@ export type { MlbWaterfallInput, MlbWaterfallBar, MlbWaterfallPair } from './fac
 
 // MLB 개별 경기 AI 종합 분석 요약 prose (analysis/game GameAnalysisProse parity — cycle 2110)
 export { buildMlbGameOverview } from './factors/mlb-overview';
-export type { MlbGameOverviewNarrative } from './factors/mlb-overview';
 
 // MLB 개별 경기 팩터별 상세 해설 (analysis/game DetailedFactorAnalysis parity — cycle 2171)
 export { buildMlbFactorDetailRows } from './factors/mlb-factor-detail';
-export type { MlbFactorDetailRow } from './factors/mlb-factor-detail';
 
 // MLB Shadow C 학습 milestone (walk-forward expanding window)
 export { MILESTONE_TRIGGERS as MLB_SHADOW_C_MILESTONES } from './factors/mlb-shadow-c';
@@ -91,12 +89,7 @@ export {
   computeMlbEloRatings,
   computeMlbEloHistory,
 } from './factors/mlb-elo';
-export type {
-  MlbEloUpdateResult,
-  MlbFinalGameForElo,
-  MlbTeamEloState,
-  MlbEloHistoryEntry,
-} from './factors/mlb-elo';
+export type { MlbFinalGameForElo } from './factors/mlb-elo';
 
 // MLB 파이프라인
 export { runMlbPipeline } from './pipeline/mlb-pipeline';

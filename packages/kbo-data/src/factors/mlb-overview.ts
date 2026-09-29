@@ -15,7 +15,7 @@ const SITUATIONAL_FACTORS = new Set(['home_advantage', 'park_factor', 'elo', 're
 // 서로 다른 "우세" 판정 기준을 갖는 drift 방지.
 export const NARRATIVE_MIN_PP = 0.1;
 
-export interface MlbGameOverviewNarrative {
+interface MlbGameOverviewNarrative {
   pitching: string[];
   batting: string[];
   situational: string[];

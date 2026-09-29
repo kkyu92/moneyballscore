@@ -72,10 +72,3 @@ export interface CalibrationBucket {
   avgPredicted: number;
   actualRate: number; // 실제 홈 승률
 }
-
-/** 실행 결과 한 행 (모델별 × scope 별). */
-interface BacktestRow {
-  model: string;
-  scope: string; // "2023-2025 all" 등
-  metrics: MetricsSummary;
-}
