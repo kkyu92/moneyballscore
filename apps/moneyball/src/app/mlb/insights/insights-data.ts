@@ -6,6 +6,7 @@ import {
 } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
+import { isValidInsightsDate } from "@/lib/insights/loader";
 
 // MLB 예측은 games FK 모델이 없음(game_id=NULL, migration 038) — KBO app/insights/page.tsx
 // 의 `games!inner` 조인은 MLB 에 그대로 쓰면 항상 미스매치(빈 목록, cycle 2114
@@ -64,20 +65,13 @@ interface MlbInsightScheduleRow {
 
 const PREVIEW_LENGTH = 280;
 
-export async function getRecentMlbInsights(limit: number): Promise<MlbInsightRow[]> {
-  const supabase = await createClient();
-  const predResult = await supabase
-    .from("predictions")
-    .select("external_game_id, mlb_game_date, is_correct, reasoning, factors")
-    .eq("league", "mlb")
-    .eq("prediction_type", "pre_game")
-    .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES as readonly string[])
-    .order("created_at", { ascending: false })
-    .limit(limit * 4);
-  const { data } = assertSelectOk(predResult, "mlb-insights.getRecentMlbInsights predictions");
-  if (!data || data.length === 0) return [];
-
-  const rows = data as unknown as MlbInsightPredRow[];
+// mlb_schedule 2-step join + presented-reasoning 매핑 — getRecentMlbInsights(hub)와
+// getMlbInsightsForDate([date] 아카이브, plan #30 Phase 2) 양쪽이 공유하는 공통 로직.
+async function mapMlbPredictionRows(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  rows: MlbInsightPredRow[],
+  limit?: number,
+): Promise<MlbInsightRow[]> {
   const gameIds = rows.map((r) => r.external_game_id).filter((id): id is string => Boolean(id));
   if (gameIds.length === 0) return [];
 
@@ -85,7 +79,7 @@ export async function getRecentMlbInsights(limit: number): Promise<MlbInsightRow
     .from("mlb_schedule")
     .select("external_game_id, home_team_code, away_team_code, status")
     .in("external_game_id", gameIds);
-  const { data: schedules } = assertSelectOk(scheduleResult, "mlb-insights.getRecentMlbInsights schedule");
+  const { data: schedules } = assertSelectOk(scheduleResult, "mlb-insights.mapMlbPredictionRows schedule");
   const scheduleByGameId = new Map(
     ((schedules ?? []) as MlbInsightScheduleRow[]).map((s) => [s.external_game_id, s]),
   );
@@ -116,7 +110,69 @@ export async function getRecentMlbInsights(limit: number): Promise<MlbInsightRow
       homeWinProb: verdict?.homeWinProb ?? null,
       factors,
     });
-    if (out.length >= limit) break;
+    if (limit !== undefined && out.length >= limit) break;
   }
   return out;
+}
+
+export async function getRecentMlbInsights(limit: number): Promise<MlbInsightRow[]> {
+  const supabase = await createClient();
+  const predResult = await supabase
+    .from("predictions")
+    .select("external_game_id, mlb_game_date, is_correct, reasoning, factors")
+    .eq("league", "mlb")
+    .eq("prediction_type", "pre_game")
+    .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES as readonly string[])
+    .order("created_at", { ascending: false })
+    .limit(limit * 4);
+  const { data } = assertSelectOk(predResult, "mlb-insights.getRecentMlbInsights predictions");
+  if (!data || data.length === 0) return [];
+  return mapMlbPredictionRows(supabase, data as unknown as MlbInsightPredRow[], limit);
+}
+
+// plan #30 Phase 2 — /mlb/insights/[date] 아카이브. KBO lib/insights/loader.ts
+// listInsightsDates()/getInsightsForDate() 의 mlb_schedule 모델 이식. KBO 는 games FK
+// 조인으로 일자를 얻지만 MLB predictions 는 mlb_game_date 컬럼을 이미 직접 보유(games FK
+// 자체가 없음, migration 038 game_id=NULL) — 별도 조인 없이 바로 필터 가능해 KBO 대비 단순.
+export async function listMlbInsightsDates(daysBack = 90): Promise<string[]> {
+  const supabase = await createClient();
+  const since = new Date();
+  since.setUTCDate(since.getUTCDate() - daysBack);
+  const sinceStr = since.toISOString().slice(0, 10);
+
+  const result = await supabase
+    .from("predictions")
+    .select("mlb_game_date")
+    .eq("league", "mlb")
+    .eq("prediction_type", "pre_game")
+    .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES as readonly string[])
+    .gte("mlb_game_date", sinceStr)
+    .order("mlb_game_date", { ascending: false })
+    .limit(daysBack * 20);
+  const { data } = assertSelectOk(result, "mlb-insights.listMlbInsightsDates");
+  if (!data) return [];
+
+  const dates = new Set<string>();
+  for (const row of data as { mlb_game_date: string | null }[]) {
+    if (row.mlb_game_date && isValidInsightsDate(row.mlb_game_date)) {
+      dates.add(row.mlb_game_date);
+    }
+  }
+  return [...dates].sort().reverse();
+}
+
+export async function getMlbInsightsForDate(date: string): Promise<MlbInsightRow[]> {
+  if (!isValidInsightsDate(date)) return [];
+  const supabase = await createClient();
+  const predResult = await supabase
+    .from("predictions")
+    .select("external_game_id, mlb_game_date, is_correct, reasoning, factors")
+    .eq("league", "mlb")
+    .eq("prediction_type", "pre_game")
+    .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES as readonly string[])
+    .eq("mlb_game_date", date)
+    .order("created_at", { ascending: false });
+  const { data } = assertSelectOk(predResult, "mlb-insights.getMlbInsightsForDate predictions");
+  if (!data || data.length === 0) return [];
+  return mapMlbPredictionRows(supabase, data as unknown as MlbInsightPredRow[]);
 }

@@ -188,6 +188,14 @@ export default async function MlbInsightsHubPage() {
                   >
                     해당 일자 전체 예측 보기 →
                   </Link>
+                  {topFactors.length > 0 && (
+                    <Link
+                      href={`/mlb/insights/${item.date}#factor-breakdown-${item.gameId}`}
+                      className="text-brand-600 dark:text-brand-300 hover:underline"
+                    >
+                      전체 팩터 보기 →
+                    </Link>
+                  )}
                 </div>
               </li>
             );

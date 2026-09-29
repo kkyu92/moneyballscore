@@ -12,6 +12,11 @@ const EN_PAGE_SRC = readFileSync(
   resolve(__dirname, "../../../en/mlb/insights/page.tsx"),
   "utf8",
 );
+const DATE_PAGE_SRC = readFileSync(resolve(__dirname, "../[date]/page.tsx"), "utf8");
+const EN_DATE_PAGE_SRC = readFileSync(
+  resolve(__dirname, "../../../en/mlb/insights/[date]/page.tsx"),
+  "utf8",
+);
 const SITEMAP_SRC = readFileSync(resolve(__dirname, "../../../sitemap.ts"), "utf8");
 const HEADER_SRC = readFileSync(
   resolve(__dirname, "../../../../components/layout/Header.tsx"),
@@ -52,9 +57,9 @@ describe("mlb/insights/page.tsx (ko hub)", () => {
     expect(PAGE_SRC).toMatch(/\{ label: "AI 인사이트" \}/);
   });
 
-  it("일자 링크는 기존 /mlb/games/[date] 라우트 사용 (신규 [date] 서브페이지 X, Phase 2 보류)", () => {
+  it("일자 카드 기본 링크는 여전히 /mlb/games/[date] 사용, 팩터 있을 때만 /mlb/insights/[date] 아카이브로 연결 (plan #30 Phase 2)", () => {
     expect(PAGE_SRC).toMatch(/href=\{`\/mlb\/games\/\$\{item\.date\}`\}/);
-    expect(PAGE_SRC).not.toMatch(/\/mlb\/insights\/\$\{item\.date\}/);
+    expect(PAGE_SRC).toMatch(/href=\{`\/mlb\/insights\/\$\{item\.date\}#factor-breakdown-\$\{item\.gameId\}`\}/);
   });
 
   it("revalidate = 86400 ISR (INSIGHTS_ISR_SECONDS 정합, Turbopack literal required)", () => {
@@ -105,6 +110,60 @@ describe("sitemap.ts — /mlb/insights + /en/mlb/insights entries", () => {
   it("KO + EN URL 둘 다 존재", () => {
     expect(SITEMAP_SRC).toMatch(/\$\{SITE_URL\}\/mlb\/insights`/);
     expect(SITEMAP_SRC).toMatch(/\$\{SITE_URL\}\/en\/mlb\/insights`/);
+  });
+
+  it("plan #30 Phase 2 — /mlb/insights/[date] + /en/mlb/insights/[date] 아카이브 URL 배선", () => {
+    expect(SITEMAP_SRC).toMatch(/listMlbInsightsDates/);
+    expect(SITEMAP_SRC).toMatch(/\$\{SITE_URL\}\/mlb\/insights\/\$\{d\}`/);
+    expect(SITEMAP_SRC).toMatch(/\$\{SITE_URL\}\/en\/mlb\/insights\/\$\{d\}`/);
+  });
+});
+
+describe("mlb/insights/insights-data.ts — plan #30 Phase 2 date-archive functions", () => {
+  it("listMlbInsightsDates / getMlbInsightsForDate export (KBO loader.ts mlb_schedule 이식)", () => {
+    expect(DATA_SRC).toMatch(/export async function listMlbInsightsDates/);
+    expect(DATA_SRC).toMatch(/export async function getMlbInsightsForDate/);
+  });
+
+  it("isValidInsightsDate 재사용 (league-agnostic, 신규 MLB 전용 날짜 검증 X)", () => {
+    expect(DATA_SRC).toMatch(/import \{ isValidInsightsDate \} from "@\/lib\/insights\/loader"/);
+  });
+
+  it("getMlbInsightsForDate 는 mlb_game_date 로 직접 필터 (games FK 조인 없음, predictions 컬럼 이미 보유)", () => {
+    expect(DATA_SRC).toMatch(/\.eq\("mlb_game_date", date\)/);
+  });
+});
+
+describe("mlb/insights/[date]/page.tsx (ko archive, plan #30 Phase 2)", () => {
+  it("Breadcrumb 3단계 (MLB 분석 → AI 인사이트 → 일자)", () => {
+    expect(DATE_PAGE_SRC).toMatch(/\{ label: "MLB 분석", href: "\/mlb" \}/);
+    expect(DATE_PAGE_SRC).toMatch(/\{ label: "AI 인사이트", href: "\/mlb\/insights" \}/);
+  });
+
+  it("dynamicParams=false + generateStaticParams(listMlbInsightsDates) — 존재하는 일자만 정적 생성", () => {
+    expect(DATE_PAGE_SRC).toMatch(/export const dynamicParams = false/);
+    expect(DATE_PAGE_SRC).toMatch(/listMlbInsightsDates\(90\)/);
+  });
+
+  it("entries 0건 시 notFound() (KBO /insights/[date] 패턴 재사용)", () => {
+    expect(DATE_PAGE_SRC).toMatch(/entries\.length === 0\) notFound\(\)/);
+  });
+
+  it("li 앵커 id=factor-breakdown-{gameId} — hub 의 '전체 팩터 보기' 링크 타겟과 일치", () => {
+    expect(DATE_PAGE_SRC).toMatch(/id=\{`factor-breakdown-\$\{item\.gameId\}`\}/);
+  });
+});
+
+describe("en/mlb/insights/[date]/page.tsx (en mirror, plan #30 Phase 2)", () => {
+  it("공유 insights-data.ts 재사용 (DRY)", () => {
+    expect(EN_DATE_PAGE_SRC).toMatch(
+      /import \{ getMlbInsightsForDate, listMlbInsightsDates \} from "@\/app\/mlb\/insights\/insights-data"/,
+    );
+  });
+
+  it("locale=en Breadcrumb + /en/mlb/insights href", () => {
+    expect(EN_DATE_PAGE_SRC).toMatch(/locale="en"/);
+    expect(EN_DATE_PAGE_SRC).toMatch(/href: "\/en\/mlb\/insights" \}/);
   });
 });
 
