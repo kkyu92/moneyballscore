@@ -1,7 +1,7 @@
 export const RETROSHEET_ATTRIBUTION =
   'The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at www.retrosheet.org';
 
-export interface HistoricalGame {
+interface HistoricalGame {
   gameDate: string;
   homeTeam: string;
   awayTeam: string;
