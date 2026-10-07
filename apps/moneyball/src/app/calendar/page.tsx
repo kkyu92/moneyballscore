@@ -6,6 +6,7 @@ import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks';
 import { getKstMonthInfo, buildEmptyGrid, type MonthInfo, type DayCell } from '@/lib/calendar/monthGrid';
+import { captureFallback } from '@/lib/observability/captureFallback';
 
 // /calendar — 현재 월 (KST) 의 daily prediction count + accuracy heatmap.
 // 월 grid 골격(getKstMonthInfo/buildEmptyGrid)은 mlb/calendar/page.tsx 와 공유(@/lib/calendar/monthGrid).
@@ -106,7 +107,9 @@ function accuracyBadge(rate: number | null, verifiedN: number): string {
 
 export default async function CalendarPage() {
   const info = getKstMonthInfo();
-  const cells = await getMonthHeatmap(info);
+  const cells = await getMonthHeatmap(info).catch((err) =>
+    captureFallback(err, buildEmptyGrid(info), { route: '/calendar', source: 'getMonthHeatmap' }),
+  );
 
   const monthTotal = cells.reduce(
     (acc, c) => {

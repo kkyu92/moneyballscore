@@ -6,6 +6,7 @@ import { assertSelectOk, KBO_FACTOR_COUNT, shortTeamName, type TeamCode, PRODUCT
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { selectTopFactors } from "@/lib/insights/topFactors";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 const PAGE_URL = `${SITE_URL}/insights`;
 const LIMIT = INSIGHTS_LIMIT;
@@ -119,7 +120,9 @@ async function getRecentInsights(): Promise<InsightRow[]> {
 
 
 export default async function InsightsHubPage() {
-  const insights = await getRecentInsights();
+  const insights = await getRecentInsights().catch((err) =>
+    captureFallback(err, [] as InsightRow[], { route: "/insights", source: "getRecentInsights" }),
+  );
   const latestDate = insights[0]?.date ?? null;
 
   const articleJsonLd = {
