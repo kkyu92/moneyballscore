@@ -1,4 +1,14 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): mlb-pipeline/retro.ts/rivalry-memory.ts/compareModels.ts as-any 패밀리 재감사, 갭 0건 (cycle 2961, 2026-10-07)
+
+진단: op-analysis gap=37(≥25, 마지막 발화 cycle 2924) — 25-cycle 주기 보정 trigger 도달. `scripts/op-analysis-ce-cohort.ts` 하네스 직접 실행 시도했으나 Supabase `exceed_egress_quota` HTTP 402 재확인(cycle 2939 최초 확인 이후 지속, 신규 action 없음 — billing 사용자 영역). 단 홈페이지 직접 curl 재확인 결과 200(cycle 2947-2953 degrade 작업 이후 500→200 회복 실측 확인, 장애 중 degrade 패턴 효과 입증). 2-chain lock 미충족(직전8 distinct=3).
+
+- op-analysis 하네스 실행 불가로 review-code(heavy) 로 pivot. cycle 2960 이 고친 `mlb-retro.ts` 주변(`mlb-pipeline.ts` 889줄) + KBO 측 동형 로직(`agent-context.ts` recent_form/head_to_head 산출) 교차검증 — KBO 는 `factors` JSON 직접 저장 구조라 동일 버그 클래스(하드코딩 중립값) 없음 확인.
+- `retro.ts:277`/`postview-daily.ts:104`/`rivalry-memory.ts:148,206`/`compareModels.ts:67,82` 의 `as any` 캐스팅 재조사 — 전부 `assertSelectOk<any[]>` 의도된 패턴이거나 `typeof` 가드 동반, silent drift 없음 확인.
+- 결론: 조사한 축 전부 갭 0건. 코드 변경 없음.
+
+다음 사이클 추천 = egress quota 재확인(코드 액션 없음, billing 조치 대기 지속) 또는 fix-incident(health-alert 재확인 noise 수준 — 근본 원인 billing 동일) 또는 explore-idea(plan#29 expiry 2026-10-15, 8일 남음) 또는 review-code(heavy) 신규 미탐색 축(`apps/moneyball/src/app/debug/*`, `apps/moneyball/src/lib/observability/` 등 소규모 파일) 저가치 판단 시 skip.
+
 ## 🟢 SUCCESS — review-code(heavy): mlb-retro recent_form/head_to_head 재배선 (cycle 2960, 2026-10-07)
 
 진단: op-analysis gap=36(≥25)이나 Supabase egress quota 402 재확인(curl 직접 재검증, day21+ 변화 없음) 저가치. 2-chain lock 미충족(직전8 distinct=3). design-system(DESIGN.md mtime 35일 trigger)도 토큰 grep 재검사 결과 신규 drift 0건. cycle 2959 와 유사한 MLB 영역(mlb-pipeline.ts/mlb-retro.ts) 직접 code read.

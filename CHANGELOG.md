@@ -1,4 +1,14 @@
-## v0.5.62.285 — 2026-10-07 (cycle 2960, review-code(heavy): mlb-retro recent_form/head_to_head 재배선 SUCCESS)
+## v0.5.62.286 — 2026-10-07 (cycle 2961, review-code(heavy): mlb-retro 주변 as-any/agent 패밀리 재감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): mlb-pipeline/retro.ts/rivalry-memory.ts/compareModels.ts as-any 패밀리 재감사 (cycle 2961, RETRO-ONLY)
+
+- 진단: op-analysis gap=37(≥25, 마지막 발화 cycle 2924) — 25-cycle 주기 보정 trigger 도달해 lite 하네스(`scripts/op-analysis-ce-cohort.ts`) 직접 실행 시도. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)/explore-idea(lite)/info-architecture-review(lite)).
+- Supabase 프로젝트가 여전히 `exceed_egress_quota` HTTP 402 반환(REST 직접 curl 재현) — cycle 2939 최초 확인 이후 지속, 신규 action 없음(billing 은 사용자 영역, 비용 가드상 자율 해결 불가). 단 cycle 2947~2953 assertSelectOk degrade 작업 이후 홈페이지는 직접 curl 재확인 결과 200(이전 500에서 회복) — degrade 패턴이 실제 장애 중 효과 발휘 중임을 실측 확인. `health-alert` workflow 는 여전히 fail(공급 데이터인 supabase 체크 자체가 장애 반영 — 의도된 신호, 코드 버그 아님).
+- op-analysis 하네스가 DB 접근 불가로 실행 불가해 review-code(heavy) 로 pivot. cycle 2960 이 고친 `mlb-retro.ts` 주변(`mlb-pipeline.ts` 889줄 재확인) + KBO 측 동형 패턴(`agent-context.ts` recent_form/head_to_head 산출 로직) 교차검증 — KBO 쪽은 `factors` JSON 직접 저장이라 동일 버그 클래스 없음 확인.
+- `retro.ts:277`(`pred.game as any`)/`postview-daily.ts:104`/`rivalry-memory.ts:148,206`/`compareModels.ts:67,82` 의 `as any` 캐스팅 전부 재조사 — 전부 `assertSelectOk<any[]>` 로 이미 any 타입인 배열 원소 접근용 의도된 패턴이거나 `typeof` 가드 동반(compareModels.ts), 실제 필드 누락으로 인한 silent drift 없음 확인(cycle 2959 validator_logs.game_id 패턴과 달리 이번엔 전부 정상).
+- 결론: review-code(heavy) 신규 축 탐색 갭 0건, 코드 변경 없음. review-code(heavy) dominance 가 scope 소진에 따라 자연 하락 중인 패턴(cycle 2950 migration note) 재확인.
+
+
 
 ### review-code(heavy): mlb-retro.ts agent-memory recent_form/head_to_head 하드코딩 중립값 재배선 (cycle 2960, SUCCESS)
 
