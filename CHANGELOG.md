@@ -1,3 +1,12 @@
+## v0.5.62.278 — 2026-10-07 (cycle 2953, review-code(heavy): assertSelectOk/degrade 패밀리 완전 소진 확인)
+
+### review-code(heavy): assertSelectOk/degrade 감사 — 전체 재검증, 잔여 gap 0건 (cycle 2953, SUCCESS retro-only)
+
+- 진단: open issue 0, approved plan 0/23. 직전8 distinct=4(2-chain lock 미충족). operational-analysis gap 29(≥25)는 `exceed_egress_quota` 지속(cycle 2939~, 14+ cycle 미해결)으로 순수 노이즈. info-architecture-review gap 31(≥30)은 신규 라우트 3건(mlb/insights 계열) 확인했으나 헤더/푸터/sitemap 즉시 배선 완료 + breadcrumb gap 0으로 저가치. cycle 2952 retro 추천대로 review-code(heavy)로 `/mlb/analysis/analysis-data.ts` 착수.
+- 착수 결과 4개 select 전부 이미 assertSelectOk 적용 확인 — cycle 2952 retro의 "23개 미보호 파일 잔존" 추정이 stale 이었음을 발견.
+- 전체 재감사(`apps/moneyball/src` 134개 `.from()` 파일 전수 교차검증): Array.from() 오탐 다수, loading.tsx skeleton 오탐, API mutation route(POST/upsert, 500 반환이 정상) 6개, client 컴포넌트 2개(이미 try/catch+Sentry+`[]` fallback), mlb 홈 page.tsx ko/en(이미 result.error 수동 null fallback) 2개 — 실제 gap 0건. assertSelectOk/degrade 패밀리 신규 스코프 완전 소진 확인(cycle 2900/2951이 예견한 가설의 최초 실측 확증).
+- lint clean, 코드 변경 0(순수 재검증). lesson 1건 dispatch(미검증 추정치 재사용 패턴 차단).
+
 ## v0.5.62.277 — 2026-10-07 (cycle 2952, review-code(heavy): /teams 데이터 레이어 assertSelectOk degrade)
 
 ### review-code(heavy): /teams 빌더 레이어 assertSelectOk degrade — 4개 파일 8개 호출 (cycle 2952, SUCCESS)

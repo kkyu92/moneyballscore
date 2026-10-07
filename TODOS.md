@@ -1,4 +1,16 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): assertSelectOk/degrade 패밀리 완전 소진 확인 (cycle 2953, 2026-10-07)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/deferred). 직전8 distinct=4(2-chain lock 미충족). operational-analysis gap 29(≥25 trigger) 재확인했으나 `exceed_egress_quota` 지속(cycle 2939~, 14+ cycle 미해결, 사용자 billing 미조치) — 순수 노이즈. info-architecture-review gap 31(≥30 trigger)도 확인했으나 신규 라우트 3건(mlb/insights 계열, cycle 2936-2938)이 커밋 메시지상 헤더 메가메뉴/푸터/sitemap 즉시 배선 완료 상태 확인 + breadcrumb 누락 grep 신규 0건 — 10연속 "현 IA 충분" 예상돼 저가치. cycle 2952 retro 추천대로 review-code(heavy)로 `/mlb/analysis/analysis-data.ts` 착수.
+
+착수 결과: analysis-data.ts 4개 select(predictions×2, mlb_schedule×2) 전부 이미 `assertSelectOk` 적용 상태 — 작업 불필요. cycle 2952 retro 가 남긴 "23개 미보호 파일 잔존" 추정치가 `grep -L captureFallback` 결과 개수만 인용한 미검증 근사치였음을 확인.
+
+전체 재감사로 확장: `apps/moneyball/src` 전체 134개 `.from()` 보유 파일 중 assertSelectOk/captureFallback 부재로 표시된 파일 전수를 하나씩 교차검증. 결과 — (1) `Array.from()` JS 빌트인 오탐 다수(loading.tsx 스켈레톤 전부 포함), (2) API mutation route(POST/upsert) 6개는 에러 시 Sentry capture + 500 반환이 올바른 동작(SSR page render 와 risk profile 이 달라 degrade 패턴 적용 대상 아님) — `picks/submit`, `picks/poll`, `picks/mlb-poll`, `picks/mlb-submit`, `leaderboard/sync`, `leaderboard/mlb-sync`, (3) client 컴포넌트 2개(`HistoricalAnalogMatchup.tsx`, `RivalryMemorySurface.tsx`)는 이미 try/catch + Sentry capture + graceful `[]` fallback 적용 중, (4) `mlb/page.tsx`/`en/mlb/page.tsx` 는 이미 `result.error` 수동 체크 + null fallback 로 보호 중. 실제 미보호 gap = **0건**.
+
+결론: assertSelectOk/degrade silent-drift 감사 패밀리가 완전 소진됐음을 실측으로 확정 — cycle 2900/2951 이 "lib/ 핵심 스코프 소진"이라 예견했던 가설의 첫 실측 확증. lint clean, 코드 변경 0(순수 재검증 cycle). `lesson: review-code retro 미보호 파일 수 추정치 미검증 재사용 위험` 1건 dispatch — 다음 review-code(heavy) 는 이전 retro 의 "미보호 N개" 추정을 그대로 재사용하지 말고 착수 직전 재검증 의무화.
+
+다음 사이클 추천 = `explore-idea`(plan #29 로그인/커뮤니티 재평가, expiry 2026-10-15 임박) 또는 `fix-incident`(egress quota 장애 지속 시, 단 noise 주의). review-code(heavy) 는 큰 파일(analysis/page.tsx 2836줄 등) 복잡도 감사로 전환 가능하나 과거 여러 차례 리뷰된 영역이라 즉시 액션 불확실.
+
 ## 🟢 SUCCESS — review-code(heavy): /teams 데이터 레이어 assertSelectOk degrade — 4개 파일 8개 호출 (cycle 2952, 2026-10-07)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/deferred), 직전8 distinct=4(review-code(heavy)3/fix-incident2/lotto(lite)1/skill-evolution(forced)1/review-code 추가분, 2-chain lock 미충족). operational-analysis(25-cycle gap 충족)와 lotto(30-cycle gap 충족) 둘 다 trigger 는 충족했지만 실측 전환 전 둘 다 저가치임을 먼저 확인: `pnpm tsx scripts/op-analysis-ce-cohort.ts`는 `exceed_egress_quota` 즉시 에러(cycle 2939부터 지속, 사용자 billing 미조치, 신규 정보 없음) — op-analysis 재확인은 순수 노이즈. lotto 는 cron 산출물 `apps/moneyball/data/lotto-picks/2026-10-10.md`(Oct 7 생성, 다음 토요일 1225회 매칭) + `lotto-results/2026-10-03.md`(Oct 7 생성, 직전 토요일 매칭) 둘 다 신선 — cycle 2951 이 재정의한 cron-artifact 기준 trigger 가 false-positive 0건으로 정상 작동함을 확인(개인 advisory 경로 기준이던 구 trigger 는 폐기됨). 두 저가치 옵션 대신 cycle 2951 retro 추천(review-code(heavy), 신규 스코프 teams)을 채택.
