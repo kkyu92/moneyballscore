@@ -1,3 +1,14 @@
+## v0.5.62.312 — 2026-10-07 (cycle 2987, review-code(heavy): mlb_combined_notify 죽은 코드 제거 + placeholder stale ETA 텍스트 수정 SUCCESS)
+
+### review-code(heavy): components/layout·notify·search 신규 축 감사 — mlb_combined_notify 죽은 코드 제거 + ETA 텍스트 수정 (cycle 2987, SUCCESS)
+
+- 진단: 직전8(2979-2986) distinct=4(review-code(heavy)5+lotto(lite)1+design-system(lite)1+fix-incident1), 2-chain lock 미충족. fix-incident gap=1(방금 발화)·op-analysis gap=63(egress quota 402 지속 재확인, 신규 정보 없음)·lotto gap=8·info-arch gap=11 전부 미근접 또는 저가치. explore-idea saturation 13/15 충족하나 organic idea 0(open issue 0, approved plan 0건, plan#29 Tier4 불변·만료 8일 남음) — 과거 패턴 동일 사유로 skip. design-system 2 사이클 전 발화(DESIGN.md mtime 변화 없음, 즉시 재검증 저가치). review-code(heavy) 과거 commit 제목 grep 으로 `components/layout`(2회)·`components/notify`(3회)·`components/search`(5회) 가 `ui`(100회) 대비 거의 미탐색 확인 — subagent 전수 read 위임.
+- **발견 1**: `mlb_combined_notify` 파이프라인 모드가 cron(`decideMlbMode`)에 전혀 매핑되지 않고(`predict_final`이 이미 "predict + notify 통합" 처리), 수동 `workflow_dispatch` 로만 도달 가능한데 그마저도 `runCombinedNotify()` 가 `{gamesFound:0, rowsInserted:0, errors:[]}` 고정 반환하는 stub — 완성된 테스트까지 갖춘 `MlbCombinedMessage.ts` 포맷터가 production 경로 어디서도 호출되지 않는 완전 죽은 코드. `mlb-pipeline.ts`/`silent-drift-alert.ts`/API route `VALID_MODES`/`worker.ts`/`mlb-pipeline.yml` dispatch 옵션/`health/pipelines` 주석에서 전부 제거 + `MlbCombinedMessage.ts`+테스트 파일 삭제 + 참조하던 4개 테스트 파일 정리.
+- **발견 2**: `/login`, `/community`, `/settings`, `PlaceholderLoginButton` 전부 "ETA 2026-08~09" 문구 노출 중 — 오늘(2026-10-07) 기준 한 달 이상 경과, plan#29(회원인증+커뮤니티, Tier4 보류, 만료 2026-10-15)는 여전히 사용자 결정 대기. 네 곳 모두 "추후 공지"로 교체(기능 결정 아님, 텍스트 정확성 수정만).
+- 검증: type-check(moneyball/kbo-data/shared/cron) clean, lint 0 warning, test 584/584 files·4610/4610 전부 통과(삭제 2개 테스트 파일 반영), production build 성공. commit 72153ca5, push + CI green 실측 확인(`gh run list` completed/success).
+
+다음 사이클 추천 = plan#29 사용자 결정(만료 2026-10-15, 8일 남음, 임박) 또는 Supabase egress quota 장애 재확인(cycle 2939~, billing 조치 대기 지속) 또는 2-chain lock 자연 해제 후 review-code(heavy) 잔여 스코프(components/share, components/live 등) 재탐색.
+
 ## v0.5.62.311 — 2026-10-07 (cycle 2986, fix-incident: @sentry/nextjs v11 migration — dependabot PR #3105 8일 CI 실패 해소 SUCCESS)
 
 ### fix-incident: @sentry/nextjs v11 migration — withSentryConfig import path + disableLogger relocate (cycle 2986, SUCCESS)

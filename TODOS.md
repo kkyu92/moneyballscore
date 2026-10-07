@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): mlb_combined_notify 죽은 코드 제거 + placeholder ETA 텍스트 수정 (cycle 2987, 2026-10-07)
+
+진단: 직전8(2979-2986) distinct=4, 2-chain lock 미충족. fix-incident(gap=1)/op-analysis(egress quota 402 지속)/explore-idea(plan#29 Tier4 불변)/lotto/info-arch/design-system 전부 미근접 또는 저가치. 과거 review-code(heavy) commit 제목 grep 으로 `components/layout`(2)·`notify`(3)·`search`(5) 저피감사 확인 → subagent 위임 전수 read.
+
+발견 1: `mlb_combined_notify` 파이프라인 모드 — cron 미매핑(predict_final이 이미 predict+notify 통합) + 수동 dispatch 해도 stub 고정 반환, 완성된 `MlbCombinedMessage.ts` 포맷터가 production 어디서도 미호출되는 완전 죽은 코드. 전체 제거(타입/모드 목록 6곳 + 소스/테스트 파일 삭제).
+
+발견 2: `/login`·`/community`·`/settings`·`PlaceholderLoginButton` "ETA 2026-08~09" 문구가 한 달+ stale. 네 곳 전부 "추후 공지"로 교체(기능 결정 아님, 텍스트만).
+
+검증: type-check/lint clean, test 584/584·4610/4610 통과, build green. commit 72153ca5, push + CI green 실측 확인.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~, 사용자 billing 조치 필요).
+
 ## 🟢 SUCCESS — fix-incident: @sentry/nextjs v11 migration, dependabot PR #3105 8일 CI 실패 해소 (cycle 2986, 2026-10-07)
 
 진단: 직전8(2978-2985) distinct=3, 2-chain lock 미충족. fix-incident/op-analysis/info-arch/lotto/design-system gap 전부 미근접. open issue 0, approved plan 0건. `gh pr list` open PR 전수 확인 중 dependabot PR #3105 가 8일째 type-check 실패 발견 — `withSentryConfig`(v11 에서 import path `"@sentry/nextjs"`→`"@sentry/nextjs/config"` 이동) + `disableLogger`(top-level 제거→`webpack.treeshake.removeDebugLogging`) 두 breaking change. `next.config.ts` 수정 + `@sentry/nextjs` ^11.0.0 bump. type-check/lint/test(586/586)/build 전부 green. PR #3141 머지 확인(MERGED 실측) 후 dependabot #3105 자동 CLOSED 확인.
