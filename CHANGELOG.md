@@ -1,3 +1,17 @@
+## v0.5.62.306 — 2026-10-07 (cycle 2981, review-code(heavy): analysis/calendar/observability/teams 재감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): analysis/calendar/observability/teams 재감사 — 갭 0건, carry-over 추천 stale 확인 (cycle 2981, RETRO-ONLY)
+
+- 진단: 직전8(2973-2980) distinct=3(review-code(heavy)6+info-architecture-review1+lotto(lite)1), 2-chain lock 미충족. op-analysis gap=13/25·fix-incident gap=11/20·lotto gap=2/30·info-arch gap=5/30·design-system gap=17 전부 미근접. explore-idea saturation 12/15 충족하나 organic idea 0(open issue 0, plan#29 Tier4 불변·만료 2026-10-15)이라 skip. plan#29 는 risk=3+자율불가로 자동 fire 대상 제외. cycle 2980 추천(review-code(heavy) 신규 스코프 "analysis/api/calendar/observability/teams 미탐색") 따라 선택.
+- 직전 20 cycle(2961-2980) chain 분포: review-code 13/20(65%) — 평가 대상 1개(review-code) 0회 아님, skill-evolution trigger5 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
+- `apps/moneyball/src/lib/{analysis,calendar,observability,teams}` 전수 read(~4600줄): `computeCompositeDuel.ts`/`computeMlbCompositeDuel.ts`(차이 연산이 NaN 에 대해 항상 false→null 로 자연 귀결되는 안전 구조, `??` fallback 자체 미사용 확인) / `convergenceRecord.ts`(874줄, h2h/threshold/팀코드 매핑 등 과거 cycle 2070/2081/2226/2304 fix 로 이미 하드닝) / `buildTeamStrengthSnapshot.ts`/`buildTeamFactorAverages.ts`/`buildTeamProfile.ts`(WAR/SFR=0 data-gap guard cycle 2429 이미 적용) / `monthGrid.ts`/`captureFallback.ts` — actionable 버그 0건.
+- **carry-over 추천 자체가 stale 이었음 확인**: 본 스코프(analysis/calendar/teams)는 실은 cycle 2967 이 이미 감사해 SFR=0 배지 버그를 수정했고, api/+observability 는 cycle 2966 이 이미 감사 완료(TODOS 참조) — cycle 2980 회고가 "미탐색"이라 적은 건 15 cycle 전 작업을 놓친 서술 오류. 다음 skill-evolution 후속 검토 항목으로 "review-code(heavy) 추천 스코프 산출 시 과거 cycle 제목 grep 선행" 제안.
+- 코드 변경 0 (clean audit).
+
+**plan#29 상태 변화 없음** (만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 사용자 결정(만료 임박) 또는 Supabase egress quota 장애(cycle 2939~) 모니터 또는 review-code(heavy) 진짜 미탐색 스코프 재확인(grep 선행).
+
 ## v0.5.62.305 — 2026-10-07 (cycle 2980, review-code(heavy): NaN 비대칭-null 가드 누락(sp_fip/sp_xfip/sfr/mlb-base 전 팩터) 수정 SUCCESS)
 
 ### review-code(heavy): carry-over 3건 — NaN 전용 비대칭-null 버그 2건 실발견 + dead-code 문서화 (cycle 2980, SUCCESS)

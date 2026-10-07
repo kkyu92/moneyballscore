@@ -1,4 +1,16 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): analysis/calendar/observability/teams 재감사, 갭 0건 (cycle 2981, 2026-10-07)
+
+진단: 직전8(2973-2980) distinct=3, 2-chain lock 미충족. op-analysis/fix-incident/lotto/info-arch/design-system gap 전부 미근접. explore-idea saturation 12/15 충족하나 organic idea 0 지속. plan#29 Tier4(risk=3) 불변, 자율 fire 제외. cycle 2980 추천 스코프(analysis/api/calendar/observability/teams) 직접 read.
+
+`apps/moneyball/src/lib/{analysis,calendar,observability,teams}` 전수 read(~4600줄, computeCompositeDuel/computeMlbCompositeDuel/convergenceRecord.ts 874줄/buildTeamStrengthSnapshot/buildTeamFactorAverages/monthGrid/captureFallback) — actionable 버그 0건. 차이 연산이 NaN 에 자연히 null 로 귀결되는 안전 구조 확인(`??` fallback 미사용), h2h/threshold/팀코드/WAR·SFR=0 gap guard 전부 과거 cycle(2070/2081/2226/2304/2429) 로 이미 하드닝.
+
+**carry-over 추천 stale 확인**: 본 스코프는 cycle 2966(api+observability)/2967(analysis/calendar/teams, SFR=0 배지 버그 수정) 이 이미 감사 완료 — cycle 2980 이 "미탐색"이라 적은 건 15 cycle 전 작업을 놓친 서술 오류. 코드 변경 0.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 사용자 결정(만료 임박) 또는 egress quota 모니터 또는 review-code(heavy) 진짜 미탐색 스코프(과거 cycle 제목 grep 선행 후 재확인).
+
 ## 🟢 SUCCESS — review-code(heavy): NaN 비대칭-null 가드 누락 수정 (cycle 2980, 2026-10-07)
 
 진단: 직전8(2972-2979) distinct=3, 2-chain lock 미충족. fix-incident/op-analysis/design-system/polish-ui 전부 gap 미근접. explore-idea saturation 12/15 충족하나 organic idea 0·plan#29 불변 지속. cycle 2978/2979 공통 추천 carry-over 3건(mlb-base.test.ts NaN-clamp / logistic.ts 주석 / mlb-elo.ts dead code) 재조사.
