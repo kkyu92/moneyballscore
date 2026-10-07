@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): /teams 허브 captureFallback route 태그 누락 수정 (cycle 3002, 2026-10-07)
+
+진단: 직전8(2994-3001) distinct=4 — 2-chain lock 미충족. open issue 0건, approved plan 0건(전부 completed/archived/spec-only-deferred). Supabase egress quota 402 재확인(65일+ 지속) — op-analysis 여전히 차단, 반복 재측정 noise 라 skip. fix-incident gap=3·info-arch gap=26·lotto cron 산출물 둘 다 신선 — 전부 미근접. 최근 감사 공백 탐색: `lib/observability/`(99일+ 미커밋)·`components/glossary/`·`components/standings/`(140일+ 미커밋) — review-code(heavy) 스코프 누락 확인, grep-count-depth 가드레일(cycle 3001) 대로 전수 read.
+
+`captureFallback()` callsite 105곳 전수 grep — `app/teams/page.tsx:48`(teams 허브) 만 `route` 태그 누락(`source`만 존재), 나머지 전부 `{route, source}` 2-key 패턴. Sentry triage 시 이 페이지만 route 미태깅되는 silent blind spot — 키 추가로 정합. `GlossaryCategoryFilter.tsx`/`TeamAccuracySortControl.tsx` 전수 read — counts/slug/order 호출부와 정합, 추가 drift 0건. tsc clean, 태그 값 변경만이라 vitest 영향 없음(기존 테스트 assert 0건 확인 후 수정).
+
+**plan#29/#30 상태 변화 없음**. **Supabase egress quota 장애 지속**(65일+ 경과) — op-analysis 여전히 차단.
+
 ## 🟢 SUCCESS — review-code(heavy): shared/index.ts 주석 drift 2건 수정 (cycle 3000, 2026-10-07, 50-cycle milestone)
 
 진단: 직전8(2992-2999) distinct=3(review-code(heavy)5+fix-incident2+design-system1) — 2-chain lock 미충족. open issue 0건, approved plan 0건. Supabase egress quota 402 재확인(60일+ 지속) — op-analysis gap=32 충족하나 cycle 2968 재확인과 중복이라 skip. cycle 2998 추천대로 index.ts 잔여 구간(3200~3453) 이어서 감사.

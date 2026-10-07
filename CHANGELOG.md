@@ -1,3 +1,14 @@
+## v0.5.62.326 — 2026-10-07 (cycle 3002, review-code(heavy): /teams 허브 captureFallback route 태그 누락 수정 SUCCESS)
+
+### review-code(heavy): `apps/moneyball/src/lib/observability/` + `components/glossary/` + `components/standings/` 전수 read — 최장기 미감사 축 (cycle 3002, SUCCESS)
+
+- 진단: 직전8(2994-3001) distinct=4(review-code(heavy)+design-system+fix-incident+skill-evolution(forced)) — 2-chain lock 미충족. open issue 0건, approved plan 0건(전부 completed/archived/spec-only-deferred). Supabase egress quota 402 재확인(직접 curl, cycle 2939~ 지속 65일+) — op-analysis 여전히 차단, 반복 재측정은 noise 라 skip. fix-incident gap=3·info-arch gap=26·lotto(cron 산출물 picks/results 둘 다 신선, 수동 개입 불필요) 전부 미근접. `git log -1` 기준 최근 감사 공백 탐색: `lib/observability/`(마지막 커밋 2026-06-30, 99일+) + `components/glossary/`·`components/standings/`(마지막 커밋 2026-05-19, 140일+) — review-code(heavy) 스코프에서 그간 누락 확인(cycle 3001 skill-evolution 이 추가한 grep-count-depth 가드레일대로 두 디렉토리 전 파일 전수 read).
+- `captureFallback()` callsite 105곳 전수 grep — 전부 `{ route, source }` 2-key 태그 패턴인데 `app/teams/page.tsx:48`(teams 허브) 만 `{ source: "teams-hub-accuracy" }` 로 route 키 누락. Sentry 알림 triage 시 이 페이지의 폴백 경로만 route 태그 없이 집계되는 silent blind spot — route 키 추가로 정합.
+- `GlossaryCategoryFilter.tsx`/`TeamAccuracySortControl.tsx` 전수 read — counts prop 타입·`data-glossary-category` slug·`data-sample-rank` 순서 전부 호출부(`glossary/page.tsx`, `standings/page.tsx`)와 정합 확인, 추가 drift 0건.
+- 검증: `tsc --noEmit`(apps/moneyball) clean. 태그 값 변경만이라 로직 테스트 영향 없음(기존 테스트 중 `teams-hub-accuracy` 태그 값을 assert 하는 테스트 0건 확인 후 수정).
+
+**plan#29/#30 상태 변화 없음**. **Supabase egress quota 장애 지속**(cycle 2939~, 65일+ 경과) — op-analysis 여전히 차단.
+
 ## v0.5.62.325 — 2026-10-07 (cycle 3000, review-code(heavy): shared/index.ts 주석 drift 2건 수정 SUCCESS)
 
 ### review-code(heavy): `packages/shared/src/index.ts` 주석 drift 2건 — stale line 번호 + 틀린 callsite 파일명 (cycle 3000, SUCCESS, 50-cycle milestone)
