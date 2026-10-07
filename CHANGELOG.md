@@ -1,3 +1,14 @@
+## v0.5.62.289 — 2026-10-07 (cycle 2964, design-system(lite): DESIGN.md 토큰 전수 재검증 RETRO-ONLY)
+
+### design-system(lite): DESIGN.md 토큰 전수 재검증, 갭 0건 (cycle 2964, RETRO-ONLY)
+
+- 진단: 2-chain lock 발동(직전8 distinct=2: review-code(heavy) 7 + polish-ui 1) — 두 chain 후보 제외. fix-incident(CI 정상, health-alert/runtime-error-alert 는 egress quota 402 재확인뿐 noise), operational-analysis(gap=40 충족이나 402 지속), explore-idea(saturation 12/15 충족이나 organic idea 전무, plan#29 Tier4 유지), lotto(cron 정상), info-arch(gap=9 미근접) 전부 저가치 또는 미근접 → design-system(gap=21, DESIGN.md mtime 34일) 유일 실행 가능 선택.
+- cycle 2963 가 2-chain lock fallback 으로 급조한 신규 8개 loading.tsx 가 기존 skeleton 토큰 패턴과 일치하는지 전수 재확인 — 8/8 일치, drift 0건.
+- `rounded-md` 잔존(cycle 2605 "전역 clean" 주장) 재검증 — 0건, 주장 유효.
+- 신규 라우트(`mlb/standings`/`mlb/wild-card`/`insights` 계열) 하드코딩 hex·라이트전용 gray 리터럴 재검증 — 0건.
+- 신규 확인: Supabase egress quota 402 가 `health-alert` workflow 를 통해 production `/api/health` overall=fail(supabase 쿼리 에러 + pipeline "No pipeline runs yet")까지 확산된 것을 재확인 — 근본 해결은 여전히 사용자 billing 조치 영역(자율 upgrade 금지, CLAUDE.md 비용 가드).
+- 코드 변경 없음(순수 재검증 cycle).
+
 ## v0.5.62.288 — 2026-10-07 (cycle 2963, polish-ui(2-chain lock fallback): insights/reviews/mlb-standings/wild-card loading.tsx 8건 신설 SUCCESS)
 
 ### polish-ui(2-chain lock fallback): loading.tsx 커버리지 갭 8건 신설 (cycle 2963, SUCCESS)

@@ -1,4 +1,15 @@
 
+## 🟡 RETRO-ONLY — design-system(lite): DESIGN.md 토큰 전수 재검증, 갭 0건 (cycle 2964, 2026-10-07)
+
+진단: 2-chain lock 발동(직전8 distinct=2: review-code(heavy) 7 + polish-ui 1, 둘 다 후보 제외). fix-incident — `gh run list` CI 정상(Dependabot in-progress 뿐), 단 `health-alert`/`runtime-error-alert` 가 egress quota 402(cycle 2939~ 지속)로 반복 fail 확인했으나 근본 원인 동일(billing, noise) 재확인만 됨. operational-analysis — gap=40(≥25 충족)이나 `scripts/op-analysis-ce-cohort.ts` 실행 시 동일 402(cycle 2939 최초 확인 이후 지속, 신규 action 없음). explore-idea — saturation 12/15 충족하나 organic idea 전무(open issue 0, approved plan 0/23, TODOS Next-Up stale), plan#29 는 Tier4(risk=3) 유지, expiry 2026-10-15(8일 남음) 접근 중. lotto — 다음 토(10/10)+직전 토(10/3) 산출물 모두 신선(cron 정상). info-arch gap=9(미근접). 남은 후보 중 design-system(DESIGN.md mtime 34일 ≥4주, 마지막 발화 cycle 2943 — gap=21) 유일하게 실행 가능 + 비차단 → 선택.
+
+- 신규 추가 8개 loading.tsx(cycle 2963, 2-chain lock fallback 로 급히 작성됨 — design-system 정식 검증 미거침) 가 기존 skeleton 토큰 패턴(`bg-gray-200 dark:bg-gray-700` pulse + `bg-white dark:bg-[var(--color-surface-card)]`/`border-gray-200 dark:border-[var(--color-border)]` 카드 wrapper) 과 일치하는지 전수 재확인 — 8/8 전부 기존 패턴 그대로 사용, drift 0건.
+- `rounded-md` 잔존 재검증(cycle 2605 "전역 clean" 주장 검증) — `grep -rl rounded-md apps/moneyball/src --include="*.tsx"` 0건, 주장 유효.
+- 신규 라우트(`mlb/standings`, `mlb/wild-card`, `insights` 계열) page.tsx 에서 하드코딩 hex 색상/라이트전용 gray 리터럴(dark: 짝 없는) 패턴 재검증 — 전부 0건.
+- 결론: DESIGN.md 토큰 체계 전수 재검증 결과 갭 0건. 코드 변경 없음(순수 재검증 cycle). Supabase egress quota 402 는 health-alert workflow 가 실제 production 영향(health 체크 overall=fail, pipeline check "No pipeline runs yet")까지 확산된 것을 신규 확인했으나 근본 해결은 여전히 사용자 billing 조치 영역(자율 upgrade 금지).
+
+다음 사이클 추천 = egress quota 재확인(코드 액션 없음, billing 조치 대기 지속 — 단 production health 실영향 확산 확인됐으므로 사용자 billing 조치 우선순위 상향 권고) 또는 plan#29 expiry(2026-10-15, 8일 남음) 임박 결정 또는 2-chain lock(review-code(heavy)/polish-ui) 해제 후 자연 복귀.
+
 ## 🟢 SUCCESS — polish-ui(2-chain lock fallback): insights/reviews/mlb-standings/wild-card loading.tsx 8건 신설 (cycle 2963, 2026-10-07)
 
 진단: 2-chain lock 발동(직전8 distinct=2: review-code(heavy) 7 + info-architecture-review(lite) 1, 둘 다 후보 제외). fix-incident(CI 전부 정상), explore-idea(plan#29 Tier4 보류 유지), operational-analysis(egress quota 402 지속), lotto(cron 정상), design-system(DESIGN.md 35일이나 cycle 2943 전수 토큰화 완료) 전부 신규 trigger 없음 → lock 규칙 polish-ui fallback.
