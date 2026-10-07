@@ -297,7 +297,7 @@ export default async function PlayersIndexPage() {
                       {b.position ?? "-"}
                     </td>
                     <td className="py-3 pr-3 text-right font-mono font-semibold">
-                      {fmtWar(b.war)}
+                      {b.war ? fmtWar(b.war) : "-"}
                     </td>
                     <td className="py-3 pr-3 text-right font-mono text-gray-700 dark:text-gray-200">
                       {b.wrcPlus ? b.wrcPlus.toFixed(1) : "-"}
