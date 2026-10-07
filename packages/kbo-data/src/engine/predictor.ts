@@ -50,14 +50,21 @@ export function predict(input: PredictionInput, opts?: PredictOptions): Predicti
   const factors: Record<string, number> = {};
 
   // 1. 선발 FIP (낮을수록 좋음)
-  const homeSPFip = input.homeSPStats?.fip ?? 4.50;
-  const awaySPFip = input.awaySPStats?.fip ?? 4.50;
-  factors.sp_fip = normalize(homeSPFip, awaySPFip, false);
+  // homeSPStats/awaySPStats=null = findPitcher() 매칭 실패 (trade 등 name/team mismatch).
+  // 한쪽만 null 이면 4.50 리그평균 대체값이 실제 측정값과 비대칭 비교되어 편향된 factor 생성
+  // → WAR/SFR 과 동일 가드 적용 (cycle 2977, review-code heavy).
+  const homeSPFip = input.homeSPStats?.fip;
+  const awaySPFip = input.awaySPStats?.fip;
+  factors.sp_fip = (homeSPFip != null && awaySPFip != null)
+    ? normalize(homeSPFip, awaySPFip, false)
+    : 0.5;
 
   // 2. 선발 xFIP (낮을수록 좋음)
-  const homeSPxFip = input.homeSPStats?.xfip ?? 4.50;
-  const awaySPxFip = input.awaySPStats?.xfip ?? 4.50;
-  factors.sp_xfip = normalize(homeSPxFip, awaySPxFip, false);
+  const homeSPxFip = input.homeSPStats?.xfip;
+  const awaySPxFip = input.awaySPStats?.xfip;
+  factors.sp_xfip = (homeSPxFip != null && awaySPxFip != null)
+    ? normalize(homeSPxFip, awaySPxFip, false)
+    : 0.5;
 
   // 3. 타선 wOBA (높을수록 좋음)
   factors.lineup_woba = normalize(
