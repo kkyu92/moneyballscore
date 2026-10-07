@@ -558,6 +558,22 @@ export async function runPostview(
     agent: 'judge',
     gameId: context.game.externalGameId ?? null,
   });
+
+  // judge postview 검증 결과 validator_logs 박제 (team postview / judge-agent pre-game 와 동일 패턴).
+  // 기존엔 Sentry capture 만 있고 영속 박제 누락 — /debug/hallucination judgeCount 가 postview judge 위반을 누락하던 gap (cycle 2974).
+  const postviewJudgeViolations = [...attribution.violations, ...reasoningValidation.violations];
+  if (postviewJudgeViolations.length > 0) {
+    const gameId = context.dbGameId ?? null;
+    logValidatorEvent({
+      gameId,
+      teamCode: 'JG',
+      agent: 'judge',
+      backend: judgeResult.model,
+      passed: attribution.ok && reasoningValidation.ok,
+      violations: postviewJudgeViolations,
+    }).catch((e) => console.warn('[validator_logs] unexpected error:', errMsg(e)));
+  }
+
   const finalReasoning =
     reasoningValidation.violations.length > 0
       ? maskViolatedReasoning(judgeData.reasoning, reasoningValidation.violations)
