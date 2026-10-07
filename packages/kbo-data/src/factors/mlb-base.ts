@@ -82,6 +82,18 @@ function safe(value: number, fallback = 0): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
+/**
+ * home/away 쌍 중 하나라도 non-finite (NaN 포함) 면 양쪽 다 fallback 으로
+ * 맞춰 diff=0 중립 보장. safe() 를 양쪽에 독립 적용하면 한쪽만 NaN 이어도
+ * 반대쪽 실측값과 비교되어 편향된 contribution 생성 — predictor.ts/mlb-pipeline.ts
+ * asymmetric-null 버그(cycle 2977/2978)와 동일 클래스. 이 두 fix 는 null/undefined
+ * 만 걸러 NaN 은 그대로 통과시켰음 — 본 함수가 NaN 까지 포함해 진짜 중립 보장.
+ */
+function pairedSafe(a: number, b: number, fallback = 0): [number, number] {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return [fallback, fallback];
+  return [a, b];
+}
+
 type MlbFactorContributions = Record<Exclude<keyof typeof MLB_BASE_WEIGHTS, 'home_elo_bonus'>, number>;
 
 /**
@@ -91,21 +103,34 @@ type MlbFactorContributions = Record<Exclude<keyof typeof MLB_BASE_WEIGHTS, 'hom
  * computeMlbProbability 는 본 함수 합산 + home_elo_bonus 고정항으로 동일 결과 유지.
  */
 export function computeMlbFactorContributions(input: MlbFactorInputs): MlbFactorContributions {
+  const [spFipH, spFipA] = pairedSafe(input.sp_fip.home, input.sp_fip.away);
+  const [spXfipH, spXfipA] = pairedSafe(input.sp_xfip.home, input.sp_xfip.away);
+  const [wobaH, wobaA] = pairedSafe(input.lineup_woba.home, input.lineup_woba.away);
+  const [bullpenH, bullpenA] = pairedSafe(input.bullpen_fip.home, input.bullpen_fip.away);
+  const [formH, formA] = pairedSafe(input.recent_form.home, input.recent_form.away);
+  const [warH, warA] = pairedSafe(input.war.home, input.war.away);
+  const [eloH, eloA] = pairedSafe(input.elo.home, input.elo.away, 1500);
+  const [sfrH, sfrA] = pairedSafe(input.defense_sfr.home, input.defense_sfr.away);
+  const [xwobaH, xwobaA] = pairedSafe(input.lineup_xwoba.home, input.lineup_xwoba.away);
+  const [barrelH, barrelA] = pairedSafe(input.lineup_barrel_pct.home, input.lineup_barrel_pct.away);
+  const [xwobaAgainstH, xwobaAgainstA] = pairedSafe(input.sp_xwoba_against.home, input.sp_xwoba_against.away);
+  const [wobaStdH, wobaStdA] = pairedSafe(input.woba_std.home, input.woba_std.away);
+
   return {
-    sp_fip: -1 * MLB_BASE_WEIGHTS.sp_fip * (safe(input.sp_fip.home) - safe(input.sp_fip.away)),
-    sp_xfip: -1 * MLB_BASE_WEIGHTS.sp_xfip * (safe(input.sp_xfip.home) - safe(input.sp_xfip.away)),
-    lineup_woba: MLB_BASE_WEIGHTS.lineup_woba * (safe(input.lineup_woba.home) - safe(input.lineup_woba.away)) * 5,
-    bullpen_fip: -1 * MLB_BASE_WEIGHTS.bullpen_fip * (safe(input.bullpen_fip.home) - safe(input.bullpen_fip.away)),
-    recent_form: MLB_BASE_WEIGHTS.recent_form * (safe(input.recent_form.home) - safe(input.recent_form.away)) * 0.05,
-    war: MLB_BASE_WEIGHTS.war * (safe(input.war.home) - safe(input.war.away)) * 0.01,
+    sp_fip: -1 * MLB_BASE_WEIGHTS.sp_fip * (spFipH - spFipA),
+    sp_xfip: -1 * MLB_BASE_WEIGHTS.sp_xfip * (spXfipH - spXfipA),
+    lineup_woba: MLB_BASE_WEIGHTS.lineup_woba * (wobaH - wobaA) * 5,
+    bullpen_fip: -1 * MLB_BASE_WEIGHTS.bullpen_fip * (bullpenH - bullpenA),
+    recent_form: MLB_BASE_WEIGHTS.recent_form * (formH - formA) * 0.05,
+    war: MLB_BASE_WEIGHTS.war * (warH - warA) * 0.01,
     head_to_head: MLB_BASE_WEIGHTS.head_to_head * (safe(input.head_to_head.homeWinRate, 0.5) - 0.5),
     park_factor: MLB_BASE_WEIGHTS.park_factor * (safe(input.park_factor, 1.0) - 1.0),
-    elo: MLB_BASE_WEIGHTS.elo * ((safe(input.elo.home) + HOME_ELO_BONUS_VALUE - safe(input.elo.away)) / ELO_DIVIDER),
-    defense_sfr: MLB_BASE_WEIGHTS.defense_sfr * (safe(input.defense_sfr.home) - safe(input.defense_sfr.away)) * 0.01,
-    lineup_xwoba: MLB_BASE_WEIGHTS.lineup_xwoba * (safe(input.lineup_xwoba.home) - safe(input.lineup_xwoba.away)) * 5,
-    lineup_barrel_pct: MLB_BASE_WEIGHTS.lineup_barrel_pct * (safe(input.lineup_barrel_pct.home) - safe(input.lineup_barrel_pct.away)) * 0.01,
-    sp_xwoba_against: -1 * MLB_BASE_WEIGHTS.sp_xwoba_against * (safe(input.sp_xwoba_against.home) - safe(input.sp_xwoba_against.away)) * 5,
-    woba_std: MLB_BASE_WEIGHTS.woba_std * (safe(input.woba_std.home) - safe(input.woba_std.away)) * 5,
+    elo: MLB_BASE_WEIGHTS.elo * ((eloH + HOME_ELO_BONUS_VALUE - eloA) / ELO_DIVIDER),
+    defense_sfr: MLB_BASE_WEIGHTS.defense_sfr * (sfrH - sfrA) * 0.01,
+    lineup_xwoba: MLB_BASE_WEIGHTS.lineup_xwoba * (xwobaH - xwobaA) * 5,
+    lineup_barrel_pct: MLB_BASE_WEIGHTS.lineup_barrel_pct * (barrelH - barrelA) * 0.01,
+    sp_xwoba_against: -1 * MLB_BASE_WEIGHTS.sp_xwoba_against * (xwobaAgainstH - xwobaAgainstA) * 5,
+    woba_std: MLB_BASE_WEIGHTS.woba_std * (wobaStdH - wobaStdA) * 5,
   };
 }
 

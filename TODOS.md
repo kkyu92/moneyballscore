@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): NaN 비대칭-null 가드 누락 수정 (cycle 2980, 2026-10-07)
+
+진단: 직전8(2972-2979) distinct=3, 2-chain lock 미충족. fix-incident/op-analysis/design-system/polish-ui 전부 gap 미근접. explore-idea saturation 12/15 충족하나 organic idea 0·plan#29 불변 지속. cycle 2978/2979 공통 추천 carry-over 3건(mlb-base.test.ts NaN-clamp / logistic.ts 주석 / mlb-elo.ts dead code) 재조사.
+
+발견: cycle 2977/2978 가 도입한 `bothPresent`/`pairedOrNeutral` 가드는 `!= null` 만 체크 — NaN 은 그대로 통과해 "한쪽만 NaN 이면 반대쪽 실측값과 비대칭 비교" 버그 재발(동일 클래스 3번째). predictor.ts 쪽은 NaN 이 끝까지 cascade 되어 `clampWinnerProb(NaN)=NaN` 미차단 가능성까지 확인.
+
+수정: mlb-base.ts `pairedSafe()` 신설(11개 팩터 적용) / predictor.ts `normalize()` 중앙 가드 추가 / mlb-pipeline.ts `pairedOrNeutral()` NaN 체크 추가. backtest/logistic.ts `vectorizeExtended` 도 재조사 결과 진짜 버그 확인해 동일 패턴 수정. mlb-elo.ts dead code 는 삭제 대신 "미사용 확정, 임의 변경 금지" 주석 명시. 신규 테스트 3파일(predictor.ts 최초 테스트 포함). kbo-data 96/1236 PASS, 전체 585/4613 PASS. PR 생성 + R7 머지 예정.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 결정 또는 Supabase egress quota 장애 모니터 또는 review-code(heavy) 신규 스코프.
+
 ## 🔵 RETRO-ONLY — lotto(lite): 30-cycle gap 체크포인트 — cron 정상 확인 (cycle 2979, 2026-10-07)
 
 진단: 직전8(2971-2978) distinct=2(review-code(heavy)/info-architecture-review) 2-chain lock 발동, 두 chain 제외. lotto gap=30/30 trigger 정확 도달(마지막 발화 2949). explore-idea saturation 12/15 충족하나 organic idea 0 지속(plan#29 불변) 판단해 lotto 선택.
