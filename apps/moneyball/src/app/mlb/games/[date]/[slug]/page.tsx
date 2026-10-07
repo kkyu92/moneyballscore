@@ -11,6 +11,7 @@ import { ShareButtons } from "@/components/share/ShareButtons";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { computeMlbCompositeDuel } from "@/lib/analysis/computeMlbCompositeDuel";
 import { getMlbRecentConvergencePickRecord, computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 import { FACTOR_LABELS_SHORT, FACTOR_GLOSSARY_ANCHORS } from "@/lib/predictions/factorLabels";
@@ -166,52 +167,62 @@ export default async function GameDetail({ params }: PageParams) {
   // 특정 못해 .maybeSingle() 이 "multiple rows" 로 throw (Sentry MONEYBALLSCORE-1A,
   // 357회, 2026-08-18~08-29). slug 에 game number 가 없어 완전 disambiguate 불가 —
   // order+limit(1) 로 1경기(더 이른 game_datetime_utc)를 결정적으로 선택해 500 방지.
-  const scheduleResult = await supabase
-    .from('mlb_schedule')
-    .select('external_game_id, home_score, away_score, status, game_datetime_utc, home_starter_name, away_starter_name')
-    .eq('game_date', date)
-    .eq('home_team_code', dbHomeCode)
-    .eq('away_team_code', dbAwayCode)
-    .order('game_datetime_utc', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-  const { data: scheduleRaw } = assertSelectOk(scheduleResult, 'MlbGameDetail schedule');
+  let scheduleRaw: unknown = null;
+  try {
+    const scheduleResult = await supabase
+      .from('mlb_schedule')
+      .select('external_game_id, home_score, away_score, status, game_datetime_utc, home_starter_name, away_starter_name')
+      .eq('game_date', date)
+      .eq('home_team_code', dbHomeCode)
+      .eq('away_team_code', dbAwayCode)
+      .order('game_datetime_utc', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    ({ data: scheduleRaw } = assertSelectOk(scheduleResult, 'MlbGameDetail schedule'));
+  } catch (err) {
+    scheduleRaw = captureFallback(err, null, { route: '/mlb/games/[date]/[slug]', source: 'schedule' });
+  }
   const schedule = scheduleRaw as ScheduleRow | null;
 
   if (!schedule) notFound();
 
-  const predResult = await supabase
-    .from('predictions')
-    .select(`
-      home_win_prob,
-      home_sp_fip,
-      away_sp_fip,
-      home_sp_xfip,
-      away_sp_xfip,
-      home_bullpen_fip,
-      away_bullpen_fip,
-      home_lineup_woba,
-      away_lineup_woba,
-      home_war_total,
-      away_war_total,
-      home_lineup_xwoba,
-      away_lineup_xwoba,
-      home_lineup_barrel_pct,
-      away_lineup_barrel_pct,
-      home_elo,
-      away_elo,
-      home_recent_form,
-      away_recent_form,
-      head_to_head_rate,
-      model_version,
-      debate_version,
-      predicted_at
-    `)
-    .eq('league', 'mlb')
-    .eq('scoring_rule', MLB_SCORING_RULE)
-    .eq('external_game_id', schedule.external_game_id)
-    .maybeSingle();
-  const { data: predRaw } = assertSelectOk(predResult, 'MlbGameDetail prediction');
+  let predRaw: unknown = null;
+  try {
+    const predResult = await supabase
+      .from('predictions')
+      .select(`
+        home_win_prob,
+        home_sp_fip,
+        away_sp_fip,
+        home_sp_xfip,
+        away_sp_xfip,
+        home_bullpen_fip,
+        away_bullpen_fip,
+        home_lineup_woba,
+        away_lineup_woba,
+        home_war_total,
+        away_war_total,
+        home_lineup_xwoba,
+        away_lineup_xwoba,
+        home_lineup_barrel_pct,
+        away_lineup_barrel_pct,
+        home_elo,
+        away_elo,
+        home_recent_form,
+        away_recent_form,
+        head_to_head_rate,
+        model_version,
+        debate_version,
+        predicted_at
+      `)
+      .eq('league', 'mlb')
+      .eq('scoring_rule', MLB_SCORING_RULE)
+      .eq('external_game_id', schedule.external_game_id)
+      .maybeSingle();
+    ({ data: predRaw } = assertSelectOk(predResult, 'MlbGameDetail prediction'));
+  } catch (err) {
+    predRaw = captureFallback(err, null, { route: '/mlb/games/[date]/[slug]', source: 'prediction' });
+  }
   const pred = predRaw as PredictionDetailRow | null;
 
   if (!pred) notFound();

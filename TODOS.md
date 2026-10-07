@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): assertSelectOk degrade 전수 감사 — 16개 파일 (cycle 2947, 2026-10-07)
+
+진단: cycle 2946 retro carry-over(assertSelectOk 보유 ~16개 파일 전수 감사) 채택. open issue 0, approved plan 0/25, 직전8 distinct=3(2-chain lock 미충족). `grep -rl assertSelectOk apps/moneyball/src/app --include=page.tsx` 로 20개 파일 확인 → captureFallback 보유 0건(`/`, `/insights`, `/calendar` 는 이미 cycle 2946 에 degrade 적용 완료 상태라 본 사이클 재작업 불필요, 실제 미적용 17개 대상).
+
+**live curl 로 production 실제 상태 직접 확인(가정 아닌 실측)** — `/v2-preview`, `/about` 이 **지금 실시간으로 500** 확인(`vercel logs` 로 둘 다 `exceed_egress_quota` uncaught throw 확인). 나머지 15개는 200 이었지만 `vercel logs` 전수 조회 결과 **거의 전 라우트가 매 요청마다 egress_quota 에러를 던지고 있고, ISR stale-cache 가 우연히 200 으로 가리고 있을 뿐**(`/dashboard`, `/analysis`, `/predictions`, `/reviews`, `/accuracy` 등 포함) — 캐시 만료/eviction 시 전부 `/v2-preview`·`/about` 과 동일하게 500 전환 가능한 상태였음(가설 아닌 로그 실측).
+
+`/reviews`, `/predictions/[date]` 2곳은 과거 "fail-loud → error.tsx boundary 처리" 의도 주석이 있었으나, cycle 2946 홈페이지 500 사례가 이미 그 전제(ISR 라우트에서 error.tsx 가 실제로 안전망 역할을 못 하고 raw 500 반환)를 실측으로 반증 — 동일 captureFallback 빈 배열 degrade 로 전환(주석 갱신, 근거 명시).
+
+17개 파일 전부(about/v2-preview/search(searchPlayers·searchDates)/accuracy(shadow)/analysis-game-id/teams-recent/predictions/predictions-date/reviews/mlb-predictions/mlb-games-date/mlb-games-date-slug(inline 2곳, try/catch 전환)/en 미러 동일 3곳/accuracy 메인(Promise.all 10개 쿼리 + helper 3개, `.then(undefined, ...)` 패턴)) 에 captureFallback(또는 동등 try/catch) 적용. `dashboard/page.tsx` 는 "fail-loud 의도적 — error.tsx 가 내부 전용 페이지에 빠른 버그 노출 우선" 명시 주석 확인 후 의도적 설계로 판단, 미변경(예외 처리 근거 기록).
+
+tsc --noEmit clean, eslint(17파일) clean, vitest 584파일/4610테스트 전부 pass. 배포 후 `/about`, `/v2-preview` 200 재확인 필요(다음 사이클 1순위).
+
+**carry-over(범위 확대 발견)**: `/analysis` 데이터 레이어(`analysis-data.ts`, 11개 assertSelectOk 호출 + `page.tsx` 의 Promise.all 20+ 항목, 전부 개별 미보호)는 이번 17개 page.tsx 스코프 밖 — 파일 규모(2836줄 page.tsx + 983줄 analysis-data.ts)상 별도 전용 cycle 필요. 다음 review-code(heavy) 1순위 후보로 명시.
+
 ## 🟢 SUCCESS — fix-incident: 홈페이지/insights/calendar 500 — degrade 누락 3건 (cycle 2946, 2026-10-07)
 
 진단 시작 시 직전(interrupted) 세션이 cycle 2946 라벨로 이미 `/insights/series/[topic]` build-time crash fix 를 커밋·push 해뒀으나 cycle_state JSON·retro commit·signal 전부 미작성 상태 발견(세션-중단 사각지대, skill-evolution 74th 박제 케이스 재확인) — 코드는 유효해 재작업 없이 그대로 검증 진행.

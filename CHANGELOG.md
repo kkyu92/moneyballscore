@@ -1,3 +1,16 @@
+## v0.5.62.272 — 2026-10-07 (cycle 2947, review-code(heavy): assertSelectOk degrade 전수 감사 17파일)
+
+### review-code(heavy): assertSelectOk 호출 보유 17개 page.tsx degrade 전수 적용 (cycle 2947, SUCCESS)
+
+- 진단: cycle 2946 retro carry-over(assertSelectOk 보유 ~16개 파일 전수 감사). `grep -rl assertSelectOk apps/moneyball/src/app --include=page.tsx` 로 20개 발견, 이미 degrade 적용된 `/`·`/insights`·`/calendar` 제외 17개가 실제 대상.
+- live curl + `vercel logs` 직접 조회로 실측: `/v2-preview`, `/about` 이 **현재 production 에서 500** 확인. 나머지 15개 라우트도 `vercel logs` 상 매 요청 egress_quota 에러를 던지고 있었으나 ISR stale-cache 가 200 으로 우연히 가리고 있던 상태 — 캐시 만료 시 전부 동일 500 전환 가능.
+- `/reviews`, `/predictions/[date]` 의 과거 "fail-loud → error.tsx boundary" 의도 주석은 cycle 2946 홈페이지 500 실측으로 전제(ISR 라우트에서 error.tsx 가 안전망 역할 못 함, raw 500 반환)가 반증됨 — captureFallback 빈 배열 degrade 로 전환, 주석에 근거 기록.
+- 17개 파일 전부 captureFallback(비동기 헬퍼 호출부) 또는 try/catch(inline assertSelectOk, mlb/en-mlb game-detail slug 2곳) 적용. `/accuracy` 메인 페이지는 Promise.all 10개 쿼리 + helper 3개 구조라 `.then(undefined, handler)` + `.catch(captureFallback(...))` 혼합 패턴 사용.
+- `dashboard/page.tsx` 는 "fail-loud 의도적 — 내부 전용 페이지, 버그 조기 노출 우선" 주석 확인 후 의도된 설계로 판단, 미변경.
+- tsc/eslint(17파일)/vitest(584파일/4610테스트) 전부 clean.
+
+다음 cycle 추천 = (1) 배포 후 `/about`,`/v2-preview` 200 재확인 (2) `/analysis` 데이터 레이어(`analysis-data.ts` 11개 + `page.tsx` Promise.all 20+ 항목, 이번 스코프 밖, 별도 전용 cycle 필요) 동일 패턴 적용.
+
 ## v0.5.62.271 — 2026-10-07 (cycle 2946, fix-incident: 홈페이지/insights/calendar 500 — Supabase 장애 degrade 누락 3건)
 
 ### fix-incident: 홈페이지(/) + /insights + /calendar 500 — assertSelectOk uncaught throw degrade 누락 (cycle 2946, SUCCESS)

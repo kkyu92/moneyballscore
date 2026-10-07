@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import * as Sentry from '@sentry/nextjs';
 import { createClient } from '@/lib/supabase/server';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import {
   DAY_MS,
   KBO_TEAMS,
@@ -294,8 +295,16 @@ export default async function SearchPage({ searchParams }: PageProps) {
   const [searchIndex, teamHits, playerHits, dateHits] = await Promise.all([
     buildSearchIndex(),
     Promise.resolve(q ? matchTeams(q) : []),
-    q ? searchPlayers(q) : Promise.resolve<PlayerHit[]>([]),
-    q ? searchDates(q) : Promise.resolve<DateHit[]>([]),
+    q
+      ? searchPlayers(q).catch((err) =>
+          captureFallback(err, [] as PlayerHit[], { route: '/search', source: 'searchPlayers' }),
+        )
+      : Promise.resolve<PlayerHit[]>([]),
+    q
+      ? searchDates(q).catch((err) =>
+          captureFallback(err, [] as DateHit[], { route: '/search', source: 'searchDates' }),
+        )
+      : Promise.resolve<DateHit[]>([]),
   ]);
 
   const totalHits = teamHits.length + playerHits.length + dateHits.length;

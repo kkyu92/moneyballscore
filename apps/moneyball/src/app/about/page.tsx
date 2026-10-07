@@ -7,6 +7,7 @@ import {
   MLB_FACTOR_COUNTS,
 } from "@moneyball/kbo-data";
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
@@ -216,7 +217,9 @@ const FAQS = [
 ];
 
 export default async function AboutPage() {
-  const simplifiedMode = await detectSimplifiedMode();
+  const simplifiedMode = await detectSimplifiedMode().catch((err) =>
+    captureFallback(err, false, { route: "/about", source: "detectSimplifiedMode" }),
+  );
   const activeFactors = FACTORS.filter(
     (f) => (DEFAULT_WEIGHTS[f.key] as number) > 0,
   ).sort(

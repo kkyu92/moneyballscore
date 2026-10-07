@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { buildAllTeamAccuracy, buildMatchupData, buildTeamBiasAnalysis } from '@/lib/standings/buildTeamAccuracy';
 import { TeamMatchupCards } from '@/components/accuracy/TeamMatchupCards';
@@ -265,6 +266,9 @@ export default async function AccuracyPage() {
   const fallbackWindowStart = new Date(Date.now() - 30 * DAY_MS).toISOString();
   const FALLBACK_TREND_DAYS = 30;
 
+  const dbCatch = (source: string) => (err: unknown) =>
+    captureFallback(err, { data: null, error: null }, { route: '/accuracy', source });
+
   const [result, versionHistoryResult, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, biasRows, fallbackResult, factorResult] = await Promise.all([
     supabase
       .from('predictions')
@@ -273,7 +277,8 @@ export default async function AccuracyPage() {
       .eq('prediction_type', 'pre_game')
       .not('verified_at', 'is', null)
       .not('is_correct', 'is', null)
-      .order('verified_at', { ascending: true }),
+      .order('verified_at', { ascending: true })
+      .then(undefined, dbCatch('main')),
     // 버전 히스토리 테이블(ModelVersionHistory) 전용 — CURRENT_MODEL_FILTER(scoring_rule=v1.8)를
     // 걸지 않음. `rows`(위 쿼리)는 baseline 정합 위해 v1.8만 담아 v1.5/v1.6/v1.7-revert/
     // v1.8-credit-fail 실측 데이터(DB 확인 n=16/46/34/25)가 항상 제외돼 Version History
@@ -284,29 +289,48 @@ export default async function AccuracyPage() {
       .eq('prediction_type', 'pre_game')
       .not('verified_at', 'is', null)
       .not('is_correct', 'is', null)
-      .order('verified_at', { ascending: true }),
-    supabase.from('pick_poll_events').select('game_id, pick'),
+      .order('verified_at', { ascending: true })
+      .then(undefined, dbCatch('versionHistory')),
+    supabase.from('pick_poll_events').select('game_id, pick').then(undefined, dbCatch('pickPoll')),
     supabase
       .from('games')
       .select('id, home_score, away_score')
       .eq('status', 'final')
       .not('home_score', 'is', null)
-      .not('away_score', 'is', null),
+      .not('away_score', 'is', null)
+      .then(undefined, dbCatch('completedGames')),
     supabase
       .from('predictions')
       .select('game_id, is_correct')
       .match(CURRENT_MODEL_FILTER)
       .eq('prediction_type', 'pre_game')
-      .not('is_correct', 'is', null),
-    buildAllTeamAccuracy(),
-    buildMatchupData(),
-    buildTeamBiasAnalysis(),
+      .not('is_correct', 'is', null)
+      .then(undefined, dbCatch('predForPoll')),
+    buildAllTeamAccuracy().catch((err) =>
+      captureFallback(err, [] as Awaited<ReturnType<typeof buildAllTeamAccuracy>>, {
+        route: '/accuracy',
+        source: 'buildAllTeamAccuracy',
+      }),
+    ),
+    buildMatchupData().catch((err) =>
+      captureFallback(err, { matchups: [], homeAway: [] } as Awaited<ReturnType<typeof buildMatchupData>>, {
+        route: '/accuracy',
+        source: 'buildMatchupData',
+      }),
+    ),
+    buildTeamBiasAnalysis().catch((err) =>
+      captureFallback(err, [] as Awaited<ReturnType<typeof buildTeamBiasAnalysis>>, {
+        route: '/accuracy',
+        source: 'buildTeamBiasAnalysis',
+      }),
+    ),
     supabase
       .from('predictions')
       .select('model_version, predicted_at')
       .in('prediction_type', ['pre_game', 'post_game'])
       .gte('predicted_at', fallbackWindowStart)
-      .order('predicted_at', { ascending: false }),
+      .order('predicted_at', { ascending: false })
+      .then(undefined, dbCatch('fallback')),
     supabase
       .from('predictions')
       .select('factors, is_correct, home_win_prob')
@@ -314,7 +338,8 @@ export default async function AccuracyPage() {
       .eq('scoring_rule', CURRENT_SCORING_RULE)
       .not('is_correct', 'is', null)
       .not('factors', 'is', null)
-      .not('home_win_prob', 'is', null),
+      .not('home_win_prob', 'is', null)
+      .then(undefined, dbCatch('factor')),
   ]);
 
   const communityStats = computeCommunityVsAI(

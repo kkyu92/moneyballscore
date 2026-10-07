@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import {
   assertSelectOk,
   CE_DETECT_THRESHOLD,
@@ -176,7 +177,12 @@ async function getPredictionDates(): Promise<{ dates: DateStat[]; simplifiedMode
 }
 
 export default async function PredictionsPage() {
-  const { dates, simplifiedMode } = await getPredictionDates();
+  const { dates, simplifiedMode } = await getPredictionDates().catch((err) =>
+    captureFallback(err, { dates: [] as DateStat[], simplifiedMode: false }, {
+      route: "/predictions",
+      source: "getPredictionDates",
+    }),
+  );
 
   const counts = {
     all: dates.length,

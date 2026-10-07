@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { PredictionCardLive } from "@/components/predictions/PredictionCardLive";
 import { PlaceholderCardLive } from "@/components/predictions/PlaceholderCardLive";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -115,8 +116,10 @@ interface DateGame {
 async function getGamePredictions(date: string): Promise<DateGame[]> {
   const supabase = await createClient();
 
-  // assertSelectOk — DB 오류 시 data=null silent fallback → 빈 배열 위장 → 사용자
-  // 에게 "예측 데이터가 없습니다" 가짜 노출 차단. fail-loud → error.tsx boundary.
+  // assertSelectOk — DB 오류 시 data=null throw. 과거엔 fail-loud로 error.tsx
+  // boundary 위임 의도였으나, cycle 2946/2947 실측 결과 ISR 라우트는 cold-cache
+  // 시 boundary 대신 raw 500 반환 확인 — captureFallback 빈 배열 degrade 로 전환
+  // (call site, 호출부 주석 참조).
   const result = await supabase
     .from("games")
     .select(
@@ -304,7 +307,9 @@ function buildSportsEventJsonLd(game: DateGame, date: string) {
 export default async function PredictionDatePage({ params }: Props) {
   const { date } = await params;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) notFound();
-  const games = await getGamePredictions(date);
+  const games = await getGamePredictions(date).catch((err) =>
+    captureFallback(err, [] as DateGame[], { route: "/predictions/[date]", source: "getGamePredictions" }),
+  );
 
   // predictions 배열이 비어 있으면 is_correct 값이 undefined → !== null 로는 걸러지지 않음.
   // pred 존재 + is_correct 값이 명시적으로 true/false 인 경우만 verified.

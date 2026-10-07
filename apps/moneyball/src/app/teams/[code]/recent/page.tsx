@@ -14,6 +14,7 @@ import {
   SMALL_SAMPLE_N,
 } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { TeamLogo } from '@/components/shared/TeamLogo';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -185,7 +186,9 @@ export default async function TeamRecentPage({ params }: PageProps) {
   if (!isTeamCode(code)) notFound();
   const meta = KBO_TEAMS[code];
   const teamName = shortTeamName(code);
-  const rows = await getRecentGames(code);
+  const rows = await getRecentGames(code).catch((err) =>
+    captureFallback(err, [] as RecentRow[], { route: '/teams/[code]/recent', source: 'getRecentGames' }),
+  );
 
   const verifiedRows = rows.filter((r) => r.isCorrect != null);
   const correctN = verifiedRows.filter((r) => r.isCorrect === true).length;

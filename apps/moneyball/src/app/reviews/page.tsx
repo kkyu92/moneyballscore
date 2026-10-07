@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import {
   type TeamCode,
   shortTeamName,
@@ -60,9 +61,6 @@ interface VerifiedPredictionRow {
 async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
   const supabase = await createClient();
 
-  // assertSelectOk — DB 오류 시 data=null silent fallback → 빈 배열 위장 →
-  // "아직 검증된 예측이 없습니다" 가짜 노출 + 적중률 0% silent 0/0 차단.
-  // fail-loud → error.tsx boundary 처리.
   const result = await supabase
     .from('predictions')
     .select(`
@@ -100,7 +98,9 @@ export default async function ReviewsPage() {
     strongDayOfWeekSplit,
     completeDayOfWeekSplit,
   ] = await Promise.all([
-    getVerifiedPredictions(),
+    getVerifiedPredictions().catch((err) =>
+      captureFallback(err, [] as VerifiedPredictionRow[], { route: "/reviews", source: "getVerifiedPredictions" }),
+    ),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE),
     // wave-592: 강수렴 픽 현재 streak + 시즌 최장 streak

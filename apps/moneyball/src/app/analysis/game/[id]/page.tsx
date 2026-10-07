@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import {
   ELO_NEUTRAL_WIN_PCT,
   KBO_FACTOR_COUNT,
@@ -139,7 +140,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const gameId = parseInt(id, 10);
   if (!Number.isFinite(gameId)) return {};
 
-  const game = await getGameAnalysis(gameId);
+  const game = await getGameAnalysis(gameId).catch((err) =>
+    captureFallback(err, null, { route: '/analysis/game/[id]', source: 'generateMetadata.getGameAnalysis' }),
+  );
   if (!game) return {};
 
   const home = shortTeamName(game.home_team?.code as TeamCode);
@@ -210,7 +213,9 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     notFound();
   }
 
-  const game = await getGameAnalysis(gameId);
+  const game = await getGameAnalysis(gameId).catch((err) =>
+    captureFallback(err, null, { route: '/analysis/game/[id]', source: 'getGameAnalysis' }),
+  );
   if (!game) {
     notFound();
   }

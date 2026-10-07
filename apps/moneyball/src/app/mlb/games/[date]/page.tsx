@@ -10,6 +10,7 @@ const TOP_PICK_MIN_WIN_PCT = Math.round(confToWinProb(TOP_PICK_CONF_MIN) * 100);
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PickButton } from "@/components/picks/PickButton";
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -101,7 +102,9 @@ export default async function MlbGames({ params }: { params: Promise<{ date: str
   if (!/^20[2-9]\d-\d{2}-\d{2}$/.test(date)) notFound();
 
   const supabase = await createClient();
-  const rows = await getMlbGamesForDate(supabase, date);
+  const rows = await getMlbGamesForDate(supabase, date).catch((err) =>
+    captureFallback(err, [] as PredictionRow[], { route: "/mlb/games/[date]", source: "getMlbGamesForDate" }),
+  );
   const topPick = rows
     .filter((p) => p.conf > TOP_PICK_MIN_WIN_PCT)
     .sort((a, b) => b.conf - a.conf)[0];

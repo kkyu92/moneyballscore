@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import {
   assertSelectOk,
   classifyWinnerProb,
@@ -181,7 +182,9 @@ async function getMlbPredictionDates(): Promise<DateStat[]> {
 }
 
 export default async function MlbPredictionsPageEn() {
-  const dates = await getMlbPredictionDates();
+  const dates = await getMlbPredictionDates().catch((err) =>
+    captureFallback(err, [] as DateStat[], { route: "/en/mlb/predictions", source: "getMlbPredictionDates" }),
+  );
 
   const counts = {
     all: dates.length,

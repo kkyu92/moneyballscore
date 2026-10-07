@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { assertSelectOk, shortTeamName, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, INSIGHTS_LIMIT, type TeamCode, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
@@ -121,7 +122,9 @@ function fmtDelta(deltaPp: number): string {
 }
 
 export default async function V2PreviewPage() {
-  const rows = await getPreviewRows();
+  const rows = await getPreviewRows().catch((err) =>
+    captureFallback(err, [] as PreviewRow[], { route: "/v2-preview", source: "getPreviewRows" }),
+  );
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">

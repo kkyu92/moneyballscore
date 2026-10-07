@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import {
   assertSelectOk,
@@ -148,7 +149,9 @@ function deltaClass(delta: number): string {
 }
 
 export default async function ShadowAccuracyPage() {
-  const pairs = await getCohortPairs();
+  const pairs = await getCohortPairs().catch((err) =>
+    captureFallback(err, [] as CohortPair[], { route: "/accuracy/shadow", source: "getCohortPairs" }),
+  );
   const daily = aggregateDaily(pairs);
   const totalN = pairs.length;
   const totalV18Brier = pairs.reduce(
