@@ -1,4 +1,10 @@
 
+## 🟢 SUCCESS — fix-incident: @sentry/nextjs v11 migration, dependabot PR #3105 8일 CI 실패 해소 (cycle 2986, 2026-10-07)
+
+진단: 직전8(2978-2985) distinct=3, 2-chain lock 미충족. fix-incident/op-analysis/info-arch/lotto/design-system gap 전부 미근접. open issue 0, approved plan 0건. `gh pr list` open PR 전수 확인 중 dependabot PR #3105 가 8일째 type-check 실패 발견 — `withSentryConfig`(v11 에서 import path `"@sentry/nextjs"`→`"@sentry/nextjs/config"` 이동) + `disableLogger`(top-level 제거→`webpack.treeshake.removeDebugLogging`) 두 breaking change. `next.config.ts` 수정 + `@sentry/nextjs` ^11.0.0 bump. type-check/lint/test(586/586)/build 전부 green. PR #3141 머지 확인(MERGED 실측) 후 dependabot #3105 자동 CLOSED 확인.
+
+**plan#29/#30 상태 변화 없음**(둘 다 status≠approved, 미처리 대상 아님). **Supabase egress quota 장애 지속**(cycle 2939~, 사용자 billing 조치 필요).
+
 ## 🟡 RETRO-ONLY — design-system(lite): DESIGN.md 토큰/drift 재감사, 갭 0건 (cycle 2985, 2026-10-07)
 
 진단: 직전8(2977-2984) distinct=2(review-code(heavy)7+lotto(lite)1) — 2-chain alternation lock 발동(info-arch 윈도우 aged out). 잠긴 2개 제외. fix-incident/op-analysis 둘 다 gap trigger 충족하나 Supabase egress quota 장애(cycle 2939~, 46일+ 경과) 재확인으로 DB 의존 작업 불가. DESIGN.md mtime 35.1일(≥4주) + design-system 마지막 발화 2943(gap=42) — DB 비의존 유일 후보로 선택.

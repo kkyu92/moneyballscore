@@ -1,4 +1,13 @@
-## v0.5.62.310 — 2026-10-07 (cycle 2985, design-system(lite): 토큰/drift 재감사, 갭 0건 RETRO-ONLY)
+## v0.5.62.311 — 2026-10-07 (cycle 2986, fix-incident: @sentry/nextjs v11 migration — dependabot PR #3105 8일 CI 실패 해소 SUCCESS)
+
+### fix-incident: @sentry/nextjs v11 migration — withSentryConfig import path + disableLogger relocate (cycle 2986, SUCCESS)
+
+- 진단: 직전8(2978-2985) distinct=3(review-code(heavy)6+lotto(lite)1+design-system(lite)1), 2-chain lock 미충족. fix-incident gap=16/20·operational-analysis gap=18/25·info-arch gap=10/30·lotto gap=7/30·design-system gap=1/15 전부 gap trigger 미근접. open issue 0, approved plan 0건(plan#29/#30 모두 status≠approved). `gh pr list` 로 open PR 전수 확인 중 dependabot PR #3105(`@sentry/nextjs` 10.64.0→11.0.0)가 2026-09-29 이후 8일째 `check` CI 실패 상태 발견 — 명시적 fix-incident 조건("버그/에러/silent 실패/regression") 충족.
+- 실패 로그: `next.config.ts(2,10): error TS2305: Module '"@sentry/nextjs"' has no exported member 'withSentryConfig'`. Sentry 공식 v10→v11 migration guide 확인 — `withSentryConfig` 가 `"@sentry/nextjs"` → `"@sentry/nextjs/config"` 전용 entry point 로 이동 + top-level `disableLogger`(v10.30+ deprecated) 제거 → `webpack.treeshake.removeDebugLogging` 재배치.
+- `apps/moneyball/next.config.ts` import path + `disableLogger`→`webpack.treeshake.removeDebugLogging` 수정 + `@sentry/nextjs` `^10.64.0`→`^11.0.0` 직접 bump(dependabot 대신 본 PR로 흡수). type-check 4/4 green, lint green, test 586/586(4618 tests) PASS, production build 성공.
+- PR #3141 머지 완료(`gh pr view --json state,mergedAt` 로 MERGED 실측 확인) 직후 dependabot PR #3105 자동 CLOSED 확인(버전 충족으로 superseded) — 8일 CI red 해소.
+
+
 
 ### design-system(lite): DESIGN.md 토큰 vs 실제 컴포넌트 재감사 — 갭 0건 (cycle 2985, RETRO-ONLY)
 
