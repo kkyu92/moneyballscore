@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): /teams 데이터 레이어 assertSelectOk degrade — 4개 파일 8개 호출 (cycle 2952, 2026-10-07)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/deferred), 직전8 distinct=4(review-code(heavy)3/fix-incident2/lotto(lite)1/skill-evolution(forced)1/review-code 추가분, 2-chain lock 미충족). operational-analysis(25-cycle gap 충족)와 lotto(30-cycle gap 충족) 둘 다 trigger 는 충족했지만 실측 전환 전 둘 다 저가치임을 먼저 확인: `pnpm tsx scripts/op-analysis-ce-cohort.ts`는 `exceed_egress_quota` 즉시 에러(cycle 2939부터 지속, 사용자 billing 미조치, 신규 정보 없음) — op-analysis 재확인은 순수 노이즈. lotto 는 cron 산출물 `apps/moneyball/data/lotto-picks/2026-10-10.md`(Oct 7 생성, 다음 토요일 1225회 매칭) + `lotto-results/2026-10-03.md`(Oct 7 생성, 직전 토요일 매칭) 둘 다 신선 — cycle 2951 이 재정의한 cron-artifact 기준 trigger 가 false-positive 0건으로 정상 작동함을 확인(개인 advisory 경로 기준이던 구 trigger 는 폐기됨). 두 저가치 옵션 대신 cycle 2951 retro 추천(review-code(heavy), 신규 스코프 teams)을 채택.
+
+`grep -L captureFallback`(assertSelectOk 보유 69개 파일 대상)으로 미보호 호출 27개 파일 전체 식별 — `/teams/[code]` 공개 페이지를 직접 구동하는 `apps/moneyball/src/lib/teams/` 4개 파일(buildTeamFactorAverages/buildTeamProfile/buildTeamRecentForm/buildTeamUpcoming, 총 8개 호출)을 이번 스코프로 선택. 같은 디렉토리의 `buildTeamStrengthSnapshot.ts`(cycle 2948 /analysis 작업 때 이미 보호)를 reference 패턴으로 사용.
+
+일반 agent 로 8개 호출 전부 try/catch + `captureFallback` 적용(`.maybeSingle()` 2곳 → `null`, 배열 destructure 6곳 → `[]`). `buildTeamProfile.ts` 가 가장 critical했음 — `/teams/[code]` page.tsx 의 `generateMetadata`+`Promise.all` 양쪽에서 `.catch()` 없이 직접 호출되고 있어 Supabase 에러 시 실제 500 유발 가능한 상태였음(기존 outer-catch 가 없는 유일한 케이스, 다른 3개 파일은 matchup 페이지 쪽에서 이미 outer `.catch()` 보호 중이라 defense-in-depth 성격).
+
+연동 테스트 5개 파일 갱신: `buildTeamFactorAverages.test.ts`/`buildTeamProfile.test.ts`/`buildTeamRecentForm.test.ts`(`.rejects.toThrow()` → degrade 계약으로 재작성) + `silent-drift-cycle-2288.test.ts`/`silent-drift-cycle-2290.test.ts`(소스 문자열 앵커를 새 `let`+destructuring-assignment 형태로 갱신). `buildTeamUpcoming.ts` 는 기존 테스트 파일 자체가 없어 추가 갱신 불필요.
+
+tsc --noEmit clean, eslint clean(9개 변경 파일), `pnpm --filter moneyball test -- --run` 584 files/4610 tests 전부 pass, zero regression.
+
+다음 사이클 = 남은 미보호 23개 파일(players/reviews/matchup/standings/leaderboard/dashboard/seasons/mlb-insights/mlb-analysis/sitemap/api routes/opengraph-image 등) 중 다음 review-code(heavy) 고가치 서브스코프 선정 — `/mlb/analysis/analysis-data.ts`(KBO `/analysis` 대응 MLB 버전, 동일 Promise.all 구조) 1순위 후보. 또는 egress quota 장애 해소 시 operational-analysis 재측정 즉시 착수.
+
 ## 🟢 SUCCESS — skill-evolution(forced): phase 46, 80회 자가 진화 (cycle 2951, 2026-10-07)
 
 트리거: `skill-evolution-pending` 마커(cycle 2950, trigger-3 milestone cycle_n % 50 == 0) 강제 발화. 2차 방어선(cycle 2950 retro commit e00fffc4) OK 확인 후 진행.

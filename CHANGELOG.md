@@ -1,3 +1,13 @@
+## v0.5.62.277 — 2026-10-07 (cycle 2952, review-code(heavy): /teams 데이터 레이어 assertSelectOk degrade)
+
+### review-code(heavy): /teams 빌더 레이어 assertSelectOk degrade — 4개 파일 8개 호출 (cycle 2952, SUCCESS)
+
+- 진단: open issue 0, approved plan 0/23(전부 completed/archived/deferred), 직전8 distinct=4(2-chain lock 미충족). operational-analysis(25-cycle gap)·lotto(30-cycle gap) 둘 다 trigger 충족했으나 실측 결과 둘 다 저가치: op-analysis 는 `exceed_egress_quota` 재확인(cycle 2939 이후 지속, 신규 정보 없음), lotto 는 cron 산출물(`apps/moneyball/data/lotto-picks/2026-10-10.md`, `lotto-results/2026-10-03.md`) 양쪽 신선 확인(cycle 2951 trigger 재정의 효과 검증 — false-positive 재발 0건). cycle 2951 retro 추천(review-code(heavy), 신규 스코프 teams)대로 전환.
+- `grep -L captureFallback`(assertSelectOk 보유 파일 대상)으로 전체 미보호 호출 27개 파일 식별. 그 중 `/teams/[code]` 공개 페이지를 직접 구동하는 `apps/moneyball/src/lib/teams/` 4개 파일(buildTeamFactorAverages/buildTeamProfile/buildTeamRecentForm/buildTeamUpcoming, 8개 호출)을 이번 사이클 스코프로 선택 — `buildTeamStrengthSnapshot.ts`(이미 cycle 2948 /analysis 작업 때 보호됨)가 reference 패턴.
+- `buildTeamProfile.ts` 가 가장 critical: `/teams/[code]` page.tsx 의 `generateMetadata`+`Promise.all` 양쪽에서 `.catch()` 없이 직접 호출 — Supabase 에러 시 실제 500 유발 가능 상태였음.
+- 8개 호출 전부 try/catch + `captureFallback` 적용(`.maybeSingle()` → `null`, 배열 → `[]`). 연동 테스트 5개 파일(`buildTeamFactorAverages.test.ts`/`buildTeamProfile.test.ts`/`buildTeamRecentForm.test.ts` + `silent-drift-cycle-2288/2290.test.ts` 앵커 문자열) 갱신.
+- tsc --noEmit clean, eslint clean, `pnpm --filter moneyball test -- --run` 584 files/4610 tests 전부 pass, zero regression.
+
 ## v0.5.62.276 — 2026-10-07 (cycle 2951, skill-evolution(forced): phase 46, 80회 자가 진화)
 
 ### skill-evolution(forced): phase 46 — 80회 자가 진화 (cycle 2951, SUCCESS)
