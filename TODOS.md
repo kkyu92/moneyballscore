@@ -1,4 +1,12 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): app/analysis/ 전체 읽기 — clean 확인 (cycle 2944, 2026-10-07)
+
+진단: cycle 2941~2943 carry-over(app/ 라우트 레벨 스코프) 채택. fix-incident Supabase egress quota 5연속 재확인(여전히 HTTP 500, 변화 없음, 재dispatch skip). lotto chain false-alarm 해소 — `~/lotto_picks/*.md`(legacy, Sep19 이후 정지)는 stale 보였지만 실제 자동화 데이터 `apps/moneyball/data/lotto-picks/`는 2026-10-10 추첨분까지 cron(GH Actions lotto-pick-update/lotto-result-update/lotto-pick-monitor 전부 green)으로 최신 유지 중 — 액션 불필요. operational-analysis gap 20/25, info-architecture-review gap 22/30 — 아직 미도달.
+
+`apps/moneyball/src/app/analysis/page.tsx`(2836줄, app/ 라우트 중 최대 단일 파일) + `analysis-data.ts`(983줄) + `game/[id]/page.tsx`(874줄) 전체 읽기 + 전역 grep 교차검증(69개 import, 전체 export 함수/타입) — dead export 0건, stale 주석 0건(cycle/wave 히스토리 주석 약 15개 전부 현재 코드와 일치), TODO/FIXME 0건, 로직 버그 0건. 코스메틱 수준 네이밍 1건(`bestPickOfMonth`가 제네릭 `getBestPickOfWeek` 재사용 — 버그 아님) 발견했으나 커밋 가치 부족 판단, 미수정.
+
+다음 사이클 추천 = review-code(heavy) 다른 app/ 서브디렉토리(teams/players/predictions/mlb) 또는 packages/shared, 혹은 operational-analysis(gap 20→25 임박, ~5 사이클 후 자동 trigger).
+
 ## 🟢 SUCCESS — design-system: KBO OG/twitter 이미지 gradient 토큰화 (cycle 2943, 2026-10-07)
 
 진단: design-system chain 직전 발화 cycle 983(약 1960 사이클 전, chain pool 10개 중 최장 미발화). DESIGN.md mtime 34.8일(>4주 trigger) + 직전20 사이클 review-code(heavy) 60% dominance → 0회 발화 chain 우선 검토 룰 적용해 diversify. fix-incident Supabase egress quota 재확인(여전히 HTTP 500, day 5+, 변화 없음, 재dispatch는 노이즈라 skip).
