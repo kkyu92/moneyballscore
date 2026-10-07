@@ -1,3 +1,14 @@
+## v0.5.62.291 — 2026-10-07 (cycle 2966, review-code(heavy): api/ + observability 감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): api/ 라우트 + lib/observability 신규 축 감사 (cycle 2966, RETRO-ONLY)
+
+- 진단: 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+polish-ui1+design-system1). fix-incident gap=20(≥20 충족) — `gh run list` 로 health-alert/runtime-error-alert/heartbeat-stale 반복 failure 확인했으나 전부 동일 근본 원인(Supabase egress quota 402, cycle 2939~ 지속, billing 대기)으로 수렴 — 신규 action 없음, noise 재확인. "Daily KBO Pipeline"/"Live Game Update" GH workflow 가 2026-04-28 이후 미실행인 점도 확인했으나 해당 workflow 파일 자체에 "Cloudflare Workers Cron 이관 완료" 주석 존재 — 의도된 비활성(실제 예측은 Cloudflare Worker가 API 직접 호출), 드리프트 아님. explore-idea — saturation 12/15 충족 + plan#29 재평가 트리거("KBO 포스트시즌 임박") 조건부 도달했으나 cycle 2954(12 cycle 전)에 동일 결론(Tier4 유지, 트래픽 402로 재측정 불가)으로 이미 재확인 완료 — 재중복 skip. operational-analysis gap=42 충족이나 동일 402 재확인뿐. design-system/lotto/info-arch 전부 gap 미근접. → review-code(heavy) 계속 선택, migration-path 추천 신규 축(analysis/api/calendar/observability/teams) 중 `apps/moneyball/src/app/api/*/route.ts`(20개) + `lib/observability/captureFallback.ts` + `lib/api/is-origin-allowed.ts` 직접 감사.
+- 감사 대상: `hub-dispatch`(HMAC 검증 + no-relay 재귀 방지), `picks/{submit,mlb-submit,poll,mlb-poll,results}`, `mlb/waitlist`(honeypot + email enumeration 방지), `leaderboard/{sync,mlb-sync}`, `revalidate`(CRON_SECRET), `kbo-scores`(Naver 매핑), `captureFallback`(Sentry fallback wrapper, 87개 호출부 전수 grep), `isOriginAllowed`(CSRF 공용 유틸).
+- 발견: 전부 기존 보안/검증 패턴 정합. `kbo-scores/route.ts` 의 `NAVER_TO_TEAM` 주석이 "팀코드"라 적혀있으나 실제 키는 Naver `homeTeamName`(팀 표시명, 한글/영문 혼용) — 함수는 정확히 그 필드로 호출돼 동작은 정상(10개 KBO_TEAMS 코드 전부 매핑 완비 확인), 주석 표현만 다소 부정확 — 동작에 영향 없어 별도 수정 보류(스코프 밖 cosmetic). `leaderboard/sync/route.ts` 의 `game_id` 검증이 `picks/submit/route.ts`(Number.isInteger + >0) 대비 느슨(`typeof === 'number'`만, NaN/음수 통과 가능)하나 DB FK 제약(`games(id)` REFERENCES)이 모든 잘못된 값을 insert 단계에서 에러로 차단(error 핸들러가 Sentry capture) — silent 실패 아님, 실익 낮은 보강이라 보류.
+- 코드 변경 없음(순수 감사 cycle, 갭 0건).
+
+다음 사이클 추천 = fix-incident(egress quota 402 지속 — billing 조치 미이행 상태 재확인만 가능, 신규 action 없음) 또는 plan#29 expiry(2026-10-15, 8일 남음) 임박 — 다음 1~2 사이클 안 explore-idea 로 최종 결정 필요 또는 2-chain lock 자연 해제 후 polish-ui/design-system 복귀.
+
 ## v0.5.62.290 — 2026-10-07 (cycle 2965, review-code(heavy): v2-shadow-monitor cohort sort 버그 수정 SUCCESS)
 
 ### review-code(heavy): v2-shadow-monitor cohort filename 정렬 버그 수정 (cycle 2965, SUCCESS)

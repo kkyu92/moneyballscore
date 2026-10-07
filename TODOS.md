@@ -1,4 +1,14 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): api/ + observability 감사, 갭 0건 (cycle 2966, 2026-10-07)
+
+진단: 2-chain lock 미충족(직전8 distinct=3). fix-incident gap=20(≥20 충족, forced lite 체크) — health-alert/runtime-error-alert/heartbeat-stale 반복 failure 전부 Supabase egress quota 402(billing 대기, cycle 2939~) 단일 원인으로 수렴, 신규 action 없음. "Daily KBO Pipeline"/"Live Game Update" GH workflow 가 2026-04-28 이후 미실행 발견했으나 workflow 파일 자체 주석("Cloudflare Workers Cron 이관 완료")으로 의도된 비활성 확인 — 드리프트 아님(실측 검증 후 false alarm 회피). explore-idea saturation 12/15 충족 + plan#29 재평가 조건("포스트시즌 임박") 도달했으나 cycle 2954(12 cycle 전)가 이미 동일 결론(Tier4 유지, 402로 트래픽 재측정 불가) 재확인 완료 — 중복 skip. operational-analysis/design-system/lotto/info-arch 전부 저가치 또는 미근접. review-code(heavy) 계속 선택 — migration-path 추천 신규 축(analysis/api/calendar/observability/teams) 중 `api/*/route.ts` 20개 + `lib/observability/captureFallback.ts` + `lib/api/is-origin-allowed.ts` 감사.
+
+- 감사 대상: hub-dispatch(HMAC+no-relay), picks/{submit,mlb-submit,poll,mlb-poll,results}, mlb/waitlist(honeypot+email enum 방지), leaderboard/{sync,mlb-sync}, revalidate(CRON_SECRET), kbo-scores(Naver 팀 매핑), captureFallback(87개 호출부 전수 grep), isOriginAllowed(CSRF 공용 유틸) — 전부 기존 보안/검증 패턴 정합, 갭 0건.
+- 경미한 관찰 2건(수정 보류, 실익 낮음): (1) `kbo-scores/route.ts` NAVER_TO_TEAM 주석이 "팀코드"라 적혔지만 실제 키는 `homeTeamName`(표시명) — 동작 정상, 주석만 부정확(cosmetic). (2) `leaderboard/sync/route.ts` game_id 검증이 `picks/submit`(Number.isInteger+>0) 대비 느슨하나 DB FK 제약이 모든 잘못된 값을 insert 단계에서 에러로 차단(Sentry capture 존재) — silent 실패 아님.
+- 코드 변경 없음(순수 감사 cycle).
+
+다음 사이클 추천 = fix-incident(egress quota 402 지속, billing 조치 미이행 — 재확인만 가능) 또는 plan#29 expiry(2026-10-15, 8일 남음) 임박 explore-idea 최종 결정 또는 2-chain lock 자연 해제 후 polish-ui/design-system 복귀.
+
 ## 🟢 SUCCESS — review-code(heavy): v2-shadow-monitor cohort sort 버그 수정 (cycle 2965, 2026-10-07)
 
 진단: 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+polish-ui1+design-system1). fix-incident gap 18/20 미근접, `gh run list` CI 전부 정상(Dependabot in-progress만). operational-analysis gap=40 충족했으나 egress quota 402 지속 재확인(billing 대기, 신규 정보 없음). explore-idea saturation 12/15 충족하나 4-source 재확인 negative(open issue 0, plan#29 Tier4 유지 — expiry 2026-10-15 임박, TODOS Next-Up stale) — 과거 사례(cycle 2896/2893/2890 등) 동일 패턴으로 organic idea 부재 skip. design-system 직전 사이클(2964) 전수 재검증 완료 직후라 재실행 저가치. lotto gap 15/30·info-arch gap 9/30 둘 다 미근접. review-code(heavy) 계속 선택 — lib/ 대부분 기존 감사 완료 상태에서 잔존 미탐색 소형 스코프(weather.ts/hub-dispatch.ts/feature-flags.ts/tabpfn-export.ts/tabpfn-import.ts/v2-shadow-monitor/changelog) subagent 위임 감사.
