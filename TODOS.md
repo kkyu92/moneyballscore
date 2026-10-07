@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — explore-idea(heavy): MLB AI 인사이트 series/[topic] 아카이브 Phase 3 (cycle 2938, 2026-10-07)
+
+진단: 직전8 distinct=4, 2-chain lock 미충족. gap trigger 4종 전부 미근접, open issue 0건. plan #30이 cycle 2937 retro의 next_recommended_chain — series.ts 토픽 taxonomy가 MLB로 일반화 가능한지(MlbTeamCode 존재) 확인 후 Phase 3 착수.
+
+KBO series.ts(format/parse/list/getSeriesByTopic)를 MLB로 이식. 30팀 435쌍은 mlb/matchup 선례(plan #24, generateStaticParams 없는 on-demand ISR) 재사용해 빌드비용 회피. mlbCanonicalPair/mlbAllPairs 재사용(DRY). getMlbSeriesByTopic은 mlb_schedule을 toMlbStatsApiCode 변환 .or() 필터 선조회 후 predictions join, mapMlbPredictionRows 공유.
+
+slug 형식은 KBO와 동일 단일 `[topic]` slug(plan #30 retro 명시). opengraph-image는 Phase 1/2 선례대로 생략. sitemap.ts KO/EN 435×2 배선 + 기존 cycle 2580 KBO series sitemap 테스트의 비앵커 regex 회귀(45→915 오집계) 발견/수정.
+
+tsc clean, test 584/584파일 4610/4610 green. PR #3124 merge.
+
+다음 사이클 추천 = plan #30 완결(Phase 1/2/3 모두 shipped) — gap trigger 자연 대기 또는 review-code(heavy) 잔여 스코프.
+
 ## 🟢 SUCCESS — explore-idea(heavy): MLB AI 인사이트 [date] 아카이브 Phase 2 (cycle 2937, 2026-09-29)
 
 진단: 직전8 distinct=4, 2-chain lock 미충족. gap trigger 4종 전부 미근접, open issue 0건. plan #30이 cycle 2936 retro의 next_recommended_chain으로 명시적 carry-over — Phase 2 착수.

@@ -1,3 +1,17 @@
+## v0.5.62.266 — 2026-10-07 (cycle 2938, explore-idea(heavy): MLB AI 인사이트 series/[topic] 아카이브 Phase 3)
+
+### explore-idea(heavy): /mlb/insights/series/[topic] + /en/mlb/insights/series/[topic] — plan #30 Phase 3 완결 (cycle 2938, SUCCESS)
+
+- 진단: 직전8(2931-2937) distinct=4(review-code 7+polish-ui+dimension-cycle+explore-idea 2), 2-chain lock 미충족. gap trigger 4종(fix-incident 13/20·op-analysis 14/25·info-arch 16/30·lotto 24/30) 전부 미근접. open issue 0건. plan #30이 cycle 2937 retro의 next_recommended_chain으로 명시적 carry-over — 선행 조건(series.ts 토픽 taxonomy가 MLB 일반화 가능한지)을 `MlbTeamCode`/`MLB_TEAMS` 존재로 확인 후 Phase 3 착수.
+- KBO `lib/insights/series.ts`(formatSeriesTopic/parseSeriesTopic/listSeriesTopics/getSeriesByTopic)를 MLB로 이식. 30팀 N choose 2 = 435쌍(KBO 45쌍 대비 9.7배) — `mlb/matchup/[teamA]/[teamB]`가 동일 스케일 문제를 "generateStaticParams 없는 on-demand ISR"로 이미 해결해둔 선례(plan #24)를 그대로 재사용, KBO 방식(전체 force-static 사전렌더)은 채택하지 않음(빌드비용 회피).
+- `lib/mlb/mlbCanonicalPair.ts`(mlbCanonicalPair/mlbAllPairs) 재사용해 페어 생성/정규화 로직 중복 없음(DRY). `getMlbSeriesByTopic`은 `mlb_schedule`을 `toMlbStatsApiCode` 변환 `.or()` 필터로 먼저 조회(DB가 StatsAPI 코드 보유 — `buildMlbMatchupProfile.ts`와 동일 패턴) 후 `predictions` in() join — `mapMlbPredictionRows`(hub/[date]와 공유)를 그대로 재사용.
+- slug 형식은 KBO와 동일 `<code1>-vs-<code2>`(plan #30 retro에 "[topic]" 단일 slug로 명시, mlb/matchup의 2-segment path와는 별개 convention — insights 패밀리 parity 우선).
+- opengraph-image.tsx는 추가하지 않음 — mlb/insights hub/[date](Phase 1/2)가 이미 생략해둔 선례를 그대로 유지(스코프 일관성).
+- sitemap.ts에 KO/EN 435×2 라우트 배선. 기존 cycle 2580 KBO series sitemap 테스트가 "/insights/series/" 부분 문자열을 앵커 없이 매칭해 신규 MLB 라우트까지 함께 집계(45→915)하던 회귀를 도메인 앵커 정규식으로 수정 + MLB KO/EN 435개 전용 검증 2건 추가.
+- tsc clean, test 584/584파일 4610/4610 green. PR #3124 merge(ee7ff4aa).
+
+다음 사이클 추천 = plan #30 완결(Phase 1/2/3 모두 shipped) — gap trigger(fix-incident/op-analysis/info-arch/lotto) 자연 대기 또는 review-code(heavy) 잔여 스코프.
+
 ## v0.5.62.265 — 2026-09-29 (cycle 2937, explore-idea(heavy): MLB AI 인사이트 [date] 아카이브 Phase 2)
 
 ### explore-idea(heavy): /mlb/insights/[date] + /en/mlb/insights/[date] — plan #30 Phase 2 완결 (cycle 2937, SUCCESS)
