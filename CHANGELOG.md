@@ -1,3 +1,14 @@
+## v0.5.62.319 — 2026-10-07 (cycle 2994, review-code(heavy): components/insights·search·ui + STATIC_PAGES 링크 정합성 재감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): components/insights(AgentVoteCard·DebateTimeline)·search(SearchClient)·ui(navigation-menu) + search STATIC_PAGES 링크 정합성 재감사 — 갭 0건 (cycle 2994, RETRO-ONLY)
+
+- 진단: 직전8(2986-2993) distinct=2(review-code(heavy)7+fix-incident1) — 2-chain lock 조건 충족이나 잠긴 2개 중 fix-incident 포함 시 lock 무시 예외(세이프티 우선) 적용, 정상 선택 진행. Supabase egress quota 402 직접 재확인(`pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행, cycle 2939~ 지속 변화 없음) — op-analysis gap=26(2968, 25 임계 이미 초과) 이지만 DB 접근 전제라 lite/heavy 둘 다 여전히 차단. fix-incident gap=8(2986)·info-arch gap=18(2976)·lotto gap=15(2979, cron 산출물 picks/results 둘 다 신선 확인) 전부 미근접. explore-idea saturation 낮음(직전15 중 review-code 단일 dominance). open issue 0건, open PR 9건 전부 dependabot. 승인 plan 0건(plan#29 spec_only_deferred 불변, 만료 2026-10-15 7일 남음).
+- `lib/`+`components/` 커밋수 재정렬 — `components/ui`(1, navigation-menu.tsx 단일 shadcn 보일러플레이트)·`components/search`(3, SearchClient.tsx) 최저 축. 직전 cycle(2900대) carry-over 추천("components/insights, components/ui 세부 재탐색")에 따라 `components/insights`(AgentVoteCard.tsx·DebateTimeline.tsx, silent-drift-cycle-2609/2616 회귀 테스트 보유 영역)도 포함.
+- `SearchClient.tsx`(Fuse.js 클라이언트 검색, 키보드 nav + a11y) 전수 read — clean. 데이터 소스인 `app/search/page.tsx`의 `buildSearchIndex()` 도 함께 추적 — `STATIC_PAGES`(49개 slug) 전체를 실제 `app/` 디렉토리 `page.tsx` 존재 여부와 대조해 broken-link 가능성 점검, 전부 실제 라우트와 일치(stale entry 0건). `AgentVoteCard.tsx`+`DebateTimeline.tsx`는 `lib/insights/loader.ts`의 `DebateTimelineData` 인터페이스와 필드 단위 대조(quantHomeProb/homeArgument/awayArgument/calibration/verdictHomeProb/predictedWinner) — 전부 정합. `navigation-menu.tsx`는 shadcn 표준 컴포넌트 확인(커스텀 로직 없음).
+- actionable 버그 0건, 코드 변경 0.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 7일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~, 본 cycle 직접 재확인) — **op-analysis gap=26 → 25 임계 이미 초과했으나 DB 접근 전제 차단 변화 없음**.
+
 ## v0.5.62.318 — 2026-10-07 (cycle 2993, review-code(heavy): buildPitcherProfile appearances 필드 FIP-null 등판 누락 수정 SUCCESS)
 
 ### review-code(heavy): `/players/[id]` 등판 수 undercounting — FIP 매칭 실패 등판 누락 (cycle 2993, SUCCESS)

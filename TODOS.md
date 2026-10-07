@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): components/insights·search·ui + STATIC_PAGES 링크 정합성 재감사, 갭 0건 (cycle 2994, 2026-10-07)
+
+진단: 직전8(2986-2993) distinct=2(review-code(heavy)7+fix-incident1) — 2-chain lock 조건 충족이나 fix-incident 포함 lock 무시 예외 적용, 정상 진행. Supabase egress quota 402 재확인(cycle 2939~ 지속) — op-analysis gap=26(25 임계 초과)이나 DB 접근 전제라 여전히 차단. fix-incident(8)/info-arch(18)/lotto(15) 전부 미근접. explore-idea saturation 낮음(review-code dominance). plan#29 상태 불변.
+
+`components/ui`(1 commit)·`components/search`(3 commit) 최저 축 + 직전 cycle carry-over 추천 `components/insights` 전수 read. `SearchClient.tsx` + `app/search/page.tsx`의 `buildSearchIndex()` 추적 — `STATIC_PAGES`(49개 slug) 전체를 실제 `app/` 디렉토리 존재 여부와 대조, stale entry 0건. `AgentVoteCard.tsx`+`DebateTimeline.tsx`를 `lib/insights/loader.ts`의 `DebateTimelineData` 인터페이스와 필드 단위 대조 — 전부 정합(calibration 필드 등 누락 의심했으나 재확인 결과 존재 확인). `navigation-menu.tsx` shadcn 표준 확인. actionable 버그 0건, 코드 변경 0.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 7일 남음). **Supabase egress quota 장애 지속**(cycle 2939~). **op-analysis gap=26 → 25 임계 이미 초과** — DB 접근 가능해지는 즉시 heavy 모드 최우선 권장.
+
 ## 🟢 SUCCESS — review-code(heavy): buildPitcherProfile appearances 필드 FIP-null 등판 누락 수정 (cycle 2993, 2026-10-07)
 
 진단: 직전8(2985-2992) distinct=3, 2-chain lock 미충족. op-analysis gap=25(2968) 임계 도달했으나 Supabase egress quota 402 재확인(cycle 2939~ 지속) — lite 모드 전제 `/weekly-review` 도 동일 DB 블로커라 재확인은 신규 정보 없이 저가치 skip. fix-incident(7)/info-arch(17)/lotto(14) 전부 미근접. explore-idea organic idea 0(plan#29 deferred·plan#30 completed) 지속 skip.
