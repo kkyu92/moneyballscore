@@ -120,26 +120,36 @@ describe("buildTeamProfile — cycle 151 silent drift family `.error` 미체크 
     vi.clearAllMocks();
   });
 
-  it("teams select error → assertSelectOk throw (silent 빈 프로필 fallback 차단)", async () => {
+  it("teams select error → throw 대신 빈 프로필 degrade (captureFallback)", async () => {
     supabaseMock = makeSupabaseMock({
       teamsError: { message: "connection refused" },
     });
 
     const { buildTeamProfile } = await import("../buildTeamProfile");
-    await expect(buildTeamProfile("HT")).rejects.toThrow(
-      /buildTeamProfile teams select failed: connection refused/,
-    );
+    const profile = await buildTeamProfile("HT");
+
+    expect(profile).not.toBeNull();
+    expect(profile?.code).toBe("HT");
+    expect(profile?.predictedGames).toBe(0);
+    expect(profile?.recentGames).toEqual([]);
+    expect(profile?.topPitchers).toEqual([]);
   });
 
-  it("games select error → assertSelectOk throw (silent 빈 record 위장 차단)", async () => {
+  it("games select error → throw 대신 빈 집계 degrade (captureFallback)", async () => {
     supabaseMock = makeSupabaseMock({
+      teamRow: { id: HT_ID },
       gamesError: { message: "syntax error at or near 'and'" },
     });
 
     const { buildTeamProfile } = await import("../buildTeamProfile");
-    await expect(buildTeamProfile("HT")).rejects.toThrow(
-      /buildTeamProfile games select failed: syntax error/,
-    );
+    const profile = await buildTeamProfile("HT");
+
+    expect(profile).not.toBeNull();
+    expect(profile?.code).toBe("HT");
+    expect(profile?.predictedGames).toBe(0);
+    expect(profile?.verifiedN).toBe(0);
+    expect(profile?.recentGames).toEqual([]);
+    expect(profile?.topPitchers).toEqual([]);
   });
 
   it("teams .maybeSingle() 빈 row (data=null, error=null) → 정상 fallback 빈 프로필 반환", async () => {

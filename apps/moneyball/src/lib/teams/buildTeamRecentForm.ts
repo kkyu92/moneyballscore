@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import {
   assertSelectOk,
   MATCHUP_RECENT_FORM_GAMES,
@@ -52,10 +53,18 @@ export async function buildTeamRecentForm(
     .select("id")
     .eq("code", teamCode)
     .maybeSingle();
-  const { data: teamRow } = assertSelectOk(
-    teamResult,
-    `buildTeamRecentForm teams ${teamCode}`,
-  );
+  let teamRow: unknown | null;
+  try {
+    ({ data: teamRow } = assertSelectOk(
+      teamResult,
+      `buildTeamRecentForm teams ${teamCode}`,
+    ));
+  } catch (err) {
+    teamRow = captureFallback(err, null, {
+      route: "/matchup/[teamA]/[teamB]",
+      source: `buildTeamRecentForm teams ${teamCode}`,
+    });
+  }
   const teamId = (teamRow as { id: number } | null)?.id ?? null;
   if (teamId == null) return EMPTY_RECENT_FORM;
 
@@ -69,10 +78,18 @@ export async function buildTeamRecentForm(
     .order("game_date", { ascending: false })
     .limit(limit);
 
-  const { data: gamesData } = assertSelectOk(
-    gamesResult,
-    `buildTeamRecentForm games ${teamCode}`,
-  );
+  let gamesData: unknown[] | null;
+  try {
+    ({ data: gamesData } = assertSelectOk(
+      gamesResult,
+      `buildTeamRecentForm games ${teamCode}`,
+    ));
+  } catch (err) {
+    gamesData = captureFallback(err, [], {
+      route: "/matchup/[teamA]/[teamB]",
+      source: `buildTeamRecentForm games ${teamCode}`,
+    });
+  }
 
   const rows = (gamesData ?? []) as GameRow[];
   const results: GameResult[] = [];

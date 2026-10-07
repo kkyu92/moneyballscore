@@ -9,7 +9,7 @@ describe('silent drift cycle 2288 — buildTeamProfile.ts games 쿼리 scoring_r
     const src = readFileSync(SRC, 'utf8');
     const block = src.slice(
       src.indexOf('const gamesResult = await supabase'),
-      src.indexOf('const { data } = assertSelectOk(gamesResult'),
+      src.indexOf('({ data } = assertSelectOk(gamesResult'),
     );
     expect(block).toMatch(/\.in\("predictions\.scoring_rule", PRODUCTION_COHORT_RULES\)/);
   });
