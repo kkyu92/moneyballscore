@@ -1,3 +1,17 @@
+## v0.5.62.309 — 2026-10-07 (cycle 2984, review-code(heavy): middleware/next.config/robots/manifest/icon 신규 축 감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): 미탐색 소형 스코프 신규 감사 — middleware/next.config/robots/manifest/icon (cycle 2984, RETRO-ONLY)
+
+- 진단: 직전8(2976-2983) distinct=3(review-code(heavy)6+info-architecture-review1+lotto(lite)1), 2-chain lock 미충족. fix-incident gap=14/20·op-analysis gap=16/25·lotto gap=5/30·info-arch gap=8/30 전부 미근접. explore-idea saturation 13/15 충족하나 organic idea 0(open issue 0, plan#29 Tier4 불변·만료 2026-10-15 — 8일 남음, 사용자 결정 여전히 대기) 지속 — 과거 패턴(2978~2983) 동일 사유로 skip. skill-evolution trigger5 미충족(직전20 review-code 14/20, 0회 아님), milestone(2984%50=34) 미도달, ship-0 미충족(직전10 success 다수).
+- cycle 2983 추천 스코프(api/changelog/debug/leaderboard/seo/og/kbo-data)를 git log 제목 grep 으로 선 검증 — 전부 과거 cycle(2966 api, 2962 debug, 2971 leaderboard, 2956/2923/2926 kbo-data, 2874 seo/changelog, 2580/2579/2263 sitemap)에 이미 감사 완료된 stale 추천 확인(cycle 2981 이 지적한 동일 패턴 재발 방지 차원에서 선-검증 후 제외).
+- grep 으로 진짜 미탐색 범위 확인 후 직접 read: `middleware.ts`(보안 헤더 + `/debug` BASIC auth), `next.config.ts`(Sentry wrapper), `robots.ts`(4-UA 정책), `manifest.ts`(PWA manifest), `icon.tsx`(dynamic multi-size icon route), `instrumentation.ts`(Sentry 서버 진입점), `instrumentation-client.ts`(Sentry 클라이언트 진입점 + DNT/GPC opt-out) — 7개 파일 전수 read, 기존 review-code(heavy) 시리즈 어느 cycle 에도 개별 언급 없던 최초 감사 대상.
+- `manifest.ts` 의 icons 참조 경로(`/icon/192`, `/icon/512`, `/icon/512-maskable`)가 `icon.tsx` 의 `generateImageMetadata()` variant id 와 정확히 일치 확인(Next.js 동적 icon route 컨벤션 정합). `robots.ts` 의 4-UA(일반/Googlebot/Mediapartners-Google/AdsBot-Google) disallow 목록이 실제 placeholder 라우트(`/login`/`/settings`/`/community`) 전부와 일치. `middleware.ts` matcher 가 정적 자산만 제외하고 나머지 전체 경로에 보안 헤더 적용하는 설계 확인. `instrumentation.ts`/`instrumentation-client.ts` 양쪽 모두 `scrubSentryEvent` beforeSend 훅 일관 적용(PII 스크럽 가드 B 패턴 유지) + 서버/클라이언트 DSN env 분리(`SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN`) 정합 — actionable 버그 0건.
+- 코드 변경 0 (clean audit). 7개 파일 = review-code(heavy) 시리즈 최초 피감사 완료, 다음 cycle 재스캔 불필요.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 사용자 결정(만료 임박, 2~3 cycle 내 미결정 시 자동 archive) 또는 Supabase egress quota 장애 모니터 또는 2-chain lock 자연 해제 후 design-system(DESIGN.md mtime 35일 ≥4주 재도달) 자연 복귀 또는 review-code(heavy) 진짜 잔여 스코프 재탐색(이번 cycle 수준으로 과거 제목 grep 선행 필수).
+
 ## v0.5.62.308 — 2026-10-07 (cycle 2983, review-code(heavy): accuracy/dashboard/insights/matchup/picks/predictions/reviews/seasons/standings/stats/supabase 재감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): 저피감사 스코프 11개 디렉토리 전수 재감사 — 갭 0건 (cycle 2983, RETRO-ONLY)

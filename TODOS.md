@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): middleware/next.config/robots/manifest/icon/instrumentation 신규 축 감사, 갭 0건 (cycle 2984, 2026-10-07)
+
+진단: 직전8(2976-2983) distinct=3, 2-chain lock 미충족. fix-incident(14/20)/op-analysis(16/25)/lotto(5/30)/info-arch(8/30) 전부 gap 미근접. explore-idea saturation 13/15 충족하나 plan#29 Tier4 불변(사용자 결정 대기, 만료 8일 남음) 지속, organic idea 없음. cycle 2983 추천 스코프(api/changelog/debug/leaderboard/seo/og/kbo-data)를 git log 제목 grep 으로 선검증 — 전부 이미 과거 cycle 감사 완료된 stale 추천 확인(cycle 2981 지적 패턴 재발 방지).
+
+진짜 미탐색 범위 재탐색 후 직접 read: middleware.ts/next.config.ts/robots.ts/manifest.ts/icon.tsx/instrumentation.ts/instrumentation-client.ts 7개 파일(review-code(heavy) 시리즈 최초 피감사). manifest.ts icons 경로↔icon.tsx variant id 일치, robots.ts 4-UA disallow 목록 정합, middleware.ts matcher 설계 정상, instrumentation 양쪽 scrubSentryEvent 일관 적용 확인 — actionable 버그 0건. 코드 변경 0.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): accuracy~supabase 11개 디렉토리 재감사, 갭 0건 (cycle 2983, 2026-10-07)
 
 진단: 직전8(2975-2982) distinct=3, 2-chain lock 미충족. fix-incident(13/20)/op-analysis(15/25)/lotto(4/30)/info-arch(7/30) 전부 gap 미근접. explore-idea saturation 12/15 충족하나 plan#29 Tier4 불변(사용자 결정 대기) 지속, organic idea 없음. cycle 2982 추천 스코프(accuracy/dashboard/insights/matchup/picks/predictions/reviews/seasons/standings/stats/supabase) 전수 read.
