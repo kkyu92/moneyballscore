@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): postview judge validator_logs 영속 박제 누락 수정 (cycle 2974, 2026-10-07)
+
+진단: 2-chain lock 미충족(직전8 distinct=4). fix-incident/operational-analysis/explore-idea(plan#29 대기)/lotto(cron 건강 확인)/info-arch/design-system 전부 gap 미근접/저가치. skill-evolution trigger 5 미충족(review-code 13/20, 0회 아님). cycle 2951 migration note 추천 "packages/kbo-data 잔여 스코프"(최근 cycle 들이 apps/moneyball/src/app 위주라 예측 엔진 코어 미감사) 선택.
+
+`postview.ts` `runPostview` judge 경로(factor attribution + judgeReasoning 검증)가 Sentry capture 만 하고 `validator_logs` 영속 박제 누락 — 같은 파일 team postview 경로·pre-game judge-agent.ts·calibration-agent.ts 는 전부 영속 박제 중이던 것과 불일치. `/debug/hallucination` judgeCount 가 postview judge 위반을 silent 누락하던 gap. pre-game judge 패턴과 동일하게 `logValidatorEvent` 호출 추가. typecheck clean, 테스트 94 files/1227 PASS.
+
+나머지 14개 agent 파일 + CLAUDE.md claim(CURRENT_SCORING_RULE/DEFAULT_WEIGHTS/CREDIT_EXHAUSTED/debate_version) 전수 교차검증 — 전부 일치, dead code 0건, 신규 버그 0건.
+
+**plan#29 상태 변화 없음** (`~/.develop-cycle/plans/moneyballscore/29.md`, 만료 2026-10-15) — 사용자 결정 여전히 대기 중.
+
+다음 사이클 추천 = 사용자 plan#29 결정 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(packages/kbo-data scrapers/pipelines) 또는 2-chain lock 자연 해제 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): glossary 팩터 banner stale 텍스트 + EN factors 공시 배너 누락 수정 (cycle 2973, 2026-10-07)
 
 진단: 직전8(2965-2972) distinct=4(review-code 5/8), 2-chain lock 미충족. 다른 chain 전부 gap 미근접/저가치. cycle 2972 추천 잔여 스코프(en/ 미러, debug/, dashboard/settings/search/glossary/guide) 선택.

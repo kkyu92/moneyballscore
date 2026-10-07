@@ -1,3 +1,14 @@
+## v0.5.62.299 — 2026-10-07 (cycle 2974, review-code(heavy): postview judge validator_logs 영속 박제 누락 수정 SUCCESS)
+
+### review-code(heavy): packages/kbo-data/src/agents 신규 스코프 감사 — postview judge validator_logs 누락 수정 (cycle 2974, SUCCESS)
+
+- 진단: 2-chain lock 미충족(직전8(2966-2973) distinct=4). fix-incident gap=3·operational-analysis gap=5·explore-idea gap=4(plan#29 사용자 결정 대기, 재방화 저가치)·lotto gap=24(cron 산출물 최신 확인 — picks 2026-10-10 + results 2026-10-03 둘 다 10/7 생성, 건강)·info-arch gap=18·design-system mtime 35일 충족이나 cycle 2964 직후 저가치. 직전20(2954-2973) chain pool 표본 20 전부, review-code 13/20 — skill-evolution trigger 5 미충족(review-code 0회 아님). review-code(heavy) 가 cycle 2951 migration note 가 추천한 "packages/kbo-data 잔여 스코프"(최근 cycle 2965-2973 전부 apps/moneyball/src/app 라우트 위주 감사 — 예측 엔진 코어는 미감사) 선택.
+- subagent 위임 전수 감사(`packages/kbo-data/src/agents/*.ts` 15개 파일 + `__tests__` + CLAUDE.md 의 CURRENT_SCORING_RULE/DEFAULT_WEIGHTS/LLM_FALLBACK_CONFIDENCE/PRODUCTION_COHORT_RULES/DEBATE_VERSION_PREGAME claim 교차검증) 결과 1건 발견: `postview.ts` `runPostview` 의 judge 경로(factor attribution + judgeReasoning 검증)가 `notifyValidationViolations`(Sentry) 만 호출하고 `logValidatorEvent` 영속 박제를 누락 — 같은 파일의 team postview 경로(line 303)·pre-game `judge-agent.ts`(line 204)·`calibration-agent.ts` 는 전부 영속 박제 중. `/debug/hallucination` 의 judgeCount/byAgent 가 postview judge 위반을 silent 하게 누락 — 사전 경기(pre-game) judge 만 집계된 상태.
+- 수정: pre-game judge 패턴과 동일하게 `logValidatorEvent({teamCode: 'JG', agent: 'judge', ...})` 호출 추가, attribution + reasoning 위반 합산. typecheck clean, 테스트 94 files / 1227 PASS (kbo-data 패키지 전체).
+- 나머지 14개 agent 파일(`debate.ts`/`judge-agent.ts`/`calibration-agent.ts`/`retro.ts`/`mlb-retro.ts`/`rivalry-memory.ts`/`team-agent.ts`/`validator.ts`/`llm*.ts` 등) + CLAUDE.md claim 전수 교차검증 — 가중치/threshold/fallback 상수 전부 일치, dead code 0건, `?? 0` coalescing 전부 null-guard 확인된 안전 케이스, 신규 버그 0건.
+
+다음 사이클 추천 = 사용자 plan#29 결정 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(packages/kbo-data 의 scrapers/pipelines 또는 apps/moneyball/src/app 미세 라우트) 또는 2-chain lock 자연 해제 대기.
+
 ## v0.5.62.298 — 2026-10-07 (cycle 2973, review-code(heavy): glossary 팩터 banner stale 텍스트 + EN factors 공시 배너 누락 수정 SUCCESS)
 
 ### review-code(heavy): glossary stale placeholder-factor 목록 + en/mlb/factors 공시 배너 누락 수정 (cycle 2973, SUCCESS)
