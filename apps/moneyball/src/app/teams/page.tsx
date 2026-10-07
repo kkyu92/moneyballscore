@@ -45,7 +45,7 @@ const TEAM_ORDER: TeamCode[] = [
 
 export default async function TeamsIndexPage() {
   const rows: TeamAccuracyRow[] = await buildAllTeamAccuracy().catch((err) =>
-    captureFallback(err, [] as TeamAccuracyRow[], { source: "teams-hub-accuracy" }),
+    captureFallback(err, [] as TeamAccuracyRow[], { route: "/teams", source: "teams-hub-accuracy" }),
   );
 
   const accMap = new Map<TeamCode, TeamAccuracyRow>();
