@@ -1,3 +1,13 @@
+## v0.5.62.283 — 2026-10-07 (cycle 2958, review-code(heavy): packages/shared index.ts + scripts/ + `as any` audit — 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): 미탐색 축 3종 감사 — 갭 0건 (cycle 2958, RETRO-ONLY)
+
+- 진단: op-analysis(gap=33) Supabase egress quota 402 재확인 저가치. lotto(gap=8) 다음 토 picks 파일 이미 존재(cron 정상). info-arch/explore-idea/design-system 전부 최근 fire 재방문 비권장. fix-incident(gap=11) CI 정상, quota 재확인 노이즈.
+- `packages/shared/src/index.ts`(3453줄, cycle 2655 이후 미재확인) 전체 export 직접 read — 가중치/버전 히스토리 주석 전부 CLAUDE.md 서술과 정합, drift 0건.
+- `scripts/*.ts` import-ref 0건 다수 = 독립 CLI 스크립트 정상 패턴(dead code 아님, false positive).
+- `as any` 17건 전수 분류 — Supabase join 방어 캐스팅 + `context.game as any).id` 5건(eslint-disable 명시 동반 의도된 기술부채) — 안전 범위 내 단일 fix 불가.
+- 코드 변경 없음.
+
 ## v0.5.62.282 — 2026-10-07 (cycle 2957, review-code(heavy): app/api/picks/* assertSelectOk 일관성 sweep — 갭 3건 SUCCESS)
 
 ### review-code(heavy): app/api/picks/* 3개 라우트 assertSelectOk 전환 (cycle 2957, SUCCESS)

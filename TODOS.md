@@ -1,4 +1,15 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): packages/shared index.ts + scripts/ dead-code + `as any` audit, 갭 0건 (cycle 2958, 2026-10-07)
+
+진단: op-analysis gap=33(≥25)이나 Supabase egress quota 402 재확인(curl 직접 테스트, day19+ 변화 없음) 저가치. lotto gap=8, 다음 토(10/10) picks 파일 이미 존재(cron 정상). info-arch gap=2(직전 2955)·explore-idea gap=3(직전 2954)·design-system gap=14(직전 2943 clean) 전부 재방문 비권장. fix-incident gap=11 — `gh run list` CI 전부 정상, egress quota 재확인은 순수 노이즈. 직전8 distinct=4(2-chain lock 미충족). review-code(heavy) 로 미탐색 축 선택.
+
+- `packages/shared/src/index.ts`(3453줄, cycle 2655 이후 미재확인) 전체 export 구조 직접 read — KBO_SEASON_YEAR/가중치 상수/v1.8-v2.1-B 히스토리 주석 전부 CLAUDE.md 서술과 정합, 날짜/버전 drift 0건.
+- `scripts/*.ts`(31개) import-ref 0건 파일 다수 발견했으나 전부 독립 실행 CLI backfill/measure 스크립트(정상 패턴) — dead code 아님, false positive.
+- `apps/moneyball/src` + `packages/kbo-data/src` + `packages/shared/src` 전체 `as any` 17건 전수 분류 — Supabase join 배열/객체 형태 방어 캐스팅(backtest/loader.ts, compareModels.ts 등) + `context.game as any).id` 패턴 5건(judge-agent/postview/team-agent/retro.ts)은 전부 `eslint-disable-next-line` 명시 동반 — 의도된 기술부채(silent 누락 아님), 안전한 범위 내 단일 fix 불가(타입 union 변경 필요, risk 상승).
+- 결론: 조사한 3축 전부 실제 gap 0건. 코드 변경 없음.
+
+다음 사이클 추천 = egress quota day20+ 진입 시 fix-incident 재검토, 또는 plan#29 expiry(2026-10-15, 6일 남음) 임박 재확인, 또는 `context.game` 타입 union 정리(5개 as any 제거) 별도 범위로 분리 검토.
+
 ## 🟢 SUCCESS — review-code(heavy): app/api/picks/* assertSelectOk 일관성 sweep (cycle 2957, 2026-10-07)
 
 진단: op-analysis(gap≥25)·explore-idea(plan#29 user-wait)·info-arch(직전 2955)·design-system(직전 2943, DESIGN.md 토큰 grep 실측 drift 0건) 전부 동일 calendar day 내 재확인 노이즈이거나 저가치 판단. packages/shared/src/index.ts(cycle 2655 audit 이후 커밋 0건) 도 재확인 무가치.
