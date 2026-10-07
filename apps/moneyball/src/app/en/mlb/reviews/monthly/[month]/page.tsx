@@ -498,6 +498,7 @@ export default async function MlbMonthlyReviewPageEn({ params }: PageProps) {
           url={url}
           title={`${range.label} MLB Monthly Review`}
           text={review.summary}
+          isEn
         />
       </footer>
     </article>

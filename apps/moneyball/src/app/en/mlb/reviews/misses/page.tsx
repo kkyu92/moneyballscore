@@ -159,6 +159,7 @@ export default async function MlbMissesReviewPageEn() {
           url={PAGE_URL}
           title={`MLB Retrospective: Top ${MISS_REPORT_LIMIT} Missed Predictions`}
           text="High-confidence MLB predictions MoneyBall Score's model got wrong — with factor analysis."
+          isEn
         />
       </footer>
     </article>

@@ -40,4 +40,11 @@ describe("en/mlb/reviews/monthly/[month]/page.tsx SMALL_SAMPLE_N source-of-truth
   it("revalidate = 3600 literal (Next.js 16 Turbopack: literal required)", () => {
     expect(PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*3600\b/);
   });
+
+  // cycle 2988 review-code(heavy): ShareButtons isEn 누락 — EN 페이지인데 공유 버튼 라벨이
+  // 한글("공유"/"링크 복사")로 렌더됨. matchup/games EN 페이지는 isEn 배선돼있었는데
+  // reviews 3종(misses/monthly/weekly)만 누락.
+  it("ShareButtons isEn 배선 — 영문 페이지에 한글 공유 라벨 노출 방지", () => {
+    expect(PAGE_SRC).toMatch(/<ShareButtons[\s\S]*?isEn[\s\S]*?\/>/);
+  });
 });
