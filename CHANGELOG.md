@@ -1,4 +1,11 @@
-## v0.5.62.281 — 2026-10-07 (cycle 2956, review-code(heavy): packages/kbo-data 신규 축 audit — gap 0건)
+## v0.5.62.282 — 2026-10-07 (cycle 2957, review-code(heavy): app/api/picks/* assertSelectOk 일관성 sweep — 갭 3건 SUCCESS)
+
+### review-code(heavy): app/api/picks/* 3개 라우트 assertSelectOk 전환 (cycle 2957, SUCCESS)
+
+- 진단: op-analysis gap≥25 충족하나 Supabase egress quota 402 지속(동일 calendar day 내 재확인은 순수 노이즈 — cycle 2940/2944 이미 2회 언급됨). explore-idea(plan#29) 사용자 결정 대기 재평가 무의미. info-arch/design-system 둘 다 최근 fire(2955/2943) 결과 재방문 저가치, DESIGN.md 토큰 vs MLB 컴포넌트 hex 색상 grep 결과도 실제 drift 0건(Twitter/Facebook 브랜드 색상만 hit). packages/shared/src/index.ts 는 cycle 2655 audit 이후 커밋 0건이라 재확인 무가치.
+- `apps/moneyball/src/app/api/` 20개 route.ts 전수 점검 — `picks/results/route.ts`의 `fetchMlbPickResults` 가 수동 `.error` 체크+throw 패턴을 쓰고 있었음(기능은 동일하나 cycle 2947-2953 assertSelectOk 전수 감사가 `app/` 디렉토리 위주로 스코프돼 `app/api/`를 놓침). `picks/poll/route.ts`·`picks/mlb-poll/route.ts` 도 동일 수동 패턴.
+- 3개 파일 모두 `assertSelectOk` helper 로 전환 — 동작 변화 없음(에러 시 throw/500 동일), 단일 검증 채널 일관성 확보.
+- `picks/results` 6 tests + `picks/poll`/`picks/mlb-poll` 포함 29 tests 전체 통과, typecheck/lint clean.
 
 ### review-code(heavy): validator.ts/postview.ts wiring + OG 토큰화 + inline style 재검증 (cycle 2956, RETRO-ONLY)
 

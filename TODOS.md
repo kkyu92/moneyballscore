@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api/picks/* assertSelectOk 일관성 sweep (cycle 2957, 2026-10-07)
+
+진단: op-analysis(gap≥25)·explore-idea(plan#29 user-wait)·info-arch(직전 2955)·design-system(직전 2943, DESIGN.md 토큰 grep 실측 drift 0건) 전부 동일 calendar day 내 재확인 노이즈이거나 저가치 판단. packages/shared/src/index.ts(cycle 2655 audit 이후 커밋 0건) 도 재확인 무가치.
+
+`apps/moneyball/src/app/api/` 20개 route.ts 전수 점검 결과 `picks/results/route.ts`(`fetchMlbPickResults`)·`picks/poll/route.ts`·`picks/mlb-poll/route.ts` 3개가 cycle 2947-2953 assertSelectOk 전수 감사(`app/` 스코프)에서 누락된 `app/api/` 하위 라우트였음 — 수동 `.error` 체크+throw 패턴(기능 동일, helper 미사용)을 `assertSelectOk` 로 전환. 동작 변화 없음, 29 tests 전체 통과 + typecheck/lint clean.
+
+다음 사이클 추천 = egress quota 장애 다음 calendar day 진입 또는 실제 billing 조치 확인 시 fix-incident 재검토, 또는 plan#29 expiry(2026-10-15, 8일 남음) 임박 재확인.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): packages/kbo-data 신규 축 audit, 갭 0건 (cycle 2956, 2026-10-07)
 
 진단: op-analysis gap≥25 충족하나 Supabase egress quota 402 지속(day5+, 변화 없음) 저가치. info-arch/design-system 둘 다 직전 사이클 방금 완료라 재방문 비권장. explore-idea(plan#29) 사용자 결정 대기 중 재평가 무의미. migration note 추천 신규 축(packages/kbo-data) 직접 code read 선택.
