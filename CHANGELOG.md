@@ -1,3 +1,13 @@
+## v0.5.62.296 — 2026-10-07 (cycle 2971, review-code(heavy): picks/leaderboard/mlb 신규 축 감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): picks/leaderboard/mlb 핵심 라우트 전수 감사 — 신규 버그 0건 (cycle 2971, RETRO-ONLY)
+
+- 진단: 2-chain lock 미충족(직전8(2963-2970) distinct=6). fix-incident gap=0(직전 cycle 발화)·operational-analysis gap=2·explore-idea gap=1(plan#29 사용자 결정 대기, 재방화 저가치)·lotto gap=22·info-arch gap=16 전부 미근접 또는 저가치. design-system DESIGN.md mtime 35일(≥4주 충족)이나 cycle 2964 토큰 재검증 직후라 저가치. `gh run list` 재확인 — CI 전부 정상, 신규 incident 없음. review-code(heavy) 직전20 60%(12/20) 지속 dominance + cycle 2970 retro 가 추천한 신규 미감사 스코프(picks/leaderboard/mlb) 존재 — 선택.
+- 감사 대상: `picks/page.tsx`, `leaderboard/page.tsx`, `mlb/predictions/page.tsx`, `mlb/games/[date]/[slug]/page.tsx`, `mlb/matchup/[teamA]/[teamB]/page.tsx`, `mlb/team/[code]/page.tsx`, `mlb/reviews/weekly/[week]/page.tsx`, `mlb/reviews/monthly/[month]/page.tsx`, `mlb/factors/page.tsx`, `mlb/players/[id]/page.tsx` (총 3660줄) — subagent 위임 전수 read + `computeCompositeDuel.ts`/`computeMlbCompositeDuel.ts`/`FactorBreakdown.tsx`/`mlb-pipeline.ts`/`mlb-waterfall.ts`/`mlb-factor-detail.ts`/`mlb-base.ts` 교차검증 + `.sort(` 전체 grep(~70 call site).
+- 결과: SFR/WAR 류 data-gap sentinel 가드(`!== 0`/`> 0`) 전부 일관 적용 확인(cycle 2967 SFR=0 fix 패턴이 MLB 쪽도 이미 정합). 파일명/cycle 번호 sort 전부 numeric comparator 사용(`compareCohortFilenames` 등, cycle 2965 fix 패턴 재발 없음). `MLB_PLACEHOLDER_FACTOR_KEYS` vs 배너 텍스트 동기 유지(cycle 2512 fix 그대로). 신규 버그 0건, 코드 변경 없음(순수 감사 cycle).
+
+다음 사이클 추천 = 사용자 plan#29 결정(연장/착수/폐기) 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(standings/postseason/wild-card/players 목록 등 미감사 라우트) 또는 2-chain lock 자연 해제 대기.
+
 ## v0.5.62.295 — 2026-10-07 (cycle 2970, fix-incident(lite): egress quota 402 지속 재확인, 신규 incident 0건 RETRO-ONLY)
 
 ### fix-incident(lite): heartbeat-stale 실패 재확인 — 동일 egress quota 402, 신규 incident 없음 (cycle 2970, RETRO-ONLY)

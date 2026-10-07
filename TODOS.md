@@ -1,4 +1,14 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): picks/leaderboard/mlb 신규 축 감사, 갭 0건 (cycle 2971, 2026-10-07)
+
+진단: 2-chain lock 미충족(직전8 distinct=6). fix-incident gap=0·operational-analysis gap=2·explore-idea gap=1(plan#29 사용자 결정 대기)·lotto gap=22·info-arch gap=16 전부 미근접/저가치. design-system mtime 35일 충족이나 cycle 2964 직후 저가치. review-code(heavy) 직전20 60% dominance + cycle 2970 추천 스코프(picks/leaderboard/mlb) 존재로 선택.
+
+subagent 위임 전수 감사(picks/leaderboard/mlb predictions·games·matchup·team·reviews·factors·players, 총 3660줄) + SFR/WAR sentinel 가드·cohort numeric sort·placeholder 배너 동기 교차검증 — 신규 버그 0건. 코드 변경 없음.
+
+**plan#29 상태 변화 없음** (`~/.develop-cycle/plans/moneyballscore/29.md`, 만료 2026-10-15, 포스트시즌 와일드카드 10/14 개막) — 사용자 결정(연장/착수/폐기) 여전히 대기 중.
+
+다음 사이클 추천 = 사용자 plan#29 결정 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(standings/postseason/wild-card/players 목록) 또는 2-chain lock 자연 해제 대기.
+
 ## 🟡 RETRO-ONLY — fix-incident(lite): egress quota 402 지속 재확인, 신규 incident 0건 (cycle 2970, 2026-10-07)
 
 진단: fix-incident gap=23(마지막 cycle 2946, ≥20 충족) — 2-chain lock 미충족(직전8 distinct=5). operational-analysis/explore-idea 둘 다 직전 cycle 발화라 재방화 부적합, design-system 은 cycle 2964 직후라 저가치, review-code(heavy)는 api/+observability 까지 이미 감사 완료 — fix-incident 선택.
