@@ -592,10 +592,10 @@ function selectBigMatchFromGames(games: HomeGame[]): HomeGame | null {
 export default async function HomePage() {
   const today = toKSTDisplayString();
   const [games, accuracy, weekSchedule, yesterdayResults, standings, teamAccuracyRows, weeklyTrend] = await Promise.all([
-    getTodayPredictions(),
-    getSeasonAccuracy(),
-    getWeekAheadSchedule(),
-    getYesterdayResults(),
+    getTodayPredictions().catch((err) => captureFallback(err, [] as HomeGame[], { route: "/", source: "getTodayPredictions" })),
+    getSeasonAccuracy().catch((err) => captureFallback(err, { total: 0, correct: 0, rate: 0, tierRates: emptyTierRates() }, { route: "/", source: "getSeasonAccuracy" })),
+    getWeekAheadSchedule().catch((err) => captureFallback(err, [] as WeekGameDay[], { route: "/", source: "getWeekAheadSchedule" })),
+    getYesterdayResults().catch((err) => captureFallback(err, [] as YesterdayGame[], { route: "/", source: "getYesterdayResults" })),
     buildStandings().catch((err) => captureFallback(err, [], { route: "/", source: "buildStandings" })),
     buildAllTeamAccuracy().catch((err) => captureFallback(err, [], { route: "/", source: "buildAllTeamAccuracy" })),
     getRecentWeeksAccuracy().catch((err) => captureFallback(err, [] as WeeklyTrendPoint[], { route: "/", source: "getRecentWeeksAccuracy" })),
@@ -604,7 +604,9 @@ export default async function HomePage() {
 
   // 오늘 편성 없을 때만 다음 일정·날씨 조회 (추가 쿼리 비용 최소화).
   const nextSchedule =
-    games.length === 0 ? await getNextScheduledGames() : null;
+    games.length === 0
+      ? await getNextScheduledGames().catch((err) => captureFallback(err, null, { route: "/", source: "getNextScheduledGames" }))
+      : null;
   const todayKST = toKSTDateString();
   const noGameReason = classifyNoGameReason(todayKST, nextSchedule);
 
