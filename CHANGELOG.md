@@ -1,3 +1,18 @@
+## v0.5.62.305 — 2026-10-07 (cycle 2980, review-code(heavy): NaN 비대칭-null 가드 누락(sp_fip/sp_xfip/sfr/mlb-base 전 팩터) 수정 SUCCESS)
+
+### review-code(heavy): carry-over 3건 — NaN 전용 비대칭-null 버그 2건 실발견 + dead-code 문서화 (cycle 2980, SUCCESS)
+
+- 진단: 직전8(2972-2979) distinct=3(review-code(heavy)6+info-architecture-review1+lotto(lite)1), 2-chain lock 미충족. fix-incident gap=10/20·op-analysis gap=12/25·design-system gap=16·polish-ui gap=17 전부 미근접. explore-idea saturation 12/15 충족하나 organic idea 0·plan#29 상태 불변(만료 2026-10-15) 지속이라 cycle 2978/2979 와 동일 결론 예상. open issue 0건. cycle 2978/2979 양쪽이 공통 추천한 carry-over 3건(mlb-base.test.ts NaN-clamp 표본 부족 / logistic.ts `?? 0` 주석 오표기 / mlb-elo.ts dead code) 직접 조사.
+- **실제 버그 발견 (carry-over 가 "저위험" 으로 분류했던 항목이 재조사 결과 진짜 버그)**: cycle 2977/2978 이 도입한 `bothPresent`/`pairedOrNeutral` 가드는 전부 `!= null` 만 검사 — **NaN은 `!= null` 통과라 가드를 그대로 빠져나감**. `mlb-base.ts` 의 `safe()` 는 NaN 을 가드하지만 **양쪽을 독립적으로** fallback 처리 — 한쪽만 NaN 이면 반대쪽 실측값과 비대칭 비교되어 48pt 급 스큐 생성(cycle 2978 이 이미 의심했던 "48pt 스큐" 가 실체 확인됨). KBO predictor.ts `normalize()` 쪽은 더 심각 — NaN 이 diff/total 에 그대로 섞여 `homeWinProb` 전체가 NaN cascade 되고 `clampWinnerProb(NaN)=NaN` 이라 끝까지 미차단.
+- 수정 3건: (1) `mlb-base.ts` — `pairedSafe()` 헬퍼 신설, 11개 paired factor(sp_fip~woba_std) 전부 적용 — 한쪽이라도 non-finite 면 양쪽 다 fallback 으로 맞춰 diff=0 진짜 중립. (2) `predictor.ts` — `normalize()` 함수 자체에 `!Number.isFinite` 가드 추가(단일 지점 수정으로 sp_fip/sp_xfip/lineup_woba/bullpen_fip/recent_form/war/elo/sfr 전 호출부 커버). (3) `mlb-pipeline.ts` `pairedOrNeutral()` — null/undefined 조건에 `!Number.isFinite` 추가.
+- `backtest/logistic.ts` 는 재조사 결과 진짜 버그 확인(seasonStats 가 팀×시즌 단위 lookup 이라 한쪽 팀만 백필 누락 가능) — `vectorizeExtended` wobaDiff/fipDiff/sfrDiff 를 양쪽 존재 체크 후 계산하도록 수정 + 주석에서 "중립" 과장 표현 정정. `mlb-elo.ts` 의 `MLB_ELO_K_POSTSEASON` 은 재확인 결과 진짜 미사용 확정(replayMlbGames 전부 단일 k, mlb_schedule 에 postseason 구분 컬럼 자체 없음) — 삭제 대신 "호출자 추가 전까진 보존, 임의 변경 금지" 주석으로 명시(출처 인용 보존 가치 > 삭제 이득).
+- 신규 테스트 3개 파일: `mlb-base.test.ts` (NaN→중립 vs sp_fip 동일값 비교로 회귀 차단), `backtest/__tests__/logistic.test.ts` (신규, 5 case), `engine/__tests__/predictor.test.ts` (신규, predictor.ts 최초 테스트 파일 — NaN cascade 비차단 회귀 검증 3 case).
+- 검증: kbo-data type-check clean, lint 0 warning, 96 files/1236 tests PASS (전 94/1227 대비 +2 files/+9 tests). 전체 585 files/4613 tests PASS.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 결정 또는 Supabase egress quota 장애(cycle 2939~) 모니터 또는 review-code(heavy) 신규 스코프(analysis/api/calendar/observability/teams 미탐색).
+
 ## v0.5.62.304 — 2026-10-07 (cycle 2979, lotto(lite): 30-cycle gap 체크포인트 — cron 정상 확인 RETRO-ONLY)
 
 ### lotto(lite): 30-cycle gap trigger 도달 — cron 양쪽(pick-update/result-update) 정상 작동 확인 (cycle 2979, RETRO-ONLY)
