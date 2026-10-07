@@ -1,3 +1,14 @@
+## (no version bump — 2026-10-07, cycle 2939, fix-incident: Supabase egress quota exceeded — 운영 인프라 한도, FAIL)
+
+### fix-incident: Supabase 프로젝트 egress quota exceeded (HTTP 402) — 사이트 홈페이지 500, 전 scheduled workflow 70건 실패 (cycle 2939, FAIL — 사용자 billing 액션 필요)
+
+- 진단: 직전8(2931-2938) distinct=4, lock 미충족. open issue 0, unprocessed approved plan 0. `gh run list --limit 10` 재확인(fix-incident 진단 source 표 룰) 중 `heartbeat-stale`/`health-alert`/`runtime-error-alert`/`deploy-drift-alert`/`data-refresh-weekly` 전부 failure 발견.
+- 근본 원인: Supabase REST(`/rest/v1/*`) 직접 curl 재현 → `HTTP 402 {"message":"Service for this project is restricted due to the following violations: exceed_egress_quota. The project owner must upgrade their plan or remove spend caps to restore service."}`. 프로젝트 전체 egress 차단 — 코드 버그 아님.
+- 영향 범위: (1) GitHub Actions scheduled workflow 100건 중 70건 failure, 최초 실패 2026-10-03T17:13Z(4일+ 지속) (2) Cloudflare Worker MLB cron(`cloudflare-worker/wrangler.toml` 4개 트리거)이 호출하는 Vercel API(`/api/pipeline`, `/api/mlb/pipeline`)도 동일 Supabase project 의존 — 차단 가능성 (3) **프로덕션 홈페이지 `https://moneyballscore.vercel.app/` 직접 curl 재현 → HTTP 500 (`__next_error__`), 실사용자 접속 불가 확인**. `/mlb` 허브 페이지는 200 (캐시된 ISR 자산 추정).
+- 최근 ship(cycle 2936-2938, MLB insights 아카이브)과 타이밍 불일치 확인(outage 시작 10/3, 신규 라우트 ship 9/29~10/7) — 신규 기능발 egress 급증 아님, 별개 billing/spend-cap 이슈로 판단.
+- 비용 가드(CLAUDE.md "운영 인프라 한도" — Vercel/Supabase/Cloudflare free tier 자율 upgrade 금지) 적용 — 코드 변경 불가능한 영역. 자율 결제/spend-cap 해제 시도 X. `memory: meta-pattern` dispatch + 사용자 직접 통지로 처리.
+- **사용자 액션 필요(긴급)**: Supabase 대시보드 → 해당 프로젝트 Billing → "Remove spend cap" 또는 플랜 업그레이드. 미처리 시 사이트 전체(홈페이지 포함) 계속 다운.
+
 ## v0.5.62.266 — 2026-10-07 (cycle 2938, explore-idea(heavy): MLB AI 인사이트 series/[topic] 아카이브 Phase 3)
 
 ### explore-idea(heavy): /mlb/insights/series/[topic] + /en/mlb/insights/series/[topic] — plan #30 Phase 3 완결 (cycle 2938, SUCCESS)

@@ -1,4 +1,16 @@
 
+## 🔴 FAIL — fix-incident: Supabase egress quota exceeded — 사용자 billing 액션 필요 (cycle 2939, 2026-10-07)
+
+진단: 직전8 distinct=4, lock 미충족. `gh run list` 재확인 중 heartbeat-stale/health-alert/runtime-error-alert/deploy-drift-alert/data-refresh-weekly 전부 failure(최근 100 run 중 70건) 발견. Supabase REST 직접 curl 재현 → HTTP 402 `exceed_egress_quota` — 프로젝트 전체 egress 차단, 2026-10-03T17:13Z부터 4일+ 지속.
+
+**실사용자 영향 확인**: `https://moneyballscore.vercel.app/` 홈페이지 직접 curl → HTTP 500(`__next_error__`). 사이트 다운 상태.
+
+코드 버그 아님 — Supabase billing/spend-cap 한도. 비용 가드(자율 upgrade 금지) 적용, 코드 fix 불가. `memory: meta-pattern` dispatch 완료.
+
+**다음 액션 (사용자, 긴급)**: Supabase 대시보드 → 해당 프로젝트 Billing → spend cap 해제 또는 플랜 업그레이드. 처리 전까지 사이트 다운 + 모든 cron(예측 파이프라인 포함) 차단 지속.
+
+다음 사이클 추천 = 사용자 billing 처리 후 fix-incident 재검증(사이트 200 복구 + scheduled workflow 정상화 확인) 또는 처리 전이면 동일 incident 재확인.
+
 ## 🟢 SUCCESS — explore-idea(heavy): MLB AI 인사이트 series/[topic] 아카이브 Phase 3 (cycle 2938, 2026-10-07)
 
 진단: 직전8 distinct=4, 2-chain lock 미충족. gap trigger 4종 전부 미근접, open issue 0건. plan #30이 cycle 2937 retro의 next_recommended_chain — series.ts 토픽 taxonomy가 MLB로 일반화 가능한지(MlbTeamCode 존재) 확인 후 Phase 3 착수.
