@@ -13,13 +13,11 @@
 // 감지. 사례 11 family 확장 — predict_final 외 verify silent drop 도 박제.
 //
 // cycle 1013 (2026-05-28) M-D 확장 — factor anomaly z-score>3 감지 Sentry warning
-// 별도 채널. shadow factor (park_weather, umpire_sz) 활성 후 factor 분포가 비정상
-// 흐름 (예: weather 결측 30%↑ → 모든 park_weather=0.5 stuck) 사전 감지 의도.
-// (cycle 2276 정정) 실제로는 어떤 파이프라인/cron 도 captureFactorAnomalyAlert 를
-// 호출하지 않음 — `/debug/silent-drift` 대시보드는 순수 계산 함수
+// 채널 (captureFactorAnomalyAlert) 시도. (cycle 2276 정정) 어떤 파이프라인/cron 도
+// 호출한 적 없음 — `/debug/silent-drift` 대시보드는 순수 계산 함수
 // `detectFactorAnomalies` 만 직접 써서 사람이 페이지를 열람할 때만 시각 표시.
-// 본 Sentry alert dispatcher 는 미배선 상태 (테스트도 0건). 자동 감지 원하면
-// daily.ts/mlb-pipeline.ts 등 실제 파이프라인에 caller 추가 필요.
+// (cycle 2941 review-code(heavy)) 미배선 dispatcher 자체를 삭제 — 재도입 시
+// daily.ts/mlb-pipeline.ts 에 실제 caller 먼저 박제할 것.
 //
 // cycle 1363 (2026-06-24) explore-idea (heavy) — postview cohort 확장 (spec
 // docs/research/noise-filtering-pipeline-2026-06-24.md 후보 A Tier 1). postview-daily
@@ -209,67 +207,14 @@ export async function captureSilentDriftAlert(
 // (Sentry-free) — apps/moneyball vitest 가 @moneyball/kbo-data import 못하는 문제 회피.
 // 본 모듈은 Sentry-dependent alert dispatcher 만 박제.
 
-import {
-  type FactorAnomaly,
-  PREDICTION_SPARSE_THRESHOLD,
-} from '@moneyball/shared';
-
-export interface FactorAnomalyAlertMeta {
-  date: string;
-  cohort: string; // scoring_rule (예: 'v1.8' | 'v2.1-B-shadow')
-  anomalies: FactorAnomaly[];
-}
-
-/**
- * detectFactorAnomalies 결과 비어있지 않으면 Sentry warning. captureSilentDriftAlert 와
- * 별도 채널 (pattern='factor_anomaly_zscore'). cohort 별 분리 박제 — v1.8 vs shadow
- * 분포 비교 surface.
- */
-export async function captureFactorAnomalyAlert(
-  meta: FactorAnomalyAlertMeta,
-): Promise<void> {
-  if (meta.anomalies.length === 0) return;
-  if (process.env.NODE_ENV === 'test') return;
-
-  let Sentry: SentryModule | null = null;
-  try {
-    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
-  } catch {
-    return;
-  }
-  if (!Sentry || typeof Sentry.captureMessage !== 'function') return;
-  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
-
-  try {
-    Sentry.captureMessage('factor_anomaly_zscore', {
-      level: 'warning',
-      tags: {
-        pattern: 'factor_anomaly_zscore',
-        cohort: meta.cohort,
-        date: meta.date,
-        anomaly_count: String(meta.anomalies.length),
-      },
-      extra: {
-        anomalies: meta.anomalies.map((a) => ({
-          factor: a.factorKey,
-          value: a.value,
-          mean: a.mean,
-          stddev: a.stdDev,
-          zscore: a.zScore,
-        })),
-      },
-    });
-  } catch {
-    // silent — main path 보호
-  }
-}
+import { PREDICTION_SPARSE_THRESHOLD } from '@moneyball/shared';
 
 // ============================================
 // scout issue #2348 cycle 1399 — sparse data prediction alert
 // ============================================
 // predict() 팩터 중 PREDICTION_SPARSE_THRESHOLD 이상이 0.5 neutral = 입력 데이터 희박.
 // 데이터 희박 예측은 사실상 coin flip 에 가깝고 도메인 지식 검증 불가.
-// captureFactorAnomalyAlert (z-score 시계열 이상) 와 별개 채널 — 단일 경기 품질 gate.
+// factor anomaly z-score 감지 (미배선, 삭제됨 — cycle 2941) 와 별개 채널 — 단일 경기 품질 gate.
 
 interface SparsePredictionAlertMeta {
   date: string;
