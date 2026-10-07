@@ -14,9 +14,9 @@ describe('PlaceholderLoginButton', () => {
     expect(button.hasAttribute('disabled')).toBe(true);
   });
 
-  it('ETA 박제 시점 명시 (2026-08~09)', () => {
+  it('ETA 안내 문구 포함 (stale 날짜 미박제)', () => {
     render(<PlaceholderLoginButton />);
-    expect(screen.getByText(/2026-08~09/)).toBeDefined();
+    expect(screen.getByText(/ETA/)).toBeDefined();
   });
 
   it('aria-describedby 박제 (accessibility)', () => {

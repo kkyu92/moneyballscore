@@ -10,7 +10,7 @@ export function PlaceholderLoginButton() {
         로그인
       </button>
       <p id="login-eta-hint" className="text-2xs text-brand-500 dark:text-brand-400">
-        📌 박제 중 (ETA 2026-08~09)
+        📌 박제 중 (ETA 추후 공지)
       </p>
     </div>
   );

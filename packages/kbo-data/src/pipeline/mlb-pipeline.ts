@@ -5,14 +5,10 @@
 // mlb_fancy_scrape: fetchFangraphsMlbTeams → mlb_team_stats upsert (cycle 1985 wiring — 스크래퍼는
 //   이미 구현/테스트됨, 이전엔 pipeline 미연결 stub 이었음).
 // mlb_savant_scrape: fetchSavantTeamStatcast → mlb_team_stats upsert (동일 cycle 1985 wiring).
-// mlb_predict_final: computeMlbProbability → predictions DB insert.
-// mlb_combined_notify: Telegram combined 메시지 (mlb_combined_notify route 통해 발송).
+// mlb_predict_final: computeMlbProbability → predictions DB insert (predict + notify 통합).
 // mlb_shadow_train: trainShadowWeights → milestone check + mlb_shadow_train_log insert (migration 049).
 // mlb_walk_forward_measure: computeBrier → mlb_walk_forward_log insert (migration 049).
 // mlb_elo_update: computeMlbEloRatings/computeMlbEloHistory → mlb_team_elo + mlb_team_elo_history upsert (plan #25 Phase 2, cycle 2082).
-//
-// packages/kbo-data 는 apps/moneyball 를 import 못함 → mlb_combined_notify
-// stub 처리 (API route 에서 직접 처리).
 
 import * as Sentry from '@sentry/nextjs';
 import { createClient } from '@supabase/supabase-js';
@@ -88,7 +84,6 @@ export type MlbPipelineMode =
   | 'mlb_fancy_scrape'
   | 'mlb_savant_scrape'
   | 'mlb_predict_final'
-  | 'mlb_combined_notify'
   | 'mlb_shadow_train'
   | 'mlb_walk_forward_measure'
   | 'mlb_elo_update';
@@ -107,7 +102,6 @@ const MLB_MODES = new Set<MlbPipelineMode>([
   'mlb_fancy_scrape',
   'mlb_savant_scrape',
   'mlb_predict_final',
-  'mlb_combined_notify',
   'mlb_shadow_train',
   'mlb_walk_forward_measure',
   'mlb_elo_update',
@@ -507,16 +501,6 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
 }
 
 // ─────────────────────────────────────────────
-// mlb_combined_notify — stub (apps/moneyball에서 처리)
-// ─────────────────────────────────────────────
-async function runCombinedNotify(_db: DB, _date: string): Promise<{ gamesFound: number; rowsInserted: number; errors: string[] }> {
-  // packages/kbo-data 는 apps/moneyball 의 MlbCombinedMessage 를 import 불가.
-  // API route /api/mlb/pipeline 의 mlb_combined_notify 분기에서 직접 처리.
-  // 여기선 stub — rows_inserted=0, errors=[].
-  return { gamesFound: 0, rowsInserted: 0, errors: [] };
-}
-
-// ─────────────────────────────────────────────
 // mlb_shadow_train
 // ─────────────────────────────────────────────
 async function runShadowTrain(db: DB, date: string): Promise<{ gamesFound: number; rowsInserted: number; errors: string[] }> {
@@ -829,13 +813,6 @@ export async function runMlbPipeline(
     }
     case 'mlb_predict_final': {
       const r = await runPredictFinal(db, date);
-      gamesFound = r.gamesFound;
-      rowsInserted = r.rowsInserted;
-      errors = r.errors;
-      break;
-    }
-    case 'mlb_combined_notify': {
-      const r = await runCombinedNotify(db, date);
       gamesFound = r.gamesFound;
       rowsInserted = r.rowsInserted;
       errors = r.errors;

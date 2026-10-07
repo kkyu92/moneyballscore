@@ -42,7 +42,6 @@ export type SilentDriftPipelineMode =
   | 'mlb_fancy_scrape'
   | 'mlb_savant_scrape'
   | 'mlb_predict_final'
-  | 'mlb_combined_notify'
   | 'mlb_shadow_train'
   | 'mlb_walk_forward_measure'
   | 'mlb_elo_update';

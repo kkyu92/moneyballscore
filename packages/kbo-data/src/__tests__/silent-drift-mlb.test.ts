@@ -80,15 +80,6 @@ describe('shouldAlertSilentDrift — MLB scrape modes (statsapi/fancy/savant/sha
   }
 });
 
-describe('shouldAlertSilentDrift — mlb_combined_notify (alert 안 함 — notify only)', () => {
-  it('mlb_combined_notify + gamesFound>0 → alert 안 함 (notify mode는 rowsInserted 무관)', () => {
-    // mlb_combined_notify 는 MLB_SCRAPE_MODES 에 없음 → false
-    expect(
-      shouldAlertSilentDrift(makeMlbMeta('mlb_combined_notify', { predictionsGenerated: 0 })),
-    ).toBe(false);
-  });
-});
-
 describe('shouldAlertSilentDrift — KBO 기존 동작 보존 (regression)', () => {
   it('predict_final + gamesFound>0 + predictionsGenerated=0 → alert (기존 보존)', () => {
     expect(

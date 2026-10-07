@@ -180,13 +180,6 @@ describe('runMlbPipeline', () => {
     assertResultShape(result, 'mlb_predict_final');
   });
 
-  it('mlb_combined_notify — stub, throw 없음, result shape 정상', async () => {
-    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
-    const result = await runMlbPipeline('mlb_combined_notify', DATE, TRIGGERED_BY);
-    assertResultShape(result, 'mlb_combined_notify');
-    expect(result.rows_inserted).toBe(0);
-  });
-
   it('mlb_shadow_train — throw 없음, result shape 정상', async () => {
     const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
     const result = await runMlbPipeline('mlb_shadow_train', DATE, TRIGGERED_BY);
