@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): daily.ts/mlb-pipeline.ts 대형 파일 단독 리뷰 (cycle 2942, 2026-10-07)
+
+진단: cycle 2939 Supabase egress quota incident 재확인 — 프로덕션 `https://moneyballscore.vercel.app/` 직접 curl → 여전히 HTTP 500(`__next_error__`), day 5+ 변화 없음. 3연속(2939/2940/2941) reconfirm 이후라 재dispatch는 노이즈 판단, skip. open issue 0, 직전8 사이클 distinct=5(2-chain lock 미충족). cycle 2941 추천(daily.ts 1659줄/mlb-pipeline.ts 892줄 단독 리뷰) 채택.
+
+`daily.ts` 전체 1659줄 read — silent drift 가드/주석(사례 3/11/18/32 등)이 전부 실제 코드와 일치 확인, dead export·stale comment 0건. 이미 cycle 936~2832 사이 수십 차례 타깃 fix 누적으로 사실상 포화 상태.
+
+`mlb-pipeline.ts` 전체 892줄 read — `shouldAlertSilentDrift` import가 실제 호출 0건(dead import, `silent-drift-alert.ts` 내부에서만 쓰이는 함수)인 걸 발견. import 구문에서 제거.
+
+lint(`eslint src/pipeline/`) exit 0, tsc --noEmit(kbo-data) clean, kbo-data vitest 94파일/1224테스트 all pass. VERSION 0.5.62.267→0.5.62.268.
+
+다음 사이클 추천 = app/ 라우트 레벨 스코프 리뷰 또는 packages/kbo-data analysis/api/calendar/mlb/observability/teams 미탐색 스코프. fix-incident는 Supabase billing 해결 전까지 매 cycle 재확인만 지속(day 5+, 사용자 액션 대기).
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/pipeline/ 24파일 dead-export 스윕 (cycle 2941, 2026-10-07)
 
 진단: cycle 2939 Supabase egress quota incident 재확인 — 여전히 HTTP 402/홈페이지 500 (2026-10-03 발생, day 5, 변화 없음), 동일 재dispatch는 잡음이라 skip. open issue 0, approved plan 0/23, 2-chain lock 미충족(직전8 distinct=5). cycle 2940 retro 추천(lib/ 소진 → packages/kbo-data 잔여) 따라 pipeline/ 24파일·75개 export 전수 선택.

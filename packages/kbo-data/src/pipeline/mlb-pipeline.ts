@@ -29,10 +29,7 @@ import {
 } from '../factors/mlb-shadow-c';
 import { computeMlbEloRatings, computeMlbEloHistory } from '../factors/mlb-elo';
 import { calculateMlbRecentForm, calculateMlbHeadToHead, type MlbFinishedGameForForm } from '../factors/mlb-form';
-import {
-  shouldAlertSilentDrift,
-  captureSilentDriftAlert,
-} from './silent-drift-alert';
+import { captureSilentDriftAlert } from './silent-drift-alert';
 import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE, normalizeMlbTeamCode, errMsg, assertSelectOk } from '@moneyball/shared';
 import { DB_CONSTRAINTS } from './db-constraints';
 import {
