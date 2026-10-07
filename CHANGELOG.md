@@ -1,3 +1,14 @@
+## v0.5.62.323 — 2026-10-07 (cycle 2998, review-code(heavy): ANALYSIS_UPCOMING_LIMIT 주석 callsite 경로 불일치 수정 SUCCESS)
+
+### review-code(heavy): `ANALYSIS_UPCOMING_LIMIT` 주석이 가리키는 callsite 파일이 실제와 다름 (cycle 2998, SUCCESS)
+
+- 진단: 직전8(2990-2997) distinct=3(review-code(heavy)6+design-system1+fix-incident1) — 2-chain lock 미충족, 정상 선택 진행. open hub-dispatch issue 0건, 승인된 unprocessed plan 0건(전부 status≠approved, plan#29 는 Tier4 사용자 결정 대기 상태 불변). Supabase egress quota 402 직접 재확인(service-role REST 호출 여전히 402, `exceed_egress_quota`, cycle 2939~ 지속, 59일+ 경과) — op-analysis 여전히 차단. fix-incident gap=2·info-arch gap=22·lotto gap=19(cron 산출물 picks/results 둘 다 신선) 전부 미근접(<30 임계). explore-idea saturation 13/15 충족하나 plan#29 상태 변화 없어 skip. cycle 2997 추천대로 `packages/shared/src/index.ts` 잔여 구간(함수 로직, 3453줄 중 상수/가중치 이후 1738~3200번대) 이어서 감사.
+- `ANALYSIS_UPCOMING_LIMIT` 상수 주석이 "동일 숫자 30 hardcoded 1 surface: app/analysis/page.tsx: getThisWeekRemainingGames() .limit(30)" 로 명시했으나, 실제 `getThisWeekRemainingGames()` 정의 + `.limit(ANALYSIS_UPCOMING_LIMIT)` 호출부는 `app/analysis/page.tsx` 가 아니라 `app/analysis/analysis-data.ts`(page.tsx 는 해당 함수를 import 해 호출만 함) — single-source 주석 패턴(wave 311 등)이 "본 상수 1곳만 갱신" 전제로 callsite 를 추적하는데, 경로 자체가 틀리면 향후 변경 시 잘못된 파일을 찾게 되는 silent drift 위험. 그 외 KST 날짜 함수(1836-1891)/matchup 통합 함수군(2455-2894)/배지 임계 상수 50여 개(2896-3200대) 전수 read — 단일 source 주석과 실제 callsite 값 전부 대조, 이 1건 외 추가 불일치 0건.
+- 수정: 주석의 callsite 경로를 `app/analysis/analysis-data.ts` 로 정정 (파일 1곳, 코드 로직 변경 없음).
+- 검증: `tsc --noEmit`(@moneyball/shared) clean, turbo type-check 통과. 순수 주석 수정이라 vitest 전체 재실행 생략(로직 변경 0).
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음, 사용자 결정 여전히 대기). **Supabase egress quota 장애 지속**(cycle 2939~, 59일+ 경과) — op-analysis gap 25+ 초과 지속, DB 복구 즉시 heavy 최우선.
+
 ## v0.5.62.322 — 2026-10-07 (cycle 2997, review-code(heavy): packages/shared/src + lib/predictions 스테일 축 재감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): packages/shared/src(7 소파일 + index.ts 상수/가중치 구간) + lib/predictions(7 파일 전체) — 갭 0건 (cycle 2997, RETRO-ONLY)

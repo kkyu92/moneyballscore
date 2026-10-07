@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): ANALYSIS_UPCOMING_LIMIT 주석 callsite 경로 불일치 수정 (cycle 2998, 2026-10-07)
+
+진단: 직전8(2990-2997) distinct=3 — 2-chain lock 미충족. open issue 0건, approved plan 0건(plan#29 Tier4 불변). Supabase egress quota 402 재확인(cycle 2939~, 59일+) — op-analysis 차단 지속. fix-incident(2)/info-arch(22)/lotto(19) 전부 미근접. cycle 2997 추천대로 `packages/shared/src/index.ts` 잔여 함수 구간 이어서 감사.
+
+`ANALYSIS_UPCOMING_LIMIT` 주석이 callsite 를 `app/analysis/page.tsx` 라 명시했으나 실제 정의+`.limit()` 호출은 `app/analysis/analysis-data.ts` — single-source 주석 경로 오류 1건 수정(코드 로직 변경 없음). KST 날짜 함수/matchup 통합 함수군/배지 임계 상수 50여 개 전수 대조 — 이 1건 외 불일치 0건. tsc clean, 순수 주석 수정이라 vitest 생략.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음). **Supabase egress quota 장애 지속**(59일+ 경과).
+
+다음 사이클 추천 = `packages/shared/src/index.ts` 잔여 구간(3200~3453줄) 계속 또는 2-chain lock 자연 해제 모니터 또는 plan#29 expiry 임박 최종 결정(만료 전 마지막 기회 근접).
+
 ## 🟡 RETRO-ONLY — review-code(heavy): packages/shared/src + lib/predictions 스테일 축 재감사, 갭 0건 (cycle 2997, 2026-10-07)
 
 진단: 직전8(2989-2996) distinct=3(review-code(heavy)6+design-system1+fix-incident1) — 2-chain lock 미충족, 정상 선택. Supabase egress quota 402 재확인(cycle 2939~ 지속, 38일+ 경과) — op-analysis 여전히 차단. fix-incident(1)/info-arch(21)/lotto(cron 신선) 전부 미근접. explore-idea saturation 충족하나 plan#29 상태 불변(만료 8일 남음) 신규 정보 없어 skip. `git log` 기준 최근 미감사 축 탐색 — `packages/shared/src`(42일+ 미커밋) + `lib/predictions`(33일+ 미커밋) 둘 다 최근 review-code(heavy) 스코프 누락 확인.
