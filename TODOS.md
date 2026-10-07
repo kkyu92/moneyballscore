@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): kbo-live.ts 스코어 파싱 ground-truth 오염 위험 + kbo-pitcher.ts silent NaN fallback 수정 (cycle 2975, 2026-10-07)
+
+진단: 직전8(2967-2974) distinct=4, 2-chain lock 미충족. fix-incident/operational-analysis/info-arch/lotto(cron 건강 확인)/design-system/explore-idea(plan#29 대기) 전부 gap 미근접/저가치. review-code(heavy) 가 cycle 2972~2974 3연속 추천한 `packages/kbo-data/src/scrapers/` 선택.
+
+발견 2건: (1) `kbo-live.ts` fetchLiveGames 의 스코어 파싱이 `Number(x) || 0` 이라 파싱 실패를 실제 0-0 스코어와 구분 못함 — 형제 파일 kbo-official.ts 는 이미 null-safe 패턴 적용 중이었는데 kbo-live.ts 만 누락. `pipeline/live.ts` updateGameScore 가 status='final' 시 이 값을 games.home_score/away_score 에 영속 박제하므로 ground-truth 오염 가능 구조. (2) `kbo-pitcher.ts` 의 era/hr/bb/hbp/so 파싱이 fancy-stats.ts 에 이미 있는 parseNumWithFallback(NaN 추적) 패턴 없이 plain `|| 0` — hr/bb/hbp/so 는 FIP 계산 거쳐 15% 가중치 home_sp_fip/away_sp_fip 팩터로 이어짐.
+
+수정: kbo-live.ts 는 NaN 시 console.warn 추가(파이프라인 쓰기 동작은 0 fallback 유지), kbo-pitcher.ts 는 fancy-stats.ts 의 parseNumWithFallback 재사용 + nanCount 비율 console.warn. typecheck clean, 테스트 94 files/1227 PASS.
+
+나머지 13개 scraper 파일 + CLAUDE.md 데이터 소스 claim 전수 교차검증 — 전부 일치, 신규 버그 0건.
+
+**plan#29 상태 변화 없음** (`~/.develop-cycle/plans/moneyballscore/29.md`, 만료 2026-10-15) — 사용자 결정 여전히 대기 중, 만료 임박.
+
+다음 사이클 추천 = plan#29 결정 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(engine/features/factors/context/backtest/analytics) 또는 2-chain lock 자연 해제 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): postview judge validator_logs 영속 박제 누락 수정 (cycle 2974, 2026-10-07)
 
 진단: 2-chain lock 미충족(직전8 distinct=4). fix-incident/operational-analysis/explore-idea(plan#29 대기)/lotto(cron 건강 확인)/info-arch/design-system 전부 gap 미근접/저가치. skill-evolution trigger 5 미충족(review-code 13/20, 0회 아님). cycle 2951 migration note 추천 "packages/kbo-data 잔여 스코프"(최근 cycle 들이 apps/moneyball/src/app 위주라 예측 엔진 코어 미감사) 선택.

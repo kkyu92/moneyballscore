@@ -139,8 +139,21 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
     const isTop = raw.GAME_TB_SC !== 'B';
 
     // 점수 — T_SCORE_CN=원정(Top), B_SCORE_CN=홈(Bottom)
-    const homeScore = Number(raw.B_SCORE_CN) || 0;
-    const awayScore = Number(raw.T_SCORE_CN) || 0;
+    // 기존 `Number(x) || 0` 은 파싱 실패(필드 누락/비정상 문자열)를 실제 0-0 스코어와
+    // 구분 못 함. status='final' 경기는 이 값이 그대로 games.home_score/away_score 에
+    // 영속 박제되므로 (pipeline/live.ts updateGameScore) 파싱 실패가 ground-truth
+    // 오염으로 이어짐 — NaN 발생 시 0 으로 fallback 하되 console.warn 으로 가시화.
+    const homeScoreParsed = raw.B_SCORE_CN != null ? Number(raw.B_SCORE_CN) : 0;
+    const awayScoreParsed = raw.T_SCORE_CN != null ? Number(raw.T_SCORE_CN) : 0;
+    if (Number.isNaN(homeScoreParsed) || Number.isNaN(awayScoreParsed)) {
+      console.warn('[KBO Live] malformed score field — fallback to 0 silent drift', {
+        externalGameId: raw.G_ID,
+        B_SCORE_CN: raw.B_SCORE_CN,
+        T_SCORE_CN: raw.T_SCORE_CN,
+      });
+    }
+    const homeScore = Number.isNaN(homeScoreParsed) ? 0 : homeScoreParsed;
+    const awayScore = Number.isNaN(awayScoreParsed) ? 0 : awayScoreParsed;
 
     const outs = Number(raw.OUT_CN) || 0;
 
