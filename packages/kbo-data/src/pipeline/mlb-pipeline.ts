@@ -60,6 +60,21 @@ interface MlbTeamStatsRow {
   barrel_pct: number | null;
 }
 
+// 한쪽 팀 stat 만 결측이면 결측 쪽만 MLB_STAT_DEFAULTS 로 대체하던 기존 패턴은
+// "실측값 vs 리그평균" 비대칭 비교를 만들어 편향된 factor 를 생성 (predictor.ts
+// sp_fip/sp_xfip 비대칭-null 버그, cycle 2977 과 동일 클래스). 양쪽 다 있을 때만
+// 실측 사용, 한쪽이라도 없으면 양쪽 다 fallback 으로 맞춰 diff=0 중립 보장.
+function pairedOrNeutral(
+  homeVal: number | null | undefined,
+  awayVal: number | null | undefined,
+  fallback: number,
+): { home: number; away: number } {
+  if (homeVal == null || awayVal == null) {
+    return { home: fallback, away: fallback };
+  }
+  return { home: homeVal, away: awayVal };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = ReturnType<typeof createClient<any, any, any>>;
 
@@ -383,18 +398,18 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     // 스크레이프하나 개인 FIP 통계 소스가 없어 프로덕션 미연결 상태(선수별 통계 신규 스크레이퍼
     // 필요 — 별도 스코프).
     const prob = computeMlbProbability({
-      sp_fip: { home: home?.fip ?? MLB_STAT_DEFAULTS.fip, away: away?.fip ?? MLB_STAT_DEFAULTS.fip },
-      sp_xfip: { home: home?.xfip ?? MLB_STAT_DEFAULTS.xfip, away: away?.xfip ?? MLB_STAT_DEFAULTS.xfip },
-      lineup_woba: { home: home?.woba ?? MLB_STAT_DEFAULTS.woba, away: away?.woba ?? MLB_STAT_DEFAULTS.woba },
-      bullpen_fip: { home: home?.fip ?? MLB_STAT_DEFAULTS.fip, away: away?.fip ?? MLB_STAT_DEFAULTS.fip },
+      sp_fip: pairedOrNeutral(home?.fip, away?.fip, MLB_STAT_DEFAULTS.fip),
+      sp_xfip: pairedOrNeutral(home?.xfip, away?.xfip, MLB_STAT_DEFAULTS.xfip),
+      lineup_woba: pairedOrNeutral(home?.woba, away?.woba, MLB_STAT_DEFAULTS.woba),
+      bullpen_fip: pairedOrNeutral(home?.fip, away?.fip, MLB_STAT_DEFAULTS.fip),
       recent_form: { home: (homeForm ?? 0.5) * 100, away: (awayForm ?? 0.5) * 100 },
-      war: { home: home?.war ?? MLB_STAT_DEFAULTS.war, away: away?.war ?? MLB_STAT_DEFAULTS.war },
+      war: pairedOrNeutral(home?.war, away?.war, MLB_STAT_DEFAULTS.war),
       head_to_head: { homeWinRate: h2hHomeWinRate },
       park_factor: homeParkPf != null ? homeParkPf / 100 : 1.0,
       elo: { home: homeElo ?? ELO_NEUTRAL, away: awayElo ?? ELO_NEUTRAL },
       defense_sfr: { home: 0, away: 0 },
-      lineup_xwoba: { home: home?.xwoba ?? MLB_STAT_DEFAULTS.xwoba, away: away?.xwoba ?? MLB_STAT_DEFAULTS.xwoba },
-      lineup_barrel_pct: { home: home?.barrel_pct ?? MLB_STAT_DEFAULTS.barrelPct, away: away?.barrel_pct ?? MLB_STAT_DEFAULTS.barrelPct },
+      lineup_xwoba: pairedOrNeutral(home?.xwoba, away?.xwoba, MLB_STAT_DEFAULTS.xwoba),
+      lineup_barrel_pct: pairedOrNeutral(home?.barrel_pct, away?.barrel_pct, MLB_STAT_DEFAULTS.barrelPct),
       // cycle 2402 발견 — defense_sfr(5%) 과 동일하게 sp_xwoba_against(4%)/woba_std(3%) 도
       // home/away 양쪽에 항상 동일 상수를 넣어 homeAdvantage 기여도가 구조적으로 항상 0
       // (diff=0). 단 defense_sfr 은 line 382 주석으로 이미 공개된 known placeholder 인 반면
