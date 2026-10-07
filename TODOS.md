@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): analysis/calendar/teams 신규 축 감사, SFR=0 배지 버그 수정 (cycle 2967, 2026-10-07)
+
+진단: 2-chain lock 미충족(직전8 distinct=3). fix-incident gap=21(≥20 충족) — `gh run list` 재확인, CI 전부 정상, 신규 failure 없음(noise 재확인뿐). operational-analysis gap=43(≥25 충족) — egress quota 402 지속(billing 대기, 신규 정보 없음). explore-idea saturation 13/15 충족하나 plan#29(expiry 2026-10-15) 재확인은 cycle 2954와 같은 날 동일 "확인 불가" 상태라 즉시 재중복 skip — organic idea 전무. design-system gap 충족이나 cycle 2964 직후 재검증이라 저가치. lotto gap=18/info-arch gap=12 미근접. review-code(heavy) 계속 선택 — migration-path 추천 신규 축 중 잔여(`analysis/`, `calendar/`, `teams/` 라우트, 6116줄) subagent 위임 전수 감사.
+
+- `analysis/page.tsx:1629-1640` wave-343 "수비 SFR 배지" — 블록 가드는 "둘 다 0 아님"이지만 개별 side 렌더는 `!= null` 만 체크 — 한쪽만 `SFR=0`(데이터 부재 sentinel, `fancy-stats.ts:412`)인 경우 그 팀이 "+0.0" 실측값처럼 색상 코딩되어 표시되던 버그 발견. 같은 파일 WAR 배지(cycle 2407)·SFR 직접대결 배지(cycle 2419)는 이미 `!= null && !== 0` 가드 적용 — wave-343 배지만 누락돼 있었음.
+- 수정: 양쪽 side 렌더 조건에 `&& g.xxxSfr !== 0` 추가. 나머지 6개 파일(analysis-data.ts, analysis/game/[id], calendar, teams×3) — 전수 read + 관련 모듈 교차검증 결과 추가 버그/dead code/stale 주석 0건.
+- 검증: type-check clean, lint 0 warning, test 585/585 files·4613/4613 통과. commit 2a4ee8f1, R4 직push.
+
+다음 사이클 추천 = fix-incident(402 재확인뿐) 또는 plan#29 expiry(2026-10-15, 8일 남음) 임박 explore-idea 최종 결정 또는 2-chain lock 자연 해제 후 polish-ui/design-system 복귀.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): api/ + observability 감사, 갭 0건 (cycle 2966, 2026-10-07)
 
 진단: 2-chain lock 미충족(직전8 distinct=3). fix-incident gap=20(≥20 충족, forced lite 체크) — health-alert/runtime-error-alert/heartbeat-stale 반복 failure 전부 Supabase egress quota 402(billing 대기, cycle 2939~) 단일 원인으로 수렴, 신규 action 없음. "Daily KBO Pipeline"/"Live Game Update" GH workflow 가 2026-04-28 이후 미실행 발견했으나 workflow 파일 자체 주석("Cloudflare Workers Cron 이관 완료")으로 의도된 비활성 확인 — 드리프트 아님(실측 검증 후 false alarm 회피). explore-idea saturation 12/15 충족 + plan#29 재평가 조건("포스트시즌 임박") 도달했으나 cycle 2954(12 cycle 전)가 이미 동일 결론(Tier4 유지, 402로 트래픽 재측정 불가) 재확인 완료 — 중복 skip. operational-analysis/design-system/lotto/info-arch 전부 저가치 또는 미근접. review-code(heavy) 계속 선택 — migration-path 추천 신규 축(analysis/api/calendar/observability/teams) 중 `api/*/route.ts` 20개 + `lib/observability/captureFallback.ts` + `lib/api/is-origin-allowed.ts` 감사.

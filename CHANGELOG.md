@@ -1,3 +1,15 @@
+## v0.5.62.292 — 2026-10-07 (cycle 2967, review-code(heavy): analysis/calendar/teams 신규 축 감사, SFR=0 배지 버그 수정 SUCCESS)
+
+### review-code(heavy): analysis/calendar/teams 신규 축 감사 — SFR=0 data-gap sentinel 오표시 수정 (cycle 2967, SUCCESS)
+
+- 진단: 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+polish-ui1+design-system1). fix-incident gap=21(≥20 충족) — `gh run list` 재확인, CI 전부 정상(Dependabot in-progress 뿐), 신규 failure 없음. operational-analysis gap=43(≥25 충족) — 동일 Supabase egress quota 402 지속(billing 대기, 신규 정보 없음). explore-idea saturation 13/15 충족하나 organic idea 전무 — plan#29(로그인+커뮤니티, Tier4, expiry 2026-10-15) 재확인은 cycle 2954(같은 날, 수 cycle 전)와 동일 "확인 불가" 상태라 즉시 재중복, skip. design-system gap reached(DESIGN.md mtime 35일)이나 cycle 2964 전수 재검증 직후라 저가치. lotto gap=18/info-arch gap=12 둘 다 미근접. → review-code(heavy) 계속 선택, migration-path 추천 신규 축 중 잔여(`analysis/`, `calendar/`, `teams/` 라우트) subagent 위임 전수 감사.
+- 감사 대상: `analysis/analysis-data.ts`(1039줄), `analysis/page.tsx`(2836줄), `analysis/game/[id]/page.tsx`(879줄), `calendar/page.tsx`, `teams/page.tsx`, `teams/[code]/page.tsx`, `teams/[code]/recent/page.tsx` — 총 6116줄 전수 read + `computeCompositeDuel.ts`/`factorLabels.ts`/`big-match.ts`/`predictor.ts`/`final-reasoning.ts`/`fancy-stats.ts`/`packages/shared` 상수 교차검증.
+- 발견: `analysis/page.tsx:1629-1640` wave-343 "수비 SFR 배지" — 블록 전체는 `(g.awaySfr !== 0 || g.homeSfr !== 0)`로 가드하지만, 각 side 개별 렌더는 `!= null` 만 체크 — `SFR=0`(Fancy Stats top-50 데이터 부재 시 `FANCY_STATS_DEFAULTS.sfr` sentinel, `fancy-stats.ts:412`)이 한쪽만 0 인 경우 그 팀이 "+0.0" 실측값처럼 색상 코딩되어 표시됨. 같은 파일의 WAR 배지(1702-1703, cycle 2407 fix)와 SFR 직접대결 배지(1646, cycle 2419 fix)는 이미 `!= null && !== 0` 가드 적용 — wave-343 배지만 이 패턴 누락.
+- 수정: 양쪽 side 렌더 조건에 `&& g.xxxSfr !== 0` 추가 — WAR 블록과 동일 가드 패턴 정합.
+- 검증: moneyball type-check clean, lint 0 warning, test 585/585 files · 4613/4613 전부 통과. commit 2a4ee8f1, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = fix-incident(egress quota 402 지속, billing 대기 재확인만 가능) 또는 plan#29 expiry(2026-10-15, 8일 남음) 임박 — 다음 1~2 사이클 안 explore-idea 최종 결정 필요 또는 2-chain lock 자연 해제 후 polish-ui/design-system 복귀.
+
 ## v0.5.62.291 — 2026-10-07 (cycle 2966, review-code(heavy): api/ + observability 감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): api/ 라우트 + lib/observability 신규 축 감사 (cycle 2966, RETRO-ONLY)
