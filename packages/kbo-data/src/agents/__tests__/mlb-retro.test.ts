@@ -32,6 +32,9 @@ const BASE_PRED = {
   away_lineup_xwoba: null,
   home_lineup_barrel_pct: null,
   away_lineup_barrel_pct: null,
+  home_recent_form: null,
+  away_recent_form: null,
+  head_to_head_rate: null,
 };
 
 const BASE_SCHEDULE = {
@@ -110,6 +113,44 @@ describe('generateMlbAgentMemories', () => {
       '2026-08-18',
       [{ pred: allNullPred, schedule: neutralParkSchedule }],
     );
+
+    expect(upsertCalls).toHaveLength(0);
+  });
+
+  it('recent_form 실측값만 존재(다른 factor 전부 null) → recent_form 이 maxBias 로 채택 (cycle 2960 재배선 검증)', async () => {
+    const { db, upsertCalls } = makeUpsertTrackingDb();
+    const pred = {
+      ...BASE_PRED,
+      home_sp_fip: null,
+      away_sp_fip: null,
+      home_recent_form: 0.9,
+      away_recent_form: 0.1,
+    };
+
+    await generateMlbAgentMemories(db, '2026-08-18', [{ pred, schedule: BASE_SCHEDULE }]);
+
+    expect(upsertCalls).toHaveLength(2);
+    const nyyRow = upsertCalls.find((c) => c.row.team_code === 'NYY');
+    expect(nyyRow?.row.content).toContain('recent_form');
+  });
+
+  it('head_to_head_rate 실측값만 존재(다른 factor 전부 null) → head_to_head 가 maxBias 로 채택', async () => {
+    const { db, upsertCalls } = makeUpsertTrackingDb();
+    const pred = { ...BASE_PRED, home_sp_fip: null, away_sp_fip: null, head_to_head_rate: 0.9 };
+
+    await generateMlbAgentMemories(db, '2026-08-18', [{ pred, schedule: BASE_SCHEDULE }]);
+
+    expect(upsertCalls).toHaveLength(2);
+    const nyyRow = upsertCalls.find((c) => c.row.team_code === 'NYY');
+    expect(nyyRow?.row.content).toContain('head_to_head');
+  });
+
+  it('head_to_head_rate null + 다른 factor 전부 null → upsert 0건 (가짜 bias 생성 없음)', async () => {
+    const { db, upsertCalls } = makeUpsertTrackingDb();
+    const pred = { ...BASE_PRED, home_sp_fip: null, away_sp_fip: null, head_to_head_rate: null };
+    const neutralParkSchedule = { ...BASE_SCHEDULE, home_team_code: 'BAL' }; // parkPf=100(중립)
+
+    await generateMlbAgentMemories(db, '2026-08-18', [{ pred, schedule: neutralParkSchedule }]);
 
     expect(upsertCalls).toHaveLength(0);
   });

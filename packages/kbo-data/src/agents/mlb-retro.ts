@@ -33,6 +33,9 @@ interface MlbPredictionRow {
   away_lineup_xwoba: number | null;
   home_lineup_barrel_pct: number | null;
   away_lineup_barrel_pct: number | null;
+  home_recent_form: number | null;
+  away_recent_form: number | null;
+  head_to_head_rate: number | null;
 }
 
 interface MlbScheduleRow {
@@ -47,13 +50,12 @@ interface MlbScheduleRow {
 // factor 만 선정. defense_sfr/sp_xwoba_against/woba_std 는 MLB_PLACEHOLDER_FACTOR_KEYS
 // (mlb-base.ts) 에 등록된 구조적 placeholder — contribution 이 항상 0 이라 자연 배제.
 // recent_form/head_to_head 는 mlb-pipeline.ts 가 cycle 2353 부터 이미 실측값을 계산해
-// predictions.home_recent_form/away_recent_form/head_to_head_rate 로 영속화하지만,
-// 이 파일(MlbPredictionRow/MLB_MEMORY_PREDICTION_COLUMNS)은 그 컬럼을 select 하지 않아
-// buildMlbFactors() 가 여전히 home=away=neutral placeholder 로 계산 — 재배선 시
-// MEMORY_CANDIDATE_KEYS 에 추가할 후보군(review-code(heavy) cycle 2822 확인, 별도
-// 스코프). elo 는 이미 실측 연결됐지만 예외 유지 — home=away=ELO_NEUTRAL 이라도
+// predictions.home_recent_form/away_recent_form/head_to_head_rate 로 영속화 —
+// 이 파일이 그 컬럼을 select 하지 않아 계속 neutral placeholder 로 계산되던 것을
+// review-code(heavy) cycle 2960 이 재배선(park_factor 와 동일 패턴: null 이면 자연
+// 제외, 있으면 실측 반영). elo 는 여전히 예외 — home=away=ELO_NEUTRAL 이라도
 // HOME_ELO_BONUS 고정항 때문에 contribution 이 0이 아닌 "모든 경기 동일한 상수" 라
-// 팀별 bias 처럼 잘못 뽑힐 위험 → 명시적 제외.
+// 팀별 bias 처럼 잘못 뽑힐 위험 → 명시적 제외 유지.
 const MEMORY_CANDIDATE_KEYS = [
   'sp_fip',
   'sp_xfip',
@@ -63,6 +65,8 @@ const MEMORY_CANDIDATE_KEYS = [
   'lineup_xwoba',
   'lineup_barrel_pct',
   'park_factor',
+  'recent_form',
+  'head_to_head',
 ] as const;
 
 /**
@@ -81,6 +85,14 @@ function buildMlbFactors(pred: MlbPredictionRow, homeCode: MlbTeamCode): Record<
     lineup_xwoba: [pred.home_lineup_xwoba, pred.away_lineup_xwoba],
     lineup_barrel_pct: [pred.home_lineup_barrel_pct, pred.away_lineup_barrel_pct],
     park_factor: [MLB_TEAMS[homeCode].parkPf / 100, 1.0],
+    // mlb-pipeline.ts 는 home_recent_form/away_recent_form 을 0-1 승률 fraction 으로
+    // 저장(raw homeForm) — computeMlbFactorContributions 입력 스케일(0-100)은 아래
+    // input 조립 시 *100 변환. away 쪽 fixed 0.5 trick 없이 실제 pair 유지(park_factor
+    // 와 달리 양쪽 다 null 가능성 있는 실측값).
+    recent_form: [pred.home_recent_form, pred.away_recent_form],
+    // head_to_head_rate 는 homeWinRate 단일값(0-1) — away 슬롯은 park_factor 패턴처럼
+    // 고정 중립값(0.5)으로 채워 null-guard 를 home 값 유무로만 판정.
+    head_to_head: [pred.head_to_head_rate, 0.5],
   };
 
   const input: MlbFactorInputs = {
@@ -88,9 +100,9 @@ function buildMlbFactors(pred: MlbPredictionRow, homeCode: MlbTeamCode): Record<
     sp_xfip: { home: pairs.sp_xfip[0] ?? 0, away: pairs.sp_xfip[1] ?? 0 },
     lineup_woba: { home: pairs.lineup_woba[0] ?? 0, away: pairs.lineup_woba[1] ?? 0 },
     bullpen_fip: { home: pairs.bullpen_fip[0] ?? 0, away: pairs.bullpen_fip[1] ?? 0 },
-    recent_form: { home: 50, away: 50 },
+    recent_form: { home: (pairs.recent_form[0] ?? 0.5) * 100, away: (pairs.recent_form[1] ?? 0.5) * 100 },
     war: { home: pairs.war[0] ?? 0, away: pairs.war[1] ?? 0 },
-    head_to_head: { homeWinRate: 0.5 },
+    head_to_head: { homeWinRate: pairs.head_to_head[0] ?? 0.5 },
     park_factor: pairs.park_factor[0] ?? 1.0,
     elo: { home: ELO_NEUTRAL, away: ELO_NEUTRAL },
     defense_sfr: { home: 0, away: 0 },
@@ -200,4 +212,5 @@ export type { MlbPredictionRow, MlbScheduleRow };
 export const MLB_MEMORY_PREDICTION_COLUMNS =
   'external_game_id, home_win_prob, home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip, ' +
   'home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip, home_war_total, ' +
-  'away_war_total, home_lineup_xwoba, away_lineup_xwoba, home_lineup_barrel_pct, away_lineup_barrel_pct';
+  'away_war_total, home_lineup_xwoba, away_lineup_xwoba, home_lineup_barrel_pct, away_lineup_barrel_pct, ' +
+  'home_recent_form, away_recent_form, head_to_head_rate';
