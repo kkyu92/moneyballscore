@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 let leaguesCount: number | null = 5;
 let leaguesError: { message: string } | null = null;
+let leaguesStatus = 200;
+let leaguesStatusText = 'OK';
 let pipelineData:
   | { run_date: string; mode: string; status: string; created_at: string }
   | null = null;
@@ -12,7 +14,13 @@ let kboFetchImpl: () => Promise<Response> = () =>
 function makeSupabaseMock() {
   const leaguesBuilder = {
     select: vi.fn().mockImplementation(() =>
-      Promise.resolve({ count: leaguesCount, data: null, error: leaguesError }),
+      Promise.resolve({
+        count: leaguesCount,
+        data: null,
+        error: leaguesError,
+        status: leaguesStatus,
+        statusText: leaguesStatusText,
+      }),
     ),
   };
   const pipelineBuilder: {
@@ -53,6 +61,8 @@ describe('GET /api/health (plan #11 Step 2)', () => {
   beforeEach(() => {
     leaguesCount = 5;
     leaguesError = null;
+    leaguesStatus = 200;
+    leaguesStatusText = 'OK';
     pipelineData = {
       run_date: '2026-05-26',
       mode: 'predict',
@@ -105,6 +115,8 @@ describe('GET /api/health (plan #11 Step 2)', () => {
 
   it('supabase egress quota 402 (billing, known issue) → degraded + 200 (fail 아님)', async () => {
     leaguesCount = null;
+    leaguesStatus = 402;
+    leaguesStatusText = 'Payment Required';
     leaguesError = {
       message:
         'Service for this project is restricted due to the following violations: exceed_egress_quota. The project owner must upgrade their plan or remove spend caps to restore service.',
@@ -116,6 +128,23 @@ describe('GET /api/health (plan #11 Step 2)', () => {
     expect(body.status).toBe('degraded');
     expect(body.checks.supabase.status).toBe('warning');
     expect(body.checks.supabase.detail).toContain('exceed_egress_quota');
+    expect(body.checks.supabase.detail).toContain('user action pending');
+  });
+
+  it('supabase egress quota 402 via HEAD request (empty error.message, cycle 2999 실측) → degraded + 200', async () => {
+    // head:true 쿼리는 HTTP HEAD 전송 — 실제 Supabase 402 응답 body 가 클라이언트에
+    // 도달 못해 error.message=''. 과거 message-text 매칭만으로는 이 실제 케이스를
+    // 못 잡아 health-alert.yml 이 계속 ::error:: 페이징 (cycle 2999 fix-incident).
+    leaguesCount = null;
+    leaguesStatus = 402;
+    leaguesStatusText = 'Payment Required';
+    leaguesError = { message: '' };
+    const res = await callGet();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.overall).toBe('degraded');
+    expect(body.checks.supabase.status).toBe('warning');
+    expect(body.checks.supabase.detail).toContain('HTTP 402');
     expect(body.checks.supabase.detail).toContain('user action pending');
   });
 

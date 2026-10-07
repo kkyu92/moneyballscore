@@ -18,14 +18,27 @@ async function checkSupabase(): Promise<Check> {
     const result = await supabase
       .from('leagues')
       .select('*', { count: 'exact', head: true });
+    // head:true → HTTP HEAD request → error response body dropped by the client,
+    // so result.error.message is '' on quota failures (verified live, cycle 2999:
+    // PostgREST returns 402 + exceed_egress_quota body on GET, but supabase-js's
+    // HEAD request surfaces status:402/statusText:'Payment Required' with an empty
+    // message). The cycle 2996 fix matched on message text, which never matches
+    // here — health-alert.yml kept paging ::error:: hourly through the same known
+    // billing outage (verified via `gh run list --workflow=health-alert.yml`, still
+    // failing every run after the 2996 fix deployed). Check status first.
+    if (result.status === 402) {
+      return {
+        status: 'warning',
+        detail: `Supabase billing quota exceeded (user action pending): HTTP 402 ${result.error?.message || result.statusText}`,
+      };
+    }
     const { count } = assertSelectOk(result, 'health.leagues');
     return { status: 'ok', detail: `${count} leagues` };
   } catch (e) {
     const detail = errMsg(e);
     // exceed_egress_quota = Supabase billing cap, not an app/infra bug — user action
-    // pending (CLAUDE.md 운영 로그). Without this carve-out health-alert.yml pages
-    // ::error:: every hour for the entire outage window (29+ days observed, cycle
-    // 2939~), indistinguishable from a genuine new failure (alert fatigue).
+    // pending (CLAUDE.md 운영 로그). Kept as a fallback in case the error surfaces
+    // via a path (e.g. non-head request) where the message text is intact.
     if (detail.includes('exceed_egress_quota')) {
       return { status: 'warning', detail: `Supabase billing quota exceeded (user action pending): ${detail}` };
     }
