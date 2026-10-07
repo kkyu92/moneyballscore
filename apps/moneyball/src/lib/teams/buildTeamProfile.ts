@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH, RECENT_RECORD_WINDOW, RECENT_RECORD_MIN_GAMES, MARGIN_AVG_MIN_GAMES, MARGIN_BLOWOUT_THRESHOLD, MARGIN_BLOWOUT_MIN_GAMES, MARGIN_CLOSE_GAME_THRESHOLD, MARGIN_CLOSE_GAME_MIN_GAMES, VENUE_SPLIT_MIN_GAMES_PER_VENUE, VENUE_SPLIT_MIN_GAP_PCT, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 import { EMPTY_FACTOR_AVERAGES, type TeamFactorAverages } from "./buildTeamFactorAverages";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 interface TeamPitcherRow {
   playerId: number;
@@ -306,7 +307,12 @@ export async function buildTeamProfile(
     .eq("code", teamCode)
     .maybeSingle();
 
-  const { data: teamRow } = assertSelectOk(teamResult, "buildTeamProfile teams");
+  let teamRow: unknown | null;
+  try {
+    ({ data: teamRow } = assertSelectOk(teamResult, "buildTeamProfile teams"));
+  } catch (err) {
+    teamRow = captureFallback(err, null, { route: "/teams/[code]", source: "buildTeamProfile teams" });
+  }
 
   const teamId = (teamRow as { id: number } | null)?.id ?? null;
   if (teamId == null) {
@@ -381,7 +387,12 @@ export async function buildTeamProfile(
     .eq("predictions.prediction_type", "pre_game")
     .in("predictions.scoring_rule", PRODUCTION_COHORT_RULES);
 
-  const { data } = assertSelectOk(gamesResult, "buildTeamProfile games");
+  let data: unknown[] | null;
+  try {
+    ({ data } = assertSelectOk(gamesResult, "buildTeamProfile games"));
+  } catch (err) {
+    data = captureFallback(err, [], { route: "/teams/[code]", source: "buildTeamProfile games" });
+  }
 
   type GameRow = NonNullable<PredRow["game"]> & {
     predictions: Array<{

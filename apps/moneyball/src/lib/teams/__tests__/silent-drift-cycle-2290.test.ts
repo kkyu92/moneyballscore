@@ -9,7 +9,7 @@ describe('silent drift cycle 2290 — buildTeamFactorAverages.ts predictions 쿼
     const src = readFileSync(SRC, 'utf8');
     const block = src.slice(
       src.indexOf('const predResult = await supabase'),
-      src.indexOf('const { data } = assertSelectOk(\n    predResult'),
+      src.indexOf('({ data } = assertSelectOk(\n      predResult'),
     );
     expect(block).toMatch(/\.match\(CURRENT_MODEL_FILTER\)/);
   });

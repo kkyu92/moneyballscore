@@ -47,26 +47,27 @@ describe("buildTeamFactorAverages", () => {
     vi.clearAllMocks();
   });
 
-  it("teams select error → assertSelectOk throw", async () => {
+  it("teams select error → throw 대신 EMPTY_FACTOR_AVERAGES degrade (captureFallback)", async () => {
     supabaseMock = makeSupabaseMock({
       teamsError: { message: "connection refused" },
     });
 
     const { buildTeamFactorAverages } = await import("../buildTeamFactorAverages");
-    await expect(buildTeamFactorAverages("HT")).rejects.toThrow(
-      /buildTeamFactorAverages teams .* select failed: connection refused/,
-    );
+    const avg = await buildTeamFactorAverages("HT");
+    expect(avg.spFip).toBeNull();
+    expect(avg.sampleN).toBe(0);
   });
 
-  it("predictions select error → assertSelectOk throw", async () => {
+  it("predictions select error → throw 대신 빈 집계 degrade (captureFallback)", async () => {
     supabaseMock = makeSupabaseMock({
+      teamRow: { id: HT_ID },
       predsError: { message: "syntax error" },
     });
 
     const { buildTeamFactorAverages } = await import("../buildTeamFactorAverages");
-    await expect(buildTeamFactorAverages("HT")).rejects.toThrow(
-      /buildTeamFactorAverages predictions .* select failed: syntax error/,
-    );
+    const avg = await buildTeamFactorAverages("HT");
+    expect(avg.spFip).toBeNull();
+    expect(avg.sampleN).toBe(0);
   });
 
   it("teams 빈 row → EMPTY_FACTOR_AVERAGES", async () => {

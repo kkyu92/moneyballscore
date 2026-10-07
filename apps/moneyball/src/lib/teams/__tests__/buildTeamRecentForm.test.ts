@@ -58,24 +58,26 @@ describe("buildTeamRecentForm", () => {
     vi.clearAllMocks();
   });
 
-  it("teams select error → assertSelectOk throw", async () => {
+  it("teams select error → throw 대신 EMPTY_RECENT_FORM degrade (captureFallback)", async () => {
     supabaseMock = makeSupabaseMock({
       teamsError: { message: "connection refused" },
     });
     const { buildTeamRecentForm } = await import("../buildTeamRecentForm");
-    await expect(buildTeamRecentForm("HT")).rejects.toThrow(
-      /buildTeamRecentForm teams .* select failed: connection refused/,
-    );
+    const form = await buildTeamRecentForm("HT");
+    expect(form.results).toEqual([]);
+    expect(form.totalGames).toBe(0);
+    expect(form.winRate).toBeNull();
   });
 
-  it("games select error → assertSelectOk throw", async () => {
+  it("games select error → throw 대신 빈 시퀀스 degrade (captureFallback)", async () => {
     supabaseMock = makeSupabaseMock({
       gamesError: { message: "syntax error" },
     });
     const { buildTeamRecentForm } = await import("../buildTeamRecentForm");
-    await expect(buildTeamRecentForm("HT")).rejects.toThrow(
-      /buildTeamRecentForm games .* select failed: syntax error/,
-    );
+    const form = await buildTeamRecentForm("HT");
+    expect(form.results).toEqual([]);
+    expect(form.totalGames).toBe(0);
+    expect(form.winRate).toBeNull();
   });
 
   it("teams 빈 row → EMPTY_RECENT_FORM", async () => {

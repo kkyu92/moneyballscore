@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import {
   assertSelectOk,
   computeFactorAveragesFromPerspectives,
@@ -71,10 +72,18 @@ export async function buildTeamFactorAverages(
     .select("id")
     .eq("code", teamCode)
     .maybeSingle();
-  const { data: teamRow } = assertSelectOk(
-    teamResult,
-    `buildTeamFactorAverages teams ${teamCode}`,
-  );
+  let teamRow: unknown | null;
+  try {
+    ({ data: teamRow } = assertSelectOk(
+      teamResult,
+      `buildTeamFactorAverages teams ${teamCode}`,
+    ));
+  } catch (err) {
+    teamRow = captureFallback(err, null, {
+      route: "/matchup/[teamA]/[teamB]",
+      source: `buildTeamFactorAverages teams ${teamCode}`,
+    });
+  }
   const teamId = (teamRow as { id: number } | null)?.id ?? null;
   if (teamId == null) return EMPTY_FACTOR_AVERAGES;
 
@@ -99,10 +108,18 @@ export async function buildTeamFactorAverages(
       foreignTable: "game",
     });
 
-  const { data } = assertSelectOk(
-    predResult,
-    `buildTeamFactorAverages predictions ${teamCode}`,
-  );
+  let data: unknown[] | null;
+  try {
+    ({ data } = assertSelectOk(
+      predResult,
+      `buildTeamFactorAverages predictions ${teamCode}`,
+    ));
+  } catch (err) {
+    data = captureFallback(err, [], {
+      route: "/matchup/[teamA]/[teamB]",
+      source: `buildTeamFactorAverages predictions ${teamCode}`,
+    });
+  }
 
   const rows = (data ?? []) as unknown as PredRow[];
 

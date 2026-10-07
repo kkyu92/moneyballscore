@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import {
   KBO_TEAMS,
   type TeamCode,
@@ -48,7 +49,12 @@ export async function buildTeamUpcoming(
     .select("id")
     .eq("code", teamCode)
     .maybeSingle();
-  const { data: teamRow } = assertSelectOk(teamResult, "buildTeamUpcoming teams");
+  let teamRow: unknown | null;
+  try {
+    ({ data: teamRow } = assertSelectOk(teamResult, "buildTeamUpcoming teams"));
+  } catch (err) {
+    teamRow = captureFallback(err, null, { route: "/teams/[code]", source: "buildTeamUpcoming teams" });
+  }
   const teamId = (teamRow as { id: number } | null)?.id ?? null;
   if (teamId == null) return [];
 
@@ -76,7 +82,12 @@ export async function buildTeamUpcoming(
     .order("game_time", { ascending: true })
     .limit(TEAM_UPCOMING_LIMIT);
 
-  const { data } = assertSelectOk(gamesResult, "buildTeamUpcoming games");
+  let data: unknown[] | null;
+  try {
+    ({ data } = assertSelectOk(gamesResult, "buildTeamUpcoming games"));
+  } catch (err) {
+    data = captureFallback(err, [], { route: "/teams/[code]", source: "buildTeamUpcoming games" });
+  }
   const rows = (data ?? []) as unknown as UpcomingGameRow[];
 
   const result: TeamUpcomingGame[] = [];
