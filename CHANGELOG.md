@@ -1,3 +1,14 @@
+## v0.5.62.327 — 2026-10-07 (cycle 3004, review-code(heavy): captureFallback tags 타입 강화 SUCCESS)
+
+### review-code(heavy): `captureFallback()` tags 타입을 `Record<string,string>` → `{ route, source } & Record<string,string>` 로 강화 (cycle 3004, SUCCESS)
+
+- 진단: 직전8(2997-3004 중 3003 제외분, 2996-3003) distinct=3(review-code(heavy)5+fix-incident2+skill-evolution(forced)1) — 2-chain lock 미충족. open issue 0건, approved plan 0건(plan#29 spec_only_deferred/#30 completed, 상태 불변). op-analysis gap≥40(Supabase egress quota 402 지속 추정, noise 라 재curl 생략) / fix-incident gap=5 / info-arch gap=28 / lotto(cron 산출물 picks 2026-10-10·results 2026-10-03 둘 다 신선) 전부 미근접. `lib/observability/captureFallback.ts`(99일+ 전 마지막 커밋, cycle 3002 가 스코프 공백으로 지목) 재방문 — 정의부 자체 read.
+- cycle 3002 가 `app/teams/page.tsx` 의 route 태그 누락을 105곳 수동 grep 으로 사후 발견했는데, 원인은 `tags: Record<string, string>` 타입이 route/source 키 존재를 강제 안 해서 — 같은 class 의 drift 가 향후 재발해도 매 cycle 수동 grep 전수 스캔에 의존해야 하는 구조적 약점. 타입을 `{ route: string; source: string } & Record<string, string>` 로 좁혀 누락 시 tsc 컴파일 에러로 즉시 차단.
+- 기존 callsite 138곳(property shorthand `{ route, source }` 패턴 포함) 전수 확인 — 전부 tsc clean, 회귀 0건.
+- 검증: `tsc --noEmit`(apps/moneyball) clean, `pnpm lint` clean, `pnpm --filter moneyball test` 585/585 파일·4619/4619 테스트 PASS.
+
+**plan#29/#30 상태 변화 없음**. **Supabase egress quota 장애 지속 추정**(cycle 2939~, 65일+ 경과) — op-analysis 재확인 skip(noise).
+
 ## v0.5.62.326 — 2026-10-07 (cycle 3002, review-code(heavy): /teams 허브 captureFallback route 태그 누락 수정 SUCCESS)
 
 ### review-code(heavy): `apps/moneyball/src/lib/observability/` + `components/glossary/` + `components/standings/` 전수 read — 최장기 미감사 축 (cycle 3002, SUCCESS)

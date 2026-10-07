@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): captureFallback tags 타입 강화 (cycle 3004, 2026-10-07)
+
+진단: 직전8(2996-3003) distinct=3 — 2-chain lock 미충족. open issue 0건, approved plan 0건. op-analysis/fix-incident/info-arch/lotto gap 전부 미근접(lotto cron 신선). cycle 3002 가 route 태그 누락을 105곳 수동 grep 으로 사후 발견한 구조적 약점 재검토 — `captureFallback()` 의 `tags: Record<string,string>` 타입이 route/source 키를 강제 안 함.
+
+`tags` 타입을 `{ route: string; source: string } & Record<string, string>` 로 강화 — 누락 시 매 cycle 수동 grep 대신 tsc 컴파일 에러로 즉시 차단. 기존 138 callsite(shorthand 패턴 포함) 전수 tsc clean, 회귀 0건. lint clean, vitest 585/585·4619/4619 PASS. PR #3144 → R7 자동 squash 머지(8e471a00).
+
+**plan#29/#30 상태 변화 없음**. **Supabase egress quota 장애 지속 추정**(65일+) — op-analysis 재확인 skip(noise).
+
 ## 🟢 SUCCESS — review-code(heavy): /teams 허브 captureFallback route 태그 누락 수정 (cycle 3002, 2026-10-07)
 
 진단: 직전8(2994-3001) distinct=4 — 2-chain lock 미충족. open issue 0건, approved plan 0건(전부 completed/archived/spec-only-deferred). Supabase egress quota 402 재확인(65일+ 지속) — op-analysis 여전히 차단, 반복 재측정 noise 라 skip. fix-incident gap=3·info-arch gap=26·lotto cron 산출물 둘 다 신선 — 전부 미근접. 최근 감사 공백 탐색: `lib/observability/`(99일+ 미커밋)·`components/glossary/`·`components/standings/`(140일+ 미커밋) — review-code(heavy) 스코프 누락 확인, grep-count-depth 가드레일(cycle 3001) 대로 전수 read.
