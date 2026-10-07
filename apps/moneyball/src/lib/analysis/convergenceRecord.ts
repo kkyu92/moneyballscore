@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import {
   assertSelectOk,
   toKSTDateString,
@@ -215,7 +216,12 @@ async function fetchConvergencePickDetailedResults(
   }
   const gamesResult = (await query) as unknown as SelectResult<ConvergenceGameRow[]>;
 
-  const { data } = assertSelectOk(gamesResult, 'fetchConvergencePickDetailedResults');
+  let data: ConvergenceGameRow[] | null;
+  try {
+    ({ data } = assertSelectOk(gamesResult, 'fetchConvergencePickDetailedResults'));
+  } catch (err) {
+    data = captureFallback(err, null, { route: '/analysis', source: 'fetchConvergencePickDetailedResults' });
+  }
   if (!data) return [];
 
   // cycle 2304: h2h(상대전적) 누락 시 computeCompositeDuel 이 h2h 팩터를 항상 제외(validCount 최대 9/10)해
@@ -315,7 +321,12 @@ async function fetchConvergencePickDetailedResultsForPair(
     .eq('predictions.prediction_type', 'pre_game')
     .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)) as unknown as SelectResult<ConvergenceGameRow[]>;
 
-  const { data } = assertSelectOk(gamesResult, `fetchConvergencePickDetailedResultsForPair ${idA} vs ${idB}`);
+  let data: ConvergenceGameRow[] | null;
+  try {
+    ({ data } = assertSelectOk(gamesResult, `fetchConvergencePickDetailedResultsForPair ${idA} vs ${idB}`));
+  } catch (err) {
+    data = captureFallback(err, null, { route: '/matchup', source: 'fetchConvergencePickDetailedResultsForPair' });
+  }
   if (!data) return [];
 
   // cycle 2304: h2h 누락 시 FACTOR_PICK_COMPLETE 게이팅 구조적 불가 (evaluateConvergencePickRow 동일 fix)
@@ -342,7 +353,12 @@ export async function getConvergencePickHeadToHeadRecord(
     .from('teams')
     .select('id, code')
     .in('code', [codeA, codeB])) as SelectResult<Array<{ id: number; code: string }>>;
-  const { data: teamRows } = assertSelectOk(teamsResult, `getConvergencePickHeadToHeadRecord teams ${codeA} vs ${codeB}`);
+  let teamRows: Array<{ id: number; code: string }> | null;
+  try {
+    ({ data: teamRows } = assertSelectOk(teamsResult, `getConvergencePickHeadToHeadRecord teams ${codeA} vs ${codeB}`));
+  } catch (err) {
+    teamRows = captureFallback(err, [], { route: '/matchup', source: 'getConvergencePickHeadToHeadRecord teams' });
+  }
   const idByCode = new Map<string, number>();
   for (const t of teamRows ?? []) idByCode.set(t.code, t.id);
   const idA = idByCode.get(codeA);
@@ -400,10 +416,22 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
       away_team_code: string;
     }>
   >;
-  const { data: scheduleRows } = assertSelectOk(
-    scheduleResult,
-    `fetchMlbConvergencePickDetailedResultsForPair schedule ${codeA} vs ${codeB}`,
-  );
+  let scheduleRows: Array<{
+    external_game_id: string;
+    game_date: string;
+    home_score: number | null;
+    away_score: number | null;
+    home_team_code: string;
+    away_team_code: string;
+  }> | null;
+  try {
+    ({ data: scheduleRows } = assertSelectOk(
+      scheduleResult,
+      `fetchMlbConvergencePickDetailedResultsForPair schedule ${codeA} vs ${codeB}`,
+    ));
+  } catch (err) {
+    scheduleRows = captureFallback(err, null, { route: '/mlb/matchup', source: 'fetchMlbConvergencePickDetailedResultsForPair schedule' });
+  }
   if (!scheduleRows || scheduleRows.length === 0) return [];
 
   const predResult = (await supabase
@@ -418,10 +446,15 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
     .eq('league', 'mlb')
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id))) as SelectResult<MlbPredBreakdownRow[]>;
-  const { data: predRows } = assertSelectOk(
-    predResult,
-    `fetchMlbConvergencePickDetailedResultsForPair predictions ${codeA} vs ${codeB}`,
-  );
+  let predRows: MlbPredBreakdownRow[] | null;
+  try {
+    ({ data: predRows } = assertSelectOk(
+      predResult,
+      `fetchMlbConvergencePickDetailedResultsForPair predictions ${codeA} vs ${codeB}`,
+    ));
+  } catch (err) {
+    predRows = captureFallback(err, [], { route: '/mlb/matchup', source: 'fetchMlbConvergencePickDetailedResultsForPair predictions' });
+  }
   const predByExternalId = new Map((predRows ?? []).map((p) => [p.external_game_id, p]));
 
   const results: Array<{ favoredTeam: MlbTeamCode; won: boolean }> = [];
@@ -498,7 +531,19 @@ async function fetchMlbConvergencePickDetailedResults(
       away_team_code: string;
     }>
   >;
-  const { data: scheduleRows } = assertSelectOk(scheduleResult, 'fetchMlbConvergencePickDetailedResults schedule');
+  let scheduleRows: Array<{
+    external_game_id: string;
+    game_date: string;
+    home_score: number | null;
+    away_score: number | null;
+    home_team_code: string;
+    away_team_code: string;
+  }> | null;
+  try {
+    ({ data: scheduleRows } = assertSelectOk(scheduleResult, 'fetchMlbConvergencePickDetailedResults schedule'));
+  } catch (err) {
+    scheduleRows = captureFallback(err, null, { route: '/mlb', source: 'fetchMlbConvergencePickDetailedResults schedule' });
+  }
   if (!scheduleRows || scheduleRows.length === 0) return [];
 
   const predResult = (await supabase
@@ -513,7 +558,12 @@ async function fetchMlbConvergencePickDetailedResults(
     .eq('league', 'mlb')
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id))) as SelectResult<MlbPredBreakdownRow[]>;
-  const { data: predRows } = assertSelectOk(predResult, 'fetchMlbConvergencePickDetailedResults predictions');
+  let predRows: MlbPredBreakdownRow[] | null;
+  try {
+    ({ data: predRows } = assertSelectOk(predResult, 'fetchMlbConvergencePickDetailedResults predictions'));
+  } catch (err) {
+    predRows = captureFallback(err, [], { route: '/mlb', source: 'fetchMlbConvergencePickDetailedResults predictions' });
+  }
   const predByExternalId = new Map((predRows ?? []).map((p) => [p.external_game_id, p]));
 
   const results: Array<{ favoredTeam: MlbTeamCode; favoredHome: boolean; won: boolean; gameDate: string }> = [];
