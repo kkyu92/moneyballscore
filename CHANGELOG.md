@@ -1,3 +1,15 @@
+## v0.5.62.281 — 2026-10-07 (cycle 2956, review-code(heavy): packages/kbo-data 신규 축 audit — gap 0건)
+
+### review-code(heavy): validator.ts/postview.ts wiring + OG 토큰화 + inline style 재검증 (cycle 2956, RETRO-ONLY)
+
+- 진단: op-analysis gap≥25 충족하나 Supabase egress quota 402 지속(day 5+, 변화 없음)으로 quota 의존 체크는 저가치 판단. info-arch(직전 2955)·design-system(직전 2943) 둘 다 방금 완료라 재방문 비권장. explore-idea(plan#29)는 사용자 결정 대기 중 재평가 무의미. migration note 추천대로 review-code(heavy) 로 packages/kbo-data 신규 축(agents/validator.ts, postview.ts) 직접 code read.
+- homepage `https://moneyballscore.vercel.app/` 재확인 — 200 OK (cycle 2939 incident 의 degrade fallback PR #3129 효과 실측 재확인). 단 Supabase REST 직접 curl(anon key 포함)은 여전히 402 — quota billing 자체는 미해결 지속.
+- `validator.ts` `low_weight_factor_emphasis` threshold(0.08 고정) 검토 — v1.8 가중치 중 head_to_head(3%)/park_factor(4%)/defense_sfr(5%) 가 상시 threshold 미만이나 이는 LLM 저가중치 factor 과대 emphasis 경고용 의도된 설계, drift 아님.
+- `postview.ts:536-539` `validateFactorAttribution` 호출부 — `DEFAULT_WEIGHTS` 정상 전달 확인, 하드코딩/stale weights 없음.
+- KBO OG/twitter 이미지(seasons/teams/reviews/calendar/picks) 전수 hex 재검사 — cycle 2943 토큰화 유효 지속, raw hex 0건.
+- 최근 7일 touch .tsx 25개 중 inline style 1건(`accuracy/page.tsx`) — SVG stroke/동적 bar height 계산용 정당 사용, 토큰 drift 아님.
+- 결론: 조사한 모든 축에서 실제 gap 0건. 코드 변경 없음.
+
 ## v0.5.62.280 — 2026-10-07 (cycle 2955, info-architecture-review(lite): 헤더/푸터/sitemap/breadcrumb 전체 감사 — 갭 0건 확인)
 
 ### info-architecture-review(lite): IA 건강도 전체 감사 — 실제 갭 0건 (cycle 2955, RETRO-ONLY)

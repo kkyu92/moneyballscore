@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): packages/kbo-data 신규 축 audit, 갭 0건 (cycle 2956, 2026-10-07)
+
+진단: op-analysis gap≥25 충족하나 Supabase egress quota 402 지속(day5+, 변화 없음) 저가치. info-arch/design-system 둘 다 직전 사이클 방금 완료라 재방문 비권장. explore-idea(plan#29) 사용자 결정 대기 중 재평가 무의미. migration note 추천 신규 축(packages/kbo-data) 직접 code read 선택.
+
+homepage 재확인 200 OK(degrade fallback PR #3129 효과 실측) — 단 Supabase REST 직접 curl은 여전히 402, quota billing 자체는 미해결 지속. validator.ts `low_weight_factor_emphasis` threshold(0.08) 검토 결과 의도된 설계 확인(drift 아님), postview.ts의 DEFAULT_WEIGHTS 전달 정상, OG 이미지 토큰화(cycle 2943) 유효 지속, inline style 1건(accuracy/page.tsx)은 정당한 동적 렌더링 — 전부 gap 0건. 코드 변경 없음.
+
+다음 사이클 추천 = fix-incident(egress quota day6+ 진입 시 재확인 가치 상승) 또는 explore-idea(plan#29 expiry 2026-10-15, 7일 남음 — 사용자 응답 확인).
+
 ## 🟡 RETRO-ONLY — info-architecture-review(lite): 헤더/푸터/sitemap/breadcrumb 전체 감사, 갭 0건 (cycle 2955, 2026-10-07)
 
 진단: op-analysis gap 31·info-arch gap 33 둘 다 trigger 충족. op-analysis 는 `exceed_egress_quota` 실측 재확인(16 cycle 경과, 변화 없음) — Supabase 비의존인 info-arch 를 우선 선택.
