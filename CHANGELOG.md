@@ -1,3 +1,15 @@
+## v0.5.62.287 — 2026-10-07 (cycle 2962, review-code(heavy): debug 대시보드 3종(hallucination/pipeline/model-comparison) 감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): /debug/hallucination + /debug/pipeline + /debug/model-comparison 신규 축 감사 (cycle 2962, RETRO-ONLY)
+
+- 진단: 2-chain lock 미충족(직전8 distinct=3: review-code(heavy) x6/explore-idea(lite)/info-architecture-review(lite)). fix-incident — `gh run list` CI 전부 정상, "CI Failure Dispatch" skipped 2건(실제 장애 0건), 홈페이지 curl 200. explore-idea — plan#29 Tier4(risk=3, 사용자 결정 필요) 7 cycle 전 재확인 완료, 신규 트리거 없음. lotto — 다음 토(10/10) picks + 직전 토(10/3) results 파일 모두 존재(cron 정상). info-arch — gap=7(직전 2955), design-system — DESIGN.md mtime 35일(≥4주) 이나 최근 git log 3건 전부 legitimate 패턴 확인된 fix(cycle 2960 polish-ui 등), 신규 drift 근거 없음. operational-analysis — Supabase egress quota 402 직접 curl 재확인(day23+, cycle 2939 최초 확인 이후 지속). 전부 저가치 → cycle 2961 이 추천한 신규 미탐색 축(`apps/moneyball/src/app/debug/*`, `apps/moneyball/src/lib/observability/`)으로 review-code(heavy) 재선택.
+- `/debug/hallucination`(page.tsx + buildHallucinationStats.ts) — cycle 2959 가 고친 `validator_logs.game_id` 재배선 이후 해당 컬럼 소비 로직 직접 재확인, `passed`/`severity`/`agent` 집계 로직 전부 정상.
+- `/debug/pipeline`(page.tsx + pipelineStats.ts) — `buildRejectReasonBreakdown`/`REJECT_REASON_LABEL` enum 매핑 전수 대조(window_too_early/window_too_late/not_scheduled/sp_unconfirmed/already_predicted/unknown), schedule.ts 실제 reason 값과 drift 0건.
+- `/debug/model-comparison`(page.tsx) — `(r as any).game` 캐스팅 패턴 재확인, `eslint-disable` 명시 동반 + 주석("Supabase JS 는 inner join 을 배열 or 객체로 반환")으로 의도된 패턴 확인 — cycle 2958/2961 이 이미 분류한 join-cast 기술부채 범주와 동일.
+- 결론: 조사한 3개 대시보드 전부 갭 0건. 코드 변경 없음. review-code(heavy) 7연속 사이클 중 3번째(2958/2961/2962) RETRO-ONLY — 미탐색 축 소진이 계속 확인되는 추세.
+
+다음 사이클 추천 = egress quota day24+ 재확인(코드 액션 없음, billing 조치 대기 지속) 또는 KBO 포스트시즌 임박 시점 도달 확인(plan#29 재평가 트리거, expiry 2026-10-15 임박) 또는 review-code(heavy) 7연속 saturation 고려 시 chain pool 전체 재순회(dimension-cycle fallback) 검토.
+
 ## v0.5.62.286 — 2026-10-07 (cycle 2961, review-code(heavy): mlb-retro 주변 as-any/agent 패밀리 재감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): mlb-pipeline/retro.ts/rivalry-memory.ts/compareModels.ts as-any 패밀리 재감사 (cycle 2961, RETRO-ONLY)

@@ -1,4 +1,15 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): /debug/hallucination + /debug/pipeline + /debug/model-comparison 신규 축 감사, 갭 0건 (cycle 2962, 2026-10-07)
+
+진단: 2-chain lock 미충족(직전8 distinct=3, review-code(heavy) 6연속 + explore-idea(lite) + info-architecture-review(lite)). fix-incident — CI 전부 정상(gh run list), CI Failure Dispatch skipped 2건(실제 장애 0), 홈페이지 curl 200. explore-idea — plan#29 Tier4 보류 유지(risk=3, 사용자 결정 필요), 7 cycle 전 재확인했고 신규 트리거 없음. lotto — 다음 토(10/10)/직전 토(10/3) 산출물 모두 존재(cron 정상). info-arch gap=7, design-system(DESIGN.md mtime 35일) 도 최근 git log 3건이 전부 이미 확인된 legitimate fix. operational-analysis — Supabase egress quota 402 직접 curl 재확인(day23+, 변화 없음). cycle 2961 추천 신규 축(`/debug/*`, `lib/observability/`)으로 review-code(heavy) 재선택.
+
+- `/debug/hallucination`(page.tsx + buildHallucinationStats.ts) — cycle 2959 `validator_logs.game_id` 재배선 이후 소비 로직 재확인, 집계 로직 정상.
+- `/debug/pipeline`(page.tsx + pipelineStats.ts) — `buildRejectReasonBreakdown`/`REJECT_REASON_LABEL` enum 전수 대조, drift 0건.
+- `/debug/model-comparison`(page.tsx) — `(r as any).game` 캐스팅은 `eslint-disable` 명시 동반 의도된 join-cast 패턴(cycle 2958/2961 과 동일 범주) 재확인.
+- 결론: 조사한 3개 대시보드 전부 갭 0건. 코드 변경 없음. review-code(heavy) 7연속 중 3번째(2958/2961/2962) RETRO-ONLY — 미탐색 축 소진 추세 지속 확인.
+
+다음 사이클 추천 = egress quota day24+ 재확인(billing 조치 대기) 또는 KBO 포스트시즌 임박 확인(plan#29 재평가, expiry 2026-10-15 임박) 또는 review-code(heavy) saturation 고려 시 chain pool 전체 재순회(dimension-cycle) 검토.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): mlb-pipeline/retro.ts/rivalry-memory.ts/compareModels.ts as-any 패밀리 재감사, 갭 0건 (cycle 2961, 2026-10-07)
 
 진단: op-analysis gap=37(≥25, 마지막 발화 cycle 2924) — 25-cycle 주기 보정 trigger 도달. `scripts/op-analysis-ce-cohort.ts` 하네스 직접 실행 시도했으나 Supabase `exceed_egress_quota` HTTP 402 재확인(cycle 2939 최초 확인 이후 지속, 신규 action 없음 — billing 사용자 영역). 단 홈페이지 직접 curl 재확인 결과 200(cycle 2947-2953 degrade 작업 이후 500→200 회복 실측 확인, 장애 중 degrade 패턴 효과 입증). 2-chain lock 미충족(직전8 distinct=3).
