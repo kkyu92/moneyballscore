@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { PICKS_POLL_IDS_LIMIT } from '@moneyball/shared';
+import { PICKS_POLL_IDS_LIMIT, assertSelectOk } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -26,12 +26,17 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  const selectResult = await supabase
     .from('mlb_pick_poll_events')
     .select('external_game_id, pick')
     .in('external_game_id', ids);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  let data;
+  try {
+    ({ data } = assertSelectOk(selectResult, 'picks.mlbPoll.getPollEvents'));
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+  }
 
   const result: MlbPickPollResult = {};
   for (const id of ids) {

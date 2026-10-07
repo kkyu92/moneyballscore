@@ -75,14 +75,17 @@ async function fetchMlbPickResults(
     .select('external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code')
     .in('external_game_id', externalIds);
 
-  if (scheduleResult.error) {
-    Sentry.captureException(scheduleResult.error, {
+  let scheduleData;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'picks.results.getMlbSchedule'));
+  } catch (e) {
+    Sentry.captureException(e, {
       tags: { layer: 'api-route', route: 'picks-results', league: 'mlb', stage: 'schedule' },
-      extra: { ids_count: externalIds.length, message: scheduleResult.error.message },
+      extra: { ids_count: externalIds.length },
     });
-    throw new Error(scheduleResult.error.message);
+    throw e;
   }
-  const scheduleRows = (scheduleResult.data ?? []) as MlbScheduleRow[];
+  const scheduleRows = (scheduleData ?? []) as MlbScheduleRow[];
   if (scheduleRows.length === 0) return [];
 
   const predResult = await supabase
@@ -93,15 +96,18 @@ async function fetchMlbPickResults(
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id));
 
-  if (predResult.error) {
-    Sentry.captureException(predResult.error, {
+  let predData;
+  try {
+    ({ data: predData } = assertSelectOk(predResult, 'picks.results.getMlbPredictions'));
+  } catch (e) {
+    Sentry.captureException(e, {
       tags: { layer: 'api-route', route: 'picks-results', league: 'mlb', stage: 'predictions' },
-      extra: { ids_count: externalIds.length, message: predResult.error.message },
+      extra: { ids_count: externalIds.length },
     });
-    throw new Error(predResult.error.message);
+    throw e;
   }
   const predByExternalId = new Map(
-    ((predResult.data ?? []) as MlbPredictionRow[])
+    ((predData ?? []) as MlbPredictionRow[])
       .filter((p) => p.external_game_id)
       .map((p) => [p.external_game_id as string, p]),
   );
