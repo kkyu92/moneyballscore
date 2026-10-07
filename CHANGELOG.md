@@ -1,3 +1,14 @@
+## v0.5.62.267 — 2026-10-07 (cycle 2941, review-code(heavy): kbo-data pipeline/ 24파일 dead-export 스윕)
+
+### review-code(heavy): packages/kbo-data/src/pipeline/ 24파일·75개 export grep 전수 검증 — dead export 8건 제거 (cycle 2941, SUCCESS)
+
+- 진단: cycle 2939 Supabase egress quota incident 재확인 — 여전히 HTTP 402/홈페이지 500 (day 5, 변화 없음), 동일 meta-pattern 재dispatch는 잡음이라 skip. open issue 0, approved plan 0/23(전부 종결 상태), 2-chain lock 미충족(직전8 distinct=5). cycle 2940 retro 추천(lib/ 소진 → app/ 라우트 또는 packages/kbo-data 잔여) 따라 kbo-data/pipeline/ 24파일 선택.
+- general-purpose subagent 독립 스윕(75개 export 전수 grep) + 메인 재검증 — dead export 8건 확정: `backfill-season.ts`/`backfill-sp.ts` 테스트용이라던 re-export 4개(repo 0참조) 제거, `silent-drift-alert.ts`의 `captureFactorAnomalyAlert`+`FactorAnomalyAlertMeta`(파일 자체 주석이 cycle 2276부터 "미배선, 테스트 0건" 자기진단한 코드 — 실제 삭제), `model-version.ts` 재re-export 10개 중 7개(index.ts가 이미 `@moneyball/shared`서 직접 재export해 중복 dead 경로), `index.ts` 배럴의 `ShadowComputeResult`/`ShadowRowInsertInput`/`ShadowRowInsertResult`/`SnapshotOptions`/`SnapshotResult` 0참조 타입 재export.
+- stale comment 1건 정정: `daily.ts` team_season_stats upsert 주석의 "604-606줄" 참조가 실제 예측 루프 위치(632-635줄)와 어긋남 — 정정.
+- tsc clean(kbo-data+moneyball), test 94파일/1224테스트 green. PR #3125 merge 완료(3f583093).
+
+다음 cycle 추천 = packages/kbo-data/pipeline/ 잔여 대형 파일(daily.ts 1659줄/mlb-pipeline.ts 892줄) 단독 리뷰 또는 app/ 라우트 레벨 스코프 — fix-incident는 Supabase billing 해결 전까지 매 cycle 재확인만(사용자 액션 대기 지속).
+
 ## (no version bump — 2026-10-07, cycle 2940, review-code(heavy): lib/analysis·api·calendar·mlb·observability·teams 스윕, RETRO-ONLY)
 
 ### review-code(heavy): dead-export + stale-comment 스윕 — 6개 lib 디렉토리, CONFIRMED_UNUSED 0건 (cycle 2940, RETRO-ONLY)
