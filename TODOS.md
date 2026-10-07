@@ -1,4 +1,16 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): components/leaderboard/ 전수 감사, 갭 0건 (cycle 3007, 2026-10-07)
+
+진단: 직전8(2999-3006) distinct=4(fix-incident1+review-code(heavy)5+skill-evolution(forced)1+info-architecture-review1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24. explore-idea saturation 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/24/TODOS Next-Up 섹션 자체 부재/plan#29 Tier4 cycle 2969 체크포인트 이후 변화 없음) — 과거 반복 패턴(cycle 2896/2965/2969) 동일하게 organic idea 부재 skip. gap trigger 4종 전부 미근접 또는 billing-blocked(fix-incident 8/20, op-analysis 39/25 충족하나 egress quota 402 curl 재확인 지속, info-arch 1(cycle 3006 직후), lotto 28/30 cron 둘 다 신선).
+
+`components/leaderboard/` 5파일(LeaderboardClient/LeaderboardTable/LeaderboardJoinModal/LeaderboardSortControl/HallOfFame, TODOS 0 mentions·33일 미커밋) 전수 read. HallOfFame 메달 SVG hex fallback(accent/brand-200/300/500/600/900)을 `globals.css` 실제 토큰과 전수 대조 — 전부 일치. LeaderboardTable 음수 delta 색상(`text-error`)이 DESIGN.md Decisions Log(2026-05-15) 기재 패턴과 일치. `USER_LEADERBOARD_DISPLAY_LIMIT` 소비처(server.ts `.limit()`, SortControl CSS order 배열 크기) 일치 확인.
+
+관찰 1건(비조치): `fetchLeaderboard()`가 명시적 `.order()` 없이 view 내장 `ORDER BY accuracy_pct DESC, total DESC`(migrations 024/026/032)에만 의존 — 실제 오동작 증거 없음(단순 view+LIMIT 구조는 Postgres 플래너가 순서 보존), `feedback_data_only_claims`/hypothetical-scenario-fix 회피 원칙상 수정 보류. 코드 변경 없음(순수 감사 cycle).
+
+**plan#29 Tier4 expiry(2026-10-15, 8일 남음)** — cycle 3006 TODOS 엔트리의 "1일 남음" 표기는 오기(실제 8일), 다음 참조 시 정정 필요. **Supabase egress quota 장애 지속**(65일+, curl 재확인 402) — op-analysis skip.
+
+다음 사이클 추천 = review-code(heavy) 계속(components/accuracy·dashboard·matchup·picks·predictions·reviews 등 저-mention 디렉토리 후보) 또는 fix-incident(gap 9/20) 또는 lotto(gap 29/30, 다음 사이클 근접).
+
 ## 🟡 RETRO-ONLY — info-architecture-review: 30-cycle gap checkpoint (cycle 3006, 2026-10-07)
 
 진단: 직전8(2998-3005) distinct=3 — 2-chain lock 미충족. info-arch gap=30 정확 도달(마지막 발화 cycle 2976) — cycle 2976 체크포인트가 예고한 재도달 지점 그대로. open issue 0건, approved plan 0/23.
