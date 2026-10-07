@@ -2,7 +2,10 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { parseCohortMarkdown, type CohortDoc } from "./parse";
 
-const APP_COHORT_DIR = join(process.cwd(), "data", "op-analysis-cohort");
+// op-analysis-weekly cron (plan #8 Tier 1 M7) 가 실제 박제하는 디렉토리.
+// 과거 "op-analysis-cohort" 디렉토리는 수동 heavy-mode 실행 전용이었고 cycle 1340 이후
+// 미사용 — cron 은 처음부터(cycle 887, commit 9351616c) 이 디렉토리에 박제해왔다.
+const APP_COHORT_DIR = join(process.cwd(), "data", "op-analysis");
 
 const ROOT_COHORT_DIR = join(
   process.cwd(),
@@ -11,8 +14,10 @@ const ROOT_COHORT_DIR = join(
   "apps",
   "moneyball",
   "data",
-  "op-analysis-cohort",
+  "op-analysis",
 );
+
+export const COHORT_FILENAME_REGEX = /^(\d{4}-\d{2}-\d{2})-cohort(-split)?(?:-cycle-(\d+))?\.md$/;
 
 interface CohortFile {
   file: string;
@@ -29,9 +34,9 @@ function resolveCohortDir(): string {
 }
 
 function parseCohortFilename(file: string): { date: string; cycle: number } {
-  const match = file.match(/^(\d{4}-\d{2}-\d{2})-cohort(?:-cycle-(\d+))?\.md$/);
+  const match = file.match(COHORT_FILENAME_REGEX);
   if (!match) return { date: file, cycle: 0 };
-  return { date: match[1], cycle: match[2] ? Number(match[2]) : 0 };
+  return { date: match[1], cycle: match[3] ? Number(match[3]) : 0 };
 }
 
 export function compareCohortFilenames(a: string, b: string): number {
@@ -44,7 +49,7 @@ export function compareCohortFilenames(a: string, b: string): number {
 function listCohortFiles(): string[] {
   const dir = resolveCohortDir();
   return readdirSync(dir)
-    .filter((f) => f.endsWith(".md"))
+    .filter((f) => COHORT_FILENAME_REGEX.test(f))
     .sort(compareCohortFilenames)
     .reverse();
 }
