@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — design-system: accent 색상 토큰 design-tokens.ts 부재 보강 (cycle 2995, 2026-10-07)
+
+진단: 직전8(2987-2994) distinct=1(review-code(heavy) 100%, lock 충족) — review-code(heavy) 제외. fix-incident(9)/info-arch(19)/lotto(cron 둘 다 신선) 전부 미근접. op-analysis 는 Supabase egress quota 402 직접 재확인 지속 차단. DESIGN.md mtime 35일+ trigger + design-system 직전 발화(cycle 2943) 52 사이클 전 — 자연 선택.
+
+DESIGN.md 가 "Accent: #c5a23e" 를 명시 문서화했는데 `design-tokens.ts`(단일 source TS export 레지스트리) 에는 accent export 자체가 없어 `KofiWidget.tsx`·`lotto/opengraph-image.tsx` 가 각자 하드코딩 — cycle 2943 KBO gradient 레지스트리 흡수와 동일 패턴의 미완성 구간. `accent = { DEFAULT, light }` export 추가 + 3개 파일(KofiWidget/lotto OG/predictions OG) 토큰 교체. tsc/eslint clean, vitest 585/585·4617/4617 통과(silent-drift-wave-141 import 순서 수정 1건 포함).
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음). **Supabase egress quota 장애 지속**(cycle 2939~) — op-analysis gap 25+ 초과 지속, DB 복구 즉시 heavy 최우선.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): components/insights·search·ui + STATIC_PAGES 링크 정합성 재감사, 갭 0건 (cycle 2994, 2026-10-07)
 
 진단: 직전8(2986-2993) distinct=2(review-code(heavy)7+fix-incident1) — 2-chain lock 조건 충족이나 fix-incident 포함 lock 무시 예외 적용, 정상 진행. Supabase egress quota 402 재확인(cycle 2939~ 지속) — op-analysis gap=26(25 임계 초과)이나 DB 접근 전제라 여전히 차단. fix-incident(8)/info-arch(18)/lotto(15) 전부 미근접. explore-idea saturation 낮음(review-code dominance). plan#29 상태 불변.

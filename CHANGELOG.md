@@ -1,3 +1,15 @@
+## v0.5.62.320 — 2026-10-07 (cycle 2995, design-system: accent 색상 토큰 design-tokens.ts 부재 보강 SUCCESS)
+
+### design-system: DESIGN.md Accent(#c5a23e/#e2c96b) 문서화됐으나 TS export 레지스트리 누락 — 3곳 분산 하드코딩 흡수 (cycle 2995, SUCCESS)
+
+- 진단: 직전8(2987-2994) distinct=1(review-code(heavy) 100%) — 2-chain lock(실제로는 1-chain) 조건 충족, review-code(heavy) 후보 제외. fix-incident gap=9(2986)·info-arch gap=19(2976)·lotto gap 없음(cron `apps/moneyball/data/lotto-picks/2026-10-10.md`+`lotto-results/2026-10-03.md` 둘 다 신선 확인) 전부 미근접. operational-analysis 는 Supabase egress quota 402 직접 재확인(service-role REST count 호출 자체 402) 지속 — 여전히 차단. explore-idea organic idea 0(plan#29 Tier4 보류 불변, 만료 2026-10-15). DESIGN.md mtime 35일 경과(≥4주 trigger) + design-system 직전 발화 cycle 2943(52 사이클 전, cooldown 충분) — design-system 자연 선택.
+- `src/components src/app` 전체 인라인 hex grep(`#[0-9a-fA-F]{6}`, design-tokens.ts·테스트 제외) 재감사 — 6개 파일 중 `HallOfFame.tsx`(CSS var fallback, 정상 패턴)·`ShareButtons.tsx`(Twitter/Facebook 브랜드 컬러, 디자인 시스템 영역 밖)는 제외, `globals.css`(CSS 정의 원본)도 제외.
+- **발견**: `KofiWidget.tsx`·`lotto/opengraph-image.tsx`가 각각 독립적으로 `#c5a23e`(accent)/`#132d1a`(brand-800)를 하드코딩. DESIGN.md 는 "Accent: #c5a23e (골드)" 를 명시적으로 문서화했는데도 `design-tokens.ts`(파일 상단 주석: "DESIGN.md 색상 토큰의 TS export... 단일 source") 에는 `brand`/`semantic`/`neutral`/`surface` 만 있고 `accent` export 자체가 없었음 — cycle 2943 이 KBO 라우트 21개 gradient 를 레지스트리로 흡수한 것과 동일한 silent drift family(단일 source 미완성 구간).
+- 수정: `design-tokens.ts` 에 `accent = { DEFAULT: "#c5a23e", light: "#e2c96b" }` export 추가. `KofiWidget.tsx`(2곳)·`lotto/opengraph-image.tsx`(accent 2곳 + brand[200] 2곳 + brand[100] 1곳)·`predictions/[date]/opengraph-image.tsx`(brand[100] 1곳) 를 토큰 import 로 교체. 로또 공 번호별 색상 코드(`#facc15`~`#16a34a`, 1~45 공식 구간 배색)는 디자인 토큰 영역 밖이라 변경 제외(cycle 2943 의 `KBO_GRADIENT_LOTTO_135` stop 순서 skip 결정과 동일 범위 판단).
+- 검증: `npx tsc --noEmit` clean, eslint 대상 파일 0 warning, `npx vitest run` 585/585 파일 · 4617/4617 테스트 전부 통과(최초 실행 시 `silent-drift-wave-141.test.ts` 1건 실패 — `predictions/[date]/opengraph-image.tsx` import 순서가 테스트의 `BRAND_GRADIENT_KBO_135 } from "..."` 말단 고정 문자열 매칭을 깨뜨려 `brand` 를 앞으로 재배치 후 재통과 확인).
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~, 본 cycle 직접 재확인) — op-analysis gap 25+ 임계 초과 상태 지속, DB 접근 가능해지는 즉시 heavy 모드 최우선 권장.
+
 ## v0.5.62.319 — 2026-10-07 (cycle 2994, review-code(heavy): components/insights·search·ui + STATIC_PAGES 링크 정합성 재감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): components/insights(AgentVoteCard·DebateTimeline)·search(SearchClient)·ui(navigation-menu) + search STATIC_PAGES 링크 정합성 재감사 — 갭 0건 (cycle 2994, RETRO-ONLY)
