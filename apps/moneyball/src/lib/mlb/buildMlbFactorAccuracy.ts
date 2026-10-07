@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import { FACTOR_LABELS } from '@/lib/predictions/factorLabels';
 import type { FactorAccuracyRow } from '@/lib/accuracy/buildFactorAccuracy';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
@@ -100,7 +101,12 @@ export async function buildMlbFactorAccuracy(locale: 'ko' | 'en' = 'ko'): Promis
     .from('mlb_schedule')
     .select('external_game_id, home_score, away_score')
     .eq('status', 'final');
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbFactorAccuracy mlb_schedule');
+  let scheduleData: ScheduleFinalRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbFactorAccuracy mlb_schedule'));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbFactorAccuracy mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
   if (scheduleRows.length === 0) return [];
 
@@ -113,7 +119,12 @@ export async function buildMlbFactorAccuracy(locale: 'ko' | 'en' = 'ko'): Promis
     .eq('league', 'mlb')
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id));
-  const { data: predData } = assertSelectOk(predResult, 'buildMlbFactorAccuracy predictions');
+  let predData: MlbFactorBreakdownRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(predResult, 'buildMlbFactorAccuracy predictions'));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbFactorAccuracy predictions' });
+  }
 
   const predByExternalId = new Map<string, MlbFactorBreakdownRow>();
   for (const p of (predData ?? []) as MlbFactorBreakdownRow[]) {

@@ -5,6 +5,7 @@ import {
   type MlbTeamCode,
   type SelectResult,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 // KBO buildTeamEloTrend.ts 병렬 구현 (mlb_team_elo_history, migration 047, 이제 팀 프로필
 // 페이지에도 재사용 — 지금까지 matchup 페이지만 소비). KBO 는 buildEloTrend() (전체 30팀
@@ -36,7 +37,12 @@ export async function buildMlbTeamEloTrend(
     .from("mlb_team_elo_history")
     .select("team_code, game_date, elo_rating")
     .order("game_date", { ascending: true })) as SelectResult<EloHistoryRow[]>;
-  const { data } = assertSelectOk(result, `buildMlbTeamEloTrend ${code}`);
+  let data: EloHistoryRow[] | null;
+  try {
+    ({ data } = assertSelectOk(result, `buildMlbTeamEloTrend ${code}`));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/mlb/team', source: 'buildMlbTeamEloTrend' });
+  }
   const rows = data ?? [];
   if (rows.length === 0) return { points: [] };
 

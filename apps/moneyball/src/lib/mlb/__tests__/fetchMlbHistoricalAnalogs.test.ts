@@ -58,12 +58,11 @@ describe("fetchMlbHistoricalAnalogs", () => {
     expect(result).toEqual([]);
   });
 
-  it("schedule select 실패 시 throw (silent drift 회귀 가드)", async () => {
+  it("schedule select 실패 시 throw 대신 빈 배열 degrade (cycle 2949 captureFallback)", async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: "boom" } });
     const { fetchMlbHistoricalAnalogs } = await import("../fetchMlbHistoricalAnalogs");
-    await expect(
-      fetchMlbHistoricalAnalogs("NYY", "BOS", "current-id", "2026-08-18"),
-    ).rejects.toThrow();
+    const result = await fetchMlbHistoricalAnalogs("NYY", "BOS", "current-id", "2026-08-18");
+    expect(result).toEqual([]);
   });
 
   it("home_win_prob + 실제 스코어로 predictedHomeWin/isCorrect derive", async () => {

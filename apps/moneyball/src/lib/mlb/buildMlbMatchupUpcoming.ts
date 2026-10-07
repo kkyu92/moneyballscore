@@ -9,6 +9,7 @@ import {
   type MlbTeamCode,
   type SelectResult,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import type { MlbMatchupPair } from "./mlbCanonicalPair";
 import { deriveMlbOutcome } from "./deriveMlbOutcome";
 
@@ -62,10 +63,15 @@ export async function buildMlbMatchupUpcoming(
     .or(orFilter)
     .order("game_date", { ascending: true })
     .limit(MATCHUP_UPCOMING_LIMIT)) as SelectResult<UpcomingScheduleRow[]>;
-  const { data: scheduleData } = assertSelectOk(
-    scheduleResult,
-    `buildMlbMatchupUpcoming mlb_schedule ${pair.codeA} vs ${pair.codeB}`,
-  );
+  let scheduleData: UpcomingScheduleRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(
+      scheduleResult,
+      `buildMlbMatchupUpcoming mlb_schedule ${pair.codeA} vs ${pair.codeB}`,
+    ));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupUpcoming mlb_schedule' });
+  }
   const rows = scheduleData ?? [];
   if (rows.length === 0) return [];
 
@@ -79,10 +85,15 @@ export async function buildMlbMatchupUpcoming(
       "external_game_id",
       rows.map((r) => r.external_game_id),
     )) as SelectResult<PredRow[]>;
-  const { data: predData } = assertSelectOk(
-    predResult,
-    `buildMlbMatchupUpcoming predictions ${pair.codeA} vs ${pair.codeB}`,
-  );
+  let predData: PredRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(
+      predResult,
+      `buildMlbMatchupUpcoming predictions ${pair.codeA} vs ${pair.codeB}`,
+    ));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupUpcoming predictions' });
+  }
 
   const predByExternalId = new Map<string, PredRow>();
   for (const p of predData ?? []) {

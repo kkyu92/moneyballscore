@@ -5,6 +5,7 @@ import {
   MLB_TEAMS,
   type MlbTeamCode,
 } from '@moneyball/shared';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import {
   computeTeamRecentRecord,
   computeTeamStreak,
@@ -47,7 +48,12 @@ export async function buildMlbTeamStrengthSnapshot(): Promise<MlbTeamStrengthRow
     .eq('status', 'final')
     .order('game_date', { ascending: false });
 
-  const { data } = assertSelectOk(result, 'buildMlbTeamStrengthSnapshot mlb_schedule');
+  let data: MlbScheduleFinalRow[] | null;
+  try {
+    ({ data } = assertSelectOk(result, 'buildMlbTeamStrengthSnapshot mlb_schedule'));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/mlb/analysis', source: 'buildMlbTeamStrengthSnapshot mlb_schedule' });
+  }
   const rows = (data ?? []) as MlbScheduleFinalRow[];
   if (rows.length === 0) return [];
 

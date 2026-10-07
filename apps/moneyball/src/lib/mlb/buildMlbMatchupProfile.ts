@@ -25,6 +25,7 @@ import {
   VENUE_SPLIT_MIN_GAP_PCT,
   WIN_LOSS_STREAK_MIN_LENGTH,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import type { MlbMatchupPair } from "./mlbCanonicalPair";
 import { deriveMlbOutcome } from "./deriveMlbOutcome";
 
@@ -327,10 +328,15 @@ export async function buildMlbMatchupProfile(
     .select("id, external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code")
     .or(orFilter)
     .order("game_date", { ascending: false })) as SelectResult<ScheduleRow[]>;
-  const { data: scheduleData } = assertSelectOk(
-    scheduleResult,
-    `buildMlbMatchupProfile mlb_schedule ${pair.codeA} vs ${pair.codeB}`,
-  );
+  let scheduleData: ScheduleRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(
+      scheduleResult,
+      `buildMlbMatchupProfile mlb_schedule ${pair.codeA} vs ${pair.codeB}`,
+    ));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupProfile mlb_schedule' });
+  }
   const scheduleRows = scheduleData ?? [];
 
   const emptyResult: MlbMatchupProfile = {
@@ -379,10 +385,15 @@ export async function buildMlbMatchupProfile(
       "external_game_id",
       scheduleRows.map((s) => s.external_game_id),
     )) as SelectResult<PredRow[]>;
-  const { data: predData } = assertSelectOk(
-    predResult,
-    `buildMlbMatchupProfile predictions ${pair.codeA} vs ${pair.codeB}`,
-  );
+  let predData: PredRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(
+      predResult,
+      `buildMlbMatchupProfile predictions ${pair.codeA} vs ${pair.codeB}`,
+    ));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupProfile predictions' });
+  }
 
   const predByExternalId = new Map<string, PredRow>();
   for (const p of predData ?? []) {

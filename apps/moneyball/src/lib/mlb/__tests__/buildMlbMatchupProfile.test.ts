@@ -213,19 +213,20 @@ describe("buildMlbMatchupProfile — pre_game prediction 누락 final 경기 rec
 });
 
 describe("buildMlbMatchupProfile — silent drift family `.error` 미체크 회귀 가드", () => {
-  it("mlb_schedule select error → assertSelectOk throw (silent 빈 프로필 fallback 차단)", async () => {
+  it("mlb_schedule select error → throw 대신 빈 프로필 degrade (cycle 2949 captureFallback)", async () => {
     supabaseMock = makeSupabaseMock([], [], {
       scheduleError: { message: "connection refused" },
     });
 
     const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
     const pair = mlbCanonicalPair("NYY", "BOS")!;
-    await expect(buildMlbMatchupProfile(pair)).rejects.toThrow(
-      /buildMlbMatchupProfile mlb_schedule .* select failed: connection refused/,
-    );
+    const profile = await buildMlbMatchupProfile(pair);
+    expect(profile.finalGames).toBe(0);
+    expect(profile.games).toEqual([]);
+    expect(profile.streak).toBeNull();
   });
 
-  it("predictions select error → assertSelectOk throw (silent 빈 record 위장 차단)", async () => {
+  it("predictions select error → throw 대신 record 는 유지, AI 예측 정확도만 0 degrade (cycle 2949 captureFallback)", async () => {
     const schedule: ScheduleFixture[] = [
       {
         id: 9201,
@@ -244,9 +245,9 @@ describe("buildMlbMatchupProfile — silent drift family `.error` 미체크 회�
 
     const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
     const pair = mlbCanonicalPair("NYY", "BOS")!;
-    await expect(buildMlbMatchupProfile(pair)).rejects.toThrow(
-      /buildMlbMatchupProfile predictions .* select failed: syntax error/,
-    );
+    const profile = await buildMlbMatchupProfile(pair);
+    expect(profile.finalGames).toBe(1);
+    expect(profile.predictionAccuracy).toEqual({ verified: 0, correct: 0, rate: null });
   });
 });
 

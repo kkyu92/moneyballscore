@@ -9,6 +9,7 @@ import {
   type MlbTeamCode,
   type SelectResult,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { deriveMlbOutcome } from "./deriveMlbOutcome";
 
 interface MlbTeamUpcomingGame {
@@ -57,10 +58,15 @@ export async function buildMlbTeamUpcoming(
     .or(`home_team_code.eq.${dbTeamCode},away_team_code.eq.${dbTeamCode}`)
     .order("game_date", { ascending: true })
     .limit(TEAM_UPCOMING_LIMIT)) as SelectResult<UpcomingScheduleRow[]>;
-  const { data: scheduleData } = assertSelectOk(
-    scheduleResult,
-    `buildMlbTeamUpcoming mlb_schedule ${teamCode}`,
-  );
+  let scheduleData: UpcomingScheduleRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(
+      scheduleResult,
+      `buildMlbTeamUpcoming mlb_schedule ${teamCode}`,
+    ));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/team', source: 'buildMlbTeamUpcoming mlb_schedule' });
+  }
   const rows = scheduleData ?? [];
   if (rows.length === 0) return [];
 
@@ -74,10 +80,15 @@ export async function buildMlbTeamUpcoming(
       "external_game_id",
       rows.map((r) => r.external_game_id),
     )) as SelectResult<PredRow[]>;
-  const { data: predData } = assertSelectOk(
-    predResult,
-    `buildMlbTeamUpcoming predictions ${teamCode}`,
-  );
+  let predData: PredRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(
+      predResult,
+      `buildMlbTeamUpcoming predictions ${teamCode}`,
+    ));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/team', source: 'buildMlbTeamUpcoming predictions' });
+  }
 
   const predByExternalId = new Map<string, PredRow>();
   for (const p of predData ?? []) {

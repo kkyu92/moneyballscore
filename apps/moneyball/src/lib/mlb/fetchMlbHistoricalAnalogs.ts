@@ -7,6 +7,7 @@ import {
   ANALOG_MATCHUP_LIMIT,
   type MlbTeamCode,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { deriveMlbOutcome } from "./deriveMlbOutcome";
 
 interface MlbAnalogGame {
@@ -67,7 +68,12 @@ export async function fetchMlbHistoricalAnalogs(
     .order("game_date", { ascending: false })
     .limit(limit);
 
-  const { data: scheduleData } = assertSelectOk(scheduleResult, "fetchMlbHistoricalAnalogs mlb_schedule");
+  let scheduleData: ScheduleRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, "fetchMlbHistoricalAnalogs mlb_schedule"));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/game', source: 'fetchMlbHistoricalAnalogs mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as ScheduleRow[];
   if (scheduleRows.length === 0) return [];
 
@@ -82,7 +88,12 @@ export async function fetchMlbHistoricalAnalogs(
       scheduleRows.map((s) => s.external_game_id),
     );
 
-  const { data: predData } = assertSelectOk(predResult, "fetchMlbHistoricalAnalogs predictions");
+  let predData: PredRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(predResult, "fetchMlbHistoricalAnalogs predictions"));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/game', source: 'fetchMlbHistoricalAnalogs predictions' });
+  }
   const predByExternalId = new Map<string, PredRow>();
   for (const p of (predData ?? []) as PredRow[]) {
     if (p.external_game_id) predByExternalId.set(p.external_game_id, p);

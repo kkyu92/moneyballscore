@@ -24,6 +24,7 @@ import {
   type TeamRecentRecord,
 } from '@/lib/teams/buildTeamProfile';
 import { computeCurrentKSTYear } from '@/lib/seasons/buildSeasonSummary';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
 interface MlbTeamRecentGame {
@@ -139,9 +140,11 @@ function safeAvg(sum: number, n: number): number | null {
 }
 
 // Plan B Tier C+D Task 3 — MLB 팀 프로필 빌더. KBO buildTeamProfile.ts 패턴 정합:
-// - assertSelectOk wrap (silent drift family 차단)
 // - mlb_schedule + predictions(external_game_id) 조인 (pre_game 만)
 // - 14 factor (KBO 10 + Statcast 4 부분 — xwOBA / Barrel%) 집계
+// assertSelectOk degrade wrap (silent drift family 차단) 은 cycle 2949 develop-cycle 감사에서
+// 본 함수 3개 호출 전부 uncaught 상태였던 것을 확인해 이번 패스에서 추가 (기존 주석은
+// "이미 wrap 됨" 으로 오기재돼있었음 — 실제로는 미적용 상태였음).
 //
 // cycle 2066 fix (사례 22 후속) — `teams`/`games` FK 는 MLB row 가 0건이라
 // teamId 가 항상 null 이 되어 이 함수가 항상 emptyProfile 만 반환했음(프로덕션
@@ -201,7 +204,12 @@ export async function buildMlbTeamProfile(
     .eq('team_code', teamCode)
     .eq('season', season)
     .maybeSingle();
-  const { data: statsRow } = assertSelectOk(statsResult, 'buildMlbTeamProfile mlb_team_stats');
+  let statsRow: BattedBallStatsRow | null;
+  try {
+    ({ data: statsRow } = assertSelectOk(statsResult, 'buildMlbTeamProfile mlb_team_stats'));
+  } catch (err) {
+    statsRow = captureFallback(err, null, { route: '/mlb/team', source: 'buildMlbTeamProfile mlb_team_stats' });
+  }
   const battedBall = statsRow as BattedBallStatsRow | null;
   const battedBallProfile: MlbBattedBallProfile | null = battedBall
     ? {
@@ -226,7 +234,12 @@ export async function buildMlbTeamProfile(
     .select('id, external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code')
     .or(`home_team_code.eq.${dbTeamCode},away_team_code.eq.${dbTeamCode}`);
 
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbTeamProfile mlb_schedule');
+  let scheduleData: ScheduleRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbTeamProfile mlb_schedule'));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/team', source: 'buildMlbTeamProfile mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as ScheduleRow[];
 
   if (scheduleRows.length === 0) return { ...emptyProfile, battedBallProfile };
@@ -255,7 +268,12 @@ export async function buildMlbTeamProfile(
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', Array.from(scheduleByExternalId.keys()));
 
-  const { data } = assertSelectOk(predResult, 'buildMlbTeamProfile predictions');
+  let data: PredRow[] | null;
+  try {
+    ({ data } = assertSelectOk(predResult, 'buildMlbTeamProfile predictions'));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/mlb/team', source: 'buildMlbTeamProfile predictions' });
+  }
 
   const predByExternalId = new Map<string, PredRow>();
   for (const p of (data ?? []) as PredRow[]) {

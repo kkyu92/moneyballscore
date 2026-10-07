@@ -52,10 +52,11 @@ describe('buildAllMlbTeamAccuracy', () => {
     expect(result).toEqual([]);
   });
 
-  it('schedule select 실패 시 throw (silent drift family 회귀 가드)', async () => {
+  it('schedule select 실패 시 throw 대신 빈 배열 degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { buildAllMlbTeamAccuracy } = await import('../buildMlbTeamAccuracy');
-    await expect(buildAllMlbTeamAccuracy()).rejects.toThrow();
+    const result = await buildAllMlbTeamAccuracy();
+    expect(result).toEqual([]);
   });
 
   it('홈/원정 양팀에 동일 판정을 집계 (경기 관련 팀 기준, KBO 정합)', async () => {
@@ -119,10 +120,11 @@ describe('buildMlbMatchupData', () => {
     expect(result).toEqual({ matchups: [], homeAway: [] });
   });
 
-  it('schedule select 실패 시 throw (silent drift family 회귀 가드)', async () => {
+  it('schedule select 실패 시 throw 대신 빈 matchups/homeAway degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
-    await expect(buildMlbMatchupData()).rejects.toThrow();
+    const result = await buildMlbMatchupData();
+    expect(result).toEqual({ matchups: [], homeAway: [] });
   });
 
   it('상대전적 양방향 집계 + 홈/원정 split', async () => {
@@ -176,10 +178,11 @@ describe('buildMlbTeamBiasAnalysis', () => {
     expect(result).toEqual([]);
   });
 
-  it('schedule select 실패 시 throw (silent drift family 회귀 가드)', async () => {
+  it('schedule select 실패 시 throw 대신 빈 배열 degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
-    await expect(buildMlbTeamBiasAnalysis()).rejects.toThrow();
+    const result = await buildMlbTeamBiasAnalysis();
+    expect(result).toEqual([]);
   });
 
   it('biasGap = predictedWinRate - actualWinPct, 실제 승패는 mlb_schedule final 스코어로 직접 derive (외부 standings 불필요)', async () => {

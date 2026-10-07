@@ -52,10 +52,11 @@ describe('buildMlbFactorAccuracy', () => {
     expect(result).toEqual([]);
   });
 
-  it('schedule select 실패 시 throw (silent drift family 회귀 가드)', async () => {
+  it('schedule select 실패 시 throw 대신 빈 배열 degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    await expect(buildMlbFactorAccuracy()).rejects.toThrow();
+    const result = await buildMlbFactorAccuracy();
+    expect(result).toEqual([]);
   });
 
   it('lower-is-better(FIP) 팩터는 낮은 쪽 팀을 우세로 판정', async () => {

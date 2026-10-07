@@ -9,6 +9,7 @@ import {
   type MlbLeagueSide,
   type MlbDivisionSide,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 // mlb/standings 전용 — 자체 datasource(별도 스크래퍼) 통합 대신 이미 수집된 mlb_schedule
 // (final 경기 home_score/away_score, MLB statsapi 원본) 로 W-L/GB 를 직접 계산.
@@ -44,7 +45,12 @@ export async function buildMlbDivisionStandings(): Promise<MlbDivisionStandings>
     .select("home_team_code, away_team_code, home_score, away_score")
     .eq("league", "mlb")
     .eq("status", "final");
-  const { data } = assertSelectOk(result, "buildMlbDivisionStandings mlb_schedule");
+  let data: MlbScheduleFinalRow[] | null;
+  try {
+    ({ data } = assertSelectOk(result, "buildMlbDivisionStandings mlb_schedule"));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/mlb/standings', source: 'buildMlbDivisionStandings mlb_schedule' });
+  }
   const rows = (data ?? []) as MlbScheduleFinalRow[];
 
   const record = new Map<MlbTeamCode, { wins: number; losses: number }>();

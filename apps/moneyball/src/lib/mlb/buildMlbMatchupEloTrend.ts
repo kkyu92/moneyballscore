@@ -6,6 +6,7 @@ import {
   type MlbTeamCode,
   type SelectResult,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 // KBO buildMatchupEloTrend.ts 병렬 구현 (plan #25 Phase 2b step 2). KBO 는 predictions.home_elo/
 // away_elo 스냅샷을 재사용하지만 MLB 는 전용 mlb_team_elo_history 테이블(migration 047)에서
@@ -45,7 +46,12 @@ export async function buildMlbMatchupEloTrend(
     .select("team_code, game_date, elo_rating")
     .in("team_code", [dbCodeA, dbCodeB])
     .order("game_date", { ascending: true })) as SelectResult<EloHistoryRow[]>;
-  const { data } = assertSelectOk(result, `buildMlbMatchupEloTrend ${codeA} vs ${codeB}`);
+  let data: EloHistoryRow[] | null;
+  try {
+    ({ data } = assertSelectOk(result, `buildMlbMatchupEloTrend ${codeA} vs ${codeB}`));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupEloTrend' });
+  }
   const rows = data ?? [];
   if (rows.length === 0) return { points: [] };
 

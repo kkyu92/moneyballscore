@@ -80,10 +80,11 @@ describe("buildMlbMatchupEloTrend", () => {
     expect(points).toEqual([]);
   });
 
-  it("select error 시 throw (assertSelectOk silent drop 방지)", async () => {
+  it("select error 시 throw 대신 points: [] degrade (cycle 2949 captureFallback)", async () => {
     supabaseMock = makeSupabaseMock([], { message: "boom" });
 
     const { buildMlbMatchupEloTrend } = await import("../buildMlbMatchupEloTrend");
-    await expect(buildMlbMatchupEloTrend("NYY", "BOS")).rejects.toThrow();
+    const { points } = await buildMlbMatchupEloTrend("NYY", "BOS");
+    expect(points).toEqual([]);
   });
 });

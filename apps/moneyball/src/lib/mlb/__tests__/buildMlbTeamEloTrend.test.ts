@@ -80,10 +80,11 @@ describe("buildMlbTeamEloTrend", () => {
     expect(points).toEqual([]);
   });
 
-  it("select error 시 throw (assertSelectOk silent drop 방지)", async () => {
+  it("select error 시 throw 대신 points: [] degrade (cycle 2949 captureFallback)", async () => {
     supabaseMock = makeSupabaseMock([], { message: "boom" });
 
     const { buildMlbTeamEloTrend } = await import("../buildMlbTeamEloTrend");
-    await expect(buildMlbTeamEloTrend("NYY")).rejects.toThrow();
+    const { points } = await buildMlbTeamEloTrend("NYY");
+    expect(points).toEqual([]);
   });
 });

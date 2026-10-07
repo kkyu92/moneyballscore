@@ -65,10 +65,12 @@ describe('buildMlbCommunityVsAI', () => {
     expect(result.communityAccuracy).toBeNull();
   });
 
-  it('poll select 실패 시 throw (silent drift family 회귀 가드)', async () => {
+  it('poll select 실패 시 throw 대신 빈 결과 degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({ pollError: { message: 'boom' } });
     const { buildMlbCommunityVsAI } = await import('../buildMlbCommunityAccuracy');
-    await expect(buildMlbCommunityVsAI()).rejects.toThrow();
+    const result = await buildMlbCommunityVsAI();
+    expect(result.communityGames).toBe(0);
+    expect(result.communityAccuracy).toBeNull();
   });
 
   it('final 경기 없으면 빈 결과', async () => {
