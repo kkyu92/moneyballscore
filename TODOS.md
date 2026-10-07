@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): mlb-retro recent_form/head_to_head 재배선 (cycle 2960, 2026-10-07)
+
+진단: op-analysis gap=36(≥25)이나 Supabase egress quota 402 재확인(curl 직접 재검증, day21+ 변화 없음) 저가치. 2-chain lock 미충족(직전8 distinct=3). design-system(DESIGN.md mtime 35일 trigger)도 토큰 grep 재검사 결과 신규 drift 0건. cycle 2959 와 유사한 MLB 영역(mlb-pipeline.ts/mlb-retro.ts) 직접 code read.
+
+- `mlb-pipeline.ts`는 cycle 2353 부터 `predictions.home_recent_form`/`away_recent_form`/`head_to_head_rate`를 실측 영속화해왔지만, `mlb-retro.ts`의 `buildMlbFactors()`는 이 컬럼을 select 하지 않고 하드코딩 중립값(`recent_form={home:50,away:50}`/`head_to_head={homeWinRate:0.5}`)을 계속 사용 — agent_memories 오답 학습 시 두 factor 가 항상 bias=0 으로 maxBias 후보에서 구조적으로 배제됨. cycle 2822 가 이미 발견했으나 "별도 스코프"로 보류됐던 항목.
+- `park_factor`/`elo` 와 동일 패턴으로 재배선: `MlbPredictionRow` 필드 추가 → select 목록 갱신 → `MEMORY_CANDIDATE_KEYS`에 추가(null 이면 자연 제외). recent_form 은 DB 저장 스케일(0-1)을 `*100` 변환해 computeMlbFactorContributions 스케일과 일치.
+- 신규 테스트 3건으로 재배선 검증. kbo-data 94 test files / 1230 tests 통과, type-check/lint clean.
+
 ## 🟢 SUCCESS — review-code(heavy): validator_logs.game_id 영구 NULL 버그 수정 (cycle 2959, 2026-10-07)
 
 진단: op-analysis gap=35(≥25) 충족하나 Supabase egress quota 402 지속(day20+, 변화 없음) 확인 후 하네스 재실행 불가. 직전8 distinct=4(2-chain lock 미충족). cycle 2958 이 risk 상승 우려로 보류한 `context.game as any).id` 패턴을 직접 조사.

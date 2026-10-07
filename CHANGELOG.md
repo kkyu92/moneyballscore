@@ -1,3 +1,12 @@
+## v0.5.62.285 — 2026-10-07 (cycle 2960, review-code(heavy): mlb-retro recent_form/head_to_head 재배선 SUCCESS)
+
+### review-code(heavy): mlb-retro.ts agent-memory recent_form/head_to_head 하드코딩 중립값 재배선 (cycle 2960, SUCCESS)
+
+- 진단: op-analysis gap=36(≥25)이나 Supabase egress quota 402 재확인(day21+, 변화 없음) — 직접 curl 재검증으로 미해결 지속 확인. 2-chain lock 미충족(직전8 distinct=3). design-system(DESIGN.md mtime 35일, ≥4주 trigger)도 토큰 grep 재검사 결과 신규 drift 0건(Twitter/Facebook 브랜드색/OG 이미지/CSS 변수 정의 전부 기존에 확인된 legitimate case). review-code(heavy)로 cycle 2959 이 다룬 KBO `GameContext` 재배선과 유사한 MLB 영역(mlb-pipeline.ts 889줄, mlb-retro.ts 203줄) 직접 code read.
+- `mlb-pipeline.ts`는 cycle 2353 부터 `predictions.home_recent_form`/`away_recent_form`/`head_to_head_rate` 컬럼에 실측값을 영속화해왔지만, `mlb-retro.ts`의 `buildMlbFactors()`는 이 컬럼을 select 하지 않고 `recent_form={home:50,away:50}`/`head_to_head={homeWinRate:0.5}` 하드코딩 중립값을 그대로 사용 — agent_memories 오답 학습 시 두 factor 가 항상 bias=0 으로 계산돼 `maxBias` 후보에서 구조적으로 배제되고 있었음. review-code(heavy) cycle 2822 가 이미 발견했으나 "별도 스코프"로 보류된 항목.
+- `park_factor`/`elo` 와 동일한 재배선 패턴 적용: `MlbPredictionRow`에 3개 필드 추가 → `MLB_MEMORY_PREDICTION_COLUMNS` select 목록 갱신 → `MEMORY_CANDIDATE_KEYS`에 `recent_form`/`head_to_head` 추가, null 이면 자연 제외(가짜 bias 방지 원칙 유지). recent_form 은 DB 저장 스케일(0-1 fraction)을 mlb-pipeline.ts 와 동일하게 `*100` 변환.
+- 신규 테스트 3건(recent_form만 존재 시 maxBias 채택 / head_to_head만 존재 시 maxBias 채택 / 둘 다 null 시 upsert 0건)으로 재배선 검증. kbo-data 94 test files / 1230 tests 전체 통과, type-check/lint clean.
+
 ## v0.5.62.284 — 2026-10-07 (cycle 2959, review-code(heavy): validator_logs.game_id 영구 NULL 버그 수정 — context.game as any 패턴 4건 SUCCESS)
 
 ### review-code(heavy): GameContext.dbGameId 신규 필드로 validator_logs FK 버그 수정 (cycle 2959, SUCCESS)
