@@ -1631,11 +1631,11 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-300 dark:text-gray-700">·</span>
                               <span className="text-gray-400 dark:text-gray-500">
                                 수비{' '}
-                                {g.awaySfr != null ? (
+                                {g.awaySfr != null && g.awaySfr !== 0 ? (
                                   <span className={`font-mono tabular-nums text-2xs ${statColorClassHigherBetter(g.awaySfr, SFR_STRONG, SFR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awaySfr >= 0 ? '+' : ''}{g.awaySfr.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
-                                {g.homeSfr != null ? (
+                                {g.homeSfr != null && g.homeSfr !== 0 ? (
                                   <span className={`font-mono tabular-nums text-2xs ${statColorClassHigherBetter(g.homeSfr, SFR_STRONG, SFR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeSfr >= 0 ? '+' : ''}{g.homeSfr.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
