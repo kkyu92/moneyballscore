@@ -164,8 +164,17 @@ describe('sitemap MLB URL coverage', () => {
 
   it('includes /insights/series/[topic] 45 canonical team-pair slugs (W-SEO, cycle 2580 review-code carry-over: regression coverage 공백)', async () => {
     const urls = await sitemap();
-    const seriesUrls = urls.filter((u) => /\/insights\/series\/[a-z]{2,3}-vs-[a-z]{2,3}$/.test(u.url));
+    // KBO 전용 — /mlb/insights/series(plan #30 Phase 3) 와 경로 구분 위해 도메인 바로 뒤
+    // /insights/series/ 로 앵커(= /mlb/insights/series 는 "/insights/series/" 부분 문자열을
+    // 포함하므로 앵커 없인 435+435 MLB 라우트까지 같이 잡혀 915 로 집계됨, cycle 2938 발견).
+    const seriesUrls = urls.filter((u) => /^https?:\/\/[^/]+\/insights\/series\/[a-z]{2}-vs-[a-z]{2}$/.test(u.url));
     expect(seriesUrls.length).toBe(45);
+  });
+
+  it('includes /mlb/insights/series/[topic] 435 canonical team-pair slugs (plan #30 Phase 3, cycle 2938)', async () => {
+    const urls = await sitemap();
+    const mlbSeriesUrls = urls.filter((u) => /^https?:\/\/[^/]+\/mlb\/insights\/series\/[a-z]{3}-vs-[a-z]{3}$/.test(u.url));
+    expect(mlbSeriesUrls.length).toBe(435);
   });
 });
 
@@ -212,6 +221,12 @@ describe('sitemap /en/mlb/* English mirror URL coverage', () => {
     const enMatchup = urls.filter((u) => /\/en\/mlb\/matchup\/[A-Z]{2,3}\/[A-Z]{2,3}$/.test(u.url));
     expect(enMatchup.length).toBe(435);
     expect(enMatchup.find((u) => u.url.endsWith('/en/mlb/matchup/LAD/NYY'))).toBeDefined();
+  });
+
+  it('/en/mlb/insights/series/[topic] 435 canonical team-pair slugs (plan #30 Phase 3, cycle 2938)', async () => {
+    const urls = await sitemap();
+    const enSeriesUrls = urls.filter((u) => /^https?:\/\/[^/]+\/en\/mlb\/insights\/series\/[a-z]{3}-vs-[a-z]{3}$/.test(u.url));
+    expect(enSeriesUrls.length).toBe(435);
   });
 
   it('/en/mlb/games/[date]/[slug] mirror present (cycle 2100 info-arch)', async () => {

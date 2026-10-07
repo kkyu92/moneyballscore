@@ -6,7 +6,7 @@ import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
 import { mlbAllPairs } from '@/lib/mlb/mlbCanonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
-import { listMlbInsightsDates } from '@/app/mlb/insights/insights-data';
+import { listMlbInsightsDates, listMlbSeriesTopics } from '@/app/mlb/insights/insights-data';
 import { listSeriesTopics } from '@/lib/insights/series';
 import { listArchiveDates } from '@/lib/lotto/archive';
 import { computeCurrentKSTYear } from '@/lib/seasons/buildSeasonSummary';
@@ -452,6 +452,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
+  // /mlb/insights/series/[topic] + EN mirror — plan #30 Phase 3, 435 team-pair slug
+  // (mlb/matchup 처럼 generateStaticParams 없는 on-demand ISR 이라 sitemap 이 유일한 discovery 경로).
+  const mlbInsightsSeriesRoutes: MetadataRoute.Sitemap = listMlbSeriesTopics().map(
+    (topic) => ({
+      url: `${SITE_URL}/mlb/insights/series/${topic.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+    }),
+  );
+  const enMlbInsightsSeriesRoutes: MetadataRoute.Sitemap = listMlbSeriesTopics().map(
+    (topic) => ({
+      url: `${SITE_URL}/en/mlb/insights/series/${topic.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.45,
+    }),
+  );
+
   return [
     ...staticRoutes,
     ...seasonYearRoutes,
@@ -481,6 +500,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...mlbInsightsDateRoutes,
     ...enMlbInsightsDateRoutes,
     ...insightsSeriesRoutes,
+    ...mlbInsightsSeriesRoutes,
+    ...enMlbInsightsSeriesRoutes,
     ...lottoArchiveRoutes,
   ];
 }
