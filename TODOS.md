@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): components/players·seasons·standings·teams 0회-감사 축 전수 재감사, 갭 0건 (cycle 2989, 2026-10-07)
+
+진단: 직전8(2981-2988) distinct=3, 2-chain lock 미충족. fix-incident(3)/op-analysis(21, Supabase egress quota 402 직접 재확인 여전히 차단)/info-arch(13)/lotto(10, cron 산출물 둘 다 신선) 전부 gap 미근접. explore-idea saturation 13/15 충족하나 organic idea 0(plan#29 만 spec_only_deferred, 미승인) 지속.
+
+디렉토리별 git log grep 으로 `components/players`·`seasons`·`standings`·`teams` 4개가 review-code(heavy) 역사상 0회 감사 확인 → 6개 파일(PitcherFipTrend/SeasonStandingsSortControl/TeamAccuracySortControl/TeamEloChart+MlbTeamEloChart/TeamConvergencePickRecord+MlbTeamConvergencePickRecord/TeamRecentGamesFilter) 전수 read. cycle 2988 과 동일 버그 클래스(EN locale 배선 누락) 재검증 포함 — `/en/mlb/team/[code]` 가 locale="en" 정확히 전달 확인. actionable 버그 0건, 코드 변경 0.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~, 본 cycle 직접 재확인).
+
 ## 🟢 SUCCESS — review-code(heavy): EN MLB reviews 페이지 공유버튼 한글 라벨 노출 수정 (cycle 2988, 2026-10-07)
 
 진단: 직전8(2980-2987) distinct=3, 2-chain lock 미충족. fix-incident/op-analysis/info-arch/lotto gap 전부 미근접. explore-idea saturation 13/15 충족하나 organic idea 0(plan#29 Tier4 불변) 지속. open PR 8건(전부 dependabot) CI check green, Vercel preview rate-limit만(실제 이슈 아님). `components/share`·`components/live` 완전 미탐색 확인 → 직접 read.
