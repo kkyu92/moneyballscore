@@ -1,4 +1,16 @@
 
+## 🔵 RETRO-ONLY — info-architecture-review: 30-cycle gap checkpoint 10연속 "현 IA 충분" 재확정 (cycle 2976, 2026-10-07)
+
+진단: info-arch gap=54(trigger 30 대폭 초과, 마지막 발화 cycle 2922). 직전8(2968-2975) distinct=4, 2-chain lock 미충족이나 review-code(heavy) 5연속 streak 다양성 redirect 겸 선택. fix-incident/operational-analysis/lotto(cron 건강) 전부 gap 미근접. plan#29 Tier4 대기 지속(만료 2026-10-15).
+
+`git log --diff-filter=A` 로 cycle 2922 체크포인트 이후 신규 라우트 6건 발견(plan #30 MLB 인사이트 아카이브 Phase 1~3, cycle 2936-2938) — 54 사이클 만에 첫 신규 라우트. header/footer/sitemap 실제 내용 grep 대조 + breadcrumb 개별 검증 결과 전부 ship 시점 배선 완료 확인, 신규 gap 0건. breadcrumb 누락 18건 cycle 2922 수치와 동일.
+
+"현 IA 충분" 10연속 재확정 (`docs/design/ia-2026-10-07-cycle-2976-30-cycle-gap-checkpoint.md`). 코드 변경 0.
+
+**plan#29 상태 변화 없음** (`~/.develop-cycle/plans/moneyballscore/29.md`, 만료 2026-10-15) — 사용자 결정 여전히 대기 중.
+
+다음 사이클 추천 = 사용자 plan#29 결정 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(engine/features/factors/context/backtest/analytics) 또는 2-chain lock 자연 해제 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): kbo-live.ts 스코어 파싱 ground-truth 오염 위험 + kbo-pitcher.ts silent NaN fallback 수정 (cycle 2975, 2026-10-07)
 
 진단: 직전8(2967-2974) distinct=4, 2-chain lock 미충족. fix-incident/operational-analysis/info-arch/lotto(cron 건강 확인)/design-system/explore-idea(plan#29 대기) 전부 gap 미근접/저가치. review-code(heavy) 가 cycle 2972~2974 3연속 추천한 `packages/kbo-data/src/scrapers/` 선택.

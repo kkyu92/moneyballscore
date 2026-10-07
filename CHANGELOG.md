@@ -1,3 +1,12 @@
+## v0.5.62.301 — 2026-10-07 (cycle 2976, info-architecture-review: 30-cycle gap checkpoint 10연속 "현 IA 충분" 재확정 RETRO-ONLY)
+
+### info-architecture-review: 54-cycle gap 체크포인트 — 신규 라우트 6건 발견, ship 시점 배선 완료 확인 (cycle 2976, RETRO-ONLY)
+
+- 진단: info-arch 마지막 발화 cycle 2922(54 사이클 경과, 30-cycle trigger 대폭 초과). 직전8(2968-2975) distinct=4, 2-chain lock 미충족이나 review-code(heavy) 5연속 streak 다양성 redirect 겸 info-arch 압도적 gap 우선 선택. fix-incident 5/20·operational-analysis 7/25·lotto(cron 산출물 건강 확인) 전부 미근접. open issue 0건, approved plan 0/23(plan#29 Tier4 여전히 대기, 만료 2026-10-15).
+- `git log --diff-filter=A 185168cc(cycle 2922 체크포인트)..HEAD -- '*page.tsx'` 실측 — 54 사이클 만에 처음으로 신규 라우트 6건(plan #30 MLB AI 인사이트 아카이브 Phase 1~3: `mlb/insights` + `[date]` + `series/[topic]` KO/EN). 이전 9회 체크포인트는 전부 "신규 라우트 0건" 구간이라 간접 확인(nav 파일 커밋 존재 여부)만으로 충분했으나, 이번엔 실제 header/footer/sitemap 파일 내용 직접 grep 대조 + breadcrumb 개별 검증 수행.
+- 결과: `apps/moneyball/src/components/layout/{Header,Footer}.tsx` + `sitemap.ts` + `search/page.tsx` 전부 `mlb/insights` 배선 확인, 신규 6개 라우트 전부 Breadcrumb 보유 — ship 시점에 이미 완료(cycle 2153 recurring gap family 재발 차단 원칙 실제 작동 evidence). breadcrumb 누락 18건은 cycle 2922 수치와 완전 일치(신규 gap 0건).
+- 결론: "현 IA 충분" 10연속 재확정(2679→...→2922→2976). 코드 변경 0 (체크포인트 문서만). 다음 30-cycle 재도달(cycle 3006 근방) 전까지 재확인 불필요.
+
 ## v0.5.62.300 — 2026-10-07 (cycle 2975, review-code(heavy): kbo-live.ts 스코어 파싱 ground-truth 오염 위험 + kbo-pitcher.ts silent NaN fallback 수정 SUCCESS)
 
 ### review-code(heavy): packages/kbo-data/src/scrapers 신규 스코프 감사 — 2건 수정 (cycle 2975, SUCCESS)
