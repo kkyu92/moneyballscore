@@ -1,3 +1,16 @@
+## v0.5.62.308 — 2026-10-07 (cycle 2983, review-code(heavy): accuracy/dashboard/insights/matchup/picks/predictions/reviews/seasons/standings/stats/supabase 재감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): 저피감사 스코프 11개 디렉토리 전수 재감사 — 갭 0건 (cycle 2983, RETRO-ONLY)
+
+- 진단: 직전8(2975-2982) distinct=3(review-code(heavy)6+info-architecture-review1+lotto(lite)1), 2-chain lock 미충족. fix-incident gap=13/20·op-analysis gap=15/25·lotto gap=4/30·info-arch gap=7/30 전부 미근접. explore-idea saturation 12/15 충족하나 organic idea 0(open issue 0, plan#29 Tier4 불변·만료 2026-10-15 — 사용자 결정 여전히 대기) 지속. skill-evolution trigger5 미충족(직전20 review-code 13/20, 0회 아님), milestone(2983%50=33) 미도달, ship-0 미충족(직전10 success 다수). cycle 2982 추천 스코프(accuracy/dashboard/insights/matchup/picks/predictions/reviews/seasons/standings/stats/supabase) 전수 read.
+- Explore agent 로 11개 디렉토리 전체 비-테스트 함수 직접 read — cycle 2975/2977/2978/2980/2982 가 반복 발견한 "비대칭-null 가드" 클래스(형제 필드 중 한쪽만 `?? 0`/null 체크하고 반대쪽 미가드) 동일 패턴 재확인. 보조로 `?? 0`/`!= null` 가드 92건 분포(23개 파일) 직접 grep 대조 — 대부분 함수가 이미 양쪽 필드 모두 가드 또는 애초 호출부에서 null 필터링(`pairedSafe` 류) 후 전달받는 구조.
+- `pearson.ts`(`pearsonCorrelation`) 는 입력 `xs[]`/`ys[]` 가 호출부에서 이미 필터링된 순수 number 배열 가정 — 자체 가드 불필요한 설계 확인. `supabase/admin.ts`/`server.ts` 는 env var 부재 시 명시적 throw, NaN 클래스 무관.
+- actionable 버그 0건 — 11개 디렉토리 전부 CLEAN 확정(다음 cycle 재스캔 불필요). 코드 변경 0.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 사용자 결정(만료 임박, 6 cycle 내 미결정 시 자동 archive) 또는 Supabase egress quota 장애 모니터 또는 review-code(heavy) 진짜 미탐색 스코프(과거 cycle 제목 grep 선행 — accuracy~supabase 11개는 이번 cycle 재확인 완료, 잔여 후보 = api/changelog/debug/leaderboard/seo/og 등 미세 스코프 또는 kbo-data 패키지 내부).
+
 ## v0.5.62.307 — 2026-10-07 (cycle 2982, review-code(heavy): weather.ts tempC NaN 비대칭-null 가드 누락 수정 SUCCESS)
 
 ### review-code(heavy): weather.ts temperature_2m 미가드 NaN 노출 수정 (cycle 2982, SUCCESS)

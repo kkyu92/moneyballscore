@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): accuracy~supabase 11개 디렉토리 재감사, 갭 0건 (cycle 2983, 2026-10-07)
+
+진단: 직전8(2975-2982) distinct=3, 2-chain lock 미충족. fix-incident(13/20)/op-analysis(15/25)/lotto(4/30)/info-arch(7/30) 전부 gap 미근접. explore-idea saturation 12/15 충족하나 plan#29 Tier4 불변(사용자 결정 대기) 지속, organic idea 없음. cycle 2982 추천 스코프(accuracy/dashboard/insights/matchup/picks/predictions/reviews/seasons/standings/stats/supabase) 전수 read.
+
+Explore agent + 직접 grep 대조(92건 `?? 0`/`!= null` 가드 분포, 23개 파일) — 비대칭-null 클래스 재발 0건. 대부분 양쪽 필드 모두 가드되거나 호출부에서 이미 필터링된 구조. pearson.ts/supabase 양쪽 clean. 11개 디렉토리 CLEAN 확정, 코드 변경 0.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): weather.ts tempC NaN 비대칭-null 가드 누락 수정 (cycle 2982, 2026-10-07)
 
 진단: 직전8(2974-2981) distinct=3, 2-chain lock 미충족. fix-incident/op-analysis/lotto/info-arch 전부 gap 미근접. explore-idea saturation 12/15 충족하나 plan#29 Tier4 불변(사용자 결정 대기) 지속, organic idea 없음. cycle 2981 자기 교훈(carry-over 추천 stale) 따라 과거 commit 제목 grep 으로 최소 피감사 모듈 재탐색 — v2-shadow-monitor/weather.ts/hub-dispatch.ts/feature-flags.ts.
