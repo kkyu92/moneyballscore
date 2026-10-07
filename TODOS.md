@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): players 리더보드 WAR=0 sentinel 버그 수정 (cycle 2972, 2026-10-07)
+
+진단: 2-chain lock 미충족(직전8 distinct=5). fix-incident/operational-analysis/explore-idea/lotto/info-arch 전부 gap 미근접, design-system 은 cycle 2964 직후라 저가치. review-code(heavy) 가 cycle 2970/2971 추천 잔여 스코프(standings/postseason/wild-card/teams/players-list/seasons/calendar/insights) 보유로 선택.
+
+`players/page.tsx:300` WAR=0 data-gap sentinel(스크래퍼 파싱 실패 시 `?? 0` coalesce)이 가드 없이 렌더되던 버그 발견·수정 — 같은 row wrcPlus/ops 셀과 동일 truthy 가드 적용(`{b.war ? fmtWar(b.war) : "-"}`). cycle 2967/2512 와 동일 silent drift family. 나머지 15개 라우트 + 공유 lib 전수 감사, 신규 버그 0건. typecheck clean, 기존 테스트 3건 PASS.
+
+**plan#29 상태 변화 없음** (`~/.develop-cycle/plans/moneyballscore/29.md`, 만료 2026-10-15) — 사용자 결정(연장/착수/폐기) 여전히 대기 중.
+
+다음 사이클 추천 = 사용자 plan#29 결정 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(en/ 미러 라우트, debug/ 페이지, dashboard/settings/search/glossary/guide) 또는 2-chain lock 자연 해제 대기.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): picks/leaderboard/mlb 신규 축 감사, 갭 0건 (cycle 2971, 2026-10-07)
 
 진단: 2-chain lock 미충족(직전8 distinct=6). fix-incident gap=0·operational-analysis gap=2·explore-idea gap=1(plan#29 사용자 결정 대기)·lotto gap=22·info-arch gap=16 전부 미근접/저가치. design-system mtime 35일 충족이나 cycle 2964 직후 저가치. review-code(heavy) 직전20 60% dominance + cycle 2970 추천 스코프(picks/leaderboard/mlb) 존재로 선택.

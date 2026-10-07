@@ -1,3 +1,14 @@
+## v0.5.62.297 — 2026-10-07 (cycle 2972, review-code(heavy): players 리더보드 WAR=0 sentinel 버그 수정 SUCCESS)
+
+### review-code(heavy): players 리더보드 WAR=0 data-gap sentinel 버그 수정 (cycle 2972, SUCCESS)
+
+- 진단: 2-chain lock 미충족(직전8(2964-2971) distinct=5: design-system/review-code/operational-analysis/explore-idea/fix-incident). fix-incident gap=2·operational-analysis gap=4·explore-idea gap=3(plan#29 사용자 결정 대기, 재방화 저가치)·lotto gap=23·info-arch gap=17 전부 미근접. design-system DESIGN.md mtime 35일(≥4주 충족)이나 cycle 2964 토큰 재검증 직후라 저가치. review-code(heavy) 가 cycle 2970/2971 양쪽이 추천한 잔여 미감사 스코프(standings/postseason/wild-card/teams/players-list/seasons/calendar/insights) 보유 — 선택.
+- subagent 위임 전수 감사(16개 라우트 + 연관 lib 14개 교차검증, `.sort(` 전체 재grep(~140 call site), WAR/SFR sentinel truthiness 전체 재grep) 결과 1건 발견: `players/page.tsx:300` `{fmtWar(b.war)}` 가 가드 없이 렌더 — 같은 row 의 `wrcPlus`/`ops` 셀(303/306줄)은 이미 truthy 가드 적용되어 있는데 `war` 만 누락. `buildBatterLeaderboard.ts:95` 가 스크래퍼 WAR 파싱 실패(NaN) 시 `r.war ?? 0` 으로 0 coalesce — `war===0` 이 "실제 WAR 0" 과 "파싱 실패" 를 구분 못 함. cycle 2967/2512 와 동일 silent drift family.
+- 수정: `{b.war ? fmtWar(b.war) : "-"}` — 같은 row wrcPlus/ops 패턴과 동일 가드로 정합. typecheck clean, 기존 테스트 3건 PASS, 신규 테스트 추가 없음(단순 1-line 렌더 가드).
+- 그 외 15개 라우트(standings/wild-card/postseason/teams/seasons/calendar/insights) + 공유 lib 전수 — numeric comparator 정상, 기존 가드(`computeFactorAveragesFromPerspectives` 등) 정상 적용 확인, 신규 버그 0건.
+
+다음 사이클 추천 = 사용자 plan#29 결정(연장/착수/폐기) 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(en/ 미러 라우트, debug/ 페이지, dashboard/settings/search/glossary/guide) 또는 2-chain lock 자연 해제 대기.
+
 ## v0.5.62.296 — 2026-10-07 (cycle 2971, review-code(heavy): picks/leaderboard/mlb 신규 축 감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): picks/leaderboard/mlb 핵심 라우트 전수 감사 — 신규 버그 0건 (cycle 2971, RETRO-ONLY)
