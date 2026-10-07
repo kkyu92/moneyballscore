@@ -230,7 +230,7 @@ export async function buildPitcherProfile(
     teamColor: teamInfo?.color ?? null,
     position: p.position,
     throws: p.throws,
-    appearances: fipN,
+    appearances: appearances.length,
     avgFip: fipN > 0 ? fipSum / fipN : null,
     avgXFip: xfipN > 0 ? xfipSum / xfipN : null,
     verifiedN,
