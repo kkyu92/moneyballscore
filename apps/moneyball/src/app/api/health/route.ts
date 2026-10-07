@@ -21,7 +21,15 @@ async function checkSupabase(): Promise<Check> {
     const { count } = assertSelectOk(result, 'health.leagues');
     return { status: 'ok', detail: `${count} leagues` };
   } catch (e) {
-    return { status: 'error', detail: errMsg(e) };
+    const detail = errMsg(e);
+    // exceed_egress_quota = Supabase billing cap, not an app/infra bug — user action
+    // pending (CLAUDE.md 운영 로그). Without this carve-out health-alert.yml pages
+    // ::error:: every hour for the entire outage window (29+ days observed, cycle
+    // 2939~), indistinguishable from a genuine new failure (alert fatigue).
+    if (detail.includes('exceed_egress_quota')) {
+      return { status: 'warning', detail: `Supabase billing quota exceeded (user action pending): ${detail}` };
+    }
+    return { status: 'error', detail };
   }
 }
 

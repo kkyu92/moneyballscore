@@ -103,6 +103,22 @@ describe('GET /api/health (plan #11 Step 2)', () => {
     expect(body.checks.supabase.detail).toContain('connection refused');
   });
 
+  it('supabase egress quota 402 (billing, known issue) → degraded + 200 (fail 아님)', async () => {
+    leaguesCount = null;
+    leaguesError = {
+      message:
+        'Service for this project is restricted due to the following violations: exceed_egress_quota. The project owner must upgrade their plan or remove spend caps to restore service.',
+    };
+    const res = await callGet();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.overall).toBe('degraded');
+    expect(body.status).toBe('degraded');
+    expect(body.checks.supabase.status).toBe('warning');
+    expect(body.checks.supabase.detail).toContain('exceed_egress_quota');
+    expect(body.checks.supabase.detail).toContain('user action pending');
+  });
+
   it('kbo_api 봇 차단 (HTTP 403) → degraded + 200 (supabase ok 보존)', async () => {
     kboFetchImpl = () => Promise.resolve(new Response('blocked', { status: 403 }));
     const res = await callGet();
