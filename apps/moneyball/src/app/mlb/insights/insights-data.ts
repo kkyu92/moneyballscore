@@ -1,12 +1,15 @@
 import {
   assertSelectOk,
+  INSIGHTS_SERIES_LIMIT,
   MLB_PRODUCTION_COHORT_RULES,
   normalizeMlbTeamCode,
+  toMlbStatsApiCode,
   type MlbTeamCode,
 } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { isValidInsightsDate } from "@/lib/insights/loader";
+import { mlbAllPairs, mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
 
 // MLB 예측은 games FK 모델이 없음(game_id=NULL, migration 038) — KBO app/insights/page.tsx
 // 의 `games!inner` 조인은 MLB 에 그대로 쓰면 항상 미스매치(빈 목록, cycle 2114
@@ -175,4 +178,91 @@ export async function getMlbInsightsForDate(date: string): Promise<MlbInsightRow
   const { data } = assertSelectOk(predResult, "mlb-insights.getMlbInsightsForDate predictions");
   if (!data || data.length === 0) return [];
   return mapMlbPredictionRows(supabase, data as unknown as MlbInsightPredRow[]);
+}
+
+// plan #30 Phase 3 — /mlb/insights/series/[topic] 아카이브. KBO lib/insights/series.ts
+// parseSeriesTopic/formatSeriesTopic/listSeriesTopics/getSeriesByTopic 의 MLB 이식.
+// 30팀 N choose 2 = 435쌍(KBO 10팀 45쌍 대비 9.7배) — mlb/matchup/[teamA]/[teamB] 가 이미
+// 동일 스케일 문제를 "generateStaticParams 없이 순수 ISR" 로 해결(cycle 2060대, plan #24)해
+// 둔 선례를 그대로 재사용: force-static 전체 사전렌더(KBO 방식) 대신 on-demand ISR 채택
+// (page.tsx 의 revalidate 만 선언, generateStaticParams 없음 — 빌드 비용 회피).
+// mlbCanonicalPair/mlbAllPairs(lib/mlb/mlbCanonicalPair.ts) 를 그대로 재사용해 페어 생성/
+// 정규화 로직 중복 없이 DRY. slug 형식은 KBO 와 동일 `<code1>-vs-<code2>`(3-letter, alphabetic
+// sort) — mlb/matchup 의 `/mlb/matchup/<a>/<b>` 2-segment path 와는 다른 convention(KBO
+// insights 패밀리 parity 우선, plan #30 retro 에 "[topic]" 단일 slug 로 명시).
+export interface MlbSeriesTopic {
+  team1: MlbTeamCode;
+  team2: MlbTeamCode;
+  slug: string;
+}
+
+export function formatMlbSeriesTopic(a: MlbTeamCode, b: MlbTeamCode): string {
+  const [first, second] = [a, b].sort();
+  return `${first.toLowerCase()}-vs-${second.toLowerCase()}`;
+}
+
+/** slug → MlbSeriesTopic. invalid 또는 non-canonical order 시 null (KBO parseSeriesTopic 패리티). */
+export function parseMlbSeriesTopic(slug: string): MlbSeriesTopic | null {
+  if (typeof slug !== "string") return null;
+  const match = slug.toLowerCase().match(/^([a-z]{3})-vs-([a-z]{3})$/);
+  if (!match) return null;
+  const [, a, b] = match;
+  const pair = mlbCanonicalPair(a.toUpperCase(), b.toUpperCase());
+  if (!pair) return null;
+  if (pair.codeA.toLowerCase() !== a) return null; // non-canonical order — invalid
+  return { team1: pair.codeA, team2: pair.codeB, slug: formatMlbSeriesTopic(pair.codeA, pair.codeB) };
+}
+
+/** 435개 모든 team-pair slug (canonical) — sitemap 용. */
+export function listMlbSeriesTopics(): MlbSeriesTopic[] {
+  return mlbAllPairs().map((p) => ({
+    team1: p.codeA,
+    team2: p.codeB,
+    slug: formatMlbSeriesTopic(p.codeA, p.codeB),
+  }));
+}
+
+interface MlbSeriesScheduleRow {
+  external_game_id: string | null;
+}
+
+/** topic 의 모든 예측 — 최신순. mlb_schedule 팀쌍 필터 선조회 후 predictions join
+ *  (KBO getSeriesByTopic 의 "N*3 최근 예측 중 in-memory pair 필터"와 반대 방향 —
+ *  MLB 는 schedule 이 DB StatsAPI 코드(toMlbStatsApiCode)라 쿼리 레벨 필터가 더 정확). */
+export async function getMlbSeriesByTopic(
+  topic: MlbSeriesTopic,
+  limit = INSIGHTS_SERIES_LIMIT,
+): Promise<MlbInsightRow[]> {
+  const supabase = await createClient();
+  const dbCodeA = toMlbStatsApiCode(topic.team1);
+  const dbCodeB = toMlbStatsApiCode(topic.team2);
+  const orFilter =
+    `and(home_team_code.eq.${dbCodeA},away_team_code.eq.${dbCodeB}),` +
+    `and(home_team_code.eq.${dbCodeB},away_team_code.eq.${dbCodeA})`;
+  const scheduleResult = await supabase
+    .from("mlb_schedule")
+    .select("external_game_id")
+    .or(orFilter)
+    .order("game_date", { ascending: false })
+    .limit(limit * 3);
+  const { data: scheduleRows } = assertSelectOk(
+    scheduleResult,
+    `mlb-insights.getMlbSeriesByTopic schedule ${topic.slug}`,
+  );
+  const gameIds = ((scheduleRows ?? []) as MlbSeriesScheduleRow[])
+    .map((r) => r.external_game_id)
+    .filter((id): id is string => Boolean(id));
+  if (gameIds.length === 0) return [];
+
+  const predResult = await supabase
+    .from("predictions")
+    .select("external_game_id, mlb_game_date, is_correct, reasoning, factors")
+    .eq("league", "mlb")
+    .eq("prediction_type", "pre_game")
+    .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES as readonly string[])
+    .in("external_game_id", gameIds)
+    .order("created_at", { ascending: false });
+  const { data } = assertSelectOk(predResult, `mlb-insights.getMlbSeriesByTopic predictions ${topic.slug}`);
+  if (!data || data.length === 0) return [];
+  return mapMlbPredictionRows(supabase, data as unknown as MlbInsightPredRow[], limit);
 }
