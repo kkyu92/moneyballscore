@@ -1,3 +1,4 @@
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import {
   assertSelectOk,
   INSIGHTS_SERIES_LIMIT,
@@ -6,10 +7,21 @@ import {
   toMlbStatsApiCode,
   type MlbTeamCode,
 } from "@moneyball/shared";
-import { createClient } from "@/lib/supabase/server";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { isValidInsightsDate } from "@/lib/insights/loader";
 import { mlbAllPairs, mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
+
+// KBO lib/insights/loader.ts 와 동일하게 anon-key 직접 클라이언트 사용 (cookies() 미호출) —
+// /mlb/insights/[date] 의 generateStaticParams 가 이 모듈을 build time 에 호출하는데,
+// cookie 기반 @/lib/supabase/server 클라이언트는 Next.js 16 에서 generateStaticParams 안
+// cookies() 사용을 금지해 빌드 실패시킴 (cycle 2945 fix-incident, 전 production 빌드 장애).
+function createInsightsClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+}
 
 // MLB 예측은 games FK 모델이 없음(game_id=NULL, migration 038) — KBO app/insights/page.tsx
 // 의 `games!inner` 조인은 MLB 에 그대로 쓰면 항상 미스매치(빈 목록, cycle 2114
@@ -71,7 +83,7 @@ const PREVIEW_LENGTH = 280;
 // mlb_schedule 2-step join + presented-reasoning 매핑 — getRecentMlbInsights(hub)와
 // getMlbInsightsForDate([date] 아카이브, plan #30 Phase 2) 양쪽이 공유하는 공통 로직.
 async function mapMlbPredictionRows(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createInsightsClient>,
   rows: MlbInsightPredRow[],
   limit?: number,
 ): Promise<MlbInsightRow[]> {
@@ -119,7 +131,7 @@ async function mapMlbPredictionRows(
 }
 
 export async function getRecentMlbInsights(limit: number): Promise<MlbInsightRow[]> {
-  const supabase = await createClient();
+  const supabase = createInsightsClient();
   const predResult = await supabase
     .from("predictions")
     .select("external_game_id, mlb_game_date, is_correct, reasoning, factors")
@@ -138,7 +150,7 @@ export async function getRecentMlbInsights(limit: number): Promise<MlbInsightRow
 // 조인으로 일자를 얻지만 MLB predictions 는 mlb_game_date 컬럼을 이미 직접 보유(games FK
 // 자체가 없음, migration 038 game_id=NULL) — 별도 조인 없이 바로 필터 가능해 KBO 대비 단순.
 export async function listMlbInsightsDates(daysBack = 90): Promise<string[]> {
-  const supabase = await createClient();
+  const supabase = createInsightsClient();
   const since = new Date();
   since.setUTCDate(since.getUTCDate() - daysBack);
   const sinceStr = since.toISOString().slice(0, 10);
@@ -166,7 +178,7 @@ export async function listMlbInsightsDates(daysBack = 90): Promise<string[]> {
 
 export async function getMlbInsightsForDate(date: string): Promise<MlbInsightRow[]> {
   if (!isValidInsightsDate(date)) return [];
-  const supabase = await createClient();
+  const supabase = createInsightsClient();
   const predResult = await supabase
     .from("predictions")
     .select("external_game_id, mlb_game_date, is_correct, reasoning, factors")
@@ -233,7 +245,7 @@ export async function getMlbSeriesByTopic(
   topic: MlbSeriesTopic,
   limit = INSIGHTS_SERIES_LIMIT,
 ): Promise<MlbInsightRow[]> {
-  const supabase = await createClient();
+  const supabase = createInsightsClient();
   const dbCodeA = toMlbStatsApiCode(topic.team1);
   const dbCodeB = toMlbStatsApiCode(topic.team2);
   const orFilter =
