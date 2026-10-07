@@ -1,3 +1,16 @@
+## v0.5.62.298 — 2026-10-07 (cycle 2973, review-code(heavy): glossary 팩터 banner stale 텍스트 + EN factors 공시 배너 누락 수정 SUCCESS)
+
+### review-code(heavy): glossary stale placeholder-factor 목록 + en/mlb/factors 공시 배너 누락 수정 (cycle 2973, SUCCESS)
+
+- 진단: 직전8(2965-2972) distinct=4(review-code 5/8) — 2-chain lock 미충족. fix-incident gap=3·operational-analysis gap=5·explore-idea gap=4(plan#29 사용자 결정 대기, 재방화 저가치)·lotto gap=24·info-arch gap=18·design-system gap=9(DESIGN.md mtime 충족이나 cycle 2964 직후 저가치) 전부 미근접/저가치. review-code(heavy) 가 cycle 2972 추천 잔여 스코프(en/ 미러 라우트, debug/ 페이지, dashboard/settings/search/glossary/guide) 보유 — 선택.
+- subagent 위임 전수 감사(en/mlb/** 26개 라우트 + debug/** 8개 + dashboard/settings/search/glossary/guide, 공유 lib 14개 교차검증) 결과 2건 발견:
+  1. `glossary/page.tsx:95-97` 가 "최근폼·상대전적·수비SFR 3개가 KBO 전용(중립값 고정)" 이라 서술 — 실제 `MLB_PLACEHOLDER_FACTOR_KEYS`(mlb-base.ts, cycle 2353 단일 source)는 `defense_sfr`·`sp_xwoba_against`·`woba_std`. recent_form/head_to_head 는 cycle 2353에 이미 실측 연결됨 — `/mlb/methodology`·`/en/mlb/methodology` 와 직접 모순. cycle 2512 와 동일 silent drift family(팩터 소스 변경 후 배너 텍스트 stale).
+  2. `en/mlb/factors/page.tsx` 가 KO `/mlb/factors`·`/en/mlb/methodology` 양쪽에 존재하는 placeholder-factor 공시 배너를 아예 누락 — 영어 독자는 Defense SFR/SP xwOBA-against/wOBA σ(합 12%)가 실측 반영되는 것처럼 보임.
+- 수정: glossary 텍스트를 `MLB_PLACEHOLDER_FACTOR_KEYS` 기준으로 정정(수비SFR·SP xwOBA-against·wOBA 표준편차). en/mlb/factors 에 KO 페이지와 동일한 `MLB_PLACEHOLDER_FACTOR_KEYS` 단일 source 배너 이식(영문). typecheck clean, 기존 테스트 29건(mlb/factors 7 + glossary 1 + 기타) PASS.
+- en/mlb 26개 라우트는 독립 번역본(thin wrapper 아님)이나 공유 formatter(`formatMlbFactorValue` 등)가 `value == null` 가드 사용 — sentinel drift 없음 확인. debug/dashboard/settings/search/guide 전부 적절한 null 가드, 신규 버그 0건.
+
+다음 사이클 추천 = 사용자 plan#29 결정(연장/착수/폐기) 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(standings/postseason/wild-card/teams/players-list/seasons/calendar/insights — cycle 2972 가 이미 감사 완료 표기했으나 재확인 필요 시) 또는 2-chain lock 자연 해제 대기.
+
 ## v0.5.62.297 — 2026-10-07 (cycle 2972, review-code(heavy): players 리더보드 WAR=0 sentinel 버그 수정 SUCCESS)
 
 ### review-code(heavy): players 리더보드 WAR=0 data-gap sentinel 버그 수정 (cycle 2972, SUCCESS)
