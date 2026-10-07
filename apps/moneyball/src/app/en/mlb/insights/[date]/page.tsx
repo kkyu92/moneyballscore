@@ -20,8 +20,15 @@ export const dynamicParams = false;
 export const revalidate = 86400; // INSIGHTS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export async function generateStaticParams() {
-  const dates = await listMlbInsightsDates(90);
-  return dates.map((date) => ({ date }));
+  // DB 장애(예: Supabase egress quota, cycle 2939)가 이 선택적 아카이브 feature 의
+  // 빌드를 넘어 전체 production 빌드를 죽이면 안 됨 — 0건으로 degrade (fix-incident cycle 2945).
+  try {
+    const dates = await listMlbInsightsDates(90);
+    return dates.map((date) => ({ date }));
+  } catch (err) {
+    console.error("en/mlb/insights/[date] generateStaticParams failed, degrading to 0 pages:", err);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
