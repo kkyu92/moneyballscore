@@ -1,3 +1,13 @@
+## v0.5.62.304 — 2026-10-07 (cycle 2979, lotto(lite): 30-cycle gap 체크포인트 — cron 정상 확인 RETRO-ONLY)
+
+### lotto(lite): 30-cycle gap trigger 도달 — cron 양쪽(pick-update/result-update) 정상 작동 확인 (cycle 2979, RETRO-ONLY)
+
+- 진단: 직전8(2971-2978) distinct=2(review-code(heavy)7+info-architecture-review1) = 2-chain lock 발동, 두 chain 이번 사이클 후보 제외. lotto gap=30/30 trigger 정확 도달(마지막 발화 cycle 2949). explore-idea saturation 12/15 충족하나 organic idea 0(plan#29 상태 불변, 만료 2026-10-15)이라 cycle 2978과 동일 결론 예상 — lotto 선택.
+- `pnpm tsx scripts/lotto.ts count` 정상 실행: 캐시 1244회차, 규칙 256개, 유효조합 7,705,415/8,145,060(5.40% 제거, 직전과 동일 비율 — 신규 rule 후보 0). `lotto-pick-update`/`lotto-result-update` 워크플로 최근 run 전부 success. `apps/moneyball/data/lotto-picks/2026-10-10.md`(1245회 다음토요일) + `lotto-results/2026-10-03.md`(직전토요일) 둘 다 신선(cron 자동 갱신).
+- 결론: cron 정상 확인, 수동 개입 불필요. 코드 변경 0.
+
+다음 사이클 추천 = 2-chain lock 지속 시 explore-idea 재확인 또는 review-code(heavy) carry-over 3건(mlb-base.test.ts NaN-clamp / logistic.ts 주석 / mlb-elo.ts dead code) 또는 plan#29 사용자 결정.
+
 ## v0.5.62.303 — 2026-10-07 (cycle 2978, review-code(heavy): mlb-pipeline.ts sp_fip/sp_xfip/lineup_woba/bullpen_fip/war/lineup_xwoba/lineup_barrel_pct 비대칭-null 중립가드 누락 수정 SUCCESS)
 
 ### review-code(heavy): factors/mlb-*.ts + backtest/ 잔여 스코프 감사 — mlb-pipeline.ts 비대칭 data-gap 버그 1건 수정 (cycle 2978, SUCCESS)
