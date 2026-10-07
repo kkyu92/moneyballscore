@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — design-system(lite): DESIGN.md 토큰/drift 재감사, 갭 0건 (cycle 2985, 2026-10-07)
+
+진단: 직전8(2977-2984) distinct=2(review-code(heavy)7+lotto(lite)1) — 2-chain alternation lock 발동(info-arch 윈도우 aged out). 잠긴 2개 제외. fix-incident/op-analysis 둘 다 gap trigger 충족하나 Supabase egress quota 장애(cycle 2939~, 46일+ 경과) 재확인으로 DB 의존 작업 불가. DESIGN.md mtime 35.1일(≥4주) + design-system 마지막 발화 2943(gap=42) — DB 비의존 유일 후보로 선택.
+
+cycle 2943 선례(grep sweep 경량 감사) 재적용: 146개 OG/twitter-image.tsx 전수 gradient-토큰 import 확인(인라인 hex 0), muted-text 2-tier flat drift 패턴 grep(0건), 제거된 easing 토큰 재참조 확인(0건). actionable 버그 0건, 코드 변경 0.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15, 8일 남음). **Supabase egress quota 장애 지속**(사용자 billing 조치 필요, 자율 결제 불가).
+
 ## 🟡 RETRO-ONLY — review-code(heavy): middleware/next.config/robots/manifest/icon/instrumentation 신규 축 감사, 갭 0건 (cycle 2984, 2026-10-07)
 
 진단: 직전8(2976-2983) distinct=3, 2-chain lock 미충족. fix-incident(14/20)/op-analysis(16/25)/lotto(5/30)/info-arch(8/30) 전부 gap 미근접. explore-idea saturation 13/15 충족하나 plan#29 Tier4 불변(사용자 결정 대기, 만료 8일 남음) 지속, organic idea 없음. cycle 2983 추천 스코프(api/changelog/debug/leaderboard/seo/og/kbo-data)를 git log 제목 grep 으로 선검증 — 전부 이미 과거 cycle 감사 완료된 stale 추천 확인(cycle 2981 지적 패턴 재발 방지).
