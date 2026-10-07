@@ -1,3 +1,14 @@
+## v0.5.62.290 — 2026-10-07 (cycle 2965, review-code(heavy): v2-shadow-monitor cohort sort 버그 수정 SUCCESS)
+
+### review-code(heavy): v2-shadow-monitor cohort filename 정렬 버그 수정 (cycle 2965, SUCCESS)
+
+- 진단: 2-chain lock 미충족(직전8 distinct=3). fix-incident gap 18/20 미근접(CI 전부 정상). operational-analysis gap=40 충족이나 egress quota 402 지속(billing 대기, 재확인해도 신규 정보 없음). explore-idea saturation 12/15 충족하나 organic idea 전무(open issue 0, plan#29 Tier4 유지, TODOS Next-Up stale) — 과거 다수 사례와 동일 패턴으로 skip. design-system 직전 사이클(2964) 전수 재검증 완료라 재실행 저가치. lotto/info-arch 둘 다 gap 미근접. review-code(heavy) 계속 선택 — 미탐색 소형 lib 스코프(weather.ts/hub-dispatch.ts/feature-flags.ts/tabpfn-export.ts/tabpfn-import.ts/v2-shadow-monitor/changelog) subagent 위임 감사.
+- `v2-shadow-monitor/loader.ts`의 `listCohortFiles()`가 cohort markdown 파일명(`YYYY-MM-DD-cohort-cycle-N.md`)을 순수 문자열 `.sort().reverse()`로 "최신" 판정 — 같은 날짜 안에서 cycle 번호 자릿수가 바뀌는 시점(예: 99→100)에 문자열 정렬이 역전돼 과거 cohort 를 "최신"으로 silent 제공할 latent 버그 확인(동일 날짜 복수 파일 실존 — 2026-06-15 cycle 1166/1194). 날짜+숫자 cycle 비교 comparator(`compareCohortFilenames`)로 교체 + 전용 테스트 3건 추가(날짜 우선 정렬 / 자릿수 경계 숫자 정렬 / cycle 번호 없는 파일 최우선순위 처리).
+- 나머지 스코프(weather.ts/feature-flags.ts/tabpfn-export.ts/tabpfn-import.ts/v2-shadow-monitor/parse.ts/changelog/parse.ts/renderMarkdown.tsx) — dead code 0건(전수 repo-wide grep 재확인), stale 주석 0건, TODO/FIXME 0건.
+- 검증: moneyball type-check clean, lint 0 warning, test 585/585 files · 4613/4613 전부 통과.
+
+다음 사이클 추천 = fix-incident(gap 19/20 근접) 또는 egress quota 재확인(billing 대기 지속) 또는 2-chain lock 자연 해제 후 polish-ui/design-system 복귀.
+
 ## v0.5.62.289 — 2026-10-07 (cycle 2964, design-system(lite): DESIGN.md 토큰 전수 재검증 RETRO-ONLY)
 
 ### design-system(lite): DESIGN.md 토큰 전수 재검증, 갭 0건 (cycle 2964, RETRO-ONLY)

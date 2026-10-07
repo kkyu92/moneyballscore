@@ -1,4 +1,15 @@
 
+## 🟢 SUCCESS — review-code(heavy): v2-shadow-monitor cohort sort 버그 수정 (cycle 2965, 2026-10-07)
+
+진단: 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+polish-ui1+design-system1). fix-incident gap 18/20 미근접, `gh run list` CI 전부 정상(Dependabot in-progress만). operational-analysis gap=40 충족했으나 egress quota 402 지속 재확인(billing 대기, 신규 정보 없음). explore-idea saturation 12/15 충족하나 4-source 재확인 negative(open issue 0, plan#29 Tier4 유지 — expiry 2026-10-15 임박, TODOS Next-Up stale) — 과거 사례(cycle 2896/2893/2890 등) 동일 패턴으로 organic idea 부재 skip. design-system 직전 사이클(2964) 전수 재검증 완료 직후라 재실행 저가치. lotto gap 15/30·info-arch gap 9/30 둘 다 미근접. review-code(heavy) 계속 선택 — lib/ 대부분 기존 감사 완료 상태에서 잔존 미탐색 소형 스코프(weather.ts/hub-dispatch.ts/feature-flags.ts/tabpfn-export.ts/tabpfn-import.ts/v2-shadow-monitor/changelog) subagent 위임 감사.
+
+- `v2-shadow-monitor/loader.ts`의 `listCohortFiles()`가 cohort markdown 파일명(`YYYY-MM-DD-cohort-cycle-N.md`)을 순수 문자열 `.sort().reverse()`로 "최신" 판정하던 것을 발견 — 같은 날짜 안에서 cycle 번호 자릿수가 바뀌는 경계(예: 99→100)를 넘으면 문자열 정렬이 역전돼 과거 cohort 를 `/v2-shadow-monitor` 에 "최신"으로 silent 제공할 latent 버그. 동일 날짜 복수 파일이 이미 실존(2026-06-15 cycle 1166/1194) — 오늘은 우연히 둘 다 4자리수라 문제 없었을 뿐.
+- 날짜+숫자 cycle 비교하는 `compareCohortFilenames` comparator로 교체(순수 함수로 export, 테스트 가능하게). 전용 테스트 3건 신규 추가(날짜 우선 정렬 / 자릿수 경계 숫자 정렬(99 vs 100) / cycle 번호 없는 플레인 `-cohort.md` 파일을 해당 날짜 최우선순위 처리).
+- 나머지 스코프(weather.ts/feature-flags.ts/tabpfn-export.ts/tabpfn-import.ts/v2-shadow-monitor/parse.ts/changelog/parse.ts/renderMarkdown.tsx) — exported symbol 전수 repo-wide grep 재확인(barrel re-export + name-collision 배제) dead code 0건, stale 주석 0건(의심 2건 모두 코드와 cross-check 후 정확함 확인), TODO/FIXME 0건.
+- 검증: moneyball type-check clean, lint 0 warning, test 585/585 files · 4613/4613 전부 통과. commit a9bddaeb, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = fix-incident(gap 19/20 근접, 단 CI 정상이라 noise 주의) 또는 egress quota 재확인(billing 대기 지속, 사용자 조치 미이행) 또는 2-chain lock 자연 해제 후 polish-ui/design-system 복귀. plan#29 expiry(2026-10-15) 임박 — 다음 1~2 사이클 안 explore-idea 로 최종 결정 필요.
+
 ## 🟡 RETRO-ONLY — design-system(lite): DESIGN.md 토큰 전수 재검증, 갭 0건 (cycle 2964, 2026-10-07)
 
 진단: 2-chain lock 발동(직전8 distinct=2: review-code(heavy) 7 + polish-ui 1, 둘 다 후보 제외). fix-incident — `gh run list` CI 정상(Dependabot in-progress 뿐), 단 `health-alert`/`runtime-error-alert` 가 egress quota 402(cycle 2939~ 지속)로 반복 fail 확인했으나 근본 원인 동일(billing, noise) 재확인만 됨. operational-analysis — gap=40(≥25 충족)이나 `scripts/op-analysis-ce-cohort.ts` 실행 시 동일 402(cycle 2939 최초 확인 이후 지속, 신규 action 없음). explore-idea — saturation 12/15 충족하나 organic idea 전무(open issue 0, approved plan 0/23, TODOS Next-Up stale), plan#29 는 Tier4(risk=3) 유지, expiry 2026-10-15(8일 남음) 접근 중. lotto — 다음 토(10/10)+직전 토(10/3) 산출물 모두 신선(cron 정상). info-arch gap=9(미근접). 남은 후보 중 design-system(DESIGN.md mtime 34일 ≥4주, 마지막 발화 cycle 2943 — gap=21) 유일하게 실행 가능 + 비차단 → 선택.
