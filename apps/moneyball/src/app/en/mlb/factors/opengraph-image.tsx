@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { KBO_GRADIENT_FACTORS_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -16,7 +17,7 @@ export default function EnMlbFactorsOgImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #1a0f0a 0%, #7c2d12 50%, #ea580c 100%)",
+          background: KBO_GRADIENT_FACTORS_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

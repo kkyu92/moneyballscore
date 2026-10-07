@@ -1,3 +1,15 @@
+## v0.5.62.269 — 2026-10-07 (cycle 2943, design-system: KBO OG/twitter 이미지 gradient 토큰화)
+
+### design-system: KBO 전용 라우트 21개 OG/twitter gradient 인라인 hex → design-tokens.ts 토큰화 (cycle 2943, SUCCESS)
+
+- 진단: 직전8(2935-2942) distinct=4(2-chain lock 미충족), fix-incident Supabase egress quota 재확인(여전히 HTTP 500, day 5+, 변화 없음, 재dispatch 스킵). 직전20 사이클 review-code(heavy) 12/20(60%) dominance. design-system chain 직전 발화 cycle 983(약 1960 사이클 전) — 0회 발화 chain 우선 검토 룰 적용. DESIGN.md mtime 34.8일(>4주 임계) 자연 trigger 매핑.
+- `lib/design-tokens.ts` 가 이미 MLB_GRADIENT_* 8종 + MATCHUP/ANALYSIS 레지스트리로 "silent drift family wave 141/144"(같은 gradient가 mlb/en mirror + og/twitter pair 로 중복 박제되던 패턴) 를 1차 해소했으나, KBO 전용(비-MLB) 라우트 21개(about/analysis/calendar/factors(ko+en mirror, 완전 동일 hex 중복 재발견)/insights·lotto·matchup·players·reviews·search·seasons·standings·teams 각 상세/허브)는 레지스트리 바깥에 인라인 hex 로 분산 — 동일 silent drift family 3번째 파동 확인.
+- 21개 신규 named token 추가(`KBO_GRADIENT_*_135`, factors는 ko/en 완전 동일값이라 토큰 1개 공유) + 34개 opengraph-image.tsx/twitter-image.tsx 파일을 인라인 hex → 토큰 import 로 치환. hex 값 자체는 전부 보존(시각 diff 0, 단일 source 전환만).
+- 자동화 스크립트의 multi-line import 처리 버그 1건(standings og/twitter 2파일, import 구문 중간에 삽입되는 구문 오류) 발견 즉시 수정.
+- tsc --noEmit(moneyball) clean, eslint 대상 파일 전수 0 warning, vitest 584파일/4610테스트 all pass. dev 서버 기동 후 OG PNG 3종(standings/about/teams) 직접 curl + Read 로 렌더 결과 육안 확인 — 토큰화 전후 시각 동일.
+
+다음 cycle 추천 = review-code(heavy) app/ 라우트 레벨 스코프 또는 packages/kbo-data 잔여, 또는 design-system 2차(이번에 발견된 KBO_GRADIENT_LOTTO_135 의 비표준 stop 순서(#132d1a→#1a3d24→#0a1f12, BRAND_GRADIENT_KBO_135 와 다른 순서) 등 세부 일관성 재검토 — 이번 cycle 은 "값 보존 + 토큰화" 만 범위, 색상 자체 재설계는 의도적으로 skip(근거 부족한 임의 변경 방지). fix-incident Supabase billing 은 사용자 액션 대기 지속(day 5+).
+
 ## v0.5.62.268 — 2026-10-07 (cycle 2942, review-code(heavy): daily.ts/mlb-pipeline.ts 대형 파일 단독 리뷰)
 
 ### review-code(heavy): daily.ts(1659줄)/mlb-pipeline.ts(892줄) 전체 read — dead import 1건 제거 (cycle 2942, SUCCESS)

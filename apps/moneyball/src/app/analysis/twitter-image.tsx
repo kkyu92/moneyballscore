@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { KBO_PREDICT_DAILY_TIME_KST, SITE_HOST } from "@moneyball/shared";
+import { KBO_GRADIENT_ANALYSIS_HUB_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -15,7 +16,7 @@ export default function AnalysisHubTwitterImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #2e0e1a 0%, #4d1c2c 50%, #823a4d 100%)",
+          background: KBO_GRADIENT_ANALYSIS_HUB_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

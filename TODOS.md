@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — design-system: KBO OG/twitter 이미지 gradient 토큰화 (cycle 2943, 2026-10-07)
+
+진단: design-system chain 직전 발화 cycle 983(약 1960 사이클 전, chain pool 10개 중 최장 미발화). DESIGN.md mtime 34.8일(>4주 trigger) + 직전20 사이클 review-code(heavy) 60% dominance → 0회 발화 chain 우선 검토 룰 적용해 diversify. fix-incident Supabase egress quota 재확인(여전히 HTTP 500, day 5+, 변화 없음, 재dispatch는 노이즈라 skip).
+
+`lib/design-tokens.ts` 가 MLB 섹션 8종 레지스트리로 이미 한 번 막은 "silent drift family"(mlb/en mirror + og/twitter pair 로 동일 gradient 중복 박제)가 KBO 전용 라우트 21개(about/analysis/calendar/factors(ko+en mirror 완전 동일 hex)/insights/lotto/matchup/players/reviews/search/seasons/standings/teams)에서 3번째 파동으로 재발 중인 걸 grep 전수조사로 발견. 21개 신규 토큰(`KBO_GRADIENT_*_135`) 추가 + 34개 파일 치환, hex 값 자체는 전부 보존(시각 diff 0).
+
+자동화 스크립트의 multi-line import 버그 1건(standings) 즉시 발견·수정. tsc/eslint/vitest(584파일/4610테스트) 전부 clean, dev 서버로 OG PNG 3종 실제 렌더 확인(토큰화 전후 동일).
+
+다음 cycle 추천 = review-code(heavy) app/ 라우트 레벨 또는 kbo-data 잔여, 혹은 이번에 발견한 `KBO_GRADIENT_LOTTO_135` 비표준 stop 순서 등 세부 일관성 재검토(색상 재설계는 범위 밖, 의도적 skip). fix-incident는 day 5+ 사용자 billing 액션 대기 지속.
+
 ## 🟢 SUCCESS — review-code(heavy): daily.ts/mlb-pipeline.ts 대형 파일 단독 리뷰 (cycle 2942, 2026-10-07)
 
 진단: cycle 2939 Supabase egress quota incident 재확인 — 프로덕션 `https://moneyballscore.vercel.app/` 직접 curl → 여전히 HTTP 500(`__next_error__`), day 5+ 변화 없음. 3연속(2939/2940/2941) reconfirm 이후라 재dispatch는 노이즈 판단, skip. open issue 0, 직전8 사이클 distinct=5(2-chain lock 미충족). cycle 2941 추천(daily.ts 1659줄/mlb-pipeline.ts 892줄 단독 리뷰) 채택.

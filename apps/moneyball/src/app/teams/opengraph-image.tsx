@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { KBO_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
+import { KBO_GRADIENT_TEAMS_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -15,7 +16,7 @@ export default function TeamsHubOgImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #2a0e07 0%, #4d1e0e 50%, #8a3a14 100%)",
+          background: KBO_GRADIENT_TEAMS_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

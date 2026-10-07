@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { SITE_HOST, LEADERBOARD_TOP_N } from "@moneyball/shared";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+import { KBO_GRADIENT_PLAYERS_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -16,7 +17,7 @@ export default function PlayersHubOgImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #062628 0%, #0a4248 50%, #167580 100%)",
+          background: KBO_GRADIENT_PLAYERS_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

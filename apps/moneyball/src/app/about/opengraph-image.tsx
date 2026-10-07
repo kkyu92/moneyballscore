@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { KBO_FACTOR_COUNT, SITE_HOST } from "@moneyball/shared";
+import { KBO_GRADIENT_ABOUT_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -15,7 +16,7 @@ export default function Image() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #0a1a2e 0%, #163055 50%, #1f4d8c 100%)",
+          background: KBO_GRADIENT_ABOUT_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

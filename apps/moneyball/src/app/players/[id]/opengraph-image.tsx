@@ -3,6 +3,7 @@ import { SITE_HOST } from "@moneyball/shared";
 import { buildPitcherProfile } from "@/lib/players/buildPitcherProfile";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 import { captureFallback } from "@/lib/observability/captureFallback";
+import { KBO_GRADIENT_PLAYER_DETAIL_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -38,8 +39,7 @@ export default async function Image({ params }: Props) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background:
-            "linear-gradient(135deg, #0d1a2b 0%, #1f3b5c 50%, #2d6b9f 100%)",
+          background: KBO_GRADIENT_PLAYER_DETAIL_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",
