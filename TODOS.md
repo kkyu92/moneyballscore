@@ -1,4 +1,14 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): packages/shared/src + lib/predictions 스테일 축 재감사, 갭 0건 (cycle 2997, 2026-10-07)
+
+진단: 직전8(2989-2996) distinct=3(review-code(heavy)6+design-system1+fix-incident1) — 2-chain lock 미충족, 정상 선택. Supabase egress quota 402 재확인(cycle 2939~ 지속, 38일+ 경과) — op-analysis 여전히 차단. fix-incident(1)/info-arch(21)/lotto(cron 신선) 전부 미근접. explore-idea saturation 충족하나 plan#29 상태 불변(만료 8일 남음) 신규 정보 없어 skip. `git log` 기준 최근 미감사 축 탐색 — `packages/shared/src`(42일+ 미커밋) + `lib/predictions`(33일+ 미커밋) 둘 다 최근 review-code(heavy) 스코프 누락 확인.
+
+DEFAULT_WEIGHTS(10팩터, 합 0.85)를 CLAUDE.md v1.8 박제 수치와 전부 대조 — 정합. `model-version-labels.ts`/`feature-flags.ts`/`mlb-teams.ts`/`korean.ts` 전수 read — clean(korean.ts `SK` 매핑도 KBO_TEAMS.SK=SSG 레거시 코드와 교차검증 완료, 드리프트 아님). `lib/predictions/` 7개 파일 전수 read — `judgeReasoning.ts` FALLBACK_PREFIXES 를 debate.ts/postview.ts 실제 문자열과 대조 완전 일치, `estimateTime.ts` cron 역산 공식 주석 예시 4건 수동 재계산 일치. actionable 버그 0건, 코드 변경 0.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음). **Supabase egress quota 장애 지속**(cycle 2939~, 38일+ 경과) — op-analysis gap 25+ 초과 지속, DB 복구 즉시 heavy 최우선.
+
+다음 사이클 추천 = `packages/shared/src/index.ts` 나머지 구간(349 export 중 constants/weights 외 함수 로직 섹션, 전체 3453줄 중 미감사 잔여) 계속 또는 2-chain lock 자연 해제 모니터 또는 plan#29 expiry(2026-10-15) 임박 최종 결정.
+
 ## 🟢 SUCCESS — fix-incident: health-alert Supabase egress quota 402 known-cause 다운그레이드 (cycle 2996, 2026-10-07)
 
 진단: 2-chain lock 발동(직전8 distinct=2: review-code(heavy)7+design-system1, 둘 다 후보 제외). op-analysis gap≥25 나 service REST 재확인 402 여전 차단. fix-incident(10)/info-arch(20) 미근접. lotto cron 둘 다 신선. explore-idea saturation 13/15 충족하나 plan#29 cycle 2969 와 동일 날짜·동일 상태라 3회차 재측정 skip(신규 정보 0). polish-ui/design-system 최근 전수 재검증 완료(gap 0).

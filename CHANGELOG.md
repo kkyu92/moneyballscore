@@ -1,3 +1,14 @@
+## v0.5.62.322 — 2026-10-07 (cycle 2997, review-code(heavy): packages/shared/src + lib/predictions 스테일 축 재감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): packages/shared/src(7 소파일 + index.ts 상수/가중치 구간) + lib/predictions(7 파일 전체) — 갭 0건 (cycle 2997, RETRO-ONLY)
+
+- 진단: 직전8(2989-2996) distinct=3(review-code(heavy)6+design-system1+fix-incident1) — 2-chain lock 미충족(distinct≤2 조건 불충족), 정상 선택 진행. Supabase egress quota 402 직접 재확인(service-role REST count 호출 자체 402, cycle 2939~ 지속, 38일+ 경과) — op-analysis 여전히 차단. fix-incident gap=1(2996 직후)·info-arch gap=21(2976)·lotto(cron 산출물 picks/results 둘 다 신선) 전부 미근접. explore-idea saturation 13/15 충족하나 plan#29(만료 2026-10-15, 8일 남음) cycle 2996 과 동일 상태 — 신규 정보 없어 skip. `git log -1 --date` 기준 최근 미감사 축 탐색: `packages/shared/src`(마지막 커밋 2026-08-26, 42일+) + `apps/moneyball/src/lib/predictions`(마지막 커밋 2026-09-04, 33일+) 둘 다 최근 review-code(heavy) 스코프에서 누락 확인.
+- `packages/shared/src/index.ts` DEFAULT_WEIGHTS(sp_fip 15%/sp_xfip 5%/lineup_woba 15%/bullpen_fip 10%/recent_form 10%/war 8%/head_to_head 3%/park_factor 4%/elo 10%/sfr 5%, 합 0.85)를 CLAUDE.md v1.8 박제 수치와 1:1 대조 — 완전 정합. `model-version-labels.ts`/`feature-flags.ts`/`mlb-teams.ts`/`korean.ts`(ENGLISH_TOKEN_HAS_BATCHIM `SK` 매핑 — KBO_TEAMS.SK=SSG 랜더스 레거시 코드와 교차검증, 드리프트 아님) 전수 read — 전부 clean.
+- `lib/predictions/` 7개 파일(v2Predictor/factorLabels/judgeReasoning/tierStats/estimateTime/adjacentDates/yesterdayDate) 전수 read. `judgeReasoning.ts`의 `FALLBACK_PREFIXES`(`에이전트 토론 불가`/`사후 분석 LLM 실패`)를 `debate.ts`/`postview.ts` 실제 fallback reasoning 문자열과 grep 대조 — 완전 일치(silent drift 부재). `estimateTime.ts` cron 역산 공식을 주석 예시 4건(14:00/18:30/17:00/10:00 경기)과 수동 재계산 대조 — 전부 일치.
+- actionable 버그 0건, 코드 변경 0 (CHANGELOG/VERSION 제외).
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~, 본 cycle 직접 재확인, 38일+ 경과) — op-analysis gap 25+ 임계 초과 지속, DB 접근 가능해지는 즉시 heavy 모드 최우선 권장.
+
 ## v0.5.62.321 — 2026-10-07 (cycle 2996, fix-incident: health-alert Supabase egress quota 402 known-cause 다운그레이드 SUCCESS)
 
 ### fix-incident: `/api/health` checkSupabase() 가 알려진 billing quota 402 를 미지의 장애와 동일 취급 — 29일+ 매시간 ::error:: alert fatigue (cycle 2996, SUCCESS)
