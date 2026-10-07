@@ -80,9 +80,15 @@ export async function fetchStadiumWeather(
     const idx = hourly.time.findIndex((t) => t === targetPrefix);
     if (idx < 0) return null;
 
+    // Open-Meteo 는 결측 시간대에 null 을 섞어 보낼 수 있음 — precipitation_probability
+    // 는 `?? 0` 으로 가드돼 있었지만 temperature_2m 은 미가드라 null * 10 = NaN 이
+    // 그대로 UI 에 "NaN°C" 로 노출될 수 있었음 (asymmetric-null 패턴).
+    const rawTemp = hourly.temperature_2m[idx];
+    if (typeof rawTemp !== 'number' || Number.isNaN(rawTemp)) return null;
+
     const meta = mapWeatherCode(hourly.weather_code[idx]);
     return {
-      tempC: Math.round(hourly.temperature_2m[idx] * 10) / 10,
+      tempC: Math.round(rawTemp * 10) / 10,
       precipPct: hourly.precipitation_probability[idx] ?? 0,
       icon: meta.icon,
       label: meta.label,
