@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): v2-shadow-monitor cohort loader 디렉토리 불일치 수정 (cycle 2990, 2026-10-07)
+
+진단: 직전8(2982-2989) distinct=3, 2-chain lock 미충족. fix-incident(4)/op-analysis(22, egress quota 지속 차단)/info-arch(14)/lotto(11) 전부 gap 미근접. explore-idea saturation 12/15 충족하나 organic idea 0(plan#29 deferred 불변) 지속. 저피감사 디렉토리 grep(`lib/stats`·`components/search`·`lib/v2-shadow-monitor`) 중 `lib/v2-shadow-monitor` 직접 read.
+
+발견: `loader.ts` 가 레거시 수동 디렉토리(`data/op-analysis-cohort/`, 마지막 파일 cycle 1340/2026-06-22)를 읽는데, `op-analysis-weekly` cron(cycle 887 부터)은 처음부터 `data/op-analysis/*-cohort-split.md` 에 박제 — 디렉토리+파일명 둘 다 불일치. `/v2-shadow-monitor` 페이지가 "자동 갱신됩니다" 주장과 달리 4개월 묵은 n=118 데이터 서빙, 옆 폴더엔 n=582(최신) 미사용. `APP_COHORT_DIR`/`ROOT_COHORT_DIR`→`data/op-analysis`, `COHORT_FILENAME_REGEX`에 `-cohort-split.md` 패턴 추가(레거시 패턴 유지), `listCohortFiles` 필터 regex 기반 교체. 회귀 테스트 5건.
+
+검증: type-check/lint clean, test 585/585·4617/4617 통과, build green. commit cfe9d988, push + pre-push hook pass.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음). **Supabase egress quota 장애 지속**(cycle 2939~).
+
 ## 🟡 RETRO-ONLY — review-code(heavy): components/players·seasons·standings·teams 0회-감사 축 전수 재감사, 갭 0건 (cycle 2989, 2026-10-07)
 
 진단: 직전8(2981-2988) distinct=3, 2-chain lock 미충족. fix-incident(3)/op-analysis(21, Supabase egress quota 402 직접 재확인 여전히 차단)/info-arch(13)/lotto(10, cron 산출물 둘 다 신선) 전부 gap 미근접. explore-idea saturation 13/15 충족하나 organic idea 0(plan#29 만 spec_only_deferred, 미승인) 지속.

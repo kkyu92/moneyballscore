@@ -1,3 +1,14 @@
+## v0.5.62.315 — 2026-10-07 (cycle 2990, review-code(heavy): v2-shadow-monitor cohort loader 디렉토리 불일치 수정 SUCCESS)
+
+### review-code(heavy): v2-shadow-monitor cohort loader 가 cron 실제 산출 디렉토리 대신 레거시 디렉토리 읽던 버그 수정 (cycle 2990, SUCCESS)
+
+- 진단: 직전8(2982-2989) distinct=3(review-code(heavy)6+design-system(lite)1+fix-incident1), 2-chain lock 미충족. fix-incident gap=4(2986)·op-analysis gap=22(2968, egress quota 지속 차단 재확인)·info-arch gap=14(2976)·lotto gap=11(2979) 전부 미근접. explore-idea saturation 12/15 충족하나 organic idea 0(plan#29 deferred 불변) 지속 — skip. open PR 9건 전부 dependabot, CI check green(Vercel preview만 rate-limit, 정상). 저피감사 디렉토리 grep(`lib/stats` 2회·`components/search` 3회·`lib/v2-shadow-monitor` 4회) 중 `lib/v2-shadow-monitor` 직접 read.
+- **발견**: `loader.ts` 가 `data/op-analysis-cohort/`(수동 heavy-mode 전용 레거시 디렉토리, 마지막 파일 2026-06-22 cycle 1340 이후 미사용)를 읽는데, 실제 `op-analysis-weekly` cron(plan #8 Tier 1 M7, cycle 887 commit 9351616c 부터)은 처음부터 `data/op-analysis/*-cohort-split.md` 에 매주 박제해왔음 — 디렉토리명 + 파일명 패턴(`-cohort.md` vs `-cohort-split.md`) 둘 다 불일치. 결과: `/v2-shadow-monitor` 페이지가 "본 dashboard는 cohort 갱신 시점마다 자동 갱신됩니다" 라고 안내하면서 실제론 4개월 묵은 n=118 데이터를 서빙 — 바로 옆 폴더에 n=582(2026-09-28) 최신 데이터가 미사용 상태로 쌓여있었음.
+- 수정: `APP_COHORT_DIR`/`ROOT_COHORT_DIR` → `data/op-analysis` 로 변경, `COHORT_FILENAME_REGEX` 에 `-cohort-split.md` 패턴 추가(레거시 `-cohort.md`/`-cohort-cycle-N.md` 매칭 유지), `listCohortFiles` 필터를 `.md` 확장자 체크에서 regex 매칭으로 교체(`mlb-elo-backtest.md` 등 같은 디렉토리의 비-cohort 파일이 "최신"으로 오인되지 않도록). 회귀 테스트 5건 추가.
+- 검증: type-check/lint clean, test 585/585·4617/4617 통과, build green. commit cfe9d988, push + pre-push hook(lint/type-check/version-sync-guard) pass.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~, 본 cycle 직접 재확인).
+
 ## v0.5.62.314 — 2026-10-07 (cycle 2989, review-code(heavy): components/players·seasons·standings·teams 0회-감사 축 전수 재감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): 0회-audit 컴포넌트 디렉토리 4종 전수 감사 — 갭 0건 (cycle 2989, RETRO-ONLY)
