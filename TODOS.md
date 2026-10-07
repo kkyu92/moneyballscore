@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): app/api 저audit route 13개 + lib/supabase·calendar·observability·seasons 재감사, 갭 0건 (cycle 2991, 2026-10-07)
+
+진단: 직전8(2983-2990) distinct=3, 2-chain lock 미충족. fix-incident(5)/op-analysis(23, egress quota 지속 차단 재확인)/info-arch(15)/lotto(12, cron 산출물 둘 다 신선) 전부 gap 미근접. explore-idea saturation 2/15 낮음. open issue 0건, open PR 전부 dependabot. 승인된 plan 0건(plan#29 spec_only_deferred 불변). DESIGN.md mtime 35일(≥4주)이나 design-system 직전 발화 6 사이클 전 + 갭 0건 확인 직후라 저가치 skip.
+
+`lib/supabase`·`lib/calendar`·`lib/observability` 저grep-count 영역 전수 read — clean(기존 regression guard 보유). app/api 커밋수 최저 13개 route(revalidate/version/leaderboard-mlb-sync/picks-mlb-submit/live/picks-mlb-poll/seo-indexnow-ping/snapshot-pitchers/sync-batter-stats/mlb-waitlist/picks-poll/picks-submit/hub-dispatch/mlb-pipeline) 전수 read — CRON_SECRET/origin 가드·Sentry capture·보안 레이어 전부 정상, actionable 버그 0건. `lib/seasons/buildSeasonSummary.ts` 도 재확인 — 과거 2차례 fix + silent-drift 회귀 테스트 이미 존재. grep count 가 audit 깊이 proxy 로 신뢰 불가 재확인(3번째 사례). 코드 변경 0.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~, 본 cycle 직접 재확인).
+
 ## 🟢 SUCCESS — review-code(heavy): v2-shadow-monitor cohort loader 디렉토리 불일치 수정 (cycle 2990, 2026-10-07)
 
 진단: 직전8(2982-2989) distinct=3, 2-chain lock 미충족. fix-incident(4)/op-analysis(22, egress quota 지속 차단)/info-arch(14)/lotto(11) 전부 gap 미근접. explore-idea saturation 12/15 충족하나 organic idea 0(plan#29 deferred 불변) 지속. 저피감사 디렉토리 grep(`lib/stats`·`components/search`·`lib/v2-shadow-monitor`) 중 `lib/v2-shadow-monitor` 직접 read.

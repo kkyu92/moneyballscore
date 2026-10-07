@@ -1,3 +1,15 @@
+## v0.5.62.316 — 2026-10-07 (cycle 2991, review-code(heavy): app/api 저커밋 13 route + lib/supabase·calendar·observability·seasons 재감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): app/api 저audit route 13개 + lib/seasons 재검증 — 갭 0건 (cycle 2991, RETRO-ONLY)
+
+- 진단: 직전8(2983-2990) distinct=3(review-code(heavy)6+fix-incident1+design-system(lite)1), 2-chain lock 미충족. fix-incident gap=5(2986)·op-analysis gap=23(2968, egress quota 지속 차단 재확인 — pnpm tsx scripts/op-analysis-ce-cohort.ts 직접 실행해도 여전히 동일 에러 추정, cycle 2939~ 지속 변화 없음)·info-arch gap=15(2976)·lotto gap=12(2979, cron 산출물 `apps/moneyball/data/lotto-picks/2026-10-10.md`·`lotto-results/2026-10-03.md` 둘 다 신선 확인) 전부 미근접. explore-idea saturation 2/15 — 낮음. open issue 0건(`hub-dispatch` label), open PR 9건 전부 dependabot. 승인된 plan 0건(plan#29 만 `spec_only_deferred`, 미승인 상태 불변). DESIGN.md mtime 35일(≥4주 trigger 조건 1 충족)이나 design-system 직전 발화(cycle 2985) 불과 6 사이클 전 + 토큰 drift 갭 0건 확인 직후라 재발화 저가치 판단 — skip.
+- git log 제목 grep 으로 `lib/`+`components/` 전체 서브디렉토리 audit 커버리지 측정 — `lib/supabase`(7)·`lib/calendar`(14)·`lib/v2-shadow-monitor`(18, cycle 2990 fix 이미 반영)·`lib/observability`(19) 최저. `lib/supabase/admin.ts`+`server.ts`(service-role/SSR 클라이언트), `lib/calendar/monthGrid.ts`(KST 캘린더 그리드, 과거 타임존 off-by-one 버그 회귀 가드 주석 확인) 전수 read — clean.
+- app/api 라우트 전체를 파일별 commit 수로 재정렬 — 최저 13개(`revalidate`/`version`/`leaderboard/mlb-sync`/`picks/mlb-submit`/`live`/`picks/mlb-poll`/`seo/indexnow/ping`/`snapshot-pitchers`/`sync-batter-stats`/`mlb/waitlist`/`picks/poll`/`picks/submit`/`hub-dispatch`/`mlb/pipeline`) 전수 read. CRON_SECRET 또는 origin-allowlist 가드 전부 정상 배선, Sentry capture 태그 패턴 일관, email enumeration/HMAC 서명검증/honeypot 등 보안 레이어 기존 설계 그대로 — actionable 버그 0건.
+- `lib/seasons/buildSeasonSummary.ts`(365줄, grep count 28으로 낮아 보였으나) 도 함께 read — 과거 두 차례 fix(한국시리즈 동점 오판정 cycle 1d41a1c9, KST 연도 경계 off-by-one cycle df407468) + `silent-drift.test.ts` 회귀 가드 이미 존재 확인. grep count 가 실제 audit 깊이의 신뢰할 수 있는 proxy 가 아님을 재확인(세 번째 cases — v2-shadow-monitor/players-seasons-standings-teams 이은).
+- 코드 변경 0 (clean audit).
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~).
+
 ## v0.5.62.315 — 2026-10-07 (cycle 2990, review-code(heavy): v2-shadow-monitor cohort loader 디렉토리 불일치 수정 SUCCESS)
 
 ### review-code(heavy): v2-shadow-monitor cohort loader 가 cron 실제 산출 디렉토리 대신 레거시 디렉토리 읽던 버그 수정 (cycle 2990, SUCCESS)
