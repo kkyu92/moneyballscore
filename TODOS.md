@@ -1,4 +1,15 @@
 
+## 🟢 SUCCESS — polish-ui(2-chain lock fallback): insights/reviews/mlb-standings/wild-card loading.tsx 8건 신설 (cycle 2963, 2026-10-07)
+
+진단: 2-chain lock 발동(직전8 distinct=2: review-code(heavy) 7 + info-architecture-review(lite) 1, 둘 다 후보 제외). fix-incident(CI 전부 정상), explore-idea(plan#29 Tier4 보류 유지), operational-analysis(egress quota 402 지속), lotto(cron 정상), design-system(DESIGN.md 35일이나 cycle 2943 전수 토큰화 완료) 전부 신규 trigger 없음 → lock 규칙 polish-ui fallback.
+
+- `page.tsx` 있는데 `loading.tsx` 없는 라우트 전수 스캔 + `revalidate`/`await` 신호로 실제 DB-heavy 라우트만 선별.
+- 갭 2종 발견: EN↔KO 패리티 결손(`/en/reviews`) + 세그먼트 자체 결손(`/insights`·`/mlb/insights`·`/en/mlb/insights`, `/mlb/standings`·`/en/mlb/standings`, `/mlb/wild-card`·`/en/mlb/wild-card`).
+- 신규 8개 loading.tsx 작성(카드 리스트 스켈레톤 신규 디자인 1종 + league/division 중첩 리스트 스켈레톤 1종 재사용). 기존 KBO 스켈레톤 톤 유지.
+- 검증: tsc clean, eslint 0 warning, vitest 584 files/4610 tests 전부 통과.
+
+다음 사이클 추천 = egress quota day24+ 재확인(billing 대기) 또는 plan#29 재평가(expiry 2026-10-15 임박) 또는 review-code(heavy)/info-arch 2-chain lock 해제 후 자연 복귀.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): /debug/hallucination + /debug/pipeline + /debug/model-comparison 신규 축 감사, 갭 0건 (cycle 2962, 2026-10-07)
 
 진단: 2-chain lock 미충족(직전8 distinct=3, review-code(heavy) 6연속 + explore-idea(lite) + info-architecture-review(lite)). fix-incident — CI 전부 정상(gh run list), CI Failure Dispatch skipped 2건(실제 장애 0), 홈페이지 curl 200. explore-idea — plan#29 Tier4 보류 유지(risk=3, 사용자 결정 필요), 7 cycle 전 재확인했고 신규 트리거 없음. lotto — 다음 토(10/10)/직전 토(10/3) 산출물 모두 존재(cron 정상). info-arch gap=7, design-system(DESIGN.md mtime 35일) 도 최근 git log 3건이 전부 이미 확인된 legitimate fix. operational-analysis — Supabase egress quota 402 직접 curl 재확인(day23+, 변화 없음). cycle 2961 추천 신규 축(`/debug/*`, `lib/observability/`)으로 review-code(heavy) 재선택.

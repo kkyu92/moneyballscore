@@ -1,4 +1,14 @@
-## v0.5.62.287 — 2026-10-07 (cycle 2962, review-code(heavy): debug 대시보드 3종(hallucination/pipeline/model-comparison) 감사, 갭 0건 RETRO-ONLY)
+## v0.5.62.288 — 2026-10-07 (cycle 2963, polish-ui(2-chain lock fallback): insights/reviews/mlb-standings/wild-card loading.tsx 8건 신설 SUCCESS)
+
+### polish-ui(2-chain lock fallback): loading.tsx 커버리지 갭 8건 신설 (cycle 2963, SUCCESS)
+
+- 진단: 2-chain lock 발동(직전8 distinct=2: review-code(heavy) 7 + info-architecture-review(lite) 1) — 두 chain 후보 제외. fix-incident(CI 전부 정상, 실제 장애 0), explore-idea(plan#29 Tier4 risk=3 사용자 결정 대기 유지), operational-analysis(egress quota 402 지속, billing 대기), lotto(cron 산출물 정상), design-system(DESIGN.md mtime 35일이나 cycle 2943 이미 전수 토큰화 완료, 신규 drift 0) 전부 trigger 미충족 → lock 규칙의 polish-ui fallback 적용.
+- `find page.tsx -without loading.tsx sibling` 전수 스캔 + ISR(`revalidate`)/`await` async 신호 교차 검증으로 실제 DB-heavy 라우트만 선별(static placeholder 페이지는 스킵 — 불필요한 skeleton flash 방지).
+- 발견 갭 2종: (1) **EN↔KO 패리티 결손** — `/en/reviews`(KO/MLB/MLB-EN 3곳은 loading.tsx 보유, EN KBO 만 누락) (2) **세그먼트 자체 결손** — `/insights` 계열(KO/MLB/MLB-EN, 전부 Supabase 조회 + `revalidate=86400`)과 `/mlb/standings`·`/mlb/wild-card`(KO+EN, `buildMlbDivisionStandings`/`buildMlbWildcardStandings` DB 조회 + `revalidate=21600`) 전부 미존재 — Next.js 상위 세그먼트 loading.tsx 상속 여부까지 확인 후 진짜 결손만 특정.
+- 신규 8개 파일: `en/reviews/loading.tsx`(KO 미러), `insights/loading.tsx` + `mlb/insights/loading.tsx` + `en/mlb/insights/loading.tsx`(카드 리스트 스켈레톤 신규 디자인), `mlb/standings/loading.tsx` + `en/mlb/standings/loading.tsx`(league/division 중첩 리스트), `mlb/wild-card/loading.tsx` + `en/mlb/wild-card/loading.tsx`(league 단일 리스트) — 전부 기존 KBO 스켈레톤 톤(`animate-pulse bg-gray-200 dark:bg-gray-700`) 재사용.
+- 검증: `tsc --noEmit` clean, `eslint` 0 warning(신규 파일 8개 대상), `vitest` 584 files / 4610 tests 전부 통과.
+
+
 
 ### review-code(heavy): /debug/hallucination + /debug/pipeline + /debug/model-comparison 신규 축 감사 (cycle 2962, RETRO-ONLY)
 
