@@ -14,6 +14,15 @@ export const brand = {
   50: "#edf7f0",
 } as const;
 
+// DESIGN.md "Accent: #c5a23e (골드) — 빅매치 뱃지, 승률 하이라이트, 프리미엄 강조".
+// CSS 쪽은 globals.css --color-accent/--color-accent-light 로 이미 존재하나 TS export
+// 부재 — satori(OG 이미지)·외부 위젯 설정(JS 객체) 등 var() 미지원 컨텍스트에서 3곳
+// (KofiWidget/lotto OG/HallOfFame fallback)이 각자 hex 하드코딩해 분산돼있던 걸 흡수.
+export const accent = {
+  DEFAULT: "#c5a23e",
+  light: "#e2c96b",
+} as const;
+
 export const semantic = {
   success: "#10b981",
   warning: "#f59e0b",

@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import * as Sentry from "@sentry/nextjs";
 import { assertSelectOk, errMsg, PRODUCTION_COHORT_RULES, SITE_HOST } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
-import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
+import { brand, BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 // 동적 Open Graph 이미지: /predictions/YYYY-MM-DD 각 날짜별로 생성.
 // satori(@vercel/og) CJK 폰트 X — 라틴 문자·숫자 중심.
@@ -189,7 +189,7 @@ export default async function Image({ params }: Props) {
               <span style={{ fontSize: 28, opacity: 0.5,
           display: "flex",
         }}>{"->"}</span>
-              <span style={{ fontSize: 56, fontWeight: 800, color: "#c4e8cf",
+              <span style={{ fontSize: 56, fontWeight: 800, color: brand[100],
           display: "flex",
         }}>
                 {stats.topPick.winnerCode}

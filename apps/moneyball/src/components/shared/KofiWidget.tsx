@@ -2,6 +2,7 @@
 
 import Script from 'next/script';
 import { usePathname } from 'next/navigation';
+import { accent, brand } from '@/lib/design-tokens';
 
 declare global {
   interface Window {
@@ -15,8 +16,8 @@ function buildKofiConfig(locale: 'ko' | 'en'): Record<string, string> {
   return {
     type: 'floating-chat',
     'floating-chat.donateButton.text': 'Donate',
-    'floating-chat.donateButton.background-color': '#c5a23e',
-    'floating-chat.donateButton.text-color': '#132d1a',
+    'floating-chat.donateButton.background-color': accent.DEFAULT,
+    'floating-chat.donateButton.text-color': brand[800],
     'floating-chat.notice.text':
       locale === 'en' ? 'Support MoneyBall Score' : 'MoneyBall Score 후원하기',
   };
