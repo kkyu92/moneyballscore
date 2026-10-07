@@ -1,3 +1,14 @@
+## v0.5.62.276 — 2026-10-07 (cycle 2951, skill-evolution(forced): phase 46, 80회 자가 진화)
+
+### skill-evolution(forced): phase 46 — 80회 자가 진화 (cycle 2951, SUCCESS)
+
+- 진단: `skill-evolution-pending` 마커 확인(cycle 2950 milestone trigger 3) → forced 발화. 2차 방어선(cycle 2950 retro commit e00fffc4) OK. open issue 0.
+- 직전 20 cycle(2931-2950) 분석: review-code(heavy) dominance 70%→50% 하락(lib/ 핵심 스코프 소진 현실화) + fix-incident/explore-idea 각 15%. success 95%→80% 하락은 전적으로 cycle 2939 Supabase egress quota billing 장애 원인(코드 결함 아님).
+- 실측 fix 1: PASS_ship 측정법의 증분 근사 가산(~2423+51=2474)이 전체 이력 단일 grep 실측값(2550)과 76건 오차 — 단일 grep 실측 방식으로 교체(`SKILL.md` 분석범위 규칙 갱신).
+- 실측 fix 2: cycle 2949 meta-pattern carry-over(lotto chain trigger 가 `~/lotto_picks/` stale 개인 경로 참조) 소비 — `apps/moneyball/data/lotto-picks/`·`lotto-results/`(실제 cron 산출물) 기준으로 trigger 재정의.
+- `~/.claude/skills/develop-cycle/MIGRATION-PATH.md` phase 46 append + `SKILL.md` 요약 라인 갱신(글로벌 파일). 감사 추적용 empty commit `feat(skill): cycle 2950 milestone` (147b36a5). `pnpm test` 584/584 files 4610/4610 green.
+- 다음 milestone = cycle 3000 (review-code dominance 추가 하락 여부 monitor + egress quota 장애 장기화 시 fix-incident 재확인 noise 누적 monitor + PASS_ship 2550 유지 확인).
+
 ## v0.5.62.275 — 2026-10-07 (cycle 2950, review-code(heavy): MLB 데이터 레이어 assertSelectOk degrade 32개 호출)
 
 ### review-code(heavy): lib/mlb/ 빌더 레이어 assertSelectOk degrade — 15개 파일 32개 호출 (cycle 2950, SUCCESS)

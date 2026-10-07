@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — skill-evolution(forced): phase 46, 80회 자가 진화 (cycle 2951, 2026-10-07)
+
+트리거: `skill-evolution-pending` 마커(cycle 2950, trigger-3 milestone cycle_n % 50 == 0) 강제 발화. 2차 방어선(cycle 2950 retro commit e00fffc4) OK 확인 후 진행.
+
+직전 20 cycle(2931-2950) 분석: review-code(heavy) dominance 70%→50% 하락 — cycle 2900 phase45 가 예고한 "lib/ 핵심 스코프 소진"이 현실화됐다. fix-incident/explore-idea 각 15%, polish-ui/dimension-cycle/design-system/lotto 각 5%로 분산. success rate 95%→80% 하락은 전적으로 cycle 2939 Supabase egress quota(HTTP 402) billing 장애가 원인 — 코드/프로세스 결함 아니며 사용자 대시보드 조치 대기 중.
+
+실측 fix 2건 적용: (1) PASS_ship 지표 자체의 측정 방법론 silent drift 발견 — 매 milestone 마다 "직전 phase 근사치 + 구간 증분"을 가산해온 방식이 59회 누적되며 76건 오차(추정 2474 vs 전체 이력 단일 grep 실측 2550)를 만들어냄. 증분 가산 방식을 폐기하고 매번 `git log --oneline --grep "subtype: cycle-retro" -F | grep -c SUCCESS` 단일 grep 실측으로 교체 — develop-cycle 이 평소 코드베이스에서 찾아내던 것과 동일한 "근사치 누적 가산 = silent drift" 패턴을 스킬 자신의 핵심 지표에서 발견한 메타적 사례. (2) cycle 2949 가 남긴 `meta-pattern: lotto-chain-trigger-stale-advisory-gap` carry-over 소비 — `lotto` chain 의 trigger(2)(3)가 `~/lotto_picks/`(개인 advisory, repo 밖) 경로를 참조해왔는데 site 기능은 cycle 2658/2812 이후 완전 cron 자동화(`lotto-pick-update.yml`/`lotto-result-update.yml`)되어 있어 이 경로가 stale 이어도 site 건강도와 무관 — trigger 를 `apps/moneyball/data/lotto-picks/`·`lotto-results/`(실제 cron 산출물) mtime 기준으로 교체해 false-positive 차단.
+
+`~/.claude/skills/develop-cycle/SKILL.md`(chain pool 테이블 line 69, 진단 source 테이블 line 236, 분석범위 규칙, migration path 요약 line 686) + `MIGRATION-PATH.md`(phase 46 append) 갱신 — 둘 다 리포 밖 글로벌 파일이라 PR 대신 감사 추적용 empty commit `feat(skill): cycle 2950 milestone` (147b36a5) 으로 기록(cycle 2850/2900 등 과거 동일 패턴). `pnpm test` 584 files/4610 tests green.
+
+다음 milestone = cycle 3000 (review-code(heavy) dominance 추가 하락 여부 monitor + egress quota 장애 장기화 시 fix-incident 재확인 noise 누적 monitor(2940/2944 2회 누적, 3회+ 시 cooldown 성격 trigger 검토) + lotto trigger 재정의 효과(false-positive 재발 0건) 확인 + PASS_ship 2550 유지 확인).
+
+다음 사이클 추천 = review-code(heavy)(신규 스코프 analysis/api/calendar/observability/teams 착수 검토) 또는 fix-incident(egress quota 장애 지속 시, 단 재확인 noise 주의).
+
 ## 🟢 SUCCESS — review-code(heavy): MLB 데이터 레이어 assertSelectOk degrade — 15개 파일 32개 호출 (cycle 2950, 2026-10-07)
 
 진단: open issue 0, approved plan 0/25(전부 completed/archived/deferred), 직전8 distinct=4(design-system/review-code(heavy)2/fix-incident2/lotto, 2-chain lock 미충족). operational-analysis gap trigger(26-cycle) 충족했으나 cycle 2949 가 바로 전날 egress_quota 장애를 재확인한 상태라 중복 확인 대신 코드 직접 read 로 전환.
