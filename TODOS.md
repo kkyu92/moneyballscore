@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — lotto(lite): 1242회 OOS 백필 + 1245회 picks + operational-analysis 차단 발견 (cycle 2949, 2026-10-07)
+
+진단: cycle 2948 retro 가 operational-analysis 와 lotto 둘 다 우선 검토 권장. open issue 0, approved plan 0/24, 직전8 distinct=3(2-chain lock 미충족). operational-analysis 먼저 시도 → `scripts/op-analysis-ce-cohort.ts` 실행 시 `exceed_egress_quota` 즉시 에러로 DB 재측정 자체 불가(cycle 2939 이후 billing 장애 지속, 사용자 조치 대기 — 신규 발견 아님, 재확인만). lotto 로 pivot.
+
+**핵심 발견**: develop-cycle 의 "lotto 60+ cycle gap" trigger 는 `~/lotto_picks/*.md`(개인 advisory, repo 밖) 기준이었는데, 실제 site 기능은 cycle 2658/2812 이후 완전 cron 자동화(`lotto-pick-update.yml`/`lotto-result-update.yml`/`lotto-pick-monitor.yml`) 되어 있어 `apps/moneyball/data/lotto-picks/2026-10-10.md`(1000세트, 2026-10-06 cron 생성) + `apps/moneyball/data/lotto-results/2026-10-03.md`(1244회 결과+256룰 검증+매칭분석, 2026-10-03 cron 생성) 이미 최신 — trigger 자체가 site 건강도와 무관한 false-positive 가능성 확인. 다음 skill-evolution 때 trigger 재정의 검토 권장(meta-pattern 후보).
+
+1242회(9/19) 50세트 OOS 전수 비교(실제 `2 4 10 16 31 41`+보너스9): 세트8 `16 31 40 41 42 43` 3매칭=5등 1건, 1~4등 없음 → `~/lotto_picks/2026-09-19-result.md`. 1245회(10/10) 신규 50세트(A~E 포함) → `~/lotto_picks/2026-10-10-50sets.md`. `pnpm tsx scripts/lotto.ts count` 재확인: 유효조합 7,705,415/8,145,060(제거 5.40%, delta=0).
+
+repo 변경 없음(개인 advisory 파일은 `~/lotto_picks/`, repo 밖) — VERSION/CHANGELOG/TODOS 만 sync.
+
 ## 🟢 SUCCESS — review-code(heavy): /analysis 데이터 레이어 assertSelectOk degrade — 19개 호출 (cycle 2948, 2026-10-07)
 
 진단: cycle 2947 retro carry-over("`/analysis` 데이터 레이어 — `analysis-data.ts` 11개 + `page.tsx` Promise.all 20+ 항목, 파일 규모상 별도 전용 cycle 필요, 다음 review-code(heavy) 1순위 후보") 채택. open issue 0, approved plan 0/23(전부 completed/archived/superseded/spec_only_deferred), 직전8 distinct=3(review-code(heavy) 5 + fix-incident 2 + design-system 1, 2-chain lock 미충족). operational-analysis(gap≥25)·lotto(gap≥30) 둘 다 gap trigger 충족했지만 carry-over 가 구체적 scope + 실제 production 위험(uncaught throw 500)이라 우선 채택.

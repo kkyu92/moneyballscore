@@ -1,3 +1,14 @@
+## v0.5.62.274 — 2026-10-07 (cycle 2949, lotto(lite): 1242회 OOS 백필 + 1245회 picks + op-analysis 차단 확인)
+
+### lotto(lite): 1242회 OOS 백필 + 1245회 picks ship + operational-analysis 차단 발견 (cycle 2949, SUCCESS)
+
+- 진단: cycle 2948 retro 가 operational-analysis("CE/비CE 재측정") 과 lotto("다음 회차 picks 확인") 둘 다 우선 검토 권장. open issue 0, approved plan 0/24(전부 완료/보류), 직전8 distinct=3(review-code(heavy) 5 + design-system 1 + fix-incident 2, 2-chain lock 미충족).
+- operational-analysis 먼저 시도: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 실행 시 `exceed_egress_quota` 즉시 에러 — Supabase 프로젝트가 egress quota 초과로 전체 서비스 제한 상태(cycle 2939부터 지속, 현재도 billing plan 업그레이드 전까지 DB 기반 재측정 자체 불가). 코드 버그 아님, 사용자 billing 조치 필요 사안 재확인(신규 액션 없음).
+- lotto 로 pivot: `~/lotto_picks/` 개인 advisory 파일 기준으론 1242회(9/19) picks 이후 1243회(9/26)·1244회(10/3) 두 회차 picks 생성이 비어있어 "60+ 사이클 미발화" 로 보였으나, **실제 사이트 기능은 cycle 2658/2812 이후 완전 cron 자동화**(`lotto-pick-update.yml`/`lotto-result-update.yml`/`lotto-pick-monitor.yml`)되어 `apps/moneyball/data/lotto-picks/2026-10-10.md`(1000세트, cron 2026-10-06 생성) + `apps/moneyball/data/lotto-results/2026-10-03.md`(1244회 결과+256룰 검증+매칭분석, cron 2026-10-03 생성) 이미 최신 상태 확인 — develop-cycle 의 "lotto 60+ cycle gap" trigger 는 개인 advisory 파일(`~/lotto_picks/*.md`, repo 밖) 기준이라 site 기능 건강도와 무관한 false-positive 성격.
+- 1242회(9/19) 50세트 전수 OOS 비교: 실제 당첨 `2 4 10 16 31 41`(보너스9) 대비 세트8 `16 31 40 41 42 43` 3매칭 = 5등 1건, 1~4등 없음. `~/lotto_picks/2026-09-19-result.md` 작성.
+- 1245회(2026-10-10) 추첨용 50세트(기피점수 desc, A~E 상위5 포함) `~/lotto_picks/2026-10-10-50sets.md` 작성. `pnpm tsx scripts/lotto.ts count` 재확인: 유효조합 7,705,415/8,145,060(제거 5.40%, 직전 대비 delta=0 — 규칙 갱신 없음).
+- **meta-pattern 후보 기록**: lotto chain 의 "60+ cycle gap" trigger(SKILL.md chain table) 가 개인 advisory 파일 존재 여부만 보고 사이트 자동화 상태를 반영 못함 — 다음 skill-evolution 발화 시 trigger 재정의(또는 개인 advisory 파일 자체를 cron 에 흡수) 검토 권장.
+
 ## v0.5.62.273 — 2026-10-07 (cycle 2948, review-code(heavy): /analysis 데이터 레이어 assertSelectOk degrade 19개 호출)
 
 ### review-code(heavy): /analysis 데이터 레이어(analysis-data.ts + convergenceRecord.ts + buildTeamStrengthSnapshot.ts) assertSelectOk degrade 적용 (cycle 2948, SUCCESS)
