@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — fix-incident: health check egress-quota downgrade never fires for HEAD-request errors (cycle 2999, 2026-10-07)
+
+진단: 직전8(2991-2998) distinct=3(review-code(heavy)5+design-system1+fix-incident1) — 2-chain lock 미충족. open issue 0건, approved plan 0건(plan#29/#30 둘 다 non-approved status 불변). `gh run list --workflow=health-alert.yml` 로 최근 8회 전부 failure 확인 — cycle 2996 이 "Supabase egress quota 402 → warning 다운그레이드" 수정을 머지했는데도 알림이 멈추지 않는 모순 발견, fix-incident 자연 발화(20-cycle 주기 보정 trigger 와 무관하게 실제 재발 증거).
+
+원인: `checkSupabase()` 가 `.select(..., { head: true })` 로 HTTP HEAD 요청 — 실제 Supabase 402(`exceed_egress_quota`) 응답 body 가 HEAD 라 클라이언트에 도달 못해 `result.error.message` 가 production 에서 빈 문자열(`@supabase/supabase-js` 직접 probe 로 실측: `status:402, statusText:'Payment Required', message:''` — 동일 엔드포인트 GET curl 은 전체 메시지 반환). cycle 2996 fix 는 메시지 텍스트 매칭(`includes('exceed_egress_quota')`)만 했는데 production 의 실제 에러는 빈 문자열이라 매칭 자체가 불가능 — 테스트는 메시지가 채워진 mock 만 썼기 때문에 PASS 했지만 실제 배포 코드 경로는 다름(test↔prod drift).
+
+수정: `result.status === 402` 를 `assertSelectOk` throw 전에 직접 체크 — 메시지 텍스트 무관하게 바로 downgrade. 기존 텍스트 매칭은 non-head 경로 fallback 으로 유지. 빈 메시지 HEAD 케이스를 재현하는 테스트 1건 추가(8/8 PASS). tsc clean, lint clean, vitest 전체 585 파일/4619 테스트 PASS.
+
+**plan#29/#30 상태 변화 없음**. **Supabase egress quota 장애 지속**(cycle 2939~, 60일+ 경과) — 이번 수정은 알림 분류만 정정, 실제 billing 조치(사용자)는 여전히 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): ANALYSIS_UPCOMING_LIMIT 주석 callsite 경로 불일치 수정 (cycle 2998, 2026-10-07)
 
 진단: 직전8(2990-2997) distinct=3 — 2-chain lock 미충족. open issue 0건, approved plan 0건(plan#29 Tier4 불변). Supabase egress quota 402 재확인(cycle 2939~, 59일+) — op-analysis 차단 지속. fix-incident(2)/info-arch(22)/lotto(19) 전부 미근접. cycle 2997 추천대로 `packages/shared/src/index.ts` 잔여 함수 구간 이어서 감사.

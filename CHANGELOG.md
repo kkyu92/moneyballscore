@@ -1,3 +1,14 @@
+## v0.5.62.324 — 2026-10-07 (cycle 2999, fix-incident: health check egress-quota downgrade never fires for HEAD-request errors SUCCESS)
+
+### fix-incident: `checkSupabase()` HEAD 요청이 402 에러 메시지를 비워버려 cycle 2996 다운그레이드 fix 가 production 에서 무효 (cycle 2999, SUCCESS)
+
+- 진단: 직전8(2991-2998) distinct=3 — 2-chain lock 미충족, 정상 선택. `gh run list --workflow=health-alert.yml` 최근 8회 전부 failure — cycle 2996 fix 머지 이후에도 알림 지속이라는 모순 발견, fix-incident 자연 발화.
+- 원인: `.select(..., { head: true })` 가 HTTP HEAD 전송 → Supabase 402(`exceed_egress_quota`) 응답 body 가 HEAD 응답이라 클라이언트에 미도달 → `result.error.message` production 실측 빈 문자열(`status:402, statusText:'Payment Required'`, 직접 supabase-js probe 확인). cycle 2996 fix 는 메시지 텍스트 매칭만 해서 이 경로를 못 잡음 — 테스트 mock 이 메시지 채워진 형태라 가짜 PASS, 실제 배포 코드와 drift.
+- 수정: `result.status === 402` 직접 체크(메시지 텍스트 무관, `assertSelectOk` throw 전에 분기) — 텍스트 매칭은 non-head fallback 으로 유지. 빈 메시지 HEAD 케이스 재현 테스트 추가.
+- 검증: tsc clean, eslint clean, vitest 585/585 파일·4619/4619 테스트 PASS(신규 1건 포함).
+
+**plan#29/#30 상태 변화 없음**. **Supabase egress quota 장애 지속**(cycle 2939~, 60일+ 경과) — 본 fix 는 알림 분류 정정만, billing 조치는 사용자 대기 그대로.
+
 ## v0.5.62.323 — 2026-10-07 (cycle 2998, review-code(heavy): ANALYSIS_UPCOMING_LIMIT 주석 callsite 경로 불일치 수정 SUCCESS)
 
 ### review-code(heavy): `ANALYSIS_UPCOMING_LIMIT` 주석이 가리키는 callsite 파일이 실제와 다름 (cycle 2998, SUCCESS)
