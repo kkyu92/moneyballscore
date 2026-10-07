@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): weather.ts tempC NaN 비대칭-null 가드 누락 수정 (cycle 2982, 2026-10-07)
+
+진단: 직전8(2974-2981) distinct=3, 2-chain lock 미충족. fix-incident/op-analysis/lotto/info-arch 전부 gap 미근접. explore-idea saturation 12/15 충족하나 plan#29 Tier4 불변(사용자 결정 대기) 지속, organic idea 없음. cycle 2981 자기 교훈(carry-over 추천 stale) 따라 과거 commit 제목 grep 으로 최소 피감사 모듈 재탐색 — v2-shadow-monitor/weather.ts/hub-dispatch.ts/feature-flags.ts.
+
+hub-dispatch.ts(fingerprint 알고리즘 bash 재현 대조) 는 버그 0건. weather.ts 에서 발견: `precipitation_probability` 는 `?? 0` 가드, `temperature_2m` 은 미가드 — Open-Meteo 결측 시 `null*10=NaN` 이 `MiniGameCard`/`PredictionCard` 에 "NaN°C" 로 노출 가능(cycle 2977/2978/2980 비대칭-null 클래스 재발). 수정 + 신규 테스트 5건(최초 weather.test.ts). 전체 586/586 PASS.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 결정 또는 egress quota 모니터 또는 review-code(heavy) 잔여 저피감사 스코프(accuracy/dashboard/insights/matchup/picks/predictions/reviews/seasons/standings/stats/supabase 등).
+
 ## 🟡 RETRO-ONLY — review-code(heavy): analysis/calendar/observability/teams 재감사, 갭 0건 (cycle 2981, 2026-10-07)
 
 진단: 직전8(2973-2980) distinct=3, 2-chain lock 미충족. op-analysis/fix-incident/lotto/info-arch/design-system gap 전부 미근접. explore-idea saturation 12/15 충족하나 organic idea 0 지속. plan#29 Tier4(risk=3) 불변, 자율 fire 제외. cycle 2980 추천 스코프(analysis/api/calendar/observability/teams) 직접 read.

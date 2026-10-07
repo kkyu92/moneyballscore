@@ -1,3 +1,16 @@
+## v0.5.62.307 — 2026-10-07 (cycle 2982, review-code(heavy): weather.ts tempC NaN 비대칭-null 가드 누락 수정 SUCCESS)
+
+### review-code(heavy): weather.ts temperature_2m 미가드 NaN 노출 수정 (cycle 2982, SUCCESS)
+
+- 진단: 직전8(2974-2981) distinct=3(review-code(heavy)6+info-architecture-review1+lotto(lite)1), 2-chain lock 미충족. fix-incident gap=11/20·op-analysis gap=13/25·lotto gap=2/30·info-arch gap=5/30 전부 미근접. explore-idea saturation 12/15 충족하나 organic idea 0(open issue 0, plan#29 Tier4 불변·만료 2026-10-15 — 사용자 결정 대기 중, 추가 재확인 생략) 지속. cycle 2981 이 자기 교훈(carry-over 추천이 stale 이었던 것) 따라 과거 commit 제목 grep 으로 진짜 미탐색 스코프 재탐색 — v2-shadow-monitor(9건)/weather.ts(7건)/hub-dispatch.ts(6건)/feature-flags.ts(4건) 최소 피감사 후보 확인.
+- `hub-dispatch.ts` 전수 read + bash 재현 composite action(`compose-dispatch-payload`) 대조 — fingerprint slug 알고리즘(join 순서/lowercase/dash 축약/60자 cap) 동일 확인, 버그 0건.
+- **`weather.ts` 에서 실제 버그 발견**: `fetchStadiumWeather()` 가 Open-Meteo `precipitation_probability[idx]` 는 `?? 0` 으로 가드했지만 바로 옆 `temperature_2m[idx]` 는 미가드 — API 가 결측 시간대에 `null` 을 섞어 보내면 `null * 10 = NaN` 이 `Math.round` 를 그대로 통과해 `WeatherSlot.tempC = NaN`, `MiniGameCard.tsx`/`PredictionCard.tsx` 양쪽에 `"NaN°C"` 로 사용자 노출 가능 (cycle 2977/2978/2980 의 비대칭-null 패턴과 동일 클래스, 다른 모듈에서 재발).
+- 수정: `temperature_2m[idx]` 타입/NaN 체크 후 미충족 시 `null` 반환(기존 함수의 다른 실패 경로와 동일 설계). 신규 테스트 5건(`weather.test.ts` 최초 테스트 파일) — 정상값/temp null/precip null/idx 불일치/fetch 실패 커버. 전체 586/586 테스트 파일 PASS (4618 tests).
+
+**plan#29 상태 변화 없음** (만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 사용자 결정(만료 임박) 또는 Supabase egress quota 장애 모니터 또는 review-code(heavy) 잔여 저피감사 스코프(v2-shadow-monitor / feature-flags.ts / hub-dispatch.ts 는 이번 cycle 재확인 완료, 추가 후보 = accuracy/changelog/dashboard/debug/insights/leaderboard/matchup/picks/predictions/reviews/seasons/seo/standings/stats/supabase 중 미세 스코프).
+
 ## v0.5.62.306 — 2026-10-07 (cycle 2981, review-code(heavy): analysis/calendar/observability/teams 재감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): analysis/calendar/observability/teams 재감사 — 갭 0건, carry-over 추천 stale 확인 (cycle 2981, RETRO-ONLY)
