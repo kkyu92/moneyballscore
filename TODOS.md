@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): /analysis 데이터 레이어 assertSelectOk degrade — 19개 호출 (cycle 2948, 2026-10-07)
+
+진단: cycle 2947 retro carry-over("`/analysis` 데이터 레이어 — `analysis-data.ts` 11개 + `page.tsx` Promise.all 20+ 항목, 파일 규모상 별도 전용 cycle 필요, 다음 review-code(heavy) 1순위 후보") 채택. open issue 0, approved plan 0/23(전부 completed/archived/superseded/spec_only_deferred), 직전8 distinct=3(review-code(heavy) 5 + fix-incident 2 + design-system 1, 2-chain lock 미충족). operational-analysis(gap≥25)·lotto(gap≥30) 둘 다 gap trigger 충족했지만 carry-over 가 구체적 scope + 실제 production 위험(uncaught throw 500)이라 우선 채택.
+
+`analysis-data.ts`(983줄, 11개) + `convergenceRecord.ts`(824줄, 7개) + `buildTeamStrengthSnapshot.ts`(111줄, 1개) = 19개 `assertSelectOk` 호출 전수 확인. `app/analysis/page.tsx` 의 27-항목 단일 Promise.all 이 이 함수들을 호출하는 구조 — 1곳이라도 throw 시 전체 reject → `/analysis` 500(cycle 2946/2947 과 동일 패턴, 파일 경계만 다름). `fetchConvergencePickDetailedResults` 1곳이 /analysis Promise.all 의 14개 항목(getRecentConvergencePickRecord×6/getConvergencePickStreak×2/getConvergencePickBestStreak×2/getConvergencePickTeamStats×2/getConvergencePickHomeAwaySplit×2)을 전부 커버하는 수렴 구조 확인.
+
+19개 호출 전부 try/catch + `captureFallback`(null/빈배열 degrade) 적용. 동일 파일 안 `/matchup/[teamA]/[teamB]`·`/mlb/matchup/[teamA]/[teamB]`·MLB 리그 집계 함수(6곳)도 전수 감사 원칙으로 함께 보호.
+
+tsc --noEmit clean(buildTeamStrengthSnapshot data 타입 `unknown[] | null` 로 완화, 기존 `as unknown as` cast 패턴과 정합), eslint(3파일) clean, vitest 584파일/4610테스트 전부 pass. `vercel inspect --logs` 로 Supabase egress quota 장애(cycle 2939, day 7+) 지속 확인 — insights/sitemap 은 이미 degrade 정상 작동 중, `/analysis`/`/matchup` 계열은 이번 fix 전까지 미보호.
+
+cycle 2947 carry-over 1순위 항목 closure. 다음 사이클 = operational-analysis(gap trigger 충족, CE/비CE 재측정) 또는 lotto(gap trigger 충족, 다음 회차 picks 확인) 우선 검토 권장.
+
 ## 🟢 SUCCESS — review-code(heavy): assertSelectOk degrade 전수 감사 — 16개 파일 (cycle 2947, 2026-10-07)
 
 진단: cycle 2946 retro carry-over(assertSelectOk 보유 ~16개 파일 전수 감사) 채택. open issue 0, approved plan 0/25, 직전8 distinct=3(2-chain lock 미충족). `grep -rl assertSelectOk apps/moneyball/src/app --include=page.tsx` 로 20개 파일 확인 → captureFallback 보유 0건(`/`, `/insights`, `/calendar` 는 이미 cycle 2946 에 degrade 적용 완료 상태라 본 사이클 재작업 불필요, 실제 미적용 17개 대상).

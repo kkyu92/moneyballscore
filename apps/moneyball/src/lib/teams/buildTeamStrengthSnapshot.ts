@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import {
   assertSelectOk,
   shortTeamName,
@@ -54,7 +55,12 @@ export async function buildTeamStrengthSnapshot(): Promise<TeamStrengthRow[]> {
     .order('created_at', { ascending: false })
     .limit(TEAM_STRENGTH_SNAPSHOT_LIMIT);
 
-  const { data } = assertSelectOk(result, 'buildTeamStrengthSnapshot');
+  let data: unknown[] | null;
+  try {
+    ({ data } = assertSelectOk(result, 'buildTeamStrengthSnapshot'));
+  } catch (err) {
+    data = captureFallback(err, null, { route: '/analysis', source: 'buildTeamStrengthSnapshot' });
+  }
   if (!data || data.length === 0) return [];
 
   const rows = data as unknown as SnapshotPredRow[];

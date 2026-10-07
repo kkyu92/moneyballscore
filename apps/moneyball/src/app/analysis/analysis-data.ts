@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import {
   ANALYSIS_TOP_FACTORS_LIMIT,
   ANALYSIS_UPCOMING_LIMIT,
@@ -133,7 +134,12 @@ export async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
     .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('game_time', { ascending: true })) as SelectResult<TodayAllRow[]>;
 
-  const { data: rawGames } = assertSelectOk(gamesResult, 'analysis getTodayAnalysisData');
+  let rawGames: TodayAllRow[] | null;
+  try {
+    ({ data: rawGames } = assertSelectOk(gamesResult, 'analysis getTodayAnalysisData'));
+  } catch (err) {
+    rawGames = captureFallback(err, null, { route: '/analysis', source: 'getTodayAnalysisData games' });
+  }
 
   if (!rawGames) {
     return { bigMatchId: null, bigMatchMode: 'no-games', bigMatchHomeCode: null, bigMatchAwayCode: null, games: [] };
@@ -149,7 +155,12 @@ export async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
     .order('observed_at', { ascending: false })) as SelectResult<
     Array<{ external_game_id: string; home_sp_name: string | null; away_sp_name: string | null }>
   >;
-  const { data: spRows } = assertSelectOk(spResult, 'analysis getTodayAnalysisData sp_confirmation_log');
+  let spRows: Array<{ external_game_id: string; home_sp_name: string | null; away_sp_name: string | null }> | null;
+  try {
+    ({ data: spRows } = assertSelectOk(spResult, 'analysis getTodayAnalysisData sp_confirmation_log'));
+  } catch (err) {
+    spRows = captureFallback(err, [], { route: '/analysis', source: 'getTodayAnalysisData sp_confirmation_log' });
+  }
   const spMap = new Map<string, { homeSP: string; awaySP: string }>();
   for (const row of spRows ?? []) {
     if (!row.external_game_id || spMap.has(row.external_game_id)) continue;
@@ -311,7 +322,12 @@ export async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
       .order('game_time', { ascending: true }) as unknown as Promise<SelectResult<YesterdayGameRow[]>>,
     getSeasonH2HData(),
   ]);
-  const { data } = assertSelectOk(gamesResult, 'analysis getYesterdayGames');
+  let data: YesterdayGameRow[] | null;
+  try {
+    ({ data } = assertSelectOk(gamesResult, 'analysis getYesterdayGames'));
+  } catch (err) {
+    data = captureFallback(err, null, { route: '/analysis', source: 'getYesterdayGames' });
+  }
 
   if (!data) return [];
 
@@ -447,7 +463,12 @@ export async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
     getSeasonH2HData(),
   ]);
 
-  const { data } = assertSelectOk(gamesResult, 'analysis getThisWeekPreviousGames');
+  let data: ThisWeekGameRow[] | null;
+  try {
+    ({ data } = assertSelectOk(gamesResult, 'analysis getThisWeekPreviousGames'));
+  } catch (err) {
+    data = captureFallback(err, null, { route: '/analysis', source: 'getThisWeekPreviousGames' });
+  }
   if (!data) return [];
 
   const rows = data as unknown as ThisWeekGameRow[];
@@ -599,9 +620,19 @@ export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame
     getSeasonH2HData(),
   ]);
 
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'analysis getThisWeekRemainingGames schedule');
+  let scheduleData: unknown[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'analysis getThisWeekRemainingGames schedule'));
+  } catch (err) {
+    scheduleData = captureFallback(err, null, { route: '/analysis', source: 'getThisWeekRemainingGames schedule' });
+  }
   if (!scheduleData || scheduleData.length === 0) return [];
-  const { data: eloData } = assertSelectOk(eloResult, 'analysis getThisWeekRemainingGames elo');
+  let eloData: unknown[] | null;
+  try {
+    ({ data: eloData } = assertSelectOk(eloResult, 'analysis getThisWeekRemainingGames elo'));
+  } catch (err) {
+    eloData = captureFallback(err, [], { route: '/analysis', source: 'getThisWeekRemainingGames elo' });
+  }
 
   const eloMap = new Map<string, number>();
   const modelProbMap = new Map<number, number>(); // wave-313: game_id → home_win_prob
@@ -800,7 +831,12 @@ export async function getPeriodStats(startDate: string, endDate: string): Promis
     .gte('game.game_date', startDate)
     .lte('game.game_date', endDate)) as SelectResult<Array<{ is_correct: boolean | null }>>;
 
-  const { data } = assertSelectOk(result, 'analysis getPeriodStats');
+  let data: Array<{ is_correct: boolean | null }> | null;
+  try {
+    ({ data } = assertSelectOk(result, 'analysis getPeriodStats'));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/analysis', source: 'getPeriodStats' });
+  }
   const rows = (data ?? []) as Array<{ is_correct: boolean | null }>;
   const total = rows.length;
   const correct = rows.filter((r) => r.is_correct === true).length;
@@ -853,7 +889,12 @@ export async function getBestPickOfWeek(startDate: string, endDate: string): Pro
     .order('confidence', { ascending: false })
     .limit(1)) as SelectResult<BestPickRow[]>;
 
-  const { data } = assertSelectOk(result, 'analysis getBestPickOfWeek');
+  let data: BestPickRow[] | null;
+  try {
+    ({ data } = assertSelectOk(result, 'analysis getBestPickOfWeek'));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/analysis', source: 'getBestPickOfWeek' });
+  }
   const rows = (data ?? []) as unknown as BestPickRow[];
   const row = rows[0];
   if (!row?.game) return null;
@@ -897,7 +938,12 @@ export async function getUpsetPickOfMonth(startDate: string, endDate: string): P
     .order('confidence', { ascending: false })
     .limit(1)) as SelectResult<BestPickRow[]>;
 
-  const { data } = assertSelectOk(result, 'analysis getUpsetPickOfMonth');
+  let data: BestPickRow[] | null;
+  try {
+    ({ data } = assertSelectOk(result, 'analysis getUpsetPickOfMonth'));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/analysis', source: 'getUpsetPickOfMonth' });
+  }
   const rows = (data ?? []) as unknown as BestPickRow[];
   const row = rows[0];
   if (!row?.game) return null;
@@ -941,7 +987,12 @@ export async function getSeasonH2HData(): Promise<Map<string, Record<string, num
     .lt('game_date', today)
     .not('winner_team_id', 'is', null)) as SelectResult<H2HRaw[]>;
 
-  const { data } = assertSelectOk(result, 'analysis getSeasonH2HData');
+  let data: H2HRaw[] | null;
+  try {
+    ({ data } = assertSelectOk(result, 'analysis getSeasonH2HData'));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/analysis', source: 'getSeasonH2HData' });
+  }
   const pairMap = new Map<string, Record<string, number>>();
 
   for (const row of (data as unknown as H2HRaw[]) ?? []) {
@@ -972,7 +1023,12 @@ export async function detectSimplifiedMode(): Promise<boolean> {
     .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .order('id', { ascending: false })
     .limit(10)) as SelectResult<Array<{ confidence: number | null }>>;
-  const { data } = assertSelectOk(result, 'analysis detectSimplifiedMode');
+  let data: Array<{ confidence: number | null }> | null;
+  try {
+    ({ data } = assertSelectOk(result, 'analysis detectSimplifiedMode'));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/analysis', source: 'detectSimplifiedMode' });
+  }
   const recentConfs = (data ?? [])
     .map((r) => r.confidence)
     .filter((c): c is number => c != null);

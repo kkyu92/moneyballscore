@@ -1,3 +1,16 @@
+## v0.5.62.273 — 2026-10-07 (cycle 2948, review-code(heavy): /analysis 데이터 레이어 assertSelectOk degrade 19개 호출)
+
+### review-code(heavy): /analysis 데이터 레이어(analysis-data.ts + convergenceRecord.ts + buildTeamStrengthSnapshot.ts) assertSelectOk degrade 적용 (cycle 2948, SUCCESS)
+
+- 진단: cycle 2947 retro carry-over("`/analysis` 데이터 레이어, 파일 규모상 별도 전용 cycle 필요, 다음 review-code(heavy) 1순위 후보") 채택. open issue 0, approved plan 0/23(전부 completed/archived/superseded/spec_only_deferred), 직전8 distinct=3(2-chain lock 미충족), operational-analysis/lotto 는 gap trigger 충족했지만 carry-over 가 더 구체적·고가치 판단.
+- `analysis-data.ts`(983줄) 11개 + `convergenceRecord.ts`(824줄) 7개 + `buildTeamStrengthSnapshot.ts`(111줄) 1개 = 총 19개 `assertSelectOk` 호출 전수 확인. `analysis/page.tsx` 의 27-항목 Promise.all 이 이 함수들을 호출 — 그 중 하나라도 throw 시 Promise.all 전체 reject → `/analysis` 전체 500(cycle 2946/2947 과 동일 silent drift family, 파일 경계만 다름).
+- `fetchConvergencePickDetailedResults`(convergenceRecord.ts) 는 /analysis 페이지의 14개 Promise.all 항목(getRecentConvergencePickRecord×6/getConvergencePickStreak×2/getConvergencePickBestStreak×2/getConvergencePickTeamStats×2/getConvergencePickHomeAwaySplit×2)이 전부 이 단일 함수로 수렴하는 구조 — 1곳 보호로 14개 항목 전체 방어.
+- 19개 호출 전부 try/catch + `captureFallback`(널/빈배열 degrade) 적용. KBO `/analysis` 전용 함수 외에 동일 파일 안의 `/matchup/[teamA]/[teamB]`, `/mlb/matchup/[teamA]/[teamB]`, MLB 리그 전체 집계 함수(총 6곳)도 같은 패턴이라 함께 보호(전수 감사 원칙 유지).
+- tsc --noEmit clean(1건 타입 불일치 수정: `buildTeamStrengthSnapshot` data 변수를 `unknown[] | null` 로 완화 — 기존 `as unknown as` cast 패턴과 정합), eslint(3파일) clean, vitest 584파일/4610테스트 전부 pass.
+- `vercel inspect --logs` 로 Supabase egress quota 장애(cycle 2939, day 7+) 지속 확인 — insights/sitemap 등은 이미 degrade 정상 작동("degrading to 0 entries" 로그), `/analysis`/`/matchup` 계열은 이번 fix 전까지 미보호 상태였음.
+
+cycle 2947 carry-over "다음 cycle 1순위" 항목 closure. 다음 review-code(heavy) 후보 = 나머지 assertSelectOk 보유 모듈(전수 감사 완료 여부 재확인 필요) 또는 다른 chain(operational-analysis/lotto gap trigger 대기 중).
+
 ## v0.5.62.272 — 2026-10-07 (cycle 2947, review-code(heavy): assertSelectOk degrade 전수 감사 17파일)
 
 ### review-code(heavy): assertSelectOk 호출 보유 17개 page.tsx degrade 전수 적용 (cycle 2947, SUCCESS)
