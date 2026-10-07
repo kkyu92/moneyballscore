@@ -1,4 +1,15 @@
 
+## 🟢 SUCCESS — review-code(heavy): validator_logs.game_id 영구 NULL 버그 수정 (cycle 2959, 2026-10-07)
+
+진단: op-analysis gap=35(≥25) 충족하나 Supabase egress quota 402 지속(day20+, 변화 없음) 확인 후 하네스 재실행 불가. 직전8 distinct=4(2-chain lock 미충족). cycle 2958 이 risk 상승 우려로 보류한 `context.game as any).id` 패턴을 직접 조사.
+
+- `validator_logs`(migration 011, `game_id INT REFERENCES games(id)`) 에 기록되는 game_id 가 `postview.ts`/`team-agent.ts`(2곳)/`judge-agent.ts` 4개 호출부 전부 `(context.game as any).id` 사용 — `GameContext.game`(`ScrapedGame`)엔 `id` 필드가 아예 없어 매번 `undefined ?? null`. 테이블 생성 이래 이 4경로의 모든 violation row의 `game_id` 가 항상 NULL — FK 조인 불가 상태로 silent 방치.
+- 실제 `games.id` 는 호출 스코프에 이미 존재(`daily.ts`의 `dbGameId`, `postview-daily.ts`의 `game.id`) — `GameContext` 생성 시 누락됐을 뿐이라 바로 수정 가능.
+- `GameContext.dbGameId?: number | null` 필드 신설 → 양쪽 생성부 채움 → 4개 소비부를 `context.dbGameId` 로 전환, `as any`/eslint-disable 제거. `retro.ts:277` 는 별개 패턴(join 캐스팅)이라 제외.
+- kbo-data 94 test files / 1224 tests 통과, type-check/lint clean.
+
+다음 사이클 추천 = egress quota day21+ 재확인 또는 plan#29 expiry(2026-10-15, 8일 남음) 임박 확인, 또는 `/debug/hallucination` 대시보드에서 본 수정 이후 신규 game_id 채워진 row 실측(쿼리 가능해지면).
+
 ## 🟡 RETRO-ONLY — review-code(heavy): packages/shared index.ts + scripts/ dead-code + `as any` audit, 갭 0건 (cycle 2958, 2026-10-07)
 
 진단: op-analysis gap=33(≥25)이나 Supabase egress quota 402 재확인(curl 직접 테스트, day19+ 변화 없음) 저가치. lotto gap=8, 다음 토(10/10) picks 파일 이미 존재(cron 정상). info-arch gap=2(직전 2955)·explore-idea gap=3(직전 2954)·design-system gap=14(직전 2943 clean) 전부 재방문 비권장. fix-incident gap=11 — `gh run list` CI 전부 정상, egress quota 재확인은 순수 노이즈. 직전8 distinct=4(2-chain lock 미충족). review-code(heavy) 로 미탐색 축 선택.

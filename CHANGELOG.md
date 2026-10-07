@@ -1,3 +1,14 @@
+## v0.5.62.284 — 2026-10-07 (cycle 2959, review-code(heavy): validator_logs.game_id 영구 NULL 버그 수정 — context.game as any 패턴 4건 SUCCESS)
+
+### review-code(heavy): GameContext.dbGameId 신규 필드로 validator_logs FK 버그 수정 (cycle 2959, SUCCESS)
+
+- 진단: op-analysis gap=35(≥25) 충족했으나 Supabase egress quota 402 지속(day20+, 변화 없음) 확인 후 재실행 불가. 직전8 distinct=4(2-chain lock 미충족). cycle 2958 이 risk 상승으로 보류한 `context.game as any).id` 패턴을 review-code(heavy) 로 직접 조사.
+- `validator_logs` 테이블(`game_id INT REFERENCES games(id)`)에 FK로 쓰일 game_id 가 `postview.ts`/`team-agent.ts`(2곳)/`judge-agent.ts` 4개 호출부 전부 `(context.game as any).id` 로 조회 — `GameContext.game`(`ScrapedGame` 타입)엔애초 `id` 필드 자체가 없어 매번 `undefined` → `?? null` fallback. 즉 이 테이블 생성(migration 011) 이래 해당 4개 경로에서 기록된 모든 violation row의 `game_id` 컬럼이 항상 NULL — FK 조인 불가능한 상태로 silent 방치됨.
+- 실제 numeric `games.id` 는 호출 스코프에 이미 존재: `daily.ts`(pre-game debate)는 `dbGameId` 변수, `postview-daily.ts`(post-game)는 `game.id` — 둘 다 `GameContext` 생성 시 누락됐을 뿐.
+- 수정: `GameContext` 에 `dbGameId?: number | null` 필드 추가 → `daily.ts`/`postview-daily.ts` 양쪽 생성부에서 실제 값 채움 → 4개 소비부(`postview.ts:303`, `team-agent.ts:91,148`, `judge-agent.ts:207`)를 `context.dbGameId` 참조로 전환, `as any`/eslint-disable 전부 제거.
+- `retro.ts:277` `pred.game as any` 는 별개 패턴(Supabase join 결과 캐스팅)이라 scope 제외.
+- kbo-data 94 test files / 1224 tests 전체 통과, type-check/lint clean.
+
 ## v0.5.62.283 — 2026-10-07 (cycle 2958, review-code(heavy): packages/shared index.ts + scripts/ + `as any` audit — 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): 미탐색 축 3종 감사 — 갭 0건 (cycle 2958, RETRO-ONLY)
