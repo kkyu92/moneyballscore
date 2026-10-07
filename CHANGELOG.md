@@ -1,4 +1,15 @@
-## v0.5.62.269 — 2026-10-07 (cycle 2943, design-system: KBO OG/twitter 이미지 gradient 토큰화)
+## v0.5.62.270 — 2026-10-07 (cycle 2945, fix-incident: cookies() in generateStaticParams 프로덕션 빌드 전면 장애)
+
+### fix-incident: cookies() in generateStaticParams 프로덕션 빌드 전면 장애 (cycle 2945, PARTIAL)
+
+- 진단: `vercel ls` 로 직접 확인 결과 최근 production 배포가 20+분간 연속 Error 상태(deploy queue 적체) — CLAUDE.md "세션 시작 검증" R5 원칙에 따라 curl/vercel inspect 로 실체 확인, cycle 2939 egress quota 기록만으론 포착 못 하는 신규 regression 발견.
+- `vercel inspect --logs` 로 실제 빌드 로그 확인 — `/en/mlb/insights/[date]` 가 `generateStaticParams` 안에서 `cookies()` 사용(Next.js 16 금지, build-time request context 부재)으로 빌드 즉시 실패. 원인 = `apps/moneyball/src/app/mlb/insights/insights-data.ts`(plan #30 Phase 2, cycle 2936~2938 MLB 인사이트 아카이브 작업분)가 cookie 기반 `@/lib/supabase/server` 클라이언트를 사용 — KBO 쪽 동일 패턴(`lib/insights/loader.ts`)은 이미 anon-key 직접 클라이언트로 이 문제를 회피해둔 선례가 있었음(포팅 시 불일치 발생).
+- `insights-data.ts` 를 KBO와 동일한 anon-key 직접 Supabase 클라이언트로 전환(4개 함수 전체) + KBO/MLB-KO/MLB-EN `[date]` 아카이브 3곳의 `generateStaticParams` 를 try/catch 로 감싸 DB 에러 시 0건으로 degrade(전체 프로덕션 빌드를 끌고 가지 않도록 blast radius 축소).
+- tsc/eslint/vitest 전부 clean. 로컬 `pnpm --filter moneyball build` 로 cookies() 에러 자체는 해소 확인(그 다음 단계까지 빌드 진행).
+- **PARTIAL 판정 근거**: 로컬 빌드가 여전히 실패 — 이번엔 cycle 2939 부터 미해결인 Supabase egress quota billing 장애(day 5+, 사용자 action 대기)에 막힘. 이 레포는 다수 force-static 페이지가 빌드 시점에 Supabase 를 직접 읽는 구조라 billing 이 막힌 동안은 코드 수정만으론 production 빌드 완전 복구 불가 — 비용 가드(외부 결제 자율 금지) 상 그대로 둠. 다만 cookies() 버그는 billing 과 무관한 별개의 진짜 regression 이었고, 수정 안 했으면 billing 복구 후에도 빌드가 또 실패했을 것 — 이번 fix 로 billing 복구 즉시 배포 정상화되도록 선제 조치.
+
+다음 cycle 추천 = fix-incident(billing 상태 재확인, 사용자 action 완료 시 production 빌드 자동 정상화 검증) 또는 review-code(heavy)/operational-analysis(gap 근접) 자연 발화. force-static 페이지 전반의 build-time DB 의존성(예: `/insights/series/[topic]` 435/45쌍 전체 prerender)이 egress 장애에 똑같이 취약한 구조적 패턴 — billing 복구 후 재발 방지 차원 재검토 후보(범위 큼, 별도 cycle).
+
 
 ### design-system: KBO 전용 라우트 21개 OG/twitter gradient 인라인 hex → design-tokens.ts 토큰화 (cycle 2943, SUCCESS)
 

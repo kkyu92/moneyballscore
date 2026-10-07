@@ -1,4 +1,14 @@
 
+## 🟡 PARTIAL — fix-incident: cookies() in generateStaticParams 프로덕션 빌드 전면 장애 (cycle 2945, 2026-10-07)
+
+진단: `gh run list` 는 CI만 반영 — `vercel ls` 로 직접 확인해 production 배포가 20+분간 연속 Error 상태인 걸 발견(cycle 2939 egress quota 기록만으론 미포착된 신규 regression). `vercel inspect --logs` 로 실제 원인 확인: `/en/mlb/insights/[date]` 의 `generateStaticParams` 가 cookie 기반 Supabase 클라이언트(`@/lib/supabase/server`)를 호출 — Next.js 16 이 build-time `cookies()` 사용을 금지해 즉시 빌드 실패(plan #30 Phase 2, cycle 2936~2938 MLB 인사이트 아카이브 작업 시 KBO 선례(`lib/insights/loader.ts` anon-key 클라이언트)와 다르게 포팅된 regression).
+
+`apps/moneyball/src/app/mlb/insights/insights-data.ts` 를 KBO와 동일한 anon-key 직접 클라이언트로 전환 + KBO/MLB-KO/MLB-EN `[date]` 아카이브 3곳 `generateStaticParams` try/catch degrade(DB 에러 시 0건, 전체 빌드 전파 차단) 추가. tsc/eslint/vitest clean, PR #3128 머지(c3ac040a).
+
+**PARTIAL 판정**: 로컬 재빌드해도 여전히 실패 — 이번엔 cycle 2939 부터 미해결인 Supabase egress quota billing 장애(day 5+)에 막힘. 다수 force-static 페이지가 build-time Supabase 직접 읽기 구조라 billing 복구 전까진 production 빌드 완전 정상화 불가(비용 가드상 자율 해결 범위 밖, 사용자 billing action 대기 지속). cookies() 버그 자체는 billing 과 무관한 진짜 regression 이라 이번 fix 로 billing 복구 즉시 배포 자동 정상화되도록 선행 조치 완료.
+
+다음 사이클 추천 = fix-incident(billing 재확인, 사용자 action 완료 시 배포 정상화 검증) 또는 자연 발화 chain. force-static 페이지 전반의 build-time DB 의존 구조(예: `/insights/series/[topic]` 435/45쌍 prerender)가 egress 장애에 동일 취약 — billing 복구 후 재발방지 재검토 후보(범위 큼, 별도 cycle로 분리).
+
 ## ⚪ RETRO-ONLY — review-code(heavy): app/analysis/ 전체 읽기 — clean 확인 (cycle 2944, 2026-10-07)
 
 진단: cycle 2941~2943 carry-over(app/ 라우트 레벨 스코프) 채택. fix-incident Supabase egress quota 5연속 재확인(여전히 HTTP 500, 변화 없음, 재dispatch skip). lotto chain false-alarm 해소 — `~/lotto_picks/*.md`(legacy, Sep19 이후 정지)는 stale 보였지만 실제 자동화 데이터 `apps/moneyball/data/lotto-picks/`는 2026-10-10 추첨분까지 cron(GH Actions lotto-pick-update/lotto-result-update/lotto-pick-monitor 전부 green)으로 최신 유지 중 — 액션 불필요. operational-analysis gap 20/25, info-architecture-review gap 22/30 — 아직 미도달.
