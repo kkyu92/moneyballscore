@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): shared/index.ts 주석 drift 2건 수정 (cycle 3000, 2026-10-07, 50-cycle milestone)
+
+진단: 직전8(2992-2999) distinct=3(review-code(heavy)5+fix-incident2+design-system1) — 2-chain lock 미충족. open issue 0건, approved plan 0건. Supabase egress quota 402 재확인(60일+ 지속) — op-analysis gap=32 충족하나 cycle 2968 재확인과 중복이라 skip. cycle 2998 추천대로 index.ts 잔여 구간(3200~3453) 이어서 감사.
+
+`CONVERGENCE_RECORD_ALL_LIMIT` 주석의 `convergenceRecord.ts L143` 참조 — 파일이 874줄로 성장(wave-589 cycle 1966 이후)하며 실제 로직은 L86. 함수명 참조로 교체(line drift 재발 방지). `WEEKDAY_LABELS_KO` 주석의 4번째 callsite `reviews/page.tsx` 명시 — 실제는 `components/reviews/ConvergenceDayOfWeekBadges.tsx`(reviews/page.tsx grep 0건). 경로 정정. 인접 상수(WIN_LOSS_STREAK_MIN_LENGTH 등) 교차검증 — 추가 불일치 0건. tsc clean, 순수 주석 수정이라 vitest 생략, pre-push 전부 PASS.
+
+**plan#29/#30 상태 변화 없음**. **Supabase egress quota 장애 지속**(60일+). **50-milestone — trigger3 충족, skill-evolution-pending 마커 박제, 다음 사이클(3001) 강제 발화**.
+
 ## 🟢 SUCCESS — fix-incident: health check egress-quota downgrade never fires for HEAD-request errors (cycle 2999, 2026-10-07)
 
 진단: 직전8(2991-2998) distinct=3(review-code(heavy)5+design-system1+fix-incident1) — 2-chain lock 미충족. open issue 0건, approved plan 0건(plan#29/#30 둘 다 non-approved status 불변). `gh run list --workflow=health-alert.yml` 로 최근 8회 전부 failure 확인 — cycle 2996 이 "Supabase egress quota 402 → warning 다운그레이드" 수정을 머지했는데도 알림이 멈추지 않는 모순 발견, fix-incident 자연 발화(20-cycle 주기 보정 trigger 와 무관하게 실제 재발 증거).

@@ -1,3 +1,15 @@
+## v0.5.62.325 — 2026-10-07 (cycle 3000, review-code(heavy): shared/index.ts 주석 drift 2건 수정 SUCCESS)
+
+### review-code(heavy): `packages/shared/src/index.ts` 주석 drift 2건 — stale line 번호 + 틀린 callsite 파일명 (cycle 3000, SUCCESS, 50-cycle milestone)
+
+- 진단: 직전8(2992-2999) distinct=3(review-code(heavy)5+fix-incident2+design-system1) — 2-chain lock 미충족. open issue 0건, approved plan 0건(plan#29 spec_only_deferred/#30 completed, 둘 다 상태 불변). Supabase egress quota 402 재확인(직접 curl, cycle 2939~ 지속 60일+) — op-analysis gap=32(≥25 trigger 충족)이나 cycle 2968 과 동일 차단 상태 재확인은 순수 중복 noise 라 skip. lotto gap=21/info-arch gap=24 둘 다 미근접. cycle 2998 추천대로 index.ts 잔여 구간(3200~3453줄) 이어서 감사.
+- `CONVERGENCE_RECORD_ALL_LIMIT` 주석이 `convergenceRecord.ts L143` 을 effectiveLimit 로직 위치로 명시했으나, 파일이 wave-589(cycle 1966) 이후 29개 함수·874줄로 성장하며 실제 로직은 L86 — line 번호 참조를 함수명(`getRecentConvergencePickRecord`) 참조로 교체해 향후 재발 방지.
+- `WEEKDAY_LABELS_KO` 주석(cycle 1980 통합 4 callsite)이 네번째 파일을 `reviews/page.tsx` 라 명시했으나 실제 import/사용은 `components/reviews/ConvergenceDayOfWeekBadges.tsx`(reviews/page.tsx 는 grep 0건, wave-599 날짜별 배지가 별도 컴포넌트로 분리되며 발생한 drift) — 경로 정정.
+- `WIN_LOSS_STREAK_MIN_LENGTH`/`CONVERGENCE_DAY_OF_WEEK_MIN_PICKS` 등 인접 상수도 교차검증(buildMlbMatchupProfile.ts 등 MLB 변형 callsite 포함) — 로직 자체 불일치는 0건, 위 2건만 주석 drift.
+- 검증: `tsc --noEmit`(@moneyball/shared) clean, 순수 주석 수정이라 vitest 생략. pre-push lint+type-check+version-sync-guard 전부 PASS.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음). **Supabase egress quota 장애 지속**(cycle 2939~, 60일+ 경과) — op-analysis 여전히 차단. **cycle 3000 = 50-milestone, trigger3 (cycle_n % 50 == 0) 충족 → skill-evolution-pending 마커 박제, 다음 사이클(3001) 강제 발화**.
+
 ## v0.5.62.324 — 2026-10-07 (cycle 2999, fix-incident: health check egress-quota downgrade never fires for HEAD-request errors SUCCESS)
 
 ### fix-incident: `checkSupabase()` HEAD 요청이 402 에러 메시지를 비워버려 cycle 2996 다운그레이드 fix 가 production 에서 무효 (cycle 2999, SUCCESS)
