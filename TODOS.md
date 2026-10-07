@@ -1,4 +1,14 @@
 
+## 🟡 RETRO-ONLY — operational-analysis(lite): 재측정 시도, egress quota 402 범위 확장 확인 (cycle 2968, 2026-10-07)
+
+진단: op-analysis gap=44(마지막 발화 cycle 2924, ≥25 트리거 대폭 초과). 직전8(2960-2967) distinct=3(review-code(heavy)6+polish-ui1+design-system1) — 2-chain lock 미충족. fix-incident gap=22(≥20 충족)이나 직전 수 사이클 반복 재확인(동일 402 billing 원인, noise). info-arch gap=13·lotto gap=19·explore-idea saturation 14/15 전부 미근접 또는 저가치. operational-analysis gap 이 가장 오래 누적(44 cycle) → `scripts/op-analysis-ce-cohort.ts` 재실행 선택.
+
+- 스크립트 실행 결과: `{ message: 'Service for this project is restricted due to the following violations: exceed_egress_quota. ...' }` — Supabase 쿼리 자체가 402 로 차단됨.
+- 신규 확인: 기존엔 egress quota 402 가 cron webhook(health-alert/runtime-error-alert/heartbeat-stale) 실패로만 관측됐으나, 본 cycle 에서 **로컬 환경의 직접 Supabase 쿼리(service role key, `scripts/op-analysis-ce-cohort.ts`)도 동일하게 차단됨**을 최초 확인 — quota 영향 범위가 cron 전용이 아니라 프로젝트 전체 Supabase 접근(REST/client 무관)으로 확장돼 있음. CE/비CE n=400 재측정 불가, 전체 n/격차 수치 갱신 없음(cycle 2924 측정치 n=400, 격차 8.9pp 가 최후 유효값으로 유지).
+- 코드 변경 없음(순수 재확인 cycle). 근본 해결 = 사용자 Supabase billing 조치(plan 업그레이드 또는 spend cap 제거) — 자율 upgrade 금지 영역.
+
+다음 사이클 추천 = fix-incident(egress quota 402 지속 — 이번 cycle 로 "DB 쿼리 전체 차단" 확인됐으니 사용자에게 사실 그대로 재전달 가치 있음) 또는 plan#29 expiry(2026-10-15, 7일 남음) 임박 explore-idea 최종 결정 또는 2-chain lock 자연 해제 후 polish-ui/design-system 복귀.
+
 ## 🟢 SUCCESS — review-code(heavy): analysis/calendar/teams 신규 축 감사, SFR=0 배지 버그 수정 (cycle 2967, 2026-10-07)
 
 진단: 2-chain lock 미충족(직전8 distinct=3). fix-incident gap=21(≥20 충족) — `gh run list` 재확인, CI 전부 정상, 신규 failure 없음(noise 재확인뿐). operational-analysis gap=43(≥25 충족) — egress quota 402 지속(billing 대기, 신규 정보 없음). explore-idea saturation 13/15 충족하나 plan#29(expiry 2026-10-15) 재확인은 cycle 2954와 같은 날 동일 "확인 불가" 상태라 즉시 재중복 skip — organic idea 전무. design-system gap 충족이나 cycle 2964 직후 재검증이라 저가치. lotto gap=18/info-arch gap=12 미근접. review-code(heavy) 계속 선택 — migration-path 추천 신규 축 중 잔여(`analysis/`, `calendar/`, `teams/` 라우트, 6116줄) subagent 위임 전수 감사.

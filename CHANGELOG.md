@@ -1,3 +1,13 @@
+## v0.5.62.293 — 2026-10-07 (cycle 2968, operational-analysis(lite): 재측정 시도, egress quota 402 범위 확장 확인 RETRO-ONLY)
+
+### operational-analysis(lite): CE/비CE 재측정 시도 — egress quota 402 범위가 cron 외 로컬 직접 쿼리까지 확장됨을 확인 (cycle 2968, RETRO-ONLY)
+
+- 진단: op-analysis gap=44(마지막 발화 cycle 2924, ≥25 트리거 대폭 초과). 직전8(2960-2967) distinct=3 — 2-chain lock 미충족. fix-incident gap=22(≥20 충족)이나 반복 재확인(noise). info-arch/lotto/explore-idea 전부 미근접 또는 저가치. gap 이 가장 오래 누적된 operational-analysis 선택, `scripts/op-analysis-ce-cohort.ts` 재실행.
+- 실행 결과: `exceed_egress_quota` 402 — Supabase service role key 직접 쿼리도 차단. 기존엔 cron webhook(health-alert/runtime-error-alert/heartbeat-stale) 실패로만 관측됐던 quota 차단이, 로컬 환경 직접 쿼리에도 동일 적용됨을 최초 확인 — 영향 범위가 cron 전용이 아니라 프로젝트 Supabase 접근 전체(REST client 무관)임이 드러남.
+- CE/비CE n 재측정 불가 — cycle 2924 측정치(n=400, CE 55.0%/비CE 63.8%, 격차 8.9pp)가 최후 유효값으로 유지. 코드 변경 없음(순수 재확인 cycle). 근본 해결 = 사용자 Supabase billing 조치 — 자율 upgrade 금지 영역.
+
+다음 사이클 추천 = fix-incident(egress quota 402 "DB 쿼리 전체 차단" 확인 사실 재전달) 또는 plan#29 expiry(2026-10-15, 7일 남음) 임박 explore-idea 최종 결정 또는 2-chain lock 자연 해제 후 polish-ui/design-system 복귀.
+
 ## v0.5.62.292 — 2026-10-07 (cycle 2967, review-code(heavy): analysis/calendar/teams 신규 축 감사, SFR=0 배지 버그 수정 SUCCESS)
 
 ### review-code(heavy): analysis/calendar/teams 신규 축 감사 — SFR=0 data-gap sentinel 오표시 수정 (cycle 2967, SUCCESS)
