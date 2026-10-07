@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): buildPitcherProfile appearances 필드 FIP-null 등판 누락 수정 (cycle 2993, 2026-10-07)
+
+진단: 직전8(2985-2992) distinct=3, 2-chain lock 미충족. op-analysis gap=25(2968) 임계 도달했으나 Supabase egress quota 402 재확인(cycle 2939~ 지속) — lite 모드 전제 `/weekly-review` 도 동일 DB 블로커라 재확인은 신규 정보 없이 저가치 skip. fix-incident(7)/info-arch(17)/lotto(14) 전부 미근접. explore-idea organic idea 0(plan#29 deferred·plan#30 completed) 지속 skip.
+
+`lib/leaderboard`·`lib/players`·`lib/debug` 저mention 영역 전수 read. `buildPitcherProfile.ts` 의 `appearances: fipN`(FIP 있는 등판만 카운트) 이 `buildPitcherLeaderboard.ts` 의 명시적 설계(`appearancesN` = FIP null 포함 전체 등판, 외국인 투수 음차 매칭 실패해도 등판 기록 유지)와 불일치 발견 — `/players/[id]` "등판 X경기" 가 FIP 매칭 실패 투수를 과소 카운트하는 실사용자 가시 버그. `appearances: appearances.length` 로 수정해 리더보드와 시맨틱 정렬. `avgFip`/`avgXFip` 는 변경 없음(FIP 표본 계산은 기존 로직 맞음).
+
+검증: type-check/lint clean, test 585/585·4617/4617 통과. commit + push 예정.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음). **Supabase egress quota 장애 지속**(cycle 2939~) — op-analysis gap 25 도달에도 DB 접근 전제라 lite/heavy 둘 다 차단 유지.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): lib/stats·api·changelog·seo 저audit 영역 + components/glossary 재감사, 갭 0건 (cycle 2992, 2026-10-07)
 
 진단: 직전8(2984-2991) distinct=3, 2-chain lock 미충족. fix-incident(6)/op-analysis(24, 25 임계 근접 미도달)/info-arch(16)/lotto(13) 전부 미근접. explore-idea saturation 13/15 충족하나 organic idea 0(plan#29 spec_only_deferred 불변, 만료 8일 남음) 지속 — skip. DESIGN.md mtime 35일+ 이나 design-system 7 사이클 전 발화라 저가치 skip.

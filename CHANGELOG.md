@@ -1,3 +1,15 @@
+## v0.5.62.318 — 2026-10-07 (cycle 2993, review-code(heavy): buildPitcherProfile appearances 필드 FIP-null 등판 누락 수정 SUCCESS)
+
+### review-code(heavy): `/players/[id]` 등판 수 undercounting — FIP 매칭 실패 등판 누락 (cycle 2993, SUCCESS)
+
+- 진단: 직전8(2985-2992) distinct=3(review-code(heavy)6+fix-incident1+design-system(lite)1), 2-chain lock 미충족. op-analysis gap=25(2968) 임계 도달했으나 Supabase egress quota 402 재확인(cycle 2939~ 지속, `pnpm tsx scripts/op-analysis-ce-cohort.ts` 직접 실행 재확인) — lite 모드 전제인 `/weekly-review` 도 `accuracy_tracking` DB 조회 필요해 동일 블로커, 재실행은 신규 정보 없이 동일 blocker 재확인뿐이라 저가치 판단 skip. fix-incident(7)·info-arch(17)·lotto(14) 전부 미근접. explore-idea saturation 충족하나 organic idea 0(plan#29 spec_only_deferred·plan#30 completed, 신규 unprocessed 0) 지속 skip. DESIGN.md mtime 35일+이나 design-system 직전 발화 8 사이클 전 저가치 skip.
+- `lib/leaderboard`·`lib/players`·`lib/debug` 저CHANGELOG-mention 영역(grep count 대비 실제 서술 희박) 전수 read.
+- **발견**: `buildPitcherProfile.ts` 의 `appearances` 필드가 `fipN`(FIP 수치 있는 등판 수)으로 계산됐는데, 바로 옆 `buildPitcherLeaderboard.ts` 는 동일 개념을 `appearancesN`(FIP null 등판도 포함한 전체 등판)으로 명시적으로 분리 설계 — 주석까지 "FIP null 이어도 등판 기록은 유지, 외국인 투수 음차 매칭 실패해도 리더보드에 이름 노출돼야" 라고 그 이유를 설명. `/players/[id]/page.tsx`·`opengraph-image.tsx` 는 이 값을 "등판 X경기" 로 사용자에게 직접 노출 — FIP 매칭 실패(외국인 선수명 음차 등) 가 있는 투수는 실제보다 적은 등판 수로 표시되는 실사용자 가시 버그.
+- 수정: `appearances: fipN` → `appearances: appearances.length`(전체 등판 배열 길이) — 리더보드 파일과 동일 시맨틱으로 정렬. `avgFip`/`avgXFip` 는 기존대로 `fipN`/`xfipN` 표본 유지(변경 없음, FIP 평균 계산은 FIP 있는 등판만이 맞음).
+- 검증: type-check/lint clean, test 585/585·4617/4617 통과(buildPitcherProfile 직접 단위 테스트 없음 — silent-drift.test.ts 의 fail-loud 가드 테스트만 존재, 영향 없음 확인). build 미실행(turbo type-check+lint+test 로 충분, 기존 cycle 패턴 동일).
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~, 본 cycle 직접 재확인) — op-analysis gap 25 도달에도 lite/heavy 둘 다 DB 접근 전제라 차단 유지.
+
 ## v0.5.62.317 — 2026-10-07 (cycle 2992, review-code(heavy): lib/stats·api·changelog·seo 저커밋 영역 + components/glossary 재감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): lib/stats·lib/api·lib/changelog·lib/seo 저audit 영역 + components/glossary 전수 재감사 — 갭 0건 (cycle 2992, RETRO-ONLY)
