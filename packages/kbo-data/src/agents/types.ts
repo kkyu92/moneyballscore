@@ -4,6 +4,8 @@ import type { PitcherStats, TeamStats, EloRating, ScrapedGame } from '../types';
 // 에이전트에 주입되는 경기 데이터
 export interface GameContext {
   game: ScrapedGame;
+  /** games.id (DB 실제 PK) — validator_logs.game_id FK 용. pre_game 단계 신규 game 은 PK 미발급이라 null 가능. */
+  dbGameId?: number | null;
   homeSPStats: PitcherStats | null;
   awaySPStats: PitcherStats | null;
   homeTeamStats: TeamStats;

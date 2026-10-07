@@ -320,6 +320,7 @@ function buildMinimalContext(game: any, homeCode: TeamCode, awayCode: TeamCode):
       status: 'final',
       externalGameId: game.external_game_id ?? '',
     },
+    dbGameId: (game.id as number | undefined) ?? null,
     // postview 프롬프트는 actual+original.factors만 쓰므로 stats는 placeholder
     homeSPStats: null,
     awaySPStats: null,

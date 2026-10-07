@@ -299,8 +299,7 @@ async function runTeamPostviewAgent(
   });
 
   if (validation.violations.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const gameId = (context.game as any).id ?? null;
+    const gameId = context.dbGameId ?? null;
     logValidatorEvent({
       gameId,
       teamCode: team,

@@ -772,6 +772,7 @@ export async function runDailyPipeline(
       try {
         const gameContext: GameContext = {
           game: input.game,
+          dbGameId,
           homeSPStats: input.homeSPStats, awaySPStats: input.awaySPStats,
           homeTeamStats: input.homeTeamStats, awayTeamStats: input.awayTeamStats,
           homeElo: input.homeElo, awayElo: input.awayElo,

@@ -87,8 +87,7 @@ export function parseResponse(text: string, team: TeamCode, context?: GameContex
     // cycle 2885: judge-agent(cycle 1400 P2)와 동일 silent family — generic filler 를
     // 정상 데이터처럼 반환해 evaluateAndCaptureAgentFallback(`r.data == null`)도, validator
     // 환각 체크도 통과. 별도 Sentry 채널로 명시 capture.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const gameId = context ? ((context.game as any).id ?? context.game.externalGameId ?? null) : null;
+    const gameId = context ? (context.dbGameId ?? context.game.externalGameId ?? null) : null;
     void captureTeamParseFallback({
       team,
       gameId,
@@ -144,8 +143,7 @@ export async function runTeamAgent(
     const validation = validateTeamArgument(result.data, context, mode, rivalry.promptBlock);
 
     // near-miss 도 박제. validation.ok=true 라도 violations.length > 0 면 silent drift 사전 감지.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const gameId = (context.game as any).id ?? null;
+    const gameId = context.dbGameId ?? null;
     if (validation.violations.length > 0) {
       logValidatorEvent({
         gameId,
