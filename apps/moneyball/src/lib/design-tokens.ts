@@ -61,3 +61,28 @@ export const NEUTRAL_GRADIENT_135 = "linear-gradient(135deg, #1a1d24 0%, #2d3140
 // MATCHUP 어디에도 없는 amber(hue≈27) 채택 — AI 분석 허브의 "강조/알림" 톤에 부합.
 export const MLB_GRADIENT_MATCHUP_135 = "linear-gradient(135deg, #2a0e2e 0%, #5c1a66 50%, #c22e8f 100%)";
 export const MLB_GRADIENT_ANALYSIS_135 = "linear-gradient(135deg, #2b1207 0%, #7a3410 50%, #e8720f 100%)";
+
+// KBO 전용 라우트 OG/twitter gradient — 21개 라우트가 design-tokens.ts 밖에서 인라인 hex 로
+// 중복/분산돼있던 걸 단일 source 로 흡수 (silent drift family, cycle 2943 design-system 스윕).
+// factors(ko/en mirror)는 완전 동일 hex라 토큰 1개 공유.
+export const KBO_GRADIENT_ABOUT_135 = "linear-gradient(135deg, #0a1a2e 0%, #163055 50%, #1f4d8c 100%)";
+export const KBO_GRADIENT_ANALYSIS_HUB_135 = "linear-gradient(135deg, #2e0e1a 0%, #4d1c2c 50%, #823a4d 100%)";
+export const KBO_GRADIENT_CALENDAR_135 = "linear-gradient(135deg, #0c1e3d 0%, #1e3a8a 50%, #0891b2 100%)";
+export const KBO_GRADIENT_FACTORS_135 = "linear-gradient(135deg, #1a0f0a 0%, #7c2d12 50%, #ea580c 100%)";
+export const KBO_GRADIENT_INSIGHTS_DATE_135 = "linear-gradient(135deg, #1a0a2e 0%, #2d1659 50%, #4f2a9f 100%)";
+export const KBO_GRADIENT_LOTTO_ARCHIVE_DATE_135 = "linear-gradient(135deg, #2a1f08 0%, #5a4014 50%, #c5a23e 100%)";
+export const KBO_GRADIENT_LOTTO_ARCHIVE_135 = "linear-gradient(135deg, #1a0e2e 0%, #2d1850 50%, #4a2880 100%)";
+export const KBO_GRADIENT_LOTTO_135 = "linear-gradient(135deg, #132d1a 0%, #1a3d24 60%, #0a1f12 100%)";
+export const KBO_GRADIENT_MATCHUP_DETAIL_135 = "linear-gradient(135deg, #1f0d2b 0%, #4a1f5c 50%, #8b3fa0 100%)";
+export const KBO_GRADIENT_MATCHUP_135 = "linear-gradient(135deg, #1a0e2e 0%, #261b4d 50%, #3d2a82 100%)";
+export const KBO_GRADIENT_MLB_TEAM_DETAIL_135 = "linear-gradient(135deg, #0d1f2b 0%, #1f3b5c 50%, #3f7ba0 100%)";
+export const KBO_GRADIENT_PICKS_135 = "linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #7c3aed 100%)";
+export const KBO_GRADIENT_PLAYER_DETAIL_135 = "linear-gradient(135deg, #0d1a2b 0%, #1f3b5c 50%, #2d6b9f 100%)";
+export const KBO_GRADIENT_PLAYERS_135 = "linear-gradient(135deg, #062628 0%, #0a4248 50%, #167580 100%)";
+export const KBO_GRADIENT_REVIEWS_MISSES_135 = "linear-gradient(135deg, #1a0a0a 0%, #3d1818 50%, #6b2d2d 100%)";
+export const KBO_GRADIENT_REVIEWS_MONTHLY_135 = "linear-gradient(135deg, #0a1e2a 0%, #15384f 50%, #2570a0 100%)";
+export const KBO_GRADIENT_REVIEWS_135 = "linear-gradient(135deg, #1a0e2e 0%, #2d1856 50%, #5b2a8a 100%)";
+export const KBO_GRADIENT_SEARCH_135 = "linear-gradient(135deg, #052e2b 0%, #065f46 50%, #10b981 100%)";
+export const KBO_GRADIENT_SEASONS_135 = "linear-gradient(135deg, #1a1407 0%, #3d2e0e 50%, #7a5a1a 100%)";
+export const KBO_GRADIENT_STANDINGS_135 = "linear-gradient(135deg, #1a2e0e 0%, #2c4d18 50%, #4d822a 100%)";
+export const KBO_GRADIENT_TEAMS_135 = "linear-gradient(135deg, #2a0e07 0%, #4d1e0e 50%, #8a3a14 100%)";

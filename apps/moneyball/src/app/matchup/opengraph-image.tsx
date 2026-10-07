@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { KBO_TEAM_COUNT, KBO_HEAD_TO_HEAD_PAIRS, SITE_HOST } from "@moneyball/shared";
+import { KBO_GRADIENT_MATCHUP_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -15,7 +16,7 @@ export default function MatchupHubOgImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #1a0e2e 0%, #261b4d 50%, #3d2a82 100%)",
+          background: KBO_GRADIENT_MATCHUP_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

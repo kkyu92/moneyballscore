@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { shortTeamName, SITE_HOST } from "@moneyball/shared";
 import { canonicalPair } from "@/lib/matchup/canonicalPair";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+import { KBO_GRADIENT_MATCHUP_DETAIL_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -25,8 +26,7 @@ export default async function Image({ params }: Props) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background:
-            "linear-gradient(135deg, #1f0d2b 0%, #4a1f5c 50%, #8b3fa0 100%)",
+          background: KBO_GRADIENT_MATCHUP_DETAIL_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

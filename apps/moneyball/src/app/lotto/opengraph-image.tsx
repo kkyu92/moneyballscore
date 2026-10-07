@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { LOTTO_RULE_COUNT } from "@moneyball/shared";
 import { getLatestLottoPicks } from "@/lib/lotto/picks-loader";
+import { KBO_GRADIENT_LOTTO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -19,7 +20,7 @@ export default function LottoHubOgImage() {
         style={{
           width: "100%",
           height: "100%",
-          background: "linear-gradient(135deg, #132d1a 0%, #1a3d24 60%, #0a1f12 100%)",
+          background: KBO_GRADIENT_LOTTO_135,
           display: "flex",
           flexDirection: "column",
           padding: "48px 56px",

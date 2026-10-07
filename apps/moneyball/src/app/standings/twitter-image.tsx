@@ -4,6 +4,7 @@ import {
   KBO_SEASON_YEAR,
   STANDINGS_REFRESH_LABEL_EN,
   STANDINGS_UPDATE_LABEL_EN, SITE_HOST } from "@moneyball/shared";
+import { KBO_GRADIENT_STANDINGS_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -19,7 +20,7 @@ export default function StandingsHubTwitterImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #1a2e0e 0%, #2c4d18 50%, #4d822a 100%)",
+          background: KBO_GRADIENT_STANDINGS_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

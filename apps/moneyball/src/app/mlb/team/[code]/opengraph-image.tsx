@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { MLB_TEAMS, type MlbTeamCode, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { KBO_GRADIENT_MLB_TEAM_DETAIL_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -28,8 +29,7 @@ export default async function Image({ params }: Props) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background:
-            "linear-gradient(135deg, #0d1f2b 0%, #1f3b5c 50%, #3f7ba0 100%)",
+          background: KBO_GRADIENT_MLB_TEAM_DETAIL_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",
