@@ -1,3 +1,16 @@
+## v0.5.62.300 — 2026-10-07 (cycle 2975, review-code(heavy): kbo-live.ts 스코어 파싱 ground-truth 오염 위험 + kbo-pitcher.ts silent NaN fallback 수정 SUCCESS)
+
+### review-code(heavy): packages/kbo-data/src/scrapers 신규 스코프 감사 — 2건 수정 (cycle 2975, SUCCESS)
+
+- 진단: 직전8(2967-2974) distinct=4(review-code 5/8), 2-chain lock 미충족(≤2 아님). fix-incident gap=4·operational-analysis gap=6·info-arch gap=19·lotto gap=25(cron 산출물 건강: picks 2026-10-10/results 2026-10-03 둘 다 생성일 정상)·design-system gap=10(DESIGN.md mtime 35일 충족이나 cycle 2964 직후라 저가치)·explore-idea gap=5(plan#29 Tier4 사용자 결정 대기, 만료 2026-10-15 아직 미도달) 전부 미근접/저가치. `gh run list` 재확인 — CI 전부 정상, CI Failure Dispatch skipped, 신규 incident 없음. review-code(heavy) 가 cycle 2972/2973/2974 3연속 추천한 잔여 스코프 `packages/kbo-data/src/scrapers/`(15개 파일, 예측 엔진 코어의 원천 데이터 수집 레이어 — 최근 cycle 들이 agents/ 와 apps/moneyball/src/app 위주라 미감사) 선택.
+- subagent 위임 전수 감사(15개 파일 + pipeline/live.ts 다운스트림 소비 경로 교차검증) 결과 2건 발견:
+  1. **`kbo-live.ts` 스코어 파싱**: `fetchLiveGames` 의 `homeScore`/`awayScore` 가 `Number(raw.B_SCORE_CN) || 0` — 같은 KBO `GetKboGameList` 엔드포인트를 쓰는 형제 파일 `kbo-official.ts`(`!= null ? Number(...) : undefined` null-safe 패턴, line 83-84)와 달리 파싱 실패를 실제 0-0 스코어와 구분 못함. `pipeline/live.ts:295-334` `updateGameScore` 가 `status==='final'` 경기 시 이 값을 그대로 `games.home_score`/`away_score` 에 영속 박제 — 순간적 필드 파싱 글리치가 전체 Brier/정확도 측정의 ground-truth 를 오염시킬 수 있는 구조.
+  2. **`kbo-pitcher.ts` 파싱**: `parsePitcherBasicFromHtml` 의 era/hr/bb/hbp/so 가 `Number.parseFloat(...) || 0` 으로 NaN 추적 없이 파싱 — `fancy-stats.ts` 가 이미 동일 패턴(`parseNumWithFallback` + nanCount/totalRows ratio + console.warn)으로 보강됐던 것과 달리 `kbo-pitcher.ts` 는 누락. hr/bb/hbp/so 는 FIP 계산에 직접 투입되고 `daily.ts` 의 `home_sp_fip`/`away_sp_fip`(15% 가중치 팩터)로 이어짐 — 이 경로는 Fancy Stats top-50 밖 투수(신인/저닝수)에서만 활성화되는데, 바로 그 구간이 컬럼 시프트 같은 파싱 오류가 가장 눈에 안 띄는 지점.
+- 수정: (1) `kbo-live.ts` — NaN 발생 시 여전히 0 으로 fallback(파이프라인 쓰기 동작 변경 없음)하되 `console.warn` 추가로 가시화. (2) `kbo-pitcher.ts` — `fancy-stats.ts` 의 `parseNumWithFallback` 재사용, nanCount>0 시 동일 포맷 `console.warn`. typecheck clean, 테스트 94 files/1227 PASS.
+- 나머지 13개 scraper 파일(`fetch-with-retry.ts`/`statsapi-mlb.ts`/`umpire.ts`/`mlb-historical-bootstrap.ts`/`naver-record.ts`/`fangraphs-mlb.ts`/`naver-schedule.ts`/`fancy-stats.ts`/`fangraphs.ts`/`weather.ts`/`kbo-scraper-alert.ts`/`baseball-savant.ts`) + CLAUDE.md "데이터 소스" claim 교차검증 — 전부 일치, dead code 1건 재확인(`fetchRetrosheetSeasonGames`, cycle 2833 기존 문서화), 신규 버그 0건.
+
+다음 사이클 추천 = 사용자 plan#29 결정(만료 2026-10-15 임박) 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프(engine/features/factors/context/backtest/analytics 디렉토리 미감사) 또는 2-chain lock 자연 해제 대기.
+
 ## v0.5.62.299 — 2026-10-07 (cycle 2974, review-code(heavy): postview judge validator_logs 영속 박제 누락 수정 SUCCESS)
 
 ### review-code(heavy): packages/kbo-data/src/agents 신규 스코프 감사 — postview judge validator_logs 누락 수정 (cycle 2974, SUCCESS)

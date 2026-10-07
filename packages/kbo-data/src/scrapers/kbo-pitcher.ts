@@ -23,6 +23,7 @@
 import * as cheerio from 'cheerio';
 import type { PitcherStats } from '../types';
 import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, assertResponseOk, resolveKoreanTeamCode } from '../types';
+import { parseNumWithFallback } from './fancy-stats';
 // KBO 리그 평균 ERA - FIP 구성요소 조정. MLB 는 3.10 고정 관행, KBO 는
 // 공식 수치 미공개라 3.10 으로 근사. 시즌 말 평가 보정 필요 시 변경.
 const FIP_CONSTANT = 3.1;
@@ -73,6 +74,8 @@ export function calculateFIP(
 export function parsePitcherBasicFromHtml(html: string): PitcherStats[] {
   const $ = cheerio.load(html);
   const out: PitcherStats[] = [];
+  let nanCount = 0;
+  let totalRows = 0;
 
   $('table tr').each((_, row) => {
     const cells = $(row).find('td');
@@ -85,12 +88,22 @@ export function parsePitcherBasicFromHtml(html: string): PitcherStats[] {
     const teamCode = resolveKoreanTeamCode(teamRaw);
     if (!teamCode) return;
 
-    const era = Number.parseFloat(cells.eq(3).text().trim()) || 0;
+    const eraParsed = parseNumWithFallback(cells.eq(3).text());
     const ip = parseIP(cells.eq(10).text());
-    const hr = Number.parseInt(cells.eq(12).text().trim(), 10) || 0;
-    const bb = Number.parseInt(cells.eq(13).text().trim(), 10) || 0;
-    const hbp = Number.parseInt(cells.eq(14).text().trim(), 10) || 0;
-    const so = Number.parseInt(cells.eq(15).text().trim(), 10) || 0;
+    const hrParsed = parseNumWithFallback(cells.eq(12).text());
+    const bbParsed = parseNumWithFallback(cells.eq(13).text());
+    const hbpParsed = parseNumWithFallback(cells.eq(14).text());
+    const soParsed = parseNumWithFallback(cells.eq(15).text());
+    const era = eraParsed.value;
+    const hr = hrParsed.value;
+    const bb = bbParsed.value;
+    const hbp = hbpParsed.value;
+    const so = soParsed.value;
+
+    totalRows += 1;
+    if (eraParsed.fellBack || hrParsed.fellBack || bbParsed.fellBack || hbpParsed.fellBack || soParsed.fellBack) {
+      nanCount += 1;
+    }
 
     const fip = calculateFIP(hr, bb, hbp, so, ip);
     if (fip == null) return;
@@ -109,6 +122,14 @@ export function parsePitcherBasicFromHtml(html: string): PitcherStats[] {
       kPer9: ip > 0 ? (so * 9) / ip : 0,
     });
   });
+
+  if (nanCount > 0) {
+    console.warn('[parsePitcherBasicFromHtml] parseNum NaN fallback to 0 silent drift', {
+      nanCount,
+      totalRows,
+      ratio: totalRows > 0 ? (nanCount / totalRows).toFixed(2) : '0.00',
+    });
+  }
 
   return out;
 }
