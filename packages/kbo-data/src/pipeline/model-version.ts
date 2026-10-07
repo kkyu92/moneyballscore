@@ -25,18 +25,7 @@ import {
   type ScoringRule,
 } from '@moneyball/shared';
 
-export {
-  CURRENT_SCORING_RULE,
-  QUANT_PREGAME_VERSION,
-  QUANT_POSTVIEW_VERSION,
-  QUANT_LIVE_VERSION,
-  LLM_DEBATE_VERSION,
-  LLM_POSTVIEW_VERSION,
-  LLM_ACTIVE_VERSIONS,
-  DEBATE_VERSION_PREGAME,
-  DEBATE_VERSION_POSTVIEW,
-} from '@moneyball/shared';
-export type { ModelVersion, DebateVersion, ScoringRule } from '@moneyball/shared';
+export { CURRENT_SCORING_RULE, QUANT_LIVE_VERSION } from '@moneyball/shared';
 
 interface ModelVersionDecision {
   model_version: ModelVersion;
