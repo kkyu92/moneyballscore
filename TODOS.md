@@ -1,5 +1,15 @@
 
-## 🔴 FAIL — fix-incident: Supabase egress quota exceeded — 사용자 billing 액션 필요 (cycle 2939, 2026-10-07)
+## ⚪ RETRO-ONLY — review-code(heavy): lib/analysis·api·calendar·mlb·observability·teams dead-export + drift 스윕 (cycle 2940, 2026-10-07)
+
+진단: cycle 2939 incident 재확인 먼저(아래 섹션) — 변화 없음(여전히 HTTP 402, 사이트 다운 5일째), 동일 meta-pattern 재dispatch는 잡음이라 skip하고 실제 코드 작업으로 전환. open issue 0, approved plan 0(plan 3~30 전부 completed/archived/deferred), 2-chain lock 미충족(직전8 distinct=6).
+
+migration-path cycle 2900 메모의 "미탐색 스코프" 후보(analysis/api/calendar/mlb/observability/teams) 전수 스윕. `lib/mlb/`(18파일) export 33개 + `lib/analysis/`(4파일, convergenceRecord.ts 824줄 포함) export 29개 + `lib/api`/`lib/calendar`/`lib/observability`/`lib/teams` 전체 — 전부 grep 참조 ≥2파일(정의+테스트 이상), CONFIRMED_UNUSED 0건. 전체 lib/ TODO·FIXME·deprecated·stale 패턴 grep 5건 hit 전부 재확인 — `v2Predictor.ts` backward-compat re-export, `leaderboard/types.ts` weekly 필드, `buildMlbFactorAccuracy.ts`/`json-ld.ts`의 "과거 stale 서술" 메모 전부 의도된 히스토리 주석(실제 drift 아님).
+
+결론: lib/ 스코프 사실상 전역 소진(cycle 2900 phase45 평가 재확인) — 코드 변경 없음, 액션 아이템 없음. 다음 review-code(heavy) 후보 = app/ 라우트 레벨 또는 packages/kbo-data 잔여.
+
+## 🔴 FAIL (지속, 5일째) — fix-incident: Supabase egress quota exceeded — 사용자 billing 액션 필요 (cycle 2939, 2026-10-07)
+
+**cycle 2940 재확인**: 여전히 미해결. `/rest/v1/predictions` curl → HTTP 402 `exceed_egress_quota` 그대로, 홈페이지 curl → HTTP 500 그대로. 사용자 billing 액션 아직 미이행 확인(2026-10-03 17:13Z 발생, 현재 2026-10-07, 4일 경과 지속). 변화 없어 신규 meta-pattern dispatch 생략(잡음 방지) — 기존 cycle 2939 dispatch 유효.
 
 진단: 직전8 distinct=4, lock 미충족. `gh run list` 재확인 중 heartbeat-stale/health-alert/runtime-error-alert/deploy-drift-alert/data-refresh-weekly 전부 failure(최근 100 run 중 70건) 발견. Supabase REST 직접 curl 재현 → HTTP 402 `exceed_egress_quota` — 프로젝트 전체 egress 차단, 2026-10-03T17:13Z부터 4일+ 지속.
 

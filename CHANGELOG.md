@@ -1,3 +1,12 @@
+## (no version bump — 2026-10-07, cycle 2940, review-code(heavy): lib/analysis·api·calendar·mlb·observability·teams 스윕, RETRO-ONLY)
+
+### review-code(heavy): dead-export + stale-comment 스윕 — 6개 lib 디렉토리, CONFIRMED_UNUSED 0건 (cycle 2940, RETRO-ONLY)
+
+- 진단: cycle 2939 fix-incident 재확인 먼저 — Supabase egress quota 여전히 미해결(변화 없음), 동일 재dispatch는 잡음이라 skip. open issue 0, approved plan 0(plan 3~30 전부 종결 상태), 2-chain lock 미충족(직전8 distinct=6).
+- migration-path cycle 2900 "미탐색 스코프" 후보 전수 스윕: `lib/mlb/`(18파일, export 33개) + `lib/analysis/`(4파일, `convergenceRecord.ts` 824줄 포함 export 29개) + `lib/api`·`lib/calendar`·`lib/observability`·`lib/teams`(단일/소수 파일) — grep 참조 카운트 전부 ≥2파일(정의+테스트 이상), CONFIRMED_UNUSED 0건.
+- lib/ 전체 TODO·FIXME·deprecated·stale 패턴 grep 5개 파일 hit — `v2Predictor.ts`(backward-compat re-export, 의도됨) / `leaderboard/types.ts`(weekly 필드 유지 사유 명시) / `buildMlbFactorAccuracy.ts`·`json-ld.ts`(과거 stale 서술을 정정한 히스토리 주석) 전부 실제 drift 아님, 액션 불필요.
+- 결론: lib/ 스코프 사실상 전역 소진(cycle 2900 phase45 평가 재확인, 신규 디렉토리 6개 추가 확인). 코드 변경 없음. 다음 review-code(heavy) 후보 = app/ 라우트 레벨 또는 packages/kbo-data 잔여.
+
 ## (no version bump — 2026-10-07, cycle 2939, fix-incident: Supabase egress quota exceeded — 운영 인프라 한도, FAIL)
 
 ### fix-incident: Supabase 프로젝트 egress quota exceeded (HTTP 402) — 사이트 홈페이지 500, 전 scheduled workflow 70건 실패 (cycle 2939, FAIL — 사용자 billing 액션 필요)
