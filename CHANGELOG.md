@@ -1,3 +1,14 @@
+## v0.5.62.275 — 2026-10-07 (cycle 2950, review-code(heavy): MLB 데이터 레이어 assertSelectOk degrade 32개 호출)
+
+### review-code(heavy): lib/mlb/ 빌더 레이어 assertSelectOk degrade — 15개 파일 32개 호출 (cycle 2950, SUCCESS)
+
+- 진단: open issue 0, approved plan 0/25, 직전8 distinct=4(2-chain lock 미충족). operational-analysis gap trigger(26-cycle) 충족했으나 cycle 2949 가 바로 전날 egress_quota 장애를 재확인해 중복 대신 코드 직접 감사로 전환.
+- `vercel logs` 로 Supabase egress_quota 장애 live 재확인(`buildMlbAccuracySummary` 에러). `/mlb` 자체는 page.tsx 레벨 degrade 로 200 확인되지만, grep 으로 `apps/moneyball/src/lib/mlb/` 하위 15개 빌더 파일(buildMlbStandings/buildMlbTeamProfile/buildMlbTeamAccuracy/buildMlbMatchupProfile 등)의 assertSelectOk 32개 호출이 전부 uncaught 임을 발견 — cycle 2945~2948 의 page.tsx(20개)·analysis 데이터 레이어(19개) 전수감사 스코프 밖이었던 신규 영역.
+- `buildMlbTeamProfile.ts` 에 "assertSelectOk wrap (silent drift family 차단)" 완료를 주장하는 주석이 있었으나 실제 코드는 미적용 상태 — comment-vs-code drift 확인 및 정정.
+- production curl 로 `/mlb/standings` 등이 현재 200 임을 확인했으나 ISR stale-cache 가 가리고 있을 뿐(cycle 2947 `/analysis` 사례와 동일 구조) — 캐시 미스 시 500 전환 가능.
+- 32개 호출 전부 try/catch + `captureFallback` 적용(배열 destructure `[]`, `buildMlbTeamProfile` 의 `.maybeSingle()` 1곳 `null`). 연동된 12개 테스트 파일의 `.rejects.toThrow()` 단언을 degrade 계약으로 갱신.
+- tsc --noEmit clean, eslint clean(26파일), vitest 584파일/4610테스트 전부 pass. PR #3132 → `gh pr merge --squash --auto --delete-branch` → state=MERGED 실측 확인(commit 1dc5bb22).
+
 ## v0.5.62.274 — 2026-10-07 (cycle 2949, lotto(lite): 1242회 OOS 백필 + 1245회 picks + op-analysis 차단 확인)
 
 ### lotto(lite): 1242회 OOS 백필 + 1245회 picks ship + operational-analysis 차단 발견 (cycle 2949, SUCCESS)

@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): MLB 데이터 레이어 assertSelectOk degrade — 15개 파일 32개 호출 (cycle 2950, 2026-10-07)
+
+진단: open issue 0, approved plan 0/25(전부 completed/archived/deferred), 직전8 distinct=4(design-system/review-code(heavy)2/fix-incident2/lotto, 2-chain lock 미충족). operational-analysis gap trigger(26-cycle) 충족했으나 cycle 2949 가 바로 전날 egress_quota 장애를 재확인한 상태라 중복 확인 대신 코드 직접 read 로 전환.
+
+`vercel logs` 로 egress_quota 장애가 지금도 active 함을 live 재확인(`buildMlbAccuracySummary` 에러 로그) — `/mlb` 페이지는 이미 page.tsx 레벨에서 degrade 되어 200 확인. 하지만 `grep`으로 `apps/moneyball/src/lib/mlb/` 하위 15개 빌더 파일(buildMlbStandings/buildMlbTeamProfile/buildMlbTeamAccuracy/buildMlbMatchupProfile 등)의 assertSelectOk 32개 호출이 전부 uncaught(try/catch·captureFallback 0건) 임을 발견 — cycle 2945~2948 의 page.tsx(20개)·analysis 데이터 레이어(19개) 전수감사 스코프 밖이었던 신규 영역. `buildMlbTeamProfile.ts` 에는 "assertSelectOk wrap (silent drift family 차단)" 완료를 주장하는 주석이 있었으나 실제 코드는 미적용 — comment-vs-code drift 확인.
+
+production curl 로 `/mlb/standings` 등이 현재 200 임을 확인했으나 ISR stale-cache 가 가리고 있을 뿐(cycle 2947 `/analysis` 사례와 동일 구조) — 캐시 미스 시 500 전환 가능한 상태였음.
+
+general-purpose agent 로 32개 호출 전부 try/catch + `captureFallback` 적용(배열 destructure는 `[]`, `buildMlbTeamProfile`의 `.maybeSingle()` 1곳은 `null`). `buildMlbTeamProfile.ts` 거짓 주석 정정. 연동된 12개 테스트 파일의 `.rejects.toThrow()` 단언을 degrade 계약(empty/null 반환)으로 갱신 — 커버리지 삭제 없이 동일 에러 경로를 새 계약으로 재검증.
+
+tsc --noEmit clean, eslint clean(26개 변경 파일), vitest 584파일/4610테스트 전부 pass. PR #3132 → `gh pr merge --squash --auto --delete-branch` → `gh pr view` 로 state=MERGED 실측 확인(commit 1dc5bb22).
+
+다음 사이클 = operational-analysis(gap 27-cycle, egress_quota 지속으로 반복 확인만 가능) 또는 info-architecture-review(gap 29-cycle, 30 임계 근접 — 다음 자연 trigger 유력).
+
 ## 🟢 SUCCESS — lotto(lite): 1242회 OOS 백필 + 1245회 picks + operational-analysis 차단 발견 (cycle 2949, 2026-10-07)
 
 진단: cycle 2948 retro 가 operational-analysis 와 lotto 둘 다 우선 검토 권장. open issue 0, approved plan 0/24, 직전8 distinct=3(2-chain lock 미충족). operational-analysis 먼저 시도 → `scripts/op-analysis-ce-cohort.ts` 실행 시 `exceed_egress_quota` 즉시 에러로 DB 재측정 자체 불가(cycle 2939 이후 billing 장애 지속, 사용자 조치 대기 — 신규 발견 아님, 재확인만). lotto 로 pivot.
