@@ -1,3 +1,14 @@
+## v0.5.62.317 — 2026-10-07 (cycle 2992, review-code(heavy): lib/stats·api·changelog·seo 저커밋 영역 + components/glossary 재감사, 갭 0건 RETRO-ONLY)
+
+### review-code(heavy): lib/stats·lib/api·lib/changelog·lib/seo 저audit 영역 + components/glossary 전수 재감사 — 갭 0건 (cycle 2992, RETRO-ONLY)
+
+- 진단: 직전8(2984-2991) distinct=3(review-code(heavy)6+fix-incident1+design-system(lite)1), 2-chain lock 미충족. fix-incident gap=6(2986)·op-analysis gap=24(2968, 25 임계 근접이나 미도달, egress quota 지속 차단 변화 없음)·info-arch gap=16(2976)·lotto gap=13(2979) 전부 미근접. explore-idea saturation 13/15 충족하나 organic idea 0(open issue 0, 승인 plan 0/29 — plan#29 spec_only_deferred 불변, 만료 2026-10-15 8일 남음) 지속 — skip. open PR 9건 전부 dependabot. DESIGN.md mtime 35일(≥4주)이나 design-system 직전 발화(cycle 2985) 7 사이클 전이라 저가치 판단 — skip.
+- `lib/` + `components/` 서브디렉토리 git log 커밋수 재정렬 — `lib/api`(1)·`lib/stats`(1)·`lib/calendar`·`lib/observability`·`lib/supabase`(cycle 2991 기 감사) 다음으로 `lib/changelog`(3)·`lib/seo`(8, export-but-unused heuristic 리팩터 커밋만 존재 — 로직 자체 미검증) 확인. `components/glossary`(1)·`components/standings`·`components/seasons`(cycle 2989 기 감사)도 재확인.
+- 전수 read: `lib/stats/pearson.ts`(Pearson 상관계수, n<2/denom=0 가드 정상) / `lib/api/is-origin-allowed.ts`(anonymous write origin 검증, cycle 2763 추출) + 호출처 5개 route 중 미확인이던 `leaderboard/sync/route.ts` 신규 전수 read(origin 체크·device_id regex·nickname XSS 문자 블락리스트·onConflict 전부 정상 배선) / `lib/changelog/parse.ts`+`renderMarkdown.tsx`(CHANGELOG.md 파서+렌더러, href는 저장소 신뢰 소스라 XSS 리스크 없음) / `lib/seo/json-ld.ts`(schema.org 빌더, 파일 상단 주석의 "insights/series 만 사용" 서술을 grep으로 재검증 — 여전히 정확, comment-drift 없음) / `components/glossary/GlossaryCategoryFilter.tsx`(localStorage 필터, CSS selector 값이 isCategorySlug 화이트리스트로 제한돼 injection 불가 확인) — actionable 버그 0건.
+- 코드 변경 0 (clean audit).
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~). **op-analysis gap=24 → 다음 cycle 25 임계 도달** — heavy 모드 자동 권장 trigger 근접.
+
 ## v0.5.62.316 — 2026-10-07 (cycle 2991, review-code(heavy): app/api 저커밋 13 route + lib/supabase·calendar·observability·seasons 재감사, 갭 0건 RETRO-ONLY)
 
 ### review-code(heavy): app/api 저audit route 13개 + lib/seasons 재검증 — 갭 0건 (cycle 2991, RETRO-ONLY)

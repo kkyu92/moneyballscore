@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): lib/stats·api·changelog·seo 저audit 영역 + components/glossary 재감사, 갭 0건 (cycle 2992, 2026-10-07)
+
+진단: 직전8(2984-2991) distinct=3, 2-chain lock 미충족. fix-incident(6)/op-analysis(24, 25 임계 근접 미도달)/info-arch(16)/lotto(13) 전부 미근접. explore-idea saturation 13/15 충족하나 organic idea 0(plan#29 spec_only_deferred 불변, 만료 8일 남음) 지속 — skip. DESIGN.md mtime 35일+ 이나 design-system 7 사이클 전 발화라 저가치 skip.
+
+`lib/stats`·`lib/api`·`lib/changelog`·`lib/seo` 저커밋 영역 + `components/glossary` 전수 read. `leaderboard/sync/route.ts` 신규 전수 read(origin/device_id/nickname 검증 정상). `lib/seo/json-ld.ts` 상단 주석 "insights/series만 사용" 서술 grep 재검증 — 여전히 정확(comment-drift 없음). `GlossaryCategoryFilter.tsx` localStorage CSS selector 값 injection 불가 확인(화이트리스트 제한). actionable 버그 0건, 코드 변경 0.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음). **Supabase egress quota 장애 지속**(cycle 2939~). **op-analysis gap=24 → 다음 cycle 25 임계 도달** — heavy 모드 자동 권장 trigger 근접.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): app/api 저audit route 13개 + lib/supabase·calendar·observability·seasons 재감사, 갭 0건 (cycle 2991, 2026-10-07)
 
 진단: 직전8(2983-2990) distinct=3, 2-chain lock 미충족. fix-incident(5)/op-analysis(23, egress quota 지속 차단 재확인)/info-arch(15)/lotto(12, cron 산출물 둘 다 신선) 전부 gap 미근접. explore-idea saturation 2/15 낮음. open issue 0건, open PR 전부 dependabot. 승인된 plan 0건(plan#29 spec_only_deferred 불변). DESIGN.md mtime 35일(≥4주)이나 design-system 직전 발화 6 사이클 전 + 갭 0건 확인 직후라 저가치 skip.
