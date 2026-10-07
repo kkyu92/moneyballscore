@@ -1,5 +1,17 @@
 
-## 🟢 SUCCESS — review-code(heavy): predictor.ts sp_fip/sp_xfip 비대칭-null 중립가드 누락 수정 (cycle 2977, 2026-10-07)
+## 🟢 SUCCESS — review-code(heavy): mlb-pipeline.ts sp_fip 등 7개 팩터 비대칭-null 중립가드 누락 수정 (cycle 2978, 2026-10-07)
+
+진단: 직전8(2970-2977) distinct=3, 2-chain lock 미충족. fix-incident/op-analysis/lotto/design-system 전부 gap 미근접. explore-idea saturation 12/15 충족하나 plan#29 상태 불변(사용자 결정 대기), organic idea 없음. review-code(heavy) cycle 2977 추천 스코프(factors/mlb-*.ts + backtest/ 잔여) 선택.
+
+발견: mlb-pipeline.ts computeMlbProbability 호출부 — 한쪽 팀 stats row 결측 시 그 쪽만 리그평균(MLB_STAT_DEFAULTS) 대체, 다른 쪽은 실측 유지 — predictor.ts(cycle 2977)와 동일 비대칭-null 버그 클래스가 MLB 파이프라인에도 존재(sp_fip/sp_xfip/lineup_woba/bullpen_fip/war/lineup_xwoba/lineup_barrel_pct 7개 키).
+
+수정: `pairedOrNeutral()` 헬퍼로 한쪽 결측 시 양쪽 다 fallback(diff=0 중립) 처리. DB 영속화 로직은 별개 경로라 미변경. kbo-data type-check clean, 94/1227 PASS. 전체 585/4613 PASS. R4 직push(단일 논리 단위, PR 생략 — 소규모 단일 파일 패치).
+
+carry-over(저위험, 다음 review-code 후보): mlb-base.test.ts NaN-clamp 테스트가 클램프 뒤 48pt 스큐 못 잡는 문제 / logistic.ts `?? 0` 주석 오표기 / mlb-elo.ts `MLB_ELO_K_POSTSEASON` dead code.
+
+**plan#29 상태 변화 없음** (만료 2026-10-15) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 결정 또는 review-code(heavy) carry-over 3건 또는 egress quota 모니터.
 
 진단: op-analysis gap=125(마지막 2852)·lotto gap=105(마지막 2872)·fix-incident gap=31(마지막 2946) 3종 동시 초과 충족. op-analysis(lite) 시도 시 Supabase egress quota restriction 재확인(cycle 2939~ 지속, 신규 아님) — DB 측정 불가. fix-incident 도 동일 root cause 재확인뿐일 가능성 높아 review-code(heavy) 선택, cycle 2974/2975 추천 잔여 스코프(engine/features/factors/context/backtest/analytics) 감사.
 

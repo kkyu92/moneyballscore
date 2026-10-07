@@ -1,3 +1,15 @@
+## v0.5.62.303 — 2026-10-07 (cycle 2978, review-code(heavy): mlb-pipeline.ts sp_fip/sp_xfip/lineup_woba/bullpen_fip/war/lineup_xwoba/lineup_barrel_pct 비대칭-null 중립가드 누락 수정 SUCCESS)
+
+### review-code(heavy): factors/mlb-*.ts + backtest/ 잔여 스코프 감사 — mlb-pipeline.ts 비대칭 data-gap 버그 1건 수정 (cycle 2978, SUCCESS)
+
+- 진단: 직전8(2970-2977) distinct=3(review-code(heavy)6+info-architecture-review1+fix-incident(lite)1), 2-chain lock 미충족. fix-incident gap=8/20·op-analysis gap=10/25·lotto gap=29/30(cron 산출물 picks/results 둘 다 신선, 건강)·design-system gap=14(cycle 2964 전수 재검증 직후라 저가치) 전부 미근접/저가치. explore-idea saturation 12/15 충족하나 organic idea 없음 — plan#29 Tier4 는 cycle 2969 이후 상태 불변(사용자 결정 대기 지속, expiry 2026-10-15), plan#30 completed, open issue 0건, approved plan 0/23. review-code(heavy) 가 cycle 2977 추천 스코프(`packages/kbo-data/src/factors/mlb-*.ts` 7개 + `backtest/` 잔여 11개) 선택 — 진짜 신규 영역(dominance 이지만 success streak, cycle 135 인정 패턴).
+- subagent 위임 전수 감사 결과 1건 HIGH 발견: **`mlb-pipeline.ts` computeMlbProbability 호출부** — `home?.fip ?? MLB_STAT_DEFAULTS.fip` 패턴(sp_fip/sp_xfip/lineup_woba/bullpen_fip/war/lineup_xwoba/lineup_barrel_pct 7개 키)이 한쪽 팀 `mlb_team_stats` row 결측 시 그 쪽만 리그평균 상수로 대체, 다른 쪽은 실측값 유지 — predictor.ts sp_fip/sp_xfip(cycle 2977)와 완전히 동일한 비대칭-null 버그 클래스가 MLB 파이프라인에 그대로 존재. `mlb-base.ts` 의 `safe()` 는 NaN 만 가드하고 "한쪽만 결측" 은 가드하지 않음.
+- 수정: `pairedOrNeutral(homeVal, awayVal, fallback)` 헬퍼 신설 — 양쪽 다 있을 때만 실측 사용, 한쪽이라도 없으면 양쪽 다 fallback 으로 맞춰 diff=0 중립 보장. 7개 키 전부 적용. `home_sp_fip ?? null` 등 DB 영속화 로직(cycle 2065)은 별개 경로라 미변경(기존 null-guard 그대로 유효).
+- subagent 가 추가로 보고한 저위험 항목(mlb-base.test.ts NaN-clamp 테스트가 클램프 뒤에 숨은 48pt 스큐를 못 잡는 문제, backtest/logistic.ts 의 `?? 0` 주석 오표기 "중립", mlb-elo.ts 의 미사용 `MLB_ELO_K_POSTSEASON` dead code)는 production 비영향(backtest 는 evidence-pack only, dead code 는 unreachable) 판단해 본 cycle 범위 밖으로 보류 — 다음 review-code(heavy) 후보로 carry-over.
+- 검증: kbo-data type-check clean, lint 0 warning, 94 files/1227 tests PASS. 전체 585 files/4613 tests PASS.
+
+다음 사이클 추천 = plan#29 사용자 결정(만료 2026-10-15 임박) 또는 review-code(heavy) carry-over(mlb-base.test.ts NaN-clamp 테스트 보강 / logistic.ts 주석 정정 / mlb-elo.ts dead code 제거) 또는 Supabase egress quota 장기화 모니터.
+
 ## v0.5.62.302 — 2026-10-07 (cycle 2977, review-code(heavy): predictor.ts sp_fip/sp_xfip 비대칭-null 중립가드 누락 수정 SUCCESS)
 
 ### review-code(heavy): engine/factors/context/backtest 신규 스코프 감사 — predictor.ts 비대칭 data-gap 버그 1건 수정 (cycle 2977, SUCCESS)
