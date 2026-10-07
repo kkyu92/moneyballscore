@@ -1,4 +1,12 @@
 
+## 🔔 사용자 결정 필요 — plan #29 (로그인/커뮤니티) expiry 2026-10-15 임박 (cycle 2954, 2026-10-07)
+
+plan #29(회원 인증+커뮤니티, `~/.develop-cycle/plans/moneyballscore/29.md`)가 2026-10-15 만료 예정(8일 남음). risk=3(인증/세션/RLS) + 자율 가능=no(인증 방식·커뮤니티 범위 미정) 조합이라 본 develop-cycle 은 자율 구현 대상에서 계속 제외 — 사용자 결정 필요:
+- 트래픽 재평가 트리거(`user_picks`/`pick_poll_events` ≥10)를 Supabase egress quota 402(cycle 2939~ 지속)로 실측 불가 — 과거 3회(cycle 2334/2417/2633) 모두 1/0/5/0 고착이었으나 현재는 확인 자체가 불가능한 상태
+- `/login` 문구의 "KBO 포스트시즌 직전" 조건은 오늘(10/7) 시점상 근접했을 가능성 있으나 KBO 공식 사이트가 JS 렌더링이라 자동 확인 불가
+- 결정 옵션: (1) 지금 착수 지시 (2) expiry 연장 (3) 그대로 두어 2026-10-15 이후 자동 archive
+- 아무 결정 없으면 스킬 룰에 따라 만료 후 다음 진단 사이클이 자동 archive 처리
+
 ## 🟡 RETRO-ONLY — review-code(heavy): assertSelectOk/degrade 패밀리 완전 소진 확인 (cycle 2953, 2026-10-07)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/deferred). 직전8 distinct=4(2-chain lock 미충족). operational-analysis gap 29(≥25 trigger) 재확인했으나 `exceed_egress_quota` 지속(cycle 2939~, 14+ cycle 미해결, 사용자 billing 미조치) — 순수 노이즈. info-architecture-review gap 31(≥30 trigger)도 확인했으나 신규 라우트 3건(mlb/insights 계열, cycle 2936-2938)이 커밋 메시지상 헤더 메가메뉴/푸터/sitemap 즉시 배선 완료 상태 확인 + breadcrumb 누락 grep 신규 0건 — 10연속 "현 IA 충분" 예상돼 저가치. cycle 2952 retro 추천대로 review-code(heavy)로 `/mlb/analysis/analysis-data.ts` 착수.

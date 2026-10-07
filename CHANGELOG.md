@@ -1,4 +1,14 @@
-## v0.5.62.278 — 2026-10-07 (cycle 2953, review-code(heavy): assertSelectOk/degrade 패밀리 완전 소진 확인)
+## v0.5.62.279 — 2026-10-07 (cycle 2954, explore-idea(lite): plan #29 재평가 — expiry 임박 사용자 결정 플래그)
+
+### explore-idea(lite): plan #29(로그인/커뮤니티) checkpoint 갱신 — expiry 2026-10-15 임박, 사용자 결정 요청 (cycle 2954, PARTIAL)
+
+- 진단: open issue 0, approved plan 0/23. 직전8 distinct=4(2-chain lock 미충족). review-code(heavy) 45%(직전20, 9/20) dominance 지속. cycle 2953 retro 가 명시 추천한 두 후보(explore-idea plan #29 / fix-incident egress quota) 중 expiry 임박(8일 남음)을 근거로 plan #29 선택.
+- 트래픽 재측정 시도 — service-role REST 전부 HTTP 402(`exceed_egress_quota`, cycle 2939~ 지속, 29일+ 미해결) 로 차단, 실측 불가. 과거 3회(cycle 2334/2417/2633) 측정은 `user_picks`=1/`mlb_user_picks`=0/`pick_poll_events`=5/`mlb_pick_poll_events`=0 고착이었으나 이번엔 "확정 미충족"이 아닌 "확인 불가" 로 상태 변경 — 추정을 실측처럼 재사용하지 않음(cycle 2953 lesson 정합).
+- KBO 포스트시즌 타이밍 재확인 시도 — `koreabaseball.com/Schedule` WebFetch 결과 AJAX 렌더링이라 정적 fetch 로 실제 날짜 확인 불가. `/login` 문구의 "postseason 직전" 조건은 오늘(10/7) 시점상 근접 가능성 높으나 자동 확인 불가.
+- risk=3 + 자율 가능=no 판단(인증/세션/RLS 영역)은 트래픽/타이밍 측정 가능 여부와 무관하게 변화 없음 — Tier 4 보류 유지, 코드 변경 없음.
+- plan 29 checkpoint 섹션에 cycle 2954 기록 추가. TODOS.md 에 "🔔 사용자 결정 필요" 섹션 신규 — expiry 전 착수/연장/폐기 중 사용자 결정 요청, 미결정 시 만료 후 자동 archive 안내.
+
+
 
 ### review-code(heavy): assertSelectOk/degrade 감사 — 전체 재검증, 잔여 gap 0건 (cycle 2953, SUCCESS retro-only)
 
