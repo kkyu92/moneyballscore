@@ -1,4 +1,16 @@
-## v0.5.62.270 — 2026-10-07 (cycle 2945, fix-incident: cookies() in generateStaticParams 프로덕션 빌드 전면 장애)
+## v0.5.62.271 — 2026-10-07 (cycle 2946, fix-incident: 홈페이지/insights/calendar 500 — Supabase 장애 degrade 누락 3건)
+
+### fix-incident: 홈페이지(/) + /insights + /calendar 500 — assertSelectOk uncaught throw degrade 누락 (cycle 2946, SUCCESS)
+
+- 진단 시작 시 직전 세션(interrupted) 이 cycle 2946 라벨로 이미 커밋(`c75b3284`, `/insights/series/[topic]` build-time crash fix)해뒀으나 cycle_state JSON·retro commit·signal 전부 미작성 — 세션-중단 사각지대(skill-evolution 74th 박제) 케이스 재확인. 코드는 이미 main 에 push 돼 있어 재작업 없이 검증만 진행.
+- `vercel ls`/`vercel inspect --logs` 직접 조회로 production 재배포 추적 — 빌드는 성공했으나 **홈페이지(`/`) 가 런타임 500** 확인(`vercel logs` 로 `home.getTodayPredictions`/`home.getSeasonAccuracy`/`home.getYesterdayResults` 가 Supabase egress quota 장애(cycle 2939, day 6+) 로 `assertSelectOk` throw → uncaught). 같은 `page.tsx` 안 `buildStandings`/`buildAllTeamAccuracy`/`getRecentWeeksAccuracy` 3곳은 이미 `captureFallback` degrade 패턴 적용돼 있었는데 나머지 4곳(`getTodayPredictions`/`getSeasonAccuracy`/`getWeekAheadSchedule`/`getYesterdayResults`) + `getNextScheduledGames` 는 누락 — 동일 파일 안 불일치 적용(silent drift family). 5곳 전부 `.catch(captureFallback(...))` 추가, PR #3129 머지.
+- 머지 직후 재배포 확인 중 홈페이지는 200 복구됐으나, 동일 `assertSelectOk` 패턴 보유 파일 21개 전수 grep → live curl 직접 확인 결과 **`/insights`, `/calendar` 도 500**(나머지 `/accuracy`/`/predictions`/`/dashboard` 등은 ISR 캐시 추정으로 200 유지) 확인. 두 라우트 모두 `captureFallback` 로 동일 degrade 적용(`/insights` → 빈 배열, `/calendar` → `buildEmptyGrid` 빈 grid), PR #3130 머지.
+- 재배포 후 홈페이지/insights/calendar/accuracy/predictions/dashboard 6개 라우트 전부 curl 200 실측 확인 — production 완전 복구(단, Supabase egress quota billing 장애 자체는 cycle 2939 부터 미해결 지속, 사용자 billing action 대기 — 이번 fix 는 "DB 장애가 사이트를 통째로 죽이면 안 된다"는 degrade 보강이지 billing 복구가 아님).
+- tsc/eslint/vitest(439파일/3494테스트, 2회 전부) clean.
+
+다음 cycle 추천 = review-code(heavy) 로 나머지 assertSelectOk 보유 파일(`/accuracy`, `/predictions`, `/dashboard`, `/about`, `/search`, `/reviews`, `/teams/[code]/recent`, `mlb/*`, `en/mlb/*`, `analysis/game/[id]` 등 약 16개) 전수 감사 — 지금은 ISR 캐시로 200 이지만 캐시 만료 시 동일하게 500 가능. fix-incident(Supabase billing)는 사용자 action 대기 지속(day 6+).
+
+
 
 ### fix-incident: cookies() in generateStaticParams 프로덕션 빌드 전면 장애 (cycle 2945, PARTIAL)
 

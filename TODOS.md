@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — fix-incident: 홈페이지/insights/calendar 500 — degrade 누락 3건 (cycle 2946, 2026-10-07)
+
+진단 시작 시 직전(interrupted) 세션이 cycle 2946 라벨로 이미 `/insights/series/[topic]` build-time crash fix 를 커밋·push 해뒀으나 cycle_state JSON·retro commit·signal 전부 미작성 상태 발견(세션-중단 사각지대, skill-evolution 74th 박제 케이스 재확인) — 코드는 유효해 재작업 없이 그대로 검증 진행.
+
+`vercel ls`/`inspect --logs`/`logs` 직접 조회로 production 재배포 추적 중 **홈페이지(`/`) 런타임 500** 확인 — `page.tsx` 안 `assertSelectOk` 호출 7곳 중 3곳(`buildStandings` 등)만 `captureFallback` degrade 적용돼 있고 나머지 4곳(`getTodayPredictions`/`getSeasonAccuracy`/`getWeekAheadSchedule`/`getYesterdayResults`) + `getNextScheduledGames` 는 미적용 — Supabase egress quota 장애(cycle 2939, day 6+) 시 uncaught throw 로 전체 사용자에게 500. 5곳 전부 degrade 추가, PR #3129 머지 + 재배포 후 200 확인.
+
+동일 패턴 보유 파일 21개 전수 grep → live curl 직접 확인해 `/insights`, `/calendar` 도 500 확인(나머지는 ISR 캐시로 200 추정). 두 라우트 동일 degrade 적용, PR #3130 머지 + 재배포 후 6개 라우트(`/`, `/insights`, `/calendar`, `/accuracy`, `/predictions`, `/dashboard`) 전부 200 실측 확인.
+
+tsc/eslint/vitest(439파일/3494테스트, 2회) clean. **Supabase billing 장애 자체는 미해결 지속**(day 6+, 사용자 action 대기) — 이번 fix 는 degrade 보강이지 billing 복구 아님.
+
+다음 사이클 추천 = review-code(heavy) 로 나머지 assertSelectOk 보유 파일(~16개: `/accuracy`/`/predictions`/`/dashboard`/`/about`/`/search`/`/reviews`/`teams/[code]/recent`/`mlb/*`/`en/mlb/*`/`analysis/game/[id]` 등) 전수 감사 — 지금 200인 건 ISR 캐시 추정, 캐시 만료 시 동일 위험.
+
 ## 🟡 PARTIAL — fix-incident: cookies() in generateStaticParams 프로덕션 빌드 전면 장애 (cycle 2945, 2026-10-07)
 
 진단: `gh run list` 는 CI만 반영 — `vercel ls` 로 직접 확인해 production 배포가 20+분간 연속 Error 상태인 걸 발견(cycle 2939 egress quota 기록만으론 미포착된 신규 regression). `vercel inspect --logs` 로 실제 원인 확인: `/en/mlb/insights/[date]` 의 `generateStaticParams` 가 cookie 기반 Supabase 클라이언트(`@/lib/supabase/server`)를 호출 — Next.js 16 이 build-time `cookies()` 사용을 금지해 즉시 빌드 실패(plan #30 Phase 2, cycle 2936~2938 MLB 인사이트 아카이브 작업 시 KBO 선례(`lib/insights/loader.ts` anon-key 클라이언트)와 다르게 포팅된 regression).
