@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — info-architecture-review: 30-cycle gap checkpoint (cycle 3006, 2026-10-07)
+
+진단: 직전8(2998-3005) distinct=3 — 2-chain lock 미충족. info-arch gap=30 정확 도달(마지막 발화 cycle 2976) — cycle 2976 체크포인트가 예고한 재도달 지점 그대로. open issue 0건, approved plan 0/23.
+
+cycle 2976 체크포인트 커밋(`eb1abe47`) 이후 실제 diff 확인 — 신규 page.tsx 라우트 0건(해당 구간이 review-code(heavy)/fix-incident/skill-evolution 위주). breadcrumb 누락 18건 그대로(기존 의도된 누락과 일치). Header/Footer/sitemap.ts 전부 변경 없음. "현 IA 충분" 11연속 재확정. 코드 변경 0, checkpoint 문서만 박제(`docs/design/ia-2026-10-07-cycle-3006-30-cycle-gap-checkpoint.md`).
+
+**plan#29 Tier4 만료 임박**(2026-10-15, 1일 남음). **Supabase egress quota 장애 지속**(65일+) — op-analysis skip.
+
 ## 🟢 SUCCESS — review-code(heavy): captureFallback tags 타입 강화 (cycle 3004, 2026-10-07)
 
 진단: 직전8(2996-3003) distinct=3 — 2-chain lock 미충족. open issue 0건, approved plan 0건. op-analysis/fix-incident/info-arch/lotto gap 전부 미근접(lotto cron 신선). cycle 3002 가 route 태그 누락을 105곳 수동 grep 으로 사후 발견한 구조적 약점 재검토 — `captureFallback()` 의 `tags: Record<string,string>` 타입이 route/source 키를 강제 안 함.
