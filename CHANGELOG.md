@@ -1,3 +1,14 @@
+## v0.5.62.268 — 2026-10-07 (cycle 2942, review-code(heavy): daily.ts/mlb-pipeline.ts 대형 파일 단독 리뷰)
+
+### review-code(heavy): daily.ts(1659줄)/mlb-pipeline.ts(892줄) 전체 read — dead import 1건 제거 (cycle 2942, SUCCESS)
+
+- 진단: cycle 2939 Supabase egress quota incident 재확인 — 여전히 HTTP 402/홈페이지 500 (프로덕션 직접 curl 재확인, day 5+, 변화 없음), 재dispatch 스킵 지속(3연속 reconfirm 이후 노이즈 판단). open issue 0, 직전 8 사이클 distinct=5(2-chain lock 미충족). cycle 2941 추천(daily.ts/mlb-pipeline.ts 단독 리뷰) 채택.
+- `daily.ts` 전체(1659줄) read — silent drift 가드/주석 전부 최신 코드와 일치 확인, dead export/stale comment 0건(이미 cycle 936~2832 사이 다수 fix 누적으로 포화 상태).
+- `mlb-pipeline.ts` 전체(892줄) read — `shouldAlertSilentDrift` import가 실제로는 어디서도 호출되지 않는 dead import 발견(해당 함수는 `silent-drift-alert.ts` 내부에서만 쓰임). 제거.
+- lint(`eslint src/pipeline/`) 0 warning, tsc clean, test 94파일/1224테스트 green.
+
+다음 cycle 추천 = app/ 라우트 레벨 스코프 리뷰 또는 packages/kbo-data analysis/api/calendar/mlb/observability/teams 미탐색 스코프 — fix-incident는 Supabase billing 해결 전까지 매 cycle 재확인만(사용자 액션 대기 지속).
+
 ## v0.5.62.267 — 2026-10-07 (cycle 2941, review-code(heavy): kbo-data pipeline/ 24파일 dead-export 스윕)
 
 ### review-code(heavy): packages/kbo-data/src/pipeline/ 24파일·75개 export grep 전수 검증 — dead export 8건 제거 (cycle 2941, SUCCESS)
