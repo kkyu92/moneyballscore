@@ -64,7 +64,15 @@ export default async function SeriesTopicPage({ params }: Props) {
   const topic = parseSeriesTopic(slug);
   if (!topic) notFound();
 
-  const entries = await getSeriesByTopic(topic);
+  // DB 장애(예: Supabase egress quota, cycle 2939)가 435쌍 전체 사전렌더를 도는 이 라우트의
+  // 빌드를 넘어 전체 production 빌드를 죽이면 안 됨 — 0건으로 degrade (fix-incident cycle 2946,
+  // insights/[date] 의 generateStaticParams degrade 패턴을 page body DB 호출에 재적용).
+  let entries: Awaited<ReturnType<typeof getSeriesByTopic>> = [];
+  try {
+    entries = await getSeriesByTopic(topic);
+  } catch (err) {
+    console.error(`insights/series/${slug} getSeriesByTopic failed, degrading to 0 entries:`, err);
+  }
   const team1Name = KBO_TEAMS[topic.team1].name;
   const team2Name = KBO_TEAMS[topic.team2].name;
   const pageUrl = `${SITE_URL}/insights/series/${topic.slug}`;
