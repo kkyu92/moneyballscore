@@ -1,4 +1,17 @@
 
+## 🟠 PARTIAL + 사용자 결정 요청 — explore-idea(lite): plan#29 포스트시즌 트리거 확정 (cycle 2969, 2026-10-07)
+
+진단: review-code(heavy) saturation(직전15, 9/15≥12) + plan#29 expiry(2026-10-15) 7일 남음(만료 전 마지막 재확인 가능성) 근거로 선택. fix-incident 402는 cycle 2968에 이미 meta-pattern dispatch 완료 + 본 cycle 직접 curl 재확인(동일 `exceed_egress_quota`, 변화 없음) — 중복 회피.
+
+**새 확인**: WebSearch로 2026 KBO 포스트시즌 일정 확정 — **와일드카드 10월 14일 개막** (세미플레이오프 10/17, 플레이오프 10/25). plan#29의 `/login` 문구 "postseason 직전" 조건이 cycle 2954의 "확인 불가"에서 이번에 최초로 "확정 충족"(오늘 10/7, 개막 7일 전)으로 전환됨. 트래픽 트리거(≥10)는 egress quota 402 지속으로 여전히 측정 불가.
+
+**사용자 결정 필요** (plan#29, `~/.develop-cycle/plans/moneyballscore/29.md`): 로그인+커뮤니티 plan이 2026-10-15 만료 예정이며, 바로 다음 날(10/14) 포스트시즌이 시작됨 — 지금이 자동 archive 전 마지막 확인 시점.
+- 연장: 만료일 연장 — 포스트시즌 기간 중 재평가
+- 착수: 지금 Tier4(risk=3, 인증방식/커뮤니티 범위 결정 필요) 승인하고 착수 지시
+- 폐기: 결정 보류 → 10/15 이후 자동 archived 처리(현상 유지)
+
+다음 사이클 추천 = 사용자 결정 있으면 그에 따라 explore-idea 재개, 없으면 review-code(heavy) 또는 fix-incident(402 billing 조치 여부 재확인) 자연 선택.
+
 ## 🟡 RETRO-ONLY — operational-analysis(lite): 재측정 시도, egress quota 402 범위 확장 확인 (cycle 2968, 2026-10-07)
 
 진단: op-analysis gap=44(마지막 발화 cycle 2924, ≥25 트리거 대폭 초과). 직전8(2960-2967) distinct=3(review-code(heavy)6+polish-ui1+design-system1) — 2-chain lock 미충족. fix-incident gap=22(≥20 충족)이나 직전 수 사이클 반복 재확인(동일 402 billing 원인, noise). info-arch gap=13·lotto gap=19·explore-idea saturation 14/15 전부 미근접 또는 저가치. operational-analysis gap 이 가장 오래 누적(44 cycle) → `scripts/op-analysis-ce-cohort.ts` 재실행 선택.

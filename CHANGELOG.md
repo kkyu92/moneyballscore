@@ -1,3 +1,15 @@
+## v0.5.62.294 — 2026-10-07 (cycle 2969, explore-idea(lite): plan#29 포스트시즌 트리거 확정, Tier4 유지 PARTIAL)
+
+### explore-idea(lite): plan#29(로그인+커뮤니티) 재평가 — 포스트시즌 트리거 "확인 불가" → "확정 충족" 전환 (cycle 2969, PARTIAL)
+
+- 진단: review-code(heavy) saturation(직전15, 9/15≥12 충족) + plan#29 expiry(2026-10-15) 7일 남음(사실상 만료 전 마지막 재확인) 근거로 explore-idea 선택. fix-incident(gap=22) 재확인은 cycle 2968에 이미 meta-pattern dispatch 완료라 중복 회피, 402 상태도 직접 curl 재확인(동일 `exceed_egress_quota`, 변화 없음).
+- WebSearch 로 KBO 공식 2026 포스트시즌 일정 확정: **와일드카드 10월 14일 개막**(세미플레이오프 10/17, 플레이오프 10/25). cycle 2954가 WebFetch 실패로 "확인 불가"로 남겼던 `/login` 문구 "postseason 직전" 조건이 이번에 최초로 확정 충족(오늘 10/7 = 개막 7일 전).
+- 트래픽 트리거(≥10)는 여전히 egress quota 402로 측정 불가 — 중복 재측정 회피(cycle 2953 lesson 정합).
+- Tier 4 판정 자체(risk=3 인증/세션/RLS 자율 단독 구현 부적합 + 자율 가능=no)는 트리거 충족과 무관하게 불변 — 코드 변경 없음, 자율 구현 범위 아님.
+- plan expiry(10/15)가 포스트시즌 개막(10/14) 바로 다음 날 — TODOS.md에 사용자 결정 요청(연장/착수/폐기 3択) 명시 박제.
+
+다음 사이클 추천 = 사용자가 plan#29 결정(연장/착수/폐기)을 내리면 그에 따라 explore-idea 재개, 미결정 시 review-code(heavy) 또는 fix-incident(402 billing 조치 여부 재확인) 자연 선택.
+
 ## v0.5.62.293 — 2026-10-07 (cycle 2968, operational-analysis(lite): 재측정 시도, egress quota 402 범위 확장 확인 RETRO-ONLY)
 
 ### operational-analysis(lite): CE/비CE 재측정 시도 — egress quota 402 범위가 cron 외 로컬 직접 쿼리까지 확장됨을 확인 (cycle 2968, RETRO-ONLY)
