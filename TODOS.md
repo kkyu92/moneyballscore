@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — fix-incident(lite): egress quota 402 지속 재확인, 신규 incident 0건 (cycle 2970, 2026-10-07)
+
+진단: fix-incident gap=23(마지막 cycle 2946, ≥20 충족) — 2-chain lock 미충족(직전8 distinct=5). operational-analysis/explore-idea 둘 다 직전 cycle 발화라 재방화 부적합, design-system 은 cycle 2964 직후라 저가치, review-code(heavy)는 api/+observability 까지 이미 감사 완료 — fix-incident 선택.
+
+`gh run list` 재확인: `heartbeat-stale` 스케줄 workflow 1건 실패 외 전부 정상(CI success, CI Failure Dispatch 전부 skipped = 빌드 실패 0건). heartbeat-stale 실패는 cycle 2968/2969 확인된 Supabase egress quota 402 와 동일 원인 — cron heartbeat 체크도 같은 billing 이슈로 차단 중임을 재확인. 신규 incident 유형 없음, 코드 변경 없음.
+
+다음 사이클 추천 = 사용자 plan#29 결정(연장/착수/폐기, `~/.develop-cycle/plans/moneyballscore/29.md`, 만료 2026-10-15) 있으면 explore-idea 재개, 없으면 review-code(heavy) 신규 스코프(picks/leaderboard/mlb 미감사 라우트).
+
 ## 🟠 PARTIAL + 사용자 결정 요청 — explore-idea(lite): plan#29 포스트시즌 트리거 확정 (cycle 2969, 2026-10-07)
 
 진단: review-code(heavy) saturation(직전15, 9/15≥12) + plan#29 expiry(2026-10-15) 7일 남음(만료 전 마지막 재확인 가능성) 근거로 선택. fix-incident 402는 cycle 2968에 이미 meta-pattern dispatch 완료 + 본 cycle 직접 curl 재확인(동일 `exceed_egress_quota`, 변화 없음) — 중복 회피.

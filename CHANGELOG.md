@@ -1,3 +1,13 @@
+## v0.5.62.295 — 2026-10-07 (cycle 2970, fix-incident(lite): egress quota 402 지속 재확인, 신규 incident 0건 RETRO-ONLY)
+
+### fix-incident(lite): heartbeat-stale 실패 재확인 — 동일 egress quota 402, 신규 incident 없음 (cycle 2970, RETRO-ONLY)
+
+- 진단: fix-incident gap=23(마지막 발화 cycle 2946, ≥20 트리거 충족) — 2-chain lock 미충족(직전8(2962-2969) distinct=5). operational-analysis gap=1(직전 cycle 발화)·explore-idea gap=0(직전 cycle 발화, 사용자 plan#29 결정 대기 중)로 둘 다 재방화 부적합. info-arch gap=14·lotto gap=20 미근접. design-system DESIGN.md mtime 35일(≥4주 충족)이나 cycle 2964에 이미 토큰 재검증 완료(갭 0건) 직후라 저가치. review-code(heavy) 직전20 65%(13/20) 지속 dominance — 신규 미감사 스코프(api/+observability) 도 cycle 2966에 이미 감사 완료. fix-incident gap 이 가장 오래 누적 + 트리거 명확 충족으로 선택.
+- `gh run list --limit 15` 재확인: `heartbeat-stale` 스케줄 workflow 실패 1건(2026-10-07T10:02:57Z) 외 전부 success/skipped. CI Failure Dispatch 전부 skipped(실제 CI 빌드 실패 0건). `heartbeat-stale` 실패는 cycle 2968/2969가 이미 확인한 Supabase egress quota 402(`exceed_egress_quota`)의 동일 증상 — 로컬 직접 쿼리뿐 아니라 cron heartbeat 체크도 동일 원인으로 차단 중임을 재확인.
+- 신규 incident 유형 0건. 근본 원인(egress quota 402, 사용자 billing 조치 대기) 변화 없음 — 코드 변경 없음(순수 재확인 cycle).
+
+다음 사이클 추천 = 사용자 plan#29 결정(연장/착수/폐기) 있으면 explore-idea 재개, 없으면 review-code(heavy) 신규 스코프(picks/leaderboard/mlb 미감사 라우트) 자연 선택 또는 2-chain lock 자연 해제 대기.
+
 ## v0.5.62.294 — 2026-10-07 (cycle 2969, explore-idea(lite): plan#29 포스트시즌 트리거 확정, Tier4 유지 PARTIAL)
 
 ### explore-idea(lite): plan#29(로그인+커뮤니티) 재평가 — 포스트시즌 트리거 "확인 불가" → "확정 충족" 전환 (cycle 2969, PARTIAL)
