@@ -49,18 +49,18 @@ describe("buildMlbTeamFactorAverages", () => {
     vi.clearAllMocks();
   });
 
-  it("mlb_schedule select error → assertSelectOk throw", async () => {
+  it("mlb_schedule select error → throw 대신 EMPTY_MLB_FACTOR_AVERAGES degrade (cycle 2949 captureFallback)", async () => {
     supabaseMock = makeSupabaseMock({
       scheduleError: { message: "connection refused" },
     });
 
     const { buildMlbTeamFactorAverages } = await import("../buildMlbTeamFactorAverages");
-    await expect(buildMlbTeamFactorAverages("NYY")).rejects.toThrow(
-      /buildMlbTeamFactorAverages mlb_schedule .* select failed: connection refused/,
-    );
+    const avg = await buildMlbTeamFactorAverages("NYY");
+    expect(avg.spFip).toBeNull();
+    expect(avg.sampleN).toBe(0);
   });
 
-  it("predictions select error → assertSelectOk throw", async () => {
+  it("predictions select error → throw 대신 sampleN=0 degrade (cycle 2949 captureFallback)", async () => {
     supabaseMock = makeSupabaseMock({
       schedule: [
         {
@@ -73,9 +73,9 @@ describe("buildMlbTeamFactorAverages", () => {
     });
 
     const { buildMlbTeamFactorAverages } = await import("../buildMlbTeamFactorAverages");
-    await expect(buildMlbTeamFactorAverages("NYY")).rejects.toThrow(
-      /buildMlbTeamFactorAverages predictions .* select failed: syntax error/,
-    );
+    const avg = await buildMlbTeamFactorAverages("NYY");
+    expect(avg.spFip).toBeNull();
+    expect(avg.sampleN).toBe(0);
   });
 
   it("mlb_schedule 빈 rows → EMPTY_MLB_FACTOR_AVERAGES", async () => {

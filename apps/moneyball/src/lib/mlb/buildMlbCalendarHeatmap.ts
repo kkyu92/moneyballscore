@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
 // mlb/calendar/page.tsx 전용 — MLB predictions.is_correct 는 전량 NULL(deriveMlbOutcome.ts
@@ -36,7 +37,12 @@ export async function getMlbMonthHeatmap(
     .select('external_game_id, game_date, status, home_score, away_score')
     .gte('game_date', firstDay)
     .lte('game_date', lastDay);
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'getMlbMonthHeatmap mlb_schedule');
+  let scheduleData: MlbScheduleRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'getMlbMonthHeatmap mlb_schedule'));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/calendar', source: 'getMlbMonthHeatmap mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as MlbScheduleRow[];
   if (scheduleRows.length === 0) return new Map();
 
@@ -50,7 +56,12 @@ export async function getMlbMonthHeatmap(
       'external_game_id',
       scheduleRows.map((s) => s.external_game_id),
     );
-  const { data: predData } = assertSelectOk(predResult, 'getMlbMonthHeatmap predictions');
+  let predData: MlbPredMiniRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(predResult, 'getMlbMonthHeatmap predictions'));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/calendar', source: 'getMlbMonthHeatmap predictions' });
+  }
   const predByExternalId = new Map<string, MlbPredMiniRow>();
   for (const p of (predData ?? []) as MlbPredMiniRow[]) {
     if (p.external_game_id) predByExternalId.set(p.external_game_id, p);

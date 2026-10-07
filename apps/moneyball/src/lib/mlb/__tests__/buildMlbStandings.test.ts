@@ -44,10 +44,12 @@ describe('buildMlbDivisionStandings', () => {
     expect(alEast.every((r) => r.wins === 0 && r.losses === 0)).toBe(true);
   });
 
-  it('select 실패 시 throw (silent drift 회귀 가드)', async () => {
+  it('select 실패 시 throw 대신 전 팀 0-0 degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({ error: { message: 'boom' } });
     const { buildMlbDivisionStandings } = await import('../buildMlbStandings');
-    await expect(buildMlbDivisionStandings()).rejects.toThrow();
+    const result = await buildMlbDivisionStandings();
+    const alEast = result.AL.East;
+    expect(alEast.every((r) => r.wins === 0 && r.losses === 0)).toBe(true);
   });
 
   it('final 경기만 집계 + 승패 정렬 + GB 계산 (BAL/NYY 예시, AL East)', async () => {

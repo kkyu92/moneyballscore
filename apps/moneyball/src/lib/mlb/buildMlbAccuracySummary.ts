@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import {
   type PredRow,
   type Bucket,
@@ -75,7 +76,12 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
     .select('external_game_id, game_date, home_score, away_score')
     .eq('status', 'final');
 
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbAccuracySummary mlb_schedule');
+  let scheduleData: ScheduleFinalRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbAccuracySummary mlb_schedule'));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbAccuracySummary mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
   if (scheduleRows.length === 0) return EMPTY_SUMMARY;
 
@@ -87,7 +93,12 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id));
 
-  const { data: predData } = assertSelectOk(predResult, 'buildMlbAccuracySummary predictions');
+  let predData: PredMiniRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(predResult, 'buildMlbAccuracySummary predictions'));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbAccuracySummary predictions' });
+  }
   const predByExternalId = new Map<string, PredMiniRow>();
   for (const p of (predData ?? []) as PredMiniRow[]) {
     if (p.external_game_id) predByExternalId.set(p.external_game_id, p);

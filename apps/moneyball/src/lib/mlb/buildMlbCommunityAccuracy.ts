@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import { computeMlbCommunityVsAI, type CommunityVsAIResult } from '@/lib/picks/buildCommunityAccuracy';
 
 interface PollRow {
@@ -33,7 +34,12 @@ export async function buildMlbCommunityVsAI(): Promise<CommunityVsAIResult> {
   const supabase = await createClient();
 
   const pollResult = await supabase.from('mlb_pick_poll_events').select('external_game_id, pick');
-  const { data: pollData } = assertSelectOk(pollResult, 'buildMlbCommunityVsAI mlb_pick_poll_events');
+  let pollData: PollRow[] | null;
+  try {
+    ({ data: pollData } = assertSelectOk(pollResult, 'buildMlbCommunityVsAI mlb_pick_poll_events'));
+  } catch (err) {
+    pollData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbCommunityVsAI mlb_pick_poll_events' });
+  }
   const pollRows = (pollData ?? []) as PollRow[];
   if (pollRows.length === 0) return EMPTY;
 
@@ -43,7 +49,12 @@ export async function buildMlbCommunityVsAI(): Promise<CommunityVsAIResult> {
     .eq('status', 'final')
     .not('home_score', 'is', null)
     .not('away_score', 'is', null);
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbCommunityVsAI mlb_schedule');
+  let scheduleData: ScheduleFinalRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbCommunityVsAI mlb_schedule'));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbCommunityVsAI mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
   if (scheduleRows.length === 0) return EMPTY;
 
@@ -54,7 +65,12 @@ export async function buildMlbCommunityVsAI(): Promise<CommunityVsAIResult> {
     .eq('league', 'mlb')
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id));
-  const { data: predData } = assertSelectOk(predResult, 'buildMlbCommunityVsAI predictions');
+  let predData: PredMiniRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(predResult, 'buildMlbCommunityVsAI predictions'));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbCommunityVsAI predictions' });
+  }
   const predRows = (predData ?? []) as PredMiniRow[];
 
   return computeMlbCommunityVsAI(pollRows, scheduleRows, predRows);

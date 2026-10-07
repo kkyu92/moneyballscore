@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES, SMALL_SAMPLE_N, type MlbTeamCode } from '@moneyball/shared';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
 export interface MlbTeamAccuracyRow {
@@ -36,7 +37,12 @@ export async function buildAllMlbTeamAccuracy(): Promise<MlbTeamAccuracyRow[]> {
     .select('external_game_id, home_team_code, away_team_code, home_score, away_score')
     .eq('status', 'final');
 
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildAllMlbTeamAccuracy mlb_schedule');
+  let scheduleData: ScheduleFinalRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildAllMlbTeamAccuracy mlb_schedule'));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildAllMlbTeamAccuracy mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
   if (scheduleRows.length === 0) return [];
 
@@ -48,7 +54,12 @@ export async function buildAllMlbTeamAccuracy(): Promise<MlbTeamAccuracyRow[]> {
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id));
 
-  const { data: predData } = assertSelectOk(predResult, 'buildAllMlbTeamAccuracy predictions');
+  let predData: PredMiniRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(predResult, 'buildAllMlbTeamAccuracy predictions'));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildAllMlbTeamAccuracy predictions' });
+  }
   const predByExternalId = new Map<string, PredMiniRow>();
   for (const p of (predData ?? []) as PredMiniRow[]) {
     if (p.external_game_id) predByExternalId.set(p.external_game_id, p);
@@ -120,7 +131,12 @@ export async function buildMlbMatchupData(): Promise<{
     .select('external_game_id, home_team_code, away_team_code, home_score, away_score')
     .eq('status', 'final');
 
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbMatchupData mlb_schedule');
+  let scheduleData: ScheduleFinalRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbMatchupData mlb_schedule'));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbMatchupData mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
   if (scheduleRows.length === 0) return { matchups: [], homeAway: [] };
 
@@ -132,7 +148,12 @@ export async function buildMlbMatchupData(): Promise<{
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id));
 
-  const { data: predData } = assertSelectOk(predResult, 'buildMlbMatchupData predictions');
+  let predData: PredMiniRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(predResult, 'buildMlbMatchupData predictions'));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbMatchupData predictions' });
+  }
   const predByExternalId = new Map<string, PredMiniRow>();
   for (const p of (predData ?? []) as PredMiniRow[]) {
     if (p.external_game_id) predByExternalId.set(p.external_game_id, p);
@@ -227,7 +248,12 @@ export async function buildMlbTeamBiasAnalysis(): Promise<MlbTeamBiasRow[]> {
     .select('external_game_id, home_team_code, away_team_code, home_score, away_score')
     .eq('status', 'final');
 
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbTeamBiasAnalysis mlb_schedule');
+  let scheduleData: ScheduleFinalRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbTeamBiasAnalysis mlb_schedule'));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbTeamBiasAnalysis mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
   if (scheduleRows.length === 0) return [];
 
@@ -239,7 +265,12 @@ export async function buildMlbTeamBiasAnalysis(): Promise<MlbTeamBiasRow[]> {
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id));
 
-  const { data: predData } = assertSelectOk(predResult, 'buildMlbTeamBiasAnalysis predictions');
+  let predData: PredMiniRow[] | null;
+  try {
+    ({ data: predData } = assertSelectOk(predResult, 'buildMlbTeamBiasAnalysis predictions'));
+  } catch (err) {
+    predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbTeamBiasAnalysis predictions' });
+  }
   const predByExternalId = new Map<string, PredMiniRow>();
   for (const p of (predData ?? []) as PredMiniRow[]) {
     if (p.external_game_id) predByExternalId.set(p.external_game_id, p);

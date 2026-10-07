@@ -6,6 +6,7 @@ import {
   MLB_PRODUCTION_COHORT_RULES,
   type MlbTeamCode,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export interface MlbTeamFactorAverages {
   spFip: number | null;
@@ -91,10 +92,15 @@ export async function buildMlbTeamFactorAverages(
     .from("mlb_schedule")
     .select("external_game_id, home_team_code, away_team_code")
     .or(`home_team_code.eq.${dbTeamCode},away_team_code.eq.${dbTeamCode}`);
-  const { data: scheduleData } = assertSelectOk(
-    scheduleResult,
-    `buildMlbTeamFactorAverages mlb_schedule ${teamCode}`,
-  );
+  let scheduleData: ScheduleRow[] | null;
+  try {
+    ({ data: scheduleData } = assertSelectOk(
+      scheduleResult,
+      `buildMlbTeamFactorAverages mlb_schedule ${teamCode}`,
+    ));
+  } catch (err) {
+    scheduleData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbTeamFactorAverages mlb_schedule' });
+  }
   const scheduleRows = (scheduleData ?? []) as ScheduleRow[];
   if (scheduleRows.length === 0) return EMPTY_MLB_FACTOR_AVERAGES;
 
@@ -122,10 +128,15 @@ export async function buildMlbTeamFactorAverages(
     .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES)
     .in("external_game_id", Array.from(scheduleByExternalId.keys()));
 
-  const { data } = assertSelectOk(
-    predResult,
-    `buildMlbTeamFactorAverages predictions ${teamCode}`,
-  );
+  let data: PredRow[] | null;
+  try {
+    ({ data } = assertSelectOk(
+      predResult,
+      `buildMlbTeamFactorAverages predictions ${teamCode}`,
+    ));
+  } catch (err) {
+    data = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbTeamFactorAverages predictions' });
+  }
 
   const rows = (data ?? []) as unknown as PredRow[];
 

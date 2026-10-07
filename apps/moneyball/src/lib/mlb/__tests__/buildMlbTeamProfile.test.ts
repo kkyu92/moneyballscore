@@ -72,17 +72,20 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
     expect(result).toBeNull();
   });
 
-  it('mlb_schedule select error → assertSelectOk throw', async () => {
+  it('mlb_schedule select error → throw 대신 빈 프로필 degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({
       scheduleError: { message: 'connection refused' },
     });
     const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
-    await expect(buildMlbTeamProfile('LAD')).rejects.toThrow(
-      /buildMlbTeamProfile mlb_schedule select failed: connection refused/,
-    );
+    const profile = await buildMlbTeamProfile('LAD');
+    expect(profile).toBeTruthy();
+    expect(profile?.code).toBe('LAD');
+    expect(profile?.predictedGames).toBe(0);
+    expect(profile?.accuracyRate).toBeNull();
+    expect(profile?.recentGames).toEqual([]);
   });
 
-  it('predictions select error → assertSelectOk throw', async () => {
+  it('predictions select error → throw 대신 빈 집계 degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({
       schedule: [
         {
@@ -99,9 +102,11 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
       predsError: { message: 'syntax error at or near and' },
     });
     const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
-    await expect(buildMlbTeamProfile('LAD')).rejects.toThrow(
-      /buildMlbTeamProfile predictions select failed: syntax error/,
-    );
+    const profile = await buildMlbTeamProfile('LAD');
+    expect(profile?.predictedGames).toBe(0);
+    expect(profile?.verifiedN).toBe(0);
+    expect(profile?.accuracyRate).toBeNull();
+    expect(profile?.recentGames).toEqual([]);
   });
 
   it('mlb_schedule 빈 rows → 빈 프로필 + meta 보존', async () => {
@@ -236,15 +241,14 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
     expect(profile?.battedBallProfile).toBeNull();
   });
 
-  it('mlb_team_stats select error → assertSelectOk throw', async () => {
+  it('mlb_team_stats select error → throw 대신 battedBallProfile null degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({
       schedule: [],
       statsError: { message: 'connection refused' },
     });
     const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
-    await expect(buildMlbTeamProfile('LAD')).rejects.toThrow(
-      /buildMlbTeamProfile mlb_team_stats select failed: connection refused/,
-    );
+    const profile = await buildMlbTeamProfile('LAD');
+    expect(profile?.battedBallProfile).toBeNull();
   });
 
   it('mlb_team_stats row 존재 → battedBallProfile 매핑 (0~100 raw scale 보존, fmtPct 와 다른 스케일)', async () => {

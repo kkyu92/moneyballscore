@@ -53,10 +53,11 @@ describe('getMlbMonthHeatmap', () => {
     expect(result.size).toBe(0);
   });
 
-  it('스케줄 select 실패 시 throw (silent drift 회귀 가드)', async () => {
+  it('스케줄 select 실패 시 throw 대신 빈 Map degrade (cycle 2949 captureFallback)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { getMlbMonthHeatmap } = await import('../buildMlbCalendarHeatmap');
-    await expect(getMlbMonthHeatmap('2026-08-01', '2026-08-31')).rejects.toThrow();
+    const result = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
+    expect(result.size).toBe(0);
   });
 
   it('final 경기는 verified/correct 집계, 미완료 경기는 total 만 증가', async () => {
