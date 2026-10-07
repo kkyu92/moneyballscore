@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): glossary 팩터 banner stale 텍스트 + EN factors 공시 배너 누락 수정 (cycle 2973, 2026-10-07)
+
+진단: 직전8(2965-2972) distinct=4(review-code 5/8), 2-chain lock 미충족. 다른 chain 전부 gap 미근접/저가치. cycle 2972 추천 잔여 스코프(en/ 미러, debug/, dashboard/settings/search/glossary/guide) 선택.
+
+발견 2건: (1) `glossary/page.tsx` 가 recent_form·head_to_head·수비SFR 을 KBO 전용이라 서술 — 실제 placeholder 는 수비SFR·SP xwOBA-against·wOBA 표준편차 (`MLB_PLACEHOLDER_FACTOR_KEYS` 단일 source). recent_form/head_to_head 는 cycle 2353에 이미 실측 연결, methodology 페이지와 모순. (2) `en/mlb/factors/page.tsx` 에 KO 페이지엔 있는 placeholder 공시 배너가 아예 없음 — 영어 독자 공시 누락. 둘 다 수정, typecheck clean, 테스트 29건 PASS.
+
+en/mlb 26개 + debug 8개 + dashboard/settings/search/guide 전수 감사, 그 외 신규 버그 0건.
+
+**plan#29 상태 변화 없음** (`~/.develop-cycle/plans/moneyballscore/29.md`, 만료 2026-10-15) — 사용자 결정(연장/착수/폐기) 여전히 대기 중.
+
+다음 사이클 추천 = 사용자 plan#29 결정 있으면 explore-idea 재개, 없으면 review-code(heavy) 잔여 스코프 재확인 또는 2-chain lock 자연 해제 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): players 리더보드 WAR=0 sentinel 버그 수정 (cycle 2972, 2026-10-07)
 
 진단: 2-chain lock 미충족(직전8 distinct=5). fix-incident/operational-analysis/explore-idea/lotto/info-arch 전부 gap 미근접, design-system 은 cycle 2964 직후라 저가치. review-code(heavy) 가 cycle 2970/2971 추천 잔여 스코프(standings/postseason/wild-card/teams/players-list/seasons/calendar/insights) 보유로 선택.

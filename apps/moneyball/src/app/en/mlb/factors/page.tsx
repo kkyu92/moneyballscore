@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_SHADOW_C_MILESTONES } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_SHADOW_C_MILESTONES } from "@moneyball/kbo-data";
 import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, HOME_ELO_BONUS_WIN_PROB_PCT, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
@@ -228,6 +228,16 @@ function totalWeight(): number {
   return Object.values(MLB_BASE_WEIGHTS).reduce<number>((sum, w) => sum + w, 0);
 }
 
+// MLB_PLACEHOLDER_FACTOR_KEYS(mlb-base.ts) 단일 source — KO factors 페이지와 동일 배너 (cycle 2512 fix 패턴 EN 이식)
+const PLACEHOLDER_ROWS: readonly FactorRow[] = MLB_PLACEHOLDER_FACTOR_KEYS.map(
+  (key) => [...KBO_FACTORS, ...STATCAST_4_FACTORS].find((f) => f.key === key)!,
+);
+const PLACEHOLDER_LABEL_EN = PLACEHOLDER_ROWS.map((f) => f.shortLabel).join(" · ");
+const PLACEHOLDER_WEIGHT_SUM = MLB_PLACEHOLDER_FACTOR_KEYS.reduce(
+  (sum, key) => sum + MLB_BASE_WEIGHTS[key],
+  0,
+);
+
 export default function MlbFactorsHubEn() {
   const allFactors: FactorRow[] = [...KBO_FACTORS, ...STATCAST_4_FACTORS];
   const sum = totalWeight();
@@ -271,6 +281,12 @@ export default function MlbFactorsHubEn() {
         <p className="text-xs text-gray-400 dark:text-gray-500">
           Weight total = {weightPercent(sum)} (including home bonus {weightPercent(MLB_BASE_WEIGHTS.home_elo_bonus)}). Weights defined in{" "}
           <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Model will update after n={V2_PROMOTION_COHORT_N} forward cohort milestone.
+        </p>
+        <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
+          ⚠ {PLACEHOLDER_LABEL_EN} ({MLB_PLACEHOLDER_FACTOR_KEYS.length} factors, {weightPercent(PLACEHOLDER_WEIGHT_SUM)} combined weight) are
+          shown for reference on team/matchup pages but currently feed a team-neutral fixed value into the win-probability
+          calculation above — not yet live (no MLB-specific data source yet; the KBO version uses real measured values).
+          Recent Form, Head-to-Head, and Elo are real measured values that do feed the win-probability calculation.
         </p>
       </header>
 
