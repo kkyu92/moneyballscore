@@ -1,3 +1,15 @@
+## v0.5.62.321 — 2026-10-07 (cycle 2996, fix-incident: health-alert Supabase egress quota 402 known-cause 다운그레이드 SUCCESS)
+
+### fix-incident: `/api/health` checkSupabase() 가 알려진 billing quota 402 를 미지의 장애와 동일 취급 — 29일+ 매시간 ::error:: alert fatigue (cycle 2996, SUCCESS)
+
+- 진단: 직전8(2988-2995) distinct=2(review-code(heavy) 7 + design-system 1) — 2-chain lock 조건 충족, 두 chain 모두 후보 제외. op-analysis gap≥25 충족하나 서비스 REST 호출 직접 재확인 결과 여전히 402(`exceed_egress_quota`) — 차단 유지. fix-incident gap=10(2986)·info-arch gap=20(2976) 둘 다 미근접. lotto cron 산출물(`lotto-picks/2026-10-10.md`+`lotto-results/2026-10-03.md`) 둘 다 신선. explore-idea saturation 13/15 충족하나 plan#29 는 cycle 2969 checkpoint 와 동일 날짜·동일 상태(포스트시즌 트리거 확정 충족 유지, 트래픽 트리거 402 로 여전히 확인 불가) — 신규 정보 없어 3번째 재측정 skip(cycle 2953 lesson 정합). polish-ui/design-system 모두 최근 cycle 에서 전수 재검증 완료(gap 0) — 신규 스코프 없음.
+- `.github/workflows/health-alert.yml`/`runtime-error-alert.yml` 재검토 중 `checkPipeline()`/`kbo_api` 는 이미 "unknown 상태 → warning(degraded), alert fatigue 회피" 패턴을 쓰는데 `checkSupabase()` 만 모든 에러를 `status:'error'`(→ overall='fail' → health-alert.yml 매시간 `::error::` exit 1)로 획일 처리 — Supabase egress quota 402(cycle 2939~, 사용자 billing 조치 대기, 발견 시점 29일+ 경과)가 매시간 "장애"로 오탐지되며 실제 신규 장애와 구분 불가능한 noise 누적 확인.
+- 수정: `checkSupabase()` catch 블록에서 에러 메시지에 `exceed_egress_quota` 포함 시 `status:'warning'`(detail 에 "user action pending" 명시)로 분기 — overall 이 'fail' 대신 'degraded' 로 낮아져 health-alert.yml 이 `::warning::`(exit 0) 처리. 그 외 Supabase 에러(connection refused 등)는 기존 `status:'error'`/'fail' 그대로 유지 — 알려진 단일 원인만 선택적으로 다운그레이드.
+- 테스트: `route.test.ts` 에 "supabase egress quota 402 → degraded + 200(fail 아님)" 케이스 신규 추가(에러 메시지 전문 포함, status/overall/checks.supabase.status/detail 전부 검증). 기존 "connection refused → fail" 케이스는 변경 없이 그대로 통과 확인(선택적 다운그레이드 검증).
+- 검증: `tsc --noEmit` clean, eslint 0 warning, `vitest run` 585/585 파일 · 4618/4618 테스트 전부 통과(신규 1건 포함). pre-push hook(lint+type-check+version-sync-guard) 통과, push 완료.
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음, 사용자 결정 여전히 대기). **Supabase egress quota 장애 지속**(cycle 2939~) — 본 fix 는 근본 원인(billing) 해결이 아니라 alert 운영 품질 개선(신규 장애와 기존 장애 구분)만 담당.
+
 ## v0.5.62.320 — 2026-10-07 (cycle 2995, design-system: accent 색상 토큰 design-tokens.ts 부재 보강 SUCCESS)
 
 ### design-system: DESIGN.md Accent(#c5a23e/#e2c96b) 문서화됐으나 TS export 레지스트리 누락 — 3곳 분산 하드코딩 흡수 (cycle 2995, SUCCESS)

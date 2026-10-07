@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — fix-incident: health-alert Supabase egress quota 402 known-cause 다운그레이드 (cycle 2996, 2026-10-07)
+
+진단: 2-chain lock 발동(직전8 distinct=2: review-code(heavy)7+design-system1, 둘 다 후보 제외). op-analysis gap≥25 나 service REST 재확인 402 여전 차단. fix-incident(10)/info-arch(20) 미근접. lotto cron 둘 다 신선. explore-idea saturation 13/15 충족하나 plan#29 cycle 2969 와 동일 날짜·동일 상태라 3회차 재측정 skip(신규 정보 0). polish-ui/design-system 최근 전수 재검증 완료(gap 0).
+
+`/api/health` checkSupabase() 가 Supabase egress quota 402(cycle 2939~, billing 조치 대기, 29일+ 경과)를 모든 미지 장애와 동일하게 `status:'error'` 처리 — health-alert.yml 이 매시간 `::error::` exit 1 반복, 실제 신규 장애와 구분 불가능한 alert fatigue 누적. `checkPipeline()`/`kbo_api` 는 이미 "알려진 저위험 상태 → warning" 패턴 보유했으나 `checkSupabase()` 만 미적용이었던 부분 흡수.
+
+- `checkSupabase()` catch 에서 에러 메시지에 `exceed_egress_quota` 포함 시 `status:'warning'`(detail에 "user action pending" 명시) 분기 추가 — overall='fail' 대신 'degraded', health-alert.yml 이 `::warning::`(exit 0) 처리. 그 외 Supabase 에러는 기존 error/fail 그대로.
+- `route.test.ts` 에 신규 케이스 추가(402 → degraded+200), 기존 "connection refused → fail" 케이스 불변 통과 확인.
+- 검증: tsc/eslint clean, vitest 585/585 파일·4618/4618 테스트 통과(신규 1건 포함). commit 524a327c, push 완료(단일 논리 단위, PR 생략).
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음, 사용자 결정 여전히 대기). **Supabase egress quota 장애 자체는 지속**(cycle 2939~, billing 조치 필요) — 본 fix 는 alert 운영 품질 개선만 담당, 근본 해결 아님.
+
+다음 사이클 추천 = 2-chain lock 자연 해제 후 review-code(heavy)/design-system 복귀, 또는 fix-incident gap 재확인(health-alert 실제 ::warning:: 전환 확인), 또는 plan#29 expiry(2026-10-15) 임박 최종 결정.
+
 ## 🟢 SUCCESS — design-system: accent 색상 토큰 design-tokens.ts 부재 보강 (cycle 2995, 2026-10-07)
 
 진단: 직전8(2987-2994) distinct=1(review-code(heavy) 100%, lock 충족) — review-code(heavy) 제외. fix-incident(9)/info-arch(19)/lotto(cron 둘 다 신선) 전부 미근접. op-analysis 는 Supabase egress quota 402 직접 재확인 지속 차단. DESIGN.md mtime 35일+ trigger + design-system 직전 발화(cycle 2943) 52 사이클 전 — 자연 선택.
