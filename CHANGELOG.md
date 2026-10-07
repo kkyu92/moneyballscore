@@ -1,4 +1,15 @@
-## v0.5.62.301 — 2026-10-07 (cycle 2976, info-architecture-review: 30-cycle gap checkpoint 10연속 "현 IA 충분" 재확정 RETRO-ONLY)
+## v0.5.62.302 — 2026-10-07 (cycle 2977, review-code(heavy): predictor.ts sp_fip/sp_xfip 비대칭-null 중립가드 누락 수정 SUCCESS)
+
+### review-code(heavy): engine/factors/context/backtest 신규 스코프 감사 — predictor.ts 비대칭 data-gap 버그 1건 수정 (cycle 2977, SUCCESS)
+
+- 진단: op-analysis gap=125(마지막 발화 cycle 2852, trigger 25 대폭 초과) + lotto gap=105(마지막 발화 2872, trigger 30 초과) + fix-incident gap=31(마지막 발화 2946, trigger 20 초과) 3종 동시 충족. 직전8(2969-2976) distinct=4, 2-chain lock 미충족. open issue 0건, approved plan 0/23(plan#29 여전히 `spec_only_deferred`, status≠approved 라 자동 매핑 대상 아님).
+- op-analysis(lite) 우선 시도 — `scripts/op-analysis-ce-cohort.ts` 실행 시 Supabase `exceed_egress_quota` restriction 재확인(cycle 2939~ 지속, 사용자 billing 조치 미이행, cycle 2970 fix-incident 재확인치와 동일 — 신규 incident 아님). DB 의존 측정 이번 사이클도 불가.
+- fix-incident 도 동일 egress quota root cause 재확인에 그칠 가능성 높아 저가치 판단, review-code(heavy) 가 cycle 2974/2975 retro 가 추천한 잔여 스코프(`packages/kbo-data/src/{engine,features,factors,context,backtest,analytics}`) 선택.
+- subagent 위임 전수 감사(predictor.ts/form.ts/game-record-features.ts/park-weather.ts/umpire-sz.ts/agent-context.ts/measurement.ts/domain.ts/metrics.ts/backtest 핵심 2개/stale-data-snapshot.ts) 결과 1건 발견: **`predictor.ts` sp_fip/sp_xfip** — `input.{home,away}SPStats?.fip ?? 4.50` 패턴이 `findPitcher()` null 매칭 실패(trade 등 name/team mismatch) 시 한쪽만 결측이어도 리그평균 4.50 으로 대체 후 실측값과 비교 — WAR(cycle 1904)/SFR(cycle 2419) 가 이미 가드하는 "비대칭 0/null → 편향 비교" 동일 버그 클래스인데 sp_fip/sp_xfip 만 v1.5 원본 그대로 미보강 상태였음. 결과값이 정확히 0.5 가 아니라 `countNeutralFactors` 희소-factor alert 에도 안 걸림.
+- 수정: WAR/SFR 과 동일한 `(bothPresent) ? normalize(...) : 0.5` 가드 적용. typecheck clean, kbo-data 94 files/1227 tests PASS, 전체 585 files/4613 tests PASS. PR #3137 squash 머지(`af859d47`).
+- 나머지 감사 대상 파일 전부 정상(이미 neutral-guard/NaN-safe 패턴 적용 중, empty catch 0건, 신규 dead code 0건). WAR/SFR 가드 간 sentinel test 불일치(`>0` vs `!==0`)는 저신뢰 관찰로만 박제, 실측 데이터 분포 확인 전까지 수정 보류.
+
+
 
 ### info-architecture-review: 54-cycle gap 체크포인트 — 신규 라우트 6건 발견, ship 시점 배선 완료 확인 (cycle 2976, RETRO-ONLY)
 

@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): predictor.ts sp_fip/sp_xfip 비대칭-null 중립가드 누락 수정 (cycle 2977, 2026-10-07)
+
+진단: op-analysis gap=125(마지막 2852)·lotto gap=105(마지막 2872)·fix-incident gap=31(마지막 2946) 3종 동시 초과 충족. op-analysis(lite) 시도 시 Supabase egress quota restriction 재확인(cycle 2939~ 지속, 신규 아님) — DB 측정 불가. fix-incident 도 동일 root cause 재확인뿐일 가능성 높아 review-code(heavy) 선택, cycle 2974/2975 추천 잔여 스코프(engine/features/factors/context/backtest/analytics) 감사.
+
+발견: predictor.ts sp_fip/sp_xfip 가 `?? 4.50` 로 결측 pitcher stats 를 리그평균 대체 — 한쪽만 결측이면 실측값과 비대칭 비교되어 편향된 factor 생성. WAR/SFR 은 이미 이 버그 클래스 가드(cycle 1904/2419) 적용 중인데 sp_fip/sp_xfip 만 v1.5 원본 그대로 누락 상태였음. 결과값이 정확히 0.5 아니라 희소-factor alert 도 못 잡음.
+
+수정: WAR/SFR 과 동일 `(bothPresent) ? normalize : 0.5` 가드 적용. typecheck clean, kbo-data 94/1227 PASS, 전체 585/4613 PASS. PR #3137 머지(`af859d47`).
+
+**plan#29 상태 변화 없음** (`~/.develop-cycle/plans/moneyballscore/29.md`, 만료 2026-10-15) — 사용자 결정 여전히 대기.
+
+다음 사이클 추천 = plan#29 결정 있으면 explore-idea, 없으면 Supabase egress quota 장기화 모니터(사용자 billing 조치 대기) 또는 review-code(heavy) 잔여 scraper/mlb-factor 스코프.
+
 ## 🔵 RETRO-ONLY — info-architecture-review: 30-cycle gap checkpoint 10연속 "현 IA 충분" 재확정 (cycle 2976, 2026-10-07)
 
 진단: info-arch gap=54(trigger 30 대폭 초과, 마지막 발화 cycle 2922). 직전8(2968-2975) distinct=4, 2-chain lock 미충족이나 review-code(heavy) 5연속 streak 다양성 redirect 겸 선택. fix-incident/operational-analysis/lotto(cron 건강) 전부 gap 미근접. plan#29 Tier4 대기 지속(만료 2026-10-15).
