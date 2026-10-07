@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — info-architecture-review(lite): 헤더/푸터/sitemap/breadcrumb 전체 감사, 갭 0건 (cycle 2955, 2026-10-07)
+
+진단: op-analysis gap 31·info-arch gap 33 둘 다 trigger 충족. op-analysis 는 `exceed_egress_quota` 실측 재확인(16 cycle 경과, 변화 없음) — Supabase 비의존인 info-arch 를 우선 선택.
+
+감사 결과 — 신규 라우트 25건(mtime -7)은 전부 기존 파일 touch (assertSelectOk 작업 흔적), breadcrumb 누락 18건은 전부 legitimate exclusion(debug 내부용 8 / 계정·루트 3 / noindex stub 1 / redirect-only 6), sitemap count 불일치(89 vs 111)는 동적 라우트 루프 생성 구조상 정상, Header 메가메뉴·Footer 10컬럼 전수 대조 결과 신규 라우트 전부 허브 페이지 경유 2차 진입으로 의도된 설계. 실제 갭 0건 — cycle 2953 이 언급한 "배선 완료" 상태의 2차 독립 검증. 코드 변경 없음.
+
+다음 info-arch 재진단 = 30-cycle gap 자연 재도달(cycle 2985 근방) 또는 신규 라우트 실제 추가 시.
+
 ## 🔔 사용자 결정 필요 — plan #29 (로그인/커뮤니티) expiry 2026-10-15 임박 (cycle 2954, 2026-10-07)
 
 plan #29(회원 인증+커뮤니티, `~/.develop-cycle/plans/moneyballscore/29.md`)가 2026-10-15 만료 예정(8일 남음). risk=3(인증/세션/RLS) + 자율 가능=no(인증 방식·커뮤니티 범위 미정) 조합이라 본 develop-cycle 은 자율 구현 대상에서 계속 제외 — 사용자 결정 필요:

@@ -1,3 +1,14 @@
+## v0.5.62.280 — 2026-10-07 (cycle 2955, info-architecture-review(lite): 헤더/푸터/sitemap/breadcrumb 전체 감사 — 갭 0건 확인)
+
+### info-architecture-review(lite): IA 건강도 전체 감사 — 실제 갭 0건 (cycle 2955, RETRO-ONLY)
+
+- 진단: open issue 0, approved plan 0/23(전부 completed/archived/deferred, plan #29 는 risk=3+자율불가 Tier4 보류 지속). 직전8 distinct=4(2-chain lock 미충족). op-analysis gap 31(≥25)·info-arch gap 33(≥30) 둘 다 trigger 충족. op-analysis 는 `pnpm tsx scripts/op-analysis-ce-cohort.ts` 실측 재확인 — `exceed_egress_quota` 여전히 지속(cycle 2939~, 16 cycle 경과, 사용자 billing 미조치) → Supabase 의존이라 또 동일 결론(신규 정보 0) 반복 예상, 저가치 판단. info-arch 는 Supabase 비의존(파일/코드 grep 기반)이라 우선 선택.
+- `find apps/moneyball/src/app -name page.tsx -mtime -7` 25건 나왔으나 전수 확인 결과 신규 라우트 아님 — 최근 assertSelectOk degrade 작업(cycle 2948/2950/2952) 이 다수 page.tsx 를 단순 touch 한 흔적, false positive.
+- breadcrumb 누락 18개 라우트 전수 분류: debug/* 8개(내부 전용) / login·settings·home 3개(계정·루트, 구조상 불필요) / community 1개(noindex stub, 미연결 placeholder) / reviews·mlb/reviews weekly·monthly(ko/en) 6개(redirect-only 308 페이지 — sitemap.ts 주석이 이미 "redirect chain 이라 sitemap 제외" 명시, breadcrumb 도 동일 논리로 불필요). 18건 전부 legitimate exclusion — 실제 갭 0건.
+- sitemap.ts(507줄) vs page.tsx count(89 vs 111) 불일치는 동적 라우트(날짜별 insights/games, matchup pairs, lotto archive 등)가 루프로 생성되는 구조라 grep count 자체가 부정확한 지표 — 코드 확인 결과 기존 설계대로 정상.
+- Header.tsx(메가메뉴) + Footer.tsx(10컬럼) 전수 대조 — 신규 라우트(teams/[code]/recent, mlb/games/[date], insights/series 등) 전부 허브 페이지(teams/[code], mlb, insights) 경유 2차 진입 경로로 설계됐고 1차 네비게이션(헤더/푸터)엔 허브만 노출 — 의도된 구조, 누락 아님.
+- 결론: IA 건강도 양호 유지 확정(cycle 2953 review-code(heavy) retro 가 언급한 "헤더/푸터/sitemap 즉시 배선 완료" 상태의 2차 독립 검증). 코드 변경 0. 다음 info-arch 재진단은 30-cycle gap 자연 재도달 시(cycle 2985 근방) 또는 신규 라우트 실제 추가 시.
+
 ## v0.5.62.279 — 2026-10-07 (cycle 2954, explore-idea(lite): plan #29 재평가 — expiry 임박 사용자 결정 플래그)
 
 ### explore-idea(lite): plan #29(로그인/커뮤니티) checkpoint 갱신 — expiry 2026-10-15 임박, 사용자 결정 요청 (cycle 2954, PARTIAL)
