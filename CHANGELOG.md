@@ -1,3 +1,14 @@
+## v0.5.62.313 — 2026-10-07 (cycle 2988, review-code(heavy): EN MLB reviews 페이지 공유버튼 한글 라벨 노출 수정 SUCCESS)
+
+### review-code(heavy): components/share·live 신규 축 감사 — EN 페이지 ShareButtons isEn 누락 수정 (cycle 2988, SUCCESS)
+
+- 진단: 직전8(2980-2987) distinct=3(review-code(heavy)6+fix-incident1+design-system(lite)1), 2-chain lock 미충족. fix-incident gap=2·op-analysis gap=20(미근접, Supabase egress quota 402 장애 재확인 결과 cycle 2939~ 지속 변화 없음)·info-arch gap=12·lotto gap=9 전부 미근접. explore-idea saturation 13/15 충족하나 organic idea 0(open issue 0, approved plan 0건, plan#29 Tier4 불변·만료 2026-10-15 8일 남음) 지속 — 과거 패턴 동일 사유로 skip. open PR 전수 확인(dependabot 8건) — 전부 `check` CI green, Vercel preview만 rate-limit(정상 운영 이슈 아님) — fix-incident 액션 불필요. git log 제목 grep 으로 `components/share`(0회)·`components/live`(0회) 완전 미탐색 확인 → 직접 read.
+- **발견**: `ShareButtons.tsx`(180줄)는 `isEn` prop 으로 버튼 라벨/aria-label 전환(한글↔영문) 지원하는데, `/en/mlb/matchup`·`/en/mlb/games` 2개 EN 페이지는 `isEn` 배선돼있었지만 `/en/mlb/reviews/misses`·`/en/mlb/reviews/monthly/[month]`·`/en/mlb/reviews/weekly/[week]` 3개 EN 페이지는 `isEn` prop 자체가 누락 — 영문 리뷰 페이지인데 공유 버튼이 "공유"/"Twitter에 공유"/"링크 복사" 한글로 렌더되는 실사용자 가시 버그. `LiveScoreboard.tsx`/`use-kbo-scores.ts` 는 로직·에러 처리 정합 확인(이상 없음).
+- 3개 파일에 `isEn` prop 추가 + 회귀 테스트 3건(`<ShareButtons ... isEn ... />` 패턴 검증, misses 는 신규 `__tests__/` 디렉토리 생성).
+- 검증: type-check(4/4) clean, lint 0 warning, test 585/585 files·4613/4613 통과(신규 테스트 3건 반영), production build 성공. commit 26f6452e, push + CI green 실측 확인(`gh run list` completed/success). 일반 커밋(PR 아님) — R7 머지 대상 아님.
+
+다음 사이클 추천 = plan#29 사용자 결정(만료 2026-10-15, 8일 남음, 임박) 또는 Supabase egress quota 장애 재확인(cycle 2939~ 지속) 또는 2-chain lock 자연 해제 후 review-code(heavy) 잔여 스코프(components/insights, components/ui 세부) 재탐색.
+
 ## v0.5.62.312 — 2026-10-07 (cycle 2987, review-code(heavy): mlb_combined_notify 죽은 코드 제거 + placeholder stale ETA 텍스트 수정 SUCCESS)
 
 ### review-code(heavy): components/layout·notify·search 신규 축 감사 — mlb_combined_notify 죽은 코드 제거 + ETA 텍스트 수정 (cycle 2987, SUCCESS)

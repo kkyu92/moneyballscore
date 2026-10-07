@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): EN MLB reviews 페이지 공유버튼 한글 라벨 노출 수정 (cycle 2988, 2026-10-07)
+
+진단: 직전8(2980-2987) distinct=3, 2-chain lock 미충족. fix-incident/op-analysis/info-arch/lotto gap 전부 미근접. explore-idea saturation 13/15 충족하나 organic idea 0(plan#29 Tier4 불변) 지속. open PR 8건(전부 dependabot) CI check green, Vercel preview rate-limit만(실제 이슈 아님). `components/share`·`components/live` 완전 미탐색 확인 → 직접 read.
+
+발견: `ShareButtons.tsx` 의 `isEn` prop 이 `/en/mlb/matchup`·`/en/mlb/games` 에는 배선됐지만 `/en/mlb/reviews/misses`·`monthly/[month]`·`weekly/[week]` 3개 EN 페이지엔 누락 — 영문 페이지인데 공유 버튼이 "공유"/"링크 복사" 한글로 렌더되는 실사용자 가시 버그. 3곳 모두 `isEn` 추가 + 회귀 테스트 3건.
+
+검증: type-check/lint clean, test 585/585·4613/4613 통과, build green. commit 26f6452e, push + CI green 실측 확인. 일반 커밋(PR 아님).
+
+**plan#29 상태 변화 없음**(만료 2026-10-15, 8일 남음) — 사용자 결정 여전히 대기. **Supabase egress quota 장애 지속**(cycle 2939~, 사용자 billing 조치 필요).
+
 ## 🟢 SUCCESS — review-code(heavy): mlb_combined_notify 죽은 코드 제거 + placeholder ETA 텍스트 수정 (cycle 2987, 2026-10-07)
 
 진단: 직전8(2979-2986) distinct=4, 2-chain lock 미충족. fix-incident(gap=1)/op-analysis(egress quota 402 지속)/explore-idea(plan#29 Tier4 불변)/lotto/info-arch/design-system 전부 미근접 또는 저가치. 과거 review-code(heavy) commit 제목 grep 으로 `components/layout`(2)·`notify`(3)·`search`(5) 저피감사 확인 → subagent 위임 전수 read.
