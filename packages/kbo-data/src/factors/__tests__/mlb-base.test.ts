@@ -70,10 +70,18 @@ describe('mlb-base.computeMlbProbability', () => {
     expect(p).toBeGreaterThan(0.5);
   });
 
-  it('returns 0.5 (NaN clamp) when input contains NaN', () => {
+  it('returns in-range probability when input contains NaN (outer clamp holds)', () => {
     const broken = { ...sampleInput, sp_fip: { home: NaN, away: 4.0 } };
     const p = computeMlbProbability(broken);
     expect(p).toBeGreaterThanOrEqual(0.15);
     expect(p).toBeLessThanOrEqual(0.85);
+  });
+
+  it('NaN on one side of a paired stat is neutral, not a biased skew (cycle 2980)', () => {
+    // sp_fip.home=NaN should behave like sp_fip being equal (contributes 0),
+    // NOT like home=0 vs away=4.0 (which would be a ~48pt skew toward home).
+    const withNaN = { ...sampleInput, sp_fip: { home: NaN, away: 4.0 } };
+    const equalSpFip = { ...sampleInput, sp_fip: { home: 3.0, away: 3.0 } };
+    expect(computeMlbProbability(withNaN)).toBeCloseTo(computeMlbProbability(equalSpFip), 6);
   });
 });

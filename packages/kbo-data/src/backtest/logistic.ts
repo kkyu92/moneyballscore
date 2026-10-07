@@ -58,8 +58,11 @@ export const FEATURE_NAMES = ['eloDiff/400', 'formDiff', 'h2hShift', 'parkShift/
 
 /**
  * GameFeatures → wOBA/FIP/SFR 포함 확장 벡터. Wayback 시즌 말 stats
- * 복원된 시즌에만 사용. stat 누락 시 0 (중립) — 단 시즌 단위로 train
- * 하므로 누락 시즌 전체를 필터링하는 편이 안전.
+ * 복원된 시즌에만 사용. 양쪽 다 있을 때만 diff 계산, 한쪽만 누락 시
+ * 0 (진짜 중립) — seasonStats 는 팀×시즌 단위 lookup 이라 한쪽 팀만
+ * 백필 누락될 수 있음 (predictor.ts/mlb-pipeline.ts 와 동일 asymmetric-null
+ * 버그 클래스, cycle 2977/2978). 단, 시즌 단위로 train 하므로 누락 시즌
+ * 전체를 필터링하는 편이 더 안전.
  *
  * 스케일링 근거 (2022-2024 관측):
  *   wOBA diff: ±0.04 (최대)    → *20  → ±0.8
@@ -68,10 +71,19 @@ export const FEATURE_NAMES = ['eloDiff/400', 'formDiff', 'h2hShift', 'parkShift/
  */
 export function vectorizeExtended(f: GameFeatures): number[] {
   const base = vectorize(f);
-  const wobaDiff = ((f.homeWoba ?? 0) - (f.awayWoba ?? 0)) * 20;
+  const wobaDiff =
+    f.homeWoba != null && f.awayWoba != null
+      ? (f.homeWoba - f.awayWoba) * 20
+      : 0;
   // FIP 는 낮을수록 좋음 — home-good 방향 맞추기 위해 away - home
-  const fipDiff = ((f.awayFip ?? 0) - (f.homeFip ?? 0)) / 2;
-  const sfrDiff = ((f.homeSfr ?? 0) - (f.awaySfr ?? 0)) / 20;
+  const fipDiff =
+    f.homeFip != null && f.awayFip != null
+      ? (f.awayFip - f.homeFip) / 2
+      : 0;
+  const sfrDiff =
+    f.homeSfr != null && f.awaySfr != null
+      ? (f.homeSfr - f.awaySfr) / 20
+      : 0;
   return [...base, wobaDiff, fipDiff, sfrDiff];
 }
 

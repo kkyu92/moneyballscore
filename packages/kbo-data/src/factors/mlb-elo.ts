@@ -17,6 +17,14 @@ import { ELO_DIVIDER, ELO_NEUTRAL, HOME_ELO_BONUS } from '@moneyball/shared';
  * heavy backtest 증거 없이 임의 변경 금지 — CLAUDE.md "데이터로만 이야기" 룰).
  */
 export const MLB_ELO_K = 4;
+/**
+ * 실제로 안 쓰임 — replayMlbGames/computeMlbEloRatings/computeMlbEloHistory 전부
+ * 단일 k 를 전 경기에 동일 적용(기본 MLB_ELO_K), postseason 여부로 분기하는 호출
+ * 경로가 리포 어디에도 없음(cycle 2980 확인). mlb_schedule 에 game_type/postseason
+ * 구분 컬럼 자체가 없어 분기 불가 — 추가하려면 스크래퍼(StatsAPI gameType 필드)
+ * + 마이그레이션 선행 필요. 참조용 상수로 보존(출처 인용 유지), 호출자 추가 전까진
+ * 상수값 변경·삭제 금지.
+ */
 export const MLB_ELO_K_POSTSEASON = 6;
 
 interface MlbEloUpdateResult {

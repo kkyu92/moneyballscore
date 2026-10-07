@@ -69,7 +69,12 @@ function pairedOrNeutral(
   awayVal: number | null | undefined,
   fallback: number,
 ): { home: number; away: number } {
-  if (homeVal == null || awayVal == null) {
+  // null/undefined 뿐 아니라 NaN (파싱 실패 등 실제 관측된 사례, cycle 2975
+  // kbo-live.ts/kbo-pitcher.ts) 도 결측과 동일 취급 — NaN 은 `!= null` 통과라 놓쳤었음.
+  if (
+    homeVal == null || awayVal == null ||
+    !Number.isFinite(homeVal) || !Number.isFinite(awayVal)
+  ) {
     return { home: fallback, away: fallback };
   }
   return { home: homeVal, away: awayVal };

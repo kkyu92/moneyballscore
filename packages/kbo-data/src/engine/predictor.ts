@@ -14,6 +14,10 @@ import { MetricRegistry, type MetricDefinition } from '../context/metrics';
  * SFR 등 KBO stat은 평균 대비 상대값으로 음수 가능 — cycle 207 버그 수정.
  */
 function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): number {
+  // 한쪽이라도 non-finite(NaN 포함) 면 중립 — bothPresent 류 호출부 가드(cycle 2977)가
+  // null/undefined 만 걸러 NaN 은 통과시켰고, NaN 은 그대로 diff/total 에 섞여 전체
+  // homeWinProb 를 NaN cascade 시킬 수 있었음 (clampWinnerProb(NaN) = NaN, 미차단).
+  if (!Number.isFinite(homeVal) || !Number.isFinite(awayVal)) return 0.5;
   if (homeVal === 0 && awayVal === 0) return 0.5;
   const total = Math.abs(homeVal) + Math.abs(awayVal);
   if (total === 0) return 0.5;
