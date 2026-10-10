@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { shortTeamName, type TeamCode } from '@moneyball/shared';
+import { shortTeamName, type TeamCode, COMMUNITY_DIVERGE_MIN, MIN_POLL_TOTAL } from '@moneyball/shared';
 
 function eulReul(name: string): string {
   const code = name.charCodeAt(name.length - 1);
@@ -33,7 +33,7 @@ export function DivergenceChip({ game }: Props) {
   const communityPct = game.communityHomePct >= 50 ? game.communityHomePct : 100 - game.communityHomePct;
   const aiPct = game.aiHomePct >= 50 ? game.aiHomePct : 100 - game.aiHomePct;
 
-  if (delta < 20 || game.communityTotal < 3) return null;
+  if (delta < COMMUNITY_DIVERGE_MIN || game.communityTotal < MIN_POLL_TOTAL) return null;
 
   return (
     <Link

@@ -1,5 +1,6 @@
 'use client';
 
+import { ACCURACY_BASELINE, ACCURACY_BASELINE_PCT } from '@moneyball/shared';
 import type { WeeklyGroup } from '@/lib/picks/buildPicksStats';
 
 interface Props {
@@ -55,7 +56,7 @@ export function PicksTrendChart({ groups }: Props) {
 
   const mySegments = toPolylineSegments(myPoints);
   const aiSegments = toPolylineSegments(aiPoints);
-  const midY = PAD_T + chartH * 0.5;
+  const midY = PAD_T + chartH * ACCURACY_BASELINE;
 
   const labels = sorted.map((g) => {
     // "5월 11일~17일" → "5/11~"
@@ -89,7 +90,7 @@ export function PicksTrendChart({ groups }: Props) {
         aria-label="주차별 픽 적중률 추이 차트"
         role="img"
       >
-        {/* 50% 기준선 + 레이블 */}
+        {/* ACCURACY_BASELINE(50%) 기준선 + 레이블 */}
         <line
           x1={PAD_L} y1={midY} x2={W - PAD_R} y2={midY}
           strokeWidth={0.5} strokeDasharray="3,3"
@@ -100,7 +101,7 @@ export function PicksTrendChart({ groups }: Props) {
           fontSize={7} textAnchor="start"
           className="fill-gray-300 dark:fill-gray-600"
         >
-          50%
+          {ACCURACY_BASELINE_PCT}%
         </text>
         {/* AI 선 */}
         {aiSegments.map((pts, i) => (
