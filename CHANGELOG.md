@@ -1,3 +1,14 @@
+## v0.5.62.332 — 2026-10-10 (cycle 3012, review-code(heavy): components/dashboard/ 전수 감사, baseline 상수 drift + dead code 수정 SUCCESS)
+
+### review-code(heavy): `components/dashboard/` 전수 read — ACCURACY_BASELINE_PCT 상수 drift + ChartTooltip dead code (cycle 3012, SUCCESS)
+
+- 진단: 직전8(3004-3011) distinct=4(review-code(heavy)5+fix-incident1+lotto(lite)1+info-architecture-review1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24(전부 completed/spec_only/archived). fix-incident gap=3/20·info-arch gap=5/30·lotto gap=2/30 전부 미근접. op-analysis gap≥25 충족하나 egress quota 402 billing block 지속(cycle 2968/3004/3007/3008 동일 결론) 재확인 skip. explore-idea saturation 13/15 충족하나 organic idea 부재(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) skip. cycle 3010 추천대로 `components/dashboard/`(17파일, 39일 미커밋 — 후보 디렉토리 중 최장기) 선택.
+- subagent 위임 전수 read 결과 2건 실제 수정: (1) `AccuracyChart`/`DailyAccuracyChart`/`ConfidenceBucketChart`/`TeamPerformanceChart` 4개가 `ACCURACY_BASELINE_PCT`(packages/shared, 0.5 baseline 의 % 파생 — "UI 색상 threshold" 용도로 명시 설계됨) 대신 리터럴 `50` 하드코딩 — `RollingAccuracyChart`/`WinnerProbBucketChart`/`WeeklyTrendMini` 는 이미 상수 참조. `ACCURACY_BASELINE` 튜닝 시 7개 chart 중 4개 silent stale 위험 — registry-vs-literal silent drift family 패턴(BrierTrendChart 주석에 wave-255/257/260 박제 사례와 동일 class). 4개 파일 전부 상수 참조로 통일.
+- (2) `ChartTooltip.tsx` 의 `title` prop + `formatRows` 미지정시 fallback 분기 + `formatNumber` 헬퍼 — 리포 전역 호출부 13개(dashboard 8 + matchup/players/accuracy/teams 5) 전수 확인, 전부 `formatRows` 지정 + `title` 미사용(dead code 확정). `formatRows` 를 필수 prop 승격, fallback 분기·헬퍼·미사용 `title` 제거.
+- 스코프 안 "cycle-3010 버그 class"(KBO 10팀 하드코딩이 MLB 30팀에서 깨지는 패턴) 재발 여부 확인 — `components/dashboard/` 대부분은 KBO 전용 라우트에만 연결(MLB 는 별도 `components/accuracy/MlbAccuracyDashboard.tsx` 가 `AccuracySummary`/`RollingAccuracyChart`/`WinnerProbBucketChart` 만 공유 소비, 셋 다 team/rank 순회 없음) — 본 스코프엔 해당 버그 class 미존재 확인.
+- `ScoringRuleDayHeatmap`/`CohortComparisonHeatmap` 색상 tier 차이(3-tier brand/yellow/red vs 4-shade brand-only, red 미표시) 1건 관찰 — 두 컴포넌트는 "자매 view"(요일축/주차축)로 문서화됐을 뿐 색상 체계 동일성은 주장하지 않아(실제 "동일 패턴" 문구는 BrierTrendChart 참조, 색상 tier 무관) 오탐으로 판단, 수정 보류(hypothetical-scenario-fix 회피 원칙).
+- 검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 585/585 파일·4619/4619 테스트 PASS.
+
 ## v0.5.62.331 — 2026-10-10 (cycle 3010, review-code(heavy): components/reviews/ 전수 감사, MLB 30팀 sort-cap 버그 수정 SUCCESS)
 
 ### review-code(heavy): `components/reviews/` 전수 read — monthly team-stats 표본순 정렬 20-cap 버그 (cycle 3010, SUCCESS)

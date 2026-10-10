@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/dashboard/ 전수 감사, baseline 상수 drift + dead code 수정 (cycle 3012, 2026-10-10)
+
+진단: 직전8(3004-3011) distinct=4 — 2-chain lock 미충족. fix-incident gap=3/20·info-arch gap=5/30·lotto gap=2/30 전부 미근접. op-analysis gap≥25 충족하나 egress quota 402 지속 재확인 skip(cycle 2968/3004/3007/3008 동일). explore-idea saturation 13/15 나 organic idea 부재 skip. cycle 3010 추천대로 `components/dashboard/`(17파일, 39일 미커밋 최장기) 선택.
+
+subagent 위임 전수 read → 실제 수정 2건: (1) `AccuracyChart`/`DailyAccuracyChart`/`ConfidenceBucketChart`/`TeamPerformanceChart` 가 `ACCURACY_BASELINE_PCT` 상수 대신 리터럴 50 하드코딩 — 나머지 3개(RollingAccuracyChart/WinnerProbBucketChart/WeeklyTrendMini)는 이미 상수 참조, 7개 중 4개만 drift 상태였음. 상수 참조로 통일. (2) `ChartTooltip.tsx` 의 `title` prop + fallback 분기 + `formatNumber` 헬퍼 — 전역 호출부 13개 전수 확인 전부 미사용, dead code 제거.
+
+cycle-3010 버그 class(KBO 10팀 하드코딩 vs MLB 30팀) 재발 여부 확인 — 본 디렉토리 대부분 KBO 전용, MLB 공유분(AccuracySummary/RollingAccuracyChart/WinnerProbBucketChart) 은 team 순회 없어 무관. `ScoringRuleDayHeatmap`/`CohortComparisonHeatmap` 색상 tier 차이 1건 관찰했으나 "동일 패턴" 문구는 색상 무관 참조라 오탐 판단, 수정 보류.
+
+`tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 585/585·4619/4619 PASS. 직접 main 커밋(PR 미경유, R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(components/accuracy·matchup·picks·predictions 등 잔여 저-mention 디렉토리) 또는 fix-incident(gap 4/20) 또는 lotto(gap 3/30).
+
 ## 🟢 SUCCESS — review-code(heavy): components/reviews/ 전수 감사, MLB 30팀 sort-cap 버그 수정 (cycle 3010, 2026-10-10)
 
 진단: 직전8(3002-3009) distinct=4 — 2-chain lock 미충족. op-analysis 는 cycle_state naming("operational-analysis(lite)") 탓에 1차 grep 오탐(0건) — startsWith 재검증으로 실제 gap=42(마지막 cycle 2968) 확인했으나 cycle 2968 자체가 "egress quota 402 가 직접 쿼리도 차단" 신규 확인 후 skip 권고한 전례(cycle 3004/3007/3008 동일 판단) 따라 재확인 skip. fix-incident gap=2·lotto gap=1·info-arch gap=4 전부 미근접. `components/reviews/`(10파일, 48일 미커밋 최장기) 선택.
