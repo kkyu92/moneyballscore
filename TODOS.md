@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — design-system: MLB nav "단일 link" 3-way stale drift 정정 (cycle 3017, 2026-10-10)
+
+진단: 직전8(3009-3016) distinct=2(lotto(lite)1+review-code(heavy)7) — 2-chain lock 충족, review-code/lotto 제외. DESIGN.md mtime 38일(≥4주 trigger) + cycle 2995(design-system 직전 발화) 동일 패턴 success evidence — design-system 선택.
+
+색상 토큰 전수 grep 재검증(rounded-md/text-gray-400 flat/text-[11px] 등) 전부 clean, 신규 drift 0건. `docs/design/components.md` 1-pager 의 `LEAGUE_NAVS.mlb` 예시가 cycle 50 박제 당시 단일 link 상태 그대로 방치 — 실제 `Header.tsx` `MLB_NAV` 는 오늘(단일) + 경기·팀(13 sub-link) + 포스트시즌(2 sub-link) 3-group. `Header.tsx:152` 코드 주석도 "단일 link" 라 자기모순, DESIGN.md 자신의 cycle 2162 정정("6 sub-link")도 이후 라우트 추가로 재차 낡음 — 3곳 모두 실측 기준 정정 (stale-correction-of-a-correction).
+
+`tsc --noEmit`/`pnpm lint`/`pnpm test` 585/585·4619/4619 전부 PASS. 직접 main 커밋(R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/accuracy`·`analysis`·`matchup`·`insights`·`share` 또는 `apps/moneyball/src/lib` 잔여 소형 스코프) 또는 fix-incident(gap 10/20) 또는 info-arch(gap 12/30).
+
 ## 🟢 SUCCESS — review-code(heavy): components/picks 전수 감사, DivergenceChip+PicksTrendChart 상수 drift 수정 (cycle 3016, 2026-10-10)
 
 진단: 직전8(3008-3015) distinct=3 — 2-chain lock 미충족. explore-idea saturation 13/15 충족하나 organic idea 부재(open issue 0/plan approved 0/TODOS Next-Up 부재) skip. fix-incident gap=8/20·lotto gap=7/30·info-arch gap=10/30 전부 미근접. op-analysis egress quota 402 지속 skip. cycle 3015 추천대로 `components/picks/`(13파일, cycle 2619 이후 미재감사) 선택.
