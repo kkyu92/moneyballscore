@@ -11,7 +11,7 @@ import {
   Cell,
   ReferenceLine,
 } from "recharts";
-import { MIN_TEAM_PREDICTIONS } from "@moneyball/shared";
+import { ACCURACY_BASELINE_PCT, MIN_TEAM_PREDICTIONS } from "@moneyball/shared";
 import { chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartGradients, ChartTooltip } from "./ChartTooltip";
 
@@ -97,7 +97,7 @@ export function TeamPerformanceChart({ data }: TeamPerformanceChartProps) {
           )}
         />
         <ReferenceLine
-          y={50}
+          y={ACCURACY_BASELINE_PCT}
           stroke={semantic.error}
           strokeDasharray="4 4"
           strokeOpacity={0.6}

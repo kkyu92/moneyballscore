@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import { ACCURACY_BASELINE_PCT } from "@moneyball/shared";
 import { neutral, semantic } from "@/lib/design-tokens";
 import { ChartGradients, ChartTooltip } from "./ChartTooltip";
 
@@ -72,12 +73,12 @@ export function AccuracyChart({ data }: AccuracyChartProps) {
           )}
         />
         <ReferenceLine
-          y={50}
+          y={ACCURACY_BASELINE_PCT}
           stroke={semantic.error}
           strokeDasharray="4 4"
           strokeOpacity={0.6}
           label={{
-            value: "50% 기준",
+            value: `${ACCURACY_BASELINE_PCT}% 기준`,
             fontSize: 10,
             fill: semantic.error,
             position: "insideBottomRight",

@@ -12,6 +12,8 @@ import {
   ReferenceLine,
 } from "recharts";
 
+import { ACCURACY_BASELINE_PCT } from "@moneyball/shared";
+
 import type { DailyAccuracyPoint } from "@/lib/dashboard/buildDailyAccuracy";
 import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartGradients, ChartTooltip } from "./ChartTooltip";
@@ -58,7 +60,7 @@ export function DailyAccuracyChart({ data }: DailyAccuracyChartProps) {
               formatRows={(payload) =>
                 ((payload ?? []) as Array<{ value: number; payload: DailyAccuracyPoint }>).map((p) => {
                   const d = p.payload;
-                  const passed = d.accuracy >= 50;
+                  const passed = d.accuracy >= ACCURACY_BASELINE_PCT;
                   return {
                     label: "적중률",
                     value: `${Number(p.value).toFixed(1)}% (${d.correct}/${d.total})`,
@@ -70,7 +72,7 @@ export function DailyAccuracyChart({ data }: DailyAccuracyChartProps) {
           )}
         />
         <ReferenceLine
-          y={50}
+          y={ACCURACY_BASELINE_PCT}
           stroke={semantic.error}
           strokeDasharray="4 4"
           strokeOpacity={0.6}
@@ -85,7 +87,7 @@ export function DailyAccuracyChart({ data }: DailyAccuracyChartProps) {
             <Cell
               key={i}
               fill={
-                entry.accuracy >= 50
+                entry.accuracy >= ACCURACY_BASELINE_PCT
                   ? "url(#brandBarGradient)"
                   : "url(#mutedBarGradient)"
               }

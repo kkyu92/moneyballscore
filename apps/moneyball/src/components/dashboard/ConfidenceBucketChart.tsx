@@ -13,7 +13,7 @@ import {
   LabelList,
 } from "recharts";
 
-import { MIN_VERIFIED_GAMES_HEDGE } from "@moneyball/shared";
+import { ACCURACY_BASELINE_PCT, MIN_VERIFIED_GAMES_HEDGE } from "@moneyball/shared";
 
 import type { ConfidenceBucketResult } from "@/lib/dashboard/buildConfidenceBuckets";
 import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
@@ -85,7 +85,7 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
           )}
         />
         <ReferenceLine
-          y={50}
+          y={ACCURACY_BASELINE_PCT}
           stroke={semantic.error}
           strokeDasharray="4 4"
           strokeOpacity={0.6}
