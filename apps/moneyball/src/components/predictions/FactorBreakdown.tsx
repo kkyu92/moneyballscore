@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, NEUTRAL_FACTOR, shortTeamName, type TeamCode } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, NEUTRAL_FACTOR, shortTeamName, type TeamCode } from "@moneyball/shared";
 import {
   FACTOR_GLOSSARY_ANCHORS,
   FACTOR_LABELS,
@@ -126,12 +126,13 @@ function getStatLabel(
 
 /**
  * factor 의 win prob 기여도 (percentage point).
- * value ∈ [0,1], NEUTRAL_FACTOR=중립. NEUTRAL_FACTOR 에서 멀어진 만큼 × weight × 2 = home prob 변화 (-1 ~ +1).
- * 100 곱해서 %p 단위로 표시.
+ * value ∈ [0,1], NEUTRAL_FACTOR=중립. NEUTRAL_FACTOR 에서 멀어진 만큼 × weight × FACTOR_CONTRIBUTION_SCALE(200,
+ * = ×2 home prob 변화 -1~+1 의 ×100 %p 환산) — factor-explanations.ts contributionPp 와 단일 source 정합
+ * (silent drift family — 하드코딩 `* 2 * 100` 대신 shared 상수 참조).
  * 음수 = away 유리, 양수 = home 유리.
  */
 export function contributionPp(value: number, weight: number): number {
-  return (value - NEUTRAL_FACTOR) * weight * 2 * 100;
+  return (value - NEUTRAL_FACTOR) * weight * FACTOR_CONTRIBUTION_SCALE;
 }
 
 function labelFor(key: string): string {

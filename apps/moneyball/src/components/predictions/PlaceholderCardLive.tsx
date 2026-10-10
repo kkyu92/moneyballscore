@@ -2,7 +2,7 @@
 
 /**
  * PlaceholderCard 의 client 래퍼. 라이브 상태를 반영해서 "경기 진행중"·
- * "경기 종료 · 예측 미기록" 문구가 실제 경기 진행과 즉시 동기화되도록.
+ * "경기 종료 · 예측 없음" 문구가 실제 경기 진행과 즉시 동기화되도록.
  *
  * `gameDate` 옵션: KST date 명시 전달 시
  * useKboScores 가 오늘이 아니면 SWR polling 차단 — predictions/[date]

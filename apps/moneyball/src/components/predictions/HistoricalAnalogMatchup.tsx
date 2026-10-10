@@ -131,7 +131,10 @@ export async function HistoricalAnalogMatchup({
   gameId,
   asOfDate,
 }: Props) {
-  const analogs = await fetchHistoricalAnalogs(homeTeamId, awayTeamId, gameId, asOfDate, 3);
+  // limit 생략 — fetchHistoricalAnalogs 기본값(ANALOG_MATCHUP_LIMIT) 사용.
+  // MLB parity(MlbHistoricalAnalogMatchup → fetchMlbHistoricalAnalogs)와 동일 패턴 —
+  // 과거 하드코딩 리터럴 3 은 ANALOG_MATCHUP_LIMIT 변경 시 silent drift 위험 (실측치 우연히 동일했을 뿐).
+  const analogs = await fetchHistoricalAnalogs(homeTeamId, awayTeamId, gameId, asOfDate);
 
   if (analogs.length === 0) return null;
 
