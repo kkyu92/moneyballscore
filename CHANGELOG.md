@@ -1,3 +1,13 @@
+## v0.5.62.331 — 2026-10-10 (cycle 3010, review-code(heavy): components/reviews/ 전수 감사, MLB 30팀 sort-cap 버그 수정 SUCCESS)
+
+### review-code(heavy): `components/reviews/` 전수 read — monthly team-stats 표본순 정렬 20-cap 버그 (cycle 3010, SUCCESS)
+
+- 진단: 직전8(3002-3009) distinct=4(review-code(heavy)5+lotto(lite)1+info-architecture-review1+fix-incident1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24. op-analysis 는 cycle_state 상 split naming("operational-analysis(lite)") 탓에 1차 prefix-match grep 이 0건으로 오탐 — startsWith 재검증으로 실제 마지막 발화 cycle 2968(gap=42, trigger 대폭 초과) 확인했으나, cycle 2968 자체가 "Supabase egress quota 402 가 service-role 직접 쿼리도 차단" 을 신규 확인한 뒤 fix-incident/explore-idea 로 우회 추천한 전례(이후 cycle 3004/3007/3008 도 전부 "noise 라 skip") 대로 재확인 skip. fix-incident gap=2·lotto gap=1·info-arch gap=4 전부 미근접. `components/reviews/`(10파일, 48일 미커밋 — 후보 디렉토리 중 최장기) 선택.
+- 전수 read 결과 1건 실제 버그 확인: `MonthlyTeamStatsSortControl.tsx` 의 표본순 정렬이 고정 20랭크 CSS 룰(`[data-sample-rank="N"]`, N<20)에 의존 — KBO(10팀) 기준 설계라 MLB(30팀) monthly review 에서 월간 예측 승리팀이 20개를 넘으면 21번째+ 팀이 order 룰 누락으로 표본순 정렬 시 맨 앞으로 밀려 올라옴. `WeeklyGamesSortControl`/`MissesSortControl` 과 동일한 CSS var(`--mb-monthly-team-stats-order`) 패턴으로 교체(상한 제거), 소비처 3곳(ko/mlb/en-mlb monthly review page) 모두 `data-sample-rank` attribute → style 커스텀 프로퍼티 전환.
+- 같은 class 의 SortControl 4개(standings/leaderboard/seasons/monthly-team-stats) 전수 대조 — standings/seasons 는 KBO 10팀만 소비해 20-cap 안전, leaderboard 는 이미 `USER_LEADERBOARD_DISPLAY_LIMIT`(50) 상수로 배열 크기 바인딩되어 안전. monthly-team-stats 만 유일하게 MLB 30팀 노출 + 하드코딩 20 조합 — family 내 단일 실제 drift, 추가 수정 불필요.
+- 나머지 9파일(Convergence*, HighlightCard/MlbHighlightCard, MissesSortControl, ReviewsResultFilter) 전수 확인 — 배지 색상/badge 분기 DESIGN.md 패턴 일치, en 라우트 링크 대상 route 존재 확인, CSS var 와이어링(`data-misses-list`) 3개 미러 모두 정상.
+- 검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 585/585 파일·4619/4619 테스트 PASS.
+
 ## v0.5.62.330 — 2026-10-10 (cycle 3009, lotto(lite): 30-cycle gap 체크포인트 cron 정상 확인 RETRO-ONLY)
 
 ### lotto(lite): 30-cycle gap 체크포인트 (cycle 3009, RETRO-ONLY)

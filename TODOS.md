@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/reviews/ 전수 감사, MLB 30팀 sort-cap 버그 수정 (cycle 3010, 2026-10-10)
+
+진단: 직전8(3002-3009) distinct=4 — 2-chain lock 미충족. op-analysis 는 cycle_state naming("operational-analysis(lite)") 탓에 1차 grep 오탐(0건) — startsWith 재검증으로 실제 gap=42(마지막 cycle 2968) 확인했으나 cycle 2968 자체가 "egress quota 402 가 직접 쿼리도 차단" 신규 확인 후 skip 권고한 전례(cycle 3004/3007/3008 동일 판단) 따라 재확인 skip. fix-incident gap=2·lotto gap=1·info-arch gap=4 전부 미근접. `components/reviews/`(10파일, 48일 미커밋 최장기) 선택.
+
+`MonthlyTeamStatsSortControl.tsx` 의 표본순 정렬이 고정 20랭크 CSS 룰에 의존 — KBO(10팀) 기준 설계라 MLB(30팀) monthly review 에서 월간 예측 승리팀 20개 초과 시 21번째+ 팀이 표본순 정렬에서 맨 앞으로 밀려 올라오는 실제 버그. `WeeklyGamesSortControl`/`MissesSortControl` 과 동일한 CSS var 패턴으로 교체(상한 제거), 소비처 3곳(ko/mlb/en-mlb) 전환. 같은 class SortControl 4개(standings/leaderboard/seasons/monthly-team-stats) 전수 대조 — leaderboard 는 `USER_LEADERBOARD_DISPLAY_LIMIT` 상수로 이미 안전, standings/seasons 는 KBO 10팀만 소비해 안전. monthly-team-stats 만 유일 drift, family 내 추가 수정 불필요.
+
+`tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 585/585·4619/4619 PASS. 직접 main 커밋(PR 미경유, R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(components/accuracy·dashboard·matchup·picks·predictions 등 잔여 저-mention 디렉토리) 또는 fix-incident(gap 3/20) 또는 lotto(gap 2/30).
+
 ## 🟡 RETRO-ONLY — lotto(lite): 30-cycle gap 체크포인트 cron 정상 확인 (cycle 3009, 2026-10-10)
 
 진단: lotto 마지막 발화 cycle 2979 — 정확히 30 사이클 경과(trigger 6 도달). fix-incident gap=1·info-arch gap=3·op-analysis egress quota 402 지속 차단 전부 미근접.
