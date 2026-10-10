@@ -46,6 +46,15 @@ jobs:
           echo "status=$HTTP_STATUS"
           echo "body=$BODY"
 
+          # exceed_egress_quota = Supabase billing cap, not an app/infra bug — user action
+          # required (plan upgrade). Downgrade to warning to avoid alert-fatigue CI failures
+          # for an already-tracked billing block (mirrors apps/moneyball/src/app/api/health/route.ts
+          # egress-quota downgrade).
+          if echo "$BODY" | grep -q "exceed_egress_quota"; then
+            echo "::warning::Supabase egress quota 초과 (HTTP $HTTP_STATUS) — 알려진 billing 이슈, heartbeat 판정 불가. 사용자 plan upgrade 대기 중."
+            exit 0
+          fi
+
           if [ "$HTTP_STATUS" != "200" ]; then
             echo "::error::pipeline_runs 조회 실패 (HTTP $HTTP_STATUS) — Supabase 연결 이상 의심."
             exit 1

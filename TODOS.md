@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — fix-incident: heartbeat-stale.yml egress-quota noise 수정 (cycle 3008, 2026-10-10)
+
+진단: `gh run list` 로 scheduled workflow 최근 실패 확인 — `heartbeat-stale` 최근 50회 중 25회(50%) 실패, 전부 동일 원인(Supabase egress-quota 402, 65일+ 지속 중인 기존 billing 이슈). 워크플로우가 모든 비-200 상태를 무차별 에러 처리해 이미 추적 중인 이슈로 CI 실패 알림 반복.
+
+`apps/moneyball/src/app/api/health/route.ts` 기존 egress-quota 다운그레이드 패턴을 `.github/workflows/heartbeat-stale.yml` 에도 적용 — 402+`exceed_egress_quota` 본문 감지 시 `::warning::`+`exit 0`, 다른 비-200(진짜 신규 장애)은 기존 `::error::`+`exit 1` 유지. YAML 전용 변경, `pnpm --filter moneyball test` 585/585·4619/4619 PASS. PR → R7 자동 머지.
+
+**Supabase egress quota 장애 자체는 미해결**(billing, 사용자 plan upgrade 대기) — 본 수정은 알림 noise 만 해소.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): components/leaderboard/ 전수 감사, 갭 0건 (cycle 3007, 2026-10-07)
 
 진단: 직전8(2999-3006) distinct=4(fix-incident1+review-code(heavy)5+skill-evolution(forced)1+info-architecture-review1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24. explore-idea saturation 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/24/TODOS Next-Up 섹션 자체 부재/plan#29 Tier4 cycle 2969 체크포인트 이후 변화 없음) — 과거 반복 패턴(cycle 2896/2965/2969) 동일하게 organic idea 부재 skip. gap trigger 4종 전부 미근접 또는 billing-blocked(fix-incident 8/20, op-analysis 39/25 충족하나 egress quota 402 curl 재확인 지속, info-arch 1(cycle 3006 직후), lotto 28/30 cron 둘 다 신선).
