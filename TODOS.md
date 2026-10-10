@@ -1,4 +1,10 @@
 
+## 🟡 RETRO-ONLY — lotto(lite): 30-cycle gap 체크포인트 cron 정상 확인 (cycle 3009, 2026-10-10)
+
+진단: lotto 마지막 발화 cycle 2979 — 정확히 30 사이클 경과(trigger 6 도달). fix-incident gap=1·info-arch gap=3·op-analysis egress quota 402 지속 차단 전부 미근접.
+
+`lotto-pick-update.yml`/`lotto-result-update.yml` 최근 5 run 전부 success, picks(2026-10-10)/results(2026-10-03) 둘 다 신선 — cron 완전 자동화 정상. `pnpm tsx scripts/lotto.ts count` 재실행 결과 cycle 2914 이후 유효조합 완전 동일(7,705,415/8,145,060, delta=0) — 규칙셋 안정, 신규 rule 없음. 코드 변경 없음.
+
 ## 🟢 SUCCESS — fix-incident: heartbeat-stale.yml egress-quota noise 수정 (cycle 3008, 2026-10-10)
 
 진단: `gh run list` 로 scheduled workflow 최근 실패 확인 — `heartbeat-stale` 최근 50회 중 25회(50%) 실패, 전부 동일 원인(Supabase egress-quota 402, 65일+ 지속 중인 기존 billing 이슈). 워크플로우가 모든 비-200 상태를 무차별 에러 처리해 이미 추적 중인 이슈로 CI 실패 알림 반복.
