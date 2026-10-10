@@ -1,3 +1,14 @@
+## v0.5.62.335 — 2026-10-10 (cycle 3016, review-code(heavy): components/picks 전수 감사, DivergenceChip+PicksTrendChart 상수 drift 수정 SUCCESS)
+
+### review-code(heavy): `components/picks/` 전수 read — DivergenceChip + PicksTrendChart 상수 drift (cycle 3016, SUCCESS)
+
+- 진단: 직전8(3008-3015) distinct=3(review-code(heavy)6+fix-incident1+lotto(lite)1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24(전부 status≠approved). explore-idea saturation 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/plan#29 Tier4 유지/TODOS Next-Up 섹션 부재) — 과거 반복 패턴(cycle 2896/2965/2969/3006) 동일하게 organic idea 부재 skip. fix-incident gap=8/20·lotto gap=7/30·info-arch gap=10/30 전부 미근접. op-analysis egress quota 402 billing block 지속(cycle 2968 이후 동일 결론) skip. cycle 3015 추천대로 `components/picks/`(13파일, cycle 2619 이후 미재감사 최우선 후보, 36일 미커밋) 선택.
+- subagent 위임 전수 read(13파일 + 테스트 1개) + 전역 호출부 cross-check → 실제 수정 2건: (1) `DivergenceChip.tsx` 의 `delta < 20 || communityTotal < 3` 가드가 `PickButton.tsx` 가 이미 올바르게 쓰는 `COMMUNITY_DIVERGE_MIN`/`MIN_POLL_TOTAL`(packages/shared) 과 별개로 중복 하드코딩된 silent-drift 셋업 — 상수 참조로 통일. (2) `PicksTrendChart.tsx` 의 50% 기준선이 `chartH * 0.5` + 리터럴 "50%" 텍스트로, 앱 내 다른 모든 정확도 차트(AccuracyChart/DailyAccuracyChart/WinnerProbBucketChart/WeeklyTrendMini/RollingAccuracyChart)가 쓰는 `ACCURACY_BASELINE`/`ACCURACY_BASELINE_PCT` 와 별개 중복 하드코딩 — 상수 참조로 통일.
+- 2개 SortControl 컴포넌트(`PicksSortControl`/`WeeklyHistorySortControl`) 가 cycle 3010 버그 class(KBO 10팀 하드코딩 CSS cap 이 MLB 30팀에서 깨짐) 재발 의심되어 중점 점검 — 둘 다 `column-reverse` 토글 2-모드 정렬이라 랭크 기반 cap/team-count 의존 0건, 해당 버그 class 미존재 확인.
+- 오탐 판단 (수정 안 함): `FactorAgreementCard`의 `MIN_FACTOR_SAMPLES`(3)/`MIN_TOTAL_MEASURED`(5) 가 `MIN_POLL_TOTAL`/`SMALL_SAMPLE_N` 과 수치 우연 일치하나 의미상 무관한 게이트(factor-row 표본 수 vs poll 크기) — spurious coupling 판단 보류. `PickButton` props 4종 전부 10+ 호출부(KBO/MLB/EN) 실사용 확인.
+- 검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 585/585·4619/4619 PASS. 직접 main 커밋(PR 미경유, R4 범위).
+- 다음 사이클 추천 = review-code(heavy) 계속(`components/accuracy`·`analysis`·`matchup`·`insights`·`share` — accuracy/analysis/matchup/insights 는 cycle 2913/2916/2915/2994 에서 이미 "SUCCESS-clean"/"갭 0건" 처리된 바 있어 우선순위 낮음, `share`/`glossary` 계열 재확인 또는 `apps/moneyball/src/lib` 잔여 소형 스코프 우선) 또는 fix-incident(gap 9/20) 또는 lotto(gap 8/30) 또는 info-arch(gap 11/30).
+
 ## v0.5.62.334 — 2026-10-10 (cycle 3015, review-code(heavy): components/predictions 전수 감사, FACTOR_CONTRIBUTION_SCALE + limit 하드코딩 drift 수정 SUCCESS)
 
 ### review-code(heavy): `components/predictions/` 전수 read — contributionPp 상수 drift + limit 하드코딩 (cycle 3015, SUCCESS)

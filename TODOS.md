@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/picks 전수 감사, DivergenceChip+PicksTrendChart 상수 drift 수정 (cycle 3016, 2026-10-10)
+
+진단: 직전8(3008-3015) distinct=3 — 2-chain lock 미충족. explore-idea saturation 13/15 충족하나 organic idea 부재(open issue 0/plan approved 0/TODOS Next-Up 부재) skip. fix-incident gap=8/20·lotto gap=7/30·info-arch gap=10/30 전부 미근접. op-analysis egress quota 402 지속 skip. cycle 3015 추천대로 `components/picks/`(13파일, cycle 2619 이후 미재감사) 선택.
+
+subagent 위임 전수 read(13파일) + 호출부 cross-check → 실제 수정 2건: `DivergenceChip.tsx` 의 `delta<20 || communityTotal<3` 가 `COMMUNITY_DIVERGE_MIN`/`MIN_POLL_TOTAL` 상수와 별개 중복 하드코딩 → 상수 참조 통일. `PicksTrendChart.tsx` 의 50% 기준선(`chartH*0.5`+"50%" 리터럴)이 다른 모든 정확도 차트가 쓰는 `ACCURACY_BASELINE`/`ACCURACY_BASELINE_PCT` 와 별개 중복 하드코딩 → 상수 참조 통일. 2개 SortControl(cycle 3010 버그 class 의심) 점검 결과 team-count 의존 0건, 재발 아님 확인.
+
+`tsc --noEmit`/`pnpm lint`/`pnpm test` 585/585·4619/4619 전부 PASS. 직접 main 커밋(R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/accuracy`·`analysis`·`matchup`·`insights`·`share` 또는 `apps/moneyball/src/lib` 잔여 소형 스코프) 또는 fix-incident(gap 9/20) 또는 lotto(gap 8/30) 또는 info-arch(gap 11/30).
+
 ## 🟢 SUCCESS — review-code(heavy): components/predictions 전수 감사, FACTOR_CONTRIBUTION_SCALE + limit 하드코딩 drift 수정 (cycle 3015, 2026-10-10)
 
 진단: 직전8(3007-3014) distinct=3 — 2-chain lock 미충족. op-analysis gap=47/25 강함이나 egress quota 402 재확인(skip, 65일+ 지속). fix-incident gap=7/20·info-arch gap=9/30·lotto gap=6/30 전부 미근접. `components/predictions/`(24파일 3357줄, 단독 전수 감사 이력 부재) 선택.
