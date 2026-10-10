@@ -149,7 +149,7 @@ const LOTTO_LINKS: NavLink[] = [
   { href: "/lotto/archive", label: "아카이브", description: "회차별 50조합 통계 분석 기록", icon: "database" },
 ];
 
-// MLB top-level pill — sub-NAV 는 단일 link 라 그룹화 없이 펼침 link 로 렌더.
+// MLB top-level pill — sub-NAV 는 KBO 와 동일한 그룹 구조(오늘 단일 link + 경기·팀/포스트시즌 2 그룹)로 렌더.
 // 로또는 기존대로 sub-NAV 그룹으로 렌더 (드롭다운).
 export const LEAGUE_NAVS: Record<League, NavItem[]> = {
   kbo: KBO_NAV,

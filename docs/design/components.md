@@ -38,7 +38,7 @@ import { LeagueSelector } from "@/components/layout/LeagueSelector";
 ```ts
 export const LEAGUE_NAVS: Record<League, NavItem[]> = {
   kbo: [...],   // 기존 NAV — 오늘 / AI / 커뮤니티 / 순위 / ...
-  mlb: [{ href: '/mlb', label: 'MLB 베타' }],
+  mlb: MLB_NAV, // 오늘(단일 link) + 경기·팀(13 sub-link 그룹) + 포스트시즌(2 sub-link 그룹) — KBO 와 동일 그룹 구조 (cycle 3017 정정, 과거 "단일 link" 서술은 stale)
   lotto: [{ label: '로또', items: [...] }],
 };
 ```
