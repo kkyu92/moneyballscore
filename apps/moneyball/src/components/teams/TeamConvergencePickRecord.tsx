@@ -2,6 +2,7 @@ import {
   computeWinRatePct,
   computeWinRateColorClass,
 } from "@/lib/analysis/convergenceRecord";
+import { FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE } from "@moneyball/shared";
 
 type TeamStat = { wins: number; losses: number } | undefined;
 
@@ -29,7 +30,7 @@ export function TeamConvergencePickRecord({
         수렴 픽 성적
       </h2>
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-        이 팀이 모델의 강수렴(8팩터+) 또는 완전수렴(10팩터) 픽으로 지목됐을 때의 실제 결과
+        이 팀이 모델의 강수렴({FACTOR_PICK_STRONG}팩터+) 또는 완전수렴({FACTOR_PICK_COMPLETE}팩터) 픽으로 지목됐을 때의 실제 결과
       </p>
       <div className="flex flex-wrap items-center gap-2">
         {strongStat && (() => {
