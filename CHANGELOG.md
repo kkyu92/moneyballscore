@@ -1,3 +1,11 @@
+## v0.5.62.329 — 2026-10-10 (cycle 3008, fix-incident: heartbeat-stale.yml egress-quota noise 수정 SUCCESS)
+
+### fix-incident: `heartbeat-stale.yml` Supabase egress-quota 402 downgrade (cycle 3008, SUCCESS)
+
+- 진단: `gh run list` 로 scheduled workflow 최근 실패 확인(fix-incident 진단 source 7) — `heartbeat-stale` 워크플로우 최근 50회 중 25회(50%) 실패. 실패 로그 확인 결과 전부 동일 원인: Supabase `pipeline_runs` REST 조회가 HTTP 402 `exceed_egress_quota`(65일+ 지속 중인 billing 차단, CLAUDE.md 기 문서화) 반환 → 워크플로우가 모든 비-200 상태를 무차별 `::error::`+`exit 1` 처리해 이미 추적 중인 동일 이슈로 CI 실패 알림 반복 발생.
+- `apps/moneyball/src/app/api/health/route.ts` 의 기존 패턴(본문에 `exceed_egress_quota` 포함 시 overall=degraded 로 다운그레이드, cycle 2999 가 HEAD-request 빈 메시지 케이스까지 확장)과 동일하게 `heartbeat-stale.yml` 에도 402+`exceed_egress_quota` 본문 감지 시 `::warning::`+`exit 0` 분기 추가. 다른 비-200 상태(진짜 신규 장애)는 기존 `::error::`+`exit 1` 그대로 유지.
+- 검증: YAML 문법 확인(`python3 -c "import yaml; yaml.safe_load(...)"`), 실제 실패 로그의 정확한 에러 본문 문자열로 grep 패턴 매칭 확인. 워크플로우 YAML 전용 변경이라 vitest 영향 없음 — `pnpm --filter moneyball test` 585/585 파일·4619/4619 테스트 PASS(회귀 0건).
+
 ## v0.5.62.328 — 2026-10-07 (cycle 3006, info-architecture-review: 30-cycle gap checkpoint 11연속 "현 IA 충분" RETRO-ONLY)
 
 ### info-architecture-review: 30-cycle gap checkpoint (cycle 3006, RETRO-ONLY)
