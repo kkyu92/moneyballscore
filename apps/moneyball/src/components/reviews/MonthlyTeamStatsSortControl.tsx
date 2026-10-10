@@ -20,6 +20,10 @@ const LABELS_EN: Record<SortMode, string> = {
 
 const ORDER: SortMode[] = ['accuracy', 'sample'];
 
+// cycle 3010: 고정 20랭크 CSS 룰(`[data-sample-rank="N"]`, N<20) 은 KBO(10팀) 기준 설계라
+// MLB(30팀) monthly review 에서 월간 예측 승리팀이 20팀을 넘으면 21번째+ 팀이 order 룰 누락으로
+// 표본순 정렬 시 맨 앞으로 밀리는 실제 버그. WeeklyGamesSortControl/MissesSortControl 과 동일한
+// CSS var(--mb-monthly-team-stats-order) 패턴으로 교체 — 팀 수 무관하게 상한 없음.
 function subscribe(callback: () => void) {
   if (typeof window === 'undefined') return () => {};
   window.addEventListener('storage', callback);
@@ -51,11 +55,6 @@ function writeSort(value: SortMode): void {
   }
 }
 
-const SAMPLE_ORDER_CSS = Array.from(
-  { length: 20 },
-  (_, i) => `[data-monthly-team-stats-list] [data-sample-rank="${i}"]{order:${i};}`,
-).join('');
-
 export function MonthlyTeamStatsSortControl({ locale = 'ko' }: { locale?: 'ko' | 'en' } = {}) {
   const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
   const labels = locale === 'en' ? LABELS_EN : LABELS;
@@ -65,7 +64,7 @@ export function MonthlyTeamStatsSortControl({ locale = 'ko' }: { locale?: 'ko' |
       {sort === 'sample' && (
         <style
           dangerouslySetInnerHTML={{
-            __html: `[data-monthly-team-stats-list]{display:flex;flex-direction:column;}${SAMPLE_ORDER_CSS}`,
+            __html: `[data-monthly-team-stats-list]{display:flex;flex-direction:column;}[data-monthly-team-stats-list] > *{order:var(--mb-monthly-team-stats-order,0);}`,
           }}
         />
       )}

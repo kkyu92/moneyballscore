@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -375,11 +376,12 @@ export default async function MlbMonthlyReviewPageEn({ params }: PageProps) {
                     const pct = Math.round(t.accuracy * 100);
                     const smallSample = t.predicted < SMALL_SAMPLE_N;
                     const sampleRank = sampleRankMap.get(t.teamCode) ?? 0;
+                    const rowStyle = { "--mb-monthly-team-stats-order": sampleRank } as CSSProperties;
                     return (
                       <div
                         key={t.teamCode}
                         className="flex items-center gap-3 text-sm"
-                        data-sample-rank={sampleRank}
+                        style={rowStyle}
                         title={
                           smallSample
                             ? `Only ${t.predicted} predicted games — treat as reference only (needs ${SMALL_SAMPLE_N}+ for confidence)`
