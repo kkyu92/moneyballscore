@@ -1,3 +1,13 @@
+## v0.5.62.333 — 2026-10-10 (cycle 3014, review-code(heavy): components/teams,players 전수 감사, FACTOR_PICK 상수 drift 수정 SUCCESS)
+
+### review-code(heavy): `components/teams/`, `components/players/` 전수 read — TeamConvergencePickRecord 상수 drift (cycle 3014, SUCCESS)
+
+- 진단: 직전8(3006-3013) distinct=4(review-code(heavy)5+info-architecture-review1+fix-incident1+lotto(lite)1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24. fix-incident gap=6/20·info-arch gap=8/30·lotto gap=5/30 전부 미근접. op-analysis egress quota 402 billing block 지속(cycle 2968 이후 동일 결론) skip. cycle 3013 추천대로 저-mention 디렉토리 계속 — `components/teams/`(git log 전체 history grep "components/teams" 0건, 53일 미커밋) + `components/players/`(1건, 53일 미커밋) 선택.
+- subagent 위임 전수 read(6파일) 결과 1건 실제 수정: `TeamConvergencePickRecord.tsx` 의 안내 문구가 `FACTOR_PICK_STRONG`(8)/`FACTOR_PICK_COMPLETE`(10) 상수값을 리터럴 "8팩터"/"10팩터" 로 하드코딩 — 상수 튜닝 시 type error 없이 UI 문구만 silent stale 위험(registry-vs-literal silent drift family, cycle 3012 ACCURACY_BASELINE_PCT 사례와 동일 class). `@moneyball/shared` 상수 참조로 전환. 자매 컴포넌트 `MlbTeamConvergencePickRecord.tsx` 는 애초 팩터 수를 노출하지 않는 문구라 동일 수정 불필요(의도된 비대칭, MLB_FACTOR_PICK_STRONG/COMPLETE 별도 상수 존재).
+- cycle-3010 버그 class(KBO 10팀 하드코딩이 MLB 30팀에서 깨지는 패턴) 재발 여부 확인 — `TeamEloChart`/`MlbTeamEloChart` y축 패딩은 실제 min/max 기반 동적 계산, `TeamRecentGamesFilter` 는 data-attribute CSS 선택자(랭크 고정 배열 아님), 팀 색상은 `KBO_TEAMS`/`MLB_TEAMS` 맵 직접 참조 — 해당 버그 class 미존재 확인.
+- dead code/미사용 import·prop 0건. 테스트 커버리지 비대칭 관찰(6파일 중 `MlbTeamEloChart.tsx` 1개만 source-text regex 테스트 보유, 나머지 0) — 버그 아님, 후속 후보로만 기록.
+- 검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 585/585 파일·4619/4619 테스트 PASS.
+
 ## v0.5.62.332 — 2026-10-10 (cycle 3012, review-code(heavy): components/dashboard/ 전수 감사, baseline 상수 drift + dead code 수정 SUCCESS)
 
 ### review-code(heavy): `components/dashboard/` 전수 read — ACCURACY_BASELINE_PCT 상수 drift + ChartTooltip dead code (cycle 3012, SUCCESS)

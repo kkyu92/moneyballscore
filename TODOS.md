@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/teams,players 전수 감사, FACTOR_PICK 상수 drift 수정 (cycle 3014, 2026-10-10)
+
+진단: 직전8(3006-3013) distinct=4 — 2-chain lock 미충족. fix-incident gap=6/20·info-arch gap=8/30·lotto gap=5/30 전부 미근접. op-analysis egress quota 402 지속 skip. cycle 3013 추천대로 저-mention 디렉토리 계속 — `components/teams/`(grep 0건, 53일 미커밋) + `components/players/`(1건, 53일 미커밋) 선택.
+
+subagent 위임 전수 read(6파일) → 실제 수정 1건: `TeamConvergencePickRecord.tsx` 안내 문구가 `FACTOR_PICK_STRONG`(8)/`FACTOR_PICK_COMPLETE`(10) 상수값을 리터럴 "8팩터"/"10팩터" 로 하드코딩 — 상수 튜닝 시 UI 문구만 silent stale 위험(cycle 3012 ACCURACY_BASELINE_PCT 와 동일 class). 상수 참조로 전환. 자매 컴포넌트 `MlbTeamConvergencePickRecord.tsx` 는 애초 팩터 수 미노출이라 수정 불필요(의도된 비대칭).
+
+cycle-3010 버그 class(KBO 10팀 vs MLB 30팀 하드코딩) 재발 확인 — TeamEloChart/TeamRecentGamesFilter 모두 동적 계산·data-attribute 기반이라 해당 없음. dead code 0건. 테스트 커버리지 비대칭(6파일 중 1개만 테스트) 관찰만, 버그 아님.
+
+`tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 585/585·4619/4619 PASS. 직접 main 커밋(PR 미경유, R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(components/accuracy·analysis·matchup·picks·predictions·insights·share 등 잔여 저-mention 디렉토리) 또는 fix-incident(gap 7/20) 또는 lotto(gap 6/30).
+
 ## 🟢 SUCCESS — review-code(heavy): components/dashboard/ 전수 감사, baseline 상수 drift + dead code 수정 (cycle 3012, 2026-10-10)
 
 진단: 직전8(3004-3011) distinct=4 — 2-chain lock 미충족. fix-incident gap=3/20·info-arch gap=5/30·lotto gap=2/30 전부 미근접. op-analysis gap≥25 충족하나 egress quota 402 지속 재확인 skip(cycle 2968/3004/3007/3008 동일). explore-idea saturation 13/15 나 organic idea 부재 skip. cycle 3010 추천대로 `components/dashboard/`(17파일, 39일 미커밋 최장기) 선택.
