@@ -1,3 +1,14 @@
+## v0.5.62.334 — 2026-10-10 (cycle 3015, review-code(heavy): components/predictions 전수 감사, FACTOR_CONTRIBUTION_SCALE + limit 하드코딩 drift 수정 SUCCESS)
+
+### review-code(heavy): `components/predictions/` 전수 read — contributionPp 상수 drift + limit 하드코딩 (cycle 3015, SUCCESS)
+
+- 진단: 직전8(3007-3014) distinct=3(review-code(heavy)6+fix-incident1+lotto(lite)1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24 (전부 status≠approved). fix-incident gap=7/20·info-arch gap=9/30·lotto gap=6/30 전부 미근접. op-analysis gap=47/25 강하게 충족했으나 `op-analysis-ce-cohort.ts` 재실행 결과 Supabase 쿼리 여전히 `exceed_egress_quota` 402 (65일+ 지속, billing 미해결) — cycle 2968/3004/3007/3008 과 동일 결론으로 skip. cycle 3014 추천대로 `components/predictions/`(24파일 3357줄, 단독 전수 감사 이력 부재 — 개별 feature fix commit 만 존재) 선택.
+- subagent 위임 전수 read(24파일 + 테스트 목록) → 실제 수정 2건: (1) `FactorBreakdown.tsx` `contributionPp()` 의 `* 2 * 100` 이 `lib/analysis/factor-explanations.ts` 의 동일 로직이 이미 쓰는 `FACTOR_CONTRIBUTION_SCALE`(200, packages/shared) 과 별개로 중복 하드코딩 — 두 곳이 같은 상수를 각자 리터럴로 들고 있던 silent-drift 셋업, 상수 참조로 통일 (수학적으로 동일값, 기존 유닛테스트 PASS 로 확인). (2) `HistoricalAnalogMatchup.tsx` 가 `fetchHistoricalAnalogs(...,3)` 로 함수 기본값(`ANALOG_MATCHUP_LIMIT`)을 리터럴 3 으로 override — MLB sibling(`MlbHistoricalAnalogMatchup`→`fetchMlbHistoricalAnalogs`)은 인자 생략으로 기본값 사용 중이라 패턴 불일치, 현재 값이 우연히 동일(3===3)할 뿐 `ANALOG_MATCHUP_LIMIT` 튜닝 시 silent drift 위험 — 리터럴 제거. 추가로 `PlaceholderCardLive.tsx` 주석이 구 문구("예측 미기록")를 참조하던 것을 현재 문구("예측 없음")로 정정(동작 변경 없음).
+- cycle-3010 버그 class(KBO 10팀 하드코딩이 MLB 30팀에서 깨지는 패턴) 재발 확인 — `components/predictions/` 24파일 중 team-count 기반 sort/cap 로직 0건, 해당 버그 class 미존재 확인. MLB sibling 컴포넌트(`MlbPredictionsSearchBox`/`MlbRivalryMemorySurface`/`MlbHistoricalAnalogMatchup`/`MlbGameOverview`/`MlbDetailedFactorAnalysis`/`MlbFactorWaterfallChart`) locale 분기 정합 확인, 한글/영어 교차 하드코딩 0건.
+- 오탐 판단 (수정 안 함): `TopStatPickCard`(이미 `KBO_FACTOR_COUNT` 참조 중), `RivalryMemorySurface`의 `memories` override prop(테스트 전용 seam, 의도된 설계), `PredictionCardLive`의 `enablePickButton` 분기(양쪽 다 실 호출부 존재), `AccuracyHeaderCard`의 props 3종(3개 호출부 모두 사용), `FactorBreakdown`의 `SHADOW_FACTOR_KEYS` 로컬 배열(대응하는 shared export 부재 — 신규 상수 발명은 스코프 밖), `FactorWaterfallChart`류의 "50%" prose 문자열(로직 미결합 narrative text).
+- 검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 585/585·4619/4619 PASS. 직접 main 커밋(PR 미경유, R4 범위).
+- 다음 사이클 추천 = review-code(heavy) 계속(components/accuracy·analysis·matchup·picks·insights·share 등 — accuracy/analysis/matchup/insights 는 cycle 2913/2916/2915/2994 에서 다른 디렉토리와 묶여 "SUCCESS-clean"/"갭 0건" 처리된 바 있어 우선순위 낮음, picks 는 cycle 2619 이후 미재감사) 또는 fix-incident(gap 8/20) 또는 lotto(gap 7/30) 또는 info-arch(gap 10/30).
+
 ## v0.5.62.333 — 2026-10-10 (cycle 3014, review-code(heavy): components/teams,players 전수 감사, FACTOR_PICK 상수 drift 수정 SUCCESS)
 
 ### review-code(heavy): `components/teams/`, `components/players/` 전수 read — TeamConvergencePickRecord 상수 drift (cycle 3014, SUCCESS)

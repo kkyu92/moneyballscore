@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/predictions 전수 감사, FACTOR_CONTRIBUTION_SCALE + limit 하드코딩 drift 수정 (cycle 3015, 2026-10-10)
+
+진단: 직전8(3007-3014) distinct=3 — 2-chain lock 미충족. op-analysis gap=47/25 강함이나 egress quota 402 재확인(skip, 65일+ 지속). fix-incident gap=7/20·info-arch gap=9/30·lotto gap=6/30 전부 미근접. `components/predictions/`(24파일 3357줄, 단독 전수 감사 이력 부재) 선택.
+
+subagent 위임 전수 read(24파일) → 실제 수정 2건: `FactorBreakdown.contributionPp()` 의 `*2*100` 이 factor-explanations.ts 가 이미 쓰는 `FACTOR_CONTRIBUTION_SCALE`(200) 과 별개 중복 하드코딩 → 상수 참조 통일. `HistoricalAnalogMatchup` 이 `fetchHistoricalAnalogs` 기본값(`ANALOG_MATCHUP_LIMIT`)을 리터럴 3 으로 override, MLB sibling 은 기본값 사용 중이라 비대칭(값 우연히 동일, 튜닝 시 drift 위험) → 리터럴 제거. `PlaceholderCardLive` 주석 구문구 참조 정정(comment only).
+
+cycle-3010 버그 class(KBO 10팀/MLB 30팀) 재발 0건. dead code 0건(props 전부 실사용 확인). `tsc --noEmit`/`pnpm lint`/`pnpm test` 585/585·4619/4619 전부 PASS. 직접 main 커밋(R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/picks/` — cycle 2619 이후 미재감사 최우선 후보) 또는 fix-incident(gap 8/20) 또는 lotto(gap 7/30) 또는 info-arch(gap 10/30).
+
 ## 🟢 SUCCESS — review-code(heavy): components/teams,players 전수 감사, FACTOR_PICK 상수 drift 수정 (cycle 3014, 2026-10-10)
 
 진단: 직전8(3006-3013) distinct=4 — 2-chain lock 미충족. fix-incident gap=6/20·info-arch gap=8/30·lotto gap=5/30 전부 미근접. op-analysis egress quota 402 지속 skip. cycle 3013 추천대로 저-mention 디렉토리 계속 — `components/teams/`(grep 0건, 53일 미커밋) + `components/players/`(1건, 53일 미커밋) 선택.
