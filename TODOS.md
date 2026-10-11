@@ -1,4 +1,20 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): apps/moneyball/src/lib 저커밋 9파일 전수 감사, 갭 0건 (cycle 3023, 2026-10-11)
+
+진단: 직전8(3015-3022) distinct=5(review-code 3+fix-incident 2+op-analysis(lite) 1+polish-ui 1+design-system 1) — 2-chain lock 미충족. open issue 0건, approved plan 0/23(전부 status≠approved). fix-incident gap=3·info-arch gap=17·lotto gap=15(다음 토 10/17 자연 주기, 아직 미도달)·op-analysis gap=2 전부 미근접. DESIGN.md mtime 0일 — design-system trigger 無. 직전 cycle 3022 추천대로 review-code(heavy) 선택, 스코프 = `apps/moneyball/src/lib` 저커밋(1~6회) 9개 파일: `utils.ts`(1)/`feature-flags.ts`(4)/`tabpfn-export.ts`(4)/`weather.ts`(4)/`hub-dispatch.ts`(5) + `lib/calendar/monthGrid.ts`(1) + `lib/debug/{agentFallbackStats,factorDeltaStats,silentDriftStats,pipelineStats}.ts`(3~4).
+
+**감사 내용**:
+- `feature-flags.ts` re-export 5개 함수(`isBigMatchEnabled` 등) `@moneyball/shared` 원본과 1:1 대조 — 일치.
+- `tabpfn-export.ts` `REQUIRED_FACTORS` 10개 키 vs `scripts/export-predictions-tabpfn.ts` SQL select 컬럼 vs `docs/research/tabpfn-data-prep.md` schema 테이블 3-way 대조 — 전부 일치, drift 0건.
+- `weather.ts` 호출부(`app/page.tsx` 4곳 + 테스트) 시그니처 일치, null/NaN 가드(temperature_2m) 정상.
+- `hub-dispatch.ts` PII 스크럽 정규식 6종 + fingerprint 결정론 로직 + Sentry payload 매핑 — 호출부(`api/hub-dispatch/route.ts`) 정합 확인.
+- `lib/calendar/monthGrid.ts` UTC 달력 연산(`toUtcDate`) — cycle 2123 회귀 버그 수정 주석 재확인, 현재 로직 정상.
+- `lib/debug/pipelineStats.ts` `REJECT_REASON_LABEL` 5개 키 vs `packages/kbo-data/src/pipeline/schedule.ts` `RejectReason` 타입 5종 1:1 대조 — 일치.
+- `lib/debug/{agentFallbackStats,factorDeltaStats,silentDriftStats}.ts` 로직 read — 전부 pure compute, I/O 없음, 명시된 proxy 가정 주석과 실제 필터 조건 일치.
+- 결론: 9개 파일 전부 actionable bug 0건. 코드 변경 없음.
+
+다음 사이클 추천 = fix-incident(gap=4, lotto 10/10 추첨 결과 cron 외부 사이트 복구 여부 재확인) 또는 lotto(gap=16, 아직 다음 토요일 10/17 전) 또는 info-arch(gap=18) 또는 review-code(heavy) 계속(`apps/moneyball/src/lib/{analysis,insights,matchup}` 등 잔여 디렉토리). Supabase/lotto 외부 블로커 2건 상태 변화 없음(재확인 불필요, 이번 사이클 미접촉).
+
 ## 🟡 RETRO-ONLY — review-code(heavy): components/share + components/glossary 전수 감사, 갭 0건 (cycle 3022, 2026-10-11)
 
 진단: 직전8(3014-3021) distinct=5(review-code 3+design-system 1+polish-ui 1+fix-incident 2+op-analysis 1) — 2-chain lock 미충족. open issue 0건, approved plan 0/23(전부 status≠approved). fix-incident gap=2·info-arch gap=16·lotto gap=13·op-analysis gap=1(직전 사이클 발화) 전부 미근접. explore-idea saturation 4/15 미충족. DESIGN.md mtime 0일(당일 수정) — design-system trigger 無. Supabase/lotto 외부 블로커 재확인(DNS NXDOMAIN 지속, dhlottery/lottolyzer 로컬 curl 도 timeout — cycle 3021과 동일, 변화 없음) — op-analysis 추가 발화 불필요. 직전 cycle 3021 추천대로 review-code(heavy) 선택, 스코프 = `components/share`(ShareButtons.tsx, 마지막 수정 cycle 600) + `components/glossary`(GlossaryCategoryFilter.tsx, 마지막 수정 cycle 699) — 둘 다 2300+ 사이클 미재감사 최소 스코프.
