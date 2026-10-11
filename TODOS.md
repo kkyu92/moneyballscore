@@ -1,4 +1,16 @@
 
+## 🔴 URGENT USER ACTION — fix-incident: Supabase 프로젝트 INACTIVE, restore API 결제 차단 (cycle 3019, 2026-10-11)
+
+**요약**: Supabase 프로젝트(`utmimgpccbrciwuuacyw`, org `vsqwlnoopqllzdwpczfr`)가 기존 "egress quota 402 degraded" 상태(65일+ 지속, cycle 2999~3018 확인)에서 **완전 INACTIVE 로 에스컬레이션**. DNS 조차 NXDOMAIN(8.8.8.8/1.1.1.1 양쪽 확인) — PostgREST 응답조차 못 받는 상태로 악화. 운영 사이트 홈페이지가 "경기가 없습니다" 표시 중(실측, DB 데이터 전부 unreachable). `health-alert` GH Action 이 2026-10-10 18:42 KST 부터 3회 연속 실패(18:42/22:41/01:59) — 약 9시간+ 지속.
+
+**진단 (Supabase Management API 직접 확인)**:
+- `GET /v1/projects/utmimgpccbrciwuuacyw` → `status: "INACTIVE"`
+- `POST /v1/projects/utmimgpccbrciwuuacyw/restore` → **HTTP 402**: `"This organization is currently under service restrictions. The project can only be restored once restrictions are lifted or organization is upgraded to paid plan."`
+
+**필요 사용자 조치 (본 메인 자율 실행 불가 — 비용 가드)**: Supabase 대시보드 (https://supabase.com/dashboard/org/vsqwlnoopqllzdwpczfr/billing) 접속 → 미납 청구 해결 또는 유료 플랜 업그레이드 → restriction 해제 후 프로젝트 restore (대시보드에서 직접 또는 restore API 재시도). **해결 전까지 사이트 전체 DB 의존 기능(예측/경기 데이터) 작동 불가.**
+
+health-alert 코드 자체는 정상 작동 (TypeError: fetch failed → status=error → overall=fail → 503, 의도대로 loud failure). 코드 수정 불필요 — 순수 billing/org 조치 대기.
+
 ## 🟡 RETRO-ONLY — polish-ui: 2-chain lock fallback, 색상/타이포 토큰 전수 재검증 갭 0건 (cycle 3018, 2026-10-10)
 
 진단: 직전8(3010-3017) distinct=2(review-code(heavy)7+design-system1) — 2-chain lock 발동, 둘 다 제외. open issue 0건, approved plan 0/24. fix-incident gap=10/20·lotto gap=9/30·info-arch gap=12/30 전부 미근접. gh run list 전부 success/skipped, CI 정상. operational-analysis gap=50/25 대폭 초과했으나 fresh curl 재확인(https://utmimgpccbrciwuuacyw.supabase.co REST) — HTTP 402 exceed_egress_quota 그대로 지속(65일+ billing block), skip. explore-idea saturation 13/15 충족하나 organic idea 부재(open issue 0/approved plan 0/TODOS Next-Up 부재) skip. 모든 chain trigger 없어 lock fallback(polish-ui 강제) 적용.
