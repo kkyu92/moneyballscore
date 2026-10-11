@@ -15,8 +15,11 @@ interface TeamLogoProps {
  * next/image 기본 optimizer 통과 (PNG, unoptimized 아님).
  */
 export function TeamLogo({ team, size = 48, className = '' }: TeamLogoProps) {
+  // DB 조회 경로(page.tsx 등)에서 `row.home_team?.code as TeamCode` 캐스팅으로
+  // 검증 없이 넘어온 값이 KBO_TEAMS 밖일 수 있음 — MlbTeamLogo.tsx 와 동일 방어
+  // (Sentry MONEYBALLSCORE-1B, MLB 쪽에서 실제 발생한 undefined.name 크래시 패턴).
   const teamInfo = KBO_TEAMS[team];
-  const alt = `${teamInfo.name} 로고`;
+  const alt = `${teamInfo?.name ?? team} 로고`;
 
   return (
     <Image
