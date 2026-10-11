@@ -1,4 +1,22 @@
 
+## 🟢 SUCCESS — review-code(heavy): matchup/insights/analysis 컴포넌트 전수 감사, silent drift 4건 정정 (cycle 3048, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/30(Tier4 불변). 2차 방어선(cycle 3047 retro `66d05bf6`) OK. Supabase 여전히 INACTIVE(nslookup NXDOMAIN 지속, op-analysis 25+ gap 계속 블락). 직전8(3040-3047) distinct=2(review-code(heavy)3+fix-incident5) — 2-chain lock 충족이나 fix-incident 포함 → lock 무시 룰 적용, 둘 다 후보 유지. fix-incident 라인은 cycle 3047 retro 가 "captureFallback 34개 전수 커버 완결"로 명시 — 신규 trigger 없음. lotto gap=10/30·info-arch gap=12/30 전부 미근접. TODOS.md grep count 로 candidate 선정(matchup/insights/analysis 저언급) 후 review-code(heavy) 선택 — grep count 는 selection heuristic 으로만 사용, 실제 감사는 전수 read 원칙 준수(cycle 3001 가드레일).
+
+subagent 위임 전수 read(matchup 11파일 + insights 2파일+4테스트 + analysis 12파일+2테스트, 총 31파일): 4건 실제 수정.
+1. `DebateTimeline.tsx` — step title 하드코딩 순번("1."~"5.")이 CE/partial-debate 로 일부 step(2~4) 스킵 시 렌더 circle 번호(`idx+1`)와 어긋나 "①③" 처럼 보이는 numbering drift. title 에서 순번 리터럴 제거, 렌더 시 `{idx+1}. {title}` 로 파생.
+2. `GameAnalysisProse.tsx` — "{KBO_FACTOR_COUNT}개 팩터를 종합" 서술 직후 같은 문장에서 `SUMMARY_FACTOR_KEYS`(4개 고정) 만 나열하며 "~을 가중합산한 결과" 라 해 10 vs 4 모순으로 읽힘. "핵심 팩터인 ... 등을" 로 한정 명시.
+3. `MatchupConvergencePickRecord.tsx` — 강수렴/완전수렴 임계(8/10팩터) 하드코딩 텍스트. 현재는 정확하지만 sibling `TeamConvergencePickRecord.tsx` 는 이미 `FACTOR_PICK_STRONG`/`FACTOR_PICK_COMPLETE` 상수 참조 — 재발 방지 위해 동일 패턴으로 통일.
+4. `ThisWeekStatusFilter.tsx` — pending 라벨 "미결", 같은 `/analysis` 페이지 인접 섹션 `YesterdayStatusFilter`+`PicksStatusFilter` 는 "대기" — 다수 컨벤션("대기")으로 통일.
+
+보류 2건(기록만): `MlbMatchupRecentForm.tsx` STRINGS 하드코딩이 `factorLabels.ts` 기존 상수와 중복되나 디렉토리 전체 MLB twin 이 동일 패턴이라 단독 수정 시 비일관 — skip. `MatchupSeasonHeadToHead.tsx`(ko "5승 3승") vs `MlbMatchupSeasonHeadToHead.tsx`(ko "5-3") win-count 포맷 차이는 의도된 US-스포츠 컨벤션 가능성 배제 못 함 — product 판단 필요, 코드 변경 보류.
+
+나머지 25개 파일(factor-compare 8/7팩터 분리 근거, KBO/MLB twin parity gap 설명 주석, factor-count 동적 파생 코드 등) 전부 clean 확인 — 과거 fix(d81a0479 "5팩터→8팩터" 등) 재검증 포함.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4629 tests 전체 green. 직접 main 커밋+push(R4 범위, `5cffaf6e`, pre-push hook lint+type-check+version-sync-guard 전부 PASS).
+
+다음 사이클 추천 = review-code(heavy) 계속(남은 미스윕 디렉토리 재탐색 — `components/live`/`components/dashboard`/`components/glossary`/`components/leaderboard` 후보) 또는 fix-incident(gap=1/20, 신규 trigger 없으면 skip) 또는 lotto(gap=11/30, 다음 토 10/17 전) 또는 op-analysis(Supabase 복구 시, gap=25+/25 최장 미발화 지속).
+
 ## 🟢 SUCCESS — fix-incident: DB 장애 구분 배너를 MLB twin 10개 페이지로 확장 (cycle 3047, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/24(전부 status≠approved). 2차 방어선(cycle 3046 retro `245c0957`) OK. Supabase 여전히 INACTIVE(nslookup NXDOMAIN 지속). 직전8(3039-3046) distinct=2(review-code(heavy)4+fix-incident4) — 2-chain lock 충족이나 잠긴 chain 중 fix-incident 포함 → lock 무시 룰(SKILL 단계2 #4) 적용. lotto gap=9/30·info-arch gap=11/30·design-system(DESIGN.md 17h 신선) 전부 미근접. explore-idea saturation 14/15(review-code9+fix-incident4+info-arch1) 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale) — 반복 패턴으로 skip. cycle 3045 retro 가 "남은 MLB twin 10개 페이지는 저우선 다음 후보"로 명시 — 이번 사이클 그 잔여분 처리.
