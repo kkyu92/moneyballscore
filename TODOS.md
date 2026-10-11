@@ -1,4 +1,22 @@
 
+## 🟢 SUCCESS — lotto(lite): 1245회 자동 fetch 전면 불능 → 복수 외부보도 교차검증 수동 박제 + count_smoke (cycle 3038, 2026-10-11)
+
+진단: 2-chain lock 탐지(직전8 3030-3037 distinct=2: review-code(heavy)6+info-architecture-review1) → 두 chain 제외. open issue 0건, approved plan 0/25(plan#29 불변). explore-idea saturation 14/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) — 과거 반복 패턴과 동일 skip. DESIGN.md 당일(10/10 23:43) 갱신이라 design-system 미도달. gap trigger(fix-incident 10/20·op-analysis 17/25·lotto 9/30) 전부 미도달이나, lotto 결과 파일 신선도 직접 확인 중 실제 incident 발견: `apps/moneyball/data/lotto-results/` 최신 파일 2026-10-03 — 직전 토요일(10/10) 1245회차 추첨 결과 미반영(cycle 3028 recheck 권고 그대로 재확인).
+
+**원인 확정**: `pnpm tsx scripts/lotto.ts update` 재실행 → dhlottery+lottolyzer 둘 다 기존 회차(1244) 재조회조차 실패(1차 방어선 분기 발동, exit 1). `gh run list --workflow=lotto-result-update.yml` 최신 run(05:22 KST) 로그 대조 → 동일 실패 재현(production 에서도 동일). 독립 2중 검증(샌드박스 curl + WebFetch, 서로 다른 egress IP)으로 dhlottery(`ECONNREFUSED`)·lottolyzer(`ECONNREFUSED`) 둘 다 TCP 단계에서 거부 확인 — cycle 3024/3028 이 문서화한 "GH Actions IP 차단(dhlottery)" 패턴이 이번엔 fallback 소스(lottolyzer)까지 확장된 전면 불능 상태로 악화(종전엔 lottolyzer 가 fallback 으로 항상 성공).
+
+**조치**: WebSearch 로 1245회(2026-10-10 추첨) 당첨번호를 복수 독립 언론사(econovill/mt.co.kr/topstarnews/tf.co.kr/wikitree/news1, 6개 매체 전부 동일 수치 보도) 교차검증 — **4 5 25 28 32 42 / 보너스 12** (1등 10명 전부 자동, 각 30억651만5775원). cycle 1414(1230회) 선례와 동일 패턴으로 `scripts/lotto-data.json` 에 수동 append(round/date/numbers/bonus) 후 `result-md 1245 "4,5,25,28,32,42" 12` 기존 manual-override 인자(cycle 1292 박제, 1229회 선례)로 OOS 리포트 생성.
+
+**부가 수정**: `result-md` 가 manual override 경로를 타도 메타 섹션에 "추첨 결과 자동 fetch (dhlottery.co.kr API)" + "(cron 새벽 자동)" 을 그대로 찍어 실제론 수동 입력인데 자동 fetch 로 거짓 서술하는 silent-drift 위험 발견(`scripts/lotto.ts` line 2569-2570) — `sourceLabel` 변수 도입해 수동 입력/lottolyzer fallback/dhlottery 성공 3갈래 정확히 구분, 생성 타임스탬프도 "(수동 실행)" vs "(cron 새벽 자동)" 분기.
+
+**execution.results 5 field**: count_smoke=OK(96.9s, 유효 7,705,415/8,145,060, 제거 5.40%) / valid_delta=0(직전 측정과 완전 동일 수치, 신규 round 가 256 rule 경계 변화 없음) / new_rules=0 / pick_sample=기존 2026-10-10.md(1245회용) 10세트 매칭 결과로 대체(1등 0·4등 5·5등 15, 256/256 PASS — 다음 1246회 picks는 cron 화요일(10/13) 생성 예정, 아직 미도달이라 미생성 정상) / self_verify=production cron 로그 대조 + 2중 독립 네트워크 검증(샌드박스+WebFetch) + 6개 언론사 교차검증.
+
+**검증**: `tsc --noEmit` clean(apps/moneyball), `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4628 tests 전체 green(lotto 전용 9 files/84 tests 포함). `scripts/lotto-data.json` JSON 무결성(중복 0건, 정렬 유지) 별도 확인. main 직접 commit+push(R4 범위).
+
+Supabase INACTIVE(cycle 3019 최초 발견) 는 본 cycle 시작 시 재확인(nslookup NXDOMAIN + 사이트 "경기가 없습니다" 재확인, R5 세션 시작 검증) — 여전히 미해결, 사용자 조치 대기 변화 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속(2-chain lock 해제, `apps/moneyball/src/components/` 잔여 또는 `packages/kbo-data`) 또는 fix-incident(gap=11/20) 또는 info-arch(gap=3/30) 또는 op-analysis(gap=18/25) — dhlottery+lottolyzer 전면 불능 지속 시 1246회(10/17) 추첨 후에도 동일 수동 override 절차 재사용 필요(절차 박제 완료, 반복 가능).
+
 ## 🟢 SUCCESS (retro-only, clean audit) — review-code(heavy): lib/{calendar,changelog,predictions,seo,stats,v2-shadow-monitor} 전수 스윕, 결함 0건 (cycle 3037, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/25(plan#29 불변, 만료 2026-10-15). 2차 방어선(cycle 3036 retro `3961570e`) OK. gap trigger 4종(fix-incident 9/20, op-analysis 16/25, lotto 8/30, info-arch 1/30) 전부 미도달. 직전8(3029-3036) distinct=3(lotto(lite)1+review-code(heavy)6+info-architecture-review1) — 2-chain lock 미충족. cycle 3036 추천대로 review-code(heavy) 계속, 잔여 미스윕 `apps/moneyball/src/lib/` 디렉토리(calendar/changelog/leaderboard/players/predictions/seo/stats/v2-shadow-monitor — leaderboard/players는 cycle 3034에서 이미 재검증 완료) 선정.
