@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): insights/loader.ts getInsightsForDate build-time crash 정정 (cycle 3034, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/24(plan#29 불변, 만료 2026-10-15). 2차 방어선(cycle 3033 retro `aba35bfa`) OK. gap trigger 4종(fix-incident 6/20, op-analysis 13/25, info-arch 28/30, lotto 5/30) 전부 미도달. 직전8(3026-3033) distinct=3(review-code(heavy)4+fix-incident3+lotto(lite)1) — 2-chain lock 미충족. 직전 cycle(3033) 추천대로 review-code(heavy) 계속, 미대조 lib/ 디렉토리(analysis/api/calendar/changelog/insights/leaderboard/players/predictions/reviews/seo/stats/v2-shadow-monitor) 스윕.
+
+subagent 위임 전수 read 결과 "unguarded assertSelectOk" sibling-asymmetry 패턴으로 leaderboard/server.ts, players/buildBatterLeaderboard.ts, buildPitcherLeaderboard.ts, buildPitcherProfile.ts, reviews/shared.ts, reviews/mlb-shared.ts, reviews/buildMissReport.ts 7개 파일 13개 호출부가 보고됐으나, **captureFallback 으로 수정 적용 직후 기존 회귀 테스트(`leaderboard/players/reviews/__tests__/silent-drift.test.ts`, cycle 173/453 박제) 가 전부 실패** — 재확인 결과 이 파일들은 cycle 173/453 때 "DB 에러 시 빈 배열/null 반환이 '참여자 0명'/'선수 없음'/'검증 0' 으로 위장돼 정상 미검증과 DB 오류를 구분 못 함" 문제를 고치기 위해 **의도적으로 fail-loud(throw)** 로 전환되고 회귀 테스트로 고정된 설계 — 주석의 "호출 site(page)가 catch 결정" 문구가 stale 할 뿐 throw 자체는 버그가 아님(Next.js error boundary 가 사용자에게 보임, 의도된 동작). 7개 파일 수정 전량 `git restore` 로 되돌림(커밋 전 발견, 실제 push 없음). **교훈**: "unguarded assertSelectOk = sibling-asymmetry 버그" 휴리스틱이 항상 성립하지 않음 — fix 적용 전 해당 디렉토리에 `silent-drift*.test.ts` 류 회귀 가드 존재 여부 먼저 확인 필요(grep-count-depth 가드레일, cycle 3001 과 유사한 성격의 새 가드레일 후보).
+
+같은 subagent 보고 중 `insights/loader.ts` 의 `getInsightsForDate` 는 다른 성격 — 유일 호출자가 `app/insights/[date]/page.tsx`(`dynamicParams=false` 정적 생성 라우트) 이고 try/catch 없음. 이 파일의 `generateStaticParams` 자체에 "DB 장애가 이 선택적 아카이브 feature 의 빌드를 넘어 전체 production 빌드를 죽이면 안 됨"(cycle 2945 fix-incident) 명시 주석이 있는데, `getInsightsForDate` 가 throw 하면 build-time 에 이 의도와 정면 모순(페이지 생성 실패 → 빌드 실패 가능). 이 함수엔 silent-drift 류 throw-lock 회귀 테스트가 없음(`loader.test.ts`/`silent-drift-cycle-2291.test.ts` 확인) — 실제 버그로 확정, captureFallback(빈 배열) 로 degrade, 호출 page 는 `entries=[] → notFound()` 로 해당 날짜만 404 처리(빌드는 보존).
+
+신규 회귀 테스트(`loader.test.ts`) 2건 추가(try/catch+captureFallback 소스 패턴 가드 + import 확인).
+
+**검증**: `tsc --noEmit` clean, lint clean, `pnpm --filter moneyball test` 587 files/4626 tests 전체 green(신규 2건 포함). pre-push(lint+type-check+version-sync-guard) PASS. main 직접 commit+push(`c4194554`, PR 미경유 R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속 — 7개 파일 오탐 경험으로 얻은 "silent-drift 회귀 테스트 존재 여부 사전 확인" 가드레일을 다음 sweep 부터 적용 권장, 또는 fix-incident(gap=7/20) 또는 info-arch(gap=29/30, 거의 도달) 또는 lotto(gap=6/30).
+
 ## 🟢 SUCCESS — review-code(heavy): buildMlbTeamEloTrend 리그 평균 forward-fill 누락 정정 (cycle 3033, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/24(plan#29 불변, 만료 2026-10-15). 2차 방어선(cycle 3032 retro `fbc936b4`) OK. gap trigger 재측정 — op-analysis gap 계산 시 `chain_selected` 문자열에 `(lite)` 접미사가 붙어 단순 `== 'operational-analysis'` 비교로는 매치 실패, prefix-match 로 재확인한 결과 실제 마지막 발화는 cycle 3021(gap=12/25) — 초기 gap=109 판단은 매칭 버그였음(정정). fix-incident gap=5/20, info-arch gap=27/30, lotto gap=4/30 — 전부 미도달. 직전8(3025-3032) distinct=3(review-code(heavy)4+fix-incident3+lotto(lite)1) — 2-chain lock 미충족. Supabase 프로젝트 INACTIVE(cycle 3019 최초 발견) nslookup 재확인 — 여전히 NXDOMAIN, 미해결(사용자 조치 대기, 재확인은 cycle 3021/3027 이미 저가치 반복 판정돼 skip). op-analysis 는 DB 의존이라 현재 측정 불가 — review-code(heavy) 로 전환, 직전 cycle(3032) 추천대로 계속.
