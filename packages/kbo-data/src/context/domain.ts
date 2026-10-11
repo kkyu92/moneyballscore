@@ -17,7 +17,7 @@
  * Step 3 (buildAgentContext) 에서 본 모듈 + MetricRegistry + AgentContext 결합.
  */
 
-import { KBO_TEAMS, KBO_STADIUM_SHORT, KBO_RIVALRIES, isRivalry, shortTeamName, type TeamCode } from '@moneyball/shared';
+import { KBO_TEAMS, KBO_STADIUM_SHORT, KBO_RIVALRIES, isRivalry, shortTeamName, RECENT_FORM_GAMES, type TeamCode } from '@moneyball/shared';
 
 /** KBO 구장 단일 context — LLM prompt 안 직접 삽입 가능한 형태. */
 export interface ParkContext {
@@ -95,7 +95,7 @@ export function getSeasonPhase(date: Date): SeasonPhase {
  * 5 로 박제되어 TIME_WINDOWS context layer 미참조 패턴 정정.
  */
 export const TIME_WINDOWS = Object.freeze({
-  recent_form: { games: 10, ko: '최근 10경기' },
+  recent_form: { games: RECENT_FORM_GAMES, ko: `최근 ${RECENT_FORM_GAMES}경기` },
   h2h_window: { days: 30, ko: '최근 30일 상대 전적' },
   h2h_recent_games: { games: 5, ko: '최근 5경기 상대 전적' },
   season: { days: 180, ko: '시즌 누적' },

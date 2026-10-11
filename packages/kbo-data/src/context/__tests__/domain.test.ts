@@ -9,7 +9,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { KBO_TEAMS, KBO_RIVALRIES, type TeamCode } from '@moneyball/shared';
+import { KBO_TEAMS, KBO_RIVALRIES, RECENT_FORM_GAMES, type TeamCode } from '@moneyball/shared';
 import {
   KBO_PARKS,
   KBO_DOMAIN_KB,
@@ -94,7 +94,7 @@ describe('getSeasonPhase', () => {
 
 describe('TIME_WINDOWS', () => {
   it('predictor / retro / agent 공유 표준 값', () => {
-    expect(TIME_WINDOWS.recent_form.games).toBe(10);
+    expect(TIME_WINDOWS.recent_form.games).toBe(RECENT_FORM_GAMES);
     expect(TIME_WINDOWS.h2h_window.days).toBe(30);
     expect(TIME_WINDOWS.season.days).toBe(180);
   });
