@@ -11655,3 +11655,19 @@ SKILL.md line 686 압축 요약 phase42→43 갱신. pnpm test 571 files/4492 te
 skill-evolution 자체 trigger5 재평가: 직전20(2782-2801) review-code 7회 발화 확인 → 다음 cycle(2802) marker 미박제(정상 진행).
 
 다음 사이클 추천 = review-code(heavy) backlog 최초 완전 소진 국면 — 신규 축 재진단 필요, 없으면 gap-fill(fix-incident 4/20, op-analysis 20/25, lotto 19/30) 자연 대기.
+
+## 🟢 SUCCESS — review-code(heavy): MLB insights series 페이지 DB 장애 build-time crash 정정 (cycle 3035, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/24(plan#29 불변, 만료 2026-10-15). 2차 방어선(cycle 3034 retro `041fbc83`) OK. gap trigger 4종(fix-incident 7/20, op-analysis 14/25, info-arch 29/30 근접, lotto 6/30) 전부 미도달. 직전8(3027-3034) distinct=3(review-code(heavy)5+fix-incident2+lotto(lite)1) — 2-chain lock 미충족. explore-idea saturation(직전15) 13/15 충족했으나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 신선) 5연속 동일 결론 — review-code(heavy) fallback. Supabase INACTIVE 지속 확인(nslookup NXDOMAIN, 반복 저가치 재확인 skip, 사용자 조치 대기 변화 없음).
+
+subagent 위임으로 `apps/moneyball/src/lib/{analysis,calendar,changelog,insights,predictions,seo,stats,v2-shadow-monitor}/` 전 파일 전수 read(cycle 3034 insights/loader.ts 제외 나머지 전부). 대부분 pure function/파일시스템 기반이라 KBO/MLB twin DB 가드 비대칭 적용 대상 자체가 없음(analysis/convergenceRecord.ts 는 이미 7곳 전부 가드 확인).
+
+**실제 발견**: `insights/series.ts`(KBO) 의 `getSeriesByTopic` 과 `mlb/insights/insights-data.ts` 의 `getMlbSeriesByTopic` 은 lib 레벨에서 둘 다 `assertSelectOk` unguarded — 대칭. 하지만 그 **호출부(page.tsx)** 에서 비대칭 발견: KBO `/insights/series/[topic]/page.tsx` 는 try/catch + 0건 degrade(fix-incident cycle 2946 패턴)를 갖췄는데, MLB twin 양쪽(`/mlb/insights/series/[topic]/page.tsx`, `/en/mlb/insights/series/[topic]/page.tsx`) 는 미가드 — transient DB 에러가 이 페이지 렌더/빌드를 그대로 죽임. `mlb-insights-series.test.ts` 전체 확인, fail-loud 회귀 가드 부재 확인 후 버그 확정(cycle 3034 가드레일 적용 — silent-drift 회귀 테스트 존재 여부 먼저 확인).
+
+TeamLogo/MlbTeamLogo(3026) → revalidate(3030) → health/route.ts(3031) → matchup/standings(3032) → insights/loader.ts(3034) 에 이은 **6번째 sibling-asymmetry 사례**.
+
+MLB KO+EN 양쪽에 KBO twin과 동일 try/catch + console.error degrade 패턴 이식, 회귀 테스트 2건 추가(`mlb-insights-series.test.ts`).
+
+**검증**: `tsc --noEmit` clean, lint clean, `pnpm --filter moneyball test` 587 files/4628 tests 전체 green(신규 2건 포함). pre-push(lint+type-check+version-sync-guard) PASS. main 직접 commit+push(`216b61c4`, PR 미경유 R4 범위).
+
+다음 사이클 추천 = info-arch(gap=30/30, 다음 사이클 정확 도달 — 자연 트리거 유력) 또는 review-code(heavy) 계속(lib/ 8개 디렉토리 소진 — components/ 재스윕 또는 packages/kbo-data 신규 축 필요) 또는 fix-incident(gap=8/20).
