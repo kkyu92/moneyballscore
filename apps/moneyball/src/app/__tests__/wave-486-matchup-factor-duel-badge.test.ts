@@ -5,7 +5,7 @@ import { FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 
 // wave-486: matchup/[teamA]/[teamB] 팩터 N:M 종합 배지
 // Feature-Drift Cycle: review-code (wave-485) → explore-idea (wave-486)
-// wave-486: MatchupFactorCompare.tsx — 5팩터 비교 후 우세 팀 N:M 종합 배지 + FACTOR_LABELS_SHORT 인라인 표시
+// wave-486: MatchupFactorCompare.tsx — 8팩터 비교 후 우세 팀 N:M 종합 배지 + FACTOR_LABELS_SHORT 인라인 표시
 
 const matchupFactorCompareSrc = readFileSync(
   join(__dirname, '../../components/matchup/MatchupFactorCompare.tsx'),
@@ -53,7 +53,7 @@ describe('wave-486 — matchup 팩터 N:M 종합 배지', () => {
 
   it('factorLabels.ts: wave-486 bullet 존재', () => {
     expect(factorLabelsSrc).toContain(
-      'wave-486 matchup/[teamA]/[teamB] 팩터 N:M 종합 배지 (cycle 1849): MatchupFactorCompare.tsx — 5팩터 비교 후 팀A/B 우세 팩터 수 집계 → N:M 종합 verdict + 우세 팩터 단축 레이블 인라인 표시 (wave-480 DETAIL / wave-482 LIST 패턴 matchup 페이지 적용).',
+      'wave-486 matchup/[teamA]/[teamB] 팩터 N:M 종합 배지 (cycle 1849): MatchupFactorCompare.tsx — 8팩터 비교 후 팀A/B 우세 팩터 수 집계 → N:M 종합 verdict + 우세 팩터 단축 레이블 인라인 표시 (wave-480 DETAIL / wave-482 LIST 패턴 matchup 페이지 적용).',
     );
   });
 

@@ -201,7 +201,7 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
         })}
       </div>
 
-      {/* wave-486: N:M 팩터 균형 배지 — 5팩터 비교 후 종합 verdict 표시 (wave-480 DETAIL / wave-482 LIST 패턴 적용) */}
+      {/* wave-486: N:M 팩터 균형 배지 — 8팩터 비교 후 종합 verdict 표시 (wave-480 DETAIL / wave-482 LIST 패턴 적용) */}
       {(() => {
         const results = FACTORS.map((f) => ({
           slug: f.slug,
