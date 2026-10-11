@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/accuracy+matchup+analysis+live 전수 감사, MatchupFactorCompare stale "5팩터" 정정 (cycle 3039, 2026-10-11)
+
+진단: 직전8(3031-3038) distinct=3(review-code(heavy)6+info-architecture-review1+lotto(lite)1) — 2-chain lock 미충족. open issue 0건, approved plan 0/29(전부 status≠approved). gap trigger 전부 미근접(fix-incident 11/20, op-analysis 18/25, lotto 1/30, info-arch 3/30). cycle 3037 추천대로 review-code(heavy) 계속, `apps/moneyball/src/components/` 중 과거 전수 스윕 이력 0건(grep 확인)인 잔여 4개 디렉토리(accuracy/analysis/matchup/live, 총 35파일) 선정.
+
+subagent 2개 병렬 위임 전수 read(accuracy+matchup 19파일 / analysis+live 16파일, packages/shared 상수 cross-check + KBO/MLB sibling pair 전수 diff 포함) 결과: **실제 결함 1건** — `MatchupFactorCompare.tsx:204` 인라인 주석 "5팩터"가 wave-486(cycle 1849) 작성 당시엔 정확했으나(FACTORS 배열 5개), wave-621(xFIP/SFR/WAR 추가 커밋 `c59c0a18`)에서 배열이 8개로 확장된 후 주석만 갱신 안 된 stale drift(MLB sibling `MlbMatchupFactorCompare.tsx`는 이미 "8팩터"로 정확). 동일 stale 텍스트가 `wave-486-matchup-factor-duel-badge.test.ts`(주석 2곳, assertion 아님) + `lib/predictions/factorLabels.ts`(주석 1곳)에도 복사되어 있어 같은 커밋에서 3곳 모두 "8팩터"로 정정. 그 외 34개 파일(CalibrationPlot/CommunityVsAICard/FactorAccuracyTable/MlbAccuracyDashboard/ModelVersionHistory/TeamBiasTable/TeamMatchupCards + matchup 10개 파일 + analysis 12개 파일 + LiveScoreboard + silent-drift-cycle-2621 regression test)는 전부 clean — 상수 drift 0, KBO/MLB sibling 비대칭 0(TeamStrengthGrid/MlbTeamStrengthGrid 의도된 데이터 가용성 차이로 확인), dead code 0, 테스트-구현 불일치 0.
+
+**review-code(heavy)의 `apps/moneyball/src/components/` 전체 커버리지가 이번 사이클로 완결**(accuracy/analysis/matchup/live 포함 전 디렉토리 전수 스윕 이력 확보) — 남은 미스윕 축 = `packages/kbo-data`.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4628 tests 전체 green. 직접 main 커밋+push(R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 스코프 전환(`packages/kbo-data` 신규 축) 또는 fix-incident(gap=12/20, Supabase INACTIVE 여전히 NXDOMAIN 사용자 조치 대기 재확인) 또는 lotto(gap=2/30, 1246회 10/17 전) 또는 info-arch(gap=4/30).
+
 ## 🟢 SUCCESS — lotto(lite): 1245회 자동 fetch 전면 불능 → 복수 외부보도 교차검증 수동 박제 + count_smoke (cycle 3038, 2026-10-11)
 
 진단: 2-chain lock 탐지(직전8 3030-3037 distinct=2: review-code(heavy)6+info-architecture-review1) → 두 chain 제외. open issue 0건, approved plan 0/25(plan#29 불변). explore-idea saturation 14/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) — 과거 반복 패턴과 동일 skip. DESIGN.md 당일(10/10 23:43) 갱신이라 design-system 미도달. gap trigger(fix-incident 10/20·op-analysis 17/25·lotto 9/30) 전부 미도달이나, lotto 결과 파일 신선도 직접 확인 중 실제 incident 발견: `apps/moneyball/data/lotto-results/` 최신 파일 2026-10-03 — 직전 토요일(10/10) 1245회차 추첨 결과 미반영(cycle 3028 recheck 권고 그대로 재확인).
