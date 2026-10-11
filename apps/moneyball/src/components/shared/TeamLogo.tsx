@@ -8,12 +8,11 @@ interface TeamLogoProps {
 }
 
 /**
- * v4-4: 팀 로고 컴포넌트.
+ * 팀 로고 컴포넌트.
  *
- * `public/logos/{team}.svg` 파일 사용. 현재는 SVG 플레이스홀더 (팀 색 + 약어).
- * 실제 공식 로고는 동일 파일명으로 덮어쓰면 즉시 반영.
- *
- * SVG는 next/image unoptimized (빌드 시 변환 없음).
+ * `public/logos/{team}.png` 파일 사용 (네이버 스포츠 CDN 출처 KBO 공식 엠블럼, public/logos/README.md 참고).
+ * 실제 공식 로고로 교체 시 동일 파일명 덮어쓰기로 즉시 반영.
+ * next/image 기본 optimizer 통과 (PNG, unoptimized 아님).
  */
 export function TeamLogo({ team, size = 48, className = '' }: TeamLogoProps) {
   const teamInfo = KBO_TEAMS[team];
