@@ -83,8 +83,14 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
 }
 
 export default async function ReviewsPage() {
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // getVerifiedPredictions 결과를 {status, value|reason} 모양으로 분리 수신 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  // 나머지 수렴 픽 집계 함수들은 captureFallback 비가드(fail-loud) — 동시성 유지 위해 별도 Promise.all.
+  const predictionsPromise = getVerifiedPredictions().then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
+  );
   const [
-    predictions,
     strongConvergenceRecord,
     completeConvergenceRecord,
     strongConvergenceStreak,
@@ -98,9 +104,6 @@ export default async function ReviewsPage() {
     strongDayOfWeekSplit,
     completeDayOfWeekSplit,
   ] = await Promise.all([
-    getVerifiedPredictions().catch((err) =>
-      captureFallback(err, [] as VerifiedPredictionRow[], { route: "/reviews", source: "getVerifiedPredictions" }),
-    ),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE),
     // wave-592: 강수렴 픽 현재 streak + 시즌 최장 streak
@@ -119,6 +122,12 @@ export default async function ReviewsPage() {
     getConvergencePickDayOfWeekSplit(FACTOR_PICK_STRONG),
     getConvergencePickDayOfWeekSplit(FACTOR_PICK_COMPLETE),
   ]);
+  const predictionsR = await predictionsPromise;
+  const predictions = predictionsR.status === "fulfilled"
+    ? predictionsR.value
+    : captureFallback(predictionsR.reason, [] as VerifiedPredictionRow[], { route: "/reviews", source: "getVerifiedPredictions" });
+  const dbDegraded = predictionsR.status === "rejected";
+
   const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
   const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);
 
@@ -151,6 +160,14 @@ export default async function ReviewsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Breadcrumb items={[{ label: '예측 결과 리뷰' }]} />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
       <div>
         <h1 className="text-3xl font-bold">예측 결과 리뷰</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">

@@ -94,17 +94,32 @@ export default async function MatchupPage({ params }: PageProps) {
     redirect(pair.path);
   }
 
-  const [profile, factorA, factorB, formA, formB, upcomingMatchup, strongH2HStats, completeH2HStats, eloTrend] = await Promise.all([
-    buildMatchupProfile(pair),
-    buildTeamFactorAverages(pair.codeA).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeA" })),
-    buildTeamFactorAverages(pair.codeB).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeB" })),
-    buildTeamRecentForm(pair.codeA, MATCHUP_RECENT_FORM_GAMES).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeA" })),
-    buildTeamRecentForm(pair.codeB, MATCHUP_RECENT_FORM_GAMES).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeB" })),
-    buildMatchupUpcoming(pair).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupUpcoming" })),
-    getConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, FACTOR_PICK_STRONG).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(strong)" })),
-    getConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, FACTOR_PICK_COMPLETE).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(complete)" })),
-    buildMatchupEloTrend(pair.codeA, pair.codeB).catch((err) => captureFallback(err, { points: [] }, { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupEloTrend" })),
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  // buildMatchupProfile 은 captureFallback 비가드(fail-loud) — 동시성 유지 위해 별도 promise 로 분리.
+  const profilePromise = buildMatchupProfile(pair);
+  const [factorAR, factorBR, formAR, formBR, upcomingMatchupR, strongH2HStatsR, completeH2HStatsR, eloTrendR] = await Promise.allSettled([
+    buildTeamFactorAverages(pair.codeA),
+    buildTeamFactorAverages(pair.codeB),
+    buildTeamRecentForm(pair.codeA, MATCHUP_RECENT_FORM_GAMES),
+    buildTeamRecentForm(pair.codeB, MATCHUP_RECENT_FORM_GAMES),
+    buildMatchupUpcoming(pair),
+    getConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, FACTOR_PICK_STRONG),
+    getConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, FACTOR_PICK_COMPLETE),
+    buildMatchupEloTrend(pair.codeA, pair.codeB),
   ]);
+  const profile = await profilePromise;
+  const factorA = factorAR.status === "fulfilled" ? factorAR.value : captureFallback(factorAR.reason, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeA" });
+  const factorB = factorBR.status === "fulfilled" ? factorBR.value : captureFallback(factorBR.reason, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeB" });
+  const formA = formAR.status === "fulfilled" ? formAR.value : captureFallback(formAR.reason, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeA" });
+  const formB = formBR.status === "fulfilled" ? formBR.value : captureFallback(formBR.reason, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeB" });
+  const upcomingMatchup = upcomingMatchupR.status === "fulfilled" ? upcomingMatchupR.value : captureFallback(upcomingMatchupR.reason, [], { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupUpcoming" });
+  const strongH2HStats = strongH2HStatsR.status === "fulfilled" ? strongH2HStatsR.value : captureFallback(strongH2HStatsR.reason, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(strong)" });
+  const completeH2HStats = completeH2HStatsR.status === "fulfilled" ? completeH2HStatsR.value : captureFallback(completeH2HStatsR.reason, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(complete)" });
+  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupEloTrend" });
+
+  const dbDegraded = [factorAR, factorBR, formAR, formBR, upcomingMatchupR, strongH2HStatsR, completeH2HStatsR, eloTrendR].some((r) => r.status === "rejected");
+
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 
   const todayStr = toKSTDateString();
@@ -158,6 +173,15 @@ export default async function MatchupPage({ params }: PageProps) {
           { label: `${tA.shortName} vs ${tB.shortName}` },
         ]}
       />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
         <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3 flex-wrap">

@@ -98,15 +98,26 @@ export default async function TeamPage({ params }: PageProps) {
   const { code } = await params;
   if (!isTeamCode(code)) notFound();
 
-  const [profile, eloTrend, upcoming, strongTeamStats, completeTeamStats] = await Promise.all([
-    buildTeamProfile(code),
-    buildTeamEloTrend(code).catch((err) => captureFallback(err, { points: [] }, { route: "/teams/[code]", source: "buildTeamEloTrend" })),
-    buildTeamUpcoming(code).catch((err) => captureFallback(err, [], { route: "/teams/[code]", source: "buildTeamUpcoming" })),
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  // buildTeamProfile 은 captureFallback 비가드(fail-loud) — 동시성 유지 위해 별도 promise 로 분리.
+  const profilePromise = buildTeamProfile(code);
+  const [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR] = await Promise.allSettled([
+    buildTeamEloTrend(code),
+    buildTeamUpcoming(code),
     // wave-607: 팀별 강수렴/완전수렴 픽 성적 — analysis/seasons/reviews 허브·monthly·weekly 재사용
-    getConvergencePickTeamStats(FACTOR_PICK_STRONG).catch((err) => captureFallback(err, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(strong)" })),
-    getConvergencePickTeamStats(FACTOR_PICK_COMPLETE).catch((err) => captureFallback(err, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(complete)" })),
+    getConvergencePickTeamStats(FACTOR_PICK_STRONG),
+    getConvergencePickTeamStats(FACTOR_PICK_COMPLETE),
   ]);
+  const profile = await profilePromise;
   if (!profile) notFound();
+
+  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/teams/[code]", source: "buildTeamEloTrend" });
+  const upcoming = upcomingR.status === "fulfilled" ? upcomingR.value : captureFallback(upcomingR.reason, [], { route: "/teams/[code]", source: "buildTeamUpcoming" });
+  const strongTeamStats = strongTeamStatsR.status === "fulfilled" ? strongTeamStatsR.value : captureFallback(strongTeamStatsR.reason, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(strong)" });
+  const completeTeamStats = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(complete)" });
+
+  const dbDegraded = [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR].some((r) => r.status === "rejected");
 
   const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);
@@ -156,6 +167,15 @@ export default async function TeamPage({ params }: PageProps) {
           { label: profile.name },
         ]}
       />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
         <div className="flex items-center gap-3 flex-wrap">

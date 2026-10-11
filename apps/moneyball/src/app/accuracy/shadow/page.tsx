@@ -149,9 +149,16 @@ function deltaClass(delta: number): string {
 }
 
 export default async function ShadowAccuracyPage() {
-  const pairs = await getCohortPairs().catch((err) =>
-    captureFallback(err, [] as CohortPair[], { route: "/accuracy/shadow", source: "getCohortPairs" }),
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // {status, value|reason} 모양으로 순수 파생값(dbDegraded) 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const pairsR = await getCohortPairs().then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
   );
+  const pairs = pairsR.status === "fulfilled"
+    ? pairsR.value
+    : captureFallback(pairsR.reason, [] as CohortPair[], { route: "/accuracy/shadow", source: "getCohortPairs" });
+  const dbDegraded = pairsR.status === "rejected";
   const daily = aggregateDaily(pairs);
   const totalN = pairs.length;
   const totalV18Brier = pairs.reduce(
@@ -171,6 +178,15 @@ export default async function ShadowAccuracyPage() {
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
       <Breadcrumb items={[{ label: "Shadow cohort 적중률" }]} />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="mt-4 space-y-3">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">

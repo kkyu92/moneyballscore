@@ -217,9 +217,16 @@ const FAQS = [
 ];
 
 export default async function AboutPage() {
-  const simplifiedMode = await detectSimplifiedMode().catch((err) =>
-    captureFallback(err, false, { route: "/about", source: "detectSimplifiedMode" }),
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // {status, value|reason} 모양으로 순수 파생값(dbDegraded) 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const simplifiedModeR = await detectSimplifiedMode().then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
   );
+  const simplifiedMode = simplifiedModeR.status === "fulfilled"
+    ? simplifiedModeR.value
+    : captureFallback(simplifiedModeR.reason, false, { route: "/about", source: "detectSimplifiedMode" });
+  const dbDegraded = simplifiedModeR.status === "rejected";
   const activeFactors = FACTORS.filter(
     (f) => (DEFAULT_WEIGHTS[f.key] as number) > 0,
   ).sort(
@@ -253,6 +260,14 @@ export default async function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <Breadcrumb items={[{ label: '소개' }]} />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
       {simplifiedMode && (
         <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
           AI 에이전트 심층 분석이 일시 중단됩니다. 통계 기반 승부예측은 계속 제공됩니다.

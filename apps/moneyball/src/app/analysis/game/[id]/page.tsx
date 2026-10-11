@@ -213,10 +213,30 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     notFound();
   }
 
-  const game = await getGameAnalysis(gameId).catch((err) =>
-    captureFallback(err, null, { route: '/analysis/game/[id]', source: 'getGameAnalysis' }),
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 존재하지 않는 경기(404)" 를 구분하기 위해
+  // {status, value|reason} 모양으로 순수 파생값(dbDegraded) 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  // 장애 시엔 404 대신 배너를 렌더 — 진짜 404(잘못된 game id)와 혼동되지 않도록.
+  const gameR = await getGameAnalysis(gameId).then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
   );
+  const dbDegraded = gameR.status === "rejected";
+  const game = gameR.status === "fulfilled"
+    ? gameR.value
+    : captureFallback(gameR.reason, null, { route: '/analysis/game/[id]', source: 'getGameAnalysis' });
   if (!game) {
+    if (dbDegraded) {
+      return (
+        <div className="max-w-4xl mx-auto py-12">
+          <div
+            role="status"
+            className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+          >
+            일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+          </div>
+        </div>
+      );
+    }
     notFound();
   }
 

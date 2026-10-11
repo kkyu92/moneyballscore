@@ -120,9 +120,16 @@ async function getRecentInsights(): Promise<InsightRow[]> {
 
 
 export default async function InsightsHubPage() {
-  const insights = await getRecentInsights().catch((err) =>
-    captureFallback(err, [] as InsightRow[], { route: "/insights", source: "getRecentInsights" }),
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // {status, value|reason} 모양으로 순수 파생값(dbDegraded) 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const insightsR = await getRecentInsights().then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
   );
+  const insights = insightsR.status === "fulfilled"
+    ? insightsR.value
+    : captureFallback(insightsR.reason, [] as InsightRow[], { route: "/insights", source: "getRecentInsights" });
+  const dbDegraded = insightsR.status === "rejected";
   const latestDate = insights[0]?.date ?? null;
 
   const articleJsonLd = {
@@ -157,6 +164,15 @@ export default async function InsightsHubPage() {
       />
 
       <Breadcrumb items={[{ label: "AI 인사이트" }]} />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="space-y-3">
         <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">AI 인사이트</h1>

@@ -186,9 +186,16 @@ export default async function TeamRecentPage({ params }: PageProps) {
   if (!isTeamCode(code)) notFound();
   const meta = KBO_TEAMS[code];
   const teamName = shortTeamName(code);
-  const rows = await getRecentGames(code).catch((err) =>
-    captureFallback(err, [] as RecentRow[], { route: '/teams/[code]/recent', source: 'getRecentGames' }),
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // {status, value|reason} 모양으로 순수 파생값(dbDegraded) 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const rowsR = await getRecentGames(code).then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
   );
+  const rows = rowsR.status === "fulfilled"
+    ? rowsR.value
+    : captureFallback(rowsR.reason, [] as RecentRow[], { route: '/teams/[code]/recent', source: 'getRecentGames' });
+  const dbDegraded = rowsR.status === "rejected";
 
   const verifiedRows = rows.filter((r) => r.isCorrect != null);
   const correctN = verifiedRows.filter((r) => r.isCorrect === true).length;
@@ -211,6 +218,15 @@ export default async function TeamRecentPage({ params }: PageProps) {
           { label: `최근 ${RECENT_FORM_GAMES}경기` },
         ]}
       />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
         <div className="flex items-center gap-3 flex-wrap">
