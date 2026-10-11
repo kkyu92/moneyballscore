@@ -1,3 +1,13 @@
+## v0.5.62.337 — 2026-10-11 (cycle 3025, review-code(heavy): components/shared+seasons 전수 감사, TeamLogo.tsx 6개월 stale JSDoc 정정 SUCCESS)
+
+### review-code(heavy): `components/shared/` + `components/seasons/` 전수 read — TeamLogo.tsx 6개월 stale 주석 (cycle 3025, SUCCESS)
+
+- 진단: 직전8(3017-3024) distinct=5(review-code(heavy)2+fix-incident2+design-system1+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24. fix-incident gap=1·lotto gap=16·info-arch gap=19·op-analysis gap=4 전부 미근접. explore-idea saturation 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale) — 과거 반복 패턴과 동일하게 organic idea 부재 skip. `components/shared/`(16파일, 44 commits)와 `components/seasons/`(1파일) 가 TODOS.md 전체 history 에 디렉토리 단위로 단 한 번도 전수 스윕된 적 없음을 grep 으로 확인(`AnalysisLink.tsx`/`ServiceWorkerRegister.tsx` 는 개별 언급 0건) — 신규 미탐색 스코프로 선정.
+- subagent 위임 전수 read(17파일 + 테스트 커버리지 확인) → 실제 수정 1건: `TeamLogo.tsx` JSDoc 이 "`{team}.svg` 파일 사용, 현재는 SVG 플레이스홀더(팀 색+약어), unoptimized" 라고 서술하지만 실제 코드(`src={`/logos/${team}.png`}`)는 2026-04-16 커밋(`f2e6b241`, 네이버 스포츠 CDN 실제 엠블럼 PNG 적용)이후 .png + next/image 기본 optimizer 사용 — 주석이 6개월간 교체 전 상태를 그대로 서술. 3가지 거짓 서술(확장자/내용/optimize 여부) 전부 실제 코드·`public/logos/README.md`"현재 상태" 섹션과 대조해 확정. 주석 정정 + 인접 드리프트(`public/logos/README.md` "파일 구조" 섹션이 여전히 `.svg` 파일명 나열, "SVG 권장" 문구)도 동일 근본원인이라 같이 정정.
+- 그 외 16개 파일 전부 clean 확인: `ServiceWorkerRegister.tsx`(comment=forward-looking TODO, 거짓 아님) / `AnalysisLink.tsx`(테스트 5건 존재, KBO 전용 scope 정확) / `Breadcrumb.tsx`(`SITE_URL` 공유 상수 참조 정상, `/en` 분기 MLB 전용 일관) / `TeamLogo` vs `MlbTeamLogo` parity(교차 사용 0건, substring-match 오탐 배제 재확인) / `FavoriteTeamFilter`/`MiniGameCard`/`KofiWidget`/`RelatedLinks`/`QuantOnlyBadge`/`SeasonStandingsSortControl` 등 하드코딩 값 전부 `packages/shared` 또는 의도된 KBO-only scope 확인. locale 분기 중복 패턴(`pathname.startsWith('/en/')`)은 이미 5개 파일에 반복 존재하는 repo-wide 기존 스타일(단일 source-of-truth 부재)이라 이번 스코프 특유 drift 아님 — 별도 액션 없음(기록만).
+- 검증: `tsc --noEmit` clean, `pnpm lint` clean. 주석/문서 전용 수정이라 vitest 생략, pre-push hook(lint+type-check+version-sync-guard) 전부 PASS. 직접 main 커밋(PR 미경유, R4 범위).
+- 다음 사이클 추천 = review-code(heavy) 계속(`TeamLogo.tsx` smoke test 추가 — `.png` src path assertion, 재발 방지) 또는 fix-incident(gap=2) 또는 lotto(gap=17, 10/17 다음 토 전) 또는 info-arch(gap=20).
+
 ## v0.5.62.336 — 2026-10-10 (cycle 3017, design-system: MLB nav "단일 link" 3-way stale drift 정정 SUCCESS)
 
 ### design-system: Header.tsx 주석 + components.md + DESIGN.md 3곳 MLB nav 구조 서술 정정 (cycle 3017, SUCCESS)
