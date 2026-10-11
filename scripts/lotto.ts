@@ -139,12 +139,18 @@ async function getLatestRound(): Promise<number> {
   } catch { return 0; }
 }
 
-// lottolyzer 전체 다운 시 fallback: dhlottery 직접 순차 probe (추첨 주기=주 1회라 수 회차만 확인하면 충분)
+// lottolyzer "최신 회차" 조회 다운 시 fallback: dhlottery 직접 순차 probe (추첨 주기=주 1회라 수 회차만 확인하면 충분)
+// dhlottery 도 실패하면 round 단위 lottolyzer scrape 재시도 (result-md 의 기존 dhlottery→lottolyzer fallback 패턴과 동일)
 const PROBE_MAX_ROUNDS = 5;
 async function probeNextRounds(oldLast: number): Promise<LottoRound[]> {
   const found: LottoRound[] = [];
   for (let i = 1; i <= PROBE_MAX_ROUNDS; i++) {
-    const round = await fetchRoundFromAPI(oldLast + i);
+    const r = oldLast + i;
+    let round = await fetchRoundFromAPI(r);
+    if (!round) {
+      const scraped = await fetchFromLottolyzer(new Set([r]));
+      round = scraped.find(s => s.round === r) ?? null;
+    }
     if (!round) break;
     found.push(round);
     await sleep(FETCH_DELAY_MS);
