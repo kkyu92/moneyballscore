@@ -1,4 +1,19 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api 고커밋 route 5개 전수 감사, pipeline/route.ts 2건 정정 (cycle 3054, 2026-10-11)
+
+진단: open issue 0, approved plan 0/23, Supabase 여전히 INACTIVE(op-analysis 블락 지속, cycle 3019 escalated — 신규 아님). 2차 방어선(cycle 3053 retro `babc8733`) OK. 직전8(3046-3053) distinct=3(review-code(heavy)5+fix-incident2+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=7/20·lotto gap=16/30·info-arch gap=18/30 전부 미근접, CI green. cycle 3053 추천대로 app/api 고커밋 route 5개(pipeline 11commits/health 11/health-pipelines 7/picks-results 9/kbo-scores 8) 선택.
+
+general-purpose agent 위임 전수 read(route 본문 + 호출 helper + 형제 라우트 비교 cross-check). 실제 defect 2건(pipeline/route.ts) 확인+수정, 나머지 4개 clean:
+1. `/api/pipeline` 가 미인식 `mode` 를 `'predict'` 로 silent fallback — 형제 라우트 `mlb/pipeline/route.ts` 는 400 반환하는데 KBO 라우트만 구버전 동작 잔존. Cloudflare Worker + `daily-pipeline.yml` 양쪽 호출부 확인 결과 둘 다 항상 유효 mode 명시 전달 → 400 전환 안전.
+2. `triggeredBy` 가 `pipeline_runs.triggered_by` VARCHAR(20) 경계로 clamp 안 됨 — mlb 형제 라우트는 cycle 2078 발견 패턴(`slice(0,20)`) 이미 반영했는데 KBO 라우트만 누락. overflow 시 insert 자체가 silent `.error` 리턴하는 기존 패턴 동일 재발 위험.
+3. (부수) `verify` mode revalidate 경로가 `/analysis`,`/feed` 누락 — 두 페이지 모두 `is_correct`/CE 통계 직접 참조, predict 블록과 커버리지 정합.
+
+mlb/pipeline/route.ts 패턴 그대로 이식 + 회귀 테스트 9건 신규 추가(mode 없음/invalid→400, triggeredBy clamp, 호출 인자 검증, 500 경로). `pnpm test` 588 files/4638 tests green, lint/tsc clean. 직접 main 커밋 + push (`d261b5eb`, PR 없음 — R4 단일 커밋 단위, 소규모 fix).
+
+skill-evolution trigger 평가: trigger3(milestone) 3054%50=4≠0. trigger5(직전20 inclusive, sample=20≥10) — review-code 12회 발화(영구 opt-out 9개 제외 평가대상 단독) → 미충족. ship-0 emergency stop: 직전10 전부 success(본 cycle 포함) → 미해당. marker 박제 X.
+
+다음 사이클 추천 = review-code(heavy) 잔여 app/api route(picks/submit 5·mlb/pipeline 5·hub-dispatch 5·sync-batter-stats 4 등) 또는 fix-incident(gap=8/20)/lotto(gap=17/30, 다음 토 10/17 draw #1246 전 점검)/info-arch(gap=19/30) 자연 발화 대기.
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): kbo-data agents 잔여 4파일 전수 감사, clean (cycle 3053, 2026-10-11)
 
 진단: open issue 0, approved plan 0/23, Supabase 여전히 INACTIVE(op-analysis 블락 지속, cycle 3019 escalated — 신규 아님). 2차 방어선(cycle 3052 retro `481e6022`) OK. 직전8(3045-3052) distinct=3(review-code(heavy)4+fix-incident3+skill-evolution1) — 2-chain lock 미충족. open issue/approved plan 없고 fix-incident gap=6/20·lotto gap=15/30·info-arch gap=17/30 전부 미근접. cycle 3052 추천대로 `packages/kbo-data/src/agents/` 잔여 4파일(llm-deepseek.ts/llm-ollama.ts/types.ts/validator-logger.ts, cycle 3052 가 11/15 파일만 처리) 선택 — 디렉토리 전수 감사 완주 목적.
