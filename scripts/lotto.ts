@@ -1508,6 +1508,17 @@ async function update(): Promise<LottoRound[]> {
       process.exitCode = 1;
       return rounds;
     }
+    // reachabilityCheck 는 "구 회차 조회 가능" 만 증명 — 둘 다 신규 회차(oldLast+1)만
+    // 유독 못 찾는 경우(소스 측 publish 지연/신규 콘텐츠만 차단)엔 false positive.
+    // 추첨은 매주 토요일 21:00 KST 고정 주기라 oldLast 날짜 + 7일 + 유예 지나고도
+    // 신규 회차 미확인이면 "이미 최신" 아닌 "지연 의심" 으로 판정.
+    const oldDrawMs = new Date(`${rounds[rounds.length - 1].date}T21:00:00+09:00`).getTime();
+    const graceMs = 6 * 60 * 60 * 1000; // dhlottery 통상 추첨 당일 22시경 공식 공시 — 6h 는 넉넉한 유예
+    if (!Number.isNaN(oldDrawMs) && Date.now() > oldDrawMs + 7 * 24 * 60 * 60 * 1000 + graceMs) {
+      console.error(`❌ 신규 회차 지연 의심 — ${oldLast}회차(${rounds[rounds.length - 1].date}) 이후 7일+유예 경과했지만 ${oldLast + 1}회차 미확인 (구 회차 재조회는 성공 — 신규 콘텐츠만 실패). "이미 최신" 아님, 미확인 상태.`);
+      process.exitCode = 1;
+      return rounds;
+    }
     console.log(`✅ 이미 최신 (${oldLast}회차)`);
     return rounds;
   }
