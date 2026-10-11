@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api live/snapshot-pitchers 정정 (cycle 3056, 2026-10-11)
+
+진단: open issue 0, approved plan 0/23. Supabase 여전히 INACTIVE(NXDOMAIN 재확인, cycle 3019 escalated 지속) — op-analysis 계속 블락. 2차 방어선(cycle 3055 retro `ac152b7a`) OK. 직전8(3048-3055) distinct=3(review-code(heavy)5+review-code2+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=8/20·lotto gap=18/30·info-arch gap=20/30 전부 미근접. cycle 3055 추천대로 app/api 잔여 6-route(leaderboard/sync·snapshot-pitchers·seo/indexnow/ping·picks/poll·mlb/waitlist·live, 형제 라우트 2개 포함) 선택.
+
+general-purpose agent 위임 전수 read(route + helper + migration 스키마 대조). 실제 defect 2건:
+1. `live/route.ts` — `runLiveUpdate()` 가 반환하는 `errors: string[]` (postponed-marking/score-update/postview 실패 누적)를 라우트가 읽지 않고 항상 HTTP 200. sync-batter-stats(cycle 3055)에서 이미 고친 동일 defect family 재발.
+2. `snapshot-pitchers/route.ts` — `snapshotPitcherStats()` 가 반환하는 `errors: number` (upsert 실패 카운트)도 동일하게 무시, 항상 200.
+
+leaderboard/sync↔mlb-sync, picks/poll↔mlb-poll, mlb/waitlist, seo/indexnow/ping = clean(VARCHAR/CHECK 제약 전부 대응 코드 존재, 23505 enumeration 방어 정상).
+
+sync-batter-stats 패턴(errors 존재 시 Sentry warning + HTTP 207) 양쪽에 이식. `pnpm test` 588 files/4638 tests green, lint/type-check clean. 직접 main 커밋 + push (`86572be0`, PR 없음 — R4 단일 커밋 단위).
+
+skill-evolution trigger 평가: trigger3(milestone) 3056%50=6≠0. trigger5(직전20 inclusive, sample≥10) — review-code 다수 발화 → 미충족. ship-0 emergency stop: 직전10 전부 success(본 cycle 포함) → 미해당. marker 박제 X.
+
+다음 사이클 추천 = review-code(heavy) 계속(app/api 잔여 배치 거의 소진, 다음 후보 packages/kbo-data/src/agents 재검토 또는 app/api 저커밋 route 전수 스윕) 또는 fix-incident(gap=9/20)/lotto(gap=19/30, 다음 토 10/17 draw #1246 전 점검)/info-arch(gap=21/30) 자연 발화 대기. **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만.**
+
 ## 🟢 SUCCESS — review-code(heavy): app/api 잔여 4-route 전수 감사, mlb VARCHAR overflow + silent swallow 정정 (cycle 3055, 2026-10-11)
 
 진단: open issue 0, approved plan 0/23. **Supabase INACTIVE 재확인(fresh nslookup/curl → 여전히 NXDOMAIN, 신규 아님, cycle 3019 escalated 상태 유지)** — op-analysis 계속 블락. 2차 방어선(cycle 3054 retro `2a8488e1`) OK. 직전8(3047-3054) distinct=4(review-code(heavy)5+fix-incident1+skill-evolution1+review-code1) — 2-chain lock 미충족. fix-incident gap=8/20·lotto gap=17/30·info-arch gap=19/30 전부 미근접, CI green. cycle 3054 추천대로 app/api 잔여 고커밋 route 4개(picks/submit 5·mlb/pipeline 5·hub-dispatch 5·sync-batter-stats 4) 선택.
