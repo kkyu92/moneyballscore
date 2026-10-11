@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — fix-incident: DB 장애 구분 배너를 matchup/teams/reviews/search/insights/about/analysis-game 10개 페이지로 2차 확장 (cycle 3045, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/23(Tier4 불변). 2차 방어선(cycle 3044 retro `27a83a20`) OK. Supabase 여전히 INACTIVE(nslookup NXDOMAIN 지속). 직전8(3037-3044) distinct=3(review-code(heavy)5+lotto1+fix-incident2) — 2-chain lock 미충족. cycle 3042(홈페이지)+3044(predictions/standings/accuracy/analysis/calendar) 에 이어, captureFallback 컨벤션 쓰는 나머지 34개 파일 중 allSettled 미적용 22개를 재grep — MLB twin(en/mlb/mlb 10개, 트래픽 낮음) 제외한 국내 KBO 핵심 10개(matchup/[teamA]/[teamB], teams/[code], teams/[code]/recent, teams/page, reviews, search, insights, about, accuracy/shadow, analysis/game/[id]) 선정.
+
+subagent 위임 전환: 다건 Promise.all 페이지(matchup/teams[code]/search)는 captureFallback 가드된 fetch만 Promise.allSettled 로 분리(비가드 fail-loud 호출은 별도 promise 유지해 동시성 보존), 단일 fetch 페이지는 `.then(onFulfilled,onRejected)` idiom(analysis/page.tsx 기존 패턴 재사용). `analysis/game/[id]`는 기존 `getGameAnalysis` 실패 시 무조건 `notFound()` 였던 로직을 DB장애(배너)와 진짜 404(존재하지 않는 경기)를 구분하도록 변경 — judgment call. captureFallback 자체 시그니처/Sentry 리포팅 동작은 불변.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4629 tests 전체 green. 직접 main 커밋+push(R4, `be0a43f9`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+남은 후속: MLB twin 페이지(en/mlb/*, mlb/* 10개) 동일 패턴 확장 후보 — 트래픽 낮아 우선순위 하, 다음 fix-incident 또는 review-code(heavy) 사이클 후보. 다음 사이클 추천 = review-code(heavy) 신규축 재탐색 또는 op-analysis(Supabase 복구 시, gap=121/25 최장 미발화) 또는 lotto(gap=7/30).
+
 ## 🟢 SUCCESS — fix-incident: 홈페이지 DB 장애 시 "경기 없음" 과 혼동되는 silent fallback 구분 배너 (cycle 3042, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/30(plan#29 불변, Tier4). 2차 방어선(cycle 3041 retro `5ecb0a11`) OK. 직전8(3034-3041) distinct=3(review-code(heavy)6+lotto1+info-architecture-review1) — 2-chain lock 미충족(≤2 기준 미달). gap trigger: fix-incident 14/20(미근접), op-analysis 117+/25(Supabase INACTIVE 로 DB harness 불가, 반복 skip 패턴 정합), info-arch 6/30·lotto 4/30 전부 미근접. explore-idea saturation 직전15 13/15 충족했으나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 16.7h 신선) — 반복 패턴. review-code(heavy) 대상 디렉토리(lib/agents/factors/scrapers/backtest/components/app-api/hooks/config/packages-shared) 전부 과거 다회 전수 스윕 완료(cycle 2685~3041 history 확인) — 신규 unswept scope 부재, 4연속 review-code(heavy) 는 재감사 diminishing-returns 우려로 보류.
