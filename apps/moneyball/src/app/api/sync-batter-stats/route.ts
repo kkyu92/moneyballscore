@@ -47,6 +47,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (result.errors.length > 0) {
+      Sentry.captureMessage('sync-batter-stats partial failure', {
+        level: 'warning',
+        tags: { layer: 'api-route', route: 'sync-batter-stats' },
+        extra: { season, errors: result.errors, upsertedStats: result.upsertedStats },
+      });
+      return Response.json(result, { status: 207 });
+    }
+
     return Response.json(result);
   } catch (e) {
     const message = errMsg(e);

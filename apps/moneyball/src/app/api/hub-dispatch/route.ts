@@ -2,7 +2,7 @@
  * Sentry webhook → playbook 허브 repository_dispatch 릴레이.
  *
  * 흐름:
- *   1. HMAC 검증 (`SENTRY_WEBHOOK_SECRET` + `X-Sentry-Hook-Signature` header)
+ *   1. HMAC 검증 (`SENTRY_WEBHOOK_SECRET` + `Sentry-Hook-Signature` header)
  *   2. payload 파싱 + PII 재스크럽
  *   3. GitHub repository_dispatch 로 playbook 에 forward
  *
@@ -28,8 +28,8 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs'; // crypto.createHmac 용
 
 /**
- * HMAC SHA256 검증. Sentry Internal Integration 은 `X-Sentry-Hook-Signature`
- * 헤더에 hex digest 를 실어 보냄 (client secret 으로 HMAC).
+ * HMAC SHA256 검증. Sentry Internal Integration 은 `Sentry-Hook-Signature`
+ * 헤더에 hex digest 를 실어 보냄 (client secret 으로 HMAC, `X-` prefix 없음 — cycle 3055 정정).
  */
 function verifySignature(
   body: string,
