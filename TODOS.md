@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — fix-incident: lotto update() 양쪽 소스 다운 시 "이미 최신" false positive 수정 (cycle 3024, 2026-10-11)
+
+진단: 직전8(3016-3023) distinct=5(review-code 3+design-system 1+polish-ui 1+fix-incident 2+op-analysis(lite) 1) — 2-chain lock 미충족. open issue 0건, approved plan 0/23. fix-incident gap=4·lotto gap=15·info-arch gap=18·op-analysis gap=3 전부 미근접(trigger 미도달). 직전 cycle 3023 추천("fix-incident 또는 lotto") 따라 lotto 외부 데이터 상태 재확인 중 — `apps/moneyball/data/lotto-results/` 최신 파일 2026-10-03.md, 직전 토요일(10/10) 추첨 결과 미반영 발견. `gh run view` 로 실제 CI 로그(2026-10-11 04:27 KST 실행) 확인 → `lotto-result-update.yml` 는 "success" 로 기록됐지만 실제론 round 1245 신규 추첨을 못 가져옴.
+
+**근본 원인**: `scripts/lotto.ts update()` 가 dhlottery + lottolyzer 양쪽 전부 네트워크 실패 시(`probeNextRounds()` 빈 배열 반환) "진짜 이미 최신" 과 "확인 자체가 불가" 를 구별 못 하고 무조건 `latest <= oldLast` → `✅ 이미 최신` 출력. cron 은 이걸 success 로 기록, 신규 회차 완전 누락이 silent 하게 통과(CLAUDE.md 사례 11 silent drop family 동일 패턴).
+
+**수정**: `update()` 에 reachability check 추가 — probe 가 빈 결과일 때 이미 보유 중인 회차(`oldLast`) 를 재조회해서 그것도 실패하면 네트워크 장애로 판정, `process.exitCode=1` + 명시적 에러 메시지로 분기. "이미 최신"(성공) 과 "확인 불가"(실패) 를 코드 레벨에서 분리.
+
+**검증**: 로컬 smoke(`pnpm exec tsx scripts/lotto.ts update`) exit code 1 확인 → `pnpm lint:scripts` clean → main 직접 commit+push(`b1823be3`) → CI green(`38112580565`) → **실측 fire**: `gh workflow run lotto-result-update.yml` 수동 dispatch(`38112632945`) → 결과 `failure`(기존이면 "success" 로 masking 됐을 케이스) — 수정 전/후 행동 차이 실제 CI 상에서 확인. 외부 소스(dhlottery+lottolyzer) 자체는 여전히 다운 상태(샌드박스+CI 양쪽 도달 불가, 사용자 조치 불가 영역) — 본 fix 는 "다운인데 성공으로 보임" 문제만 제거, 다운 자체 해결은 아님.
+
+다음 사이클 추천 = lotto(gap=16, 외부 소스 복구 여부 재확인 — 이제 실패 시 CI 가 명확히 failure 로 보여줘서 모니터링 가능) 또는 review-code(heavy) 계속 또는 info-arch(gap=19).
+
 ## 🟡 RETRO-ONLY — review-code(heavy): apps/moneyball/src/lib 저커밋 9파일 전수 감사, 갭 0건 (cycle 3023, 2026-10-11)
 
 진단: 직전8(3015-3022) distinct=5(review-code 3+fix-incident 2+op-analysis(lite) 1+polish-ui 1+design-system 1) — 2-chain lock 미충족. open issue 0건, approved plan 0/23(전부 status≠approved). fix-incident gap=3·info-arch gap=17·lotto gap=15(다음 토 10/17 자연 주기, 아직 미도달)·op-analysis gap=2 전부 미근접. DESIGN.md mtime 0일 — design-system trigger 無. 직전 cycle 3022 추천대로 review-code(heavy) 선택, 스코프 = `apps/moneyball/src/lib` 저커밋(1~6회) 9개 파일: `utils.ts`(1)/`feature-flags.ts`(4)/`tabpfn-export.ts`(4)/`weather.ts`(4)/`hub-dispatch.ts`(5) + `lib/calendar/monthGrid.ts`(1) + `lib/debug/{agentFallbackStats,factorDeltaStats,silentDriftStats,pipelineStats}.ts`(3~4).
