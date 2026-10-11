@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): api/live, api/pipeline revalidate false-failure 정정 (cycle 3030, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/23(plan#29 불변). 2차 방어선(cycle 3029 retro `4a5a29e3`) OK. gap trigger 4종(fix-incident 2/20, op-analysis 9/25, info-arch 24/30, lotto 1/30) 전부 미도달. 직전8(3022-3029) distinct=3(review-code(heavy)3+fix-incident4+lotto(lite)1) — 2-chain lock 미충족. explore-idea saturation(직전15) 12/15 충족했으나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 반복 패턴 — review-code(heavy) 로 fallback.
+
+직전 cycle 추천("review-code(heavy) dominance 10/19=53% 유지 monitor") 따라 `apps/moneyball/src/app/api/` 저커밋 route 전수 read (`leaderboard/mlb-sync`, `picks/mlb-submit`, `picks/mlb-poll`, `picks/submit`, `picks/poll`, `mlb/waitlist`, `revalidate`, `version`, `live`, `seo/indexnow/ping`, `sync-batter-stats`) — KBO/MLB twin route 쌍들은 parity 양호, 버그 0건.
+
+**실제 발견**: `live/route.ts`(runLiveUpdate 성공 후 ISR revalidate 트리거)와 `pipeline/route.ts`(predict/verify 모드 동일 패턴, 2곳)가 본 작업 성공 후 revalidate fetch 를 **같은 try 블록 안**에 둬서, revalidate 쪽 transient 실패(네트워크 blip)가 전체 응답을 500 으로 만들어 실제론 성공한 작업(DB write 완료)을 실패로 오보고. `cloudflare-worker/src/worker.ts`(`runLiveUpdate`)가 non-2xx 응답 시 Sentry 에러를 쏘는 구조라 false-positive 장애 알림으로 이어짐.
+
+**sibling 비교**: `sync-batter-stats/route.ts`는 이미 동일 revalidate 호출을 독립 try/catch(`// revalidate 실패는 치명적이지 않음`)로 감싼 정답 패턴 보유 — TeamLogo/MlbTeamLogo(cycle 3026) 와 동일한 "sibling 중 하나만 방어 획득, 나머지 미적용" silent drift family 재확인(3번째 sibling-asymmetry 사례).
+
+**수정**: `live/route.ts` 1곳 + `pipeline/route.ts` 2곳(predict/predict_final, verify) revalidate fetch 를 개별 try/catch 로 격리 — 실패 시 Sentry capture 만 하고 본 작업 결과는 그대로 200 반환.
+
+**검증**: `pnpm test` 전체 587 files/4623 tests green, lint clean, tsc clean. pre-push(lint+type-check+version-sync-guard) PASS. main 직접 commit+push(`ff3c9f40`, PR 미경유 R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(app/api 잔여 저커밋 route 일부 미검토 — `kbo-scores`, `picks/results`, `health/pipelines`, `hub-dispatch` 등) 또는 info-arch(gap=25/30, threshold 근접) 또는 lotto(gap=2, 1245회차 외부 소스 복구 여부 1~2일 내 재확인).
+
 ## 🟢 SUCCESS — lotto(lite): publish-delay 보강 production 실효성 검증 (cycle 3029, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/23(plan#29 불변). 2차 방어선(cycle 3028 retro `dbfbc98a`) OK. gap trigger: fix-incident 0/20, op-analysis 7/25, info-arch 22/30, lotto 39+/30(trigger 충족 — 최근 39 사이클 미발화). 직전8(3021-3028) distinct=3, 2-chain lock 미충족. 3연속 fix-incident(3026-3028) 직후 다양성 redirect로 lotto 선택.
