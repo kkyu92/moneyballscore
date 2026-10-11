@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): dashboard/glossary/leaderboard/live 컴포넌트 전수 감사, silent drift 2건 정정 (cycle 3049, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/23(전부 completed/archived/superseded — Tier4 불변). 2차 방어선(cycle 3048 retro `4c3191a0`) OK. Supabase 여전히 INACTIVE(nslookup NXDOMAIN 지속, op-analysis gap=3048 최장 미발화 블락 지속). 직전8(3041-3048) distinct=2(review-code(heavy)3+fix-incident5) — 2-chain lock 조건 충족이나 fix-incident 포함 → lock 무시 룰 적용. fix-incident gap=1(cycle 3047 직후)로 신규 trigger 없음. lotto gap=10/30·info-arch gap=12/30 전부 미근접. cycle 3048 retro 가 명시한 잔여 후보(components/live/dashboard/glossary/leaderboard, 25파일) 그대로 이어서 처리.
+
+subagent 위임 전수 read(dashboard 15파일+1테스트 / glossary 1파일 / leaderboard 5파일 / live 1파일+1테스트, 총 25파일): 2건 실제 수정, 둘 다 leaderboard 디렉토리.
+1. `LeaderboardTable.tsx` — `LeaderboardSortControl` 이 정렬(연속순/표본순) 변경을 CSS `order` 속성으로만 처리(`data-streak-rank`/`data-sample-rank`), 반면 `#` 등수/메달(🥇🥈🥉)/상위3 골드 하이라이트는 항상 원본(정확도순) 배열 인덱스 `i`로만 계산 — 연속순/표본순 선택 시 화면 맨 위로 온 행이 실제로는 `#7` 같은 엉뚱한 번호에 메달 없음으로 표시되는 "시각적 위치 vs 표시 번호" desync. `DebateTimeline.tsx` 스텝 번호 drift(cycle 3048)와 동일 class. `useLeaderboardSortMode` 훅을 `LeaderboardSortControl`에서 분리 export해 `LeaderboardTable`도 같은 활성 정렬을 읽어 `streakRank`/`sampleRank` 기준으로 등수를 재계산하도록 수정, `streakEnabled` prop 추가 전달.
+2. `LeaderboardClient.tsx` — 정렬 칩 노출 가드가 `entries.length >= 5` 리터럴 하드코딩. 같은 디렉토리 `LeaderboardTable.tsx`는 동일 개념(소표본 가드)에 이미 `SMALL_SAMPLE_N` 상수를 쓰고 있어 상수 변경 시 조용히 desync 되는 2번째 drift. `SMALL_SAMPLE_N` import 로 교체.
+
+나머지 23개 파일(dashboard 차트군 — factor-bias 부호 컨벤션, 소표본 경고, KBO-only `/standings` 스코프의 `EloTrendChart` 등 / glossary / `HallOfFame`/`LeaderboardJoinModal`/`LeaderboardSortControl` 자체 / `LiveScoreboard`+기존 회귀 테스트) 전부 clean 확인.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4629 tests 전체 green. 직접 main 커밋+push(R4 범위, `977f77aa`, pre-push hook lint+type-check+version-sync-guard 전부 PASS).
+
+다음 사이클 추천 = review-code(heavy) 계속(dashboard/glossary/leaderboard/live 디렉토리 소진 — 다음 미스윕 후보 재탐색 필요, 예: `components/search`/`components/notify`/`app/api` 저커밋 route) 또는 fix-incident(gap=2/20, 신규 trigger 없으면 skip) 또는 lotto(gap=11/30, 다음 토 10/17 전) 또는 op-analysis(Supabase 복구 시, gap=3048 최장 미발화 지속).
+
 ## 🟢 SUCCESS — review-code(heavy): matchup/insights/analysis 컴포넌트 전수 감사, silent drift 4건 정정 (cycle 3048, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/30(Tier4 불변). 2차 방어선(cycle 3047 retro `66d05bf6`) OK. Supabase 여전히 INACTIVE(nslookup NXDOMAIN 지속, op-analysis 25+ gap 계속 블락). 직전8(3040-3047) distinct=2(review-code(heavy)3+fix-incident5) — 2-chain lock 충족이나 fix-incident 포함 → lock 무시 룰 적용, 둘 다 후보 유지. fix-incident 라인은 cycle 3047 retro 가 "captureFallback 34개 전수 커버 완결"로 명시 — 신규 trigger 없음. lotto gap=10/30·info-arch gap=12/30 전부 미근접. TODOS.md grep count 로 candidate 선정(matchup/insights/analysis 저언급) 후 review-code(heavy) 선택 — grep count 는 selection heuristic 으로만 사용, 실제 감사는 전수 read 원칙 준수(cycle 3001 가드레일).
