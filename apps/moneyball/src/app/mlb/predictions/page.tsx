@@ -179,9 +179,15 @@ async function getMlbPredictionDates(): Promise<DateStat[]> {
 }
 
 export default async function MlbPredictionsPage() {
-  const dates = await getMlbPredictionDates().catch((err) =>
-    captureFallback(err, [] as DateStat[], { route: "/mlb/predictions", source: "getMlbPredictionDates" }),
-  );
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const [datesR] = await Promise.allSettled([getMlbPredictionDates()]);
+  const dates =
+    datesR.status === "fulfilled"
+      ? datesR.value
+      : captureFallback(datesR.reason, [] as DateStat[], { route: "/mlb/predictions", source: "getMlbPredictionDates" });
+
+  const dbDegraded = [datesR].some((r) => r.status === "rejected");
 
   const counts = {
     all: dates.length,
@@ -271,6 +277,14 @@ export default async function MlbPredictionsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Breadcrumb items={[{ label: 'MLB 분석', href: '/mlb' }, { label: '예측 기록' }]} />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
       <h1 className="text-3xl font-bold">MLB 예측 기록</h1>
       <p className="text-gray-500 dark:text-gray-400">날짜별 MLB 승부예측 기록입니다.</p>
 

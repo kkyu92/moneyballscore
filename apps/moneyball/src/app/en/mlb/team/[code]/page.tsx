@@ -114,26 +114,27 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
   const profile = await buildMlbTeamProfile(code);
   if (!profile) notFound();
 
-  const eloTrend = await buildMlbTeamEloTrend(code).catch((err) =>
-    captureFallback(err, { points: [] }, { route: "/en/mlb/team/[code]", source: "buildMlbTeamEloTrend" }),
-  );
-  const upcoming = await buildMlbTeamUpcoming(code).catch((err) =>
-    captureFallback(err, [], { route: "/en/mlb/team/[code]", source: "buildMlbTeamUpcoming" }),
-  );
-
-  // wave-625: 팀별 강수렴/완전수렴 픽 성적 — matchup 페이지의 두 팀 한정 집계와 별개로
-  // 시즌 전체 기준 (TeamConvergencePickRecord KBO wave-607 대응).
-  const [strongTeamStats, completeTeamStats, divisionStandings] = await Promise.all([
-    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_STRONG).catch((err) =>
-      captureFallback(err, [], { route: "/en/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(strong)" }),
-    ),
-    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_COMPLETE).catch((err) =>
-      captureFallback(err, [], { route: "/en/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(complete)" }),
-    ),
-    buildMlbDivisionStandings().catch((err) =>
-      captureFallback(err, null, { route: "/en/mlb/team/[code]", source: "buildMlbDivisionStandings" }),
-    ),
+  // Promise.allSettled lets us tell a backend outage apart from "no data yet" —
+  // the fulfilled/rejected status is a pure derived value (no `let` reassignment
+  // inside the component body, which this repo's lint rule blocks).
+  // wave-625: per-team strong/complete convergence pick record — season-wide,
+  // separate from the two-team aggregate on the matchup page (KBO wave-607 parity).
+  const [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR] = await Promise.allSettled([
+    buildMlbTeamEloTrend(code),
+    buildMlbTeamUpcoming(code),
+    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_STRONG),
+    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_COMPLETE),
+    buildMlbDivisionStandings(),
   ]);
+
+  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/en/mlb/team/[code]", source: "buildMlbTeamEloTrend" });
+  const upcoming = upcomingR.status === "fulfilled" ? upcomingR.value : captureFallback(upcomingR.reason, [], { route: "/en/mlb/team/[code]", source: "buildMlbTeamUpcoming" });
+  const strongTeamStats = strongTeamStatsR.status === "fulfilled" ? strongTeamStatsR.value : captureFallback(strongTeamStatsR.reason, [], { route: "/en/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(strong)" });
+  const completeTeamStats = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, [], { route: "/en/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(complete)" });
+  const divisionStandings = divisionStandingsR.status === "fulfilled" ? divisionStandingsR.value : captureFallback(divisionStandingsR.reason, null, { route: "/en/mlb/team/[code]", source: "buildMlbDivisionStandings" });
+
+  const dbDegraded = [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR].some((r) => r.status === "rejected");
+
   const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);
   const divisionRank = divisionStandings
@@ -181,6 +182,15 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
         ]}
         locale="en"
       />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          Some information may be temporarily unavailable due to a service issue. Please try again shortly.
+        </div>
+      )}
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
         <div className="flex items-center gap-3 flex-wrap">

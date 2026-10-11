@@ -163,57 +163,34 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
     redirect(`/en${pair.path}`);
   }
 
-  const [profile, factorA, factorB, formA, formB, strongH2HStats, completeH2HStats, eloTrend, upcomingMatchup] = await Promise.all([
-    buildMlbMatchupProfile(pair),
-    buildMlbTeamFactorAverages(pair.codeA).catch((err) =>
-      captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
-        route: "/en/mlb/matchup/[teamA]/[teamB]",
-        source: "buildMlbTeamFactorAverages.codeA",
-      }),
-    ),
-    buildMlbTeamFactorAverages(pair.codeB).catch((err) =>
-      captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
-        route: "/en/mlb/matchup/[teamA]/[teamB]",
-        source: "buildMlbTeamFactorAverages.codeB",
-      }),
-    ),
-    buildTeamRecentForm(pair.codeA, MATCHUP_RECENT_FORM_GAMES).catch((err) =>
-      captureFallback(err, EMPTY_RECENT_FORM, {
-        route: "/en/mlb/matchup/[teamA]/[teamB]",
-        source: "buildTeamRecentForm.codeA",
-      }),
-    ),
-    buildTeamRecentForm(pair.codeB, MATCHUP_RECENT_FORM_GAMES).catch((err) =>
-      captureFallback(err, EMPTY_RECENT_FORM, {
-        route: "/en/mlb/matchup/[teamA]/[teamB]",
-        source: "buildTeamRecentForm.codeB",
-      }),
-    ),
-    getMlbConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, MLB_FACTOR_PICK_STRONG).catch((err) =>
-      captureFallback(err, [], {
-        route: "/en/mlb/matchup/[teamA]/[teamB]",
-        source: "getMlbConvergencePickHeadToHeadRecord(strong)",
-      }),
-    ),
-    getMlbConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, MLB_FACTOR_PICK_COMPLETE).catch((err) =>
-      captureFallback(err, [], {
-        route: "/en/mlb/matchup/[teamA]/[teamB]",
-        source: "getMlbConvergencePickHeadToHeadRecord(complete)",
-      }),
-    ),
-    buildMlbMatchupEloTrend(pair.codeA, pair.codeB).catch((err) =>
-      captureFallback(err, { points: [] }, {
-        route: "/en/mlb/matchup/[teamA]/[teamB]",
-        source: "buildMlbMatchupEloTrend",
-      }),
-    ),
-    buildMlbMatchupUpcoming(pair).catch((err) =>
-      captureFallback(err, [], {
-        route: "/en/mlb/matchup/[teamA]/[teamB]",
-        source: "buildMlbMatchupUpcoming",
-      }),
-    ),
+  // Promise.allSettled lets us tell a backend outage apart from "no data yet" —
+  // the fulfilled/rejected status is a pure derived value (no `let` reassignment
+  // inside the component body, which this repo's lint rule blocks).
+  // buildMlbMatchupProfile is not captureFallback-guarded (fail-loud) — kept as a
+  // separate promise so it still runs concurrently with the allSettled batch below.
+  const profilePromise = buildMlbMatchupProfile(pair);
+  const [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR] = await Promise.allSettled([
+    buildMlbTeamFactorAverages(pair.codeA),
+    buildMlbTeamFactorAverages(pair.codeB),
+    buildTeamRecentForm(pair.codeA, MATCHUP_RECENT_FORM_GAMES),
+    buildTeamRecentForm(pair.codeB, MATCHUP_RECENT_FORM_GAMES),
+    getMlbConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, MLB_FACTOR_PICK_STRONG),
+    getMlbConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, MLB_FACTOR_PICK_COMPLETE),
+    buildMlbMatchupEloTrend(pair.codeA, pair.codeB),
+    buildMlbMatchupUpcoming(pair),
   ]);
+  const profile = await profilePromise;
+  const factorA = factorAR.status === "fulfilled" ? factorAR.value : captureFallback(factorAR.reason, EMPTY_MLB_FACTOR_AVERAGES, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbTeamFactorAverages.codeA" });
+  const factorB = factorBR.status === "fulfilled" ? factorBR.value : captureFallback(factorBR.reason, EMPTY_MLB_FACTOR_AVERAGES, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbTeamFactorAverages.codeB" });
+  const formA = formAR.status === "fulfilled" ? formAR.value : captureFallback(formAR.reason, EMPTY_RECENT_FORM, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeA" });
+  const formB = formBR.status === "fulfilled" ? formBR.value : captureFallback(formBR.reason, EMPTY_RECENT_FORM, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeB" });
+  const strongH2HStats = strongH2HStatsR.status === "fulfilled" ? strongH2HStatsR.value : captureFallback(strongH2HStatsR.reason, [], { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "getMlbConvergencePickHeadToHeadRecord(strong)" });
+  const completeH2HStats = completeH2HStatsR.status === "fulfilled" ? completeH2HStatsR.value : captureFallback(completeH2HStatsR.reason, [], { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "getMlbConvergencePickHeadToHeadRecord(complete)" });
+  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupEloTrend" });
+  const upcomingMatchup = upcomingMatchupR.status === "fulfilled" ? upcomingMatchupR.value : captureFallback(upcomingMatchupR.reason, [], { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupUpcoming" });
+
+  const dbDegraded = [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR].some((r) => r.status === "rejected");
+
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
   const summary = buildSummaryEn(profile);
 
@@ -261,6 +238,15 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
           { label: `${tA.shortName} vs ${tB.shortName}` },
         ]}
       />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          Some information may be temporarily unavailable due to a service issue. Please try again shortly.
+        </div>
+      )}
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
         <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3 flex-wrap">

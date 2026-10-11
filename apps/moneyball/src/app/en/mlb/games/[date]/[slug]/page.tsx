@@ -141,6 +141,84 @@ const MLB_EVENT_STATUS: Record<string, string> = {
   scheduled: 'https://schema.org/EventScheduled',
 };
 
+// KO page.tsx(cycle 2099/2108) 와 동일 이유 — MLB 는 games(KBO FK 스키마) 에 없고
+// game_id=NULL(migration 038, mlb-pipeline.ts:451) 이라 KBO 전용 FK inner join 은 항상
+// 미스매치. 더블헤더(같은 날 같은 매치업 2경기)는 (game_date, home, away) 만으로 row 1개를
+// 특정 못해 .maybeSingle() 이 "multiple rows" 로 throw (Sentry MONEYBALLSCORE-1A,
+// 357회, 2026-08-18~08-29, KO page.tsx 동일 버그). slug 에 game number 가 없어 완전
+// disambiguate 불가 — order+limit(1) 로 1경기(더 이른 game_datetime_utc)를 결정적으로
+// 선택해 500 방지.
+async function getMlbScheduleForGame(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  date: string,
+  dbHomeCode: string,
+  dbAwayCode: string,
+): Promise<ScheduleRow | null> {
+  const scheduleResult = await supabase
+    .from('mlb_schedule')
+    .select('external_game_id, home_score, away_score, status, game_datetime_utc, home_starter_name, away_starter_name')
+    .eq('game_date', date)
+    .eq('home_team_code', dbHomeCode)
+    .eq('away_team_code', dbAwayCode)
+    .order('game_datetime_utc', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const { data } = assertSelectOk(scheduleResult, 'MlbGameDetailEn schedule');
+  return data as ScheduleRow | null;
+}
+
+async function getMlbPredictionForGame(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  externalGameId: string,
+): Promise<PredictionDetailRow | null> {
+  const predResult = await supabase
+    .from('predictions')
+    .select(`
+      home_win_prob,
+      home_sp_fip,
+      away_sp_fip,
+      home_sp_xfip,
+      away_sp_xfip,
+      home_bullpen_fip,
+      away_bullpen_fip,
+      home_lineup_woba,
+      away_lineup_woba,
+      home_war_total,
+      away_war_total,
+      home_lineup_xwoba,
+      away_lineup_xwoba,
+      home_lineup_barrel_pct,
+      away_lineup_barrel_pct,
+      home_elo,
+      away_elo,
+      home_recent_form,
+      away_recent_form,
+      head_to_head_rate,
+      model_version,
+      debate_version,
+      predicted_at
+    `)
+    .eq('league', 'mlb')
+    .eq('scoring_rule', MLB_SCORING_RULE)
+    .eq('external_game_id', externalGameId)
+    .maybeSingle();
+  const { data } = assertSelectOk(predResult, 'MlbGameDetailEn prediction');
+  return data as PredictionDetailRow | null;
+}
+
+function DbDegradedBanner() {
+  return (
+    <div className="max-w-4xl mx-auto py-12">
+      <div
+        role="status"
+        className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+      >
+        Some information may be temporarily unavailable due to a service issue. Please try again shortly.
+      </div>
+    </div>
+  );
+}
+
 export default async function GameDetailEn({ params }: PageParams) {
   const { date, slug } = await params;
   const [homeParam, awayParam] = slug.split('-vs-');
@@ -157,70 +235,34 @@ export default async function GameDetailEn({ params }: PageParams) {
 
   const supabase = await createClient();
 
-  // 더블헤더(같은 날 같은 매치업 2경기)는 (game_date, home, away) 만으로 row 1개를
-  // 특정 못해 .maybeSingle() 이 "multiple rows" 로 throw (Sentry MONEYBALLSCORE-1A,
-  // 357회, 2026-08-18~08-29, KO page.tsx 동일 버그). slug 에 game number 가 없어 완전
-  // disambiguate 불가 — order+limit(1) 로 1경기(더 이른 game_datetime_utc)를 결정적으로
-  // 선택해 500 방지.
-  let scheduleRaw: unknown = null;
-  try {
-    const scheduleResult = await supabase
-      .from('mlb_schedule')
-      .select('external_game_id, home_score, away_score, status, game_datetime_utc, home_starter_name, away_starter_name')
-      .eq('game_date', date)
-      .eq('home_team_code', dbHomeCode)
-      .eq('away_team_code', dbAwayCode)
-      .order('game_datetime_utc', { ascending: true })
-      .limit(1)
-      .maybeSingle();
-    ({ data: scheduleRaw } = assertSelectOk(scheduleResult, 'MlbGameDetailEn schedule'));
-  } catch (err) {
-    scheduleRaw = captureFallback(err, null, { route: '/en/mlb/games/[date]/[slug]', source: 'schedule' });
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 존재하지 않는 경기(404)" 를 구분하기 위해
+  // {status, value|reason} 모양으로 순수 파생값을 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  // 장애 시엔 404 대신 배너를 렌더 — 진짜 404(잘못된 slug)와 혼동되지 않도록.
+  const scheduleR = await getMlbScheduleForGame(supabase, date, dbHomeCode, dbAwayCode).then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
+  );
+  const schedule = scheduleR.status === "fulfilled"
+    ? scheduleR.value
+    : captureFallback(scheduleR.reason, null, { route: '/en/mlb/games/[date]/[slug]', source: 'schedule' });
+
+  if (!schedule) {
+    if (scheduleR.status === "rejected") return <DbDegradedBanner />;
+    notFound();
   }
-  const schedule = scheduleRaw as ScheduleRow | null;
 
-  if (!schedule) notFound();
+  const predR = await getMlbPredictionForGame(supabase, schedule.external_game_id).then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
+  );
+  const pred = predR.status === "fulfilled"
+    ? predR.value
+    : captureFallback(predR.reason, null, { route: '/en/mlb/games/[date]/[slug]', source: 'prediction' });
 
-  let predRaw: unknown = null;
-  try {
-    const predResult = await supabase
-      .from('predictions')
-      .select(`
-        home_win_prob,
-        home_sp_fip,
-        away_sp_fip,
-        home_sp_xfip,
-        away_sp_xfip,
-        home_bullpen_fip,
-        away_bullpen_fip,
-        home_lineup_woba,
-        away_lineup_woba,
-        home_war_total,
-        away_war_total,
-        home_lineup_xwoba,
-        away_lineup_xwoba,
-        home_lineup_barrel_pct,
-        away_lineup_barrel_pct,
-        home_elo,
-        away_elo,
-        home_recent_form,
-        away_recent_form,
-        head_to_head_rate,
-        model_version,
-        debate_version,
-        predicted_at
-      `)
-      .eq('league', 'mlb')
-      .eq('scoring_rule', MLB_SCORING_RULE)
-      .eq('external_game_id', schedule.external_game_id)
-      .maybeSingle();
-    ({ data: predRaw } = assertSelectOk(predResult, 'MlbGameDetailEn prediction'));
-  } catch (err) {
-    predRaw = captureFallback(err, null, { route: '/en/mlb/games/[date]/[slug]', source: 'prediction' });
+  if (!pred) {
+    if (predR.status === "rejected") return <DbDegradedBanner />;
+    notFound();
   }
-  const pred = predRaw as PredictionDetailRow | null;
-
-  if (!pred) notFound();
 
   const home = homeCode;
   const away = awayCode;

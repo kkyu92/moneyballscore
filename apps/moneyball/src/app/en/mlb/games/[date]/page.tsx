@@ -103,9 +103,17 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
   if (!/^20[2-9]\d-\d{2}-\d{2}$/.test(date)) notFound();
 
   const supabase = await createClient();
-  const rows = await getMlbGamesForDate(supabase, date).catch((err) =>
-    captureFallback(err, [] as PredictionRow[], { route: "/en/mlb/games/[date]", source: "getMlbGamesForDate" }),
-  );
+  // Promise.allSettled lets us tell a backend outage apart from "no data yet" —
+  // the fulfilled/rejected status is a pure derived value (no `let` reassignment
+  // inside the component body, which this repo's lint rule blocks).
+  const [rowsR] = await Promise.allSettled([getMlbGamesForDate(supabase, date)]);
+  const rows =
+    rowsR.status === "fulfilled"
+      ? rowsR.value
+      : captureFallback(rowsR.reason, [] as PredictionRow[], { route: "/en/mlb/games/[date]", source: "getMlbGamesForDate" });
+
+  const dbDegraded = [rowsR].some((r) => r.status === "rejected");
+
   const topPick = rows
     .filter((p) => p.conf > TOP_PICK_MIN_WIN_PCT)
     .sort((a, b) => b.conf - a.conf)[0];
@@ -116,6 +124,15 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
         { label: 'MLB Analysis', href: '/en/mlb' },
         { label: date },
       ]} locale="en" />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          Some information may be temporarily unavailable due to a service issue. Please try again shortly.
+        </div>
+      )}
 
       <h1 className="text-2xl md:text-3xl font-bold text-brand-700 dark:text-brand-100">
         MLB Games — {date}

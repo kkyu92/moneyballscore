@@ -182,9 +182,16 @@ async function getMlbPredictionDates(): Promise<DateStat[]> {
 }
 
 export default async function MlbPredictionsPageEn() {
-  const dates = await getMlbPredictionDates().catch((err) =>
-    captureFallback(err, [] as DateStat[], { route: "/en/mlb/predictions", source: "getMlbPredictionDates" }),
-  );
+  // Promise.allSettled lets us tell a backend outage apart from "no data yet" —
+  // the fulfilled/rejected status is a pure derived value (no `let` reassignment
+  // inside the component body, which this repo's lint rule blocks).
+  const [datesR] = await Promise.allSettled([getMlbPredictionDates()]);
+  const dates =
+    datesR.status === "fulfilled"
+      ? datesR.value
+      : captureFallback(datesR.reason, [] as DateStat[], { route: "/en/mlb/predictions", source: "getMlbPredictionDates" });
+
+  const dbDegraded = [datesR].some((r) => r.status === "rejected");
 
   const counts = {
     all: dates.length,
@@ -278,6 +285,14 @@ export default async function MlbPredictionsPageEn() {
         items={[{ label: 'MLB Analysis', href: '/en/mlb' }, { label: 'Prediction History' }]}
         locale="en"
       />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          Some information may be temporarily unavailable due to a service issue. Please try again shortly.
+        </div>
+      )}
       <h1 className="text-3xl font-bold">MLB Prediction History</h1>
       <p className="text-gray-500 dark:text-gray-400">Daily MLB prediction history.</p>
 
