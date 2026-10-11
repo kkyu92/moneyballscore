@@ -1,4 +1,24 @@
 
+## 🟢 SUCCESS — review-code(heavy): matchup/standings KBO lib 3곳 DB 에러 silent crash 정정 (cycle 3032, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/24(plan#29 불변, 만료 2026-10-15). 2차 방어선(cycle 3031 retro `c30252fb`) OK. gap trigger 4종(fix-incident 4/20, op-analysis 11/25, info-arch 26/30, lotto 3/30) 전부 미도달. 직전8(3025-3031) distinct=3(review-code(heavy)5+fix-incident4+lotto(lite)1) — 2-chain lock 미충족. explore-idea saturation(직전15) 12/15 충족했으나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재, DESIGN.md 16시간 신선) — review-code(heavy) 로 fallback. 직전 cycle 추천대로 `apps/moneyball/src/app/api/` 저커밋 route 전수 확인 — 20개 전체 route 중 유일하게 미스윕 상태였던 `leaderboard/sync/route.ts` 를 twin `leaderboard/mlb-sync/route.ts` 와 대조 read, 완전 parity 확인(버그 0) → app/api 디렉토리 전수 스윕 완결.
+
+app/api 소진 후 `apps/moneyball/src/lib/` KBO/MLB twin lib 13쌍으로 스코프 전환(subagent 위임 전수 read). 발견:
+
+1. **`matchup/buildMatchupUpcoming.ts`**(teamA/teamB/games 3곳) — `assertSelectOk` 가 try/catch 없이 직접 호출, DB 일시 장애 시 throw. Twin `mlb/buildMlbMatchupUpcoming.ts` 는 이미 전부 `captureFallback` 로 감싸짐.
+2. **`standings/buildTeamAccuracy.ts`**(buildAllTeamAccuracy/buildMatchupData/buildTeamBiasAnalysis 3곳) — 동일 미가드. Twin `mlb/buildMlbTeamAccuracy.ts` 는 5곳 전부 가드됨. 파일 자체가 이미 `captureFallback` import 해놓고(`buildTeamBiasAnalysis` 의 `fetchStandings().catch()` 에서만 사용) 나머지 3곳엔 미적용 — 부분 적용 흔적.
+3. **`standings/buildEloTrend.ts`** — 동일 미가드. KBO 전체 Elo 추이의 유일한 데이터 소스라 `matchup/buildMatchupEloTrend.ts` + `teams/buildTeamEloTrend.ts` 양쪽에 영향. Twin `mlb/buildMlbMatchupEloTrend.ts`/`mlb/buildMlbTeamEloTrend.ts` 는 가드됨.
+
+TeamLogo/MlbTeamLogo(cycle 3026) → revalidate try/catch(cycle 3030) → health/route.ts `.single()`→`.maybeSingle()`(cycle 3031) 에 이은 5번째 sibling-asymmetry 사례 — MLB 확장 시점에 추가된 방어 패턴이 구 KBO 파일로 역-포팅 안 된 동일 원인.
+
+3곳 모두 MLB twin과 동일 패턴(`try { assertSelectOk } catch(err) { captureFallback(err, [], {...}) }`)으로 정정. `buildTeamAccuracy.test.ts` 의 "DB error → assertSelectOk throw" 테스트를 새 degrade 계약("빈 배열 반환")에 맞게 갱신.
+
+subagent 가 추가로 낮은 확신도 발견 1건 보고(`mlb/buildMlbTeamEloTrend.ts` 의 league avg 가 KBO 와 달리 forward-fill 없이 당일 경기팀만으로 평균 — 차트 왜곡 가능성) — 코드 주석이 성능 이유만 명시하고 이 평균 의미론 차이는 미언급돼 애매, fix 보류·다음 cycle 재검토 후보로 carry-over.
+
+**검증**: `tsc --noEmit` clean, lint clean, `pnpm --filter moneyball test` 587 files/4623 tests 전체 green (최초 1 fail → test 갱신 후 재통과 확인). pre-push(lint+type-check+version-sync-guard) PASS. main 직접 commit+push(`1fc2189e`, PR 미경유 R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속 — `mlb/buildMlbTeamEloTrend.ts` league avg forward-fill 애매 건 재검토, 또는 `apps/moneyball/src/lib/` 나머지 twin 미대조 파일(accuracy/, dashboard/, debug/, picks/buildPicksStats.ts 등 명확한 KBO/MLB 쌍 아닌 단독 파일들) 전수 read. 또는 fix-incident(gap=5/20) / lotto(gap=4/30, 1246회 10/17 전).
+
 ## 🟢 SUCCESS — review-code(heavy): health/route.ts checkPipeline() silent 에러 downgrade 정정 (cycle 3031, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/24(plan#29 불변, 만료 2026-10-15 1일 전). 2차 방어선(cycle 3030 retro `5b6a7a32`) OK. gap trigger 4종(fix-incident 3/20, op-analysis 10/25, info-arch 25/30, lotto 2/30) 전부 미도달 — info-arch 는 cycle 3006 checkpoint 가 "다음 재도달 cycle 3036 근방" 예고, 아직 미도달. 직전8(3024-3030) distinct=3(review-code(heavy)3+fix-incident4+lotto(lite)1) — 2-chain lock 미충족. explore-idea saturation(직전15) 7/15 미충족. 직전 cycle(3030) 추천 그대로 review-code(heavy) app/api 잔여 저커밋 route 스윕 계속.
