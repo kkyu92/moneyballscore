@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): buildMlbTeamEloTrend 리그 평균 forward-fill 누락 정정 (cycle 3033, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/24(plan#29 불변, 만료 2026-10-15). 2차 방어선(cycle 3032 retro `fbc936b4`) OK. gap trigger 재측정 — op-analysis gap 계산 시 `chain_selected` 문자열에 `(lite)` 접미사가 붙어 단순 `== 'operational-analysis'` 비교로는 매치 실패, prefix-match 로 재확인한 결과 실제 마지막 발화는 cycle 3021(gap=12/25) — 초기 gap=109 판단은 매칭 버그였음(정정). fix-incident gap=5/20, info-arch gap=27/30, lotto gap=4/30 — 전부 미도달. 직전8(3025-3032) distinct=3(review-code(heavy)4+fix-incident3+lotto(lite)1) — 2-chain lock 미충족. Supabase 프로젝트 INACTIVE(cycle 3019 최초 발견) nslookup 재확인 — 여전히 NXDOMAIN, 미해결(사용자 조치 대기, 재확인은 cycle 3021/3027 이미 저가치 반복 판정돼 skip). op-analysis 는 DB 의존이라 현재 측정 불가 — review-code(heavy) 로 전환, 직전 cycle(3032) 추천대로 계속.
+
+subagent 위임으로 `apps/moneyball/src/lib/{accuracy,dashboard,debug,picks}/` 전 파일(16개 소스 + 15개 테스트) 전수 read — 전부 clean(순수 데이터 변환 함수, DB 직접 호출 없음). `buildModelTuningInsights.ts` 가 `assertSelectOk` 를 try/catch 없이 직접 호출해 sibling-asymmetry 패턴처럼 보였으나, 주석 + 전용 테스트(cycle 152)로 "의도적 fail-loud 전환"임을 확인 — 오탐 배제, 수정 안 함.
+
+cycle 3032 retro 가 낮은 확신도로 carry-over한 `mlb/buildMlbTeamEloTrend.ts` 리그 평균 forward-fill 의문점을 재조사 — **실제 버그로 확정**. KBO twin 은 `teams/buildTeamEloTrend.ts` → `standings/buildEloTrend.ts` (전 파일에 걸쳐 forward-fill: 경기 없는 팀도 마지막 known Elo 로 평균에 포함). MLB 는 `mlb_team_elo_history` 를 직접 조회해 "그 날짜 실제로 뛴 팀만" 평균 — MLB 는 30팀 일정이 KBO 10팀보다 훨씬 분산돼 있어(`computeMlbEloHistory`, 팀마다 경기일 다름) 날짜별로 그날 우연히 뛴 팀 구성에 따라 리그 평균이 흔들리는 왜곡 발생(특히 올스타 브레이크·시즌 초반 분산 개막 등). 코드 주석은 "canonical 코드 매핑 필요"만 설명하고 이 평균 산출 방식 차이는 미언급 — stale/incomplete 문서화.
+
+`lastEloByTeam` forward-fill map 방식(KBO 패턴과 동일 구조)으로 정정. 기존 테스트 2건은 모두 "전 팀이 같은 날 뛴" 케이스라 forward-fill 영향 없이 그대로 통과 확인, 버그가 실제로 드러나는 "팀 결장일에도 과거 팀이 평균에 남아야" 케이스를 신규 테스트로 추가해 회귀 방지.
+
+**검증**: `tsc --noEmit` clean, lint clean, `pnpm --filter moneyball test` 587 files/4624 tests 전체 green(신규 테스트 1건 포함). pre-push(lint+type-check+version-sync-guard) PASS. main 직접 commit+push(`0008c05f`, PR 미경유 R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(`apps/moneyball/src/lib/` 잔여 미대조 단독 파일 — `analysis/`, `api/`, `calendar/`, `changelog/`, `insights/`, `leaderboard/`, `players/`, `predictions/`, `reviews/`, `seo/`, `stats/`, `v2-shadow-monitor/` 등) 또는 fix-incident(gap=6/20) 또는 info-arch(gap=28/30, 거의 근접) 또는 lotto(gap=5/30, 1246회 10/17 전).
+
 ## 🟢 SUCCESS — review-code(heavy): matchup/standings KBO lib 3곳 DB 에러 silent crash 정정 (cycle 3032, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/24(plan#29 불변, 만료 2026-10-15). 2차 방어선(cycle 3031 retro `c30252fb`) OK. gap trigger 4종(fix-incident 4/20, op-analysis 11/25, info-arch 26/30, lotto 3/30) 전부 미도달. 직전8(3025-3031) distinct=3(review-code(heavy)5+fix-incident4+lotto(lite)1) — 2-chain lock 미충족. explore-idea saturation(직전15) 12/15 충족했으나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재, DESIGN.md 16시간 신선) — review-code(heavy) 로 fallback. 직전 cycle 추천대로 `apps/moneyball/src/app/api/` 저커밋 route 전수 확인 — 20개 전체 route 중 유일하게 미스윕 상태였던 `leaderboard/sync/route.ts` 를 twin `leaderboard/mlb-sync/route.ts` 와 대조 read, 완전 parity 확인(버그 0) → app/api 디렉토리 전수 스윕 완결.
