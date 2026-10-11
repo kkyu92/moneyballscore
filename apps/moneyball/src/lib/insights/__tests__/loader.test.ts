@@ -59,3 +59,15 @@ describe("loader.ts supabase select column guard (cycle 849 silent drift family 
     expect(LOADER_SRC).toMatch(/away_team:teams!games_away_team_id_fkey\(code\)/);
   });
 });
+
+describe("loader.ts getInsightsForDate build-time crash guard (cycle 3034 review-code heavy)", () => {
+  it("getInsightsForDate 의 assertSelectOk 가 try/catch + captureFallback 로 감싸짐 (dynamicParams=false 정적 생성 중 throw 시 build 전체 실패 방지, generateStaticParams cycle 2945 degrade 취지 정합)", () => {
+    const block = LOADER_SRC.slice(LOADER_SRC.indexOf("export async function getInsightsForDate"));
+    expect(block).toMatch(/try\s*{\s*\(\{\s*data\s*\}\s*=\s*assertSelectOk\(result, "insights\.getInsightsForDate"\)\);\s*}\s*catch/);
+    expect(block).toMatch(/captureFallback\(err, \[\], \{ route: "\/insights\/\[date\]", source: "getInsightsForDate" \}\)/);
+  });
+
+  it("captureFallback import 됨", () => {
+    expect(LOADER_SRC).toMatch(/import \{ captureFallback \} from "@\/lib\/observability\/captureFallback"/);
+  });
+});

@@ -1,6 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { assertSelectOk, PRODUCTION_COHORT_RULES, type TeamCode } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 const DATE_REGEX = /^20[2-9]\d-\d{2}-\d{2}$/;
 
@@ -229,7 +230,16 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
     .in("scoring_rule", PRODUCTION_COHORT_RULES as readonly string[])
     .eq("games.game_date", date)
     .order("created_at", { ascending: false });
-  const { data } = assertSelectOk(result, "insights.getInsightsForDate");
+  // dynamicParams=false 정적 생성 경로(app/insights/[date]/page.tsx) 유일 호출자 —
+  // 여기서 throw 시 build-time 에 이 선택적 아카이브 feature 가 전체 production
+  // 빌드를 실패시킴 (generateStaticParams 의 degrade 의도와 모순, cycle 2945 취지
+  // 역행). captureFallback 으로 degrade, 호출 page 는 entries=[] → notFound() 처리.
+  let data: typeof result.data;
+  try {
+    ({ data } = assertSelectOk(result, "insights.getInsightsForDate"));
+  } catch (err) {
+    data = captureFallback(err, [], { route: "/insights/[date]", source: "getInsightsForDate" });
+  }
   if (!data) return [];
 
   const seen = new Set<number>();
