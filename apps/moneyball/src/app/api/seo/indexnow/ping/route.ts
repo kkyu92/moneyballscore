@@ -27,7 +27,14 @@ export async function GET(request: NextRequest): Promise<Response> {
   const entries = await sitemap();
   const urlList = entries
     .map((e) => e.url)
-    .filter((u): u is string => typeof u === 'string' && u.startsWith(`https://${HOST}/`))
+    .filter((u): u is string => {
+      if (typeof u !== 'string') return false;
+      try {
+        return new URL(u).host === HOST;
+      } catch {
+        return false;
+      }
+    })
     .slice(0, MAX_URLS);
 
   if (urlList.length === 0) {

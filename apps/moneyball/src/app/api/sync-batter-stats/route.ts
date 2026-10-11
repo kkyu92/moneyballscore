@@ -40,8 +40,10 @@ export async function POST(request: NextRequest) {
           },
           body: JSON.stringify({ paths: ['/players'] }),
         });
-      } catch {
-        // revalidate 실패는 치명적이지 않음
+      } catch (revalidateError) {
+        Sentry.captureException(revalidateError, {
+          tags: { layer: 'api-route', route: 'sync-batter-stats', sub: 'revalidate' },
+        });
       }
     }
 
