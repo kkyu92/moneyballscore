@@ -1,4 +1,19 @@
 
+## 🟢 SUCCESS — review-code(heavy): kbo-data agents 전수 감사, silent drift 3건 정정 (cycle 3052, 2026-10-11)
+
+진단: open issue 0, approved plan 0/23, Supabase 여전히 INACTIVE(op-analysis gap 블락 지속, cycle 3019 이미 escalated — 신규 trigger 아님). 2차 방어선(cycle 3051 retro `c3cdef42`) OK. 직전8(3044-3051) distinct=3(fix-incident4+review-code(heavy)3+skill-evolution1) — 2-chain lock 미충족. 신규 스코프: `packages/kbo-data/src/agents/` 78 cycle 미감사(마지막 터치 cycle 2974, validator_logs 단일 narrow bugfix). validator.ts 1246줄 monolith — review-code(heavy) trigger 명확.
+
+general-purpose agent 위임 전수 read(11파일, 4362줄 — validator/postview/retro/llm/calibration-agent/rivalry-memory/judge-agent/mlb-retro/team-agent/personas/debate). 실제 defect 3건 확인+수정:
+1. `validator.ts` `maskViolatedReasoning` — 환각 숫자 `detail` 엔 `normalizeNum()` 정규화 값만 저장(예: "3.80"→"3.8")하는데 마스킹은 원문에 `\b3\.8\b` 리터럴 매칭 시도 → trailing zero 변형("3.80") 마스킹 실패, 환각 숫자가 그대로 published `judgeReasoning`(사용자 가시 블로그 프리뷰)에 leak. 숫자 추출 후 normalizeNum 비교 방식으로 교체.
+2. `team-agent.ts` — validator near-miss(warn 1~2건, ok=true) 위반을 judge/calibration/postview 와 달리 `notifyValidationViolations`(Sentry) 호출 없이 DB(`validator_logs`)에만 기록. Supabase INACTIVE 인 현재 이 경로 완전 비가시 상태 — judge-agent 동일 패턴으로 Sentry capture 추가.
+3. `team-agent.ts`/`judge-agent.ts` parseResponse — `Number(x) || DEFAULT` 패턴이 LLM legitimate 0(확신 없음/중립) 을 falsy 로 오인해 DEFAULT(중립값)로 덮어쓰던 버그. `Number.isFinite` 체크로 NaN(파싱 실패/필드 부재)만 DEFAULT 처리하도록 정정 — retro.ts calibration 신호 오염 차단.
+
+회귀 테스트 1건 추가(trailing-zero 환각 숫자 마스킹). `pnpm test` 587 files/4629 tests green, lint/tsc clean. PR #3147 squash merge(`02f092a6`), R7 auto-merge, CI green.
+
+skill-evolution trigger 평가: trigger3(milestone) cycle_n%50≠0, trigger5(직전20 chain 0회) — 영구 opt-out 9개 제외 평가대상 review-code 1개뿐이라 자동 미충족. marker 박제 X.
+
+다음 사이클 추천 = review-code(heavy) agents 디렉토리 잔여(llm-deepseek/llm-ollama 저우선) 또는 app/api 고커밋 route 재검토, 또는 fix-incident(gap 체크, 신규 trigger 없으면 skip), 또는 lotto(gap=14/30, 다음 토 10/17 draw #1246 전 점검), 또는 info-arch(gap=16/30). Supabase 복구 전까진 op-analysis 불가.
+
 ## 🟢 SUCCESS — skill-evolution(forced): phase 48 자가 진화, cycle 3050 milestone (cycle 3051, 2026-10-11)
 
 트리거: `skill-evolution-pending` marker (cycle 3050, cycle_n%50==0 trigger3 단독) → cycle 3051 강제 발화 (사례 19 mitigation 26th consecutive OK). 2차 방어선(cycle 3050 retro `2fcc9dff`) OK.
