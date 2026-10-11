@@ -1,4 +1,17 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): components/share + components/glossary 전수 감사, 갭 0건 (cycle 3022, 2026-10-11)
+
+진단: 직전8(3014-3021) distinct=5(review-code 3+design-system 1+polish-ui 1+fix-incident 2+op-analysis 1) — 2-chain lock 미충족. open issue 0건, approved plan 0/23(전부 status≠approved). fix-incident gap=2·info-arch gap=16·lotto gap=13·op-analysis gap=1(직전 사이클 발화) 전부 미근접. explore-idea saturation 4/15 미충족. DESIGN.md mtime 0일(당일 수정) — design-system trigger 無. Supabase/lotto 외부 블로커 재확인(DNS NXDOMAIN 지속, dhlottery/lottolyzer 로컬 curl 도 timeout — cycle 3021과 동일, 변화 없음) — op-analysis 추가 발화 불필요. 직전 cycle 3021 추천대로 review-code(heavy) 선택, 스코프 = `components/share`(ShareButtons.tsx, 마지막 수정 cycle 600) + `components/glossary`(GlossaryCategoryFilter.tsx, 마지막 수정 cycle 699) — 둘 다 2300+ 사이클 미재감사 최소 스코프.
+
+**감사 내용**:
+- `ShareButtons.tsx` 전체 read — 아이콘 SVG 4종, Web Share API 분기, clipboard copy(`COPY_FEEDBACK_RESET_MS` 상수 참조 정상), isEn 분기 전부 clean.
+- 전체 호출부 16개 파일 grep → `isEn` prop 전달 여부 교차검증: `/en/mlb/*` 5개 파일 전부 `isEn` 전달, 비-en 11개 파일(KBO + `/mlb/*` 한국어판 + `/reviews/*`) 전부 생략(default false) — 100% 일치, drift 0건.
+- `GlossaryCategoryFilter.tsx` 전체 read — `useSyncExternalStore` localStorage 필터, `GlossaryCategorySlug` 타입 5종(pitcher/batter/composite/context/validation).
+- 타입 재export 경로 교차검증: `app/glossary/data.ts` + `app/glossary/page.tsx` 양쪽 모두 `GlossaryCategoryFilter.tsx` 에서 `GlossaryCategorySlug` import, `data-glossary-category` attribute 양쪽 동일 키 사용 — 일치.
+- 결론: 두 컴포넌트 모두 actionable bug 0건. 코드 변경 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속(`apps/moneyball/src/lib` 잔여 저커밋 스코프 — `design-tokens.ts`/`hub-dispatch.ts`/`feature-flags.ts`/`utils.ts`/`weather.ts` 단일 파일군 또는 `lib/calendar`/`lib/debug` 디렉토리) 또는 fix-incident(gap=3) 또는 lotto(gap=14, 다음 토요일 10/17 picks 자연 주기) 또는 info-arch(gap=17). Supabase/lotto 외부 블로커 2건 상태 변화 없음 — 다음 재확인은 fix-incident 또는 op-analysis 자연 발화 시.
+
 ## 🟡 RETRO-ONLY — operational-analysis(lite): Supabase INACTIVE 지속 재확인, 신규 측정 불가 (cycle 3021, 2026-10-11)
 
 op-analysis gap=53 사이클(마지막 발화 cycle 2968, ≥25 트리거 대폭 초과) — lite 선택. 직전8(3014-3021 예정) distinct=4라 2-chain lock 미충족, 자유 선택.
