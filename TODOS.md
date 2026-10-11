@@ -1,4 +1,17 @@
 
+## 🟢 SUCCESS (retro-only) — info-architecture-review: 30-cycle gap checkpoint, 현 IA 충분 12연속 (cycle 3036, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/25(plan#29 불변, 만료 2026-10-15). 2차 방어선(cycle 3035 retro `8710c735`) OK. gap trigger 재측정(prefix-match 보정, `operational-analysis`/`lotto` suffix `(lite)` 붙은 케이스 고려) — fix-incident gap=8/20, op-analysis gap=15/25, lotto gap=7/30 전부 미도달, **info-arch gap=30/30 정확 도달** (마지막 발화 cycle 3006). 직전8(3028-3035) distinct=3(fix-incident1+lotto(lite)1+review-code(heavy)6) — 2-chain lock 미충족.
+
+cycle 3006 체크포인트가 예고한 "cycle 3036 근방 재도달" 정확 적중, 단 이번 구간(3006→3036)은 직전(2976→3006, 신규 라우트 0건)과 달리 신규 라우트 다수: `/mlb/analysis` hub + EN mirror, `/mlb/insights` 아카이브 Phase1-3(`[date]`, `series/[topic]`) + EN mirror, `/en/mlb/reviews/{weekly,monthly}` 미러. 전수 검증(breadcrumb/헤더메가메뉴/푸터sitemap/sitemap.xml) 전부 clean:
+
+- breadcrumb 1차 후보(`grep -L Breadcrumb`) 다수 나왔으나 `reviews/weekly`·`monthly`, `mlb/reviews/weekly`·`monthly`, `en/mlb/reviews/weekly`·`monthly` index `page.tsx` 6개는 전부 **redirect-only**(UI 없음, `[week]`/`[month]` 동적 sibling 은 전부 breadcrumb 보유) — false positive. `community`(noindex placeholder)/`login`/`settings`/`debug/*` 도 기존부터 의도적 범위 밖.
+- 신규 라우트(`mlb/analysis`, `mlb/insights`, `mlb/insights/series/[topic]`, EN 미러) 전부 breadcrumb 보유, `Header.tsx`/`Footer.tsx` 메가메뉴·sitemap 컬럼 기배선, `sitemap.ts` 동적 생성(`listMlbInsightsDates`/`listMlbSeriesTopics`)으로 전부 포함 확인.
+
+체크포인트 문서 `docs/design/ia-2026-10-11-cycle-3036-30-cycle-gap-checkpoint.md` 박제(직접 main commit `510bb075`, 코드 변경 0). 다음 30-cycle 재도달 = cycle 3066 근방.
+
+다음 사이클 추천 = review-code(heavy) 계속(`apps/moneyball/src/lib/` 잔여: `calendar/changelog/leaderboard/players/predictions/seo/stats/v2-shadow-monitor`) 또는 fix-incident(gap=9/20) 또는 op-analysis(gap=16/25) 또는 lotto(gap=8/30, 10/17 1246회 전).
+
 ## 🟢 SUCCESS — review-code(heavy): insights/loader.ts getInsightsForDate build-time crash 정정 (cycle 3034, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/24(plan#29 불변, 만료 2026-10-15). 2차 방어선(cycle 3033 retro `aba35bfa`) OK. gap trigger 4종(fix-incident 6/20, op-analysis 13/25, info-arch 28/30, lotto 5/30) 전부 미도달. 직전8(3026-3033) distinct=3(review-code(heavy)4+fix-incident3+lotto(lite)1) — 2-chain lock 미충족. 직전 cycle(3033) 추천대로 review-code(heavy) 계속, 미대조 lib/ 디렉토리(analysis/api/calendar/changelog/insights/leaderboard/players/predictions/reviews/seo/stats/v2-shadow-monitor) 스윕.
