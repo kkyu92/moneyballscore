@@ -11766,3 +11766,15 @@ MLB KO+EN 양쪽에 KBO twin과 동일 try/catch + console.error degrade 패턴 
 **검증**: `tsc --noEmit` clean, lint clean, `pnpm --filter moneyball test` 587 files/4628 tests 전체 green(신규 2건 포함). pre-push(lint+type-check+version-sync-guard) PASS. main 직접 commit+push(`216b61c4`, PR 미경유 R4 범위).
 
 다음 사이클 추천 = info-arch(gap=30/30, 다음 사이클 정확 도달 — 자연 트리거 유력) 또는 review-code(heavy) 계속(lib/ 8개 디렉토리 소진 — components/ 재스윕 또는 packages/kbo-data 신규 축 필요) 또는 fix-incident(gap=8/20).
+
+## 🟡 RETRO-ONLY — review-code(heavy): OG/twitter-image Supabase 가드 전수 감사, 갭 0건 (cycle 3043, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/23(모두 completed/archived/spec_only, 리터럴 `status: approved` 없음). 2차 방어선(cycle 3042 retro `37ee0fc0`) OK. gap trigger 재측정 — fix-incident 1/20(직전 사이클 발화), info-arch 7/30, lotto 5/30 전부 미도달. **op-analysis 마지막 발화 cycle 2924(git log 실측) → gap 119 cycle, 25-cycle trigger 대폭 초과** (SKILL.md 의 python split()[0] 자동측정 명령은 `operational-analysis(lite)` 류 접미사 때문에 0건으로 오탐 — git log grep 수동 재확인으로 교정). 직전8(3035-3042) distinct=4(review-code(heavy) 다수) — 2-chain lock 미충족.
+
+**op-analysis 착수 시도했으나 즉시 블락 확인**: `memory/project_supabase_inactive_incident_2026_10_11.md` (cycle 3019 박제) 가 Supabase org billing restriction INACTIVE 상태 기록 — 본 사이클 재확인(`nslookup utmimgpccbrciwuuacyw.supabase.co` 8.8.8.8/1.1.1.1 둘 다 NXDOMAIN, cycle 3019 대비 24 사이클 경과 후에도 변화 없음) 결과 여전히 DB 완전 unreachable. op-analysis(lite/heavy) 둘 다 Supabase 쿼리 전제라 fresh 측정 불가능 — 사용자 billing 조치 전까지 반복 블락 상태. 코드로 해결 불가(비용 가드 — 자율 결제/업그레이드 금지), 재시도 보류.
+
+**대체 선택**: 살아있는 인시던트를 실제 end-to-end 검증 기회로 활용 — review-code(heavy) 로 기존 sibling-asymmetry 헌팅 계열(TeamLogo/revalidate/health/matchup-standings/insights-loader/insights-series, 6건) 의 다음 후보 영역인 `opengraph-image.tsx`/`twitter-image.tsx` (동적 이미지 생성, request-time Supabase fetch 흔함) 20쌍(KO/EN/MLB 포함 140 파일) 전수 감사를 subagent 위임. 결과: 전부 안전 확인 — 대부분 정적 상수/순수 함수만 사용(DB 미접촉), lotto 는 파일시스템 기반(null-safe), predictions/[date]·analysis/game/[id]·players/[id] 3곳은 이미 try/catch + Sentry capture + null fallback 패턴 적용 확인(기존 house style 정합). twitter-image 는 전부 opengraph-image re-export라 동일 가드 상속. 신규 수정 0건 — `tsc --noEmit` 베이스라인 green 확인.
+
+결론: 이 축(OG/twitter image)은 sibling-asymmetry 패턴 부재 — 7번째 후보 영역이 클린으로 종료. op-analysis gap(119)은 다음 사이클도 계속 블락 예상(사용자 billing 조치 없이는 미해소) — 매 사이클 재확인 대신 memory 파일 변경 여부만 체크 권장(저가치 반복 재확인 회피).
+
+다음 사이클 추천 = info-arch(gap=8/30, 아직 여유) 또는 review-code(heavy) 신규 축(app/api cron 라우트 재확인 또는 packages/kbo-data 잔여) 또는 fix-incident(gap=2/20, Supabase 상태 변화 시 즉시 재평가).
