@@ -2409,12 +2409,14 @@ JSON: {"draw": ${drwNo}, "passed_rules": ${passed}, "failed_rules": ${failed}, "
     }
     // manual override (smoke / dhlottery 차단 환경): result-md 1229 "12,13,29,34,37,42" 16
     let round: LottoRound | null = null;
+    let sourceLabel = '추첨 결과 자동 fetch (dhlottery.co.kr API)';
     const manualWinning = process.argv[4];
     const manualBonus = process.argv[5];
     if (manualWinning) {
       const nums = manualWinning.split(',').map(s => Number(s.trim())).sort((a, b) => a - b);
       if (nums.length === 6 && nums.every(n => n >= 1 && n <= 45) && manualBonus) {
         round = { round: targetDrwNo, date: '', numbers: nums, bonus: Number(manualBonus) };
+        sourceLabel = '추첨 결과 수동 입력 (dhlottery+lottolyzer 양쪽 fetch 불가 확인 후 공신력 있는 복수 외부 보도 교차검증)';
         if (round.date === '') {
           // estimate next Saturday for picks lookup; will rewrite below if picksFile match
           const cached = rounds.find(r => r.round === targetDrwNo);
@@ -2430,7 +2432,7 @@ JSON: {"draw": ${drwNo}, "passed_rules": ${passed}, "failed_rules": ${failed}, "
       // dhlottery 차단 환경 (GH Actions IP 등) → lottolyzer fallback
       console.log(`dhlottery 실패 → lottolyzer fallback...`);
       const fallback = await fetchFromLottolyzer(new Set([targetDrwNo]));
-      if (fallback.length > 0) round = fallback[0];
+      if (fallback.length > 0) { round = fallback[0]; sourceLabel = '추첨 결과 자동 fetch (lottolyzer fallback)'; }
     }
     if (!round) {
       console.error(`${targetDrwNo}회 미발표 또는 fetch 실패. 추첨 후 재시도.`);
@@ -2566,8 +2568,8 @@ ${missAnalysis}
 
 ## 메타
 
-- 추첨 결과 자동 fetch (dhlottery.co.kr API)
-- 생성: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC (cron 새벽 자동)
+- ${sourceLabel}
+- 생성: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC${manualWinning ? ' (수동 실행)' : ' (cron 새벽 자동)'}
 - picks file: \`apps/moneyball/data/lotto-picks/${picksFile}\` (${picksDate})
 
 JSON: {"draw": ${targetDrwNo}, "winning": [${winning.join(',')}], "bonus": ${round.bonus}, "tier1": ${tierCounts.tier1}, "tier2": ${tierCounts.tier2}, "tier3": ${tierCounts.tier3}, "tier4": ${tierCounts.tier4}, "tier5": ${tierCounts.tier5}, "rule_pass": ${rulePassed}, "rule_fail": ${ruleFailed}, "top10_has_1st": ${topPickHas1st}}
