@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — fix-incident: 홈페이지 DB 장애 시 "경기 없음" 과 혼동되는 silent fallback 구분 배너 (cycle 3042, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/30(plan#29 불변, Tier4). 2차 방어선(cycle 3041 retro `5ecb0a11`) OK. 직전8(3034-3041) distinct=3(review-code(heavy)6+lotto1+info-architecture-review1) — 2-chain lock 미충족(≤2 기준 미달). gap trigger: fix-incident 14/20(미근접), op-analysis 117+/25(Supabase INACTIVE 로 DB harness 불가, 반복 skip 패턴 정합), info-arch 6/30·lotto 4/30 전부 미근접. explore-idea saturation 직전15 13/15 충족했으나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 16.7h 신선) — 반복 패턴. review-code(heavy) 대상 디렉토리(lib/agents/factors/scrapers/backtest/components/app-api/hooks/config/packages-shared) 전부 과거 다회 전수 스윕 완료(cycle 2685~3041 history 확인) — 신규 unswept scope 부재, 4연속 review-code(heavy) 는 재감사 diminishing-returns 우려로 보류.
+
+Supabase INACTIVE(org billing restriction, 2026-10-10 18:42 KST~, [[project_supabase_inactive_incident_2026_10_11]]) 장애가 진행 중이라는 점에 착안 — "billing 자체는 코드로 못 고친다"는 기존 결론과 별개로, **장애 중 사용자가 실제로 보는 화면**을 agent 위임 조사(subagent "Investigate homepage DB-down UX"). 결과: `page.tsx`(및 동일 컨벤션 29개 파일)가 `assertSelectOk` throw → `.catch(captureFallback(...))` 로 Sentry 에는 기록하지만 사용자에게는 "실제 데이터 0건"과 완전히 동일한 빈 상태("오늘은 편성된 경기가 없습니다")를 보여줌 — 장애 중에도 사용자는 단순 휴식일/비시즌으로 오인하는 misleading UX. 이건 billing 블록과 무관하게 코드로 고칠 수 있는 범위.
+
+수정: `page.tsx` 를 `Promise.allSettled` 기반으로 전환 — 7개 주요 fetch + `nextSchedule`/`divergenceGame` 까지 총 9개 호출의 성공/실패를 `status` 필드로 순수 파생(`dbDegraded = ...some(r => r.status === "rejected")`), 재할당 없는 const 체인(react-hooks/immutability lint 룰이 컴포넌트 함수 내 `let` 재할당을 차단 — 최초 `let dbDegraded` 시도가 lint fail, allSettled 로 재설계). 하나라도 실패 시 기존 빈 상태 위에 "일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다" 배너 노출(UI 카피 dev-jargon 금지 룰 준수 — "DB"/"Sentry"/"fallback" 등 미노출). `captureFallback` 의 기존 Sentry 리포팅 동작·시그니처는 변경 없음 — 호출부만 재구성.
+
+범위: 홈페이지(page.tsx) pilot 1건. 동일 `assertSelectOk`→`captureFallback` 컨벤션을 쓰는 나머지 28개 파일(predictions/standings/accuracy/matchup 등)은 다음 review-code(heavy) 또는 fix-incident 사이클 후속 확장 후보(기계적이나 파일 수가 많아 1 cycle 분량 아님, agent 투자 조사 결과 그대로).
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean(1회 fail→재설계 후 clean), `pnpm --filter moneyball test` 587 files/4628 tests 전체 green. 직접 main 커밋+push(R4 범위, `4a603645`, pre-push hook lint+type-check+version-sync-guard 전부 PASS).
+
+다음 사이클 추천 = 동일 패턴 나머지 28개 파일 확장(fix-incident 계속, predictions/standings/accuracy 우선) 또는 review-code(heavy) 신규 축 재탐색(diminishing returns 우려 — 전수 스윕 완료 영역 재확인보다 신규 생성 파일 위주) 또는 op-analysis(Supabase 복구 시 즉시, gap=118/25 최장 미발화) 또는 lotto(gap=5/30, 1246회 10/17 전).
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/context 전수 감사, TIME_WINDOWS.recent_form 하드코딩 10 정정 (cycle 3041, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/24(plan#29 불변, Tier4). 2차 방어선(cycle 3040 retro `79dd9023`) OK. 직전8(3033-3040) distinct=3(review-code(heavy)5+info-architecture-review1+lotto1) — 2-chain lock 미충족. gap trigger: op-analysis 117-cycle 미발화(마지막 cycle 2924)로 25-cycle 임계 대폭 초과했으나, Supabase 재확인(nslookup NXDOMAIN 지속) — DB 의존 harness 실행 불가, 반복 저가치 재확인 skip(cycle 3035 패턴 정합) 판단으로 op-analysis 보류. explore-idea saturation 13/15 충족했으나 4-source negative(open issue 0/approved plan 0 Tier4/TODOS Next-Up 부재/DESIGN.md 16.5h 신선) — review-code(heavy) fallback. cycle 3040 추천대로 `packages/kbo-data/context/`(4파일 917줄, 과거 전수 스윕 이력 0건) 선정.
