@@ -11800,3 +11800,15 @@ cycle 3042 fix-incident pilot(홈페이지 Promise.allSettled 기반 dbDegraded 
 검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4629 tests 전체 green. 직접 main 커밋+push(R4 범위, `0675661a`, pre-push hook lint+type-check PASS).
 
 다음 사이클 추천 = 동일 패턴 잔여 22개 파일 확장 계속(fix-incident, mlb/en-mlb 라우트 다수 + matchup/teams/insights/about/search/reviews/v2-preview) 또는 Supabase 복구 시 op-analysis(gap=120/25 최장 미발화) 즉시 전환.
+
+## 🟢 SUCCESS — fix-incident: v2-preview DB 장애 구분 배너 추가 (cycle 3046, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/24(변화 없음). 2차 방어선(cycle 3045 retro `e2cf3de4`) OK. 직전8(3038-3045) distinct=3(review-code(heavy)4+fix-incident3+lotto1) — 2-chain lock 미충족. gap trigger 4종 — fix-incident 1/20(직전 발화), lotto 8/30, info-arch 10/30, op-analysis 122/25(Supabase INACTIVE 지속, nslookup 재확인 NXDOMAIN — 사용자 billing 조치 대기 변화 없음, 반복 재확인 skip). explore-idea saturation 14/15 충족했으나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 17h 신선) 지속 — fallback.
+
+cycle 3044/3045 가 "captureFallback 사용처 34개 중 allSettled 미적용" 스윕을 국내 핵심 20개로 커버했지만 `v2-preview/page.tsx`(noindex 내부 미리보기, captureFallback 단일 `.catch()`)는 두 사이클 리스트에서 누락됨 — grep 재확인으로 발견. 해당 페이지도 DB 장애 시 "누적된 pre_game 예측이 없습니다" 로 degrade, 실제 無데이터와 구분 불가능한 동일 결함.
+
+Promise.allSettled 기반 dbDegraded 배너(cycle 3042 pattern) 적용 — 단일 fetch 라 구조 단순.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4629 tests 전체 green. 직접 main 커밋+push(R4 범위, `00796ef5`, pre-push lint+type-check+version-sync-guard PASS).
+
+다음 사이클 추천 = review-code(heavy)(packages/kbo-data backtest/scrapers 잔여 재탐색) 또는 lotto(gap=9/30) 또는 Supabase 복구 시 op-analysis(gap=123/25 최장 미발화) 즉시 전환. captureFallback 스윕 잔여 = MLB/en-mlb twin 10개(저우선, cycle 3045 확인) 뿐.
