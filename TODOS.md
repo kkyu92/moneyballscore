@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api 잔여 5-route 완주, 전체 20/20 감사 완료 milestone (cycle 3057, 2026-10-11)
+
+진단: open issue 0, approved plan 0/23. Supabase 여전히 INACTIVE(NXDOMAIN 재확인, cycle 3019 escalated 지속) — op-analysis 계속 블락. lotto cron 정상(2026-10-10 picks+results 존재, stale 아님). 직전8(3049-3056) distinct=3(review-code(heavy)5+review-code2+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=10/20·lotto gap=19/30·info-arch gap=21/30 전부 미근접. app/api 20개 route 중 cycle 3052~3056 에 15개 이미 감사, 잔여 5개(leaderboard/mlb-sync, picks/mlb-submit, picks/mlb-poll, revalidate, version) 미감사 발견 — 선택.
+
+general-purpose agent 위임 전수 read(route + helper + migration 스키마 대조, 형제 route 와 cross-check). 전부 clean — defect 0건:
+- `leaderboard/mlb-sync`, `picks/mlb-submit`: 이미 fix 된 형제(`leaderboard/sync`, `picks/submit`) 와 구조 동일하나 애초에 partial-failure array 반환하는 helper 자체가 없음(단일 upsert + 직접 error 체크 → Sentry + 500) — silent-200 defect family 해당 없음. VARCHAR 길이 검증(`external_game_id` ≤20) 모두 마이그레이션 컬럼 폭과 일치.
+- `picks/mlb-poll`: `assertSelectOk` 가 select error 시 throw → catch → 500, silent swallow 없음.
+- `revalidate`: CRON_SECRET 가드 정상, DB 호출 없어 overflow/swallow 위험 자체 없음.
+- `version`: 공개 메타데이터 endpoint 무인증 — `health`/`kbo-scores` 와 동일 관례, `deploy-drift-alert.yml` 모니터링 목적상 의도된 설계.
+
+`pnpm test` 588 files/4638 tests green, lint/type-check clean. 코드 변경 0건 — clean 확인 자체가 결과 (app/api 전체 20/20 route 감사 완주 milestone, cycle 3052~3057 누적).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 누적 10건, 과거부터 지속 ≥5 — 신규 crossing 아니므로 비적용) · trigger3(milestone) 3057%50=7≠0 · trigger5(직전20 inclusive, sample=9<10 표본 부족 skip) · trigger2/4 해당없음. ship-0 emergency stop: 직전10 전부 success(본 cycle 포함) → 미해당. marker 박제 X.
+
+다음 사이클 추천 = review-code(heavy) 대상 전환(packages/kbo-data/src/agents 재검토 또는 apps/moneyball/src/lib) 또는 fix-incident(gap=11/20)/lotto(gap=20/30, 10/17 draw #1246 전 점검)/info-arch(gap=22/30) 자연 대기. **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만.**
+
 ## 🟢 SUCCESS — review-code(heavy): app/api live/snapshot-pitchers 정정 (cycle 3056, 2026-10-11)
 
 진단: open issue 0, approved plan 0/23. Supabase 여전히 INACTIVE(NXDOMAIN 재확인, cycle 3019 escalated 지속) — op-analysis 계속 블락. 2차 방어선(cycle 3055 retro `ac152b7a`) OK. 직전8(3048-3055) distinct=3(review-code(heavy)5+review-code2+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=8/20·lotto gap=18/30·info-arch gap=20/30 전부 미근접. cycle 3055 추천대로 app/api 잔여 6-route(leaderboard/sync·snapshot-pitchers·seo/indexnow/ping·picks/poll·mlb/waitlist·live, 형제 라우트 2개 포함) 선택.
