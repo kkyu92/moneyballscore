@@ -1,4 +1,22 @@
 
+## 🟢 SUCCESS — review-code(heavy): health/route.ts checkPipeline() silent 에러 downgrade 정정 (cycle 3031, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/24(plan#29 불변, 만료 2026-10-15 1일 전). 2차 방어선(cycle 3030 retro `5b6a7a32`) OK. gap trigger 4종(fix-incident 3/20, op-analysis 10/25, info-arch 25/30, lotto 2/30) 전부 미도달 — info-arch 는 cycle 3006 checkpoint 가 "다음 재도달 cycle 3036 근방" 예고, 아직 미도달. 직전8(3024-3030) distinct=3(review-code(heavy)3+fix-incident4+lotto(lite)1) — 2-chain lock 미충족. explore-idea saturation(직전15) 7/15 미충족. 직전 cycle(3030) 추천 그대로 review-code(heavy) app/api 잔여 저커밋 route 스윕 계속.
+
+subagent 위임 전수 read(`snapshot-pitchers`/`hub-dispatch`/`mlb/pipeline`/`health/pipelines`/`kbo-scores`/`picks/results`/`health` 7개, 전부 기존 cycle 3030 이 다룬 route 와 중복 없음 확인) → 3곳 수정:
+
+1. **`health/route.ts` checkPipeline()`** (실제 버그, 가장 중요): `.single()` + 뭉뚱그린 catch 가 "pipeline_runs 행 없음"과 "진짜 DB/RLS 장애"를 똑같이 `status:'warning', detail:'No pipeline runs yet'` 로 downgrade — errMsg/Sentry 전혀 없음. 형제 `health/pipelines/route.ts` checkMode() 는 `.maybeSingle()` + catch 분리(진짜 예외만 `status:'error'`)로 올바르게 처리 — 동일 sibling-asymmetry family(TeamLogo/MlbTeamLogo, revalidate try/catch 에 이은 4번째 사례). `.maybeSingle()` + `status:'error', detail: errMsg(e)` 로 정정 — 실제 pipeline_runs 장애 시 `overall:'fail'` 로 제대로 반영되게.
+2. `picks/results/route.ts`: `assertSelectOk` 호출 직전 중복 `if (result.error)` 수동 체크가 있어 바로 아래 assertSelectOk 의 try/catch 가 영원히 도달 불가능한 dead code 였음(같은 파일 `fetchMlbPickResults` 의 라이브 패턴과 대조해 확정). 수동 체크 제거 — 단 제거 후 단순 재throw 로 두면 KBO 분기만 형제 MLB 분기(`fetchMlbPickResults` 호출부가 catch 해서 JSON 500 반환)와 달리 unhandled 로 새니 catch 안을 그대로 JSON 500 반환으로 바꿔 동일하게 맞춤(최초 edit 에서 실수로 rethrow 로 뒀다가 직접 재검토 후 수정).
+3. `snapshot-pitchers/route.ts` JSDoc: cron 출처를 `.github/workflows/pitcher-snapshot.yml` 로 서술했지만 해당 workflow 의 schedule 트리거는 2026-04-30 Cloudflare Worker 로 이관되어 `workflow_dispatch` 만 남음 — 실제 출처(`cloudflare-worker/src/worker.ts` `'37 * * * *'` 분기)로 정정.
+
+`hub-dispatch`/`mlb/pipeline`/`health/pipelines`/`kbo-scores` 4개는 clean 확인(`mlb/pipeline` 은 revalidate 패턴 자체가 없음 확인 — MLB 전체가 KBO 의 on-demand revalidate 대신 ISR time-based revalidate 만 쓰는 의도된 아키텍처 차이, drift 아님).
+
+**검증 중 추가 발견**: `health/route.ts` 수정 후 기존 테스트 mock 이 `.single()` 만 stub 해서 `.maybeSingle()` 호출 시 mock 전체가 깨져 무관한 3개 테스트까지 503 으로 fail — mock 을 `.maybeSingle()` 로 동기화해 재통과.
+
+**검증**: `tsc --noEmit` clean, lint clean, `pnpm --filter moneyball test` 587 files/4623 tests 전체 green. pre-push(lint+type-check+version-sync-guard) PASS. main 직접 commit+push(`9a27e121`, PR 미경유 R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(app/api 저커밋 route 거의 소진 — 남은 미검토는 `mlb/scrape`, `mlb/shadow-train`, `mlb/elo-update` 등 cron-only 류, 또는 `apps/moneyball/src/lib` 잔여 소형 스코프로 전환) 또는 fix-incident(gap=4/20) 또는 lotto(gap=3/30, 1246회 10/17 전).
+
 ## 🟢 SUCCESS — review-code(heavy): api/live, api/pipeline revalidate false-failure 정정 (cycle 3030, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/23(plan#29 불변). 2차 방어선(cycle 3029 retro `4a5a29e3`) OK. gap trigger 4종(fix-incident 2/20, op-analysis 9/25, info-arch 24/30, lotto 1/30) 전부 미도달. 직전8(3022-3029) distinct=3(review-code(heavy)3+fix-incident4+lotto(lite)1) — 2-chain lock 미충족. explore-idea saturation(직전15) 12/15 충족했으나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 반복 패턴 — review-code(heavy) 로 fallback.
