@@ -17,17 +17,24 @@ export async function POST(request: NextRequest) {
   try {
     const result = await runLiveUpdate(date);
 
-    // 업데이트가 있으면 ISR revalidation
+    // 업데이트가 있으면 ISR revalidation. revalidate 실패는 live update 자체의
+    // 성공을 가리면 안 됨 (silent false-failure 방지, sync-batter-stats 동일 패턴).
     if (result.updated > 0) {
-      const revalidateUrl = new URL('/api/revalidate', request.url);
-      await fetch(revalidateUrl.toString(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${cronSecret}`,
-        },
-        body: JSON.stringify({ paths: ['/'] }),
-      });
+      try {
+        const revalidateUrl = new URL('/api/revalidate', request.url);
+        await fetch(revalidateUrl.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${cronSecret}`,
+          },
+          body: JSON.stringify({ paths: ['/'] }),
+        });
+      } catch (revalidateError) {
+        Sentry.captureException(revalidateError, {
+          tags: { layer: 'api-route', route: 'live', sub: 'revalidate' },
+        });
+      }
     }
 
     return Response.json(result);

@@ -26,49 +26,62 @@ export async function POST(request: NextRequest) {
   try {
     const result = await runDailyPipeline(date, mode, triggeredBy);
 
-    // ISR revalidation 트리거
+    // ISR revalidation 트리거. revalidate 실패는 pipeline 본 작업의 성공을
+    //   가리면 안 됨 (silent false-failure 방지, sync-batter-stats 동일 패턴).
     //   predict/predict_final: 예측 생성 시 홈 + 예측 페이지
     //   verify: is_correct 업데이트 → /dashboard + /predictions 일자 페이지
     if (
       (mode === 'predict' || mode === 'predict_final') &&
       result.predictionsGenerated > 0
     ) {
-      const revalidateUrl = new URL('/api/revalidate', request.url);
-      await fetch(revalidateUrl.toString(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${cronSecret}`,
-        },
-        body: JSON.stringify({
-          paths: [
-            '/',
-            '/predictions',
-            `/predictions/${result.date}`,
-            '/analysis',
-            '/feed',
-          ],
-        }),
-      });
+      try {
+        const revalidateUrl = new URL('/api/revalidate', request.url);
+        await fetch(revalidateUrl.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${cronSecret}`,
+          },
+          body: JSON.stringify({
+            paths: [
+              '/',
+              '/predictions',
+              `/predictions/${result.date}`,
+              '/analysis',
+              '/feed',
+            ],
+          }),
+        });
+      } catch (revalidateError) {
+        Sentry.captureException(revalidateError, {
+          tags: { layer: 'api-route', route: 'pipeline', mode, sub: 'revalidate' },
+        });
+      }
     }
 
     if (mode === 'verify') {
-      const revalidateUrl = new URL('/api/revalidate', request.url);
-      await fetch(revalidateUrl.toString(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${cronSecret}`,
-        },
-        body: JSON.stringify({
-          paths: [
-            '/dashboard',
-            '/predictions',
-            `/predictions/${result.date}`,
-            '/',
-          ],
-        }),
-      });
+      try {
+        const revalidateUrl = new URL('/api/revalidate', request.url);
+        await fetch(revalidateUrl.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${cronSecret}`,
+          },
+          body: JSON.stringify({
+            paths: [
+              '/dashboard',
+              '/predictions',
+              `/predictions/${result.date}`,
+              '/',
+            ],
+          }),
+        });
+      } catch (revalidateError) {
+        Sentry.captureException(revalidateError, {
+          tags: { layer: 'api-route', route: 'pipeline', mode, sub: 'revalidate' },
+        });
+      }
     }
 
     return Response.json(result);
