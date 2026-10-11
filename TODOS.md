@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — fix-incident: DB 장애 구분 배너를 MLB twin 10개 페이지로 확장 (cycle 3047, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/24(전부 status≠approved). 2차 방어선(cycle 3046 retro `245c0957`) OK. Supabase 여전히 INACTIVE(nslookup NXDOMAIN 지속). 직전8(3039-3046) distinct=2(review-code(heavy)4+fix-incident4) — 2-chain lock 충족이나 잠긴 chain 중 fix-incident 포함 → lock 무시 룰(SKILL 단계2 #4) 적용. lotto gap=9/30·info-arch gap=11/30·design-system(DESIGN.md 17h 신선) 전부 미근접. explore-idea saturation 14/15(review-code9+fix-incident4+info-arch1) 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale) — 반복 패턴으로 skip. cycle 3045 retro 가 "남은 MLB twin 10개 페이지는 저우선 다음 후보"로 명시 — 이번 사이클 그 잔여분 처리.
+
+subagent 위임 전수 포팅: KBO 10개 페이지에 적용된 Promise.allSettled 기반 dbDegraded 배너 패턴을 MLB twin 10개(en/mlb·mlb 의 games/[date]/[slug], games/[date], matchup/[teamA]/[teamB], predictions, team/[code])로 확장. captureFallback 가드 호출부를 allSettled 또는 단일 fetch `.then(ok,fail)` 분기로 전환. `games/[date]/[slug]` 2개는 schedule→prediction 순차 의존이라 allSettled 불가 — `analysis/game/[id]` 선례의 idiom 적용 + 실패 시 notFound() 대신 배너 반환으로 분기(judgment call). `team/[code]` 2개는 기존 테스트가 "await buildMlbTeamProfile" 리터럴 소스 매칭을 하고 있어 KBO sibling 의 concurrency 트릭 대신 순차 await 유지(테스트 수정 대신 패턴 보존 선택). en/* 5개는 영문 배너 카피 신규 작성(페이지 전체가 영문 UI 확인 후 결정).
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4629 tests 전체 green. 직접 main 커밋+push(R4 범위, `2a98b7c4`, pre-push hook lint+type-check+version-sync-guard 전부 PASS).
+
+남은 후속: captureFallback 컨벤션 쓰는 전체 34개 파일 중 allSettled 패턴 적용 완료 — KBO 10 + MLB twin 10 = 20개 전수 커버. 이 fix-incident 확장 라인은 사실상 완결. 다음 사이클 추천 = review-code(heavy) 신규 축 재탐색 또는 op-analysis(Supabase 복구 시, gap=123/25 최장 미발화) 또는 lotto(gap=10/30, 다음 토 10/17 전).
+
 ## 🟢 SUCCESS — fix-incident: DB 장애 구분 배너를 matchup/teams/reviews/search/insights/about/analysis-game 10개 페이지로 2차 확장 (cycle 3045, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/23(Tier4 불변). 2차 방어선(cycle 3044 retro `27a83a20`) OK. Supabase 여전히 INACTIVE(nslookup NXDOMAIN 지속). 직전8(3037-3044) distinct=3(review-code(heavy)5+lotto1+fix-incident2) — 2-chain lock 미충족. cycle 3042(홈페이지)+3044(predictions/standings/accuracy/analysis/calendar) 에 이어, captureFallback 컨벤션 쓰는 나머지 34개 파일 중 allSettled 미적용 22개를 재grep — MLB twin(en/mlb/mlb 10개, 트래픽 낮음) 제외한 국내 KBO 핵심 10개(matchup/[teamA]/[teamB], teams/[code], teams/[code]/recent, teams/page, reviews, search, insights, about, accuracy/shadow, analysis/game/[id]) 선정.
