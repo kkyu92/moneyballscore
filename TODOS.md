@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — fix-incident: analysis/page.tsx fetchStandings() Promise.all 가드 누락 정정 (cycle 3027, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/23(plan#29 Tier4 미변화). 2차 방어선(cycle 3026 retro `68022d8a`) OK. gap trigger 4종(fix-incident 1/20, op-analysis 6/25, info-arch 21/30, lotto 18/30) 전부 미도달. 직전8(3019-3026) distinct=3(fix-incident/operational-analysis(lite)/review-code(heavy)) — 2-chain lock 미충족. Supabase 프로젝트(utmimgpccbrciwuuacyw) INACTIVE 장애(cycle 3019 최초 발견, org billing restriction) 지속 여부를 nslookup+curl 로 독립 재확인 — 여전히 NXDOMAIN(supabase.com 자체는 200 정상 응답이라 샌드박스 네트워크 제약 아닌 실제 프로젝트 장애로 확정). 이미 cycle 3019 에서 TODOS+meta-pattern 에스컬레이션 완료(비용 가드상 자율 결제/업그레이드 불가, 사용자 조치 대기), cycle 3021 op-analysis(lite) 가 지속 확인 완료 — 추가 재확인은 저가치 반복이라 스킵, 대신 "DB 완전 장애가 다른 경로를 crash 시키는가" blast-radius 조사로 전환(Agent 위임, read-only).
+
+조사 결과: `assertSelectOk`(packages/shared/src/db-error.ts) + `captureFallback` 2-layer 방어가 홈페이지/predictions/analysis 전역에 일관 적용 — Supabase 쪽 crash 위험 없음(supabase-js v2 는 `.throwOnError()` 미호출 시 fetch-level 실패도 `{data:null,error}` 로 안전 변환, repo 전체에 `throwOnError` 0건 확인). `/api/health` 도 Supabase 전용 체크가 이미 독립 try/catch 로 502/503 을 정확히 보고 — 알림 체계 정상 작동 중.
+
+단 하나의 예외 발견: `analysis/page.tsx` 최상단 거대 `Promise.all`(27개 항목) 안 `fetchStandings()`(KBO 공식 사이트 스크랩, Supabase 와 무관한 외부 소스, `fetchWithRetry` 재시도 소진 시 throw)만 가드 없이 섞여 있었음 — 나머지 26개는 전부 내부 함수(`getTodayAnalysisData`/`buildTeamStrengthSnapshot`/`getSeasonH2HData` 등)가 자체적으로 `assertSelectOk`+`captureFallback` 가드를 갖춰 절대 throw 하지 않는 반면, `fetchStandings()` 는 raw 호출. 자매 함수 `apps/moneyball/src/lib/standings/buildTeamAccuracy.ts`(line 210)는 이미 동일 호출을 `fetchStandings().catch(captureFallback)` 로 가드 — `analysis/page.tsx` 만 동일 패턴 미적용(silent drift family, KBO 스크랩 사이트 장애 시 `/analysis` 전체 500 위험).
+
+**수정**: `captureFallback` import 추가 + `fetchStandings()` 를 `.catch((err) => captureFallback(err, [] as StandingRow[], {...}))` 로 가드. KBO 사이트 장애 시에도 `/analysis` 전체가 `standingsRows=[]` fallback 으로 degrade(순위/최근10경기/홈원정 배지만 공란, 나머지 섹션 정상).
+
+검증: 신규 `silent-drift-cycle-3027.test.ts`(source 패턴 매칭 2건) passed + `tsc --noEmit` clean + lint clean + `pnpm test` 전체 587 files/4623 tests green. pre-push PASS. main 직접 commit+push(`1c2f63f9`, PR 미경유 R4 범위). Supabase 자체 INACTIVE 는 미해결(코드로 고칠 수 없는 부분, 사용자 조치 대기 유지).
+
+다음 사이클 추천 = review-code(heavy) 계속(남은 신규 축 탐색 필요) 또는 fix-incident(gap=1, Supabase INACTIVE 지속 시 재확인 주기적 필요하나 저빈도 권장 — 매 cycle 재확인은 노이즈) 또는 lotto(gap=19) 또는 info-arch(gap=22).
+
 ## 🟢 SUCCESS — fix-incident: TeamLogo.tsx 미인식 team code 크래시 가드 추가 (cycle 3026, 2026-10-11)
 
 진단: open issue 0건, unprocessed approved plan 0/23(plan#29 만 status=spec_only_deferred_recommended, Tier4 사용자 결정 대기 — cycle 2969 이후 변화 없음). 2차 방어선(cycle 3025 retro commit `c1d469bc`) OK. gap trigger 4종(fix-incident 2/20, op-analysis 5/25, info-arch 20/30, lotto 17/30) 전부 미도달. 직전8(3018-3025) distinct=4(2-chain lock 미충족). explore-idea saturation(직전15 13/15) 충족했으나 4-source 재확인 negative(GH issue 0, TODOS Next-Up stale, plan#29 Tier4 risk=3 자율 가능=no 불변, 포스트시즌 WC(10/14) 3일 전으로 아직 미도달) — 과거 cycle 2591/2684/2689/2780/2788과 동일 패턴 반복, review-code(heavy) 계열로 fallback.
