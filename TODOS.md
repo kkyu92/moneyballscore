@@ -1,4 +1,12 @@
 
+## 🟡 PARTIAL — fix-incident: lotto-result-update cron "최신 회차 조회 실패" (cycle 3020, 2026-10-11)
+
+**진단**: `lotto-result-update.yml` 3-fire(10-10 20:34 / 10-11 01:56 모두) 전부 "최신 회차 조회 실패" 후 1244회(10/3)에 머물러 idempotent skip — 10/10 추첨(1245회) 결과 미반영. 원인: `scripts/lotto.ts update()` 가 `getLatestRound()`(lottolyzer en 페이지 scrape) 단일 source 로 최신 회차를 판별했는데, 그 함수가 실패하면 dhlottery 재시도 없이 즉시 bail — dhlottery 는 round 번호 지정 fetch(`fetchRoundFromAPI`)가 이미 있는데도 안 씀.
+
+**조치**: `update()` 에 oldLast+1 부터 순차 probe fallback 추가(dhlottery 우선 → lottolyzer per-round scrape, `result-md` 의 기존 fallback 패턴과 동일) — 커밋 2건, `pnpm test` 585/585 PASS, `workflow_dispatch` 로 2회 실측 fire. **결과**: 코드는 정상 동작(두 fallback 분기 전부 실행 확인, 크래시 없음) — 그러나 **dhlottery.co.kr 과 lottolyzer.com 양쪽 모두 GH Actions runner 에서 현재 도달 불가**(`lottolyzer 페이지 1 실패` 로그 확인) 라 1245회 데이터 자체를 못 가져옴. Supabase 건과 달리 사용자 조치 불필요 — 외부 두 사이트 동시 일시 장애로 추정, cron 이 하루 3회 재시도하므로 복구 시 자동 catch-up(probe 범위 5주치).
+
+**다음 확인**: 다음 cycle 또는 자연 fire 시 `apps/moneyball/data/lotto-results/2026-10-10.md` 생성 여부로 외부 복구 확인.
+
 ## 🔴 URGENT USER ACTION — fix-incident: Supabase 프로젝트 INACTIVE, restore API 결제 차단 (cycle 3019, 2026-10-11)
 
 **요약**: Supabase 프로젝트(`utmimgpccbrciwuuacyw`, org `vsqwlnoopqllzdwpczfr`)가 기존 "egress quota 402 degraded" 상태(65일+ 지속, cycle 2999~3018 확인)에서 **완전 INACTIVE 로 에스컬레이션**. DNS 조차 NXDOMAIN(8.8.8.8/1.1.1.1 양쪽 확인) — PostgREST 응답조차 못 받는 상태로 악화. 운영 사이트 홈페이지가 "경기가 없습니다" 표시 중(실측, DB 데이터 전부 unreachable). `health-alert` GH Action 이 2026-10-10 18:42 KST 부터 3회 연속 실패(18:42/22:41/01:59) — 약 9시간+ 지속.
