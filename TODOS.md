@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data analytics/features/notify/engine 전수 감사, calculateRecentForm 하드코딩 10 정정 (cycle 3040, 2026-10-11)
+
+진단: 직전8(3032-3039) distinct=3(review-code(heavy)6+info-architecture-review1+lotto(lite)1) — 2-chain lock 미충족. open issue 0건, approved plan 0/30. gap trigger 전부 미근접(fix-incident 12/20, op-analysis 19/25, lotto 2/30, info-arch 4/30). Supabase INACTIVE 재확인(nslookup 여전히 NXDOMAIN) — 변화 없음, 사용자 조치 대기 지속. cycle 3039 추천대로 review-code(heavy) 스코프를 `packages/kbo-data`로 전환, 그중 과거 전수 스윕 이력 0건(git log grep 확인)인 analytics/features/notify/engine 4개 디렉토리(5파일, 883줄) 선정 — grep-count 낮은 영역도 전수 read 필요(cycle 3001 가드레일) 원칙 적용.
+
+subagent 위임 전수 read + 호출부 cross-check 결과: **실제 결함 1건** — `engine/form.ts:31` `calculateRecentForm` 의 `lastN` 기본값이 `packages/shared` 의 `RECENT_FORM_GAMES=10` 상수를 참조하지 않고 리터럴 `10`을 하드코딩. 같은 함수의 두 production/backtest 호출부(`pipeline/daily.ts:691-692`, `backtest/loader.ts:98-99`)도 동일 리터럴 중복 — `RECENT_FORM_GAMES` 가 추후 변경되면(예: 10→12) UI 라벨은 갱신되는데 실제 예측엔진/backtest window 는 구버전에 silent 하게 묶이는 전형적 silent-drift-family 패턴. 3곳 모두 상수 참조로 정정. 그 외 4파일(`analytics/stale-data-snapshot.ts`/`features/game-record-features.ts`/`notify/telegram.ts`/`engine/predictor.ts`)은 전부 clean — DEFAULT_WEIGHTS/HOME_ADVANTAGE/null-guard 대칭성/Korean 라벨 전부 shared 상수 참조 확인, dead code 0, 테스트-구현 불일치 0. (`stale-data-snapshot.ts`의 UTC 요일 그룹핑은 KST 컨벤션과 기술적으론 어긋나나 테스트에 명시적으로 문서화된 의도된 단순화로 판단, 영향도 낮아 수정 보류.)
+
+**review-code(heavy)의 `packages/kbo-data` 커버리지 축적 계속** — 잔여 미스윕: `agents/`(과거 cycle 2848/2884 재감사 완료), `context/`·`factors/`·`scrapers/`(과거 부분 스윕 이력 있음, 최신 재확인 필요 시 다음 축 후보), `backtest/` 나머지 파일(loader.ts 외).
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4628 tests 전체 green, `pnpm --filter @moneyball/kbo-data test` 96 files/1234 tests 전체 green. 직접 main 커밋+push(R4 범위, `07c67a1b`).
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data` 잔여: context/factors/scrapers 재감사 또는 backtest/ 나머지) 또는 fix-incident(gap=13/20, Supabase INACTIVE 재확인) 또는 lotto(gap=3/30) 또는 info-arch(gap=5/30).
+
 ## 🟢 SUCCESS — review-code(heavy): components/accuracy+matchup+analysis+live 전수 감사, MatchupFactorCompare stale "5팩터" 정정 (cycle 3039, 2026-10-11)
 
 진단: 직전8(3031-3038) distinct=3(review-code(heavy)6+info-architecture-review1+lotto(lite)1) — 2-chain lock 미충족. open issue 0건, approved plan 0/29(전부 status≠approved). gap trigger 전부 미근접(fix-incident 11/20, op-analysis 18/25, lotto 1/30, info-arch 3/30). cycle 3037 추천대로 review-code(heavy) 계속, `apps/moneyball/src/components/` 중 과거 전수 스윕 이력 0건(grep 확인)인 잔여 4개 디렉토리(accuracy/analysis/matchup/live, 총 35파일) 선정.
