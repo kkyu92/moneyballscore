@@ -89,7 +89,7 @@ export function GameAnalysisProse({
         {KBO_FACTOR_COUNT}개 세이버메트릭스 팩터를 종합한 정량 모델은 {confidenceLabel}으로{' '}
         {favored}
         {josa(favored, '이', '가')} {marginPp > 0 ? `${marginPp}%p 앞선다` : '팽팽하다'}고 평가한다.
-        {SUMMARY_FACTOR_KEYS.map((k) => FACTOR_LABELS_TECHNICAL[k]).join('·')}을 가중합산한 결과이며, 당일 선발 변경이나 돌발 변수는 반영되지 않는다.
+        핵심 팩터인 {SUMMARY_FACTOR_KEYS.map((k) => FACTOR_LABELS_TECHNICAL[k]).join('·')} 등을 가중합산한 결과이며, 당일 선발 변경이나 돌발 변수는 반영되지 않는다.
       </p>
     </section>
   );

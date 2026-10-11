@@ -19,7 +19,7 @@ const LABELS: Record<StatusFilter, string> = {
   all: '전체',
   correct: '적중',
   wrong: '실패',
-  pending: '미결',
+  pending: '대기',
 };
 
 const ORDER: StatusFilter[] = ['all', 'correct', 'wrong', 'pending'];

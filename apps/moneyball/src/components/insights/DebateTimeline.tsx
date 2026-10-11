@@ -54,7 +54,7 @@ export function DebateTimeline({
       homeWinProb: debate.quantHomeProb,
       predictedWinner: debate.quantHomeProb >= 0.5 ? homeTeam : awayTeam,
       note: `세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 합산. 홈 ${quantHomePct}% / 원정 ${100 - quantHomePct}%.`,
-      title: "1. 정량 모델 baseline",
+      title: "정량 모델 baseline",
     });
   }
 
@@ -71,7 +71,7 @@ export function DebateTimeline({
       homeWinProb: arg.confidence,
       predictedWinner: homeTeam,
       note: noteParts.length > 0 ? noteParts.join(" · ") : null,
-      title: `2. ${homeName} 옹호 논거`,
+      title: `${homeName} 옹호 논거`,
     });
   }
 
@@ -90,7 +90,7 @@ export function DebateTimeline({
       homeWinProb: homeProbFromAway,
       predictedWinner: awayTeam,
       note: noteParts.length > 0 ? noteParts.join(" · ") : null,
-      title: `3. ${awayName} 옹호 논거`,
+      title: `${awayName} 옹호 논거`,
     });
   }
 
@@ -110,7 +110,7 @@ export function DebateTimeline({
       homeWinProb: null,
       predictedWinner: null,
       note: noteParts.length > 0 ? noteParts.join(" · ") : null,
-      title: "4. 회고 에이전트 보정",
+      title: "회고 에이전트 보정",
     });
   } else if (debate.calibrationApplied) {
     steps.push({
@@ -119,7 +119,7 @@ export function DebateTimeline({
       homeWinProb: null,
       predictedWinner: null,
       note: debate.calibrationApplied,
-      title: "4. 회고 에이전트 보정",
+      title: "회고 에이전트 보정",
     });
   }
 
@@ -130,7 +130,7 @@ export function DebateTimeline({
     homeWinProb: debate.verdictHomeProb,
     predictedWinner: debate.predictedWinner,
     note: debate.verdictReasoning,
-    title: "5. 심판 종합 판단",
+    title: "심판 종합 판단",
     highlight: true,
   });
 
@@ -182,7 +182,7 @@ export function DebateTimeline({
             </span>
             <div className="space-y-2">
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">
-                {step.title}
+                {idx + 1}. {step.title}
               </p>
               <AgentVoteCard
                 role={step.role}
