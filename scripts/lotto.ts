@@ -139,6 +139,19 @@ async function getLatestRound(): Promise<number> {
   } catch { return 0; }
 }
 
+// lottolyzer 전체 다운 시 fallback: dhlottery 직접 순차 probe (추첨 주기=주 1회라 수 회차만 확인하면 충분)
+const PROBE_MAX_ROUNDS = 5;
+async function probeNextRounds(oldLast: number): Promise<LottoRound[]> {
+  const found: LottoRound[] = [];
+  for (let i = 1; i <= PROBE_MAX_ROUNDS; i++) {
+    const round = await fetchRoundFromAPI(oldLast + i);
+    if (!round) break;
+    found.push(round);
+    await sleep(FETCH_DELAY_MS);
+  }
+  return found;
+}
+
 async function fetchMissing(rounds: LottoRound[], targetMax: number): Promise<LottoRound[]> {
   const have = new Set(rounds.map(r => r.round));
   const needed = new Set<number>();
@@ -1473,8 +1486,13 @@ async function update(): Promise<LottoRound[]> {
   const oldLast = rounds[rounds.length - 1].round;
   console.log(`현재 데이터: ${rounds.length}회차 (최신 ${oldLast}회)\n`);
 
-  const latest = await getLatestRound();
-  if (!latest) { console.error('최신 회차 조회 실패'); return rounds; }
+  let latest = await getLatestRound();
+  let probedRounds: LottoRound[] = [];
+  if (!latest) {
+    console.warn('최신 회차 조회 실패 (lottolyzer) — dhlottery 직접 probe fallback');
+    probedRounds = await probeNextRounds(oldLast);
+    latest = probedRounds.length > 0 ? probedRounds[probedRounds.length - 1].round : oldLast;
+  }
   if (latest <= oldLast) { console.log(`✅ 이미 최신 (${oldLast}회차)`); return rounds; }
 
   const newRoundNums = Array.from({length: latest - oldLast}, (_, i) => oldLast + 1 + i);
@@ -1483,9 +1501,11 @@ async function update(): Promise<LottoRound[]> {
   // 기존 stats 저장
   const oldStats = computeStats(rounds);
 
-  // 신규 회차 수집
+  // 신규 회차 수집 (probe 단계에서 이미 fetch 한 회차는 재사용)
   const needed = new Set(newRoundNums);
+  for (const pr of probedRounds) { rounds.push(pr); needed.delete(pr.round); }
   for (const r of newRoundNums) {
+    if (!needed.has(r)) continue;
     const round = await fetchRoundFromAPI(r);
     if (round) { rounds.push(round); needed.delete(r); }
     await sleep(FETCH_DELAY_MS);
