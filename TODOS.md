@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — fix-incident: lotto update() reachability check 우회하는 신규 회차 publish 지연 보강 (cycle 3028, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/23(plan#29 불변). 2차 방어선(cycle 3027 retro `ca73eec7`) OK. gap trigger 4종(fix-incident 0/20, op-analysis 7/25, info-arch 22/30, lotto 19/30) 전부 미도달. 직전8(3020-3027) distinct=3(fix-incident4+operational-analysis(lite)1+review-code(heavy)3) — 2-chain lock 미충족. explore-idea saturation 13/15 충족 재확인했으나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up stale) 반복 패턴.
+
+lotto 회차 파일 신선도 직접 확인 중 실제 incident 발견: `apps/moneyball/data/lotto-results/` 최신 파일 2026-10-03.md — 직전 토요일(10/10) 추첨(1245회차) 결과 미반영. `gh run list --workflow=lotto-result-update.yml` 로 오늘 새벽 실행 로그 대조 → 04:25/04:28 KST 두 런 모두 "success" 기록했지만 실제론 1245회차 미반영된 채 "✅ 이미 최신 (1244회차)" 출력 — cycle 3024 수정(`b1823be3`, reachabilityCheck 도입)으로도 못 잡는 재발 케이스.
+
+**근본 원인**: cycle 3024 fix 는 `fetchRoundFromAPI(oldLast)` 재조회 성공 여부로 "네트워크 정상"을 판정했지만, 이는 "구 회차(1244) 조회 가능"만 증명할 뿐 "신규 회차(1245) 미발행"을 증명하지 못함. 오늘 두 성공 런(04:25/04:28) 모두 dhlottery+lottolyzer 양쪽 1245회차 조회만 실패하고 1244회차 재조회는 성공 — reachabilityCheck 통과로 "이미 최신" false 출력, 실제론 1245회차(추첨일 2026-10-10, 이미 17h+ 경과)가 여전히 결측.
+
+**수정**: `scripts/lotto.ts update()` 에 시간 기반 보강 추가 — oldLast 의 `date` 필드 기준 다음 추첨일(+7일, 토요일 21:00 KST 고정 주기) + 6h 유예 지나고도 신규 회차 미확인이면 reachabilityCheck 통과 여부와 무관하게 "지연 의심" 판정 + exitCode=1. 평시(추첨 전 주중)는 임계 미도달이라 영향 없음 — 토요일 추첨 후 6h+ 경과 + 신규 회차 미확인 케이스만 신규 포착.
+
+**검증**: 날짜 연산 node 격리 테스트로 현재 실제 overdue=true 확인(1245회차 17h+ 지연 상황 정확히 재현). `pnpm test` 전체 587 files/4623 tests green, lint clean, `tsc`(turbo scope) clean. pre-push 전부 PASS. main 직접 commit+push(`88541c4f`, PR 미경유 R4 범위). 실측 fire: push 후 `gh workflow run lotto-result-update.yml` 수동 재실행(run 38114567788) → dhlottery 가 이 시점엔 구 회차 재조회조차 완전 실패(기존 1차 방어선 분기로 exit 1) — 신규 보강 분기 자체는 아직 production live-fire 미확인(두 방어선이 상호 배타적 타이밍이라 동시 관찰 불가), 로직은 격리 테스트로 정확성 확보.
+
+Supabase INACTIVE(cycle 3019 최초 발견) 는 미해결 유지(사용자 조치 대기). 1245회차 실제 데이터 자체는 dhlottery/lottolyzer 양쪽 소스 복구 전까진 여전히 결측 — 코드 fix 는 "silent false success" 재발만 차단, 외부 소스 복구는 본 cycle 범위 밖.
+
+다음 사이클 추천 = lotto(gap=0, 1245회차 실제 fetch 성공 여부 1~2일 내 재확인 필요 — 외부 소스 복구 모니터) 또는 review-code(heavy) 계속 또는 fix-incident(Supabase INACTIVE 재확인은 저가치 반복이라 skip 권장) 또는 info-arch(gap=22).
+
 ## 🟢 SUCCESS — fix-incident: analysis/page.tsx fetchStandings() Promise.all 가드 누락 정정 (cycle 3027, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/23(plan#29 Tier4 미변화). 2차 방어선(cycle 3026 retro `68022d8a`) OK. gap trigger 4종(fix-incident 1/20, op-analysis 6/25, info-arch 21/30, lotto 18/30) 전부 미도달. 직전8(3019-3026) distinct=3(fix-incident/operational-analysis(lite)/review-code(heavy)) — 2-chain lock 미충족. Supabase 프로젝트(utmimgpccbrciwuuacyw) INACTIVE 장애(cycle 3019 최초 발견, org billing restriction) 지속 여부를 nslookup+curl 로 독립 재확인 — 여전히 NXDOMAIN(supabase.com 자체는 200 정상 응답이라 샌드박스 네트워크 제약 아닌 실제 프로젝트 장애로 확정). 이미 cycle 3019 에서 TODOS+meta-pattern 에스컬레이션 완료(비용 가드상 자율 결제/업그레이드 불가, 사용자 조치 대기), cycle 3021 op-analysis(lite) 가 지속 확인 완료 — 추가 재확인은 저가치 반복이라 스킵, 대신 "DB 완전 장애가 다른 경로를 crash 시키는가" blast-radius 조사로 전환(Agent 위임, read-only).
