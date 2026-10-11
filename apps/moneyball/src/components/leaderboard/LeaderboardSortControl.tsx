@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import { USER_LEADERBOARD_DISPLAY_LIMIT } from '@moneyball/shared';
 
-type LeaderboardSortMode = 'accuracy' | 'streak' | 'sample';
+export type LeaderboardSortMode = 'accuracy' | 'streak' | 'sample';
 
 const STORAGE_SORT = 'mb_leaderboard_sort_v1';
 
@@ -57,15 +57,17 @@ const SAMPLE_ORDER_CSS = Array.from(
   (_, i) => `[data-leaderboard-list] [data-sample-rank="${i}"]{order:${i};}`,
 ).join('');
 
+export function useLeaderboardSortMode(streakEnabled: boolean): LeaderboardSortMode {
+  const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
+  return sort === 'streak' && !streakEnabled ? 'accuracy' : sort;
+}
+
 interface Props {
   streakEnabled: boolean;
 }
 
 export function LeaderboardSortControl({ streakEnabled }: Props) {
-  const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
-
-  const effectiveSort: LeaderboardSortMode =
-    sort === 'streak' && !streakEnabled ? 'accuracy' : sort;
+  const effectiveSort = useLeaderboardSortMode(streakEnabled);
 
   const visibleOrder: LeaderboardSortMode[] = streakEnabled
     ? ORDER

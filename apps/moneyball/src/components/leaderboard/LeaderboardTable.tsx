@@ -1,3 +1,5 @@
+'use client';
+
 import {
   MIN_LEADERBOARD_PICKS,
   PICKS_STREAK_BADGE_MIN,
@@ -5,6 +7,7 @@ import {
   USER_LEADERBOARD_DISPLAY_LIMIT,
 } from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry } from '@/lib/leaderboard/types';
+import { useLeaderboardSortMode } from './LeaderboardSortControl';
 
 interface Props {
   entries: LeaderboardEntry[];
@@ -12,6 +15,7 @@ interface Props {
   aiBaseline?: AiBaseline | null;
   streakRankMap?: Map<string, number>;
   sampleRankMap?: Map<string, number>;
+  streakEnabled?: boolean;
 }
 
 function formatDelta(diff: number): string {
@@ -25,7 +29,16 @@ function deltaClass(diff: number): string {
   return 'text-gray-400 dark:text-gray-500';
 }
 
-export function LeaderboardTable({ entries, myDeviceId, aiBaseline, streakRankMap, sampleRankMap }: Props) {
+export function LeaderboardTable({
+  entries,
+  myDeviceId,
+  aiBaseline,
+  streakRankMap,
+  sampleRankMap,
+  streakEnabled = false,
+}: Props) {
+  const effectiveSort = useLeaderboardSortMode(streakEnabled);
+
   if (entries.length === 0) {
     return (
       <div className="text-center py-12 text-gray-400 dark:text-gray-500 text-sm">
@@ -94,11 +107,16 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline, streakRankMa
         <div data-leaderboard-list>
         {entries.map((entry, i) => {
           const isMe = myDeviceId && entry.device_id === myDeviceId;
-          const rank = i + 1;
-          const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
-          const delta = aiPct !== null ? entry.accuracy_pct - aiPct : null;
           const streakRank = streakRankMap?.get(entry.device_id);
           const sampleRank = sampleRankMap?.get(entry.device_id);
+          const rank =
+            effectiveSort === 'streak' && streakRank !== undefined
+              ? streakRank + 1
+              : effectiveSort === 'sample' && sampleRank !== undefined
+              ? sampleRank + 1
+              : i + 1;
+          const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
+          const delta = aiPct !== null ? entry.accuracy_pct - aiPct : null;
 
           return (
             <div

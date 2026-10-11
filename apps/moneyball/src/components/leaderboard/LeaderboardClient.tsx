@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { MIN_LEADERBOARD_PICKS, PICKS_STREAK_BADGE_MIN } from '@moneyball/shared';
+import { MIN_LEADERBOARD_PICKS, PICKS_STREAK_BADGE_MIN, SMALL_SAMPLE_N } from '@moneyball/shared';
 import { LeaderboardTable } from './LeaderboardTable';
 import { LeaderboardJoinModal } from './LeaderboardJoinModal';
 import { LeaderboardSortControl } from './LeaderboardSortControl';
@@ -83,8 +83,8 @@ export function LeaderboardClient({ entries, aiBaseline }: Props) {
         </div>
       )}
 
-      {/* 정렬 칩 — 표본 가드: entries >= 5 */}
-      {entries.length >= 5 && (
+      {/* 정렬 칩 — 표본 가드: entries >= SMALL_SAMPLE_N */}
+      {entries.length >= SMALL_SAMPLE_N && (
         <LeaderboardSortControl streakEnabled={sortMeta.streakEnabled} />
       )}
 
@@ -95,6 +95,7 @@ export function LeaderboardClient({ entries, aiBaseline }: Props) {
         aiBaseline={aiBaseline}
         streakRankMap={sortMeta.streakRankMap}
         sampleRankMap={sortMeta.sampleRankMap}
+        streakEnabled={sortMeta.streakEnabled}
       />
 
       {/* 모달 */}
