@@ -1499,7 +1499,18 @@ async function update(): Promise<LottoRound[]> {
     probedRounds = await probeNextRounds(oldLast);
     latest = probedRounds.length > 0 ? probedRounds[probedRounds.length - 1].round : oldLast;
   }
-  if (latest <= oldLast) { console.log(`✅ 이미 최신 (${oldLast}회차)`); return rounds; }
+  if (latest <= oldLast) {
+    // probe 가 신규 회차를 못 찾았을 때 "진짜 최신" 과 "두 소스 전부 다운" 을 구별.
+    // 이미 아는 회차(oldLast) 를 재조회해 네트워크 자체가 죽었는지 확인.
+    const reachabilityCheck = await fetchRoundFromAPI(oldLast);
+    if (!reachabilityCheck) {
+      console.error(`❌ 네트워크 장애로 최신 여부 확인 불가 — dhlottery+lottolyzer 모두 ${oldLast}회차 재조회 실패. "이미 최신" 아님, 미확인 상태.`);
+      process.exitCode = 1;
+      return rounds;
+    }
+    console.log(`✅ 이미 최신 (${oldLast}회차)`);
+    return rounds;
+  }
 
   const newRoundNums = Array.from({length: latest - oldLast}, (_, i) => oldLast + 1 + i);
   console.log(`신규 ${newRoundNums.length}회차 발견: ${newRoundNums[0]}~${latest}회\n`);
