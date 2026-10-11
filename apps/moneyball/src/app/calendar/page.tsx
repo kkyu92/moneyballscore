@@ -107,9 +107,15 @@ function accuracyBadge(rate: number | null, verifiedN: number): string {
 
 export default async function CalendarPage() {
   const info = getKstMonthInfo();
-  const cells = await getMonthHeatmap(info).catch((err) =>
-    captureFallback(err, buildEmptyGrid(info), { route: '/calendar', source: 'getMonthHeatmap' }),
-  );
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const [cellsR] = await Promise.allSettled([getMonthHeatmap(info)]);
+  const cells =
+    cellsR.status === "fulfilled"
+      ? cellsR.value
+      : captureFallback(cellsR.reason, buildEmptyGrid(info), { route: '/calendar', source: 'getMonthHeatmap' });
+
+  const dbDegraded = [cellsR].some((r) => r !== null && r.status === "rejected");
 
   const monthTotal = cells.reduce(
     (acc, c) => {
@@ -138,6 +144,15 @@ export default async function CalendarPage() {
   return (
     <article className="max-w-4xl mx-auto space-y-6 py-4">
       <Breadcrumb items={[{ label: '월별 캘린더' }]} />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">{info.monthLabel} 승부예측 캘린더</h1>

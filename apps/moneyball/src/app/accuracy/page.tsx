@@ -266,10 +266,9 @@ export default async function AccuracyPage() {
   const fallbackWindowStart = new Date(Date.now() - 30 * DAY_MS).toISOString();
   const FALLBACK_TREND_DAYS = 30;
 
-  const dbCatch = (source: string) => (err: unknown) =>
-    captureFallback(err, { data: null, error: null }, { route: '/accuracy', source });
-
-  const [result, versionHistoryResult, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, biasRows, fallbackResult, factorResult] = await Promise.all([
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const [resultR, versionHistoryResultR, pollResultR, completedGamesResultR, predForPollR, teamRowsR, matchupDataR, biasRowsR, fallbackResultR, factorResultR] = await Promise.allSettled([
     supabase
       .from('predictions')
       .select('confidence, is_correct, verified_at, scoring_rule, model_version, reasoning->homeWinProb')
@@ -277,8 +276,7 @@ export default async function AccuracyPage() {
       .eq('prediction_type', 'pre_game')
       .not('verified_at', 'is', null)
       .not('is_correct', 'is', null)
-      .order('verified_at', { ascending: true })
-      .then(undefined, dbCatch('main')),
+      .order('verified_at', { ascending: true }),
     // 버전 히스토리 테이블(ModelVersionHistory) 전용 — CURRENT_MODEL_FILTER(scoring_rule=v1.8)를
     // 걸지 않음. `rows`(위 쿼리)는 baseline 정합 위해 v1.8만 담아 v1.5/v1.6/v1.7-revert/
     // v1.8-credit-fail 실측 데이터(DB 확인 n=16/46/34/25)가 항상 제외돼 Version History
@@ -289,48 +287,29 @@ export default async function AccuracyPage() {
       .eq('prediction_type', 'pre_game')
       .not('verified_at', 'is', null)
       .not('is_correct', 'is', null)
-      .order('verified_at', { ascending: true })
-      .then(undefined, dbCatch('versionHistory')),
-    supabase.from('pick_poll_events').select('game_id, pick').then(undefined, dbCatch('pickPoll')),
+      .order('verified_at', { ascending: true }),
+    supabase.from('pick_poll_events').select('game_id, pick'),
     supabase
       .from('games')
       .select('id, home_score, away_score')
       .eq('status', 'final')
       .not('home_score', 'is', null)
-      .not('away_score', 'is', null)
-      .then(undefined, dbCatch('completedGames')),
+      .not('away_score', 'is', null),
     supabase
       .from('predictions')
       .select('game_id, is_correct')
       .match(CURRENT_MODEL_FILTER)
       .eq('prediction_type', 'pre_game')
-      .not('is_correct', 'is', null)
-      .then(undefined, dbCatch('predForPoll')),
-    buildAllTeamAccuracy().catch((err) =>
-      captureFallback(err, [] as Awaited<ReturnType<typeof buildAllTeamAccuracy>>, {
-        route: '/accuracy',
-        source: 'buildAllTeamAccuracy',
-      }),
-    ),
-    buildMatchupData().catch((err) =>
-      captureFallback(err, { matchups: [], homeAway: [] } as Awaited<ReturnType<typeof buildMatchupData>>, {
-        route: '/accuracy',
-        source: 'buildMatchupData',
-      }),
-    ),
-    buildTeamBiasAnalysis().catch((err) =>
-      captureFallback(err, [] as Awaited<ReturnType<typeof buildTeamBiasAnalysis>>, {
-        route: '/accuracy',
-        source: 'buildTeamBiasAnalysis',
-      }),
-    ),
+      .not('is_correct', 'is', null),
+    buildAllTeamAccuracy(),
+    buildMatchupData(),
+    buildTeamBiasAnalysis(),
     supabase
       .from('predictions')
       .select('model_version, predicted_at')
       .in('prediction_type', ['pre_game', 'post_game'])
       .gte('predicted_at', fallbackWindowStart)
-      .order('predicted_at', { ascending: false })
-      .then(undefined, dbCatch('fallback')),
+      .order('predicted_at', { ascending: false }),
     supabase
       .from('predictions')
       .select('factors, is_correct, home_win_prob')
@@ -338,9 +317,31 @@ export default async function AccuracyPage() {
       .eq('scoring_rule', CURRENT_SCORING_RULE)
       .not('is_correct', 'is', null)
       .not('factors', 'is', null)
-      .not('home_win_prob', 'is', null)
-      .then(undefined, dbCatch('factor')),
+      .not('home_win_prob', 'is', null),
   ]);
+  const result = resultR.status === 'fulfilled' ? resultR.value : captureFallback(resultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'main' });
+  const versionHistoryResult = versionHistoryResultR.status === 'fulfilled' ? versionHistoryResultR.value : captureFallback(versionHistoryResultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'versionHistory' });
+  const pollResult = pollResultR.status === 'fulfilled' ? pollResultR.value : captureFallback(pollResultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'pickPoll' });
+  const completedGamesResult = completedGamesResultR.status === 'fulfilled' ? completedGamesResultR.value : captureFallback(completedGamesResultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'completedGames' });
+  const predForPoll = predForPollR.status === 'fulfilled' ? predForPollR.value : captureFallback(predForPollR.reason, { data: null, error: null }, { route: '/accuracy', source: 'predForPoll' });
+  const teamRows = teamRowsR.status === 'fulfilled' ? teamRowsR.value : captureFallback(teamRowsR.reason, [] as Awaited<ReturnType<typeof buildAllTeamAccuracy>>, {
+    route: '/accuracy',
+    source: 'buildAllTeamAccuracy',
+  });
+  const matchupData = matchupDataR.status === 'fulfilled' ? matchupDataR.value : captureFallback(matchupDataR.reason, { matchups: [], homeAway: [] } as Awaited<ReturnType<typeof buildMatchupData>>, {
+    route: '/accuracy',
+    source: 'buildMatchupData',
+  });
+  const biasRows = biasRowsR.status === 'fulfilled' ? biasRowsR.value : captureFallback(biasRowsR.reason, [] as Awaited<ReturnType<typeof buildTeamBiasAnalysis>>, {
+    route: '/accuracy',
+    source: 'buildTeamBiasAnalysis',
+  });
+  const fallbackResult = fallbackResultR.status === 'fulfilled' ? fallbackResultR.value : captureFallback(fallbackResultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'fallback' });
+  const factorResult = factorResultR.status === 'fulfilled' ? factorResultR.value : captureFallback(factorResultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'factor' });
+
+  const dbDegraded = [resultR, versionHistoryResultR, pollResultR, completedGamesResultR, predForPollR, teamRowsR, matchupDataR, biasRowsR, fallbackResultR, factorResultR].some(
+    (r) => r !== null && r.status === 'rejected',
+  );
 
   const communityStats = computeCommunityVsAI(
     (pollResult.data ?? []) as Array<{ game_id: number; pick: string }>,
@@ -393,6 +394,15 @@ export default async function AccuracyPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       <Breadcrumb items={[{ label: 'AI 적중 기록' }]} className="mb-2" />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white space-y-1">
         <h1 className="text-2xl font-bold">AI 적중 기록</h1>

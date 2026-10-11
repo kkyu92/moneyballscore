@@ -307,9 +307,15 @@ function buildSportsEventJsonLd(game: DateGame, date: string) {
 export default async function PredictionDatePage({ params }: Props) {
   const { date } = await params;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) notFound();
-  const games = await getGamePredictions(date).catch((err) =>
-    captureFallback(err, [] as DateGame[], { route: "/predictions/[date]", source: "getGamePredictions" }),
-  );
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const [gamesR] = await Promise.allSettled([getGamePredictions(date)]);
+  const games =
+    gamesR.status === "fulfilled"
+      ? gamesR.value
+      : captureFallback(gamesR.reason, [] as DateGame[], { route: "/predictions/[date]", source: "getGamePredictions" });
+
+  const dbDegraded = [gamesR].some((r) => r !== null && r.status === "rejected");
 
   // predictions 배열이 비어 있으면 is_correct 값이 undefined → !== null 로는 걸러지지 않음.
   // pred 존재 + is_correct 값이 명시적으로 true/false 인 경우만 verified.
@@ -388,6 +394,15 @@ export default async function PredictionDatePage({ params }: Props) {
           { label: date },
         ]}
       />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       {simplifiedMode && (
         <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">

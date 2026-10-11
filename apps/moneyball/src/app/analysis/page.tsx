@@ -185,7 +185,16 @@ function renderConvergenceHomeAwayBadgeRow(
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord, completeTeamStats, completeHomeAwaySplit, recentCompleteConvergenceRecord, simplifiedMode] = await Promise.all([
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // fetchStandings 결과를 순수 파생값(dbDegraded)으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  // cycle 3027 fix: fetchStandings 는 KBO 공식 스크랩(외부 사이트) — 실패 시 재시도 소진 후 throw, 유일한 비가드 호출이라
+  // Promise.all 전체 reject → /analysis 500 위험이었던 부분. 아래 Promise.all 과 동시 시작(동시성 유지)하되
+  // {status, value|reason} 모양으로 분리 수신해 실패해도 전체를 reject 시키지 않는다.
+  const standingsPromise = fetchStandings().then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
+  );
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord, completeTeamStats, completeHomeAwaySplit, recentCompleteConvergenceRecord, simplifiedMode] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -196,10 +205,6 @@ export default async function AnalysisIndexPage() {
     getBestPickOfWeek(currentMonth.startDate, currentMonth.endDate),
     getUpsetPickOfMonth(currentMonth.startDate, currentMonth.endDate),
     buildTeamStrengthSnapshot(),
-    // cycle 3027 fix: fetchStandings 는 KBO 공식 스크랩(외부 사이트) — 실패 시 재시도 소진 후 throw, 유일한 비가드 호출이라 Promise.all 전체 reject → /analysis 500 위험. 자매 함수(buildTeamAccuracy.ts) 와 동일 패턴 적용
-    fetchStandings().catch((err) =>
-      captureFallback(err, [] as StandingRow[], { route: 'AnalysisIndexPage', source: 'fetchStandings' }),
-    ),
     getSeasonH2HData(),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_STRONG),
@@ -233,6 +238,13 @@ export default async function AnalysisIndexPage() {
     // about/predictions 페이지와 동일한 "날짜 무관 최근 예측 10건" 기준 (KBO 휴식일 배너 누락 정정)
     detectSimplifiedMode(),
   ]);
+  const standingsR = await standingsPromise;
+  const standingsRows =
+    standingsR.status === "fulfilled"
+      ? standingsR.value
+      : captureFallback(standingsR.reason, [] as StandingRow[], { route: 'AnalysisIndexPage', source: 'fetchStandings' });
+
+  const dbDegraded = [standingsR].some((r) => r !== null && r.status === "rejected");
 
   // wave-325: 현재 KBO 순위 맵
   const rankMap = new Map<TeamCode, number>(
@@ -390,6 +402,14 @@ export default async function AnalysisIndexPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
       <Breadcrumb items={[{ label: 'AI 분석' }]} />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
       {simplifiedMode && (
         <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
           AI 에이전트 심층 분석이 일시 중단됩니다. 통계 기반 승부예측은 계속 제공됩니다.

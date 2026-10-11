@@ -107,11 +107,18 @@ function HomeAwayRecord({ wins, losses, homeWins, homeLosses }: { wins: number; 
 }
 
 export default async function StandingsPage() {
-  const [standings, teamAccuracy, eloTrend] = await Promise.all([
-    buildStandings().catch((err) => captureFallback(err, [], { route: "/standings", source: "buildStandings" })),
-    buildAllTeamAccuracy().catch((err) => captureFallback(err, [], { route: "/standings", source: "buildAllTeamAccuracy" })),
-    buildEloTrend().catch((err) => captureFallback(err, { points: [], teams: [] }, { route: "/standings", source: "buildEloTrend" })),
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const [standingsR, teamAccuracyR, eloTrendR] = await Promise.allSettled([
+    buildStandings(),
+    buildAllTeamAccuracy(),
+    buildEloTrend(),
   ]);
+  const standings = standingsR.status === "fulfilled" ? standingsR.value : captureFallback(standingsR.reason, [], { route: "/standings", source: "buildStandings" });
+  const teamAccuracy = teamAccuracyR.status === "fulfilled" ? teamAccuracyR.value : captureFallback(teamAccuracyR.reason, [], { route: "/standings", source: "buildAllTeamAccuracy" });
+  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [], teams: [] }, { route: "/standings", source: "buildEloTrend" });
+
+  const dbDegraded = [standingsR, teamAccuracyR, eloTrendR].some((r) => r !== null && r.status === "rejected");
 
   // 현재 Elo: eloTrend 마지막 데이터 포인트에서 팀별 추출 (신규 DB 쿼리 0건)
   const currentEloMap = new Map<string, number>();
@@ -143,6 +150,15 @@ export default async function StandingsPage() {
       />
 
       <Breadcrumb items={[{ label: "팀 순위" }]} />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="space-y-2">
         <h1 className="text-2xl font-bold">{KBO_SEASON_YEAR} KBO 팀 순위</h1>
