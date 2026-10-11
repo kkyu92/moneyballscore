@@ -11778,3 +11778,15 @@ MLB KO+EN 양쪽에 KBO twin과 동일 try/catch + console.error degrade 패턴 
 결론: 이 축(OG/twitter image)은 sibling-asymmetry 패턴 부재 — 7번째 후보 영역이 클린으로 종료. op-analysis gap(119)은 다음 사이클도 계속 블락 예상(사용자 billing 조치 없이는 미해소) — 매 사이클 재확인 대신 memory 파일 변경 여부만 체크 권장(저가치 반복 재확인 회피).
 
 다음 사이클 추천 = info-arch(gap=8/30, 아직 여유) 또는 review-code(heavy) 신규 축(app/api cron 라우트 재확인 또는 packages/kbo-data 잔여) 또는 fix-incident(gap=2/20, Supabase 상태 변화 시 즉시 재평가).
+
+## 🟢 SUCCESS — fix-incident: DB 장애 구분 배너 predictions/standings/accuracy/analysis/calendar 확장 (cycle 3044, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/30(plan#29 deferred Tier4, plan#30 completed). 2차 방어선(cycle 3043 retro `fc4cae21`) OK. 직전8(3037-3044) distinct=4(review-code(heavy)5+fix-incident1+lotto1+info-arch1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 2/20, info-arch 8/30, lotto 6/30, op-analysis 120+/25 — Supabase 여전히 NXDOWN 반복 skip). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/DESIGN.md 17h 신선) 지속.
+
+cycle 3042 fix-incident pilot(홈페이지 Promise.allSettled 기반 dbDegraded 배너) 성공 직후 명시적 carry-over — 동일 `captureFallback` 컨벤션 쓰는 나머지 28개 page.tsx 중 고트래픽 6개(predictions/page.tsx, predictions/[date]/page.tsx, standings/page.tsx, accuracy/page.tsx, analysis/page.tsx, calendar/page.tsx) 우선 확장. agent 위임 구현 — captureFallback 17건을 Promise.allSettled 파생값으로 전환(accuracy 10건, standings 3건, predictions 계열 2건, calendar 1건, analysis 1건[fetchStandings만 — 나머지 23건은 captureFallback 가드 없는 fail-loud 로직이라 비즈니스 로직 불변 원칙에 따라 보존]). 홈페이지와 동일 배너 UI("일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다") 재사용, dev-jargon 미노출.
+
+`silent-drift-cycle-3027.test.ts` 는 analysis/page.tsx 의 fetchStandings 가드 패턴이 `.catch` → `.then(dual-callback)` 로 바뀜에 따라 리터럴 소스 매칭 테스트 갱신(captureFallback 호출 보존 확인 추가).
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4629 tests 전체 green. 직접 main 커밋+push(R4 범위, `0675661a`, pre-push hook lint+type-check PASS).
+
+다음 사이클 추천 = 동일 패턴 잔여 22개 파일 확장 계속(fix-incident, mlb/en-mlb 라우트 다수 + matchup/teams/insights/about/search/reviews/v2-preview) 또는 Supabase 복구 시 op-analysis(gap=120/25 최장 미발화) 즉시 전환.
