@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/api,calendar,stats,observability,supabase 클러스터 감사, clean (cycle 3058, 2026-10-11)
+
+진단: open issue 0, approved plan 0/23. Supabase 여전히 INACTIVE(NXDOMAIN curl 재검증) — op-analysis gap=37/25 강하게 충족하나 블락 지속, skip 유지. 직전8(3050-3057) distinct=3(review-code(heavy)6+review-code2+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=11/20·lotto gap=20/30·info-arch gap=22/30 전부 미근접. `apps/moneyball/src/lib` 하위 commits=1~2 저변경 클러스터(api/calendar/stats/observability/supabase, 5파일) — grep-count-depth 가드레일(cycle 2991/3001 박제) 적용해 "낮은 commit = 안전"으로 추정하지 않고 전수 read 위임.
+
+general-purpose agent 위임 전수 read(5개 소스 + 3개 테스트 파일, call-site cross-check): `supabase/admin.ts`(11 call-site, service-role 전용 정상) / `supabase/server.ts`(25+ call-site, server-only 정상, non-null assertion 은 silent fail 아님) / `api/is-origin-allowed.ts`(SITE_URL 공유 상수 참조, 5 caller 모두 403 처리) / `calendar/monthGrid.ts`(KST_OFFSET_MS 공유 상수, KBO/MLB/EN locale 분기 일관) / `stats/pearson.ts`(n<2·zero-variance 0 반환이 양쪽 caller 모두 minSamples 게이트로 커버) / `observability/captureFallback.ts`(Sentry 태깅 정상, 60+ 사용처) — 전부 clean, defect 0건. 저커밋 = 실제 안정된 narrow-scope 유틸 확인 (false alarm, 가드레일 적용 자체는 유효했음).
+
+코드 변경 0건 — clean 확인 자체가 결과. retro-only.
+
+skill-evolution trigger 평가: trigger3(milestone) 3058%50=8≠0. trigger5(직전20 inclusive, sample≥10 review-code 다수) 미충족. ship-0 emergency stop: 직전10 전부 success → 미해당. marker 박제 X.
+
+다음 사이클 추천 = review-code(heavy) 계속(`apps/moneyball/src/lib` 잔여 subdir — accuracy/analysis/dashboard/matchup/mlb/reviews/teams 등 commits 많아도 전수 미확인) 또는 fix-incident(gap=12/20)/lotto(gap=21/30)/info-arch(gap=23/30) 자연 대기. **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만.**
+
 ## 🟢 SUCCESS — review-code(heavy): app/api 잔여 5-route 완주, 전체 20/20 감사 완료 milestone (cycle 3057, 2026-10-11)
 
 진단: open issue 0, approved plan 0/23. Supabase 여전히 INACTIVE(NXDOMAIN 재확인, cycle 3019 escalated 지속) — op-analysis 계속 블락. lotto cron 정상(2026-10-10 picks+results 존재, stale 아님). 직전8(3049-3056) distinct=3(review-code(heavy)5+review-code2+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=10/20·lotto gap=19/30·info-arch gap=21/30 전부 미근접. app/api 20개 route 중 cycle 3052~3056 에 15개 이미 감사, 잔여 5개(leaderboard/mlb-sync, picks/mlb-submit, picks/mlb-poll, revalidate, version) 미감사 발견 — 선택.
