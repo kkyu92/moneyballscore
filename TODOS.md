@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): search 컴포넌트 + 저커밋 API route 14개 전수 감사, silent drift 2건 정정 (cycle 3050, 2026-10-11, milestone cycle_n%50==0)
+
+진단: open issue 0건, approved plan 0/23(전부 completed/archived/superseded — Tier4 불변, status=approved 매칭 0건 재확인). 2차 방어선(cycle 3049 retro `2fab173b`) OK. Supabase 여전히 INACTIVE(nslookup NXDOMAIN 지속, op-analysis gap=25+ 최장 미발화 블락 지속). 직전8(3042-3049) distinct=2(fix-incident5+review-code(heavy)3) — 2-chain lock 조건 충족이나 fix-incident 포함 → lock 무시 룰 적용. fix-incident gap=3(cycle 3047 직후)로 신규 trigger 없음. lotto gap=12/30·info-arch gap=14/30 전부 미근접. cycle 3049 retro 가 명시한 잔여 후보(components/dashboard/glossary/leaderboard/live 소진 후 신규 축: components/search / components/notify(디렉토리 부재 확인) / app/api 저커밋 route) 그대로 이어서 처리 — grep-count-depth 가드레일(cycle 3001) 준수, 전수 read 로 커버리지 직접 확인.
+
+subagent 위임 전수 read(search 1파일+2테스트, app/api 저커밋 route 11개 — mlb-sync/mlb-submit/revalidate/version/mlb-poll/indexnow-ping/sync-batter-stats/live/mlb-waitlist/picks-poll/snapshot-pitchers, 총 14파일 + sibling 비교용 leaderboard/sync·picks/submit·is-origin-allowed·db-constraints·site.ts·sitemap.ts 등): 2건 실제 수정.
+1. `api/seo/indexnow/ping/route.ts` — `sitemap()` 첫 항목(`SITE_URL`, trailing slash 없음)이 URL 필터 `startsWith('https://${HOST}/')`(trailing slash 요구) 조건에 안 걸려 홈페이지가 매 IndexNow ping에서 누락되던 silent drift. `new URL(u).host === HOST` 비교로 교체(host-spoofing substring 우회도 부수적으로 차단).
+2. `api/sync-batter-stats/route.ts` — revalidate 실패를 주석만 남기고 완전 무음 처리. 같은 cycle 3030 패턴 공유하는 `live`/`pipeline` route는 이미 `Sentry.captureException` 추가했는데 본 route만 누락(CLAUDE.md 사례 6 observability silent 류). 동일 Sentry 패턴으로 정렬.
+
+나머지 12개 파일(KBO/MLB twin 쌍 — leaderboard/mlb-sync vs leaderboard/sync, picks/mlb-submit vs picks/submit, picks/mlb-poll vs picks/poll — nickname/device-id validation 로직 byte-for-byte 동일 확인, DB_CONSTRAINTS 키 upsert 컬럼 전부 일치, device_id 검증 방식 차이(UUID regex vs length-only)는 양쪽 twin 대칭이라 의도된 설계로 판단, 수정 보류) 전부 clean 확인.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4629 tests 전체 green. 직접 main 커밋+push(R4 범위, `2fa79cb0`, pre-push hook lint+type-check+version-sync-guard 전부 PASS).
+
+**milestone (cycle_n % 50 == 0)**: skill-evolution trigger 3 충족 — 다른 trigger 평가와 독립적으로 marker 박제(cycle 2051 사례 19 룰). 다음 사이클이 skill-evolution 강제 발화.
+
+다음 사이클 추천 = skill-evolution(마커 발견 시 강제) 또는 review-code(heavy) 계속(search/저커밋 API route 소진 — 다음 미스윕 후보: `components/notify` 부재 확인됨 제외, `packages/kbo-data/src/agents` 또는 남은 고커밋 API route 재검토) 또는 fix-incident(gap=4/20, 신규 trigger 없으면 skip) 또는 lotto(gap=13/30, 다음 토 10/17 전) 또는 op-analysis(Supabase 복구 시).
+
 ## 🟢 SUCCESS — review-code(heavy): dashboard/glossary/leaderboard/live 컴포넌트 전수 감사, silent drift 2건 정정 (cycle 3049, 2026-10-11)
 
 진단: open issue 0건, approved plan 0/23(전부 completed/archived/superseded — Tier4 불변). 2차 방어선(cycle 3048 retro `4c3191a0`) OK. Supabase 여전히 INACTIVE(nslookup NXDOMAIN 지속, op-analysis gap=3048 최장 미발화 블락 지속). 직전8(3041-3048) distinct=2(review-code(heavy)3+fix-incident5) — 2-chain lock 조건 충족이나 fix-incident 포함 → lock 무시 룰 적용. fix-incident gap=1(cycle 3047 직후)로 신규 trigger 없음. lotto gap=10/30·info-arch gap=12/30 전부 미근접. cycle 3048 retro 가 명시한 잔여 후보(components/live/dashboard/glossary/leaderboard, 25파일) 그대로 이어서 처리.
