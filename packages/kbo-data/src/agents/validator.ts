@@ -658,8 +658,12 @@ export function maskViolatedReasoning(
   for (const v of violations) {
     if (v.type === 'hallucinated_number') {
       for (const num of extractDetailValues(v.detail)) {
-        const escaped = num.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        masked = masked.replace(new RegExp(`\\b${escaped}\\b`, 'g'), MASK_HALLUCINATED_NUMBER);
+        // detail 엔 normalizeNum 처리된 값만 저장 (예: "3.80" → "3.8"). reasoning 원문의
+        // 실제 표기(trailing zero 포함)는 다를 수 있어 리터럴 매칭 대신 숫자 추출 후
+        // normalizeNum 비교로 교체 — "3.80" 같은 변형이 마스킹 안 되고 그대로 노출되던 버그.
+        masked = masked.replace(/\d+(?:\.\d+)?/g, (match) =>
+          normalizeNum(match) === num ? MASK_HALLUCINATED_NUMBER : match
+        );
       }
     } else if (v.type === 'invented_player_name') {
       for (const name of extractDetailValues(v.detail)) {

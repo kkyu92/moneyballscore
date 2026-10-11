@@ -4,7 +4,12 @@ import { buildAgentContext, renderContextForLLM, formatGapAwareStat } from '../c
 import { MetricRegistry } from '../context/metrics';
 import { callLLM } from './llm';
 import { BASE_PROMPT, HOME_ROLE, AWAY_ROLE, RESPONSE_FORMAT } from './personas';
-import { validateTeamArgument, resolveValidationMode, captureTeamParseFallback } from './validator';
+import {
+  validateTeamArgument,
+  resolveValidationMode,
+  captureTeamParseFallback,
+  notifyValidationViolations,
+} from './validator';
 import { logValidatorEvent } from './validator-logger';
 import { getRivalryBlock } from './rivalry-memory';
 import type { GameContext, TeamArgument, AgentResult } from './types';
@@ -80,7 +85,12 @@ export function parseResponse(text: string, team: TeamCode, context?: GameContex
       strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 5) : [],
       opponentWeaknesses: Array.isArray(parsed.opponentWeaknesses) ? parsed.opponentWeaknesses.slice(0, 3) : [],
       keyFactor: String(parsed.keyFactor || ''),
-      confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || AGENT_PARSE_CONFIDENCE_DEFAULT)),
+      // `|| DEFAULT` 는 legitimate 0 (LLM 이 "확신 없음" 의도로 0 반환) 을 falsy 로 오인해
+      // DEFAULT(0.5, 중립) 로 덮어쓰던 버그 — NaN(파싱 실패/필드 부재) 만 DEFAULT 처리.
+      confidence: Math.max(
+        0,
+        Math.min(1, Number.isFinite(Number(parsed.confidence)) ? Number(parsed.confidence) : AGENT_PARSE_CONFIDENCE_DEFAULT)
+      ),
       reasoning: String(parsed.reasoning || '').slice(0, 500),
     };
   } catch (e) {
@@ -145,6 +155,11 @@ export async function runTeamAgent(
     // near-miss 도 박제. validation.ok=true 라도 violations.length > 0 면 silent drift 사전 감지.
     const gameId = context.dbGameId ?? null;
     if (validation.violations.length > 0) {
+      void notifyValidationViolations(validation, {
+        agent: 'team',
+        gameId: context.game.externalGameId ?? null,
+        backend: result.model,
+      });
       logValidatorEvent({
         gameId,
         teamCode: team,

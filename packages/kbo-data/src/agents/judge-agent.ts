@@ -105,11 +105,17 @@ export function parseResponse(
     if (!jsonMatch) throw new Error('No JSON found');
     const parsed = JSON.parse(jsonMatch[0]);
 
-    const homeWinProb = clampWinnerProb(Number(parsed.homeWinProb) || ELO_NEUTRAL_WIN_PCT);
+    // `|| DEFAULT` 는 legitimate 0 (LLM 이 "확신 없음"/"50:50 아님" 의도로 0 반환) 을 falsy 로
+    // 오인해 DEFAULT(중립값) 로 덮어쓰던 버그 — NaN(파싱 실패/필드 부재) 만 DEFAULT 처리.
+    const rawHomeWinProb = Number(parsed.homeWinProb);
+    const homeWinProb = clampWinnerProb(Number.isFinite(rawHomeWinProb) ? rawHomeWinProb : ELO_NEUTRAL_WIN_PCT);
 
     return {
       homeWinProb,
-      confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || AGENT_PARSE_CONFIDENCE_DEFAULT)),
+      confidence: Math.max(
+        0,
+        Math.min(1, Number.isFinite(Number(parsed.confidence)) ? Number(parsed.confidence) : AGENT_PARSE_CONFIDENCE_DEFAULT)
+      ),
       homeArgSummary: String(parsed.homeArgSummary || ''),
       awayArgSummary: String(parsed.awayArgSummary || ''),
       calibrationApplied: parsed.calibrationApplied || null,

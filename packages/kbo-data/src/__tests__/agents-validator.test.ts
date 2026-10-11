@@ -858,6 +858,22 @@ describe('maskViolatedReasoning', () => {
     }
     expect(masked).toContain('[검증실패:환각숫자]');
   });
+
+  // cycle 3052 — detail 엔 normalizeNum("3.80")="3.8" 같은 정규화된 값만 저장되는데,
+  // 과거 구현은 원문 reasoning 에 `\b3\.8\b` 리터럴 매칭을 시도해 "3.80" trailing zero
+  // 변형을 놓치고 환각 숫자가 그대로 published text 에 leak 되던 버그 회귀 가드.
+  it('환각 숫자가 trailing zero 변형 (3.990)으로 등장해도 mask', () => {
+    const ctx = makeContext();
+    // 3.99 는 위 테스트에서 이미 injection 에 없는 순수 환각값으로 검증됨 — trailing zero
+    // 변형(3.990)도 동일하게 환각이어야 하며, normalizeNum("3.990")==="3.99" 와
+    // 원문 리터럴("3.990")의 word-boundary 불일치로 mask 가 빠지던 버그 회귀 가드.
+    const reasoning = '임찬규 FIP 3.990 우위.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(true);
+    const masked = maskViolatedReasoning(reasoning, result.violations);
+    expect(masked).not.toContain('3.990');
+    expect(masked).toContain('[검증실패:환각숫자]');
+  });
 });
 
 // ============================================
