@@ -1,4 +1,19 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api 잔여 4-route 전수 감사, mlb VARCHAR overflow + silent swallow 정정 (cycle 3055, 2026-10-11)
+
+진단: open issue 0, approved plan 0/23. **Supabase INACTIVE 재확인(fresh nslookup/curl → 여전히 NXDOMAIN, 신규 아님, cycle 3019 escalated 상태 유지)** — op-analysis 계속 블락. 2차 방어선(cycle 3054 retro `2a8488e1`) OK. 직전8(3047-3054) distinct=4(review-code(heavy)5+fix-incident1+skill-evolution1+review-code1) — 2-chain lock 미충족. fix-incident gap=8/20·lotto gap=17/30·info-arch gap=19/30 전부 미근접, CI green. cycle 3054 추천대로 app/api 잔여 고커밋 route 4개(picks/submit 5·mlb/pipeline 5·hub-dispatch 5·sync-batter-stats 4) 선택.
+
+general-purpose agent 위임 전수 read(route 본문 + helper + sibling 비교). picks/submit 은 clean. 실제 defect 2건 + cosmetic 1건:
+1. `mlb-pipeline.ts` 가 호출하는 `pipeline_runs.mode` VARCHAR(20) 를 `mlb_walk_forward_measure`(24자) 가 초과 — migration 019 사례 3 family 재발. insert 가 supabase-js `.error` silent 리턴(throw 안 함) → 해당 run 의 pipeline_runs row 영구 누락, Sentry 로만 노출. migration 053 으로 VARCHAR(30) 확장(db push 는 Supabase INACTIVE 로 지금 blocked, 복구 후 수동 push 필요).
+2. `sync-batter-stats` route 가 `syncBatterStats()` 의 부분 실패(`errors[]`)를 전혀 읽지 않고 항상 HTTP 200 — 일부 선수만 실패해도 cron caller(cloudflare worker)가 감지 불가. errors 존재 시 Sentry warning + HTTP 207 추가(resp.ok 는 유지되므로 cron 안 깨짐).
+3. (부수) `hub-dispatch` 주석이 Sentry 헤더명을 `X-Sentry-Hook-Signature` 로 오기 — 실제/코드는 `Sentry-Hook-Signature`(X- 없음). 동작 영향 없는 comment drift, 정정만.
+
+`pnpm test` 588 files/4638 tests green, lint/type-check clean. 직접 main 커밋 + push (`0221b5d8`, PR 없음 — R4 단일 커밋 단위).
+
+skill-evolution trigger 평가: trigger3(milestone) 3055%50=5≠0. trigger5(직전20 inclusive, sample=20≥10) — review-code 12회 발화(영구 opt-out 9개 제외 평가대상 단독) → 미충족. ship-0 emergency stop: 직전10 전부 success(본 cycle 포함) → 미해당. marker 박제 X.
+
+다음 사이클 추천 = review-code(heavy) 다음 app/api 배치(leaderboard/sync 6commits·snapshot-pitchers 4·seo/indexnow/ping 4·picks/poll 4·mlb/waitlist 4·live 4) 또는 fix-incident(gap=9/20)/lotto(gap=18/30, 다음 토 10/17 draw #1246 전 점검)/info-arch(gap=20/30) 자연 발화 대기. **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만, 자율 결제/업그레이드 시도 금지.**
+
 ## 🟢 SUCCESS — review-code(heavy): app/api 고커밋 route 5개 전수 감사, pipeline/route.ts 2건 정정 (cycle 3054, 2026-10-11)
 
 진단: open issue 0, approved plan 0/23, Supabase 여전히 INACTIVE(op-analysis 블락 지속, cycle 3019 escalated — 신규 아님). 2차 방어선(cycle 3053 retro `babc8733`) OK. 직전8(3046-3053) distinct=3(review-code(heavy)5+fix-incident2+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=7/20·lotto gap=16/30·info-arch gap=18/30 전부 미근접, CI green. cycle 3053 추천대로 app/api 고커밋 route 5개(pipeline 11commits/health 11/health-pipelines 7/picks-results 9/kbo-scores 8) 선택.
