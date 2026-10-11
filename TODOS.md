@@ -11987,3 +11987,17 @@ Promise.allSettled 기반 dbDegraded 배너(cycle 3042 pattern) 적용 — 단�
 검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 587 files/4629 tests 전체 green. 직접 main 커밋+push(R4 범위, `00796ef5`, pre-push lint+type-check+version-sync-guard PASS).
 
 다음 사이클 추천 = review-code(heavy)(packages/kbo-data backtest/scrapers 잔여 재탐색) 또는 lotto(gap=9/30) 또는 Supabase 복구 시 op-analysis(gap=123/25 최장 미발화) 즉시 전환. captureFallback 스윕 잔여 = MLB/en-mlb twin 10개(저우선, cycle 3045 확인) 뿐.
+
+## 🟢 SUCCESS — review-code(heavy): lib accuracy/analysis/dashboard/matchup/reviews/teams 전수 감사, 월간 리뷰 임계값 오상수 정정 (cycle 3059, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/30(변화 없음, 전부 completed/archived/spec_only). 2차 방어선(cycle 3058 retro `f738f73c`) OK. 직전8(3051-3058) distinct=3(skill-evolution 1 + review-code(heavy) 6 + review-code 1) — 2-chain lock 미충족(≤2 요건). gap trigger 전부 미도달(fix-incident 12/20, lotto 21/30, info-arch 23/30, op-analysis Supabase NXDOMAIN 지속 블락). explore-idea saturation 6/15 미충족.
+
+cycle 3056~3058 이 `apps/moneyball/src/lib/` 를 api/calendar/stats/observability/supabase 클러스터까지 커버 — cycle 3058 retro 가 명시적으로 추천한 잔여 subdir(accuracy/analysis/dashboard/matchup/reviews/teams, 34파일) 을 agent 위임 전수 read 로 감사.
+
+결과: 28/34 파일 clean(기존 silent-drift family — stale comment/silent fallback swallow/DB-TS mismatch/VARCHAR overflow/하드코딩 전부 부재, Supabase 쿼리는 전부 `assertSelectOk`/`captureFallback` fail-loud 패턴 확인). 실제 버그 1건: `buildMonthlyReview.ts:97` 이 월 적중률(accuracyRate)을 per-pick 확신도 임계값 `WINNER_PROB_CONFIDENT`(0.65) 와 비교 — MLB 쌍둥이 `buildMlbMonthlyReview.ts` 와 배지 색상 로직은 전부 월간 임계값 `ACCURACY_GOOD_RATE`(0.60) 사용. cycle 881(`8f90dd14`)가 원시 리터럴 통일 시 "잠재 silent drift 영역"으로 주석에 직접 남겼으나 정정 누락됐던 건. 60~65% 구간에서 배지(양호)와 요약 문구(불일치) 모순되는 사용자 가시 버그 — `ACCURACY_GOOD_RATE` 로 정정.
+
+테스트 커버리지 갭 5건 기록만(KBO review builder 4종 + dashboard/accuracy/teams/matchup 일부 — MLB twin 대비 미작성, 별도 액션 없음, 저우선).
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 588 files/4638 tests 전체 green. 직접 main 커밋+push(R4 범위, `ece714ba`, pre-push lint+type-check+version-sync-guard PASS).
+
+다음 사이클 추천 = review-code(heavy)(packages/kbo-data backtest/scrapers 잔여 재탐색, 또는 lib/ 나머지 소형 subdir — insights/leaderboard/predictions/players/standings/seasons/seo/mlb/picks/lotto/v2-shadow-monitor/changelog/debug) 또는 lotto(gap=22/30) 또는 info-arch(gap=24/30) 또는 fix-incident(gap=13/20). op-analysis 는 Supabase billing 해결 전까지 매 cycle 재확인만 유지.
