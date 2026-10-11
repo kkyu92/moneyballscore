@@ -1,3 +1,5 @@
+import { RECENT_FORM_GAMES } from '@moneyball/shared';
+
 /**
  * DB 의 games 테이블 기반 recent form / h2h 계산.
  *
@@ -23,12 +25,12 @@ export interface FinishedGame {
  *
  * @param games - DB 쿼리 결과 (game_date desc 정렬된 final 경기)
  * @param teamId - teams 테이블 PK
- * @param lastN - 최근 몇 경기 기준 (기본 10)
+ * @param lastN - 최근 몇 경기 기준 (기본 RECENT_FORM_GAMES)
  */
 export function calculateRecentForm(
   games: FinishedGame[],
   teamId: number,
-  lastN = 10,
+  lastN = RECENT_FORM_GAMES,
 ): number | null {
   const relevant = games
     .filter((g) => g.home_team_id === teamId || g.away_team_id === teamId)

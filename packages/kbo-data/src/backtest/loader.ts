@@ -7,7 +7,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_TEAMS, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
+import { KBO_TEAMS, SUPABASE_PAGE_SIZE, RECENT_FORM_GAMES } from '@moneyball/shared';
 import { calculateRecentForm, calculateHeadToHead } from '../engine/form';
 import type { FinishedGame } from '../engine/form';
 import { getEloAt } from './elo-history';
@@ -95,8 +95,8 @@ export function buildFeatures(
   seasonStats?: SeasonStatsMap,
   priorRecords?: GameRecordLite[],
 ): GameFeatures | null {
-  const homeFormRaw = calculateRecentForm(priorInSeason, target.homeTeamId, 10);
-  const awayFormRaw = calculateRecentForm(priorInSeason, target.awayTeamId, 10);
+  const homeFormRaw = calculateRecentForm(priorInSeason, target.homeTeamId, RECENT_FORM_GAMES);
+  const awayFormRaw = calculateRecentForm(priorInSeason, target.awayTeamId, RECENT_FORM_GAMES);
   const h2h = calculateHeadToHead(priorInSeason, target.homeTeamId, target.awayTeamId);
 
   const homeElo =

@@ -5,7 +5,7 @@ import {
   PRODUCTION_COHORT_RULES, SHADOW_V20_SCORING_RULE,
   isV2ModelEnabled, isV21BShadowEnabled, isDebateEnabled,
   SHADOW_V20_WEIGHTS, DAY_MS,
-  countNeutralFactors, PREDICTION_SPARSE_THRESHOLD,
+  countNeutralFactors, PREDICTION_SPARSE_THRESHOLD, RECENT_FORM_GAMES,
 } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchForecastWeather } from '../scrapers/weather';
@@ -688,8 +688,8 @@ export async function runDailyPipeline(
       errors.push(`recentFinalGames ${game.awayTeam}v${game.homeTeam}: ${rfgResult.error.message}`);
     }
     const finished: FinishedGame[] = (rfgResult.data ?? []) as FinishedGame[];
-    let homeForm = calculateRecentForm(finished, homeTeamIdForForm, 10);
-    let awayForm = calculateRecentForm(finished, awayTeamIdForForm, 10);
+    let homeForm = calculateRecentForm(finished, homeTeamIdForForm, RECENT_FORM_GAMES);
+    let awayForm = calculateRecentForm(finished, awayTeamIdForForm, RECENT_FORM_GAMES);
     let h2h = calculateHeadToHead(finished, homeTeamIdForForm, awayTeamIdForForm);
 
     // DB 데이터 부족 시 (시즌 초기 / 운영 첫 주) KBO 스크래핑 fallback.
