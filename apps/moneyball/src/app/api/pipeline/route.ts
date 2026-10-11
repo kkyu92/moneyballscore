@@ -18,10 +18,24 @@ export async function POST(request: NextRequest) {
   const validModes = ['announce', 'predict', 'predict_final', 'verify'] as const;
   type Mode = (typeof validModes)[number];
   const rawMode = body.mode as string | undefined;
-  const mode: Mode = (validModes as readonly string[]).includes(rawMode ?? '')
-    ? (rawMode as Mode)
-    : 'predict';
-  const triggeredBy = (body.triggeredBy as 'cron' | 'manual' | 'api') || 'api';
+
+  // mode 검증 — 미인식 mode 를 'predict' 로 silent fallback 하면 (구버전 동작)
+  // 호출자 의도(예: verify)가 조용히 무시되고 엉뚱한 mode 가 성공 처리됨.
+  // mlb/pipeline/route.ts 동일 패턴 (400 반환).
+  if (!rawMode || !(validModes as readonly string[]).includes(rawMode)) {
+    return Response.json(
+      { error: 'invalid mode', valid_modes: validModes, received: rawMode },
+      { status: 400 },
+    );
+  }
+  const mode: Mode = rawMode as Mode;
+
+  // pipeline_runs.triggered_by 는 VARCHAR(20) — 초과 시 supabase-js insert 가 throw
+  // 없이 .error 리턴해 로그 자체가 silent 누락 (cycle 2078 발견). 경계에서 clamp.
+  const triggeredBy = ((body.triggeredBy as string) || 'api').slice(0, 20) as
+    | 'cron'
+    | 'manual'
+    | 'api';
 
   try {
     const result = await runDailyPipeline(date, mode, triggeredBy);
@@ -29,7 +43,8 @@ export async function POST(request: NextRequest) {
     // ISR revalidation 트리거. revalidate 실패는 pipeline 본 작업의 성공을
     //   가리면 안 됨 (silent false-failure 방지, sync-batter-stats 동일 패턴).
     //   predict/predict_final: 예측 생성 시 홈 + 예측 페이지
-    //   verify: is_correct 업데이트 → /dashboard + /predictions 일자 페이지
+    //   verify: is_correct 업데이트 → /dashboard + /predictions + /analysis + /feed
+    //   (CE/accuracy 통계·is_correct 직접 참조 페이지 전부 포함, predict 블록과 동일 커버리지)
     if (
       (mode === 'predict' || mode === 'predict_final') &&
       result.predictionsGenerated > 0
@@ -74,6 +89,8 @@ export async function POST(request: NextRequest) {
               '/predictions',
               `/predictions/${result.date}`,
               '/',
+              '/analysis',
+              '/feed',
             ],
           }),
         });
