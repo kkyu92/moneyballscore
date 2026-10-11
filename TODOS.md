@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/context 전수 감사, TIME_WINDOWS.recent_form 하드코딩 10 정정 (cycle 3041, 2026-10-11)
+
+진단: open issue 0건, approved plan 0/24(plan#29 불변, Tier4). 2차 방어선(cycle 3040 retro `79dd9023`) OK. 직전8(3033-3040) distinct=3(review-code(heavy)5+info-architecture-review1+lotto1) — 2-chain lock 미충족. gap trigger: op-analysis 117-cycle 미발화(마지막 cycle 2924)로 25-cycle 임계 대폭 초과했으나, Supabase 재확인(nslookup NXDOMAIN 지속) — DB 의존 harness 실행 불가, 반복 저가치 재확인 skip(cycle 3035 패턴 정합) 판단으로 op-analysis 보류. explore-idea saturation 13/15 충족했으나 4-source negative(open issue 0/approved plan 0 Tier4/TODOS Next-Up 부재/DESIGN.md 16.5h 신선) — review-code(heavy) fallback. cycle 3040 추천대로 `packages/kbo-data/context/`(4파일 917줄, 과거 전수 스윕 이력 0건) 선정.
+
+subagent 위임 전수 read 결과: **실제 결함 1건** — `context/domain.ts:98` `TIME_WINDOWS.recent_form.games` 가 `RECENT_FORM_GAMES` 상수를 참조하지 않고 리터럴 `10` 하드코딩. **cycle 3040(`07c67a1b`)에서 수정한 3곳(engine/form.ts, pipeline/daily.ts, backtest/loader.ts)과 동일 패턴의 4번째 spot** — 당일 다른 sweep 에서 누락된 케이스. 이 값은 LLM judge-agent/postview/validator/team-agent 에 전달되는 prompt 문구(`renderTimeWindowsForLLM`) source 라 `RECENT_FORM_GAMES` 변경 시 quant 엔진과 LLM 서술이 silent 하게 어긋날 위험. `domain.test.ts:97`도 리터럴 `toBe(10)` assert 라 drift 못 잡음 — 상수 참조로 동기. 그 외 agent-context.ts/measurement.ts/metrics.ts 는 전부 clean(스테일 주석 0, MLB twin 비대칭 대상 자체 없음 — MLB pipeline 은 buildAgentContext 미사용, dead code 0, unguarded call 0). `h2h_recent_games.games=5` 가 `MATCHUP_RECENT_FORM_GAMES=5`와 수치는 같지만 의도적으로 분리된 별개 개념(파일 자체 주석에 명시) — 중복 버그 아님.
+
+검증: `tsc --noEmit` clean, `pnpm --filter @moneyball/kbo-data test` 96 files/1234 tests 전체 green. 직접 main 커밋+push(R4 범위, `3798be58`).
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data` 잔여: factors/scrapers 재감사 또는 backtest/ 나머지) 또는 op-analysis(DB 복구 시 즉시, gap=117/25 최장 미발화) 또는 fix-incident(gap=14/20, Supabase INACTIVE 재확인) 또는 lotto(gap=4/30).
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data analytics/features/notify/engine 전수 감사, calculateRecentForm 하드코딩 10 정정 (cycle 3040, 2026-10-11)
 
 진단: 직전8(3032-3039) distinct=3(review-code(heavy)6+info-architecture-review1+lotto(lite)1) — 2-chain lock 미충족. open issue 0건, approved plan 0/30. gap trigger 전부 미근접(fix-incident 12/20, op-analysis 19/25, lotto 2/30, info-arch 4/30). Supabase INACTIVE 재확인(nslookup 여전히 NXDOMAIN) — 변화 없음, 사용자 조치 대기 지속. cycle 3039 추천대로 review-code(heavy) 스코프를 `packages/kbo-data`로 전환, 그중 과거 전수 스윕 이력 0건(git log grep 확인)인 analytics/features/notify/engine 4개 디렉토리(5파일, 883줄) 선정 — grep-count 낮은 영역도 전수 read 필요(cycle 3001 가드레일) 원칙 적용.
