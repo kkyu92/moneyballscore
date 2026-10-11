@@ -175,14 +175,6 @@ export async function GET(req: NextRequest) {
       )
       .in('id', ids);
 
-    if (result.error) {
-      Sentry.captureException(result.error, {
-        tags: { layer: 'api-route', route: 'picks-results' },
-        extra: { ids_count: ids.length, message: result.error.message },
-      });
-      return NextResponse.json({ error: result.error.message }, { status: 500 });
-    }
-
     let data;
     try {
       ({ data } = assertSelectOk(result, 'picks.results.getGames'));
@@ -191,7 +183,7 @@ export async function GET(req: NextRequest) {
         tags: { layer: 'api-route', route: 'picks-results' },
         extra: { ids_count: ids.length, stage: 'assertSelectOk' },
       });
-      throw e;
+      return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
     }
 
     for (const g of data ?? []) {

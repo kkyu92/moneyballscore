@@ -27,12 +27,12 @@ function makeSupabaseMock() {
     select: ReturnType<typeof vi.fn>;
     order: ReturnType<typeof vi.fn>;
     limit: ReturnType<typeof vi.fn>;
-    single: ReturnType<typeof vi.fn>;
+    maybeSingle: ReturnType<typeof vi.fn>;
   } = {
     select: vi.fn().mockImplementation(() => pipelineBuilder),
     order: vi.fn().mockImplementation(() => pipelineBuilder),
     limit: vi.fn().mockImplementation(() => pipelineBuilder),
-    single: vi.fn().mockImplementation(() =>
+    maybeSingle: vi.fn().mockImplementation(() =>
       Promise.resolve({ data: pipelineData, error: pipelineError }),
     ),
   };

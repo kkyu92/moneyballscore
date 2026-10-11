@@ -11,7 +11,9 @@ import { snapshotPitcherStats } from '@moneyball/kbo-data';
  * 포인트가 주간 cron 으로 호출되어 매주 snapshot 누적 → 향후 "경기 ≤ 근접
  * snapshot" 으로 시점별 FIP/xFIP/WAR/K9 팩터 복원 가능.
  *
- * Cron: .github/workflows/pitcher-snapshot.yml — 일요일 KST 00시.
+ * Cron: cloudflare-worker/src/worker.ts '37 * * * *' UTC 토요일 15시 분기 (KST 일요일 00시대)
+ * — .github/workflows/pitcher-snapshot.yml 의 schedule 은 2026-04-30 본 worker 로 이관,
+ * workflow_dispatch 만 보존.
  *
  * body: { season?: number } 선택. 기본 현재 연도.
  */

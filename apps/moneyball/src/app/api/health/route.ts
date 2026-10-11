@@ -54,7 +54,7 @@ async function checkPipeline(): Promise<Check> {
       .select('run_date, mode, status')
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
     const { data } = assertSelectOk(result, 'health.pipeline_runs');
     if (data) {
       return {
@@ -63,8 +63,8 @@ async function checkPipeline(): Promise<Check> {
       };
     }
     return { status: 'warning', detail: 'No pipeline runs yet' };
-  } catch {
-    return { status: 'warning', detail: 'No pipeline runs yet' };
+  } catch (e) {
+    return { status: 'error', detail: errMsg(e) };
   }
 }
 
