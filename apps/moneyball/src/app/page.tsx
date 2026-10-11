@@ -591,22 +591,40 @@ function selectBigMatchFromGames(games: HomeGame[]): HomeGame | null {
 
 export default async function HomePage() {
   const today = toKSTDisplayString();
-  const [games, accuracy, weekSchedule, yesterdayResults, standings, teamAccuracyRows, weeklyTrend] = await Promise.all([
-    getTodayPredictions().catch((err) => captureFallback(err, [] as HomeGame[], { route: "/", source: "getTodayPredictions" })),
-    getSeasonAccuracy().catch((err) => captureFallback(err, { total: 0, correct: 0, rate: 0, tierRates: emptyTierRates() }, { route: "/", source: "getSeasonAccuracy" })),
-    getWeekAheadSchedule().catch((err) => captureFallback(err, [] as WeekGameDay[], { route: "/", source: "getWeekAheadSchedule" })),
-    getYesterdayResults().catch((err) => captureFallback(err, [] as YesterdayGame[], { route: "/", source: "getYesterdayResults" })),
-    buildStandings().catch((err) => captureFallback(err, [], { route: "/", source: "buildStandings" })),
-    buildAllTeamAccuracy().catch((err) => captureFallback(err, [], { route: "/", source: "buildAllTeamAccuracy" })),
-    getRecentWeeksAccuracy().catch((err) => captureFallback(err, [] as WeeklyTrendPoint[], { route: "/", source: "getRecentWeeksAccuracy" })),
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
+  const [gamesR, accuracyR, weekScheduleR, yesterdayResultsR, standingsR, teamAccuracyRowsR, weeklyTrendR] = await Promise.allSettled([
+    getTodayPredictions(),
+    getSeasonAccuracy(),
+    getWeekAheadSchedule(),
+    getYesterdayResults(),
+    buildStandings(),
+    buildAllTeamAccuracy(),
+    getRecentWeeksAccuracy(),
   ]);
+  const games = gamesR.status === "fulfilled" ? gamesR.value : captureFallback(gamesR.reason, [] as HomeGame[], { route: "/", source: "getTodayPredictions" });
+  const accuracy = accuracyR.status === "fulfilled" ? accuracyR.value : captureFallback(accuracyR.reason, { total: 0, correct: 0, rate: 0, tierRates: emptyTierRates() }, { route: "/", source: "getSeasonAccuracy" });
+  const weekSchedule = weekScheduleR.status === "fulfilled" ? weekScheduleR.value : captureFallback(weekScheduleR.reason, [] as WeekGameDay[], { route: "/", source: "getWeekAheadSchedule" });
+  const yesterdayResults = yesterdayResultsR.status === "fulfilled" ? yesterdayResultsR.value : captureFallback(yesterdayResultsR.reason, [] as YesterdayGame[], { route: "/", source: "getYesterdayResults" });
+  const standings = standingsR.status === "fulfilled" ? standingsR.value : captureFallback(standingsR.reason, [], { route: "/", source: "buildStandings" });
+  const teamAccuracyRows = teamAccuracyRowsR.status === "fulfilled" ? teamAccuracyRowsR.value : captureFallback(teamAccuracyRowsR.reason, [], { route: "/", source: "buildAllTeamAccuracy" });
+  const weeklyTrend = weeklyTrendR.status === "fulfilled" ? weeklyTrendR.value : captureFallback(weeklyTrendR.reason, [] as WeeklyTrendPoint[], { route: "/", source: "getRecentWeeksAccuracy" });
   const teamAccuracyMap = new Map(teamAccuracyRows.map((r) => [r.teamCode, r]));
 
   // 오늘 편성 없을 때만 다음 일정·날씨 조회 (추가 쿼리 비용 최소화).
-  const nextSchedule =
+  const nextScheduleR =
     games.length === 0
-      ? await getNextScheduledGames().catch((err) => captureFallback(err, null, { route: "/", source: "getNextScheduledGames" }))
+      ? await getNextScheduledGames().then(
+          (value) => ({ status: "fulfilled" as const, value }),
+          (reason) => ({ status: "rejected" as const, reason }),
+        )
       : null;
+  const nextSchedule =
+    nextScheduleR === null
+      ? null
+      : nextScheduleR.status === "fulfilled"
+        ? nextScheduleR.value
+        : captureFallback(nextScheduleR.reason, null, { route: "/", source: "getNextScheduledGames" });
   const todayKST = toKSTDateString();
   const noGameReason = classifyNoGameReason(todayKST, nextSchedule);
 
@@ -667,10 +685,26 @@ export default async function HomePage() {
     { confident: 0, lean: 0, tossup: 0, total: 0 } as { confident: number; lean: number; tossup: number; total: number },
   );
 
-  const divergenceGame = await getTodayDivergenceGame(games).catch((err) => captureFallback(err, null, { route: "/", source: "getTodayDivergenceGame" }));
+  const divergenceGameR = await getTodayDivergenceGame(games).then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
+  );
+  const divergenceGame = divergenceGameR.status === "fulfilled" ? divergenceGameR.value : captureFallback(divergenceGameR.reason, null, { route: "/", source: "getTodayDivergenceGame" });
+
+  const dbDegraded = [gamesR, accuracyR, weekScheduleR, yesterdayResultsR, standingsR, teamAccuracyRowsR, weeklyTrendR, nextScheduleR, divergenceGameR].some(
+    (r) => r !== null && r.status === "rejected",
+  );
 
   return (
     <div className="space-y-8">
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
       {/* 실시간 스코어 */}
       <LiveScoreboard />
 
