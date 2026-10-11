@@ -6,6 +6,7 @@ import {
   PRODUCTION_COHORT_RULES,
   type TeamCode,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export interface EloDataPoint {
   date: string;
@@ -47,7 +48,12 @@ export async function buildEloTrend(): Promise<EloTrendData> {
     .order("game_date", { ascending: true })
     .limit(600);
 
-  const { data } = assertSelectOk(result, "standings.buildEloTrend");
+  let data: unknown[] | null = null;
+  try {
+    ({ data } = assertSelectOk(result, "standings.buildEloTrend"));
+  } catch (err) {
+    data = captureFallback(err, [], { route: "/standings", source: "buildEloTrend" });
+  }
   if (!data || data.length === 0) return { points: [], teams: [] };
 
   // 날짜별 팀 Elo 집계 (같은 날 여러 경기 대비 최신 값 덮어쓰기)

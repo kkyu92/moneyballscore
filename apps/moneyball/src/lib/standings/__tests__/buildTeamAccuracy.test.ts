@@ -81,9 +81,10 @@ describe("buildAllTeamAccuracy", () => {
     expect(result.length).toBe(2); // SS, NC만
   });
 
-  it("DB error → assertSelectOk throw", async () => {
+  it("DB error → throw 대신 빈 배열 degrade (captureFallback)", async () => {
     supabaseMock = makeMock({ error: { message: "db error" } });
-    await expect(buildAllTeamAccuracy()).rejects.toThrow();
+    const result = await buildAllTeamAccuracy();
+    expect(result).toEqual([]);
   });
 
   it("CURRENT_MODEL_FILTER 적용 — match 호출 확인", async () => {

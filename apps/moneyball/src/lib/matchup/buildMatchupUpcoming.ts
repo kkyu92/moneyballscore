@@ -7,6 +7,7 @@ import {
   toKSTDateString,
   type TeamCode,
 } from "@moneyball/shared";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import type { MatchupPair } from "./canonicalPair";
 
 interface MatchupUpcomingGame {
@@ -46,8 +47,18 @@ export async function buildMatchupUpcoming(
     supabase.from("teams").select("id").eq("code", pair.codeA).maybeSingle(),
     supabase.from("teams").select("id").eq("code", pair.codeB).maybeSingle(),
   ]);
-  const { data: tARow } = assertSelectOk(teamAResult, "buildMatchupUpcoming teamA");
-  const { data: tBRow } = assertSelectOk(teamBResult, "buildMatchupUpcoming teamB");
+  let tARow: { id: number } | null = null;
+  try {
+    ({ data: tARow } = assertSelectOk(teamAResult, "buildMatchupUpcoming teamA") as { data: { id: number } | null });
+  } catch (err) {
+    tARow = captureFallback(err, null, { route: "/matchup", source: "buildMatchupUpcoming teamA" });
+  }
+  let tBRow: { id: number } | null = null;
+  try {
+    ({ data: tBRow } = assertSelectOk(teamBResult, "buildMatchupUpcoming teamB") as { data: { id: number } | null });
+  } catch (err) {
+    tBRow = captureFallback(err, null, { route: "/matchup", source: "buildMatchupUpcoming teamB" });
+  }
   const teamAId = (tARow as { id: number } | null)?.id ?? null;
   const teamBId = (tBRow as { id: number } | null)?.id ?? null;
   if (teamAId == null || teamBId == null) return [];
@@ -79,7 +90,12 @@ export async function buildMatchupUpcoming(
     .order("game_time", { ascending: true })
     .limit(MATCHUP_UPCOMING_LIMIT);
 
-  const { data } = assertSelectOk(gamesResult, "buildMatchupUpcoming games");
+  let data: unknown[] | null = null;
+  try {
+    ({ data } = assertSelectOk(gamesResult, "buildMatchupUpcoming games"));
+  } catch (err) {
+    data = captureFallback(err, [], { route: "/matchup", source: "buildMatchupUpcoming games" });
+  }
   const rows = (data ?? []) as unknown as UpcomingRow[];
 
   const result: MatchupUpcomingGame[] = [];

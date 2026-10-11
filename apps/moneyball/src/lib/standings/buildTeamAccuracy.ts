@@ -76,7 +76,12 @@ export async function buildAllTeamAccuracy(): Promise<TeamAccuracyRow[]> {
     .eq("prediction_type", "pre_game")
     .not("is_correct", "is", null);
 
-  const { data } = assertSelectOk(result, "buildAllTeamAccuracy");
+  let data: unknown[] | null = null;
+  try {
+    ({ data } = assertSelectOk(result, "buildAllTeamAccuracy"));
+  } catch (err) {
+    data = captureFallback(err, [], { route: "/standings", source: "buildAllTeamAccuracy" });
+  }
   if (!data || data.length === 0) return [];
 
   const rows = data as unknown as PredRow[];
@@ -125,7 +130,12 @@ export async function buildMatchupData(): Promise<{
     .eq("prediction_type", "pre_game")
     .not("is_correct", "is", null);
 
-  const { data } = assertSelectOk(result, "buildMatchupData");
+  let data: unknown[] | null = null;
+  try {
+    ({ data } = assertSelectOk(result, "buildMatchupData"));
+  } catch (err) {
+    data = captureFallback(err, [], { route: "/standings", source: "buildMatchupData" });
+  }
   if (!data || data.length === 0) return { matchups: [], homeAway: [] };
 
   const rows = data as unknown as PredRow[];
@@ -212,7 +222,12 @@ export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
     ),
   ]);
 
-  const { data } = assertSelectOk(predResult, "buildTeamBiasAnalysis");
+  let data: unknown[] | null = null;
+  try {
+    ({ data } = assertSelectOk(predResult, "buildTeamBiasAnalysis"));
+  } catch (err) {
+    data = captureFallback(err, [], { route: "/standings", source: "buildTeamBiasAnalysis" });
+  }
   if (!data || data.length === 0) return [];
 
   const rows = data as unknown as BiasExtRow[];
