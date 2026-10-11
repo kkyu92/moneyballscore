@@ -105,6 +105,11 @@ describe("mlb/insights/series/[topic]/page.tsx (ko, plan #30 Phase 3)", () => {
     expect(SERIES_PAGE_SRC).toMatch(/href=\{`\/mlb\/team\/\$\{topic\.team2\}`\}/);
     expect(SERIES_PAGE_SRC).not.toMatch(/topic\.team1\.toLowerCase\(\)/);
   });
+
+  it("DB 장애 시 getMlbSeriesByTopic throw 를 try/catch 로 degrade (cycle 3035 sibling-asymmetry fix — KBO twin insights/series/[topic]/page.tsx 와 패리티, build 전체 crash 방지)", () => {
+    expect(SERIES_PAGE_SRC).toMatch(/try \{\s*entries = await getMlbSeriesByTopic\(topic\);\s*\} catch/);
+    expect(SERIES_PAGE_SRC).not.toMatch(/const entries = await getMlbSeriesByTopic\(topic\);/);
+  });
 });
 
 describe("en/mlb/insights/series/[topic]/page.tsx (en mirror, plan #30 Phase 3)", () => {
@@ -122,6 +127,11 @@ describe("en/mlb/insights/series/[topic]/page.tsx (en mirror, plan #30 Phase 3)"
   it("EN canonical + KO alternate 상호 링크", () => {
     expect(EN_SERIES_PAGE_SRC).toMatch(/en\/mlb\/insights\/series/);
     expect(EN_SERIES_PAGE_SRC).toMatch(/ko:\s*`\$\{SITE_URL\}\/mlb\/insights\/series\/\$\{topic\.slug\}`/);
+  });
+
+  it("DB 장애 시 getMlbSeriesByTopic throw 를 try/catch 로 degrade (cycle 3035 sibling-asymmetry fix, KO 와 동일 가드)", () => {
+    expect(EN_SERIES_PAGE_SRC).toMatch(/try \{\s*entries = await getMlbSeriesByTopic\(topic\);\s*\} catch/);
+    expect(EN_SERIES_PAGE_SRC).not.toMatch(/const entries = await getMlbSeriesByTopic\(topic\);/);
   });
 });
 

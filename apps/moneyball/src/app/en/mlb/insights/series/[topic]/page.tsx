@@ -60,7 +60,14 @@ export default async function EnMlbSeriesTopicPage({ params }: Props) {
   const topic = parseMlbSeriesTopic(slug);
   if (!topic) notFound();
 
-  const entries = await getMlbSeriesByTopic(topic);
+  // DB outage must not crash the whole production build — degrade to 0 entries
+  // (KBO twin insights/series/[topic]/page.tsx, fix-incident cycle 2946 pattern ported).
+  let entries: Awaited<ReturnType<typeof getMlbSeriesByTopic>> = [];
+  try {
+    entries = await getMlbSeriesByTopic(topic);
+  } catch (err) {
+    console.error(`en/mlb/insights/series/${slug} getMlbSeriesByTopic failed, degrading to 0 entries:`, err);
+  }
   const team1Name = MLB_TEAMS[topic.team1].name;
   const team2Name = MLB_TEAMS[topic.team2].name;
   const pageUrl = `${SITE_URL}/en/mlb/insights/series/${topic.slug}`;
