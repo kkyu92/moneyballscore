@@ -33,6 +33,16 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await snapshotPitcherStats({ season });
+
+    if (result.errors > 0) {
+      Sentry.captureMessage('snapshot-pitchers partial failure', {
+        level: 'warning',
+        tags: { layer: 'api-route', route: 'snapshot-pitchers' },
+        extra: { season, errors: result.errors },
+      });
+      return Response.json(result, { status: 207 });
+    }
+
     return Response.json(result);
   } catch (e) {
     const message = errMsg(e);
