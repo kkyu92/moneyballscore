@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — fix-incident: TeamLogo.tsx 미인식 team code 크래시 가드 추가 (cycle 3026, 2026-10-11)
+
+진단: open issue 0건, unprocessed approved plan 0/23(plan#29 만 status=spec_only_deferred_recommended, Tier4 사용자 결정 대기 — cycle 2969 이후 변화 없음). 2차 방어선(cycle 3025 retro commit `c1d469bc`) OK. gap trigger 4종(fix-incident 2/20, op-analysis 5/25, info-arch 20/30, lotto 17/30) 전부 미도달. 직전8(3018-3025) distinct=4(2-chain lock 미충족). explore-idea saturation(직전15 13/15) 충족했으나 4-source 재확인 negative(GH issue 0, TODOS Next-Up stale, plan#29 Tier4 risk=3 자율 가능=no 불변, 포스트시즌 WC(10/14) 3일 전으로 아직 미도달) — 과거 cycle 2591/2684/2689/2780/2788과 동일 패턴 반복, review-code(heavy) 계열로 fallback.
+
+cycle 3025 추천("TeamLogo.tsx smoke test 추가")을 따라가다 더 근본적인 갭 발견: `TeamLogo.tsx`(`teamInfo.name` 무가드 접근)가 `MlbTeamLogo.tsx`(Sentry MONEYBALLSCORE-1B 이후 `teamInfo?.name ?? team` 방어 획득, cycle 2737)와 동일 crash 패턴을 가진 채 방치돼 있었음 — `page.tsx`/`analysis-data.ts`/`insights/page.tsx` 등 다수 호출부가 `row.home_team?.code as TeamCode` 형태로 DB 조회값을 검증 없이 캐스팅해 `TeamLogo` 에 전달. KBO 팀코드는 10개 고정 집합이라 MLB보다 발생 확률은 낮지만 동일 crash surface 존재 — fix-incident 분류(silent-drift 아닌 명시적 크래시 가능성 패치).
+
+**수정**: `TeamLogo.tsx` `const alt = \`\${teamInfo?.name ?? team} 로고\`;` 로 방어 + 원인 주석. `__tests__/TeamLogo.test.tsx` 신규(정상 코드 렌더 + 미인식 코드 크래시 없음, `MlbTeamLogo.test.tsx` 패턴 그대로 미러).
+
+**검증**: `vitest run TeamLogo.test.tsx MlbTeamLogo.test.tsx` 4 passed. `pnpm test` 전체 586 files/4621 tests green. pre-push(lint+type-check+version-sync-guard) PASS. main 직접 commit+push(`8b71eb92`, PR 미경유 R4 범위).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 디렉토리 재진단 필요 — components/shared+seasons+lib 계열 대부분 소진) 또는 fix-incident(gap=1, Supabase egress quota 402 지속 여부 재확인) 또는 lotto(gap=18) 또는 info-arch(gap=21).
+
 ## 🟢 SUCCESS — review-code(heavy): components/shared+seasons 전수 감사, TeamLogo.tsx 6개월 stale JSDoc 정정 (cycle 3025, 2026-10-11)
 
 진단: 직전8(3017-3024) distinct=5(review-code(heavy)2+fix-incident2+design-system1+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24. fix-incident gap=1·lotto gap=16·info-arch gap=19·op-analysis gap=4 전부 미근접. explore-idea saturation 13/15 충족하나 organic idea 부재(open issue 0/approved plan 0/TODOS Next-Up stale) skip — 반복 패턴. `components/shared/`(16파일, 44 commits)와 `components/seasons/`(1파일)가 전체 cycle history 통틀어 디렉토리 단위 전수 스윕 이력 0건(grep 확인, `AnalysisLink.tsx`/`ServiceWorkerRegister.tsx` 개별 언급도 0건) — 신규 스코프 선정.
