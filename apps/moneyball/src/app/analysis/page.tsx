@@ -72,6 +72,7 @@ import {
   type TeamCode,
 } from '@moneyball/shared';
 import { fetchStandings, type StandingRow } from '@moneyball/kbo-data';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
 import { getCurrentMonth } from '@/lib/reviews/computeMonthRange';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
@@ -195,7 +196,10 @@ export default async function AnalysisIndexPage() {
     getBestPickOfWeek(currentMonth.startDate, currentMonth.endDate),
     getUpsetPickOfMonth(currentMonth.startDate, currentMonth.endDate),
     buildTeamStrengthSnapshot(),
-    fetchStandings(),
+    // cycle 3027 fix: fetchStandings 는 KBO 공식 스크랩(외부 사이트) — 실패 시 재시도 소진 후 throw, 유일한 비가드 호출이라 Promise.all 전체 reject → /analysis 500 위험. 자매 함수(buildTeamAccuracy.ts) 와 동일 패턴 적용
+    fetchStandings().catch((err) =>
+      captureFallback(err, [] as StandingRow[], { route: 'AnalysisIndexPage', source: 'fetchStandings' }),
+    ),
     getSeasonH2HData(),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_STRONG),
