@@ -122,13 +122,30 @@ function fmtDelta(deltaPp: number): string {
 }
 
 export default async function V2PreviewPage() {
-  const rows = await getPreviewRows().catch((err) =>
-    captureFallback(err, [] as PreviewRow[], { route: "/v2-preview", source: "getPreviewRows" }),
-  );
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적.
+  const [previewRowsR] = await Promise.allSettled([getPreviewRows()]);
+  const rows =
+    previewRowsR.status === "fulfilled"
+      ? previewRowsR.value
+      : captureFallback(previewRowsR.reason, [] as PreviewRow[], {
+          route: "/v2-preview",
+          source: "getPreviewRows",
+        });
+  const dbDegraded = previewRowsR.status === "rejected";
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
       <Breadcrumb items={[{ label: "v2 시뮬레이션 미리보기" }]} />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="mt-4 space-y-3">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
