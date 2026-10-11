@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 // KBO buildTeamEloTrend 병렬 구현 — mlb_team_elo_history 전체 조회 후 단일 팀 시계열 +
-// 리그 평균(그 날짜 조회된 모든 팀 rating 평균) 산출. 핵심 검증: (1) StatsAPI alias 코드
-// (TB/SD 등) 도 canonical 로 정규화돼 팀 매칭되는지 (사례 27 family) (2) 리그 평균 계산
-// (3) 빈 결과 시 points: [] graceful 반환 (4) select error 시 throw.
+// 리그 평균(forward-fill 된 전 팀 최신 rating 평균, cycle 3033 정정) 산출. 핵심 검증:
+// (1) StatsAPI alias 코드(TB/SD 등) 도 canonical 로 정규화돼 팀 매칭되는지 (사례 27 family)
+// (2) 리그 평균 forward-fill 계산 (3) 빈 결과 시 points: [] graceful 반환 (4) select error
+// 시 throw 대신 degrade.
 
 interface EloHistoryFixture {
   team_code: string;
@@ -68,6 +69,27 @@ describe("buildMlbTeamEloTrend", () => {
     expect(points).toEqual([
       { date: "2026-04-01", elo: 1520, avg: 1520 },
       { date: "2026-04-02", elo: 1512, avg: 1496 },
+    ]);
+  });
+
+  it("팀 경기 없는 날짜도 리그 평균은 forward-fill (스케줄 분산 왜곡 방지, cycle 3033)", async () => {
+    const rows: EloHistoryFixture[] = [
+      { team_code: "NYY", game_date: "2026-04-01", elo_rating: 1520 },
+      { team_code: "NYY", game_date: "2026-04-02", elo_rating: 1512 },
+      { team_code: "BOS", game_date: "2026-04-02", elo_rating: 1480 },
+      { team_code: "NYY", game_date: "2026-04-03", elo_rating: 1500 },
+    ];
+    supabaseMock = makeSupabaseMock(rows);
+
+    const { buildMlbTeamEloTrend } = await import("../buildMlbTeamEloTrend");
+    const { points } = await buildMlbTeamEloTrend("NYY");
+
+    // 04-03 엔 BOS 경기 없음 — forward-fill 된 BOS 1480 이 평균에 계속 반영돼야 함
+    // (forward-fill 없으면 avg === elo === 1500, BOS 소실).
+    expect(points).toEqual([
+      { date: "2026-04-01", elo: 1520, avg: 1520 },
+      { date: "2026-04-02", elo: 1512, avg: 1496 },
+      { date: "2026-04-03", elo: 1500, avg: 1490 },
     ]);
   });
 
