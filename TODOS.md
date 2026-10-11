@@ -1,4 +1,17 @@
 
+## 🟡 RETRO-ONLY — operational-analysis(lite): Supabase INACTIVE 지속 재확인, 신규 측정 불가 (cycle 3021, 2026-10-11)
+
+op-analysis gap=53 사이클(마지막 발화 cycle 2968, ≥25 트리거 대폭 초과) — lite 선택. 직전8(3014-3021 예정) distinct=4라 2-chain lock 미충족, 자유 선택.
+
+**직접 재확인 (Supabase Management API + DNS + REST)**:
+- `GET /v1/projects/utmimgpccbrciwuuacyw` → `status: "INACTIVE"` 그대로 (cycle 3019 진단 이후 변화 없음, 사용자 billing 조치 미이행)
+- `utmimgpccbrciwuuacyw.supabase.co` DNS 조회 → **NXDOMAIN** (REST 엔드포인트 자체 무응답, curl 000)
+- `dhlottery.co.kr` / `en.lottolyzer.com` 직접 curl → 둘 다 connection timeout (cycle 3020 lotto PARTIAL 진단과 동일 — 로컬 환경에서도 재현, GH Actions 전용 문제 아님 확인. google.com 은 200 정상 응답 — 로컬 네트워크 자체는 정상, 두 로또 사이트만 특정적으로 도달 불가)
+
+**결론**: op-analysis 측정 스크립트(`scripts/op-analysis-ce-cohort.ts`)는 Supabase REST 의존 — INACTIVE+NXDOMAIN 상태에선 실행 자체가 무의미(즉시 실패 확정). CE/비CE n=400(cycle 2924) 수치 재측정 불가 지속. 코드 변경 없음 — 순수 외부 상태 재확인.
+
+다음 사이클 추천 = review-code(heavy)(components/accuracy·analysis·matchup·insights·share 또는 apps/moneyball/src/lib 잔여 스코프, 직전8 4회로 dominance 지속 중이나 2-chain lock 미충족) 또는 lotto(gap=12, 다음 토요일 10/17 picks 생성 자연 주기 확인) 또는 info-arch(gap=15). Supabase/lotto 외부 블로커 2건 모두 사용자 조치/외부 복구 대기 — 다음 fix-incident 발화 시 재확인 권장(이번 cycle 변화 없음 확인했으므로 당장 재방문 불필요).
+
 ## 🟡 PARTIAL — fix-incident: lotto-result-update cron "최신 회차 조회 실패" (cycle 3020, 2026-10-11)
 
 **진단**: `lotto-result-update.yml` 3-fire(10-10 20:34 / 10-11 01:56 모두) 전부 "최신 회차 조회 실패" 후 1244회(10/3)에 머물러 idempotent skip — 10/10 추첨(1245회) 결과 미반영. 원인: `scripts/lotto.ts update()` 가 `getLatestRound()`(lottolyzer en 페이지 scrape) 단일 source 로 최신 회차를 판별했는데, 그 함수가 실패하면 dhlottery 재시도 없이 즉시 bail — dhlottery 는 round 번호 지정 fetch(`fetchRoundFromAPI`)가 이미 있는데도 안 씀.
