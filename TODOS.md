@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): harness.ts dead-skeleton + walkForwardSplit dead code 제거 (cycle 3080, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3079 retro `54e477ac`) OK. 직전8(3072-3079) distinct=3(review-code(heavy)6+polish-ui1+expand-scope1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 13/20·lotto 12/30·info-arch 16/30), op-analysis 블락 유지(Supabase DNS 미해결 56+ cycle). cycle 3076/3078/3079 3회 연속 동일 추천 — `harness.ts` dead-skeleton 정리 또는 `walkForwardSplit` dead code 제거 — carry-over evidence 명확해 채택.
+
+**조사**: `packages/kbo-data/src/backtest/harness.ts`(241L, cycle 893 plan#9 Step3 skeleton) — `makeModelWithCandidates` 실제 factor integration 은 Step4 carry-over 였으나 plan#9 cycle 896 "auto-commit risk pivot" 으로 다른 경로(predictor 직접 wiring, cycle 894-895)로 완결 — 본 skeleton 은 영구 미완성. `runHarness`/`HarnessInputSchema` 등 모든 export grep 결과 자기 테스트(`backtest-harness.test.ts`) 외 production 호출자 0 (index.ts 재export 만). candidate factor 9종도 `GameFeatures` 에 끝내 통합 안 됨(grep 0건). **전체 삭제** — harness.ts + 테스트 + index.ts 재export.
+
+`walk-forward-helpers.ts` 의 `walkForwardSplit` — cycle 1019 pattern, 자신의 docstring(cycle 1021)이 "rule_definition_date 직후 train≈0 degenerate" 명시하고 `scoringRuleSplit`/`rollingTimeCV` 대체 pattern 으로 교체됨. `scripts/backtest-v2-candidate.ts`(유일 소비 스크립트)는 대체 함수 2개만 import — `walkForwardSplit` 은 자기 테스트 외 호출자 0. **함수 + 테스트 3건 삭제**, `CvPattern` union 에서 `'walk-forward'` variant 제거(`scoringRuleSplit`/`rollingTimeCV` 는 production 소비 확인 — 유지).
+
+검증: `tsc --noEmit` clean, `eslint` clean, `kbo-data` vitest 96 files/1214 tests 전부 PASS. 직접 main 커밋 + push (R4, PR 미경유) — pre-push hook(lint+type-check+version-sync-guard) PASS. `9c685273`.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 재탐색(`packages/kbo-data/src/agents/` 재확인 또는 app/api 고커밋 route) 또는 fix-incident(gap=14/20)/lotto(gap=13/30)/info-arch(gap=17/30) 자연 대기. **Supabase INACTIVE 56+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## ⚪ RETRO-ONLY — expand-scope: 2-chain lock(review-code+polish-ui) fallback, 신규 확장 기회 미발견 (cycle 3079, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 2일전, 불변). 2차 방어선(cycle 3078 retro `ab4b98b1`) OK. 직전8(3071-3078) distinct=2(review-code(heavy)7+polish-ui1) — **2-chain lock 발동, 둘 다 제외**(cycle 2147 선례와 동일 locked pair). gap trigger 4종 전부 미근접(fix-incident 12/20·lotto 11/30·info-arch 15/30)/블락(op-analysis 25+/25 충족이나 Supabase DNS NXDOMAIN 재확인 지속, 55+cycle). `gh run list` 전부 success/skipped — fix-incident 실제 incident 0건. info-arch route mtime -7 체크는 거의 전체 트리에 걸리는 false positive(실제 신규 라우트 아님), breadcrumb 미싱 전부 기존 확인된 false-positive(root/placeholder/redirect-only). 남은 pool 중 **expand-scope 조건(1)** — "직전4(3075-3078) 모두 {review-code,polish-ui} 안" — 유일하게 명시적으로 충족해 선택.
