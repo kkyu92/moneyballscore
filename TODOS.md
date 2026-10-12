@@ -1,4 +1,19 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/insights,players,standings,picks,lotto,v2-shadow-monitor 전수 감사, Elo trend truncation + CE row 배제 재발 수정 (cycle 3061, 2026-10-12)
+
+진단: open issue 0, approved plan 0/23(전부 처리 완료). 2차 방어선(cycle 3060 retro `6120e1cf`) OK. 직전8(3053-3060) distinct=3(review-code(heavy)5+review-code2+polish-ui1) — 2-chain lock 미충족(cycle 3060 polish-ui 발화로 distinct 재확장). fix-incident gap=14/20·lotto gap=23/30·info-arch gap=25/30 전부 미근접. op-analysis 는 25+ 사이클 미발화(Supabase billing INACTIVE 지속, curl NXDOMAIN 재확인)로 블락 유지. explore-idea saturation 6/15 미충족. 직전 2 사이클 추천대로 review-code(heavy) 계속 — lib/ 미스윕 서브디렉토리 중 insights/players/standings/picks/lotto/v2-shadow-monitor 선정(predictions/mlb/seo/changelog/debug/seasons/leaderboard 는 git history 상 이미 전수 스윕 또는 export-but-unused 패스 완료 확인).
+
+subagent 위임 전수 read(약 25개 소스 + 테스트 파일, packages/shared 및 MLB sibling cross-check) → players/picks/v2-shadow-monitor clean (KBO=10팀 하드코딩이 MLB 30팀에서 깨지는 cycle 3010 버그 class 재발 0건, 상수 전부 shared 참조 확인). 실제 수정 2건:
+
+1. `standings/buildEloTrend.ts` — `games` 테이블 쿼리가 `order("game_date", {ascending:true}).limit(600)` 로 되어 있어 KBO 시즌 누적 경기 수가 600건을 넘으면 가장 **오래된** 600건만 남고 최신 경기가 silent 드롭됨 (현재 시즌 말기 시점 영향 가능성). `/standings`, `/teams/[code]`, matchup Elo 차트 전부가 `buildEloTrend()` 재사용이라 영향 범위 넓음. `ascending:false` 로 정정(하위 집계는 이미 날짜 재정렬하므로 추가 변경 불필요) + order 호출 인자를 검증하는 회귀 테스트 추가.
+2. `insights/series.ts` — `getSeriesByTopic` 이 `CURRENT_MODEL_FILTER`(.match, scoring_rule exact-match `'v1.8'`)를 사용해 CE(`v1.8-credit-fail`) row 를 silent 배제 — `config/model.ts` 자체 주석이 "wave-656 fix 를 14개 파일에 전파했으나 일부 누락 가능"이라 문서화한 바로 그 버그 class 가 이 파일에 남아있었음(loader.ts 는 이미 `PRODUCTION_COHORT_RULES` 사용 중). 동일 패턴으로 전환 + 옛 회귀 테스트(`silent-drift-cycle-2291.test.ts`, cycle 2291 당시 "필터 자체가 누락"을 막기 위해 `CURRENT_MODEL_FILTER` 리터럴을 검증하던 테스트)를 새 구현에 맞게 갱신(가드 의도는 "scoring_rule 필터 누락 방지"로 유지).
+
+추가로 `lib/lotto/combo-check-data.ts`(lib/lotto 안 유일하게 테스트 파일이 없던 소스) 테스트 커버리지 보강. "저커밋 = 안전"으로 추정하지 않고(grep-count-depth 가드레일, cycle 2991/3001) 전수 read 로 실제 버그 2건 확인 — 가드레일 재확인 사례 추가.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 589/589 파일·4642/4642 테스트 PASS. 직접 main 커밋 + push (PR 미경유, R4 범위, commit `a1fb36e9`).
+
+다음 사이클 추천 = review-code(heavy) 계속(남은 lib 서브디렉토리 재확인 또는 components/accuracy,analysis,matchup,insights,share — 이미 clean 확인된 바 있어 우선순위 낮음 — 또는 packages/kbo-data 잔여 스코프) 또는 fix-incident(gap=15/20)/lotto(gap=24/30, 10/17 draw 점검)/info-arch(gap=26/30) 자연 대기. **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만.**
+
 ## 🟡 RETRO-ONLY — polish-ui: 2-chain lock fallback, DB장애/CE 배너 30개 페이지 전수 색상 토큰 재검증 갭 0건 (cycle 3060, 2026-10-12)
 
 진단: open issue 0, approved plan 0/23(전부 처리 완료). 2차 방어선(cycle 3059 retro `84f7883a`) OK. 직전8(3052-3059) 리터럴 chain_selected 문자열 차이("review-code(heavy)" vs "review-code (heavy)" 띄어쓰기 불일치)로 split()[0] 기준 distinct=2 — 2-chain lock 발동(review-code/review-code(heavy) 둘 다 review-code 계열 단일 작업이지만 스킬 룰 리터럴 기준 lock 적용). fix-incident gap=12/20·lotto gap=21/30·info-arch gap=23/30 전부 미근접, op-analysis 는 Supabase NXDOMAIN 지속 블락. explore-idea saturation 5/15 미충족. 모든 chain trigger 없어 lock fallback 룰(polish-ui 강제) 적용 — polish-ui 자체도 gap=42/41(last fire cycle 3018) 로 장기 미발화 상태.
