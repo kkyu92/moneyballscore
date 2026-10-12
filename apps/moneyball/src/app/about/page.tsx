@@ -180,7 +180,7 @@ const FAQS = [
   },
   {
     q: "AI 에이전트 토론은 무엇을 기반으로 하나요?",
-    a: "Anthropic Claude 모델(Haiku + Sonnet)을 사용합니다. 홈/원정 에이전트는 정량 데이터와 팀 페르소나를 입력받아 각자 입장에서 논거를 제시하고, 심판 에이전트가 양측 논거를 평가해 최종 확률을 결정합니다(Steelman 원칙).",
+    a: "Anthropic Claude 모델(Haiku + Sonnet)을 사용합니다. 홈/원정 에이전트는 정량 데이터와 팀 페르소나를 입력받아 각자 입장에서 논거를 제시하고, 보정 에이전트가 과거 예측 이력을 회고해 편향 보정 힌트를 더하면, 심판 에이전트가 이를 종합 평가해 최종 확률을 결정합니다(Steelman 원칙).",
   },
   {
     q: "예측 카드에 표시되는 신뢰도 70% 는 어떤 의미인가요?",
@@ -395,8 +395,12 @@ export default async function AboutPage() {
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">원정팀 관점에서 반론 제시. 홈팀 약점과 원정팀 강점을 강조.</p>
           </div>
           <div className="p-4 bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)]">
+            <h3 className="font-semibold">보정 에이전트</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">과거 예측 이력을 회고해 팀별 편향·모델 약점을 보정 힌트로 산출. 심판에게 제안으로만 전달.</p>
+          </div>
+          <div className="p-4 bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)]">
             <h3 className="font-semibold">심판 에이전트 (Sonnet)</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">양측 논거를 평가하고, 정량 모델 결과와 종합하여 최종 승리 확률 결정. Steelman 원칙 적용.</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">양측 논거 + 보정 힌트를 평가하고, 정량 모델 결과와 종합하여 최종 승리 확률 결정. Steelman 원칙 적용.</p>
           </div>
         </div>
         <p className="text-sm text-gray-400 dark:text-gray-500">
