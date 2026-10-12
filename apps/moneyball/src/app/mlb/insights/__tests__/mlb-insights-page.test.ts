@@ -86,6 +86,12 @@ describe("mlb/insights/page.tsx (ko hub)", () => {
     expect(PAGE_SRC).toMatch(/"@type":\s*"Article"/);
     expect(PAGE_SRC).toMatch(/"@id":\s*PAGE_URL/);
   });
+
+  it("DB 장애 시 uncaught throw 대신 dbDegraded 배너로 degrade (KBO /insights 패턴 패리티, cycle 3062 fix — getRecentMlbInsights 가 assertSelectOk 로 throw 하는데 unwrapped 호출이라 서비스 장애 시 uncaught crash 였음)", () => {
+    expect(PAGE_SRC).toMatch(/captureFallback\(insightsR\.reason, \[\] as MlbInsightRow\[\], \{ route: "\/mlb\/insights", source: "getRecentMlbInsights" \}\)/);
+    expect(PAGE_SRC).toMatch(/const dbDegraded = insightsR\.status === "rejected"/);
+    expect(PAGE_SRC).toMatch(/\{dbDegraded && \(/);
+  });
 });
 
 describe("en/mlb/insights/page.tsx (en mirror)", () => {

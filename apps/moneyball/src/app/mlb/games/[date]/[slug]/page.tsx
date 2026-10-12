@@ -38,7 +38,7 @@ interface PageParams {
   params: Promise<{ date: string; slug: string }>;
 }
 
-// 실제 dl breakdown 에 렌더되는 팩터만 정의 (park_factor/home_advantage/recent_form 등
+// 실제 dl breakdown 에 렌더되는 팩터만 정의 (park_factor/home_advantage 등
 // plan #25 Phase 3-gated placeholder 는 제외 — review-code heavy, cycle 2108: 이전엔
 // 전체 모델 팩터 총합 상수(14)를 그대로 heading/description 에 써서 표시 숫자와
 // 실제 7행 렌더 mismatch 가 있었음. cycle 2102 가 5→7행으로 늘렸지만 카운트 클레임

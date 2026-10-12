@@ -125,7 +125,7 @@ export default async function MlbWildCardHub() {
           <li>MLB {MLB_GAMES_PER_TEAM}game 풀 인제스트 + {FACTOR_TOTAL}팩터 본선 — <strong>박제 완료</strong></li>
           <li>{MLB_TEAM_COUNT}팀 standings (AL/NL × E/C/W {MLB_DIVISION_COUNT} division) — <strong>박제 완료</strong> (<Link href="/mlb/standings" className="underline">/mlb/standings</Link>)</li>
           <li>Wild Card {MLB_WILDCARD_COUNT}장 진출 경쟁 순위 + game-back + Magic Number — <strong>박제 완료</strong></li>
-          <li>Postseason 브라켓 (WC / DS / LCS / WS) 시각화 — <strong>ETA 2026-09</strong></li>
+          <li>Postseason 브라켓 (WC / DS / LCS / WS) 시각화 — <strong>준비 중</strong></li>
         </ul>
       </section>
 

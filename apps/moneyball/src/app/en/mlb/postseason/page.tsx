@@ -9,7 +9,7 @@ export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: liter
 export const metadata: Metadata = {
   title: "MLB Postseason Bracket — WC / DS / LCS / WS | MoneyBall Score",
   description:
-    `MLB Postseason 4 rounds (Wild Card / Division Series / League Championship / World Series) bracket + ${MLB_FACTOR_COUNTS.total}-factor model series predictions. Live integration ETA 2026-09.`,
+    `MLB Postseason 4 rounds (Wild Card / Division Series / League Championship / World Series) bracket + ${MLB_FACTOR_COUNTS.total}-factor model series predictions. Coming soon — live integration in progress.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/postseason`,
     languages: {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "MLB Postseason Bracket | MoneyBall Score",
     description:
-      `MLB Postseason 4-round bracket + ${MLB_FACTOR_COUNTS.total}-factor series predictions — Live integration ETA 2026-09.`,
+      `MLB Postseason 4-round bracket + ${MLB_FACTOR_COUNTS.total}-factor series predictions — Coming soon — live integration in progress.`,
     url: `${SITE_URL}/en/mlb/postseason`,
     type: "website",
     locale: "en_US",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MLB Postseason Bracket | MoneyBall Score",
     description:
-      `MLB Postseason 4-round bracket + ${MLB_FACTOR_COUNTS.total}-factor series predictions — Live integration ETA 2026-09.`,
+      `MLB Postseason 4-round bracket + ${MLB_FACTOR_COUNTS.total}-factor series predictions — Coming soon — live integration in progress.`,
   },
 };
 
@@ -114,7 +114,7 @@ export default function MlbPostseasonHubEn() {
           After the regular season ends — 4-round playoff: Wild Card / Division Series / League Championship / World Series.
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          ETA 2026-09 — Live series-by-series {MLB_FACTOR_COUNTS.total}-factor predictions + bracket visualization activates immediately after the regular season.
+          Coming soon — live series-by-series {MLB_FACTOR_COUNTS.total}-factor predictions + bracket visualization, activating after the regular season ends.
         </p>
       </header>
 
@@ -132,7 +132,7 @@ export default function MlbPostseasonHubEn() {
           <li>MLB {MLB_GAMES_PER_TEAM}-game full ingestion + {MLB_FACTOR_COUNTS.total}-factor model — <strong>Complete</strong></li>
           <li>{MLB_TEAM_COUNT}-team standings + season game-back tracking — <strong>Complete</strong> (<Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link>)</li>
           <li>Wild Card race tracking — <strong>Complete</strong> (<Link href="/en/mlb/wild-card" className="underline">/en/mlb/wild-card</Link>)</li>
-          <li>Postseason bracket + per-series {MLB_FACTOR_COUNTS.total}-factor predictions — <strong>ETA 2026-09</strong></li>
+          <li>Postseason bracket + per-series {MLB_FACTOR_COUNTS.total}-factor predictions — <strong>Coming soon</strong></li>
         </ul>
       </section>
 
@@ -168,7 +168,7 @@ export default function MlbPostseasonHubEn() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ Live Postseason bracket + per-series {MLB_FACTOR_COUNTS.total}-factor predictions = ETA 2026-09 (activates immediately after regular season ends).
+          ※ Live Postseason bracket + per-series {MLB_FACTOR_COUNTS.total}-factor predictions = coming soon (activates after regular season ends).
         </p>
         <p>
           ※ Related: <Link href="/en/mlb/wild-card" className="underline">/en/mlb/wild-card</Link> · <Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link> · <Link href="/en/mlb" className="underline">/en/mlb</Link> hub.

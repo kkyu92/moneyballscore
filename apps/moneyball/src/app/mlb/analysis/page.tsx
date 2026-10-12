@@ -71,9 +71,10 @@ export default async function MlbAnalysisPage() {
   ]);
   const weekRemainingByDate = groupMlbGamesByDate(weekRemainingGames);
 
-  // wave-624 KBO 대응 — 최고 자신감 픽 = 오늘의 빅매치 (MLB 는 elo/recent_form 미구현이라
-  // KBO selectBigMatch(rivalry/elo-closeness 휴리스틱)를 그대로 쓰면 데이터 부족으로
-  // 무의미(전 경기 동점) — confidence 기반으로 대체, plan #28 Phase 1 스코프 결정).
+  // wave-624 KBO 대응 — 최고 자신감 픽 = 오늘의 빅매치 (KBO selectBigMatch 는
+  // isRivalry(TeamCode) 에 의존하는 KBO 전용 라이벌 휴리스틱이라 MLB 30팀엔
+  // 대응 데이터/타입이 없음 — elo/recent_form 자체는 MLB 도 실제 값 사용 중,
+  // cycle 2349/2353) — confidence 기반으로 대체, plan #28 Phase 1 스코프 결정).
   const topPick = rows
     .filter((p) => p.conf > TOP_PICK_MIN_WIN_PCT)
     .sort((a, b) => b.conf - a.conf)[0];

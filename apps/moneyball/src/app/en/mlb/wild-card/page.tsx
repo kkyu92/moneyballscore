@@ -129,7 +129,7 @@ export default async function MlbWildCardHubEn() {
           <li>MLB {MLB_GAMES_PER_TEAM}-game full ingestion + {MLB_FACTOR_COUNTS.total}-factor model — <strong>Complete</strong></li>
           <li>{MLB_TEAM_COUNT}-team standings (AL/NL × E/C/W {MLB_DIVISION_COUNT} divisions) — <strong>Complete</strong> (<Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link>)</li>
           <li>Wild Card {MLB_WILDCARD_COUNT}-spot race standings + game-back + Magic Number — <strong>Complete</strong></li>
-          <li>Postseason bracket (WC / DS / LCS / WS) visualization — <strong>ETA 2026-09</strong></li>
+          <li>Postseason bracket (WC / DS / LCS / WS) visualization — <strong>Coming soon</strong></li>
         </ul>
       </section>
 

@@ -139,7 +139,7 @@ export default async function MlbHubEn() {
         </Link>
         <Link href="/en/mlb/postseason" className="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 p-5">
           <h3 className="font-bold text-amber-700 dark:text-amber-200">⭐ Postseason Bracket</h3>
-          <p className="text-xs text-amber-600 mt-1">ETA 2026-09</p>
+          <p className="text-xs text-amber-600 mt-1">Coming soon</p>
         </Link>
         <Link href="/en/mlb/factors" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">{TOTAL}-Factor Model</h3>

@@ -5,7 +5,8 @@ import { mlbShortTeamName, INSIGHTS_ISR_HOURS, INSIGHTS_LIMIT, SITE_URL } from "
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { selectTopFactors } from "@/lib/insights/topFactors";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
-import { getRecentMlbInsights } from "./insights-data";
+import { captureFallback } from "@/lib/observability/captureFallback";
+import { getRecentMlbInsights, type MlbInsightRow } from "./insights-data";
 
 const PAGE_URL = `${SITE_URL}/mlb/insights`;
 const LIMIT = INSIGHTS_LIMIT;
@@ -37,7 +38,14 @@ export const metadata: Metadata = {
 export const revalidate = 86400; // INSIGHTS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export default async function MlbInsightsHubPage() {
-  const insights = await getRecentMlbInsights(LIMIT);
+  const insightsR = await getRecentMlbInsights(LIMIT).then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
+  );
+  const insights = insightsR.status === "fulfilled"
+    ? insightsR.value
+    : captureFallback(insightsR.reason, [] as MlbInsightRow[], { route: "/mlb/insights", source: "getRecentMlbInsights" });
+  const dbDegraded = insightsR.status === "rejected";
   const latestDate = insights[0]?.date ?? null;
 
   const articleJsonLd = {
@@ -72,6 +80,15 @@ export default async function MlbInsightsHubPage() {
       />
 
       <Breadcrumb items={[{ label: "MLB 분석", href: "/mlb" }, { label: "AI 인사이트" }]} />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="space-y-3">
         <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">MLB AI 인사이트</h1>
