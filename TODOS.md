@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): scripts/ 미감사 6건 전수 감사, llm-context-baseline.ts dead import + stale 서술 수정 (cycle 3084, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed). 2차 방어선(cycle 3083 retro `1719f02f`) OK. 직전8(3076-3083) distinct=4(review-code(heavy)6+polish-ui1+expand-scope1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 17/20·lotto 16/30·info-arch 20/30). op-analysis gap≥25 충족하나 Supabase DNS NXDOMAIN 재확인(`curl` exit=6 재현) 지속 — skip. DESIGN.md mtime 1.5일(신선) — design-system 미근접. cycle 3083 추천대로 `scripts/` 나머지 미감사 파일 선별 — CHANGELOG grep 0건 기준(grep-count-depth 가드레일 준수, 선별 용도로만 사용 + 전수 read 로 실제 커버리지 확인) `backfill-kbo-confirmed-postponed.ts`/`backfill-kbo-stuck-verify.ts`/`backfill-tie-winner-null.ts`/`llm-context-baseline.ts`/`measure-context-layer-brier.ts`/`run-pipeline.ts` (6파일, 717L) 채택.
+
+**조사**: subagent 위임 전수 read(6파일) + import/env var/schema/constant cross-check + 가능한 파일은 실제 `tsx` 실행으로 import 해석 검증. 5개 파일(backfill-kbo-confirmed-postponed/backfill-kbo-stuck-verify/backfill-tie-winner-null/measure-context-layer-brier/run-pipeline) — import 시그니처·env var convention(`NEXT_PUBLIC_SUPABASE_URL`)·컬럼명 전부 현재 코드/스키마 일치, drift 0건. `llm-context-baseline.ts`(plan #23 Step 4 baseline, cycle 1229 도입) — 2건 발견: (1) `estimatePromptTokens` import 되었으나 파일 안 어디서도 미호출(dead import, 실사용은 `measureContextTokenBudget`/`measureHallucinations` 뿐). (2) 출력 텍스트가 "judge/postview/team/personas/debate/calibration/rivalry-memory 통합 후 측정" 이라 전부 미통합 서술하지만, 실제론 `judge-agent.ts`(2회)/`team-agent.ts`(2회)/`postview.ts`(3회)/`validator.ts`(4회, 목록에 아예 없었음) 가 이미 `buildAgentContext` 호출 — 잔여 미통합은 `personas`/`debate`/`calibration-agent`/`rivalry-memory` 4개뿐(각 0회). 매 baseline artifact 생성마다 이 stale 서술이 그대로 박제되는 구조.
+
+수정: dead import 제거 + 출력 텍스트를 "judge/postview/team/validator 는 이미 통합 완료 — 잔여 agent(personas/debate/calibration/rivalry-memory) 통합 후 측정" 으로 정정.
+
+검증: `pnpm --filter kbo-data exec tsc --noEmit` clean. 직접 main 커밋 + push(R4, PR 미경유, pre-push hook lint+type-check+version-sync-guard PASS). `addbc68b`.
+
+다음 사이클 추천 = review-code(heavy) 계속(`scripts/` 잔여 — backtest-v2-candidate.ts/backtest.ts/cohort-cleanup.ts/dev-postview.ts/export-predictions-tabpfn.ts/import-tabpfn-predictions.ts/measure-n178-vs-n165.ts/op-analysis-*.ts 7개/update-stale-data.ts, CHANGELOG 1회+ 언급이나 개별 전수감사 이력 불명확) 또는 fix-incident(gap=18/20)/lotto(gap=17/30)/info-arch(gap=21/30) 자연 대기. **Supabase DNS NXDOMAIN 59+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): scripts/backfill-*.ts 3건 전수 감사, env var drift 수정 (cycle 3083, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed). 2차 방어선(cycle 3082 retro `90be8013`) OK. 직전8(3075-3082) distinct=4(review-code(heavy)5+polish-ui1+expand-scope1+review-code1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 16/20·lotto 15/30·info-arch 19/30). op-analysis gap 충족하나 Supabase DNS NXDOMAIN 블락 지속(58+ cycle) — skip. DESIGN.md mtime 신선 — design-system 미근접. cycle 3082 추천대로 `scripts/backfill-is-correct-shadow-fix.ts`/`backfill-shadow-cohort.ts`/`backfill-home-win-prob.ts`(cycle 2762 sweep 누락분, 478L) 채택.
