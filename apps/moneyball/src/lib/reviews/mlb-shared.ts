@@ -211,7 +211,18 @@ export function mapMlbRowsToHighlightCandidates(rows: MlbPredictionRow[]): MlbWe
     }));
 }
 
-export function buildMlbTeamStats(rows: MlbPredictionRow[]): MlbWeeklyTeamStat[] {
+type MlbTeamStatsSort = "predicted" | "accuracy";
+
+// shared.ts(KBO) buildTeamStats 대응 — sortBy 옵션 부재 시 buildMlbMonthlyReview.ts 의
+// topTeam(가장 정확했던 팀) 산출이 predicted-count 내림차순 배열에서 find() 하게 되어
+// "가장 많이 예측한 팀"을 "가장 정확했던 팀"으로 오라벨링하는 parity bug 발생 (cycle
+// review-code(heavy) 2026-10 정정). KBO buildMonthlyReview.ts 는 { sortBy: "accuracy" }
+// 로 호출해 이 문제가 없었음.
+export function buildMlbTeamStats(
+  rows: MlbPredictionRow[],
+  options: { sortBy?: MlbTeamStatsSort } = {},
+): MlbWeeklyTeamStat[] {
+  const { sortBy = "predicted" } = options;
   const byTeam = new Map<MlbTeamCode, { predicted: number; correct: number }>();
 
   for (const r of rows) {
@@ -223,16 +234,19 @@ export function buildMlbTeamStats(rows: MlbPredictionRow[]): MlbWeeklyTeamStat[]
     byTeam.set(code, prev);
   }
 
-  return Array.from(byTeam.entries())
-    .map(([code, s]) => ({
-      teamCode: code,
-      teamName: mlbShortTeamName(code),
-      predicted: s.predicted,
-      correct: s.correct,
-      accuracy: s.predicted > 0 ? s.correct / s.predicted : 0,
-      color: MLB_TEAMS[code]?.color ?? "#888",
-    }))
-    .sort((a, b) => b.predicted - a.predicted);
+  const stats = Array.from(byTeam.entries()).map(([code, s]) => ({
+    teamCode: code,
+    teamName: mlbShortTeamName(code),
+    predicted: s.predicted,
+    correct: s.correct,
+    accuracy: s.predicted > 0 ? s.correct / s.predicted : 0,
+    color: MLB_TEAMS[code]?.color ?? "#888",
+  }));
+
+  if (sortBy === "accuracy") {
+    return stats.sort((a, b) => b.accuracy - a.accuracy || b.predicted - a.predicted);
+  }
+  return stats.sort((a, b) => b.predicted - a.predicted);
 }
 
 // KBO analyzeFactorAccuracy(dashboard/factor-accuracy.ts) 대응. MLB 는 정규화된 0.5중심

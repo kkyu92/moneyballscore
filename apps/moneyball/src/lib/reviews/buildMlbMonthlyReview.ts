@@ -157,7 +157,7 @@ export async function buildMlbMonthlyReview(
   }
 
   const highlights = pickHighlights(rows);
-  const teamStats = buildMlbTeamStats(rows);
+  const teamStats = buildMlbTeamStats(rows, { sortBy: "accuracy" });
   const factorInsights = buildMlbFactorInsights(rows, { minSamples: SMALL_SAMPLE_N, locale });
   const topTeam =
     teamStats.find((t) => t.predicted >= SMALL_SAMPLE_N) ?? teamStats[0] ?? null;

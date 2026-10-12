@@ -51,6 +51,25 @@ describe('buildMlbTeamStats', () => {
     expect(stats.find((s) => s.teamCode === 'SFG')?.predicted).toBe(1);
     expect(stats.find((s) => s.teamCode === 'SFG')?.correct).toBe(0);
   });
+
+  it('sortBy="accuracy" 지정 시 정확도 내림차순 정렬 (shared.ts buildTeamStats 대응 — 회귀 가드)', () => {
+    // LAD: predicted=3, correct=1 (acc 0.33) — predicted 는 더 많지만 정확도는 낮음.
+    const ladRows = Array.from({ length: 3 }, (_, i) =>
+      row({ external_game_id: `lad-${i}`, home_team_code: 'LAD', predictedHomeWin: true, isCorrect: i === 0 }),
+    );
+    // SFG: predicted=1, correct=1 (acc 1.0) — predicted 는 적지만 정확도는 더 높음.
+    const sfgRows = [
+      row({ external_game_id: 'sfg-0', away_team_code: 'SFG', predictedHomeWin: false, isCorrect: true, actualHomeWin: false }),
+    ];
+    const rows = [...ladRows, ...sfgRows];
+
+    const byPredicted = buildMlbTeamStats(rows);
+    expect(byPredicted[0].teamCode).toBe('LAD'); // default: predicted 내림차순 -> LAD 먼저
+
+    const byAccuracy = buildMlbTeamStats(rows, { sortBy: 'accuracy' });
+    expect(byAccuracy[0].teamCode).toBe('SFG'); // accuracy 내림차순 -> SFG(1.0) 먼저
+    expect(byAccuracy[0].accuracy).toBe(1);
+  });
 });
 
 describe('mapMlbRowsToHighlightCandidates', () => {
