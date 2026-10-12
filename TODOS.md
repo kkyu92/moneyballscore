@@ -1,4 +1,18 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy): packages/kbo-data/src/agents 15파일 4387줄 전수 감사, drift 0건 (cycle 3066, 2026-10-12)
+
+진단: open issue 0건, plan #30=completed(cycle 2936~2938 기 ship)/plan #29=spec_only_deferred — 둘 다 `approved` 아니라 auto-transport 미해당. 2차 방어선(cycle 3065 retro `c577a100`) OK. 직전8(3058-3065) distinct=3(review-code(heavy)6+polish-ui1+info-arch1) — 2-chain lock 미충족. gap trigger: fix-incident 19/20(근접이나 미도달)·lotto 28/30·info-arch 2/30(방금 발화)·op-analysis 76+ cycle 미발화하나 Supabase 재확인(nslookup NXDOMAIN 지속) 블락 유지 스킵. `gh run list` 전부 success/skipped — 실제 incident 없음. cycle 3065 추천대로 KBO/MLB app/*/page.tsx 전수 감사 완주 후 신규 축 = `packages/kbo-data/src/agents` 선정 — 예측 파이프라인 핵심(debate/judge/calibration/retro/validator) 이라 이번까지 review-code 대상에서 빠져 있던 영역.
+
+4개 병렬 subagent 위임 전수 read(grep 스킵 X): (1) calibration-agent/debate/judge-agent/personas, (2) llm/llm-deepseek/llm-ollama/validator-logger, (3) mlb-retro/retro/rivalry-memory/team-agent/types, (4) validator.ts(1250줄)+postview.ts(632줄) — 15파일 4387줄 전부 완독.
+
+초기 플래그 2건, 양쪽 재검증 후 **기존 already-accepted 설계**로 판정(신규 drift 아님):
+- `postview.ts` parseTeamPostview/parseJudgePostview 의 JSON-parse fallback 이 `validator.ts` `agentsFailed`(`r.data==null`) 검사를 못 잡는 건 사실이나, 해당 catch 블록 주석이 "cycle 2886 발견 silent family — Sentry 별도 채널(`captureTeamPostviewParseFallback`/`captureJudgePostviewParseFallback`)로 가시화" 라고 이미 명시 — 알려진 트레이드오프, 미수정.
+- `llm.ts` CREDIT_EXHAUSTED Sentry alert 가 `LLM_BACKEND_FALLBACK` 미설정(실제 프로덕션 상태) 시 미발화 — 이 env 자체가 opt-in 미사용 기능이고, 실제 CE 탐지 경로는 DB 레벨(`debate_version IS NULL`, CLAUDE.md 가중치 섹션 반복 측정)이라 이 파일의 무발화가 blind spot 아님.
+
+코드 변경 0건 — 핵심 예측 파이프라인 agents package 가 silent drift family(KOREAN_FAMILY_NAMES/postview schema류) 로부터 자유로움을 확인한 negative result. `__tests__` 하위 테스트 파일은 스코프 밖(프로덕션 로직 우선).
+
+다음 사이클 추천 = review-code(heavy) 1차 스코프(app routes 전수 + agents package) 소진 — 다음은 `app/api` 고커밋 route 재검토 또는 다양성 chain(fix-incident gap 19/20 거의 도달·lotto 화요일 cron 결과 확인) 자연 대기 권장. **plan #29 만료 2026-10-15 임박 — Tier4 사용자 결정 대기 계속.** **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만(nslookup NXDOMAIN 재확인, 76+ cycle 지속).**
+
 ## 🟢 SUCCESS — review-code(heavy): KBO 잔여 page.tsx 25개 전수 감사, about 페이지 보정 에이전트 누락 정정 (cycle 3065, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 불변, 만료 2026-10-15 임박). 2차 방어선(cycle 3064 retro `54eac7ca`) OK. 직전8(3057-3064) distinct=3(review-code(heavy)6+polish-ui1+info-arch1) — 2-chain lock 미충족(안전). gap trigger: fix-incident 18/20·lotto 27/30(cron 정상, 10-17 draw pick 은 화요일 생성 예정 — stale 아님)·explore-idea saturation 4/15 전부 미근접. op-analysis 0/25 트리거 충족이었으나 Supabase 재확인(nslookup NXDOMAIN 지속) 블락 유지 스킵. `gh run list` 전부 skipped/success — 실제 incident 없음. cycle 3063 추천대로 KBO app/*/page.tsx 잔여(cycle 3063 미확인분) 선정.
