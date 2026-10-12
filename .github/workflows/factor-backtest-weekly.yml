@@ -3,7 +3,7 @@ name: factor-backtest-weekly
 # 주간 factor backtest 자동 fire — packages/kbo-data/src/pipeline/backtest-manual-weights-run.ts.
 # 결과 JSON 박제 + 변화 시 Sentry warning (plan #8 Tier 1 M2).
 #
-# cron '33 17 * * 0' (UTC 일 17:00 = KST 월 02:00) — verify cron 직후 baseline 측정 timing.
+# cron '33 17 * * 0' (UTC 일 17:33 = KST 월 02:33) — verify cron 직후 baseline 측정 timing.
 # manual fire 가능 (workflow_dispatch).
 
 on:
@@ -69,6 +69,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
           git add apps/moneyball/data/backtest-results/
+          if [ -f apps/moneyball/data/v2-backtest-results.json ]; then
+            git add apps/moneyball/data/v2-backtest-results.json
+          fi
           git commit -m "data(backtest): ${DATE} factor backtest weekly (plan #8 Tier 1 M2)" || {
             echo "::notice::no changes to commit"
             exit 0

@@ -376,7 +376,11 @@ async function main() {
   // baseline simulation evidence — 결론 X, n=133 noise + 매핑 불가 한계 명시.
   const path = await import('node:path');
   const fs = await import('node:fs');
-  const outDir = path.resolve(process.cwd(), '../../apps/moneyball/data');
+  const { fileURLToPath } = await import('node:url');
+  // cwd 무관 경로 해석 (cycle 3106 silent drift fix — factor-backtest-weekly.yml 가
+  // repo root 에서 실행해 process.cwd() 기반 경로가 repo 밖으로 나가던 버그).
+  const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+  const outDir = path.resolve(scriptDir, '../../../../apps/moneyball/data');
   const outPath = path.join(outDir, 'v2-backtest-results.json');
   const result = {
     version: 1,

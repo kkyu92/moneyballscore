@@ -3,7 +3,7 @@ name: op-analysis-weekly
 # 주간 operational-analysis lite — cohort split 측정 + Sentry warning (변화 감지 시).
 # scoring_rule + 요일 + win_prob_tier 누적 + markdown 박제.
 #
-# cron '45 17 * * 1' (UTC 월 17:00 = KST 화 02:00).
+# cron '45 17 * * 1' (UTC 월 17:45 = KST 화 02:45).
 #
 # plan #8 Tier 1 M7.
 
