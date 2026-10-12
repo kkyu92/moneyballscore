@@ -1,5 +1,15 @@
 
 
+## ⚪ RETRO-ONLY — review-code(heavy): app/api 저-commit route 4건 전수 감사, drift 0건 (cycle 3081, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed 기존 확인). 2차 방어선(cycle 3080 retro `c666edd3`) OK. 직전8(3073-3080) distinct=3(review-code(heavy)6+polish-ui1+expand-scope1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 14/20·lotto 13/30·info-arch 17/30). op-analysis gap=25+/25 충족하나 Supabase DNS NXDOMAIN 재확인 지속(56+ cycle) — 블락 유지, skip. `gh run list` 전부 success/in_progress/skipped — 실제 incident 0건. explore-idea saturation 4/15 미충족. DESIGN.md mtime 1일(신선) — design-system 미근접. cycle 3080 추천대로 `packages/kbo-data/src/agents/` 재확인 — CHANGELOG 교차검증 결과 이미 cycle 2886/2960/2961/구-line436 에서 14개 agent 파일 전수 교차검증 완료 이력 확인(신규 스코프 아님) — 대안으로 `app/api 고커밋 route` 추천 채택, 단 실제로는 **저**-commit(미감사 가능성 높은) route 를 전수 커밋 카운트로 선별(grep-count-depth 가드레일 — count 낮은 게 아니라 전수 read 커버리지로 판단).
+
+**조사**: `find apps/moneyball/src/app/api -name route.ts` 전체 git 커밋 카운트 측정 → CHANGELOG 0회 언급 4건 선별: `revalidate/route.ts`(21L, commit 2), `version/route.ts`(30L, commit 2), `picks/mlb-submit/route.ts`(69L, commit 2), `leaderboard/mlb-sync/route.ts`(81L, commit 3). 4개 전수 read + KBO sibling parity 교차검증(`picks/submit/route.ts`, `leaderboard/sync/route.ts`) — `revalidate`: CRON_SECRET Bearer 비교 패턴이 `pipeline/route.ts` 등 기존 cron route 와 동일(drift 아님). `version`: 순수 env 노출, 버그 없음. `mlb-submit`/`mlb-sync`: KBO sibling 과 완전 parity(검증 로직·컬럼명만 다름, `external_game_id` VARCHAR(20) 분리 사유 주석도 정확) — cycle 2991/2992 가 과거 `leaderboard/sync` 에서 발견한 버그 클래스가 `mlb-sync` 에는 재발 안 함 확인.
+
+**발견 0건** — 4개 파일 전부 clean. `revalidate/route.ts` 만 유일하게 전용 테스트 파일 부재(다른 3개는 `__tests__/route.test.ts` 존재) 확인했으나, 단순 2-branch 로직(auth guard + path whitelist slice)이라 별도 테스트 추가는 이번 스코프 외(과도한 커버리지 추구 회피).
+
+검증: 코드 변경 없음(read-only 감사). 다음 사이클 추천 = review-code(heavy) 신규 스코프 계속(`app/api` 나머지 고커밋 route — `picks/results`/`health`/`pipeline`/`kbo-scores` 재확인 또는 `hub-dispatch`/`health/pipelines` 미감사) 또는 fix-incident(gap=15/20)/lotto(gap=14/30)/info-arch(gap=18/30) 자연 대기. **Supabase INACTIVE 57+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): harness.ts dead-skeleton + walkForwardSplit dead code 제거 (cycle 3080, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3079 retro `54e477ac`) OK. 직전8(3072-3079) distinct=3(review-code(heavy)6+polish-ui1+expand-scope1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 13/20·lotto 12/30·info-arch 16/30), op-analysis 블락 유지(Supabase DNS 미해결 56+ cycle). cycle 3076/3078/3079 3회 연속 동일 추천 — `harness.ts` dead-skeleton 정리 또는 `walkForwardSplit` dead code 제거 — carry-over evidence 명확해 채택.
