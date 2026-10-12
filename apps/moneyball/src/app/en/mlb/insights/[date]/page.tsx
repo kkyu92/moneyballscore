@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { mlbShortTeamName, SITE_URL } from "@moneyball/shared";
+import { mlbShortTeamName, INSIGHTS_ISR_HOURS, SITE_URL } from "@moneyball/shared";
 import { isValidInsightsDate } from "@/lib/insights/loader";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
 import { selectTopFactors } from "@/lib/insights/topFactors";
@@ -210,7 +210,7 @@ export default async function EnMlbInsightsDatePage({ params }: Props) {
 
       <footer className="pt-6 border-t border-gray-200 dark:border-[var(--color-border)] text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          MLB AI Insights for {date} refreshes on a 24h ISR cycle. MLB has no LLM debate layer, so
+          MLB AI Insights for {date} refreshes on a {INSIGHTS_ISR_HOURS}h ISR cycle. MLB has no LLM debate layer, so
           every analysis is quant-model-only (see Methodology for details).
         </p>
       </footer>

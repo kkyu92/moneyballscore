@@ -97,7 +97,7 @@ describe("mlb/insights/page.tsx (ko hub)", () => {
 describe("en/mlb/insights/page.tsx (en mirror)", () => {
   it("공유 insights-data.ts 재사용 (KO 전용 재구현 X, DRY)", () => {
     expect(EN_PAGE_SRC).toMatch(
-      /import \{ getRecentMlbInsights \} from "@\/app\/mlb\/insights\/insights-data"/,
+      /import \{ getRecentMlbInsights, type MlbInsightRow \} from "@\/app\/mlb\/insights\/insights-data"/,
     );
   });
 
@@ -109,6 +109,12 @@ describe("en/mlb/insights/page.tsx (en mirror)", () => {
   it("EN canonical + KO alternate 상호 링크", () => {
     expect(EN_PAGE_SRC).toMatch(/en\/mlb\/insights/);
     expect(EN_PAGE_SRC).toMatch(/ko:\s*`\$\{SITE_URL\}\/mlb\/insights`/);
+  });
+
+  it("DB 장애 시 uncaught throw 대신 dbDegraded 배너로 degrade (KO hub parity, cycle 3062 fix 가 EN mirror 엔 포팅 안 됐던 drift — cycle 3095 polish-ui fix)", () => {
+    expect(EN_PAGE_SRC).toMatch(/captureFallback\(insightsR\.reason, \[\] as MlbInsightRow\[\], \{ route: "\/en\/mlb\/insights", source: "getRecentMlbInsights" \}\)/);
+    expect(EN_PAGE_SRC).toMatch(/const dbDegraded = insightsR\.status === "rejected"/);
+    expect(EN_PAGE_SRC).toMatch(/\{dbDegraded && \(/);
   });
 });
 
@@ -158,6 +164,11 @@ describe("mlb/insights/[date]/page.tsx (ko archive, plan #30 Phase 2)", () => {
   it("li 앵커 id=factor-breakdown-{gameId} — hub 의 '전체 팩터 보기' 링크 타겟과 일치", () => {
     expect(DATE_PAGE_SRC).toMatch(/id=\{`factor-breakdown-\$\{item\.gameId\}`\}/);
   });
+
+  it("footer ISR 문구는 INSIGHTS_ISR_HOURS 상수 참조 (하드코딩 '24시간' silent drift 방지, cycle 3095 fix)", () => {
+    expect(DATE_PAGE_SRC).toMatch(/import \{ mlbShortTeamName, INSIGHTS_ISR_HOURS, SITE_URL \} from "@moneyball\/shared"/);
+    expect(DATE_PAGE_SRC).toMatch(/ISR \{INSIGHTS_ISR_HOURS\}시간으로 갱신됩니다/);
+  });
 });
 
 describe("en/mlb/insights/[date]/page.tsx (en mirror, plan #30 Phase 2)", () => {
@@ -170,6 +181,11 @@ describe("en/mlb/insights/[date]/page.tsx (en mirror, plan #30 Phase 2)", () => 
   it("locale=en Breadcrumb + /en/mlb/insights href", () => {
     expect(EN_DATE_PAGE_SRC).toMatch(/locale="en"/);
     expect(EN_DATE_PAGE_SRC).toMatch(/href: "\/en\/mlb\/insights" \}/);
+  });
+
+  it("footer ISR copy 는 INSIGHTS_ISR_HOURS 상수 참조 (하드코딩 '24h' silent drift 방지, cycle 3095 fix)", () => {
+    expect(EN_DATE_PAGE_SRC).toMatch(/import \{ mlbShortTeamName, INSIGHTS_ISR_HOURS, SITE_URL \} from "@moneyball\/shared"/);
+    expect(EN_DATE_PAGE_SRC).toMatch(/refreshes on a \{INSIGHTS_ISR_HOURS\}h ISR cycle/);
   });
 });
 

@@ -5,7 +5,8 @@ import { mlbShortTeamName, INSIGHTS_ISR_HOURS, INSIGHTS_LIMIT, SITE_URL } from "
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { selectTopFactors } from "@/lib/insights/topFactors";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
-import { getRecentMlbInsights } from "@/app/mlb/insights/insights-data";
+import { captureFallback } from "@/lib/observability/captureFallback";
+import { getRecentMlbInsights, type MlbInsightRow } from "@/app/mlb/insights/insights-data";
 
 // /mlb/insights(KO) 의 EN mirror — 로직은 완전 동일, 문자열만 번역 + locale="en" prop
 // 전파 (mlb/predictions EN mirror 와 동일 패턴). 데이터 조회는 insights-data.ts 공유(DRY,
@@ -40,7 +41,14 @@ export const metadata: Metadata = {
 export const revalidate = 86400; // INSIGHTS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export default async function EnMlbInsightsHubPage() {
-  const insights = await getRecentMlbInsights(LIMIT);
+  const insightsR = await getRecentMlbInsights(LIMIT).then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
+  );
+  const insights = insightsR.status === "fulfilled"
+    ? insightsR.value
+    : captureFallback(insightsR.reason, [] as MlbInsightRow[], { route: "/en/mlb/insights", source: "getRecentMlbInsights" });
+  const dbDegraded = insightsR.status === "rejected";
   const latestDate = insights[0]?.date ?? null;
 
   const articleJsonLd = {
@@ -78,6 +86,15 @@ export default async function EnMlbInsightsHubPage() {
         items={[{ label: "MLB Analysis", href: "/en/mlb" }, { label: "AI Insights" }]}
         locale="en"
       />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          Some information may be temporarily unavailable due to a service disruption. Please try again shortly.
+        </div>
+      )}
 
       <header className="space-y-3">
         <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">MLB AI Insights</h1>

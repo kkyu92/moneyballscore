@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { mlbShortTeamName, SITE_URL } from "@moneyball/shared";
+import { mlbShortTeamName, INSIGHTS_ISR_HOURS, SITE_URL } from "@moneyball/shared";
 import { isValidInsightsDate } from "@/lib/insights/loader";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
 import { selectTopFactors } from "@/lib/insights/topFactors";
@@ -206,7 +206,7 @@ export default async function MlbInsightsDatePage({ params }: Props) {
 
       <footer className="pt-6 border-t border-gray-200 dark:border-[var(--color-border)] text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          {date} MLB AI 인사이트는 ISR 24시간으로 갱신됩니다. MLB 는 LLM 에이전트 토론 layer 가 없어
+          {date} MLB AI 인사이트는 ISR {INSIGHTS_ISR_HOURS}시간으로 갱신됩니다. MLB 는 LLM 에이전트 토론 layer 가 없어
           모든 분석이 정량 모델 단독 결과입니다 (자세한 내용은 예측 방법론 참고).
         </p>
       </footer>
