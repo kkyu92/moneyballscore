@@ -1,4 +1,19 @@
 
+## 🟢 SUCCESS — review-code(heavy): mlb/**/page.tsx 27개 전수 감사, insights crash 가드 + stale ETA/comment drift 4건 수정 (cycle 3062, 2026-10-12)
+
+진단: open issue 0, approved plan 0/24(status: approved 매칭 0건 — completed_*/archived/deferred 등 전부 처리 완료 상태). 2차 방어선(cycle 3061 retro `10972f3d`) OK. 직전8(3054-3061) distinct=3(review-code(heavy)6+review-code2+polish-ui1, 리터럴 split 기준) — 2-chain lock 미충족. fix-incident gap=15/20·info-arch gap=26/30·lotto gap=24/30 전부 미근접. op-analysis gap=25+ 트리거 충족이었으나 Supabase `utmimgpccbrciwuuacyw.supabase.co` 재확인 결과 여전히 NXDOMAIN(INACTIVE 지속) — 블락 유지, 스킵. lotto cron 재확인: lotto-pick-update 정상, lotto-result-update 일부 workflow_dispatch 실패 확인했으나 원인 = 이미 알려진 dhlottery+lottolyzer 완전 불능(기존 수동 override 상태 지속, 신규 아님) — 액션 불필요. explore-idea saturation 4/15 미충족. lib/ + packages/kbo-data 는 이미 반복 스윕으로 거의 포화 상태 — app/ 라우트 레벨(page.tsx, 지금까지 lib/components/api 위주로만 감사되고 페이지 자체는 일부만 커버)에 미스윕 축 발견, 그중 MLB 라우트(KBO twin 드리프트 재발 bug class — cycle 3010/3014/3048 등)가 가장 리스크 높아 선정.
+
+subagent 위임 `apps/moneyball/src/app/mlb/**/page.tsx` 27개 전수 read(KBO sibling 대조) → 23개 clean(이미 대부분 MLB_TEAMS 30팀/league='mlb' 필터/MLB 전용 상수 정합 확인), 4건 실제 수정:
+
+1. `mlb/insights/page.tsx` — `getRecentMlbInsights()` 가 `assertSelectOk` 로 throw 하는데 unwrapped 직접 호출이라 DB 장애 시 uncaught crash(루트 `error.tsx` 전체 화면 에러) — KBO `/insights` 의 `.then(fulfilled,rejected)` + `captureFallback` + `dbDegraded` 배너 패턴이 이 페이지만 누락돼 있었음. 동일 패턴 이식 + 회귀 테스트(`mlb-insights-page.test.ts`) 추가.
+2. `mlb/page.tsx`, `en/mlb/page.tsx`, `mlb/wild-card/page.tsx`, `en/mlb/wild-card/page.tsx`, `mlb/postseason/page.tsx`, `en/mlb/postseason/page.tsx` — "ETA 2026-09" 문구가 현재 시점(10/12) 이미 지난 약속 날짜. cycle 2306(commit `6f737c37`) 이 wild-card 라이브 전환 때 동일 ETA stale 패턴을 한 번 고쳤지만 postseason 쪽 "ETA 2026-09"(실제 아직 미구현 기능)는 손대지 않고 넘어가 또 재발. 날짜 명시 없는 "준비 중"/"Coming soon" 으로 정정(실제 postseason 브라켓 기능 자체는 여전히 미구현 — 본 cycle 스코프 밖, copy 정확성만 수정).
+3. `mlb/analysis/page.tsx` — "MLB 는 elo/recent_form 미구현" 주석이 사실과 다름(cycle 2349/2353 로 이미 실데이터 연결 완료). `selectBigMatch` 미재사용의 실제 이유는 `isRivalry(TeamCode)` 가 KBO 전용 타입이라 MLB 호환 불가이기 때문 — 주석 정정.
+4. `mlb/games/[date]/[slug]/page.tsx` — "recent_form 은 Phase 3-gated placeholder 라 제외" 주석이 틀림(`GAME_DETAIL_FACTOR_ROWS` 6번째 항목으로 실제 렌더 중, `MLB_PLACEHOLDER_FACTOR_KEYS` 에도 미포함). 예시 목록에서 제거.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 589/589 파일·4643/4643 테스트 PASS(신규 테스트 1건 포함). 직접 main 커밋 + push(PR 미경유, R4 범위, commit `933706ac`).
+
+다음 사이클 추천 = review-code(heavy) 계속 — KBO 쪽 app/*/page.tsx 라우트(현재 analysis/accuracy 만 개별 전수 확인됨, predictions/reviews/guide/insights/login/search 등 다수 미확인) 재감사 또는 packages/kbo-data 잔여 소형 파일(big-match.ts/index.ts/types.ts) 또는 fix-incident(gap=16/20)/lotto(gap=25/30)/info-arch(gap=27/30) 자연 대기. **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만.**
+
 ## 🟢 SUCCESS — review-code(heavy): lib/insights,players,standings,picks,lotto,v2-shadow-monitor 전수 감사, Elo trend truncation + CE row 배제 재발 수정 (cycle 3061, 2026-10-12)
 
 진단: open issue 0, approved plan 0/23(전부 처리 완료). 2차 방어선(cycle 3060 retro `6120e1cf`) OK. 직전8(3053-3060) distinct=3(review-code(heavy)5+review-code2+polish-ui1) — 2-chain lock 미충족(cycle 3060 polish-ui 발화로 distinct 재확장). fix-incident gap=14/20·lotto gap=23/30·info-arch gap=25/30 전부 미근접. op-analysis 는 25+ 사이클 미발화(Supabase billing INACTIVE 지속, curl NXDOMAIN 재확인)로 블락 유지. explore-idea saturation 6/15 미충족. 직전 2 사이클 추천대로 review-code(heavy) 계속 — lib/ 미스윕 서브디렉토리 중 insights/players/standings/picks/lotto/v2-shadow-monitor 선정(predictions/mlb/seo/changelog/debug/seasons/leaderboard 는 git history 상 이미 전수 스윕 또는 export-but-unused 패스 완료 확인).
