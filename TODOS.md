@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — polish-ui: 2-chain lock forced, MLB insights twin-diff(plan#30), EN hub DB-degrade 배너 누락 + ISR hour 하드코딩 2건 수정 (cycle 3095, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3094 retro `95b07b0d`) OK. 직전8(3087-3094) distinct=2(review-code(heavy)7+info-architecture-review1) — 2-chain lock 충족, 둘 다 제외. fix-incident gap=28/20·op-analysis gap=74/25 도달하나 Supabase DNS NXDOMAIN 지속(billing 조치 필요, actionable 없음) skip. lotto gap=27/30 미근접, design-system/expand-scope 트리거 없음 — lock fallback: polish-ui 강제.
+
+**조사**: mtime 기반 신규 라우트 스캔(`find -mtime -7`)이 체크아웃 아티팩트로 전체 page.tsx 매칭되는 노이즈 발견 — `git log --diff-filter=A` 로 대체해 plan#30(2026-09-29~10-07 ship) 의 실제 신규 라우트(mlb/insights hub+detail, KBO/MLB/EN 3-locale twin) 확정. subagent 전수 diff(hub 3종 + detail 3종 + insights-data.ts) → 2건 발견: (1) EN hub 가 KO hub 이 cycle 3062 에 이미 갖춘 dbDegraded/captureFallback 패턴 누락 — Supabase 장애 시 500 대신 배너 표시해야 하나 EN 만 미적용(resilience regression, 포팅 누락). (2) detail 페이지 footer 2곳이 `INSIGHTS_ISR_HOURS` 공유 상수 대신 24h/24-hour 문자열 하드코딩.
+
+**수정**: `en/mlb/insights/page.tsx` 에 KO hub 동일 fallback 패턴 추가, `mlb/insights/[date]/page.tsx` + `en/mlb/insights/[date]/page.tsx` 에 공유 상수 import 후 하드코딩 대체. `tsc --noEmit` clean, eslint clean, `pnpm --filter moneyball test` 589/589 파일·4647/4647 통과(신규 회귀 테스트 3건 포함), pre-push(lint+type-check+version-sync-guard) 통과 — main 직접 commit+push 완료(`d7211d17`).
+
+**skill-evolution trigger 평가**: milestone(`3095 % 50 = 45`) 미충족. trigger5(직전20 inclusive) 표본 충분, 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수).
+
+다음 사이클 추천 = 2-chain lock cooldown N=1 만료로 review-code(heavy)/info-architecture-review 재개 가능 — review-code(heavy) 는 app route 내부 로직 재검토 standing 추천(cycle 3090), 또는 fix-incident/lotto/op-analysis gap 자연 대기(Supabase 블락 지속, plan#29 만료 2026-10-15 임박 Tier4 사용자 결정 대기). **Supabase DNS NXDOMAIN 75+ cycle 지속 — 사용자 billing 조치 필요.**
+
 ## 🟢 SUCCESS — review-code(heavy): components/{glossary,share,search,leaderboard,insights} 재감사, HallOfFame.tsx 이모지 허가-대기 주석 drift 수정 (cycle 3093, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일 전 불변). 2차 방어선(cycle 3092 retro `518e1374`) OK. 직전8(3085-3092) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap=26/20·op-analysis gap=150+/25 둘 다 도달하나 각각 `gh run list` 재확인(실제 incident 없음) / `op-analysis-ce-cohort.ts` 직접 실행 시도(Supabase DNS NXDOMAIN 재확인, cycle 3019부터 escalated, 사용자 billing 조치 필요, 코드 fix 불가) — actionable 없음 skip. lotto gap=25/30·info-arch gap=2/30 미근접. review-code(heavy) 신규 스코프로 components/{glossary,share,search,leaderboard,insights}(17파일) 선택.
