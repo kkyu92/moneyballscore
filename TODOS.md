@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): scripts/ dev-diagnostic 3종 전수 감사, umpire scraper stale 주석 수정 (cycle 3082, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed). 2차 방어선(cycle 3081 retro `b7b872d3`) OK. 직전8(3074-3081) distinct=3(review-code(heavy)6+polish-ui(lock fallback)1+expand-scope1) — 2-chain lock 미충족(distinct=3>2). gap trigger 전부 미근접(fix-incident 15/20·lotto 14/30·info-arch 18/30). op-analysis gap≥25 충족하나 Supabase DNS NXDOMAIN 재확인 재지속(57+ cycle, `getaddrinfo ENOTFOUND`) — 블락 유지, skip. `gh run list` 전부 success/in_progress/skipped — 실제 incident 0건. explore-idea saturation 4/15 미충족. DESIGN.md mtime 2일(신선) — design-system 미근접. cycle 3081 추천 `app/api` 나머지 저커밋 route(picks/mlb-poll/mlb-waitlist/picks-poll/indexnow-ping 등) 재확인 결과 전부 cycle 2806/2838/2947-2953/3249-3253 에서 이미 전수 감사 완료 확인(신규 스코프 아님) — `apps/moneyball/src/hooks/`(use-user-picks/use-kbo-scores) 도 cycle 325/2896/2988 에서 완료 확인. Explore subagent 위임 전체 디렉토리 스캔 → `scripts/dev-debate.ts`/`dev-backend-compare.ts`/`smoke-umpire-scraper.ts`(367L, agents 모듈 호출, TODOS/CHANGELOG 0회 언급) 신규 미감사 축 발견.
+
+**조사(general-purpose subagent)**: 3개 스크립트 + 호출 대상 `packages/kbo-data/src/agents/{debate,llm,personas,validator,types}.ts` 전수 read. `dev-debate.ts`/`dev-backend-compare.ts` — 시그니처/exports/필드 전부 현재 코드와 일치, drift 0건. `smoke-umpire-scraper.ts` — 헤더 주석 + stdout 배너가 "KBO Score.aspx 안 심판 4인 추출" 서술 유지했으나 실제 `umpire.ts` 는 cycle 1013 Score.aspx 시도(302 redirect+SPA) 폐기 후 cycle 1014 Naver record API(`etcRecords` 심판 row) 로 전환됨 — 함수 호출(`scrapeGameUmpires(gameId, 2026)`, 2-arg) 자체는 정상, 주석/로그만 구 경로 서술한 stale drift.
+
+수정: 헤더 주석 + 로그 배너를 Naver API 기준으로 정정, 실패 모드 설명(API 구조 변경/심판 row 부재/HTTP error)도 현재 구현 맞게 갱신.
+
+검증: `pnpm --filter kbo-data exec tsc --noEmit` clean, `pnpm --filter kbo-data lint` clean(`scripts/` 자체는 tsconfig include 밖이라 임시 tsconfig 로 별도 검증 후 삭제, exit 0). 직접 main 커밋 + push(R4, PR 미경유, pre-push hook lint+type-check+version-sync-guard PASS). `ccc85c95`.
+
+다음 사이클 추천 = review-code(heavy) 계속(`scripts/backfill-is-correct-shadow-fix.ts`/`backfill-shadow-cohort.ts`/`backfill-home-win-prob.ts` — Explore subagent 가 cycle 2762 scripts/ sweep 에서 누락된 것으로 식별한 3개 backfill 스크립트, 478L) 또는 fix-incident(gap=16/20)/lotto(gap=15/30)/info-arch(gap=19/30) 자연 대기. **Supabase INACTIVE 57+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## ⚪ RETRO-ONLY — review-code(heavy): app/api 저-commit route 4건 전수 감사, drift 0건 (cycle 3081, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed 기존 확인). 2차 방어선(cycle 3080 retro `c666edd3`) OK. 직전8(3073-3080) distinct=3(review-code(heavy)6+polish-ui1+expand-scope1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 14/20·lotto 13/30·info-arch 17/30). op-analysis gap=25+/25 충족하나 Supabase DNS NXDOMAIN 재확인 지속(56+ cycle) — 블락 유지, skip. `gh run list` 전부 success/in_progress/skipped — 실제 incident 0건. explore-idea saturation 4/15 미충족. DESIGN.md mtime 1일(신선) — design-system 미근접. cycle 3080 추천대로 `packages/kbo-data/src/agents/` 재확인 — CHANGELOG 교차검증 결과 이미 cycle 2886/2960/2961/구-line436 에서 14개 agent 파일 전수 교차검증 완료 이력 확인(신규 스코프 아님) — 대안으로 `app/api 고커밋 route` 추천 채택, 단 실제로는 **저**-commit(미감사 가능성 높은) route 를 전수 커밋 카운트로 선별(grep-count-depth 가드레일 — count 낮은 게 아니라 전수 read 커버리지로 판단).
