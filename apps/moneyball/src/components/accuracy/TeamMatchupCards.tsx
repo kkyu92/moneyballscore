@@ -25,7 +25,13 @@ interface Props {
   teamAccuracy: TeamAccuracyLike[];
   teamCodes?: string[];
   shortName?: (code: string) => string;
+  locale?: 'ko' | 'en';
 }
+
+const COPY = {
+  ko: { home: '홈', away: '원정', vs: 'vs' },
+  en: { home: 'Home', away: 'Away', vs: 'vs' },
+};
 
 function fmtPct(v: number | null): string {
   return v !== null ? `${(v * 100).toFixed(0)}%` : '—';
@@ -37,7 +43,9 @@ export function TeamMatchupCards({
   teamAccuracy,
   teamCodes = Object.keys(KBO_TEAMS) as TeamCode[],
   shortName = shortTeamName,
+  locale = 'ko',
 }: Props) {
+  const copy = COPY[locale];
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
       {teamCodes.map((teamCode) => {
@@ -64,14 +72,14 @@ export function TeamMatchupCards({
             {ha && (
               <div className="text-2xs text-gray-500 dark:text-gray-400 space-y-0.5">
                 <div className={`flex justify-between ${ha.homeN < SMALL_SAMPLE_N ? 'opacity-50' : ''}`}>
-                  <span>홈</span>
+                  <span>{copy.home}</span>
                   <span className="font-mono">
                     {fmtPct(ha.homeAccuracy)}{' '}
                     <span className="text-gray-400 dark:text-gray-500">({ha.homeN})</span>
                   </span>
                 </div>
                 <div className={`flex justify-between ${ha.awayN < SMALL_SAMPLE_N ? 'opacity-50' : ''}`}>
-                  <span>원정</span>
+                  <span>{copy.away}</span>
                   <span className="font-mono">
                     {fmtPct(ha.awayAccuracy)}{' '}
                     <span className="text-gray-400 dark:text-gray-500">({ha.awayN})</span>
@@ -89,7 +97,7 @@ export function TeamMatchupCards({
                     className={`flex justify-between text-2xs ${m.n < SMALL_SAMPLE_N ? 'opacity-50' : ''}`}
                   >
                     <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                      vs {shortName(m.opponentCode)}
+                      {copy.vs} {shortName(m.opponentCode)}
                     </span>
                     <span className="font-mono text-gray-700 dark:text-gray-300">
                       {m.correct}/{m.n}

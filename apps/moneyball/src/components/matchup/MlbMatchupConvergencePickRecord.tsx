@@ -79,7 +79,7 @@ export function MlbMatchupConvergencePickRecord({
       <div className="space-y-2">
         {rows.map(({ team, strong, complete }) => (
           <div key={team.code} className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium w-20 shrink-0">{team.shortName}</span>
+            <span className="text-sm font-medium w-20 shrink-0 truncate">{team.shortName}</span>
             {strong && (() => {
               const pct = computeWinRatePct(strong.wins, strong.wins + strong.losses);
               return (

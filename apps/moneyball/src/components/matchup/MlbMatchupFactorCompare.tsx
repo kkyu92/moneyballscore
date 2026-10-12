@@ -24,6 +24,8 @@ interface FactorRow {
   format: (v: number) => string;
   /** native title 툴팁 — 비전문가용 약어 풀이 + 의미 */
   hint: string;
+  /** glossary 앵커 slug — 없으면 일반 /glossary 로 연결 (xwOBA/Barrel% 는 MetricRegistry 미등록) */
+  glossarySlug?: string;
 }
 
 interface Strings {
@@ -79,6 +81,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
         format: (v) => v.toFixed(2),
         hint:
           "FIP — Fielding Independent Pitching. ERA-like metric using only outcomes a pitcher directly controls (K/BB/HR). Lower is better.",
+        glossarySlug: "fip",
       },
       {
         key: "lineupWoba",
@@ -88,6 +91,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
         format: (v) => v.toFixed(3),
         hint:
           "wOBA — Weighted On-Base Average. Combines all offensive outcomes into a single value-weighted rate stat. Higher is better.",
+        glossarySlug: "woba",
       },
       {
         key: "bullpenFip",
@@ -96,6 +100,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
         direction: "lower",
         format: (v) => v.toFixed(2),
         hint: "Bullpen FIP — combined FIP of relief pitchers. Lower is better.",
+        glossarySlug: "bullpen-fip",
       },
       {
         key: "recentForm",
@@ -104,6 +109,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
         direction: "higher",
         format: (v) => `${computeWinProbPct(v)}%`,
         hint: `Recent form — win rate over the last ${RECENT_FORM_GAMES} games. Higher is better.`,
+        glossarySlug: "recent-form",
       },
       {
         key: "elo",
@@ -112,6 +118,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
         direction: "higher",
         format: (v) => v.toFixed(0),
         hint: "Elo — relative team strength rating. Higher is stronger.",
+        glossarySlug: "elo",
       },
       {
         key: "lineupXwoba",
@@ -142,6 +149,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
       format: (v) => v.toFixed(2),
       hint:
         "FIP — Fielding Independent Pitching. 선발투수가 직접 통제할 수 있는 결과(삼진·볼넷·홈런)만 본 평균자책점 지표. 낮을수록 우세.",
+      glossarySlug: "fip",
     },
     {
       key: "lineupWoba",
@@ -151,6 +159,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
       format: (v) => v.toFixed(3),
       hint:
         "wOBA — Weighted On-Base Average. 안타·볼넷·홈런 등 출루 결과별 가치를 가중치로 합산한 종합 타격 지표. 높을수록 우세.",
+      glossarySlug: "woba",
     },
     {
       key: "bullpenFip",
@@ -160,6 +169,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
       format: (v) => v.toFixed(2),
       hint:
         "불펜 FIP — 중계/마무리 투수진의 종합 FIP. 선발 강판 후 경기 결과에 큰 영향. 낮을수록 우세.",
+      glossarySlug: "bullpen-fip",
     },
     {
       key: "recentForm",
@@ -168,6 +178,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
       direction: "higher",
       format: (v) => `${computeWinProbPct(v)}%`,
       hint: `최근 폼 — 최근 ${RECENT_FORM_GAMES}경기 승률. 높을수록 우세.`,
+      glossarySlug: "recent-form",
     },
     {
       key: "elo",
@@ -176,6 +187,7 @@ function buildFactors(locale: "ko" | "en"): FactorRow[] {
       direction: "higher",
       format: (v) => v.toFixed(0),
       hint: "Elo — 체스에서 유래한 상대평가 레이팅. 높을수록 강팀.",
+      glossarySlug: "elo",
     },
     {
       key: "lineupXwoba",
@@ -264,12 +276,13 @@ export function MlbMatchupFactorCompare({
               </div>
 
               <div className="flex flex-col items-center gap-1 min-w-[8rem]">
-                <span
-                  className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none cursor-help"
+                <a
+                  href={f.glossarySlug ? `/glossary#${f.glossarySlug}` : "/glossary"}
+                  className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none cursor-help hover:text-brand-600 dark:hover:text-brand-300 underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 underline-offset-2"
                   title={f.hint}
                 >
                   {f.label}
-                </span>
+                </a>
                 <div className="relative w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
                   {aWins && (
                     <div className="absolute inset-y-0 left-0 right-[50%] bg-brand-500/50 dark:bg-brand-400/60 rounded-l-full" />

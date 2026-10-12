@@ -104,6 +104,7 @@ export default async function EnMlbAccuracyPage() {
             teamAccuracy={teamRows}
             teamCodes={Object.keys(MLB_TEAMS)}
             shortName={mlbShortTeamName}
+            locale="en"
           />
         </section>
       )}
