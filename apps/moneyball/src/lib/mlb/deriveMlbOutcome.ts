@@ -1,3 +1,5 @@
+import { NEUTRAL_FACTOR } from '@moneyball/shared';
+
 /**
  * MLB `predictions` 행의 `predicted_winner`/`is_correct`/`confidence` 컬럼은 전량 NULL
  * (mlb-pipeline.ts `runPredictFinal` 이 의도적으로 안 씀 — 팀이 string 코드라 INT FK 인
@@ -24,7 +26,7 @@ interface MlbOutcomeResult {
 }
 
 export function deriveMlbOutcome(input: MlbOutcomeInput): MlbOutcomeResult {
-  const predictedHomeWin = input.homeWinProb != null ? input.homeWinProb >= 0.5 : null;
+  const predictedHomeWin = input.homeWinProb != null ? input.homeWinProb >= NEUTRAL_FACTOR : null;
   const actualHomeWin =
     input.hasFinalScore && input.homeScore != null && input.awayScore != null
       ? input.homeScore > input.awayScore

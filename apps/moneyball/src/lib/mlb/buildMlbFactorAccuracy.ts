@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES, NEUTRAL_FACTOR } from '@moneyball/shared';
 import { captureFallback } from '@/lib/observability/captureFallback';
 import { FACTOR_LABELS } from '@/lib/predictions/factorLabels';
 import type { FactorAccuracyRow } from '@/lib/accuracy/buildFactorAccuracy';
@@ -30,7 +30,7 @@ type PairFactorKey = keyof typeof FACTOR_COLUMN_PAIRS;
 // mlb-pipeline.ts line 373 "head_to_head 는 0-1(승률)" 주석 + KBO NEUTRAL_FACTOR(0.5)
 // 판정과 동일 원리로 >0.5 홈 우세 / <0.5 원정 우세 판정.
 const SINGLE_RATE_COLUMN = 'head_to_head_rate' as const;
-const SINGLE_RATE_NEUTRAL = 0.5;
+const SINGLE_RATE_NEUTRAL = NEUTRAL_FACTOR;
 
 type FactorKey = PairFactorKey | 'head_to_head';
 
