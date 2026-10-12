@@ -37,26 +37,47 @@ export function runBacktest(input: RunnerInput): RunnerOutput {
   let skipped = 0;
   let used = 0;
 
-  for (const g of games) {
-    const prior = priorBySeason.get(g.season) ?? [];
-    const features = buildFeatures(g, prior, eloHistory);
-    if (features) {
-      used++;
-      outcomes.push(g.homeWon ? 1 : 0);
-      for (const [name, model] of Object.entries(models)) {
-        probs[name].push(model(features));
+  // 같은 game_date 경기는 배치로 묶어 동일 prior 스냅샷으로 처리한 뒤
+  // 배치 전체가 끝난 후에만 prior 에 반영 — 더블헤더(같은 날 2경기) 가
+  // 서로의 feature 계산에 누출되는 look-ahead bias 차단.
+  let i = 0;
+  while (i < games.length) {
+    let j = i + 1;
+    while (
+      j < games.length &&
+      games[j].season === games[i].season &&
+      games[j].date === games[i].date
+    ) {
+      j++;
+    }
+    const batch = games.slice(i, j);
+
+    for (const g of batch) {
+      const prior = priorBySeason.get(g.season) ?? [];
+      const features = buildFeatures(g, prior, eloHistory);
+      if (features) {
+        used++;
+        outcomes.push(g.homeWon ? 1 : 0);
+        for (const [name, model] of Object.entries(models)) {
+          probs[name].push(model(features));
+        }
+      } else {
+        skipped++;
       }
-    } else {
-      skipped++;
     }
 
-    // 경기 결과를 prior 에 push — 다음 경기용. desc 정렬이므로 unshift.
-    prior.unshift({
-      home_team_id: g.homeTeamId,
-      away_team_id: g.awayTeamId,
-      winner_team_id: g.homeWon ? g.homeTeamId : g.awayTeamId,
-    });
-    priorBySeason.set(g.season, prior);
+    // 배치 전체 처리 완료 후에만 prior 에 반영. desc 정렬이므로 unshift.
+    for (const g of batch) {
+      const prior = priorBySeason.get(g.season) ?? [];
+      prior.unshift({
+        home_team_id: g.homeTeamId,
+        away_team_id: g.awayTeamId,
+        winner_team_id: g.homeWon ? g.homeTeamId : g.awayTeamId,
+      });
+      priorBySeason.set(g.season, prior);
+    }
+
+    i = j;
   }
 
   const perModel: Record<string, MetricsSummary> = {};
