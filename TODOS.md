@@ -1,4 +1,14 @@
 
+## ⚪ RETRO-ONLY — polish-ui (2-chain lock fallback): DESIGN.md token vs 컴포넌트 재감사, drift 0건 (cycle 3077, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 spec_only_deferred Tier4, 만료 2026-10-15 3일 남음, 변화 없음). 2차 방어선(cycle 3076 retro `b2b3faf1`) OK. 직전8(3069-3076) distinct=2(review-code(heavy)6+review-code(lite)2) — 2-chain lock 충족, review-code 전체 제외. gap trigger: fix-incident 10/20·lotto 9/30(cron 산출물 최신, 2026-10-10 picks/results 정상)·info-arch 13/30 전부 미근접. op-analysis gap 25+ 충족하나 Supabase 여전히 INACTIVE(DNS ENOTFOUND/curl 000) — 블락 유지. explore-idea saturation 4/15 미충족. `gh run list` 확인 — CI Failure Dispatch 전부 skipped, 실제 incident 0건. 어떤 chain 도 trigger 없어 룰 명시 fallback — polish-ui 강제 발화 (cycle 3018 과 동일 패턴).
+
+**polish-ui 재진단 (3개 축)**: (1) breadcrumb 누락 grep → `community/page.tsx`(placeholder noindex, breadcrumb 불필요) + `debug/*` 6개(내부 전용, CLAUDE.md 기존 예외) + `en/mlb/reviews/monthly/page.tsx`(redirect-only index) — 전부 false-positive, 실제 drift 아님. (2) 하드코딩 hex 색상 grep → `ShareButtons.tsx`의 `#1DA1F2`/`#1877F2`(소셜 플랫폼 공식 컬러) + `border-gray-200`(라이트모드 literal) — DESIGN.md Decisions Log(2026-05-05, line 64) 기 문서화 의도, drift 아님. (3) `text-gray-[0-9]` 계열 259건 전수 분류 → DESIGN.md:56 명시한 "항상 drift" 패턴(`text-gray-400 dark:text-gray-400` 류 flat non-invert) grep 0건 — 전부 2-tier muted 패턴(invert) 또는 opacity 예외(Decisions Log 2026-08-26) 규칙 안.
+
+코드 변경 0건 — 2-chain lock fallback 이 cycle 3018 에 이어 2회 연속 "clean" 결론 (59 cycle 간격). DESIGN.md 토큰 체계가 안정적으로 유지되고 있음을 재확인.
+
+다음 사이클 추천 = lock cooldown 1 사이클 경과 후 review-code(heavy) 복귀 — `harness.ts` dead-skeleton 정리/완성 또는 `walkForwardSplit` dead code 제거(cycle 3076 추천 잔존) 또는 app/api 고커밋 route 재검토. fix-incident(gap=11/20)/lotto(gap=10/30)/info-arch(gap=14/30) 자연 대기. **Supabase INACTIVE 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/backtest/ 전수 감사 — 더블헤더 look-ahead bias 수정 (cycle 3076, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(전부 archived/completed/status≠approved). 2차 방어선(cycle 3075 retro `9fa3220d`) OK. 직전8(3068-3075) distinct=3(review-code(heavy)5+review-code(lite)2+lotto1) — 2-chain lock 미충족(≤2 요건). gap trigger: fix-incident 9/20·lotto 8/30·info-arch 12/30 전부 미근접. op-analysis Supabase INACTIVE 재확인(DNS ENOTFOUND 지속) — 블락 유지. explore-idea saturation 4/15 미충족. cycle 3075 추천 두 후보(`context/measurement.ts` 잔존 / `backtest/`) 중 `backtest/`(13파일 2051줄) 채택 — git log 상 cycle 2980/3040/3110 개별 버그 fix 는 있었으나 디렉토리 단위 전수 read sweep 이력은 없었음.
