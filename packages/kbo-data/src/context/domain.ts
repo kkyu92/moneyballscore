@@ -87,16 +87,24 @@ export function getSeasonPhase(date: Date): SeasonPhase {
  * silent drift wave 48 = TIME_WINDOWS 가 7 로 박제되어 LLM agent prompt 가 잘못된
  * 윈도우 문구를 받던 패턴 정정.
  *
+ * `h2h_window.games = 50` — daily.ts 의 recent-form/h2h 공용 쿼리(`.limit(50)`, 두 팀
+ * 어느 한쪽이라도 관련된 최근 final 경기, date-based 필터 아님)가 실제 source. 상대
+ * 매치업 0건이면 KBO 공식 상대전적 페이지(`fetchHeadToHead`, 시즌 누적) fallback —
+ * MLB(`mlb-pipeline.ts`)도 시즌 시작~당일 누적만 사용. cycle 1226 도입 당시 "30일"
+ * 로 박제된 값은 실제 쿼리 어디에도 구현된 적 없는 date-window — LLM agent 가 실제와
+ * 다른 recency 가정으로 상대전적을 reasoning 하던 stale 문구 정정 (review-code heavy
+ * cycle 3075 발견).
+ *
  * `h2h_recent_games.games = 5` — rivalry-memory.ts 가 LLM prompt 에 직접 주입하는
- * "최근 N 경기 head-to-head" 게임 수. h2h_window (30일) 와 별도 — h2h_window 는
- * predictor 가 사용하는 date-based 누적 윈도우, h2h_recent_games 는 agent prompt
- * 안 example 박제용 (token budget MAX_BLOCK_CHARS=600 와 같이 작아야 함). cycle
- * 1241 silent drift wave 49 = rivalry-memory.ts RECENT_GAMES_LIMIT 가 hard-coded
- * 5 로 박제되어 TIME_WINDOWS context layer 미참조 패턴 정정.
+ * "최근 N 경기 head-to-head" 게임 수. h2h_window 와 별도 — h2h_window 는 predictor 가
+ * 사용하는 recency-capped 누적 윈도우, h2h_recent_games 는 agent prompt 안 example
+ * 박제용 (token budget MAX_BLOCK_CHARS=600 와 같이 작아야 함). cycle 1241 silent
+ * drift wave 49 = rivalry-memory.ts RECENT_GAMES_LIMIT 가 hard-coded 5 로 박제되어
+ * TIME_WINDOWS context layer 미참조 패턴 정정.
  */
 export const TIME_WINDOWS = Object.freeze({
   recent_form: { games: RECENT_FORM_GAMES, ko: `최근 ${RECENT_FORM_GAMES}경기` },
-  h2h_window: { days: 30, ko: '최근 30일 상대 전적' },
+  h2h_window: { games: 50, ko: '최근 50경기 내 상대전적(부족 시 시즌 누적)' },
   h2h_recent_games: { games: 5, ko: '최근 5경기 상대 전적' },
   season: { days: 180, ko: '시즌 누적' },
 } as const);
@@ -145,7 +153,7 @@ export function renderSeasonForLLM(date: Date): string {
 /**
  * 시간 윈도우 한 줄 — LLM 이 분석 단위를 mismatch 없이 참조하도록.
  *
- * 예: "분석 윈도우 — 최근 폼: 최근 10경기 / H2H: 최근 30일 상대 전적 / 시즌: 시즌 누적."
+ * 예: "분석 윈도우 — 최근 폼: 최근 10경기 / H2H: 최근 50경기 내 상대전적(부족 시 시즌 누적) / 시즌: 시즌 누적."
  */
 export function renderTimeWindowsForLLM(): string {
   const parts = (Object.keys(TIME_WINDOWS) as TimeWindowKey[]).map((k) => `${k}: ${TIME_WINDOWS[k].ko}`);

@@ -43,8 +43,9 @@ interface RivalryBlock {
 // 토큰 1개 ≈ 한국어 1.5자 근사. 400 tokens ≈ 600자 상한. 초과 시 truncate.
 const MAX_BLOCK_CHARS = 600;
 // h2h 경기 수 = TIME_WINDOWS.h2h_recent_games 단일 source — agent context layer
-// (plan #23 wave 49) silent drift 차단. predictor 가 사용하는 h2h_window (30일) 와
-// 별도 — agent prompt 토큰 예산 (MAX_BLOCK_CHARS=600) 안 example 박제용.
+// (plan #23 wave 49) silent drift 차단. predictor 가 사용하는 h2h_window (최근 50경기
+// 내, 부족 시 시즌 누적) 와 별도 — agent prompt 토큰 예산 (MAX_BLOCK_CHARS=600) 안
+// example 박제용.
 const RECENT_GAMES_LIMIT = TIME_WINDOWS.h2h_recent_games.games;
 const MEMORIES_LIMIT = 5;
 

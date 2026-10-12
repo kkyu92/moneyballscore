@@ -95,7 +95,7 @@ describe('getSeasonPhase', () => {
 describe('TIME_WINDOWS', () => {
   it('predictor / retro / agent 공유 표준 값', () => {
     expect(TIME_WINDOWS.recent_form.games).toBe(RECENT_FORM_GAMES);
-    expect(TIME_WINDOWS.h2h_window.days).toBe(30);
+    expect(TIME_WINDOWS.h2h_window.games).toBe(50);
     expect(TIME_WINDOWS.season.days).toBe(180);
   });
 
