@@ -1,4 +1,14 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/ 소형 subdir 2차 배치 감사 CLEAN (cycle 3073, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/23(plan#29 spec_only_deferred Tier4, 만료 2026-10-15 3일 남음, 사용자 결정 대기 불변). 2차 방어선(cycle 3072 retro `d9c97935`) OK. 직전8(3065-3072) distinct=4(review-code(heavy)6+fix-incident1+lotto1) — 2-chain lock 미충족(≤2 요건). gap trigger: fix-incident 5/20·lotto 4/30·info-arch 8/30 전부 미근접. op-analysis Supabase INACTIVE 재확인(`node dns lookup` ENOTFOUND 지속) — 블락 유지. explore-idea saturation 직전15 5/15 — 미충족(review-code dominance 완화 중). review-code 5-cycle retro-only cooldown 체크 — streak=1, 미충족. cycle 3072 추천대로 lib/ 잔여 소형 subdir 배치 채택.
+
+**review-code(heavy) 실행**: `apps/moneyball/src/lib/` 중 아직 미감사 소형 subdir 8개(changelog/debug/insights/lotto/players/standings/seo/v2-shadow-monitor, 24개 non-test 파일 ~2860줄) agent 위임 전수 full-read 감사 — silent-drift family 5종(stale comment / silent fallback swallow / DB-TS mismatch / 공유 상수 중복 하드코딩 / 로직·임계값 버그) 관점. 결과: 전부 CLEAN. 참고 사항(버그 아님) 2건 — (1) `debug/factorDeltaStats.ts:115` float 동등비교(`t.mean === hit.value`)는 같은 in-memory 값끼리 비교라 불일치 불가능. (2) `players/buildPitcherProfile.ts`가 playerId-scoped 필터 없이 전체 예측 테이블을 가져와 클라이언트 필터링 — `buildPitcherLeaderboard.ts` 기존 패턴과 동일, 성능 관점 latent concern(correctness 버그 아님).
+
+코드 변경 0건 — actionable fix 없음, retro-only. 2 사이클 연속(3072/3073) 실제 버그 미발견 — lib/ 전수 감사가 diminishing-returns 국면 진입 신호.
+
+다음 사이클 추천 = review-code(heavy) 는 lib/mlb/(18파일 2840줄, 유일 미감사 lib subdir — 완료 시 lib/ 전체 전수 감사 완주) 또는 app/api 고커밋 route 재검토, 혹은 info-arch(gap=9/30)/fix-incident(gap=6/20)/lotto(gap=5/30) 자연 대기. **Supabase INACTIVE 55+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/ 나머지 소형 subdir KBO-MLB parity 감사 CLEAN (cycle 3072, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/23(plan#29 spec_only_deferred Tier4, 만료 2026-10-15 임박, 사용자 결정 대기 불변). 2차 방어선(cycle 3071 retro `a6dad64e`) OK. 직전8(3064-3071) distinct=5(review-code(heavy)3+review-code(lite)1+info-arch1+fix-incident1+lotto1+polish-ui0) — 2-chain lock 미충족. gap trigger: fix-incident 5/20·lotto 4/30·info-arch 8/30 전부 미근접. op-analysis Supabase INACTIVE 재확인(`nslookup`/DNS ENOTFOUND 지속, 54+ cycle) — 블락 유지. explore-idea saturation 직전15 14/15(review-code(heavy+lite)11+polish-ui1+info-arch1+fix-incident1) 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 42h 신선) — 과거 반복 패턴과 동일 skip. cycle 3071 추천대로 lib/ 나머지 소형 subdir parity 감사 채택.
