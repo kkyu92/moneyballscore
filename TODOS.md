@@ -1,5 +1,19 @@
 
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/{ui,seasons,standings,live,teams,players} 저-스윕증거 10파일 전수 감사, CLEAN (cycle 3089, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(status: approved 매칭 0건 — plan#29 spec_only_deferred Tier4 만료 2026-10-15 3일 남음 불변). 2차 방어선(cycle 3088 retro `2e98c760`) OK. 직전8(3081-3088) distinct=3(review-code(heavy)6+review-code1+polish-ui1) — 2-chain lock 미충족. gap trigger: fix-incident 20+/20 도달하나 `gh run list` 재확인(CI 전부 success/skipped, Failure Dispatch 모두 skipped) + Supabase DNS NXDOMAIN 재확인(동일 인시던트, 코드 fix 불가, 63+ cycle 반복 확인) — actionable 없음 skip. op-analysis 25+/25 도달하나 동일 Supabase 블락 지속 — skip. lotto(마지막 3068, 21/30)·info-arch(마지막 3064, 25/30) 미근접. DESIGN.md mtime 44.3h 신선 — design-system 미근접. explore-idea saturation 직전15 14/15(review-code(heavy+lite) dominance) 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 신선) — 15+회 반복된 동일 패턴으로 skip, review-code(heavy) 계속.
+
+**스코프 선정**: app/api(cycle 3031 전수 스윕 완결)·lib/ 전체(cycle 3074 lib/mlb 완료로 전수 완주)·scripts/(cycle 3082~3087 30/31 완료)·packages/kbo-data/src/agents(cycle 3088 완료) 전부 과거 다회 감사 완료 확인 — cycle 3088 추천 "app/api 고커밋 route 재검토"는 stale 추천(이미 cycle 3031 완결, carry-over 갱신 누락)이었음을 재확인하고 폐기. 대신 components/ 20개 서브디렉토리 중 TODOS.md grep 언급 횟수 최소(1~3회) + 파일 수 적은 6개 서브디렉토리(ui/seasons/standings/live/teams/players, 10파일) 신규 선정 — KBO/MLB twin pair 2쌍(TeamConvergencePickRecord↔Mlb쌍, TeamEloChart↔Mlb쌍) 포함.
+
+**조사**: subagent 위임 10파일 전수 read + twin pair 2쌍 line-by-line 대조 + SortControl 2개 comparator 로직 검증 + PitcherFipTrend 임계값 교차검증. 결과: **10개 전부 CLEAN**. 의심 사례 2건 모두 false positive 확정 — (1) KBO/MLB ConvergencePickRecord 설명 문구 차이는 매칭 자매 컴포넌트(`MlbMatchupConvergencePickRecord.tsx`)와 동일한 의도된 MLB-wide 카피 패턴(실제 threshold 상수는 별도 정상 사용). (2) SeasonStandingsSortControl/TeamAccuracySortControl 의 하드코딩 랭크 슬롯(12/20)은 `MonthlyTeamStatsSortControl.tsx`(cycle 3010, MLB 30팀 대응 CSS-var 패턴 fix 이력) 과 같은 버그 클래스로 보였으나, 두 컴포넌트 모두 호출부가 KBO 전용(시즌 아카이브·`/standings`)이라 MLB 미노출 — 실제 버그 아님.
+
+코드 변경 0건 — actionable fix 없음, retro-only.
+
+**skill-evolution trigger 평가**: milestone(`3089 % 50 = 39`) 미충족. trigger5 표본(직전20 inclusive) — review-code 계열 다수, 표본 임계 충족이나 0회 발화 chain = 영구 opt-out 9개 제외 시 review-code 자체는 활발히 발화 중 — 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수: 3082/3083/3084/3085(retro)/3086/3087(retro)/3088 전부 success 또는 retro-only, fail 0건).
+
+다음 사이클 추천 = components/ 잔여 서브디렉토리(accuracy/analysis/dashboard/predictions/reviews/matchup/picks/leaderboard/layout/shared — 이미 각 5~15회 언급돼 과거 감사 이력 있으나 twin-pair 일부 미대조 가능성) 재검토 또는 hooks/ 디렉토리(아직 미확인) 신규 스코프, 혹은 fix-incident(gap=21/20, 실제 incident 부재 재확인됨)/op-analysis(gap=26/25, Supabase 블락 지속)/lotto(gap=22/30)/info-arch(gap=26/30) 자연 대기. **Supabase DNS NXDOMAIN 63+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/agents/ 신규 스코프 전수 감사, judge Sonnet 모델 ID stale 수정 + dead import 2건 (cycle 3088, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 임박, plan#30 completed). 2차 방어선(cycle 3087 retro `250d5616`) OK. 직전8(3080-3087) distinct=3(review-code 6+review-code(heavy)1+polish-ui1) — 2-chain lock 미충족(cooldown 불필요). gap trigger: fix-incident 20/20 도달하나 `gh run list` 재확인 실제 incident 부재(Supabase DNS NXDOMAIN 뿐, 코드 fix 불가, 이미 62+ cycle 반복 확인된 상태) — skip. op-analysis 25/25 도달하나 동일 Supabase 블락 지속 — skip. lotto(마지막 3068, 20/30)·info-arch(마지막 3064, 24/30) 미근접. DESIGN.md mtime 1.3일 신선 — design-system 미근접. cycle 3087 추천대로 `packages/kbo-data/src/agents/` (scripts/ 전수 감사 완료 후 신규 스코프) 채택.
