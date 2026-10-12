@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/agents/ 신규 스코프 전수 감사, judge Sonnet 모델 ID stale 수정 + dead import 2건 (cycle 3088, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 임박, plan#30 completed). 2차 방어선(cycle 3087 retro `250d5616`) OK. 직전8(3080-3087) distinct=3(review-code 6+review-code(heavy)1+polish-ui1) — 2-chain lock 미충족(cooldown 불필요). gap trigger: fix-incident 20/20 도달하나 `gh run list` 재확인 실제 incident 부재(Supabase DNS NXDOMAIN 뿐, 코드 fix 불가, 이미 62+ cycle 반복 확인된 상태) — skip. op-analysis 25/25 도달하나 동일 Supabase 블락 지속 — skip. lotto(마지막 3068, 20/30)·info-arch(마지막 3064, 24/30) 미근접. DESIGN.md mtime 1.3일 신선 — design-system 미근접. cycle 3087 추천대로 `packages/kbo-data/src/agents/` (scripts/ 전수 감사 완료 후 신규 스코프) 채택.
+
+**조사**: subagent 위임 전수 read(15파일, ~4300줄 — calibration-agent/debate/judge-agent/llm-deepseek/llm-ollama/llm/mlb-retro/personas/postview/retro/rivalry-memory/team-agent/types/validator-logger/validator). retro.ts↔mlb-retro.ts 포팅 누락 0건(MLB 제외 팩터들은 의도된 구조적 placeholder, `packages/shared` DEFAULT_WEIGHTS/ACTIVE_FACTOR_KEYS 와 일치). 발견 3건 중 2건 즉시 수정 + 1건은 latent(현재 무해) 플래그만:
+
+1. **(수정) llm.ts `getModelId()` sonnet 분기 모델 ID stale**: `'claude-sonnet-4-6'`(2026-04-15 #6 당시 유효 확인된 ID) pinned인데, 같은 함수의 Haiku 분기(`'claude-haiku-4-5-20251001'`)는 세션 환경이 주입하는 현재 공식 모델 ID와 정확히 일치 — Sonnet만 구버전으로 남음. Claude 5 세대 출시 후 구 ID가 deprecated 됐을 가능성 — `'claude-sonnet-5'`로 교체. **중요 플래그**: 기존 ID가 실제로 invalid 였다면 judge-agent(Sonnet) 호출이 매번 model_not_found 로 실패해 debate.ts fallback(정량 모델 결과만 사용) 경로로 빠졌을 수 있고, CLAUDE.md 가 수십 cycle 누적 측정해온 "CREDIT_EXHAUSTED"(`debate_version IS NULL` proxy, 실제 에러 텍스트 비교 없이 측정) 의 일부가 실은 별개 원인(모델 ID 오류)이었을 가능성 있음 — **확정 아님, 추정**. 검증은 사용자 Anthropic 크레딧 충전 후 실제 judge 응답 성공 여부로만 가능(현재 Supabase 도 DNS 장애라 pipeline 실행 자체 불가, 교차 검증 불가 상태).
+2. **(수정) dead import 2건**: `debate.ts:1`, `validator.ts:34` — 둘 다 미사용 `TeamCode` import (과거 리팩토링 잔여, lint 설정상 빌드 fail은 안 하지만 cruft).
+3. **(플래그만, 미수정) calibration-agent.ts `today` 파라미터 미전달**: `buildCalibrationContextBlock`의 `today: Date = new Date()` 가 실제 경기 날짜를 받지 못함(유일한 호출부 `debate.ts:32`가 `context.game.date` 를 들고 있으면서도 안 넘김) — 현재는 모든 실제 호출이 "오늘 경기"라 무해(`new Date()`와 경기일이 항상 일치), 향후 backfill/replay 스크립트가 이 경로를 타면 날짜 불일치 가능 — latent, 수정 보류.
+
+검증: `tsc --noEmit` clean(kbo-data), `eslint src` clean(kbo-data), vitest 90개 통과(agents-debate/agents-postview/pipeline-daily/pipeline-final-reasoning). 직접 main 커밋 + push(R4, PR 미경유, pre-push hook lint+type-check+version-sync-guard PASS). `fb8938bb`.
+
+**skill-evolution trigger 평가**: milestone(`3088 % 50 = 38`) 미충족. trigger5 표본(직전20 inclusive, "review-code(heavy)" 공백없는 포맷 regex 미매치 기지 quirk, cycle 3085/3086/3087 과 동일) — 표본 임계 미달 추정, 신규 조사 보류(known quirk). ship-0 emergency stop 미충족(직전10 중 success 다수, 3085/3086/3088 전부 success).
+
+다음 사이클 추천 = `packages/kbo-data/src/agents/` 는 이번 cycle 전수 감사 완료 — 다음 review-code(heavy) 신규 스코프는 `app/api` 고커밋 route 재검토 권장. 또는 fix-incident(gap=20/20, 실제 incident 부재 재확인됨)/lotto(gap=20/30)/info-arch(gap=24/30) 자연 대기. **Supabase DNS NXDOMAIN 63+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속. 신규: judge Sonnet 모델 ID 교체분(`claude-sonnet-5`) — Supabase/크레딧 복구 후 실제 judge 응답 성공 확인 1회 필요(현재 미검증).**
+
 ## 🟡 RETRO-ONLY — review-code(heavy): scripts/op-analysis-*.ts 7건 + MLB backfill 3건 전수 감사, drift 0건 (cycle 3087, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3086 retro `545054b1`) OK. 직전8(3079-3086) distinct=4(review-code(heavy)5+review-code1+polish-ui1+expand-scope1) — 2-chain lock 미충족. **fix-incident gap=20/20 도달** — 실제 incident 재확인: `gh run list` CI Failure Dispatch 전부 skipped, 유일한 실제 incident = Supabase DNS NXDOMAIN(cycle 3019부터 escalated, 사용자 billing 조치 대기, 코드 fix 불가) — 신규 actionable 없음, skip. lotto gap=19/30·info-arch gap=23/30 미근접. op-analysis gap 충족이나 Supabase 블락 지속(`nslookup` NXDOMAIN 재현) — skip. DESIGN.md mtime 1일(신선) — design-system 미근접. cycle 3085/3086 추천대로 `scripts/op-analysis-*.ts` 7개(brier-drift/ce-cohort/cohort/mlb-elo-backtest/postbreak-full/postbreak/war-check) 채택.
