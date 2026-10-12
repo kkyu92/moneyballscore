@@ -1,5 +1,17 @@
 
 
+## 🟡 RETRO-ONLY — review-code(heavy): scripts/op-analysis-*.ts 7건 + MLB backfill 3건 전수 감사, drift 0건 (cycle 3087, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3086 retro `545054b1`) OK. 직전8(3079-3086) distinct=4(review-code(heavy)5+review-code1+polish-ui1+expand-scope1) — 2-chain lock 미충족. **fix-incident gap=20/20 도달** — 실제 incident 재확인: `gh run list` CI Failure Dispatch 전부 skipped, 유일한 실제 incident = Supabase DNS NXDOMAIN(cycle 3019부터 escalated, 사용자 billing 조치 대기, 코드 fix 불가) — 신규 actionable 없음, skip. lotto gap=19/30·info-arch gap=23/30 미근접. op-analysis gap 충족이나 Supabase 블락 지속(`nslookup` NXDOMAIN 재현) — skip. DESIGN.md mtime 1일(신선) — design-system 미근접. cycle 3085/3086 추천대로 `scripts/op-analysis-*.ts` 7개(brier-drift/ce-cohort/cohort/mlb-elo-backtest/postbreak-full/postbreak/war-check) 채택.
+
+**조사**: 7개 파일 전수 read — drift 0건(모두 point-in-time 진단 스크립트, 하드코딩 날짜는 의도된 분석 시점 고정). 이미 cycle 3085 에서 감사된 6개 파일(backtest-v2-candidate/cohort-cleanup/dev-postview/export-predictions-tabpfn/measure-n178-vs-n165/update-stale-data)을 cycle 3087 추천 문구 오독으로 중복 재 read(낭비, 신규 발견 없음 — 재확인만). 중복 발견 후 실제 미감사 잔여 스코프 재계산: `scripts/*.ts` 31개 중 27개는 cycle 3082~3086 누적 감사 완료, 미감사 = `backfill-mlb-elo.ts`/`backfill-mlb-factor-breakdown.ts`/`backfill-mlb-schedule-status.ts`(3개, MLB backfill 계열) + `lotto.ts`(별도 도메인, lotto chain 소관 제외). MLB backfill 3개 전수 read 추가 — drift 0건. `backfill-mlb-factor-breakdown.ts`의 `home_bullpen_fip: home?.fip` (sp_fip 와 동일 team-aggregate 재사용)은 `mlb-pipeline.ts:462`(live 경로)와 동일 패턴(cycle 2402 이미 문서화된 기지 한계) — 신규 버그 아님, 오탐 배제.
+
+**결과**: `scripts/*.ts` 31개 중 30개(lotto.ts 제외) 전수 감사 완료 — cycle 3082~3087 6-cycle review-code(heavy) 시리즈 종료. 이번 cycle 신규 drift 0건(코드 수정 없음) — retro-only.
+
+**skill-evolution trigger 평가**: milestone(`3087 % 50 = 37`) 미충족. trigger5 표본(직전20 inclusive, 정확매치 regex) = 7 < 10(표본 임계 미달, "review-code(heavy)" 공백없는 포맷 regex 미매치 기지 quirk 재확인) — skip. ship-0 emergency stop 미충족(직전10 중 success 6건).
+
+다음 사이클 추천 = `scripts/` 전수 감사 시리즈 종료 — review-code(heavy) 신규 스코프(app/api 고커밋 route 또는 packages/kbo-data/src/agents) 재탐색 필요. 또는 fix-incident(gap=20/20 도달, 단 실제 incident 부재 확인됨)/lotto(gap=19/30)/info-arch(gap=23/30) 자연 대기. **Supabase DNS NXDOMAIN 62+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — polish-ui(2-chain lock fallback): insights/series/[topic] h1 token drift + MLB twin BreadcrumbList JSON-LD 누락 수정 (cycle 3086, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3085 retro `1c74eb33`) OK. **2-chain lock 탐지**: 직전8(3078-3085) distinct=2 (review-code(heavy) 7 + expand-scope 1) — lock 발동. 다른 gap trigger 전부 미근접(fix-incident 19/20·lotto 18/30·info-arch 22/30), op-analysis gap 충족이나 Supabase DNS NXDOMAIN 지속 블락(`nslookup` NXDOMAIN 재현) — skip. DESIGN.md mtime 1.8일 신선 — design-system 미근접. explore-idea saturation 2/15 미충족. 승인 plan 0건. → lock fallback 규칙(다른 chain trigger 전무 시 polish-ui 강제) 적용, **polish-ui** 발화.
