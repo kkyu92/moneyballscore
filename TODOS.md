@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): KBO 잔여 page.tsx 25개 전수 감사, about 페이지 보정 에이전트 누락 정정 (cycle 3065, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 불변, 만료 2026-10-15 임박). 2차 방어선(cycle 3064 retro `54eac7ca`) OK. 직전8(3057-3064) distinct=3(review-code(heavy)6+polish-ui1+info-arch1) — 2-chain lock 미충족(안전). gap trigger: fix-incident 18/20·lotto 27/30(cron 정상, 10-17 draw pick 은 화요일 생성 예정 — stale 아님)·explore-idea saturation 4/15 전부 미근접. op-analysis 0/25 트리거 충족이었으나 Supabase 재확인(nslookup NXDOMAIN 지속) 블락 유지 스킵. `gh run list` 전부 skipped/success — 실제 incident 없음. cycle 3063 추천대로 KBO app/*/page.tsx 잔여(cycle 3063 미확인분) 선정.
+
+subagent 위임 about/accuracy(+shadow)/analysis(+game/[id])/changelog/community/contact/matchup(+[teamA]/[teamB])/methodology/home/players(+[id])/privacy/seasons(+[year])/standings/teams(+[code]/[code]/recent)/terms/v2-preview/v2-shadow-monitor/lotto = 25개 전수 read → 24개 clean(grep-count-depth 가드레일 준수, dynamic sub-route 포함 전수 커버), 1건 실제 drift 발견:
+
+- `about/page.tsx` "AI 에이전트 토론" FAQ 답변 + agents 섹션이 홈/원정/심판 3-agent 구성만 설명 — `methodology/page.tsx`(4. AI 에이전트 토론 섹션) + `analysis/game/[id]/page.tsx`(DebateCalibration 렌더)는 실제로 **보정 에이전트**(과거 예측 이력 회고 → 편향 보정 힌트 → 심판 제안) 포함 4-agent 파이프라인 설명 — about 페이지만 누락된 stale 요약. FAQ 답변 1곳 + agents 섹션 box 1개 추가로 methodology 기준 정합 (commit `3b73666b`).
+
+`players/[id]`/`seasons/[year]` 의 primary loader 비가드 호출은 `teams/[code]`/`matchup` 과 동일 "fail-loud" 의도된 컨벤션(주석 확인) — 버그 아님, 미수정.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 589/589 파일·4643/4643 테스트 PASS. 직접 main 커밋 + push(PR 미경유, R4 범위).
+
+다음 사이클 추천 = 이로써 KBO app/*/page.tsx **전수 감사 완주**(cycle 3062 MLB 27개 + cycle 3063 KBO 20개 + cycle 3065 KBO 25개). review-code(heavy) 다음 축 = packages/kbo-data/src/agents 또는 app/api 고커밋 route 재검토 권장 — 2-chain lock 재발 방지 위해 fix-incident(gap=19/20, 거의 임계)/lotto(gap=28/30)/info-arch(gap=1/30, 방금 발화) 자연 대기도 고려. **plan #29(로그인+커뮤니티) 만료 2026-10-15 임박 — Tier4 사용자 결정 대기 계속.** **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만.**
+
 ## 🟡 RETRO-ONLY — info-architecture-review: 2-chain lock 조기 발화, 현 IA 충분 13연속 재확정 (cycle 3064, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3063 retro `b8e026b4`) OK. 직전8(3057-3063) distinct=2(review-code(heavy)6+polish-ui1) — **2-chain lock 탐지**(룰: 직전8 distinct≤2 → 잠긴 2개 제외 + 잔여 pool 중 trigger 최강 선택). review-code(heavy)/polish-ui 제외 후 잔여 gap 확인: fix-incident 17/20·lotto 26/30(cron 재확인 결과 정상 — lotto-pick-update 화요일 09:19 KST 주기, 10-10 draw 완료 후 10-17 draw 용 pick 은 내일 화요일 생성 예정, 실제 stale 아님)·op-analysis 0/25(Supabase 재확인 nslookup NXDOMAIN 지속 INACTIVE, 블락 유지 스킵)·explore-idea saturation 3/15 미충족 — info-arch(gap 28/30) 최근접으로 자율 선택.
