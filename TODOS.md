@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/mlb/ 전수 감사 완료 — 공유 NEUTRAL_FACTOR 상수 미사용 수정 (cycle 3074, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 spec_only_deferred Tier4, 만료 2026-10-15 3일 남음, 사용자 결정 대기 불변). 2차 방어선(cycle 3073 retro `b011d1a4`) OK. 직전8(3066-3073) distinct=4(review-code(heavy)6+fix-incident1+lotto1) — 2-chain lock 미충족. gap trigger: fix-incident 7/20·lotto 6/30·info-arch 10/30 전부 미근접. op-analysis Supabase INACTIVE 재확인(DNS ENOTFOUND 지속) — 블락 유지. explore-idea saturation 미충족. cycle 3073 추천대로 lib/mlb/(18파일, 2840줄, 유일 미감사 lib subdir) 채택 — 완료 시 lib/ 전체 전수 감사 완주.
+
+**review-code(heavy) 실행**: `apps/moneyball/src/lib/mlb/` 18개 비-테스트 파일(2840줄) agent 위임 전수 full-read 감사, KBO sibling(`buildFactorAccuracy.ts`/`buildEloTrend.ts`/`buildTeamProfile.ts` 등) parity 대조 포함. 대부분 CLEAN(`assertSelectOk`+`captureFallback` 패턴 일관 적용 확인, silent-swallow 아님) — **1건 확정 발견**: `deriveMlbOutcome.ts:27`(`homeWinProb >= 0.5`) + `buildMlbFactorAccuracy.ts:33`(`SINGLE_RATE_NEUTRAL = 0.5`) 양쪽이 tossup 중립 임계값을 로컬 리터럴 `0.5` 로 하드코딩 — KBO sibling(`lib/accuracy/buildFactorAccuracy.ts`)은 `@moneyball/shared` 의 `NEUTRAL_FACTOR` 상수 사용. 공유 상수 중복 하드코딩 패턴(silent-drift family #4) — 오늘은 값 동일해 동작 차이 없으나 재조정 시 KBO만 자동 반영되고 MLB는 stale 하게 남는 drift risk.
+
+**수정**: 양쪽 파일에서 `NEUTRAL_FACTOR` import 로 교체 (`fix: MLB neutral-threshold 하드코딩 0.5 → 공유 NEUTRAL_FACTOR 상수 사용`, commit `e0cfeb1f`). 대상 테스트 17건 + 전체 typecheck 통과 확인 후 main 직접 커밋 + push.
+
+**lib/ 전수 감사 완주**: KBO/MLB 양쪽 `lib/` 서브디렉토리 전체가 이번 cycle 로 1회 이상 감사됨 (cycle 3065~3074 누적: page.tsx 25개, packages/kbo-data/src/agents, lib/reviews, lib/ 소형 subdir 2배치, lib/mlb/). 다음 review-code(heavy) 는 신규 축 필요 — app/api 고커밋 route 재검토 또는 git 1-commit heuristic 재스윕 주기 대기.
+
+다음 사이클 추천 = app/api 고커밋 route 재검토 또는 info-arch(gap=10/30)/fix-incident(gap=7/20)/lotto(gap=6/30) 자연 대기. **Supabase INACTIVE 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/ 소형 subdir 2차 배치 감사 CLEAN (cycle 3073, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/23(plan#29 spec_only_deferred Tier4, 만료 2026-10-15 3일 남음, 사용자 결정 대기 불변). 2차 방어선(cycle 3072 retro `d9c97935`) OK. 직전8(3065-3072) distinct=4(review-code(heavy)6+fix-incident1+lotto1) — 2-chain lock 미충족(≤2 요건). gap trigger: fix-incident 5/20·lotto 4/30·info-arch 8/30 전부 미근접. op-analysis Supabase INACTIVE 재확인(`node dns lookup` ENOTFOUND 지속) — 블락 유지. explore-idea saturation 직전15 5/15 — 미충족(review-code dominance 완화 중). review-code 5-cycle retro-only cooldown 체크 — streak=1, 미충족. cycle 3072 추천대로 lib/ 잔여 소형 subdir 배치 채택.
