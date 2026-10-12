@@ -1,5 +1,22 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/{accuracy,reviews,matchup} 전수 감사, EN 한글 텍스트 누출 + MLB 팀명 wrap + glossary 링크 누락 3건 수정 (cycle 3096, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved status). 2차 방어선(cycle 3095 retro `a82489d6`) OK. 직전8(3088-3095) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. gap trigger: fix-incident 29/20·op-analysis 80+/25 도달하나 Supabase DNS NXDOMAIN 지속(billing 조치 필요, actionable 없음) skip. lotto gap=28/30·info-arch gap=5/30 미근접. explore-idea saturation 직전15 15/15(역대 최고치, review-code(heavy)+polish-ui+info-arch dominance) 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 45.6h 신선) — 반복 패턴과 동일 skip. cycle 3093 추천대로 components/ 잔여 서브디렉토리 중 accuracy(8파일)+reviews(10파일)+matchup(11파일) 29파일 신규 스코프 선정(dashboard/layout/picks/predictions/shared 5개는 다음 사이클 잔여).
+
+**조사**: subagent 전수 read(29파일) — reviews/ 클린(10파일 전부, locale 패턴 일관). accuracy/+matchup/ 에서 7건 발견, 우선순위 상위 3건 수정:
+1. `TeamMatchupCards.tsx` — locale prop 자체가 없어 홈/원정/vs 하드코딩 한글이 전체 영어인 `/en/mlb/accuracy` 페이지에 그대로 노출(형제 컴포넌트 `TeamBiasTable` 은 이미 locale 지원). locale prop + ko/en copy 추가, EN 콜사이트에 `locale="en"` 배선.
+2. `MlbMatchupRecentForm.tsx`/`MlbMatchupConvergencePickRecord.tsx` — MLB 팀 shortName 고정폭(w-20) 박스에 truncate 누락, "Diamondbacks"/"Blue Jays"/"White Sox"/"Red Sox" 등 긴 이름이 overflow/wrap 되어 행 레이아웃 깨짐(KBO 형제는 2글자라 미발현, 다른 MLB 페이지들은 이미 truncate 로 표준화된 패턴). truncate 클래스 추가.
+3. `MlbMatchupFactorCompare.tsx` — 본 파일 자체 주석이 "glossary 앵커 없는 항목은 일반 /glossary 로 연결"이라 명시했지만 실제 렌더는 plain span(title 툴팁만, href 전혀 없음) — KBO 형제 `MatchupFactorCompare.tsx` 의 실제 `<a href>` 링크가 MLB 쪽엔 포팅된 적 없었음. 팩터별 glossarySlug(fip/woba/bullpen-fip/recent-form/elo, xwOBA/Barrel%는 주석 의도대로 일반 /glossary fallback) 추가 + label 을 실제 링크로 전환.
+
+낮은 우선순위 4건(CommunityVsAICard KBO/MLB 중복 미통합, FactorAccuracyTable 하드코딩 리터럴 "0.45~0.55", KBO sport 분기 locale 무시, CalibrationPlot.v20 dead export)은 리스크/스코프 대비 가치 낮아 이번 사이클 보류 — 다음 review-code(heavy) 재방문 후보로 carry-over.
+
+`tsc --noEmit` clean, eslint clean(변경 5파일), `pnpm --filter moneyball test` 589/589 파일·4647/4647 통과. pre-push(lint+type-check+version-sync-guard) 통과 — main 직접 commit+push 완료(`07abbdc6`).
+
+**skill-evolution trigger 평가**: milestone(`3096 % 50 = 46`) 미충족. trigger5(직전20 inclusive, 표본 충분) — review-code 계열 다수 발화, 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수).
+
+다음 사이클 추천 = components/{dashboard,layout,picks,predictions,shared}(5개 디렉토리, 약 95파일) 잔여 스코프 — CommunityVsAICard 중복 통합도 이 참에 같이 검토 권장. 또는 fix-incident/lotto/op-analysis gap 자연 대기. **Supabase DNS NXDOMAIN 76+ cycle 지속 — 사용자 billing 조치 필요. plan#29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — polish-ui: 2-chain lock forced, MLB insights twin-diff(plan#30), EN hub DB-degrade 배너 누락 + ISR hour 하드코딩 2건 수정 (cycle 3095, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3094 retro `95b07b0d`) OK. 직전8(3087-3094) distinct=2(review-code(heavy)7+info-architecture-review1) — 2-chain lock 충족, 둘 다 제외. fix-incident gap=28/20·op-analysis gap=74/25 도달하나 Supabase DNS NXDOMAIN 지속(billing 조치 필요, actionable 없음) skip. lotto gap=27/30 미근접, design-system/expand-scope 트리거 없음 — lock fallback: polish-ui 강제.
