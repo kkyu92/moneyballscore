@@ -1,4 +1,15 @@
 
+
+## ⚪ RETRO-ONLY — expand-scope: 2-chain lock(review-code+polish-ui) fallback, 신규 확장 기회 미발견 (cycle 3079, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 2일전, 불변). 2차 방어선(cycle 3078 retro `ab4b98b1`) OK. 직전8(3071-3078) distinct=2(review-code(heavy)7+polish-ui1) — **2-chain lock 발동, 둘 다 제외**(cycle 2147 선례와 동일 locked pair). gap trigger 4종 전부 미근접(fix-incident 12/20·lotto 11/30·info-arch 15/30)/블락(op-analysis 25+/25 충족이나 Supabase DNS NXDOMAIN 재확인 지속, 55+cycle). `gh run list` 전부 success/skipped — fix-incident 실제 incident 0건. info-arch route mtime -7 체크는 거의 전체 트리에 걸리는 false positive(실제 신규 라우트 아님), breadcrumb 미싱 전부 기존 확인된 false-positive(root/placeholder/redirect-only). 남은 pool 중 **expand-scope 조건(1)** — "직전4(3075-3078) 모두 {review-code,polish-ui} 안" — 유일하게 명시적으로 충족해 선택.
+
+**실행 (office-hours skip, 자동 fire 환경 — plan#29 선례 패턴)**: 메인 자율로 신규 scope-expansion 기회 재탐색. 결과: 이미 식별된 2대 이슈 — (1) Supabase billing INACTIVE(DNS NXDOMAIN, 55+ cycle 지속, 사용자 대시보드 조치 필요) / (2) plan#29 회원인증+커뮤니티(Tier4, risk=3, 자율 가능=no, 트래픽 실측 1/0/5/0 고착) — 외 신규 blind spot 발견 안 됨. 두 이슈 모두 이미 사용자 결정 큐에 있고 엔지니어링 스코프 확장으로 해결될 영역이 아님. 트래픽 근거 부재 상태에서 신규 기능 확장은 risk 대비 가치 낮다고 판단 — **확장 가치 부족 결론**.
+
+코드 변경 0건.
+
+다음 사이클 추천 = lock cooldown 1 cycle 경과 후 review-code(heavy) 복귀(잔존: `harness.ts` dead-skeleton 정리 또는 `walkForwardSplit` dead code 제거) 또는 fix-incident(gap=13/20)/lotto(gap=12/30)/info-arch(gap=16/30) 자연 대기. **Supabase INACTIVE 56+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(2일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## ⚪ RETRO-ONLY — review-code(heavy): packages/kbo-data/src/context/measurement.ts 전수 감사, drift 0건 (cycle 3078, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 10/15 3일전 불변). 2차 방어선(cycle 3077 retro `9fd628a1`) OK. 직전8(3070-3077) distinct=3(review-code(heavy)6+review-code1+polish-ui1) — 2-chain lock 미충족. gap trigger: fix-incident 11/20·lotto 10/30·info-arch 14/30 전부 미근접. Supabase INACTIVE 재확인(DNS ENOTFOUND 지속) — op-analysis 블락 유지. `gh run list` 전부 green/skipped. cycle 3075/3076 양쪽이 공통 추천한 잔여 스코프 `context/measurement.ts`(233L, context/ 디렉토리 유일 미감사 파일) 채택.
