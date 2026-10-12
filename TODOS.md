@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): kbo-data context/ 잔존 "7 agent" stale comment drift 3건 수정 (cycle 3097, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved status). 2차 방어선(cycle 3096 retro `6032d192`) OK. 직전8(3089-3096) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족(distinct=3>2). gap trigger: fix-incident 30/20 도달하나 `gh run list` 재확인(CI 전부 success/in_progress, CI Failure Dispatch 전부 skipped) — 실제 인시던트 부재 skip. op-analysis Supabase 재확인(`node dns lookup` ENOTFOUND 지속, 75+ cycle) — 블락 유지 skip. lotto gap=29/30(cron 산출물 picks/results 10/10 둘 다 최신, stale 아님)·info-arch gap=6/30 전부 미근접. cycle 3096 이 추천한 `packages/kbo-data/src/context/measurement.ts`(233L, 여러 사이클째 잔존 후보) 채택.
+
+**직접 read(본 메인, agent 위임 없이)**: `measurement.ts`(233L) 전수 read. index.ts 배럴 확인 결과 실사용처(scripts/measure-context-layer-brier.ts, scripts/llm-context-baseline.ts) + 전용 테스트(measurement.test.ts) 정상 확인 — dead export 0건(cycle 2927 가 이미 HallucinationStats/TokenBudgetStats/BrierStats/ContextLayerBrierDelta export 키워드 제거 완료 확인). `measureBrierStats` 의 `prob >= 0.5` tie-break 도 cycle 3094 가 통일한 `metrics.ts` 컨벤션과 일치 — drift 없음.
+
+**확정 버그 1건 (잔존 comment drift, cycle 2927 후속)**: cycle 2927(#3107)가 `agent-context.ts`/`domain.ts`/`metrics.ts` 3파일의 "7 agent(postview/judge/team/personas/debate/calibration/rivalry-memory)가 소비" 서술을 실사용 재확인 후 "judge/postview/team/validator 4곳(+도메인별 calibration-agent/retro.ts/predictor.ts 추가 소비)" 로 정정했으나, 같은 파일들 안 **별개 위치**에 남아있던 bare count 서술 3곳은 그 수정에서 누락됨 — 같은 파일 안에서 "4곳" 과 "7 agent" 가 동시에 존재하는 내부 모순 상태였음: `agent-context.ts:17`("Step 4 ... 7 agent 가 실제 소비"), `agent-context.ts:56`("LLM Agent 표준 ContextPayload — 7 agent 공통 input"), `measurement.ts:6`("LLM agent 7곳에 통합"). `domain.ts`/`metrics.ts` 는 해당 패턴(bare count) 자체가 없어 이미 clean 확인.
+
+수정: 3곳 전부 "4 agent(judge/postview/team/validator)" 로 정정(cycle 2927 가 확정한 실제 직접 소비처 리스트와 정합). 값/로직 변경 없음(주석만).
+
+검증: `tsc --noEmit`(kbo-data) clean, `pnpm --filter @moneyball/kbo-data test` context 스코프 96 files/1216 tests 전체 green, lint clean. 직접 main 커밋+push(R4 범위, `2be6cc4c`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**skill-evolution trigger 평가**: milestone(`3097 % 50 = 47`) 미충족. trigger5(직전20 inclusive, 3078-3097) — review-code 계열 다수 발화 지속, 미충족(표본 10+ 충족, review-code 1개뿐 평가 대상이라 distinct 측정 무의미 — 항상 미충족 구조). ship-0 emergency stop 미충족(직전10 중 success 다수: 3090/3093/3094/3096/3097 success, 3091/3092/3095 retro-only/lock-forced, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/backtest/__tests__/` 테스트 커버리지 보완 또는 components/{dashboard,layout,picks,predictions,shared} 5개 잔여 서브디렉토리(cycle 3096 이 분리한 잔존 스코프)) 또는 fix-incident(gap=31/20, 실제 incident 부재 재확인됨)/op-analysis(Supabase 블락 지속, 75+ cycle)/lotto(gap=29/30, 거의 근접)/info-arch(gap=6/30, 직전 쿨다운) 자연 대기. **Supabase DNS ENOTFOUND 75+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): components/{accuracy,reviews,matchup} 전수 감사, EN 한글 텍스트 누출 + MLB 팀명 wrap + glossary 링크 누락 3건 수정 (cycle 3096, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(전부 non-approved status). 2차 방어선(cycle 3095 retro `a82489d6`) OK. 직전8(3088-3095) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. gap trigger: fix-incident 29/20·op-analysis 80+/25 도달하나 Supabase DNS NXDOMAIN 지속(billing 조치 필요, actionable 없음) skip. lotto gap=28/30·info-arch gap=5/30 미근접. explore-idea saturation 직전15 15/15(역대 최고치, review-code(heavy)+polish-ui+info-arch dominance) 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 45.6h 신선) — 반복 패턴과 동일 skip. cycle 3093 추천대로 components/ 잔여 서브디렉토리 중 accuracy(8파일)+reviews(10파일)+matchup(11파일) 29파일 신규 스코프 선정(dashboard/layout/picks/predictions/shared 5개는 다음 사이클 잔여).
