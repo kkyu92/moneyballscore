@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): KBO app/*/page.tsx 20개 전수 감사, MLB insights 6파일 stale "에이전트 토론" copy 정정 (cycle 3063, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 불변, 만료 2026-10-15 임박이나 사용자 결정 대기). 2차 방어선(cycle 3062 retro `bc7e2a44`) OK. 직전8(3055-3062) distinct=3(review-code(heavy)6+review-code1+polish-ui1) — 2-chain lock 미충족. gap trigger: fix-incident 16/20·info-arch 27/30·lotto 25/30 전부 미근접. op-analysis 25+ 트리거 충족이었으나 Supabase 재확인(nslookup NXDOMAIN 지속, INACTIVE 장기화) — 블락 유지 스킵. explore-idea saturation 직전15 13/15(review-code(heavy) dominance) 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale/DESIGN.md 41h 신선) — 과거 반복 패턴과 동일 skip, review-code(heavy) 계속. cycle 3062 추천대로 KBO 쪽 app/*/page.tsx(지금까지 analysis/accuracy 만 개별 확인, predictions/reviews/guide/insights/login/search 등 미확인) 선정.
+
+subagent 위임 20개 KBO page.tsx 전수 read(predictions/[date], reviews(4종), guide, insights(3종), login, search, settings, calendar, glossary, dashboard, leaderboard, picks) → **20개 전부 clean** — 기존 defensive pattern(Promise.allSettled + captureFallback + dbDegraded 배너) 이미 정합 확인, 수정 0건.
+
+단 스코프 밖 실제 버그 2건 발견 보고 — 직접 검증 후 1건 확정 수정:
+1. **확정 버그**: `mlb/insights/{page,[date]/page,series/[topic]/page}.tsx` + en 미러 3개(총 6파일)가 "정량 모델 + 양팀 에이전트 토론 + 심판 종합" 문구로 MLB 도 KBO 처럼 LLM judge debate 를 거치는 것처럼 설명 — 실제로는 `mlb/methodology/page.tsx`("LLM 토론 layer 없이") + `mlb-pipeline.ts:437-443`("LLM debate 미구현, debate_version 항상 null") + `insights-data.ts` 자체 주석(reasoning 컬럼 league='mlb' 전량 NULL, 쿼리 항상 빈 배열 반환)과 정면 모순. methodology 페이지 기준으로 6파일 metadata+header+footer 문구 정정(commit `b8598e77`).
+2. **false positive**: `mlb/calendar/page.tsx` 가 "DB 장애 시 unguarded crash" 로 플래그됐으나 `getMlbMonthHeatmap()` 내부가 이미 assertSelectOk 를 try/catch+captureFallback 으로 감싸 항상 graceful degrade — KBO 와 레이어만 다를 뿐(페이지 레벨 vs lib 레벨) 실제 버그 아님, 미수정.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 589/589 파일·4643/4643 테스트 PASS. 직접 main 커밋 + push(PR 미경유, R4 범위, commit `b8598e77`).
+
+다음 사이클 추천 = review-code(heavy) 계속 — KBO app/*/page.tsx 잔여(about/changelog/community/contact/debug 6종/glossary 외/lotto 5종/matchup/methodology/players/privacy/seasons/standings/teams/terms/v2-preview/v2-shadow-monitor 등 미확인) 또는 packages/kbo-data 잔여 소형 파일 또는 fix-incident(gap=17/20)/lotto(gap=26/30)/info-arch(gap=28/30) 자연 대기. **plan #29(로그인+커뮤니티) 만료 2026-10-15 임박 — Tier4 사용자 결정 대기 계속, 자율 처리 불가.** **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만.**
+
 ## 🟢 SUCCESS — review-code(heavy): mlb/**/page.tsx 27개 전수 감사, insights crash 가드 + stale ETA/comment drift 4건 수정 (cycle 3062, 2026-10-12)
 
 진단: open issue 0, approved plan 0/24(status: approved 매칭 0건 — completed_*/archived/deferred 등 전부 처리 완료 상태). 2차 방어선(cycle 3061 retro `10972f3d`) OK. 직전8(3054-3061) distinct=3(review-code(heavy)6+review-code2+polish-ui1, 리터럴 split 기준) — 2-chain lock 미충족. fix-incident gap=15/20·info-arch gap=26/30·lotto gap=24/30 전부 미근접. op-analysis gap=25+ 트리거 충족이었으나 Supabase `utmimgpccbrciwuuacyw.supabase.co` 재확인 결과 여전히 NXDOMAIN(INACTIVE 지속) — 블락 유지, 스킵. lotto cron 재확인: lotto-pick-update 정상, lotto-result-update 일부 workflow_dispatch 실패 확인했으나 원인 = 이미 알려진 dhlottery+lottolyzer 완전 불능(기존 수동 override 상태 지속, 신규 아님) — 액션 불필요. explore-idea saturation 4/15 미충족. lib/ + packages/kbo-data 는 이미 반복 스윕으로 거의 포화 상태 — app/ 라우트 레벨(page.tsx, 지금까지 lib/components/api 위주로만 감사되고 페이지 자체는 일부만 커버)에 미스윕 축 발견, 그중 MLB 라우트(KBO twin 드리프트 재발 bug class — cycle 3010/3014/3048 등)가 가장 리스크 높아 선정.
