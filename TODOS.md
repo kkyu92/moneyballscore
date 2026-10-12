@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/backtest/ 전수 감사 — 더블헤더 look-ahead bias 수정 (cycle 3076, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(전부 archived/completed/status≠approved). 2차 방어선(cycle 3075 retro `9fa3220d`) OK. 직전8(3068-3075) distinct=3(review-code(heavy)5+review-code(lite)2+lotto1) — 2-chain lock 미충족(≤2 요건). gap trigger: fix-incident 9/20·lotto 8/30·info-arch 12/30 전부 미근접. op-analysis Supabase INACTIVE 재확인(DNS ENOTFOUND 지속) — 블락 유지. explore-idea saturation 4/15 미충족. cycle 3075 추천 두 후보(`context/measurement.ts` 잔존 / `backtest/`) 중 `backtest/`(13파일 2051줄) 채택 — git log 상 cycle 2980/3040/3110 개별 버그 fix 는 있었으나 디렉토리 단위 전수 read sweep 이력은 없었음.
+
+**review-code(heavy) 실행**: agent 위임 전수 read(13파일 2051줄 + __tests__). 대부분 CLEAN. **확정 발견 1건**: `runner.ts`의 `runBacktest` 가 경기를 시간순 1건씩 순회하며 처리 직후 즉시 prior 버퍼에 반영 — `loader.ts`의 `buildFeatures` 계약("모든 feature 는 game_date 미만 데이터로만 구성, look-ahead bias 0")을 더블헤더(같은 날 같은 두 팀 2경기) 상황에서 위반. 첫 경기 처리 → prior 즉시 push → 같은 날 두 번째 경기가 첫 경기 결과를 h2h/최근폼 계산에 누출. 동일 silent-drift family(cycle 2083 `mlb-elo.ts` 더블헤더 dedupe 버그)의 재발 패턴.
+**수정**: 같은 `game_date` 배치를 모아 동일 prior 스냅샷으로 처리 후, 배치 전체가 끝나야 prior 에 반영하도록 `runBacktest` 루프 재구성 (`422d3aeb`). `runner.ts` 자체 테스트 커버리지가 0 이었음을 확인 — 더블헤더 누출 회귀 테스트(`backtest-runner.test.ts`) 신규 작성, 날짜 경계 정상 동작(다음날 경기는 prior 정상 반영) 케이스도 포함.
+그 외 발견 (수정 보류, 다음 사이클 후보): `harness.ts`(241줄) 가 cycle 893 skeleton 이후 wiring 미완성 — 프로덕션 호출자 0, config 필드 silent no-op. `walk-forward-helpers.ts`의 `walkForwardSplit` 은 cycle 1019 이후 superseded 돼 자신의 테스트 외 호출자 0(dead code). 둘 다 risk 낮은 cleanup 이나 이번 cycle 스코프 밖(핵심 correctness fix 와 분리) — 과욕 방지.
+
+**검증**: `pnpm --filter @moneyball/kbo-data test` 97 files/1237 tests PASS(신규 테스트 포함), `tsc --noEmit` clean(kbo-data+moneyball), `pnpm --filter @moneyball/kbo-data lint` clean. 직접 main 커밋(PR 미경유, R4 범위) + push, pre-push hook(lint+type-check+version-sync-guard) 전부 PASS.
+
+다음 사이클 추천 = review-code(heavy) 는 `harness.ts` dead-skeleton 정리/완성 결정 또는 `walkForwardSplit` dead code 제거, 혹은 `context/measurement.ts` 잔존, 혹은 fix-incident(gap=10/20)/lotto(gap=9/30)/info-arch(gap=13/30) 자연 대기. **Supabase INACTIVE 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(1일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): lib/mlb/ 전수 감사 완료 — 공유 NEUTRAL_FACTOR 상수 미사용 수정 (cycle 3074, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 spec_only_deferred Tier4, 만료 2026-10-15 3일 남음, 사용자 결정 대기 불변). 2차 방어선(cycle 3073 retro `b011d1a4`) OK. 직전8(3066-3073) distinct=4(review-code(heavy)6+fix-incident1+lotto1) — 2-chain lock 미충족. gap trigger: fix-incident 7/20·lotto 6/30·info-arch 10/30 전부 미근접. op-analysis Supabase INACTIVE 재확인(DNS ENOTFOUND 지속) — 블락 유지. explore-idea saturation 미충족. cycle 3073 추천대로 lib/mlb/(18파일, 2840줄, 유일 미감사 lib subdir) 채택 — 완료 시 lib/ 전체 전수 감사 완주.
