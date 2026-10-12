@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/pipeline 0-mention 6개 전수 감사, 신규 drift 0건 (cycle 3109, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3108 retro `61a1a785`) OK. 직전8(3101-3108) distinct=3(review-code(heavy)6+skill-evolution1+fix-incident(lite)1) — 2-chain lock 미충족. fix-incident gap=5, op-analysis Supabase DNS ENOTFOUND 재확인(86+ cycle 지속 블락, `node dns lookup` 직접 재확인 ENOTFOUND), lotto gap=11/30·info-arch gap=18/30 전부 미근접.
+
+cycle 3108 next_recommended(`packages/kbo-data/src/pipeline/` 0-mention 6개) 채택 — `accuracy-update.ts`/`brier.ts`/`daily-summary.ts`/`db-error.ts`/`prediction-history.ts`/`winner-id.ts` 전수 read(subagent 위임) + 전체 caller 교차검증(`daily.ts`/`live.ts`/`calibration-agent.ts`/`scripts/op-analysis-brier-drift.ts`).
+
+**신규 drift 0건** — 6개 파일 전부 clean. `brier.ts` Brier score 공식 재검증((p−outcome)² 평균, COIN_FLIP_BRIER=0.25 수학 정합) — 유일한 caller 가 `scripts/op-analysis-brier-drift.ts`(초기 좁은 grep 이 `apps/`/`packages/` 만 봐서 놓칠 뻔, `scripts/` 포함 재검색으로 확인). `prediction-history.ts` 주석의 "cycle 2823 wiring fix" 주장(reverseTeamMap 비어있지 않은 맵 전달)을 `daily.ts:1384` 실제 호출부로 재확인 — 주석 정확. `winner-id.ts`의 `computeWinnerTeamId` 파라미터 순서 3개 호출부(`daily.ts` x2, `live.ts`) 전부 일치. `db-error.ts` re-export shim 도 `@moneyball/shared` 경로 정합.
+
+**packages/kbo-data/src/pipeline/ 디렉토리 전체 파일 CHANGELOG mention ≥1 확보 완료** — 추가로 kbo-data 하위 전체 서브디렉토리(agents/backtest/context/engine/factors/features/notify/pipeline/scrapers/analytics) 파일 단위 0-mention 재확인 결과 전부 소진 확인. 다음 축 후보 = `apps/moneyball/src/lib/` (components/hooks/app/api/scripts/kbo-data 전부 소진 후 미탐색 큰 디렉토리, 서브디렉토리 다수: accuracy/analysis/dashboard/leaderboard/lotto/mlb/observability/picks/predictions/seo/stats/supabase 등).
+
+검증: 코드 변경 없음(읽기 전용 감사) — `pnpm test` 불필요.
+
+**skill-evolution trigger 평가**: milestone(`3109 % 50`) 미충족. trigger5(직전20 inclusive, review-code 단독 평가) — 0회 아님, 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
+
 ## 🟢 SUCCESS — review-code(heavy): scripts/*.ts 0-mention 잔여 7개 전수 감사, 신규 drift 0건 (cycle 3108, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3107 retro `a6cc5774`) OK. 직전8(3100-3107) distinct=3(review-code(heavy)6+skill-evolution1+fix-incident(lite)1) — 2-chain lock 미충족. fix-incident gap=4, op-analysis Supabase DNS ENOTFOUND 재확인(85+ cycle 지속 블락), lotto gap=10/30·info-arch gap=17/30 전부 미근접.
