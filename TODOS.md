@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): scripts/backfill-*.ts 3건 전수 감사, env var drift 수정 (cycle 3083, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed). 2차 방어선(cycle 3082 retro `90be8013`) OK. 직전8(3075-3082) distinct=4(review-code(heavy)5+polish-ui1+expand-scope1+review-code1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 16/20·lotto 15/30·info-arch 19/30). op-analysis gap 충족하나 Supabase DNS NXDOMAIN 블락 지속(58+ cycle) — skip. DESIGN.md mtime 신선 — design-system 미근접. cycle 3082 추천대로 `scripts/backfill-is-correct-shadow-fix.ts`/`backfill-shadow-cohort.ts`/`backfill-home-win-prob.ts`(cycle 2762 sweep 누락분, 478L) 채택.
+
+**조사**: 3개 스크립트 전수 read + 호출 대상(`packages/shared/src/index.ts` scoring rule 상수, `packages/kbo-data/src/pipeline/shadow-cohort.ts` insertShadowRow/computeShadowPrediction, `apps/moneyball/src/lib/accuracy/buildAccuracyData.ts` resolveWinnerProb) cross-check. `backfill-is-correct-shadow-fix.ts`/`backfill-home-win-prob.ts` — import/시그니처/NEUTRAL_FACTOR 값 전부 현재 코드 일치, drift 0건. `backfill-shadow-cohort.ts`(cycle 1014 작성) — `process.env.SUPABASE_URL` 요구하나 `.env.local`엔 `NEXT_PUBLIC_SUPABASE_URL`만 존재(다른 모든 backfill 스크립트 동일 convention, `import-tabpfn-predictions.ts` 는 fallback 패턴까지 갖춤) — 문서화된 사용법(`pnpm tsx scripts/backfill-shadow-cohort.ts`)대로 실행 시 가드 체크에서 항상 `exit 1` — 영구 비기능 drift 발견.
+
+수정: 주석 + 실제 env var read 를 `NEXT_PUBLIC_SUPABASE_URL` 로 정정(다른 backfill 스크립트 convention 통일).
+
+검증: `pnpm --filter kbo-data exec tsc --noEmit` clean. 직접 main 커밋 + push(R4, PR 미경유, pre-push hook lint+type-check+version-sync-guard PASS). `f9072100`.
+
+다음 사이클 추천 = review-code(heavy) 계속(`scripts/` 나머지 미감사 파일 재확인 — find 전수 커밋이력 대조) 또는 fix-incident(gap=17/20)/lotto(gap=16/30)/info-arch(gap=20/30) 자연 대기. **Supabase INACTIVE 58+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): scripts/ dev-diagnostic 3종 전수 감사, umpire scraper stale 주석 수정 (cycle 3082, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed). 2차 방어선(cycle 3081 retro `b7b872d3`) OK. 직전8(3074-3081) distinct=3(review-code(heavy)6+polish-ui(lock fallback)1+expand-scope1) — 2-chain lock 미충족(distinct=3>2). gap trigger 전부 미근접(fix-incident 15/20·lotto 14/30·info-arch 18/30). op-analysis gap≥25 충족하나 Supabase DNS NXDOMAIN 재확인 재지속(57+ cycle, `getaddrinfo ENOTFOUND`) — 블락 유지, skip. `gh run list` 전부 success/in_progress/skipped — 실제 incident 0건. explore-idea saturation 4/15 미충족. DESIGN.md mtime 2일(신선) — design-system 미근접. cycle 3081 추천 `app/api` 나머지 저커밋 route(picks/mlb-poll/mlb-waitlist/picks-poll/indexnow-ping 등) 재확인 결과 전부 cycle 2806/2838/2947-2953/3249-3253 에서 이미 전수 감사 완료 확인(신규 스코프 아님) — `apps/moneyball/src/hooks/`(use-user-picks/use-kbo-scores) 도 cycle 325/2896/2988 에서 완료 확인. Explore subagent 위임 전체 디렉토리 스캔 → `scripts/dev-debate.ts`/`dev-backend-compare.ts`/`smoke-umpire-scraper.ts`(367L, agents 모듈 호출, TODOS/CHANGELOG 0회 언급) 신규 미감사 축 발견.
