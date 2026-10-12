@@ -39,6 +39,10 @@ interface NaverGame {
   // LIVE/FINAL 은 과거 문서 형식 — 호환 위해 유지.
   statusCode: 'BEFORE' | 'STARTED' | 'LIVE' | 'RESULT' | 'FINAL' | 'CANCEL';
   statusInfo: string;
+  // naver-schedule.ts (packages/kbo-data) 와 동일 엔드포인트 응답 필드 — cancel/suspended
+  // 가 statusInfo 텍스트 매칭보다 우선하는 구조적 시그널 (cancel=true 가 최우선).
+  cancel?: boolean;
+  suspended?: boolean;
   stadium: string;
   gameDateTime: string;
   homeTeamEmblemUrl: string;
@@ -61,7 +65,11 @@ export interface LiveScore {
   gameTime: string;
 }
 
-function mapStatus(code: string, info?: string): LiveScore['status'] {
+function mapStatus(code: string, info?: string, cancel?: boolean, suspended?: boolean): LiveScore['status'] {
+  // cancel/suspended 구조적 필드 최우선 (naver-schedule.ts mapStatus 와 동일 우선순위).
+  if (cancel || suspended) {
+    return 'postponed';
+  }
   // statusInfo 한국어 '취소' / '연기' 텍스트 폴백 — Naver API 가 우천취소 시
   // statusCode='BEFORE' + statusInfo='경기취소' 응답 (statusCode='CANCEL' 만
   // 의존 시 'scheduled' fallback → UI / verify mode silent drift). 실측 패턴.
@@ -127,7 +135,7 @@ export async function GET(request: NextRequest) {
       awayTeamName: g.awayTeamName,
       homeScore: g.homeTeamScore ?? 0,
       awayScore: g.awayTeamScore ?? 0,
-      status: mapStatus(g.statusCode, g.statusInfo),
+      status: mapStatus(g.statusCode, g.statusInfo, g.cancel, g.suspended),
       statusText: g.statusInfo ?? '',
       stadium: g.stadium ?? '',
       gameTime: g.gameDateTime?.split('T')[1]?.slice(0, 5) ?? '',
