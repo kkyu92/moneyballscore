@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — polish-ui(2-chain lock fallback): insights/series/[topic] h1 token drift + MLB twin BreadcrumbList JSON-LD 누락 수정 (cycle 3086, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3085 retro `1c74eb33`) OK. **2-chain lock 탐지**: 직전8(3078-3085) distinct=2 (review-code(heavy) 7 + expand-scope 1) — lock 발동. 다른 gap trigger 전부 미근접(fix-incident 19/20·lotto 18/30·info-arch 22/30), op-analysis gap 충족이나 Supabase DNS NXDOMAIN 지속 블락(`nslookup` NXDOMAIN 재현) — skip. DESIGN.md mtime 1.8일 신선 — design-system 미근접. explore-idea saturation 2/15 미충족. 승인 plan 0건. → lock fallback 규칙(다른 chain trigger 전무 시 polish-ui 강제) 적용, **polish-ui** 발화.
+
+**진단 2단계**: 최근 7일 실제 git-add 기준(mtime 아님 — mtime -10 은 bulk touch 로 거의 전체 디렉토리 걸려 신뢰 불가, `git log --diff-filter=A` 로 재확인) 신규 라우트 = `insights/series/[topic]` KBO + `mlb/insights/series/[topic]` MLB twin(plan #30 Phase 3 이식, cycle 2946 패턴 재사용) 2개. `/plan-design-review` 풀 시퀀스는 **첫 tool call 자체가 AskUserQuestion scope gate**(SKILL 본문 "하드 STOP, 첫 호출 반드시 AskUserQuestion") — 자동화 zero-touch 환경에서 응답 없는 무한 대기 위험(cycle 178/200 AskUserQuestion hang 선례와 동일 class). skip 하고 direct manual diff 로 대체(skill-evolution 의 `/office-hours` skip 패턴과 동일 mitigation).
+
+**조사**: KBO/MLB twin 파일 전체 `diff` 대조. 발견 2건: (1) KBO h1 `text-brand-700` — 같은 insights 계열 다른 3개 파일(`insights/page.tsx`/`insights/[date]/page.tsx`, KBO+MLB 전부 `text-brand-900`) 대비 유일한 outlier(cross-check: `grep "text-3xl font-bold text-brand" apps/moneyball/src/app/mlb/*/page.tsx apps/moneyball/src/app/insights/*/page.tsx`). (2) MLB twin이 BreadcrumbList JSON-LD 전부 누락 — KBO 원본(`buildBreadcrumbListJsonLd` 생성)은 갖고 있는데, MLB 포팅 시 `articleJsonLd` 는 수동 재구현(helper 미사용)하면서 breadcrumb 자체를 빠뜨림 — 자기 주석("KBO twin ... 패턴 이식")과 달리 포팅 불완전, SEO breadcrumb rich snippet 누락.
+
+수정: KBO h1 `brand-700`→`brand-900` 통일. MLB twin에 `@/lib/seo/json-ld` 의 `buildArticleJsonLd`/`buildBreadcrumbListJsonLd` 헬퍼 import + 재사용(수동 object 제거), breadcrumb `<script>` 태그 추가.
+
+검증: `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm --filter moneyball lint` clean. 직접 main 커밋 + push(R4, PR 미경유, pre-push hook lint+type-check+version-sync-guard PASS). `6675a319`.
+
+**skill-evolution trigger 평가**: milestone(`3086 % 50 = 36`) 미충족. trigger5 표본(직전20, 정확 매치 `"review-code"` 만 카운트하는 regex) = 8 < 10(표본 임계 미달) — `"review-code(heavy)"`(공백 없는 포맷)가 정규식 미매치되어 표본이 희석된 기존 known quirk(이번에 새로 발견, 수정은 보류 — scope 밖). skip 자동 적용. ship-0 emergency stop 미충족(직전10 중 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속(`scripts/op-analysis-*.ts` 7개 잔여 미감사) 또는 fix-incident(gap=20/20 도달)/lotto(gap=19/30)/info-arch(gap=23/30) 자연 대기. **Supabase DNS NXDOMAIN 61+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): scripts/ 미감사 8건 전수 감사, import-tabpfn-predictions.ts reasoning 이중 인코딩 버그 수정 (cycle 3085, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed). 2차 방어선(cycle 3084 retro `115b1a97`) OK. 직전8(3077-3084) distinct=4(review-code(heavy)6+polish-ui1+expand-scope1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 18/20·lotto 17/30·info-arch 21/30). op-analysis gap≥25 충족하나 Supabase DNS NXDOMAIN 재확인(`nslookup` NXDOMAIN 재현) 지속 — skip. DESIGN.md mtime 1.8일(신선) — design-system 미근접. explore-idea saturation 3/15(미충족, 과포화 아님). `gh run list` CI Failure Dispatch 전부 skipped — 실제 incident 0건. cycle 3084 추천대로 `scripts/` 나머지 미감사 파일 선별 — CHANGELOG grep 기준(가드레일 준수, 전수 read 로 실제 커버리지 확인) `backtest-v2-candidate.ts`/`backtest.ts`/`cohort-cleanup.ts`/`dev-postview.ts`/`export-predictions-tabpfn.ts`/`import-tabpfn-predictions.ts`/`measure-n178-vs-n165.ts`/`update-stale-data.ts` (8파일, op-analysis-*.ts 7개는 다음 사이클로 이연) 채택.
