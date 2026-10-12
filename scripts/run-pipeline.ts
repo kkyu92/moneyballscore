@@ -1,7 +1,7 @@
-import { runDailyPipeline } from '../packages/kbo-data/src/pipeline/daily';
+import { runDailyPipeline, type PipelineMode } from '../packages/kbo-data/src/pipeline/daily';
 
 const date = process.argv[2] || undefined;
-const mode = (process.argv[3] as 'predict' | 'verify') || 'predict';
+const mode = (process.argv[3] as PipelineMode) || 'predict';
 
 console.log(`Running pipeline: date=${date || 'today'} mode=${mode}`);
 console.log('---');
