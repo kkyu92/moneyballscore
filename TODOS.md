@@ -12147,3 +12147,20 @@ cycle 3056~3058 이 `apps/moneyball/src/lib/` 를 api/calendar/stats/observabili
 검증: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm --filter moneyball test` 588 files/4638 tests 전체 green. 직접 main 커밋+push(R4 범위, `ece714ba`, pre-push lint+type-check+version-sync-guard PASS).
 
 다음 사이클 추천 = review-code(heavy)(packages/kbo-data backtest/scrapers 잔여 재탐색, 또는 lib/ 나머지 소형 subdir — insights/leaderboard/predictions/players/standings/seasons/seo/mlb/picks/lotto/v2-shadow-monitor/changelog/debug) 또는 lotto(gap=22/30) 또는 info-arch(gap=24/30) 또는 fix-incident(gap=13/20). op-analysis 는 Supabase billing 해결 전까지 매 cycle 재확인만 유지.
+
+## 🟢 SUCCESS — review-code(heavy): lib/reviews 빌더 로직 KBO↔MLB parity 재감사, MLB monthly topTeam 오라벨링 확정 수정 (cycle 3071, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/23(plan#29 spec_only_deferred/plan#30 completed, 리터럴 `approved` 매칭 0건). 2차 방어선(cycle 3070 retro `5b56d1e2`) OK. 직전8(3063-3070) distinct=5(review-code(heavy)4+review-code(lite)1+info-arch1+fix-incident1+lotto1) — 2-chain lock 미충족. Supabase 재확인(`node dns lookup` ENOTFOUND 재확인) — INACTIVE 지속, op-analysis 스킵. gap trigger: fix-incident 4/20·lotto 3/30·info-arch 7/30 전부 미근접. explore-idea saturation 5/15<12 미충족. DESIGN.md mtime 42h(<4주) — design-system 미충족. cycle 3070 이 "review-code(heavy) 백로그 사실상 소진, 다음은 buildWeeklyReview/buildMonthlyReview/shared.ts/mlb-shared.ts 리뷰 빌더 로직 자체" 로 명시 추천한 스코프 채택.
+
+**사전 확인**: `lib/reviews/` 디렉토리는 과거 cycle 2908(unused export 제거)/또 다른 cycle(unused type/interface 제거)/또 다른 cycle(`SMALL_SAMPLE_N` 매직넘버 통일) 등 여러 차례 export-cleanup/magic-number 차원 감사를 거쳤으나, "빌더 로직 자체(비즈니스 로직 정확성)" 차원의 KBO↔MLB parity 비교 감사는 미수행 확인 — 신규 스코프로 적합.
+
+**subagent 위임 전수 read**: `shared.ts`(213L)/`mlb-shared.ts`(409L)/`buildWeeklyReview.ts`(164L)/`buildMlbWeeklyReview.ts`(176L)/`buildMonthlyReview.ts`(167L)/`buildMlbMonthlyReview.ts`(187L)/`buildMissReport.ts`(212L)/`computeWeekRange.ts`(151L)/`computeMonthRange.ts`(103L) + 테스트 8개 전수 read, KBO↔MLB 쌍 line-by-line 비교.
+
+**확정 버그 1건**: MLB 월간 리뷰의 "가장 정확했던 팀"이 실제론 "가장 많이 예측된 팀" — KBO/MLB parity drift. `shared.ts`의 `buildTeamStats()`는 `{ sortBy: "accuracy" }` 옵션을 지원하고 KBO `buildMonthlyReview.ts:141`이 이 옵션으로 호출해 `topTeam`이 올바르게 최고 정확도 팀을 반환. 반면 `mlb-shared.ts`의 `buildMlbTeamStats()`는 sortBy 옵션 자체가 부재 — 항상 `predicted` 내림차순 정렬뿐이었고, `buildMlbMonthlyReview.ts:160`이 옵션 없이 호출해 `topTeam = teamStats.find(...)`가 "가장 정확한 팀"이 아닌 "가장 많이 예측된 팀"을 반환하면서 두 locale 요약 문구(`가장 정확했던 팀은 ...` / "The most accurately predicted team was ...")가 그 팀을 정확도 라벨로 잘못 노출. 구체 실패 시나리오: A팀 predicted=20/correct=8(정확도 40%), B팀 predicted=6/correct=5(정확도 83%), `SMALL_SAMPLE_N=5` 조건에서 월간 요약이 B팀(83%, 진짜 최고 정확도) 대신 A팀(40%)을 "가장 정확한 팀"으로 노출. weekly 트윈 2종은 둘 다 옵션 없이(default "predicted") 호출해 애초 문제 없음 — monthly 만 드리프트.
+수정: `mlb-shared.ts`의 `buildMlbTeamStats()`에 `sortBy?: "predicted"|"accuracy"` 옵션 추가(KBO `TeamStatsSort` 대응) + `buildMlbMonthlyReview.ts`가 `{ sortBy: "accuracy" }`로 호출하도록 수정. 회귀 테스트 추가(`mlb-shared.test.ts`, default vs accuracy 정렬이 다른 팀 순서를 내는지 검증).
+
+**오탐 판단 (수정 안 함)**: `buildMissReport.ts`의 `limit*6` 오버페치 버퍼 vs MLB `buildMlbMissReport`의 무제한 fetch — 공유 상수 부재(드리프트 대상 자체가 없음) + 아키텍처 차이(KBO 전체 이력 vs MLB production cohort rule 범위)로 의도된 설계 판단. KBO 리뷰 빌더 4종(`buildWeeklyReview`/`buildMonthlyReview`/`shared.ts`/`buildMissReport`) 전용 유닛테스트 부재(MLB 트윈만 보유 + 공통 `silent-drift.test.ts`)는 기존 known gap(TODOS 기록만, 별도 액션 없음) 재확인, 이번 사이클 범위 밖으로 유지. `computeWeekRange`/`computeMonthRange`의 ISO-week/KST 시프트 산술은 수동 trace 결과 이상 없음(기존 전용 회귀 테스트도 충분).
+
+검증: `tsc --noEmit` clean, `pnpm --filter moneyball test` 589/589 파일 4644/4644 테스트 전체 green(회귀 테스트 1개 추가). 직접 main 커밋+push(R4 범위, `62c3bab6`, pre-push hook lint+type-check+version-sync-guard 전부 PASS).
+
+다음 사이클 추천 = review-code(heavy) 계속(`lib/` 나머지 소형 subdir — insights/leaderboard/predictions/players/standings/seasons/seo/mlb/picks/lotto/v2-shadow-monitor/changelog/debug, 빌더 로직 parity 차원 재적용 가능) 또는 fix-incident(gap=5/20)/lotto(gap=4/30)/info-arch(gap=8/30) 자연 대기. **Supabase INACTIVE 53+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
