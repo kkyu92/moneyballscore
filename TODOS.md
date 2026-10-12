@@ -1,4 +1,18 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): packages/kbo-data/src/context/measurement.ts 전수 감사, drift 0건 (cycle 3078, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 10/15 3일전 불변). 2차 방어선(cycle 3077 retro `9fd628a1`) OK. 직전8(3070-3077) distinct=3(review-code(heavy)6+review-code1+polish-ui1) — 2-chain lock 미충족. gap trigger: fix-incident 11/20·lotto 10/30·info-arch 14/30 전부 미근접. Supabase INACTIVE 재확인(DNS ENOTFOUND 지속) — op-analysis 블락 유지. `gh run list` 전부 green/skipped. cycle 3075/3076 양쪽이 공통 추천한 잔여 스코프 `context/measurement.ts`(233L, context/ 디렉토리 유일 미감사 파일) 채택.
+
+**직접 read(본 메인)**: `measurement.ts`(233L) 전수 + 호출처 2곳 추적 — `scripts/llm-context-baseline.ts`(165L, synthetic fixture baseline, cycle 1229)/`scripts/measure-context-layer-brier.ts`(130L, 실 DB cohort CLI, cycle 1239). `extractMetricPairsFromText`/`measureHallucinations`/`measureContextTokenBudget`/`measureBrierStats`/`measureContextLayerBrierDelta` 5개 함수 로직 전부 검증 — 버그 0건.
+
+**의심 사례 1건 조사 후 오탐 확정**: `measure-context-layer-brier.ts`가 `predictions` 테이블을 `.eq('prediction_type', 'pre_game')`만으로 쿼리하고 `league` 필터가 없어 KBO/MLB cohort 혼입(wave43 pre/post 경계 비교가 MLB 데이터로 오염) 가능성 의심 → 조사 결과 기각: `mlb-pipeline.ts`의 predictions insert 가 `game_id` 컬럼(KBO `games` 테이블 FK, `UNIQUE`)을 세팅하지 않아 MLB row 는 항상 NULL 유지 — 스크립트의 `games(home_team_id)` 조인이 MLB row 에서 null 반환 → `if (homeTeamId == null) continue` 가드가 MLB row 를 자연 배제. league 필터 없어도 안전한 구조 확인(명시적 league 필터 추가는 가독성 개선일 뿐 버그 수정 아님 — 변경 보류).
+
+**결과**: `packages/kbo-data/src/context/` 디렉토리(agent-context.ts/domain.ts/measurement.ts/metrics.ts 4파일) 전수 감사 완주(cycle 3075 + 본 cycle). 코드 변경 0건.
+
+검증: 코드 변경 없음(CLEAN 확정, 테스트/타입체크 불필요 — read-only 조사).
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 재탐색(`packages/kbo-data/src/agents/` 재확인 또는 app/api 잔여 route) 또는 fix-incident(gap=12/20)/lotto(gap=11/30)/info-arch(gap=15/30) 자연 대기. **Supabase INACTIVE 55+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## ⚪ RETRO-ONLY — polish-ui (2-chain lock fallback): DESIGN.md token vs 컴포넌트 재감사, drift 0건 (cycle 3077, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 spec_only_deferred Tier4, 만료 2026-10-15 3일 남음, 변화 없음). 2차 방어선(cycle 3076 retro `b2b3faf1`) OK. 직전8(3069-3076) distinct=2(review-code(heavy)6+review-code(lite)2) — 2-chain lock 충족, review-code 전체 제외. gap trigger: fix-incident 10/20·lotto 9/30(cron 산출물 최신, 2026-10-10 picks/results 정상)·info-arch 13/30 전부 미근접. op-analysis gap 25+ 충족하나 Supabase 여전히 INACTIVE(DNS ENOTFOUND/curl 000) — 블락 유지. explore-idea saturation 4/15 미충족. `gh run list` 확인 — CI Failure Dispatch 전부 skipped, 실제 incident 0건. 어떤 chain 도 trigger 없어 룰 명시 fallback — polish-ui 강제 발화 (cycle 3018 과 동일 패턴).
