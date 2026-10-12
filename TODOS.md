@@ -12437,3 +12437,21 @@ cycle 3056~3058 이 `apps/moneyball/src/lib/` 를 api/calendar/stats/observabili
 **skill-evolution trigger 평가**: milestone(`3092 % 50 = 42`) 미충족. trigger5(직전20 inclusive) — review-code 계열 다수 발화 지속, 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수: 3083/3084/3085/3088/3090 success, 3089/3091/3092 retro-only, fail 0건).
 
 다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/backtest/` 13파일 2051L 또는 `packages/kbo-data/src/context/measurement.ts` 233L — 둘 다 cycle 3025 이후 잔존 후보) 또는 fix-incident(gap=26/20, 실제 incident 부재 재확인됨)/op-analysis(Supabase 블락 지속)/lotto(gap=25/30) 자연 대기. **Supabase DNS NXDOMAIN 66+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/backtest 전수 감사, accuracyHit tie-break drift + CvPattern 타입 갭 수정 (cycle 3094, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 spec_only_deferred/plan#30 completed). 2차 방어선(cycle 3093 retro `9821752a`) OK. 직전8(3086-3093) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미충족. gap trigger: fix-incident 20/20 도달하나 `gh run list` 재확인(CI/Submit-Lesson 전부 success, CI Failure Dispatch skipped) — 실제 인시던트 부재 skip. op-analysis Supabase 재확인(`node dns lookup` ENOTFOUND 지속) — 블락 유지, skip. lotto gap=26/30·info-arch gap=3/30 전부 미근접. explore-idea saturation 3/15 미충족. cycle 3092/3093 이 연속 추천한 `packages/kbo-data/src/backtest/`(13파일 1790L, TODOS 언급 2건뿐 — ops 스크립트 참조만, 코드 감사 이력 사실상 0, cycle 3025 이후 잔존 후보) 채택.
+
+**subagent 위임 전수 read**(12파일 1790L 전부 + 테스트 + 전역 caller 7개 pipeline 스크립트 + `scripts/backtest-v2-candidate.ts` cross-check): index.ts 배럴/metrics.ts 수식/elo-history.ts 이진탐색/wayback-team-stats.ts 시즌 경계/runner.ts 더블헤더 lookahead 차단/models.ts 상수 import/backtest-v2-helpers.ts 가중치 값(SHADOW_V20_WEIGHTS 대조)/logistic.ts vs logistic-regression.ts(둘 다 live, 용도 분리 확인 — 중복 아님) 전부 clean. dead export 0건.
+
+**확정 버그 2건**:
+1. `backtest-v2-helpers.ts:accuracyHit()`가 `prob > 0.5`(strict) tie-break 사용 vs `metrics.ts:computeMetrics()`의 `prob >= 0.5` — 동일 "accuracy" 개념의 두 엔트리포인트(모델-벡터 하네스 vs production-row 하네스)가 정확히 0.5 지점에서 불일치. `computeProb()`가 소수 3자리 반올림(`Math.round(prob*1000)/1000`)이라 대칭 팩터 입력 시 실제 0.500 도달 가능(이론적 edge case 아님). 테스트 커버리지도 tie-point 0건. `metrics.ts` 컨벤션(`>= 0.5`)으로 통일 + tie-point 테스트 2건 추가.
+2. `walk-forward-helpers.ts:CvPattern` union(`'v18-only-rescore'|'rolling'|'train-and-test'`)에 `scripts/backtest-v2-candidate.ts:parseCvPattern()`이 실제로 반환하는 기본값 `'walk-forward'`가 누락 — 타입 에러지만 `scripts/`가 pnpm workspace 밖(tsx 트랜스파일만, type-check 미적용)이라 silent. union 에 `'walk-forward'` 추가 + 주석.
+
+**stale 주석 2건 수정(값/로직 변경 없음)**: `models.ts:teamHomeAdvantagesInEloPt()` 독스트링이 "홈 승률 − 리그 평균"이라 적었으나 실제 구현은 0.5 baseline 대비 변환만(리그 평균 차감 없음) — 정정. `loader.ts` 파일 헤더가 포괄적으로 "Look-ahead bias 0" 주장했으나 선택적으로 채워지는 Wayback 시즌말 stat 필드(`homeWoba`/`homeFip`/`homeSfr` 등)는 `types.ts:GameFeatures` 자체가 look-ahead bias 있다고 명시 — 핵심 feature(elo/form/h2h/park)만 bias-0 이라고 범위 좁혀 정정.
+
+검증: `tsc --noEmit`(kbo-data) clean, `pnpm --filter @moneyball/kbo-data test` 96 files/1216 tests 전체 green(tie-point 회귀 테스트 2개 추가), `pnpm --filter @moneyball/kbo-data lint` clean. 직접 main 커밋+push(R4 범위, `c39c2ad8`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**skill-evolution trigger 평가**: milestone(`3094 % 50 = 44`) 미충족. trigger5(직전20 inclusive, 3075-3094) — review-code 계열 다수 발화 지속, 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수: 3084/3085/3088/3090/3093/3094 success).
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/backtest/__tests__/` 테스트 자체 커버리지 보완 — accuracyHit tie-point 외 전 함수 edge-case 재점검 또는 `packages/kbo-data/src/context/measurement.ts`(233L, 여러 사이클째 잔존)) 또는 fix-incident(gap=21/20, 실제 incident 부재 재확인됨)/op-analysis(Supabase 블락 지속, 73+ cycle)/lotto(gap=27/30)/info-arch(gap=4/30, 직전 발화 쿨다운) 자연 대기. **Supabase DNS ENOTFOUND 73+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
