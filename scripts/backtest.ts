@@ -1,7 +1,7 @@
 import { fetchGames, DEFAULT_PARK_FACTORS } from '../packages/kbo-data/src/scrapers/kbo-official';
 import { fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher } from '../packages/kbo-data/src/scrapers/fancy-stats';
 import { predict } from '../packages/kbo-data/src/engine/predictor';
-import { toKSTDateString, ELO_NEUTRAL, ELO_NEUTRAL_WIN_PCT } from '../packages/shared/src/index';
+import { ELO_NEUTRAL, ELO_NEUTRAL_WIN_PCT } from '../packages/shared/src/index';
 import type { PredictionInput, ScrapedGame } from '../packages/kbo-data/src/types';
 
 const BACKTEST_SEASON = 2025;

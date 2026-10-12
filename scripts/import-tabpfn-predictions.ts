@@ -95,7 +95,6 @@ async function main(): Promise<void> {
       predicted_winner: predictedWinner,
       is_correct: isCorrect,
       model_version: 'tabpfn-shadow',
-      reasoning: JSON.stringify(base.reasoning),
       predicted_at: now,
       verified_at: game.winner_team_id != null ? now : null,
     };
