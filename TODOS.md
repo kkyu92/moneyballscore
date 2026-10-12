@@ -1,5 +1,19 @@
 
 
+## ⚪ RETRO-ONLY — info-architecture-review: 2-chain lock 재발 조기 발화, IA 14연속 재확정 (cycle 3091, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 spec_only_deferred Tier4 만료 2026-10-15 3일 남음 불변). 2차 방어선(cycle 3090 retro `c6746c19`) OK. 직전8(3083-3090) distinct=2(review-code(heavy)7+polish-ui1) — 2-chain lock 충족(review-code(heavy)/polish-ui 둘 다 fix-incident 아님 → lock 적용, 둘 다 후보 제외). 남은 pool 중 fix-incident(gap=24/20, `gh run list` 재확인 — CI 전부 success/skipped, 신규 incident 없음)·lotto(gap=23/30, cron 정상 주기)·op-analysis(Supabase egress quota 블락 지속) 보다 info-arch(gap=27/30, 마지막 발화 cycle 3064)가 임계에 가장 근접 — cycle 3064 선례(동일 lock 상황 조기 발화) 따라 선택.
+
+**검증**: cycle 3064 체크포인트(`54eac7ca`) 이후 범위 재검사 — 신규 라우트 0건(`--diff-filter=A -- '**/page.tsx'`), Header/Footer 변경 0 commit, breadcrumb 누락 후보 13건 전부 기존 known false-positive(debug/* 유틸 6종 + reviews/weekly·monthly redirect-only 2종 + community/login/settings placeholder 3종)와 100% 일치, sitemap.xml 구조 불변. 신규 drift 0건 — "현 IA 충분" 14연속 재확정.
+
+**부수 발견**: cycle 3090 수정(data-refresh-weekly/factor-backtest-weekly fail-fast 전환) 이후 실제 cron 2회 실행 확인(10-06 data-refresh, 10-11 factor-backtest) — 둘 다 label-swallow 버그는 해소(이제 진짜 실패가 silent 아닌 visible failure 로 보고), 근본 원인은 기존에 이미 알려진 Supabase egress quota 블락(billing 조치 필요, 신규 이슈 아님). 수정 의도대로 작동 확인.
+
+코드 변경 0건(checkpoint 문서만 추가) — actionable fix 없음, retro-only.
+
+**skill-evolution trigger 평가**: milestone(`3091 % 50 = 41`) 미충족. trigger5(직전20 inclusive) — review-code 계열 다수 발화 중, 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수: 3082/3083/3084/3086/3087(retro)/3088/3089(retro)/3090/3091(retro) 전부 success 또는 retro-only, fail 0건).
+
+다음 사이클 추천 = fix-incident(gap=25/20, 실제 incident 부재 재확인됨)/op-analysis(gap=71/25, Supabase 블락 지속)/lotto(gap=24/30) 자연 대기, 또는 review-code(heavy)/polish-ui 2-chain lock 해제 후 복귀(cooldown N=1, 다음 사이클부터 재평가 가능). **Supabase egress quota 블락 66+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속. data-refresh-weekly/factor-backtest-weekly 는 fail-fast 수정 확인 완료, 근본 원인(Supabase)만 남음.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/{features,analytics,notify} 신규 스코프 감사, data-refresh-weekly + factor-backtest-weekly 4개월 silent PR-create 실패 수정 (cycle 3090, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3089 retro `5077c357`) OK. 직전8(3082-3089) distinct=3(review-code(heavy)6+review-code1+polish-ui1) — 2-chain lock 미충족. fix-incident gap=23/20·op-analysis gap=69/25 둘 다 도달하나 각각 CI green(`gh run list` 재확인) + Supabase DNS NXDOMAIN 지속(코드 fix 불가) — actionable 없음 skip. lotto gap=22/30·info-arch gap=26/30 미근접. DESIGN.md mtime 44h 신선. cycle 3089 "hooks/ 신규 스코프" 추천은 실제로 cycle 325/2896/2988/3081 에서 이미 완료된 stale carry-over 였음을 재확인(components/ 잔여 glossary/leaderboard 도 과거 스윕 완료 확인) — 대신 TODOS/CHANGELOG grep 0건인 `packages/kbo-data/src/features/game-record-features.ts` + `analytics/stale-data-snapshot.ts` + `notify/telegram.ts` 로 스코프 전환.
