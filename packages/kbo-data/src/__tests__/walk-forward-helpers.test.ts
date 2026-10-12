@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import {
-  walkForwardSplit,
   scoringRuleSplit,
   rollingTimeCV,
 } from '../backtest/walk-forward-helpers';
@@ -24,37 +23,6 @@ function makeRow(
     },
   };
 }
-
-describe('walkForwardSplit', () => {
-  it('rule_definition_date 기준 train/test 분리', () => {
-    const rows = [
-      makeRow(1, '2026-05-10'),
-      makeRow(2, '2026-05-11'),
-      makeRow(3, '2026-05-12'),
-      makeRow(4, '2026-05-13'),
-      makeRow(5, '2026-05-14'),
-    ];
-    const r = walkForwardSplit(rows, '2026-05-12');
-    expect(r.train.length).toBe(2);
-    expect(r.test.length).toBe(3);
-    expect(r.pattern).toBe('walk-forward');
-  });
-
-  it('빈 cohort → train=0 test=0', () => {
-    const r = walkForwardSplit([], '2026-05-12');
-    expect(r.train.length).toBe(0);
-    expect(r.test.length).toBe(0);
-  });
-
-  it('game_date 누락 row → skip', () => {
-    const rows: BacktestPredictionRow[] = [
-      makeRow(1, '2026-05-13'),
-      { game_id: 2, scoring_rule: 'v1.8', factors: {}, games: null },
-    ];
-    const r = walkForwardSplit(rows, '2026-05-12');
-    expect(r.train.length + r.test.length).toBe(1);
-  });
-});
 
 describe('scoringRuleSplit', () => {
   it('scoring_rule 기준 train/test 분리', () => {

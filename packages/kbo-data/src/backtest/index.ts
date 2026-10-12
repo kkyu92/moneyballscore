@@ -33,17 +33,3 @@ export {
   fetchAllSeasonTeamStats,
 } from './wayback-team-stats';
 export type { SeasonStatsMap } from './wayback-team-stats';
-
-export {
-  BASE_FACTORS,
-  CANDIDATE_FACTORS,
-  ALL_FACTORS,
-  HarnessInputSchema,
-  HarnessOutputSchema,
-  CalibrationBucketSchema,
-  MetricsSummarySchema,
-  FactorCoverageSchema,
-  measureFactorCoverage,
-  runHarness,
-} from './harness';
-export type { HarnessInput, HarnessOutput, HarnessRunContext } from './harness';

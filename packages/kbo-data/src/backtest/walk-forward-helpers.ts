@@ -22,8 +22,6 @@ import type { BacktestPredictionRow } from './backtest-v2-helpers';
 /**
  * CvPattern union — backtest harness mode flag.
  *
- * - walk-forward: 기존 cycle 1019 pattern (rule_definition_date 기준 train/test 분리).
- *   v1.8 시작 직후 cohort = train ≈ 0 degenerate.
  * - v18-only-rescore: 이전 'expanding' alias. autoplan Eng-C1 finding (CRITICAL)
  *   후속 rename — backtest-v2-candidate.ts 안 `cohort = split.test` 만 사용,
  *   train cohort (v1.5/v1.6/v1.7-revert) 자체 X. 실제 동작 = v1.8 cohort 재가중합
@@ -35,38 +33,13 @@ import type { BacktestPredictionRow } from './backtest-v2-helpers';
  *   test cohort (v1.8) 위 learned vs DEFAULT vs SHADOW_V20 3-way comparison.
  *   v18-only-rescore 와 분리 — train set 자체 사용 (학습 layer 신규).
  */
-export type CvPattern = 'walk-forward' | 'v18-only-rescore' | 'rolling' | 'train-and-test';
+export type CvPattern = 'v18-only-rescore' | 'rolling' | 'train-and-test';
 
 interface SplitResult {
   pattern: CvPattern;
   train: BacktestPredictionRow[];
   test: BacktestPredictionRow[];
   notes: string;
-}
-
-/**
- * walk-forward split (cycle 1019 기존 pattern).
- * rule_definition_date 기준 train=before / test=after.
- * v1.8 시작 (5/13) 직후 = train set ≈ 0 (degenerate).
- */
-export function walkForwardSplit(
-  rows: BacktestPredictionRow[],
-  ruleDefinitionDate: string,
-): SplitResult {
-  const train: BacktestPredictionRow[] = [];
-  const test: BacktestPredictionRow[] = [];
-  for (const row of rows) {
-    const date = row.games?.game_date;
-    if (!date) continue;
-    if (date < ruleDefinitionDate) train.push(row);
-    else test.push(row);
-  }
-  return {
-    pattern: 'walk-forward',
-    train,
-    test,
-    notes: `walk-forward split: rule_definition_date=${ruleDefinitionDate} / train=${train.length} / test=${test.length}`,
-  };
 }
 
 /**
