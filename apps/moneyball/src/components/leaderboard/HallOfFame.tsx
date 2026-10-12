@@ -16,7 +16,8 @@ const MEDAL_LABEL: Record<MedalRank, string> = {
 /**
  * Hall of Fame 섹션 — 현재 active tab 의
  * top 3 medal display. SVG 인라인 메달 (gold / silver / brand). DESIGN.md brand-* +
- * accent token 정합. emoji 사용자 명시 허가 wait — svg 안전 path.
+ * accent token 정합. (LeaderboardTable 은 동일 페이지에서 🏆/🔥/🥇 이모지 사용 중 —
+ * 본 컴포넌트만 SVG 유지, 이모지 허가 대기 아님.)
  *
  * 0 entries 시 section hide (defensive). top 1~3 누락 (entries < 3) 시도 안전:
  * available 분만 노출.
