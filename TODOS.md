@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): scripts/ 미감사 8건 전수 감사, import-tabpfn-predictions.ts reasoning 이중 인코딩 버그 수정 (cycle 3085, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed). 2차 방어선(cycle 3084 retro `115b1a97`) OK. 직전8(3077-3084) distinct=4(review-code(heavy)6+polish-ui1+expand-scope1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 18/20·lotto 17/30·info-arch 21/30). op-analysis gap≥25 충족하나 Supabase DNS NXDOMAIN 재확인(`nslookup` NXDOMAIN 재현) 지속 — skip. DESIGN.md mtime 1.8일(신선) — design-system 미근접. explore-idea saturation 3/15(미충족, 과포화 아님). `gh run list` CI Failure Dispatch 전부 skipped — 실제 incident 0건. cycle 3084 추천대로 `scripts/` 나머지 미감사 파일 선별 — CHANGELOG grep 기준(가드레일 준수, 전수 read 로 실제 커버리지 확인) `backtest-v2-candidate.ts`/`backtest.ts`/`cohort-cleanup.ts`/`dev-postview.ts`/`export-predictions-tabpfn.ts`/`import-tabpfn-predictions.ts`/`measure-n178-vs-n165.ts`/`update-stale-data.ts` (8파일, op-analysis-*.ts 7개는 다음 사이클로 이연) 채택.
+
+**조사**: subagent 위임 전수 read(8파일) + import/env var(`NEXT_PUBLIC_SUPABASE_URL` convention)/스키마 컬럼명/`packages/shared` 상수 cross-check. 6개 파일(backtest-v2-candidate/cohort-cleanup/dev-postview/export-predictions-tabpfn/measure-n178-vs-n165/update-stale-data) — drift 0건. 2건 발견·수정: (1) `backtest.ts` — `toKSTDateString` import 되었으나 미사용(dead import, 날짜 포맷은 inline `toISOString().slice(0,10)`). (2) `import-tabpfn-predictions.ts` — `reasoning` 컬럼(JSONB, `001_initial_schema.sql` 확인)에 `buildTabpfnPredictionInsert()`(이미 object 반환, 다른 모든 pipeline writer — live.ts/postview-daily.ts — 와 동일 convention)의 값을 `JSON.stringify()`로 재덮어써 object를 string으로 이중 인코딩하던 실제 기능 버그 — 다운스트림 `tabpfn-export.ts`의 `row.reasoning?.homeWinProb` 읽기가 string 대상이면 `undefined` 반환. 해당 override 라인 제거로 object 그대로 통과.
+
+오탐 판단 (수정 안 함): `import-tabpfn-predictions.ts`의 `SUPABASE_URL` fallback(`??` 뒤, 정상 var 우선 시도 후 dead fallback, 비기능적) / `export-predictions-tabpfn.ts` 주석의 "ACTIVE_FACTOR_KEYS" vs 실제 `REQUIRED_FACTORS" 네이밍 불일치(값·순서 동일, 동작 차이 0 — 순수 네이밍, 수정 보류).
+
+검증: `pnpm --filter kbo-data exec tsc --noEmit` clean, `pnpm lint:scripts` clean, 두 수정 파일 모두 `tsx` dry-run 확인(모듈 해석 에러 0건). 직접 main 커밋 + push(R4, PR 미경유, pre-push hook lint+type-check+version-sync-guard PASS). `59c81fd8`.
+
+다음 사이클 추천 = review-code(heavy) 계속(`scripts/op-analysis-*.ts` 7개 — brier-drift/ce-cohort/cohort/mlb-elo-backtest/postbreak-full/postbreak/war-check, 전수 미감사 잔여) 또는 fix-incident(gap=19/20)/lotto(gap=18/30)/info-arch(gap=22/30) 자연 대기. **Supabase DNS NXDOMAIN 60+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): scripts/ 미감사 6건 전수 감사, llm-context-baseline.ts dead import + stale 서술 수정 (cycle 3084, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 만료 2026-10-15 3일전 불변, plan#30 completed). 2차 방어선(cycle 3083 retro `1719f02f`) OK. 직전8(3076-3083) distinct=4(review-code(heavy)6+polish-ui1+expand-scope1) — 2-chain lock 미충족. gap trigger 전부 미근접(fix-incident 17/20·lotto 16/30·info-arch 20/30). op-analysis gap≥25 충족하나 Supabase DNS NXDOMAIN 재확인(`curl` exit=6 재현) 지속 — skip. DESIGN.md mtime 1.5일(신선) — design-system 미근접. cycle 3083 추천대로 `scripts/` 나머지 미감사 파일 선별 — CHANGELOG grep 0건 기준(grep-count-depth 가드레일 준수, 선별 용도로만 사용 + 전수 read 로 실제 커버리지 확인) `backfill-kbo-confirmed-postponed.ts`/`backfill-kbo-stuck-verify.ts`/`backfill-tie-winner-null.ts`/`llm-context-baseline.ts`/`measure-context-layer-brier.ts`/`run-pipeline.ts` (6파일, 717L) 채택.
