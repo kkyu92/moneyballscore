@@ -114,7 +114,7 @@ export default async function SeriesTopicPage({ params }: Props) {
       />
 
       <header className="space-y-3">
-        <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-100">
+        <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">
           {team1Name} vs {team2Name}
           <span className="block text-lg font-medium text-brand-500 dark:text-brand-300 mt-1">
             AI 인사이트 시리즈

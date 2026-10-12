@@ -8,6 +8,7 @@ import {
   getMlbSeriesByTopic,
   parseMlbSeriesTopic,
 } from "@/app/mlb/insights/insights-data";
+import { buildArticleJsonLd, buildBreadcrumbListJsonLd } from "@/lib/seo/json-ld";
 
 // /insights/series/[topic](KBO) 의 MLB 이식 — plan #30 Phase 3. generateStaticParams
 // 없음(mlb/matchup/[teamA]/[teamB] 선례 재사용, 435쌍 전체 사전렌더 빌드비용 회피) — on-demand
@@ -72,20 +73,18 @@ export default async function MlbSeriesTopicPage({ params }: Props) {
   const team2Name = MLB_TEAMS[topic.team2].name;
   const pageUrl = `${SITE_URL}/mlb/insights/series/${topic.slug}`;
 
-  const articleJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "@id": pageUrl,
+  const articleJsonLd = buildArticleJsonLd({
+    url: pageUrl,
     headline: `${team1Name} vs ${team2Name} — MLB AI 인사이트 시리즈`,
     description: `${team1Name}와 ${team2Name}의 ${entries.length}경기 AI 심판 reasoning 시계열.`,
-    url: pageUrl,
-    inLanguage: "ko-KR",
     datePublished: entries[entries.length - 1]?.date ?? "2026-09-29",
     dateModified: entries[0]?.date ?? "2026-09-29",
-    author: { "@type": "Organization", name: "MoneyBall Score", url: SITE_URL },
-    publisher: { "@type": "Organization", name: "MoneyBall Score", url: SITE_URL },
-    mainEntityOfPage: pageUrl,
-  };
+  });
+  const breadcrumbLd = buildBreadcrumbListJsonLd([
+    { name: "MLB 분석", url: `${SITE_URL}/mlb` },
+    { name: "AI 인사이트", url: `${SITE_URL}/mlb/insights` },
+    { name: `${team1Name} vs ${team2Name}`, url: pageUrl },
+  ]);
 
   const correctN = entries.filter((e) => e.isCorrect === true).length;
   const wrongN = entries.filter((e) => e.isCorrect === false).length;
@@ -97,6 +96,10 @@ export default async function MlbSeriesTopicPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       <Breadcrumb
