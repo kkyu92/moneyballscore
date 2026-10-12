@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const pageUrl = `${SITE_URL}/mlb/insights/${date}`;
   return {
     title: `${date} MLB AI 인사이트`,
-    description: `${date} MLB 경기 AI 심판 에이전트 reasoning 모음. 정량 모델 + 양팀 에이전트 토론 종합 분석.`,
+    description: `${date} MLB 경기 AI 심판 에이전트 reasoning 모음. 순수 정량 모델 기반 분석.`,
     alternates: {
       canonical: pageUrl,
       languages: { en: `${SITE_URL}/en/mlb/insights/${date}`, ko: pageUrl },
@@ -100,8 +100,8 @@ export default async function MlbInsightsDatePage({ params }: Props) {
       <header className="space-y-3">
         <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">{date} MLB AI 인사이트</h1>
         <p className="text-gray-700 dark:text-brand-300 leading-relaxed">
-          {date} MLB 경기의 AI 심판 에이전트가 남긴 reasoning 모음입니다. 정량 세이버메트릭스 모델 위에
-          홈/원정 에이전트 토론 → 심판 종합 결과를 {entries.length}경기 보여드립니다.
+          {date} MLB 경기의 AI 심판 에이전트가 남긴 reasoning 모음입니다. MLB 는 LLM 에이전트 토론 layer 없이
+          순수 정량 세이버메트릭스 모델만으로 산출한 결과를 {entries.length}경기 보여드립니다.
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           일자 경기 카드는{" "}
@@ -206,8 +206,8 @@ export default async function MlbInsightsDatePage({ params }: Props) {
 
       <footer className="pt-6 border-t border-gray-200 dark:border-[var(--color-border)] text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          {date} MLB AI 인사이트는 ISR 24시간으로 갱신됩니다. 정량 모델 단독 표시는 에이전트 토론이 일시
-          중단되어 정량 모델 결과만 노출된 경우입니다.
+          {date} MLB AI 인사이트는 ISR 24시간으로 갱신됩니다. MLB 는 LLM 에이전트 토론 layer 가 없어
+          모든 분석이 정량 모델 단독 결과입니다 (자세한 내용은 예측 방법론 참고).
         </p>
       </footer>
     </div>

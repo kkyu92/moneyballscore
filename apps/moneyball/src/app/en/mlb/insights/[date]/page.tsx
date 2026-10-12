@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const pageUrl = `${SITE_URL}/en/mlb/insights/${date}`;
   return {
     title: `${date} MLB AI Insights`,
-    description: `Archive of AI judge agent reasoning for MLB games on ${date}. Quant model + two-agent debate, synthesized by a judge.`,
+    description: `Archive of AI judge agent reasoning for MLB games on ${date}. Pure quant model analysis.`,
     alternates: {
       canonical: pageUrl,
       languages: { en: pageUrl, ko: `${SITE_URL}/mlb/insights/${date}` },
@@ -104,8 +104,8 @@ export default async function EnMlbInsightsDatePage({ params }: Props) {
       <header className="space-y-3">
         <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">{date} MLB AI Insights</h1>
         <p className="text-gray-700 dark:text-brand-300 leading-relaxed">
-          What our MLB AI judge agent wrote for {date} games — a quant sabermetrics model feeding a
-          home/away agent debate, synthesized by a judge, across {entries.length} games.
+          What our MLB AI judge agent wrote for {date} games — scored by a pure quant sabermetrics
+          model with no LLM debate layer, across {entries.length} games.
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           See the full slate of predictions on the{" "}
@@ -210,8 +210,8 @@ export default async function EnMlbInsightsDatePage({ params }: Props) {
 
       <footer className="pt-6 border-t border-gray-200 dark:border-[var(--color-border)] text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          MLB AI Insights for {date} refreshes on a 24h ISR cycle. &quot;Quant model only&quot; means the
-          agent debate was temporarily unavailable and only the quant model result is shown.
+          MLB AI Insights for {date} refreshes on a 24h ISR cycle. MLB has no LLM debate layer, so
+          every analysis is quant-model-only (see Methodology for details).
         </p>
       </footer>
     </div>

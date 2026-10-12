@@ -16,7 +16,7 @@ const LIMIT = INSIGHTS_LIMIT;
 export const metadata: Metadata = {
   title: "MLB AI Insights",
   description:
-    "Archive of MLB AI judge agent reasoning, in reverse chronological order. Each game's quant model output is combined with a two-agent debate and summarized by a judge model.",
+    "Archive of MLB AI judge agent reasoning, in reverse chronological order. Each game is analyzed by a pure quant sabermetrics model.",
   alternates: {
     canonical: PAGE_URL,
     languages: {
@@ -49,7 +49,7 @@ export default async function EnMlbInsightsHubPage() {
     "@id": PAGE_URL,
     headline: "MoneyBall Score MLB AI Insights",
     description:
-      "Archive of MLB AI judge agent reasoning. Quant model + two-agent debate + judge synthesis.",
+      "Archive of MLB AI judge agent reasoning. Pure quant model analysis.",
     url: PAGE_URL,
     inLanguage: "en-US",
     datePublished: "2026-09-29",
@@ -82,9 +82,9 @@ export default async function EnMlbInsightsHubPage() {
       <header className="space-y-3">
         <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">MLB AI Insights</h1>
         <p className="text-gray-700 dark:text-brand-300 leading-relaxed">
-          A reverse-chronological archive of what our MLB AI judge agent wrote after each game —
-          a quant sabermetrics model ({MLB_FACTOR_COUNTS.total} factors) feeding a home/away agent
-          debate, synthesized by a judge.
+          A reverse-chronological archive of what our MLB AI judge agent wrote after each game.
+          MLB is scored by a pure quant sabermetrics model ({MLB_FACTOR_COUNTS.total} factors) —
+          unlike KBO, it does not go through an LLM debate layer.
         </p>
         <p className="text-sm text-gray-500 dark:text-brand-300/70">
           Showing the latest {insights.length}. Tap a date to see all predictions for that day.
@@ -213,9 +213,8 @@ export default async function EnMlbInsightsHubPage() {
 
       <footer className="pt-6 border-t border-gray-200 dark:border-[var(--color-border)] text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          MLB AI Insights refreshes automatically every day ({INSIGHTS_ISR_HOURS}h ISR).
-          &quot;Quant model only&quot; means the agent debate was temporarily unavailable and
-          only the quant model result is shown.
+          MLB AI Insights refreshes automatically every day ({INSIGHTS_ISR_HOURS}h ISR). MLB has
+          no LLM debate layer, so every analysis is quant-model-only (see Methodology for details).
         </p>
       </footer>
     </div>

@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const team2Name = MLB_TEAMS[topic.team2].name;
   const pageUrl = `${SITE_URL}/en/mlb/insights/series/${topic.slug}`;
   const title = `${team1Name} vs ${team2Name} — MLB AI Insights Series`;
-  const description = `Archive of AI judge agent reasoning for every ${team1Name} vs ${team2Name} game. Quant model + two-agent debate, synthesized by a judge.`;
+  const description = `Archive of AI judge agent reasoning for every ${team1Name} vs ${team2Name} game. Pure quant model analysis.`;
   return {
     title,
     description,
@@ -116,9 +116,9 @@ export default async function EnMlbSeriesTopicPage({ params }: Props) {
           </span>
         </h1>
         <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-          AI judge agent reasoning across every {team1Name} vs {team2Name} game — a quant sabermetrics
-          model ({MLB_FACTOR_COUNTS.total} factors) feeding a home/away agent debate, synthesized by a
-          judge, in reverse chronological order.
+          AI judge agent reasoning across every {team1Name} vs {team2Name} game — scored by a pure quant
+          sabermetrics model ({MLB_FACTOR_COUNTS.total} factors) with no LLM debate layer, in reverse
+          chronological order.
         </p>
         <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
           <span>{entries.length} games total</span>

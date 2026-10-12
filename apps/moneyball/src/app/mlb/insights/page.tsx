@@ -14,7 +14,7 @@ const LIMIT = INSIGHTS_LIMIT;
 export const metadata: Metadata = {
   title: "MLB AI 인사이트",
   description:
-    "MLB 경기 AI 심판 에이전트 reasoning 시계열 아카이브. 매 경기 정량 모델 + 양팀 에이전트 토론 결과를 심판이 종합한 분석을 시간 역순으로 모아보세요.",
+    "MLB 경기 AI 심판 에이전트 reasoning 시계열 아카이브. 매 경기 순수 정량 세이버메트릭스 모델 분석을 시간 역순으로 모아보세요.",
   alternates: {
     canonical: PAGE_URL,
     languages: {
@@ -54,7 +54,7 @@ export default async function MlbInsightsHubPage() {
     "@id": PAGE_URL,
     headline: "MoneyBall Score MLB AI 인사이트",
     description:
-      "MLB 경기 AI 심판 에이전트 reasoning 시계열 아카이브. 정량 모델 + 양팀 에이전트 토론 + 심판 종합.",
+      "MLB 경기 AI 심판 에이전트 reasoning 시계열 아카이브. 순수 정량 모델 기반 분석.",
     url: PAGE_URL,
     inLanguage: "ko-KR",
     datePublished: "2026-09-29",
@@ -94,7 +94,8 @@ export default async function MlbInsightsHubPage() {
         <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">MLB AI 인사이트</h1>
         <p className="text-gray-700 dark:text-brand-300 leading-relaxed">
           MLB 경기 AI 심판 에이전트가 매 경기 남긴 reasoning 을 시간 역순으로 모아봤습니다.
-          정량 세이버메트릭스 모델 ({MLB_FACTOR_COUNTS.total}팩터) 위에 홈/원정 에이전트 토론 → 심판 종합의 결과입니다.
+          MLB 는 순수 정량 세이버메트릭스 모델({MLB_FACTOR_COUNTS.total}팩터 가중 합산)로만 산출하며,
+          KBO 와 달리 LLM 에이전트 토론 layer 는 거치지 않습니다.
         </p>
         <p className="text-sm text-gray-500 dark:text-brand-300/70">
           최근 {insights.length}건. 일자 카드를 누르면 해당 일자 전체 예측으로 이동합니다.
@@ -222,8 +223,8 @@ export default async function MlbInsightsHubPage() {
 
       <footer className="pt-6 border-t border-gray-200 dark:border-[var(--color-border)] text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          MLB AI 인사이트는 매일 자동 갱신됩니다 ({INSIGHTS_ISR_HOURS}시간 ISR). 정량 모델 단독 표시는 에이전트 토론이 일시 중단되어
-          정량 모델 결과만 노출된 경우입니다.
+          MLB AI 인사이트는 매일 자동 갱신됩니다 ({INSIGHTS_ISR_HOURS}시간 ISR). MLB 는 LLM 에이전트 토론 layer
+          가 없어 모든 분석이 정량 모델 단독 결과입니다 (자세한 내용은 예측 방법론 참고).
         </p>
       </footer>
     </div>

@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const team2Name = MLB_TEAMS[topic.team2].name;
   const pageUrl = `${SITE_URL}/mlb/insights/series/${topic.slug}`;
   const title = `${team1Name} vs ${team2Name} — MLB AI 인사이트 시리즈`;
-  const description = `${team1Name}와 ${team2Name}의 모든 경기에 대한 AI 심판 reasoning 시계열 아카이브. 정량 모델 + 양팀 에이전트 토론 + 심판 종합.`;
+  const description = `${team1Name}와 ${team2Name}의 모든 경기에 대한 AI 심판 reasoning 시계열 아카이브. 순수 정량 모델 기반 분석.`;
   return {
     title,
     description,
@@ -116,8 +116,8 @@ export default async function MlbSeriesTopicPage({ params }: Props) {
         </h1>
         <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
           {team1Name}와 {team2Name}의 모든 경기에 대한 AI 심판 에이전트 reasoning 시계열입니다.
-          정량 세이버메트릭스 모델 ({MLB_FACTOR_COUNTS.total}팩터) + 홈/원정 에이전트 토론 + 심판 종합
-          결과를 시간 역순으로 모았습니다.
+          MLB 는 LLM 에이전트 토론 layer 없이 순수 정량 세이버메트릭스 모델({MLB_FACTOR_COUNTS.total}팩터
+          가중 합산)로만 산출한 결과를 시간 역순으로 모았습니다.
         </p>
         <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
           <span>총 {entries.length}경기</span>
