@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): scripts/*.ts 0-mention 6개 전수 감사, 타입 drift 1건 수정 (cycle 3107, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved, plan #29 만료 2026-10-15 3일 전). 2차 방어선(cycle 3106 retro `0ceef642`) OK. 직전8(3099-3106) distinct=3(review-code(heavy)6+skill-evolution1+fix-incident(lite)1) — 2-chain lock 미충족. fix-incident gap=3(3104 방금 발화), op-analysis gap=25+(Supabase DNS ENOTFOUND 재확인, 블락 지속), lotto gap=9/30·info-arch gap=16/30 전부 미근접. 사용자-허용 plan 0건.
+
+cycle 3106 next_recommended(`scripts/*.ts 운영 스크립트 전수 감사`) 채택 — `scripts/*.ts` 31개 중 CHANGELOG mention 0회 13개 발견, 그 중 6개(`run-pipeline.ts`/`smoke-umpire-scraper.ts`/`backfill-home-win-prob.ts`/`backfill-kbo-confirmed-postponed.ts`/`backfill-tie-winner-null.ts`/`dev-debate.ts`) 전수 read + 타입 시그니처 교차검증(`runDailyPipeline`/`runDebate` 실제 함수 서명과 대조, API route `app/api/pipeline/route.ts` mode 검증 로직과 대조).
+
+**발견**: `run-pipeline.ts`의 `mode` 캐스트가 `'predict'|'verify'` 2종만 — 실제 `PipelineMode`(daily.ts:126)는 `announce`/`predict`/`predict_final`/`verify` 4종. `as` 캐스트라 런타임 동작엔 영향 없었음(TS 체크 우회, 어떤 문자열이든 통과)이나 CLI 개발 도구가 거짓 타입 힌트 제공 — `PipelineMode` 타입 직접 import 로 정합(commit `0e24f52d`). 나머지 5개 backfill/smoke 스크립트는 전부 docstring-코드 1:1 대조 clean(dry-run 기본값, 환경변수 가드, 페이지네이션 안전장치 모두 정상).
+
+검증: `pnpm exec tsx -e "import('./scripts/run-pipeline.ts')"` 로 모듈 로드 + 타입 해석 확인(Supabase env 가드에서 정상 fail — 기대 동작). `pnpm run type-check` 전체 4패키지 cache-hit(scripts/ 는 별도 tsconfig 범위 밖, turbo 캐시 영향 없음 확인).
+
+**skill-evolution trigger 평가**: milestone(`3107 % 50`) 미충족. trigger5(직전20 inclusive, review-code 단독 평가) — 0회 아님, 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속(`scripts/*.ts` 0-mention 잔여 7개 — `measure-context-layer-brier.ts`/`dev-backend-compare.ts`/`op-analysis-cohort.ts`/`llm-context-baseline.ts`/`backfill-shadow-cohort.ts`/`backfill-is-correct-shadow-fix.ts`/`backfill-kbo-stuck-verify.ts`) 또는 lotto(gap=10/30)/info-arch(gap=17/30) 자연 대기. **Supabase DNS ENOTFOUND 84+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): app/api 저-mention 4개 route 전수 감사, 신규 drift 0건 (cycle 3105, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(전부 non-approved, plan #29 만료 2026-10-15 3일 전 재확인). 2차 방어선(cycle 3104 retro `28abd2fe`) OK. 직전8(3097-3104) distinct=4(review-code(heavy)5+lotto(lite)1+skill-evolution1+fix-incident(lite)1) — 2-chain lock 미충족. fix-incident 직전 사이클 방금 발화(gap=1), op-analysis Supabase DNS 재확인(`node dns lookup` ENOTFOUND 지속) 블락 유지, lotto gap=7/30·info-arch gap=14/30 전부 미근접. `app/api/` 13개 route 전체 재집계 — cycle 3099 가 이미 5개(kbo-scores/leaderboard-mlb-sync/live/revalidate/snapshot-pitchers) 감사 완료, 나머지 8개 중 CHANGELOG mention 최저 4개(`version`=0, `seo/indexnow`=1, `mlb/waitlist`=3, `health/pipelines`=5)를 신규 축으로 채택(hub-dispatch=30/sync-batter-stats=8/picks 하위=4~11/mlb-pipeline=6 은 상대적으로 기손길 多 — 다음 축 후보).
