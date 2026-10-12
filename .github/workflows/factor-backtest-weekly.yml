@@ -77,9 +77,7 @@ jobs:
           PR_URL=$(gh pr create \
             --title "data(backtest): ${DATE} factor backtest weekly (cron)" \
             --body "plan #8 Tier 1 M2 — weekly cron 자동 backtest. cycle 231 v2.0 후보 적용 시 추정 acc/Brier 박제." \
-            --label "automated,backtest" 2>/dev/null || echo "")
-          if [ -n "$PR_URL" ]; then
-            PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-            gh pr merge "$PR_NUM" --squash --auto --delete-branch
-            echo "::notice::PR $PR_URL queued for auto-merge"
-          fi
+            --label "automated,backtest")
+          PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+          gh pr merge "$PR_NUM" --squash --auto --delete-branch
+          echo "::notice::PR $PR_URL queued for auto-merge"
