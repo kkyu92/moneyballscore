@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   formatSeriesTopic,
   parseSeriesTopic,
@@ -54,6 +54,36 @@ describe("insights/series topic helpers", () => {
       const [a, b] = t.slug.split("-vs-");
       expect(a < b).toBe(true);
     }
+  });
+});
+
+describe("getSeriesByTopic — CE cohort inclusion (cycle 3061)", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("scoring_rule 은 in()으로 PRODUCTION_COHORT_RULES(v1.8 + v1.8-credit-fail) 전체 포함 — CURRENT_MODEL_FILTER exact-match 사용 금지 (CE row silent 배제 재발 방지)", async () => {
+    const inSpy = vi.fn().mockReturnThis();
+    const matchSpy = vi.fn().mockReturnThis();
+    const builder: Record<string, unknown> = {
+      select: vi.fn().mockReturnThis(),
+      match: matchSpy,
+      eq: vi.fn().mockReturnThis(),
+      in: inSpy,
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
+    vi.resetModules();
+    vi.doMock("@supabase/supabase-js", () => ({
+      createClient: () => ({ from: () => builder }),
+    }));
+
+    const { getSeriesByTopic: freshGetSeriesByTopic } = await import("../series");
+    await freshGetSeriesByTopic({ team1: "HT", team2: "LG", slug: "ht-vs-lg" });
+
+    expect(inSpy).toHaveBeenCalledWith(
+      "scoring_rule",
+      expect.arrayContaining(["v1.8", "v1.8-credit-fail"]),
+    );
+    expect(matchSpy).not.toHaveBeenCalled();
   });
 });
 

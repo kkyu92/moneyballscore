@@ -47,4 +47,15 @@ describe("buildEloTrend — wave-241 CREDIT_EXHAUSTED fix", () => {
     expect(result.points).toHaveLength(0);
     expect(result.teams).toHaveLength(0);
   });
+
+  it("limit(600) 적용 시 최신 경기가 아닌 가장 오래된 경기가 잘리도록 descending 정렬 사용 (cycle 3061 — ascending+limit는 시즌 후반 Elo 데이터 silent truncation)", async () => {
+    supabaseMock = makeSupabaseMock([]);
+    const { buildEloTrend } = await import("../buildEloTrend");
+    await buildEloTrend();
+
+    expect(supabaseMock.builder.order).toHaveBeenCalledWith(
+      "game_date",
+      expect.objectContaining({ ascending: false }),
+    );
+  });
 });

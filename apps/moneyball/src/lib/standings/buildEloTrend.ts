@@ -45,7 +45,7 @@ export async function buildEloTrend(): Promise<EloTrendData> {
     .eq("predictions.prediction_type", "pre_game")
     .in("predictions.scoring_rule", [...PRODUCTION_COHORT_RULES])
     .not("predictions.home_elo", "is", null)
-    .order("game_date", { ascending: true })
+    .order("game_date", { ascending: false })
     .limit(600);
 
   let data: unknown[] | null = null;
