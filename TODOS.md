@@ -1,4 +1,16 @@
 
+## 🟡 RETRO-ONLY — fix-incident(lite): health-alert/deploy-drift-alert 재진단, 신규 코드 버그 0건 확인 (cycle 3067, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/23. 2차 방어선(cycle 3066 retro `8abc8b66`) OK. 직전8(3059-3066) distinct=3(review-code(heavy)6+polish-ui1+info-arch1) — 2-chain lock 미충족. **fix-incident gap=20/20 trigger 정확 도달**(마지막 발화 cycle 3047) — SKILL 7번 trigger("장기 미발화 주기 보정")로 lite 자동 권장. lotto 29/30·info-arch 3/30·op-analysis 77+ cycle(Supabase 블락 지속) 전부 미근접/스킵.
+
+`gh run list` 최근 10건은 success/skipped 지만, 범위 넓혀 주요 scheduled workflow 7일 재점검 — **health-alert 5연속 failure** + **deploy-drift-alert 3/5 failure** 발견. 둘 다 근본원인 재확인 결과 **기존 documented 패턴**으로 판정, 신규 버그 아님:
+- `health-alert`: `/api/health` 가 `supabase`/`pipeline` check 를 `error`(fetch failed) 로 정확히 보고 중 — 원인은 Supabase INACTIVE(org billing restriction, [[project_supabase_inactive_incident_2026_10_11]]) 그대로. alert 는 설계대로 fail 시 ::error:: 발화 중(정상 작동), 사용자 billing 조치 전까지 계속 fail 예정.
+- `deploy-drift-alert`: 최근 failure(2026-10-12T02:21 UTC, gap_hours=16, prod_sha 정체)는 cycle 2222/2898 에 이미 문서화된 "develop-cycle 봇 연속 push + Vercel 직렬 빌드 큐 backlog drain 중" 패턴과 동일 — 직접 재확인(`curl /api/version` 실시간, `vercel ls --prod`/`vercel inspect`)으로 production alias 가 현재 `c577a10`(cycle 3065, main HEAD 대비 2 commit 지연, 최근 배포 2분 전 Building 확인)까지 catch-up 중임을 확인 — 진짜 정체 아님, self-resolving.
+
+코드 변경 0건 — 두 alert 모두 "의도대로 작동 중인 기존 known issue 재알림"으로 확인, 신규 fix 불필요. fix-incident chain 자체(코드 버그 사냥) 관점에서는 negative result.
+
+다음 사이클 추천 = review-code(heavy) 신규 축(app/api 고커밋 route) 또는 2-chain lock 재발 방지 위해 lotto(gap 29/30, 거의 도달)/info-arch 자연 대기. **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만(77+ cycle 지속). plan #29 만료 2026-10-15 임박 — Tier4 사용자 결정 대기 계속.**
+
 ## 🟡 RETRO-ONLY — review-code(heavy): packages/kbo-data/src/agents 15파일 4387줄 전수 감사, drift 0건 (cycle 3066, 2026-10-12)
 
 진단: open issue 0건, plan #30=completed(cycle 2936~2938 기 ship)/plan #29=spec_only_deferred — 둘 다 `approved` 아니라 auto-transport 미해당. 2차 방어선(cycle 3065 retro `c577a100`) OK. 직전8(3058-3065) distinct=3(review-code(heavy)6+polish-ui1+info-arch1) — 2-chain lock 미충족. gap trigger: fix-incident 19/20(근접이나 미도달)·lotto 28/30·info-arch 2/30(방금 발화)·op-analysis 76+ cycle 미발화하나 Supabase 재확인(nslookup NXDOMAIN 지속) 블락 유지 스킵. `gh run list` 전부 success/skipped — 실제 incident 없음. cycle 3065 추천대로 KBO/MLB app/*/page.tsx 전수 감사 완주 후 신규 축 = `packages/kbo-data/src/agents` 선정 — 예측 파이프라인 핵심(debate/judge/calibration/retro/validator) 이라 이번까지 review-code 대상에서 빠져 있던 영역.
