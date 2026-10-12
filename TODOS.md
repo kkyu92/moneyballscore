@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): scripts/*.ts 0-mention 잔여 7개 전수 감사, 신규 drift 0건 (cycle 3108, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3107 retro `a6cc5774`) OK. 직전8(3100-3107) distinct=3(review-code(heavy)6+skill-evolution1+fix-incident(lite)1) — 2-chain lock 미충족. fix-incident gap=4, op-analysis Supabase DNS ENOTFOUND 재확인(85+ cycle 지속 블락), lotto gap=10/30·info-arch gap=17/30 전부 미근접.
+
+cycle 3107 next_recommended(`scripts/*.ts 0-mention 잔여 7개`) 채택 — `measure-context-layer-brier.ts`/`dev-backend-compare.ts`/`op-analysis-cohort.ts`/`llm-context-baseline.ts`/`backfill-shadow-cohort.ts`/`backfill-is-correct-shadow-fix.ts`/`backfill-kbo-stuck-verify.ts` 전수 read + import/export 시그니처 교차검증(`packages/shared/src/index.ts`의 `CURRENT_SCORING_RULE`/`SHADOW_SCORING_RULE`/`SHADOW_V20_SCORING_RULE`/`PRODUCTION_COHORT_RULES`, `shadow-cohort.ts`의 `insertShadowRow`/`computeShadowPrediction`, `accuracy-update.ts`의 `buildAccuracyUpdates`, `winner-id.ts`의 `computeWinnerTeamId`, `agents/llm.ts`의 `getBackend`/`LLM_BACKEND` fallback 체인).
+
+**신규 drift 0건** — 7개 파일 전부 주석-코드-외부 export 시그니처 1:1 대조 clean. `measure-context-layer-brier.ts` WAVE43_BOUNDARY_UTC(02:36 UTC = 11:36 KST) 변환도 주석과 정합. `scripts/*.ts` 0-mention 축 완결(cycle 3107 6개 + 3108 7개 = 13개 전부 감사 완료).
+
+**부산물**: 다음 축 발견 — `packages/kbo-data/src/pipeline/` 0-mention 6개(`accuracy-update.ts`/`brier.ts`/`daily-summary.ts`/`db-error.ts`/`prediction-history.ts`/`winner-id.ts`).
+
+검증: 코드 변경 없음(읽기 전용 감사) — `pnpm test` 불필요.
+
+**skill-evolution trigger 평가**: milestone(`3108 % 50`) 미충족. trigger5(직전20 inclusive, review-code 단독 평가) — 0회 아님, 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/pipeline` 0-mention 6개) 또는 lotto(gap=11/30)/info-arch(gap=18/30) 자연 대기. **Supabase DNS ENOTFOUND 85+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): scripts/*.ts 0-mention 6개 전수 감사, 타입 drift 1건 수정 (cycle 3107, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(전부 non-approved, plan #29 만료 2026-10-15 3일 전). 2차 방어선(cycle 3106 retro `0ceef642`) OK. 직전8(3099-3106) distinct=3(review-code(heavy)6+skill-evolution1+fix-incident(lite)1) — 2-chain lock 미충족. fix-incident gap=3(3104 방금 발화), op-analysis gap=25+(Supabase DNS ENOTFOUND 재확인, 블락 지속), lotto gap=9/30·info-arch gap=16/30 전부 미근접. 사용자-허용 plan 0건.
