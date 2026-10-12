@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — info-architecture-review: 2-chain lock 조기 발화, 현 IA 충분 13연속 재확정 (cycle 3064, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3063 retro `b8e026b4`) OK. 직전8(3057-3063) distinct=2(review-code(heavy)6+polish-ui1) — **2-chain lock 탐지**(룰: 직전8 distinct≤2 → 잠긴 2개 제외 + 잔여 pool 중 trigger 최강 선택). review-code(heavy)/polish-ui 제외 후 잔여 gap 확인: fix-incident 17/20·lotto 26/30(cron 재확인 결과 정상 — lotto-pick-update 화요일 09:19 KST 주기, 10-10 draw 완료 후 10-17 draw 용 pick 은 내일 화요일 생성 예정, 실제 stale 아님)·op-analysis 0/25(Supabase 재확인 nslookup NXDOMAIN 지속 INACTIVE, 블락 유지 스킵)·explore-idea saturation 3/15 미충족 — info-arch(gap 28/30) 최근접으로 자율 선택.
+
+검증: `git log 510bb075(cycle-3036 체크포인트 commit)..HEAD --diff-filter=A -- '**/page.tsx'` 신규 라우트 0건(77 commit 전부 기존 페이지 수정/fix). breadcrumb 후보 18건 전부 cycle 3036 체크포인트 기존 false-positive(redirect-only reviews 6종/community placeholder/login·settings·debug 유틸/root) 와 100% 일치, 신규 미분류 0건. Header/Footer 미변경(0 commit). 코드 변경 없음 — "현 IA 충분" 13연속 재확정. 문서: `docs/design/ia-2026-10-12-cycle-3064-2chain-lock-early-checkpoint.md`.
+
+다음 사이클 추천 = review-code(heavy)/polish-ui 외 3rd chain 유지 권장(lock 재발 방지) — fix-incident(gap 18/20) 또는 lotto(화요일 cron 결과 확인 후 OOS) 또는 info-arch 정규 재도달(cycle 3094 근방) 자연 대기. **Supabase INACTIVE 는 사용자 billing 조치 필요 — 매 cycle 재확인만. plan #29 만료 2026-10-15 임박, Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): KBO app/*/page.tsx 20개 전수 감사, MLB insights 6파일 stale "에이전트 토론" copy 정정 (cycle 3063, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24(plan#29 Tier4 불변, 만료 2026-10-15 임박이나 사용자 결정 대기). 2차 방어선(cycle 3062 retro `bc7e2a44`) OK. 직전8(3055-3062) distinct=3(review-code(heavy)6+review-code1+polish-ui1) — 2-chain lock 미충족. gap trigger: fix-incident 16/20·info-arch 27/30·lotto 25/30 전부 미근접. op-analysis 25+ 트리거 충족이었으나 Supabase 재확인(nslookup NXDOMAIN 지속, INACTIVE 장기화) — 블락 유지 스킵. explore-idea saturation 직전15 13/15(review-code(heavy) dominance) 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale/DESIGN.md 41h 신선) — 과거 반복 패턴과 동일 skip, review-code(heavy) 계속. cycle 3062 추천대로 KBO 쪽 app/*/page.tsx(지금까지 analysis/accuracy 만 개별 확인, predictions/reviews/guide/insights/login/search 등 미확인) 선정.
