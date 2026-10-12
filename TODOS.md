@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/ 나머지 소형 subdir KBO-MLB parity 감사 CLEAN (cycle 3072, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/23(plan#29 spec_only_deferred Tier4, 만료 2026-10-15 임박, 사용자 결정 대기 불변). 2차 방어선(cycle 3071 retro `a6dad64e`) OK. 직전8(3064-3071) distinct=5(review-code(heavy)3+review-code(lite)1+info-arch1+fix-incident1+lotto1+polish-ui0) — 2-chain lock 미충족. gap trigger: fix-incident 5/20·lotto 4/30·info-arch 8/30 전부 미근접. op-analysis Supabase INACTIVE 재확인(`nslookup`/DNS ENOTFOUND 지속, 54+ cycle) — 블락 유지. explore-idea saturation 직전15 14/15(review-code(heavy+lite)11+polish-ui1+info-arch1+fix-incident1) 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 42h 신선) — 과거 반복 패턴과 동일 skip. cycle 3071 추천대로 lib/ 나머지 소형 subdir parity 감사 채택.
+
+**부가 확인 (false-alarm 정정)**: `www.moneyballscore.com`/`moneyballscore.com` DNS 가 real resolver(8.8.8.8)에서도 NXDOMAIN + whois "No match" 확인 — 실제 production 도메인은 `SITE_URL = https://moneyballscore.vercel.app`(`packages/shared/src/site.ts`)이고 `.com` 은 테스트 fixture 에만 등장하는 placeholder. `moneyballscore.vercel.app/api/version` 정상 200 응답(1.3s, commit_sha 는 HEAD 보다 1 커밋 뒤처진 상태로 backlog-drain 중 — cycle 2222/2898 기존 문서화 패턴과 동일, 신규 인시던트 아님). 실제 도메인 인시던트 아님 — 혼동 원인은 과거 세션들의 일부 수동 curl 테스트가 `.com` 을 사용한 것으로 추정, 코드베이스 자체엔 `.com` 의존성 없음.
+
+**review-code(heavy) 실행**: cycle 3071 이 명시 추천한 lib/ 잔여 subdir 중 league-aware 코드(grep `league|Mlb|MLB|mlb` 매칭) 보유 파일 7개 전수 full-read 감사 — `leaderboard/{types,use-leaderboard,server}.ts` / `predictions/factorLabels.ts` / `seasons/buildSeasonSummary.ts` / `picks/{buildCommunityAccuracy,buildPicksStats}.ts` + 대응 테스트 전부. 결과: 전부 CLEAN. 참고 사항 2건(버그 아님) — (1) `use-leaderboard.ts` join() 에서 KBO fetch 는 picks 0건이어도 무조건 발사하는 반면 MLB fetch 는 gate 됨 — 양쪽 API route 모두 빈 배열 시 `{synced:0}` no-op 라 동작 차이 없음(화장적 비대칭). (2) `leaderboard/server.ts` 는 KBO 뷰만 읽고 MLB 리더보드 읽기 경로 자체가 없음 — migration 050 주석에 "Phase 1, Phase 3 뷰 대비" 명시된 계획된 미래 단계라 drift 아님. `buildSeasonSummary.ts`/`factorLabels.ts`/`buildCommunityAccuracy.ts`/`buildPicksStats.ts` 는 KBO/MLB 분리가 스키마 차이에 따른 의도된 설계(또는 KBO 전용 — MLB 쌍 자체 부재)로 확인, line-by-line 대칭 검증 완료.
+
+코드 변경 0건 — actionable fix 없음, retro-only. cycle 3071 과 달리 이번엔 실제 버그 미발견(diminishing-returns 신호 — lib/reviews 류 parity 버그가 흔하지 않음을 시사).
+
+다음 사이클 추천 = review-code(heavy) 는 lib/mlb/(18파일 2840줄, 아직 전수 감사 이력 없음 — league-pair 상대가 아니라 MLB 전용 로직 집합이라 parity 관점보다 일반 품질 감사 관점) 또는 app/api 고커밋 route 재검토, 혹은 info-arch(gap=9/30)/fix-incident(gap=6/20)/lotto(gap=5/30) 자연 대기. **Supabase INACTIVE 54+ cycle 지속 — 사용자 billing 조치 필요, 매 cycle 재확인만. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## ⚪ RETRO-ONLY — review-code(heavy): git 1-commit heuristic 신규 스윕 32/33 파일 CLEAN (cycle 3070, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/23. 2차 방어선(cycle 3069 retro `d61aef10`) OK. 직전8(3062-3069) distinct=4(review-code(heavy)4+info-arch1+fix-incident1+lotto1+review-code(lite)1) — 2-chain lock 미충족. fix-incident gap=3·lotto gap=2·info-arch gap=6 전부 미근접. op-analysis gap=25+(Supabase INACTIVE 52+ cycle 지속, DNS 재확인 완료 — 여전히 `ENOTFOUND`, 신규 아님 재확인). explore-idea saturation 5/15<12. plan #29(회원인증+커뮤니티, Tier4 risk=3) 만료 2026-10-15 임박 — 자율 영역 아님, 변화 없음.
