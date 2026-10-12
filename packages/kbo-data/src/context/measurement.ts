@@ -3,7 +3,7 @@
  *
  * 도입 동기:
  *   - Step 1~3 (MetricRegistry / KBO_DOMAIN_KB / AgentContext) 박제 후, 본 layer 가
- *     LLM agent 7곳에 통합 될 때 회귀 측정 필요.
+ *     LLM agent 4곳(judge/postview/team/validator)에 통합 될 때 회귀 측정 필요.
  *   - plan #23 Step 4 4가지 측정 중 본 cycle 박제 대상 = (1) hallucination 비율
  *     (validation 실패율) + (2) prompt token 추정 (budget guard) 두 측정 layer.
  *   - 나머지 2가지 (pre/post Brier delta / 실제 agent 통합 후 측정) = 실측 cohort

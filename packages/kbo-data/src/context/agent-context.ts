@@ -14,7 +14,7 @@
  *   - 구장 / 시즌 / 라이벌리 hint = `KBO_DOMAIN_KB` render helper 재사용. drift X.
  *   - LLM hallucination catch = `isMetricValueValid` 호출 가능 (slug + value pair).
  *
- * Step 4 (회귀 가드) = 본 모듈을 7 agent 가 실제 소비한 후 pre/post Brier delta 측정.
+ * Step 4 (회귀 가드) = 본 모듈을 4 agent(judge/postview/team/validator) 가 실제 소비한 후 pre/post Brier delta 측정.
  */
 
 import { ELO_NEUTRAL_WIN_PCT, KBO_FACTOR_COUNT, type TeamCode } from '@moneyball/shared';
@@ -53,7 +53,7 @@ interface AgentGameMeta {
 }
 
 /**
- * LLM Agent 표준 ContextPayload — 7 agent 공통 input.
+ * LLM Agent 표준 ContextPayload — 4 agent(judge/postview/team/validator) 공통 input.
  *
  * 기존 inline prompt 안 `KBO_TEAMS` / `DEFAULT_WEIGHTS` / glossary 흩어진 참조를 본
  * payload 단일 source 로 통합. agent 별 prompt builder 는 본 payload 를 input 으로
