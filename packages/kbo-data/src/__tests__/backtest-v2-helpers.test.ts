@@ -65,6 +65,10 @@ describe('accuracyHit', () => {
   it('prob > 0.5 + 홈 승 → hit', () => expect(accuracyHit(0.6, true)).toBe(true));
   it('prob < 0.5 + 홈 패 → hit', () => expect(accuracyHit(0.4, false)).toBe(true));
   it('prob > 0.5 + 홈 패 → miss', () => expect(accuracyHit(0.6, false)).toBe(false));
+  // metrics.ts computeMetrics 의 `p >= 0.5 → home` tie-break 과 통일 (cycle 3094 review-code(heavy) 수정)
+  it('prob === 0.5 + 홈 승 → hit (metrics.ts 과 tie-break 통일)', () =>
+    expect(accuracyHit(0.5, true)).toBe(true));
+  it('prob === 0.5 + 홈 패 → miss', () => expect(accuracyHit(0.5, false)).toBe(false));
 });
 
 describe('evaluatePair', () => {

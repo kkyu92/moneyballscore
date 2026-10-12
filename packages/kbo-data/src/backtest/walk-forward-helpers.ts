@@ -32,8 +32,13 @@ import type { BacktestPredictionRow } from './backtest-v2-helpers';
  *   (v1.5/v1.6/v1.7-revert) 위 logistic regression fit → learned weights.
  *   test cohort (v1.8) 위 learned vs DEFAULT vs SHADOW_V20 3-way comparison.
  *   v18-only-rescore 와 분리 — train set 자체 사용 (학습 layer 신규).
+ * - walk-forward: 기존 cycle 1019 legacy default (no `--cv-pattern` flag) —
+ *   train ≈ 0 degenerate 단일 cohort. 본 helper 파일의 split 함수들은 호출 X
+ *   (scripts/backtest-v2-candidate.ts 의 독립 fallback 분기). union 에 cycle
+ *   3094 까지 누락돼 있었음(스크립트가 pnpm workspace 밖 tsx 실행이라 type-check
+ *   미적용 — review-code(heavy) 로 발견, 실제 동작 영향 없었음).
  */
-export type CvPattern = 'v18-only-rescore' | 'rolling' | 'train-and-test';
+export type CvPattern = 'walk-forward' | 'v18-only-rescore' | 'rolling' | 'train-and-test';
 
 interface SplitResult {
   pattern: CvPattern;

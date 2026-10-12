@@ -1,8 +1,11 @@
 /**
  * Supabase games 테이블에서 decided 경기 로드 + feature 재계산.
  *
- * 핵심 원칙: 모든 feature 는 **해당 경기 game_date 미만** 데이터로만 구성.
- * Look-ahead bias 0.
+ * 핵심 원칙: elo/form/h2h/park 등 핵심 feature 는 **해당 경기 game_date 미만**
+ * 데이터로만 구성 (look-ahead bias 0). 단 선택적으로 채워지는
+ * homeWoba/awayWoba/.../homeSfr/awaySfr (Wayback 시즌 말 stats) 는
+ * `GameFeatures` 타입 자체가 명시하듯 look-ahead bias 있음 —
+ * feature selection 검증 전용, 프로덕션 예측 confidence 산출엔 미사용.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';

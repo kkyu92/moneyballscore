@@ -245,9 +245,9 @@ export function brierScore(prob: number, homeWin: boolean): number {
   return (prob - outcome) ** 2;
 }
 
-/** accuracy hit — prob > 0.5 = home pred. */
+/** accuracy hit — prob >= 0.5 = home pred (metrics.ts computeMetrics 와 tie-break 통일). */
 export function accuracyHit(prob: number, homeWin: boolean): boolean {
-  return prob > 0.5 === homeWin;
+  return prob >= 0.5 === homeWin;
 }
 
 /**
