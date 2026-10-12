@@ -31,7 +31,6 @@
  *   으로 leak 차단 보존. 3개+ = LLM quality 실제 문제 = hard reject 유지.
  */
 
-import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS } from '@moneyball/shared';
 import { buildAgentContext, renderMetricsAndRecentFormForLLM, formatGapAwareStat } from '../context/agent-context';
 import { MetricRegistry } from '../context/metrics';

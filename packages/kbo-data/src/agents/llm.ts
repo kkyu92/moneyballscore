@@ -73,12 +73,16 @@ function getBackend(role: 'haiku' | 'sonnet'): LLMBackend {
 }
 
 function getModelId(model: 'haiku' | 'sonnet'): string {
-  // Anthropic Claude 4.x 모델 ID
+  // Anthropic 모델 ID
   // Haiku 4.5: 'claude-haiku-4-5-20251001' (2025-10-01 릴리즈, team-agent / calibration-agent / postview team-postview-agent 3종 모두 사용)
-  // Sonnet 4.6: 'claude-sonnet-4-6' (pre-game judge-agent + postview factor-attribution 양쪽 심판 모두 사용. 'claude-sonnet-4-6-20250514' 형태는 오타 — 20250514는 구 Sonnet 4.0 날짜.)
+  // Sonnet: 'claude-sonnet-5' (pre-game judge-agent + postview factor-attribution 양쪽 심판 모두 사용.
+  //   cycle 3088 fix — 기존 'claude-sonnet-4-6'(2026-04-15 #6 당시엔 유효했던 ID)는 Claude 5 세대
+  //   출시 후 deprecated 추정. 교체 검증은 CREDIT_EXHAUSTED 복구(사용자 크레딧 충전) 이후 실제
+  //   judge 호출 성공 여부로 확인 필요 — 잘못된 모델 ID 였다면 그간 "CE" 로 뭉뚱그려 측정된
+  //   debate_version IS NULL 비율 일부가 실제론 model_not_found INVALID_REQUEST 였을 가능성 있음.
   return model === 'haiku'
     ? 'claude-haiku-4-5-20251001'
-    : 'claude-sonnet-4-6';
+    : 'claude-sonnet-5';
 }
 
 function isRetryableStatus(status: number): boolean {
