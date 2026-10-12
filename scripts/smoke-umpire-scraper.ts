@@ -1,8 +1,10 @@
 /**
  * Smoke test — umpire scraper 첫 실제 fire (cycle 1014 Day 2).
  *
- * 의도: scrapeGameUmpires 가 KBO Score.aspx 안 심판 4인 추출 가능한지 검증.
- * 실패 시: HTML selector 변경 / robots 차단 / HTTP error 중 어느 path 인지 식별.
+ * 의도: scrapeGameUmpires 가 Naver record API(etcRecords 심판 row) 안 심판 4인 추출
+ * 가능한지 검증. (cycle 1013 KBO 공식 Score.aspx 시도는 302 redirect + JS 렌더링 SPA 로
+ * 폐기 — cycle 1014 Naver 전환. umpire.ts 참조.)
+ * 실패 시: Naver API 응답 구조 변경 / 심판 row 부재 / HTTP error 중 어느 path 인지 식별.
  *
  * 박제: 본 스크립트 = 일회성 검증. cron 진입 X, 결과는 stdout. 실패해도 production 영향 X.
  */
@@ -16,7 +18,7 @@ const SAMPLES = [
 ];
 
 async function main() {
-  console.log('umpire scraper smoke — KBO Score.aspx 4 umpire fetch test\n');
+  console.log('umpire scraper smoke — Naver record API 4 umpire fetch test\n');
   let success = 0;
   let fail = 0;
 
