@@ -15,7 +15,6 @@ import {
   renderContextForLLM,
 } from '../packages/kbo-data/src/context/agent-context';
 import {
-  estimatePromptTokens,
   measureContextTokenBudget,
   measureHallucinations,
 } from '../packages/kbo-data/src/context/measurement';
@@ -149,7 +148,7 @@ function main() {
   lines.push('');
   lines.push('## 다음 측정 후속');
   lines.push('');
-  lines.push('- 실제 운영 agent (judge / postview / team / personas / debate / calibration / rivalry-memory) 통합 후 측정');
+  lines.push('- judge / postview / team / validator 는 이미 통합 완료 — 잔여 agent (personas / debate / calibration / rivalry-memory) 통합 후 측정');
   lines.push('- LLM 응답 cohort 수집 → `measureHallucinations` 실측 (synthetic X)');
   lines.push('- v1.8 유지 확정 (cycle 1460) — weight transition 측정 불필요');
   lines.push('- pre/post Brier delta (Context Layer 도입 전후) — Context Layer 통합 후 cohort wait');
