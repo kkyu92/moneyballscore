@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): app/api 저-grep-count 5개 route 전수 감사, kbo-scores cancel/suspended 구조적 필드 누락 수정 (cycle 3099, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선(cycle 3098 retro `8c0cc6d6`) OK. 직전8(3091-3098) distinct=4 — 2-chain lock 미충족. fix-incident gap=21/20 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped, 실제 인시던트 부재) skip. op-analysis Supabase DNS 블락 지속 skip. lotto gap=1/30·info-arch gap=8/30 미근접. explore-idea saturation 13/15 충족하나 4-source negative skip. **cycle 3098 추천("components/{dashboard,layout,picks,predictions,shared} 5개 잔여")은 CHANGELOG 재검증 결과 stale — 5개 전부 과거 cycle 에 이미 개별 스윕 완료 확인** (dashboard=3012/layout=2987·2917/picks=2619·3016/predictions=3015/shared=3025). components/ 전체 20개 서브디렉토리 모두 최소 1회 스윕 이력 재확인 — 신규 축으로 `app/api/` route 자체 로직 선정, CHANGELOG mention 0회인 5개 route(kbo-scores/leaderboard-mlb-sync/live/revalidate/snapshot-pitchers, ~370줄) 채택.
+
+본 메인 직접 전수 read. `leaderboard/mlb-sync`는 쌍둥이 `leaderboard/sync`(cycle 2992 감사)와 1:1 대조 정합. `live`/`revalidate`/`snapshot-pitchers`는 cron route 전역 컨벤션(CRON_SECRET + Sentry partial-failure 207)과 일치, drift 0건.
+
+**확정 버그 1건**: `kbo-scores/route.ts`(공개 GET, 클라이언트 실시간 스코어보드 소비)가 우천취소 감지를 `statusInfo` 텍스트 매칭('취소'/'연기')에만 의존 — 같은 Naver 엔드포인트를 쓰는 내부 파이프라인 `naver-schedule.ts`는 구조적 boolean 필드 `cancel`/`suspended`를 최우선 시그널로 사용("cancel=true 가 최우선"). `kbo-scores` 라우트는 이 필드를 인터페이스에 선언도 안 해 파싱 자체를 안 함 — Naver 가 문구를 바꾸면 깨지는 fragile 의존 상태. `cancel?`/`suspended?` 필드 추가 + `mapStatus()` 1순위 반영(naver-schedule.ts 와 동일 우선순위), 텍스트 매칭은 2차 방어선 유지.
+
+검증: `tsc --noEmit`/`pnpm lint` clean. 테스트 부재(쌍둥이 route 도 동일 패턴). 직접 main 커밋+push(R4, `7fab5642`, pre-push 전부 PASS).
+
+**skill-evolution trigger 평가**: milestone(`3099 % 50`) 미충족. trigger5(직전20 inclusive) — review-code 평가 대상 1개뿐 구조상 항상 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/api/{health,mlb,picks,pipeline,seo,version}` 등 mention 있으나 전수 감사 이력 불명확한 route 재확인) 또는 fix-incident(gap=22/20, 실제 incident 부재 재확인 필요)/op-analysis(Supabase 블락 77+ cycle)/lotto(gap=2/30, 쿨다운)/info-arch(gap=9/30) 자연 대기. **Supabase DNS ENOTFOUND 77+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음, 임박) — Tier4 대기 계속.**
+
 ## 🟢 SUCCESS — lotto(lite): cron 30-cycle gap trigger 재확인, drift 0건 (cycle 3098, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3097 retro `7fefc2b4`) OK. 직전8(3090-3097) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. gap trigger: fix-incident 20/20 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped, 실제 인시던트 부재) skip. op-analysis Supabase DNS 재확인(`node dns lookup` ENOTFOUND 지속, 75+ cycle) 블락 유지 skip. info-arch gap=7/30 미근접. explore-idea saturation 직전15 15/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재) skip. **lotto gap=30/30 정확 도달(마지막 발화 cycle 3068)** — review-code(heavy) 75%(15/20) dominance 완화 겸 자연 선택.
