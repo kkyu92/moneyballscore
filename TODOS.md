@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/backtest/ 신규 축, 7개 파일 전수 감사, 신규 drift 0건 (cycle 3103, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3102 retro `0244ecd0`) OK. 직전8(3095-3102) distinct=4(review-code(heavy)5+polish-ui1+lotto(lite)1+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=36(3067 마지막) 나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped, 실제 인시던트 부재 — skip. op-analysis gap=30+ 도달하나 Supabase DNS(`utmimgpccbrciwuuacyw.supabase.co`) `node dns lookup` 재확인 ENOTFOUND 지속(billing 미해결) — skip. lotto gap=5/30·info-arch gap=12/30 미근접. `packages/kbo-data/src/` 서브디렉토리별 CHANGELOG mention 재집계 — `backtest/`(10개 파일, 1068줄) 가 `analytics`(0)/`notify`(1) 다음으로 저빈도. `backtest/` 내부 grep count 재확인: `models.ts`(0)/`walk-forward-helpers.ts`(1)/`elo-history.ts`(2)/`metrics.ts`(2)/`runner.ts`(2)/`wayback-team-stats.ts`(2) 6개를 신규 축으로 채택(logistic.ts/logistic-regression.ts/loader.ts/index.ts 는 mention 3~63 으로 기존 손길 있어 제외).
+
+본 메인 직접 전수 read 7개(6개 + 연쇄 참조된 `types.ts`): `models.ts`(ELO_DIVIDER=400 vs `teamHomeAdvantagesInEloPt` 리터럴 400 — 값은 동일하나 상수 미참조, 기능 버그 아님 스타일 중복)/`walk-forward-helpers.ts`(CvPattern union 'walk-forward' 케이스 cycle 3094 fix 이후 정합 재확인)/`elo-history.ts`(binary search `getEloAt` invariant 정확, Plotly text 파싱 teamM/dateM/eloM 3-field 가드 정합)/`metrics.ts`(Brier/LogLoss/calibration bucket 공식 정합)/`runner.ts`(더블헤더 batch 분리 + desc-order prior unshift 일관)/`wayback-team-stats.ts`(Wayback CDX 스냅샷 3개 시즌 하드코딩 + elo 컬럼 "검증 전용, source of truth 는 elo-history.ts" 주석 정확)/`types.ts`(`GameFeatures`/`MetricsSummary`/`CalibrationBucket`/`BacktestGame` 필드가 위 6개 파일 사용부와 1:1 일치).
+
+**신규 drift 0건** — 전부 clean. `models.ts` 의 `ELO_DIVIDER`(상수) vs `teamHomeAdvantagesInEloPt()` 내부 리터럴 `400`(같은 파일 상단에서 `ELO_DIVIDER` 이미 import) 불일치는 값 자체는 동일(ELO_DIVIDER=400 확인)해 기능 버그는 아니나 상수 미참조 — fix 범위 밖(사소 스타일) 판단.
+
+검증: 코드 변경 없음(읽기 전용 감사) — `pnpm --filter @moneyball/kbo-data test` 96 files 1216 tests 전부 green 재확인(회귀 없음 baseline).
+
+**skill-evolution trigger 평가**: milestone(`3103 % 50`) 미충족. trigger5(직전20 inclusive) — review-code 평가 대상 1개뿐 구조상 항상 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속(`backtest/{logistic.ts,logistic-regression.ts}` 저빈도 잔여 또는 `analytics/`·`notify/` 1-file 디렉토리) 또는 fix-incident/lotto(gap=6/30)/info-arch(gap=13/30) 자연 대기. **Supabase DNS ENOTFOUND 81+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음, 임박) — Tier4 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/agents/ 신규 축, 7개 파일 전수 감사, 신규 drift 0건 (cycle 3102, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3101 retro `131d9271`) OK. 직전8(3094-3101) distinct=4(review-code(heavy)5+skill-evolution1+polish-ui1+lotto1) — 2-chain lock 미충족. fix-incident gap=20+ 나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped, 실제 인시던트 부재 — skip. op-analysis gap=25+ 도달하나 Supabase DNS(`utmimgpccbrciwuuacyw.supabase.co`) 재확인 ENOTFOUND 지속(billing 미해결) — skip. lotto gap=4/30·info-arch gap=11/30 미근접. cycle 3101 추천대로 `packages/kbo-data/src/agents/` 신규 축 채택.
