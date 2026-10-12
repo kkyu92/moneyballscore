@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — fix-incident(lite): 20-cycle gap trigger 재점검, Vercel 프로덕션 build Error 1건 발견·진단 (cycle 3104, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved status — 10/11/12/13/15~19/21~24/27~30/3~9 전수 재확인). 2차 방어선(cycle 3103 retro `c0f80bce`) OK. 직전8(3096-3103) distinct=3(review-code(heavy)6+skill-evolution1+lotto(lite)1) — 2-chain lock 미충족. fix-incident gap=20/20 정확 도달(직전 20사이클 0회 발화) — 이번엔 `gh run list` 뿐 아니라 **진단 source 확장**: `vercel ls --yes --limit 20` 으로 실제 프로덕션 배포 상태 직접 조회(과거 cycle 3090/3093/3097/3099 fix-incident gap 재점검은 전부 `gh run list`/Supabase DNS 만 확인하고 skip — Vercel 배포 자체 상태는 미확인이었던 진단 공백 발견).
+
+**발견**: `moneyballscore-394554dm9` 배포(cycle 3097 push `2be6cc4c`, 21:40:19 KST 커밋 직후 21:40:47 트리거)가 `readyState: ERROR` — 그러나 `builds[0].readyState: READY` (빌드 자체는 완료, 배포 레벨에서 Error라는 드문 불일치). `vercel inspect --logs`/`vercel logs` 둘 다 CLI 로 build log 접근 불가("never reached READY" — 실제로는 build READY인데 CLI 메시지가 deployment 레벨 상태만 봄, 상세 원인 미확인). 영향 범위 확인: 바로 다음 push(cycle 3097 TODOS 커밋, 21:41:16/27)가 Ready 배포 생성 → 프로덕션 alias 는 최신 성공 배포로 자동 전환되어 **moneyballscore.com 실사용자 다운타임 없음** (5~52분 전 Ready 배포 3개 연속 확인, Error 는 그 사이 1건 고립). 과거 TODOS/CHANGELOG grep 0건 — 최초 포착.
+
+**결론**: 코드 결함 아님(자가 치유, 수정 불필요) — develop-cycle 이 커밋을 3~5분 간격 연타하는 운영 패턴상 Vercel 빌드 큐 경합으로 인한 고립 Error 로 추정(확정 X, 로그 접근 불가). 액션 아이템 없음(변경 0줄). `lesson:` dispatch 로 "fix-incident 진단 시 `gh run list` 만으론 부족, `vercel ls` 직접 조회 필요(GH Actions CI green 이어도 Vercel 배포 자체는 별도 실패 가능)" 1건 박제 — 향후 fix-incident 진단 source 테이블에 반영 후보.
+
+검증: 코드 변경 없음(진단 전용) — `pnpm test` 불필요(코드 미변경). fix-incident gap 클락 리셋(cycle 3104 기준).
+
+**skill-evolution trigger 평가**: milestone(`3104 % 50`) 미충족. trigger5(직전20 inclusive, review-code 단독 평가 대상) — review-code 14/20 발화, 0회 아님 — 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 계속(`backtest/{logistic.ts,logistic-regression.ts}` 또는 `analytics/`·`notify/`) 또는 lotto(gap=6/30)/info-arch(gap=13/30) 자연 대기. **Supabase DNS ENOTFOUND 82+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음, 임박) — Tier4 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/backtest/ 신규 축, 7개 파일 전수 감사, 신규 drift 0건 (cycle 3103, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3102 retro `0244ecd0`) OK. 직전8(3095-3102) distinct=4(review-code(heavy)5+polish-ui1+lotto(lite)1+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=36(3067 마지막) 나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped, 실제 인시던트 부재 — skip. op-analysis gap=30+ 도달하나 Supabase DNS(`utmimgpccbrciwuuacyw.supabase.co`) `node dns lookup` 재확인 ENOTFOUND 지속(billing 미해결) — skip. lotto gap=5/30·info-arch gap=12/30 미근접. `packages/kbo-data/src/` 서브디렉토리별 CHANGELOG mention 재집계 — `backtest/`(10개 파일, 1068줄) 가 `analytics`(0)/`notify`(1) 다음으로 저빈도. `backtest/` 내부 grep count 재확인: `models.ts`(0)/`walk-forward-helpers.ts`(1)/`elo-history.ts`(2)/`metrics.ts`(2)/`runner.ts`(2)/`wayback-team-stats.ts`(2) 6개를 신규 축으로 채택(logistic.ts/logistic-regression.ts/loader.ts/index.ts 는 mention 3~63 으로 기존 손길 있어 제외).
