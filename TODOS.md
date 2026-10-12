@@ -12610,3 +12610,21 @@ cycle 3056~3058 이 `apps/moneyball/src/lib/` 를 api/calendar/stats/observabili
 2차 방어선(3051-3100) 결손 0건, watch hang kill 0건 — 17 consecutive 50-cycle window 무결손. PASS_ship 단일 grep 실측 2705(+60). SKILL.md/MIGRATION-PATH.md 갱신(글로벌, 리포 밖) + pnpm test 589/589 green. 다음 milestone = cycle 3150.
 
 다음 사이클 추천 = review-code(heavy) 신규 축(`packages/kbo-data/src/agents` 또는 미탐색 고커밋 route) 또는 fix-incident/lotto/info-arch gap 자연 대기. **Supabase 장애 지속 — 사용자 billing 조치 필요. plan#29 만료 2026-10-15(3일 남음).**
+
+## 🟢 SUCCESS — review-code(heavy): .github/workflows/*.yml 12개 미감사 파일 전수 감사, factor-backtest JSON silent escape 버그 수정 (cycle 3106, 2026-10-12)
+
+진단: open issue 0건, approved plan 0/24(상태 매칭 無, plan#29 Tier4 만료 2026-10-15 3일 남음 불변). 2차 방어선(cycle 3105 retro `dc1436bc`) OK. 직전8(3098-3105) distinct=4(review-code(heavy)5+fix-incident(lite)1+lotto1+skill-evolution1) — 2-chain lock 미충족. gap trigger: fix-incident 2/20·op-analysis 80+(Supabase DNS ENOTFOUND 재확인, 지속 블락)·lotto 8/30·info-arch 15/30 — 전부 미근접 또는 blocked. explore-idea saturation 직전15 13/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 37h 신선) — 반복 패턴 skip.
+
+app/api·packages/kbo-data(agents/backtest/context/analytics/engine/features/notify)·components 전체가 2-4회씩 재감사 완료 상태(grep 확인) — review-code(heavy) 신규 스코프 탐색. `.github/workflows/*.yml` 23개 중 실제 코드리뷰 이력(TODOS 3+회 언급) 있는 건 7개뿐(lotto-pick-update/result-update·deploy-cloudflare-worker·deploy-drift-alert·daily-pipeline·live-update·mlb-pipeline·mlb-schedule-status-backfill) — 나머지 12개(998줄)는 0~1회 언급으로 미감사. Explore subagent 위임 전수 read + cross-reference(cron 시각 정합/secret 참조/대상 script·route 존재 및 invocation shape 일치/submit-lesson.yml 4-subtype 파싱 무결성).
+
+**발견 2종, 수정 완료**:
+1. **실제 버그**: `factor-backtest-weekly.yml` 가 repo root 에서 `backtest-manual-weights-run.ts` 를 실행하는데, 스크립트는 `path.resolve(process.cwd(), '../../apps/moneyball/data')` 로 출력 경로를 계산 — 스크립트 자체 헤더 주석이 문서화한 "`cd apps/moneyball && tsx ../../packages/...`" 실행법과 실제 workflow 호출법이 불일치해 `v2-backtest-results.json` 이 repo 밖(2단계 위)에 매주 silent 기록되고 있었음(plan #8 M1 이후 지속). 설상가상 workflow 의 commit 단계도 `apps/moneyball/data/backtest-results/` 만 git add — 경로가 맞았어도 JSON 은 애초에 커밋 대상이 아니었음. `import.meta.url` 기반 cwd-독립 경로 해석으로 전환 + git add 에 JSON 경로 조건부 추가(`[ -f ... ]` 가드, `set -e` 호환).
+2. **stale 주석 2건**(값/로직 변경 없음): `op-analysis-weekly.yml`/`factor-backtest-weekly.yml` 의 cron 설명 주석이 분(`:45`/`:33`)을 `:00` 으로 반올림 서술 — 실제 cron 문자열 기준 정정.
+
+**나머지 10개 clean**: sitemap-warmup/submit-lesson(4-subtype 파싱 무결성 확인, `subtype=self-policy` 통합은 의도된 설계)/sync-batter-stats/ci-failure-dispatch/ci/data-refresh-weekly/indexnow-ping/pat-expiry-check/runtime-error-alert/vercel-deploy-error-dispatch — secret 참조·cron 분 충돌 회피(:17/:37 등)·대상 route 호출 shape 전부 정합.
+
+검증: `tsc --noEmit`(kbo-data) clean, `pnpm --filter @moneyball/kbo-data test` 96 files/1216 tests 전체 green, lint clean, YAML 파싱 확인(python3 yaml.safe_load). 직접 main 커밋+push(R4, `2d9c6eb5`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**skill-evolution trigger 평가**: milestone(`3106 % 50 = 6`) 미충족. trigger5(직전20 inclusive, 3087-3106) — review-code 계열 다수 발화 지속, 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속(`.github/workflows/`의 나머지 미감사 영역은 이제 23개 전체 커버 완료 — 신규 축은 `scripts/*.ts` 운영 스크립트 전수 감사 또는 `supabase/migrations/` 최신 몇 개 교차검증 권장) 또는 fix-incident(gap=3/20, 실제 incident 부재 재확인됨)/op-analysis(Supabase DNS 지속, 80+ cycle)/lotto(gap=9/30)/info-arch(gap=16/30) 자연 대기. **Supabase DNS ENOTFOUND 80+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
