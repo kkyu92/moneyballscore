@@ -95,7 +95,7 @@ export function makeRestricted(
 
 /**
  * 2023-2025 시즌별 각 팀의 홈 승률 → Elo pt 환산 Map 생성 (0.5 baseline 대비,
- * 리그 평균 차감 아님 — `400 * log10(rate/(1-rate))`).
+ * 리그 평균 차감 아님 — `ELO_DIVIDER * log10(rate/(1-rate))`).
  * 호출자가 미리 `computeTeamHomeAdvantages()` 로 계산한 결과를 전달.
  */
 export function teamHomeAdvantagesInEloPt(
@@ -106,9 +106,9 @@ export function teamHomeAdvantagesInEloPt(
     const rate = winRates[code];
     if (rate == null) continue;
     // rate > 0.5 → 양수, rate 0.55 → +17 Elo pt 수준
-    // pt = 400 * log10(rate / (1-rate))
+    // pt = ELO_DIVIDER * log10(rate / (1-rate))
     const safeRate = clamp(rate, 0.1, 0.9);
-    out[code] = 400 * Math.log10(safeRate / (1 - safeRate));
+    out[code] = ELO_DIVIDER * Math.log10(safeRate / (1 - safeRate));
   }
   return out;
 }
