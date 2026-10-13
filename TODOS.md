@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/pipeline 미감사 6개 신규 축, drift 0건 (cycle 3143, 2026-10-13)
+
+진단: open issue 0건. cycle 3142 cycle_state.json 누락 발견(retro commit `3b27690a` 는 존재 — 두 layer 독립 drift, 백필 완료). 1차 방어선 OK. 2-chain lock 재확인(직전8, 3135-3142) distinct=3(review-code(heavy)5+fix-incident1+explore-idea1) — 미충족, 자유 선택. plan lookup 24개 전부 non-approved. op-analysis Supabase DNS 재확인(NXDOMAIN 지속) skip. fix-incident gap=5·info-arch gap=22/30·lotto gap=14/30 전부 미도달. design-system(DESIGN.md 68h 신선, 미근접) 스킵. components/·lib/·app/api/ 전부 review-code(heavy) 과거 cycle 누적으로 사실상 전수 스윕 완료 확인(CHANGELOG grep 교차검증, grep-count-depth 가드레일 준수 — low mention 만으로 skip 안 하고 실제 커버리지 이력 대조) → 신규 미탐색 축으로 `packages/kbo-data/src/pipeline/` 안 CHANGELOG mention 0회 파일 6개(`accuracy-update.ts`/`brier.ts`/`daily-summary.ts`/`db-error.ts`/`prediction-history.ts`/`winner-id.ts`, 총 281줄) 선정.
+
+**감사 결과**: 6개 파일 전수 read + `daily.ts`/`calibration-agent.ts` 콜사이트 교차검증 — 전부 clean. `buildAccuracyUpdates` 콜사이트가 주석 claim(Promise.all + `.error` 체크) 그대로 구현됨 확인. `buildSummaryPredictions` 콜사이트 `assertSelectOk` + `summary.length===0` 가드 확인. `computePredictionHistory` 의 `RECENT_RESULTS_LIMIT=5` 주석이 `calibration-agent.ts:115` 의 실제 `slice(0, 5)` 와 일치 확인. `computeWinnerTeamId` 의 `'final'` 리터럴이 `naver-schedule.ts:79` 매핑 결과와 일치 확인. `db-error.ts` 는 cycle 147 shim 그대로 유효(daily.ts 가 여전히 이 경로로 import). `brier.ts` 는 `scripts/op-analysis-brier-drift.ts` 단일 소비자 확인, 정상. 코드 변경 없음(읽기 전용, 커밋 없음 — 본 retro + TODOS 엔트리만).
+
+**skill-evolution trigger 평가**: milestone(`3143 % 50 = 43`) 미충족. trigger5(직전20 inclusive, 3124-3143) — review-code(heavy) 다수 발화 지속, 평가 대상(review-code) 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 신규 축 계속 모색(`packages/kbo-data/src/pipeline/` 나머지 26개 파일 중 저-mention 축 — `backfill-season.ts`/`backfill-weather.ts`/`backtest-wayback-run.ts`/`factor-bias-bootstrap-ci.ts`/`notify-status-predicate.ts` 등 1-mention 파일 재확인, 또는 `packages/kbo-data/src/scrapers/` 저-mention 축 `baseball-savant.ts`/`kbo-scraper-alert.ts`) 또는 info-arch(gap=23/30, 자연 대기) 또는 lotto(gap=15/30, 자연 대기). Supabase billing 조치 여전히 사용자 영역(DNS NXDOMAIN 지속). plan #29 만료 2026-10-15(임박, Tier4 대기).
+
 ## 🟢 SUCCESS — review-code(heavy): components/predictions 재감사, DailyPredictionSummaryBar aria-label drift 1건 수정 (cycle 3142, 2026-10-13)
 
 진단: open issue 0건. 1차 방어선(cycle 3141 retro `f5daa101`) OK. 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3134-3141) distinct=3(review-code(heavy)6+explore-idea1+fix-incident1) — 미충족, 자유 선택. plan lookup — 24개 plan 파일 전부 `status: approved` 아님 → 자율 매핑 대상 없음. op-analysis Supabase DNS 재확인(`nslookup utmimgpccbrciwuuacyw.supabase.co` → NXDOMAIN) — billing 인시던트 지속, skip. fix-incident gap=4·info-arch gap=21/30·lotto gap=13/30 전부 미도달. cycle 3141 retro 의 명시적 추천대로 `components/predictions/`(25 non-test 파일) 선택.
