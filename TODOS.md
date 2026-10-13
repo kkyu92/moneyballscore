@@ -12968,3 +12968,15 @@ cycle 3118 next_recommended("factor-bias-bootstrap-ci.ts, count=1 티어 잔여 
 **skill-evolution trigger 평가**: milestone(`3123 % 50 = 23`) 미충족. trigger5(직전20 inclusive, 3104-3123) — review-code(heavy) 계열 다수 발화(15/20) 지속, 미충족. ship-0 emergency stop 미충족(직전10 중 success 8건).
 
 다음 사이클 추천 = review-code(heavy)(2-chain lock 해제 예상, 신규 스코프 `scripts/*.ts` 운영 스크립트 전수 권장) 또는 info-architecture-review(gap=2/30, 자연 대기) 또는 fix-incident(gap=57/20 지속이나 actionable 신규 0 반복 확인). **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(2일 남음).**
+
+## 🟢 SUCCESS — review-code(heavy): scripts/ 저커밋 5개 전수 감사, update-stale-data.ts pagination drift 1건 수정 (cycle 3132, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3131 retro `bd7f6548`) OK. 직전8 distinct=3(review-code(heavy)6+fix-incident1+lotto1) — 2-chain lock 미발동. fix-incident gap=4(3128) · op-analysis gap=25+(Supabase billing 외부 블락 지속, 저가치) · info-arch gap=11(3121, 30 미도달) · lotto gap=3(3129) — 전부 trigger 미충족 또는 저가치. review-code(heavy) dominance(직전8 중 6) 지속 + grep-count-depth 가드레일(cycle 3001) 따라 scripts/ 저커밋(≤2) 잔여 5개 직접 전수 read 선택.
+
+**감사 대상**: `dev-backend-compare.ts`(167줄) / `dev-debate.ts`(151줄) / `dev-postview.ts`(147줄) — 전부 1회성 dev fixture, DB 미접촉, 환각/factor-attribution 검증용 드라이런 스크립트로 drift 없음. `cohort-cleanup.ts`(224줄) — 이미 `PAGE=1000` range 루프 적용돼 있어 drift 없음.
+
+**발견 + 수정**: `update-stale-data.ts` — cron `data-refresh-weekly.yml` 이 매주 돌리는 stale-data snapshot writer 가 `predictions` pre_game verified row 를 단일 `.select()` (PostgREST 기본 1000행 한도)로 fetch — cycle 3131 fix(`backfill-home-win-prob.ts`)와 완전히 같은 class 버그. 현재 verified n < 1000 이라 당장 증상 없지만 데이터 누적 시 weekly snapshot (acc%, v1.8 progress n) 이 조용히 틀어짐. `cohort-cleanup.ts` 의 기존 PAGE=1000 range 루프 패턴 그대로 적용해 수정. Supabase DNS 현재 unreachable(billing 인시던트 지속)이라 실제 DB 호출 검증은 불가 — `tsc`/`eslint` clean 만 확인(tsc 의 `Cannot find module '@supabase/supabase-js'` 는 edit 전 stash 비교로 pre-existing 무관 에러 확정). 직접 main commit+push(R4, `15339ff4`), pre-push hook(lint+type-check+version-sync-guard) 전부 PASS.
+
+**skill-evolution trigger 평가**: milestone(`3132 % 50 = 32`) 미충족. trigger5(직전20, 3113-3132) — review-code(heavy) 계열 다수 발화 지속, 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
+
+다음 사이클 추천 = review-code(heavy)(scripts/ 티어 소진, 다음 후보 = apps/moneyball/src/app routes/components 또는 packages/kbo-data/src/agents) 또는 info-architecture-review(gap=12/30, 아직 미도달). **Supabase billing 조치 여전히 사용자 영역 — DNS unreachable 직접 재확인(ENOTFOUND). plan #29 만료 2026-10-15(임박, Tier4 대기).**
