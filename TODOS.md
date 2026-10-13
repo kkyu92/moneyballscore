@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src count=2 티어 14개 전수 감사, 신규 drift 0건 (cycle 3120, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3119 retro `7260a5f4`) OK. 직전8(3112-3119) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. fix-incident 마지막 cycle 3067(gap=53) 도달하나 `gh run list` 재확인(CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped) + Supabase DNS 재확인(ENOTFOUND 지속, 기존 known blocker) — actionable 신규 incident 부재 skip. op-analysis 마지막 cycle 3114(gap=6)·lotto 마지막 cycle 3098(gap=22)·info-arch 마지막 cycle 3091(gap=29, 근접이나 미달) 전부 미근접. explore-idea saturation 직전15 14/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale/DESIGN.md 2.7일 신선) — 반복 패턴 동일 skip.
+
+cycle 3119 next_recommended("count=2 티어 재탐색") 채택 — packages/kbo-data/src 전체 CHANGELOG mention count==2 재grep, 14개 식별(`pipeline/{notify-status-predicate,backtest-v3-run,save-game-record,backtest-grid-run,backfill-records,backtest-logistic-run}.ts` + `context/{domain,metrics}.ts` + `factors/mlb-form.ts` + `backtest/{wayback-team-stats,runner,metrics}.ts` + `scrapers/{fetch-with-retry,naver-record}.ts`, 총 2032줄). 범위가 커 general-purpose agent 위임 — 전수 read + 모든 export 의 실제 caller 교차검증(grep-count-depth 가드레일 준수).
+
+**결과**: 14개 전부 drift 0건. `pipeline/notify-status-predicate.ts` "PipelineMode 4종" 주석이 `daily.ts:126-130` 와 정확 일치(자체 테스트파일의 `mlb_*` 모드는 별도 타입 `SilentDriftPipelineMode` 소속, 본 predicate 엔 전달 안 됨 — 혼동 아님). `context/domain.ts`/`metrics.ts` 의 "누가 이 값을 쓰는지" 상세 주석(judge/postview/team/validator agent 경유 vs calibration-agent 직접) 전부 grep 재확인 정합, `TIME_WINDOWS.h2h_window.games=50` ↔ `daily.ts` 실제 `.limit(50)` 일치, `DEFAULT_WEIGHTS` 12개 키 ↔ `MetricRegistry` 12개 entry 일치. `factors/mlb-form.ts` 의 "desc 정렬 + status='final' 가정은 호출부 책임" 계약이 `mlb-pipeline.ts` 실제 쿼리와 정확 일치. `scrapers/fetch-with-retry.ts` 모든 호출부(`kbo-official.ts`/`naver-schedule.ts`/`fancy-stats.ts`) default retry config 사용 확인, `statsapi-mlb.ts` 동명 로컬 헬퍼는 무관한 별개 함수(import 충돌 없음). `scrapers/naver-record.ts` 의 `summarizePitching`/`summarizeBatting` 은 테스트에서만 쓰이고 production feature 파이프라인엔 미배선 — 단 주석이 그렇다고 주장한 바 없어 drift 아닌 "미사용 유틸" 로만 기록.
+
+검증: 대상 모듈 매칭 vitest 8개 파일 76/76 passed(`save-game-record.ts`/`backfill-records.ts`/3개 CLI backtest-run 스크립트는 기존부터 테스트 부재 — DB-hitting 수동 CLI 툴이라 레포 기존 패턴). 코드 변경 없음(신규 drift 0건).
+
+skill-evolution trigger 평가: milestone(3120%50=20) 미충족. trigger5(직전20 inclusive, 3101-3120) — review-code 16회 fire, 0-fire chain 없음(평가 대상 review-code 단독) — 미충족. ship-0 emergency stop 미충족(직전10 success 9 + retro-only 1).
+
+다음 사이클 추천 = **info-arch gap=30/30 정확 도달 예상**(마지막 발화 cycle 3091, 다음 cycle 3121 시점 gap 정확히 30) — trigger 자연 발화 권장. 대안 = review-code(heavy) count=3 티어 재탐색 또는 lotto(gap=23/30)/fix-incident(gap=54/20, 실제 incident 계속 부재 확인 필요) 자연 대기. **Supabase billing 조치 여전히 사용자 영역, plan #29 만료 2026-10-15(2일 남음) — Tier4 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src count<=1 티어 잔여 마지막 1개(factor-bias-bootstrap-ci.ts) 전수 감사 완결, 신규 drift 0건 (cycle 3119, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선(cycle 3118 retro `c90b9c8d`) OK. 직전8(3111-3118) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 해제. fix-incident gap=14/20·lotto gap=20/30·info-arch gap=27/30(가장 근접이나 미달)·op-analysis gap=4/25 전부 미근접.
