@@ -12770,3 +12770,15 @@ app/api·packages/kbo-data(agents/backtest/context/analytics/engine/features/not
 **skill-evolution trigger 평가**: milestone(`3106 % 50 = 6`) 미충족. trigger5(직전20 inclusive, 3087-3106) — review-code 계열 다수 발화 지속, 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수).
 
 다음 사이클 추천 = review-code(heavy) 계속(`.github/workflows/`의 나머지 미감사 영역은 이제 23개 전체 커버 완료 — 신규 축은 `scripts/*.ts` 운영 스크립트 전수 감사 또는 `supabase/migrations/` 최신 몇 개 교차검증 권장) 또는 fix-incident(gap=3/20, 실제 incident 부재 재확인됨)/op-analysis(Supabase DNS 지속, 80+ cycle)/lotto(gap=9/30)/info-arch(gap=16/30) 자연 대기. **Supabase DNS ENOTFOUND 80+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(3일 남음) — Tier4 사용자 결정 대기 계속.**
+
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data CHANGELOG count≤1 티어 10개 전수 감사, 신규 drift 0건 (cycle 3118, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선(cycle 3117 retro `caf825c6`) OK. 직전8(3110-3117) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 해제. fix-incident gap=14/20·lotto gap=20/30·info-arch gap=27/30(가장 근접이나 미달)·op-analysis gap=4 전부 미근접. ship-0 emergency stop 미충족(직전10 success 다수). skill-evolution trigger5 미충족(직전20 chain pool distinct=6, review-code 15회 fire — 0-fire 없음).
+
+cycle 3117 next_recommended("count=1 티어 잔여 계속") 채택 — packages/kbo-data/src count≤1 티어 11개 재스코핑, 그 중 10개(factor-bias-bootstrap-ci.ts 제외) 전수 read + 호출부 교차검증(grep-count-depth 가드레일 준수).
+
+**교차검증 결과**: `validator-logger.ts`(logValidatorEvent, team/judge/calibration-agent + postview 4곳 호출 확인) / `walk-forward-helpers.ts`(scoringRuleSplit/rollingTimeCV, 유일 호출부 backtest-v2-candidate.ts — walk-forward 분기는 미사용 주석과 일치) / `accuracy-update.ts`(buildAccuracyUpdates, daily.ts:1650 Promise.all+.error 패턴 일치) / `backfill-season.ts`/`backfill-weather.ts`/`backtest-wayback-run.ts`(독립 CLI 스크립트, self-consistent) / `daily-summary.ts`(buildSummaryPredictions, daily.ts:1346 assertSelectOk throw + summary.length===0 가드 일치) / `db-error.ts`(shared re-export shim) / `winner-id.ts`(computeWinnerTeamId, daily.ts 2곳+live.ts 동점→null 일관 사용) / `kbo-scraper-alert.ts`(shouldAlertKboScraperHtml/captureKboScraperHtmlAlert, kbo-official.ts/kbo-live.ts 호출 확인) — 전부 주석-코드 정합, drift 0건.
+
+검증: `vitest run winner-id.test.ts scrapers-kbo-scraper-alert.test.ts agents-validator-logger.test.ts pipeline-daily-summary.test.ts` 30/30 passed. 코드 변경 없음.
+
+다음 사이클 추천 = review-code(heavy) `factor-bias-bootstrap-ci.ts`(count=1 티어 잔여 마지막 1개) 또는 info-arch gap=27/30 근접 모니터. **Supabase billing 조치 여전히 사용자 영역.**
