@@ -1,5 +1,23 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): app/api 잔여 14개 route 전수 감사, health check 2종 billing-outage false-positive + indexnow silent-200 swallow 수정 (cycle 3124, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved status). 2차 방어선(cycle 3123 retro `e2f73f13`) OK. 직전8(3116-3123) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. fix-incident gap=20/20 정확 도달하나 `gh run list` 재확인(CI/Vercel Failure Dispatch 전부 success/skipped) — actionable 인시던트 부재. op-analysis gap=10/25·lotto gap=26/30·info-arch gap=3/30(방금 발화) 전부 미근접.
+
+cycle 3099 note("나머지 8개 route 그룹은 CHANGELOG mention 1건 이상이나 전수 감사 미실시") 채택 — `health/{route,pipelines/route}` + `hub-dispatch` + `leaderboard/sync` + `mlb/{pipeline,waitlist}` + `picks/{mlb-poll,mlb-submit,poll,results,submit}` + `pipeline` + `seo/indexnow/ping` + `sync-batter-stats` + `version` 14개 route.ts(~1457줄) 선정. general-purpose agent 위임 — 전수 read + twin-route parity + auth 패턴 교차검증.
+
+**확정 버그 2건**: (1) `/api/health` `checkPipeline()` + `/api/health/pipelines` `checkMode()` 의 catch 블록이 `checkSupabase()`(기존 cycle 2996/2999 fix)와 달리 `exceed_egress_quota` downgrade 가 없어, 현재 진행 중인 Supabase billing outage 기간에 pipeline 체크만 `status:'error'` 로 남아 `overall:'fail'`(503) 고착 — `health-alert.yml` 이 known billing issue 를 app bug 로 오인해 계속 false-positive paging. `checkSupabase()` 와 동일 텍스트 매칭(`exceed_egress_quota`) downgrade 를 양쪽에 추가(warning/stale). (2) `/api/seo/indexnow/ping` 이 업스트림 IndexNow API 호출 실패(4xx/5xx) 시에도 항상 HTTP 200 반환 — `ok`/`status` 필드가 JSON body 안에만 있고, 소비 cron(`indexnow-ping.yml`)은 outer HTTP status 만 확인(body 미파싱)해 실제 실패를 silent swallow. `response.ok=false` 시 502 반환하도록 변경 — 기존 테스트의 "실패해도 200" assertion 자체가 버그를 고정하고 있었음을 확인 후 502 로 정정.
+
+나머지 11개 route 전부 clean: twin route parity(`picks/poll` vs `picks/mlb-poll`, `picks/submit` vs `picks/mlb-submit`) 확인, auth 패턴(CRON_SECRET/origin-check/HMAC) 전부 established convention 정합, silent-failure 패턴(catch에서 Sentry 미기록) 0건. `pipeline/route.ts` 의 `triggeredBy` 런타임 미검증 캐스팅은 낮은 실질 영향(VARCHAR(20) 컬럼, 다른 로직 미의존)이라 기록만 하고 미수정.
+
+검증: health route 테스트 23/23 pass(신규 2건 추가 — 양쪽 route 의 egress-quota case), indexnow 테스트 기존 fail-case assertion 200→502 정정 후 pass. `tsc --noEmit`/`pnpm lint` clean. 직접 main 커밋+push(R4, `a5e61e7f`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+`app/api/` 전체 13개 route(14 route.ts 파일) 전수 감사 완결(cycle 3099 5개 + 본 cycle 14개 = 19개 중복 없이 전부 1회 이상 전수 read 완료 — 13개 그룹 전체).
+
+skill-evolution trigger 평가: milestone(3124%50=24) 미충족. trigger5 표본(직전20, 3105-3124) < 10 임계 — skip(자동 미충족). ship-0 emergency stop 미충족(직전10 success 9 + retro-only 1).
+
+다음 사이클 추천 = review-code(heavy) 계속 — packages/kbo-data count=4+ 티어(현재 4개 파일: `backtest-v2-helpers.ts`/`notify/telegram.ts`/`pipeline/db-constraints.ts`/`scrapers/kbo-pitcher.ts`) 또는 components/ 재탐색. 대안 = fix-incident(gap=21/20, actionable 재확인 필요)/lotto(gap=27/30)/op-analysis(gap=11/25)/info-arch(gap=4/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역, plan #29 만료 2026-10-15(2일 남음) — Tier4 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data count=3 티어 14개 전수 감사, prefetchSchedule 10건-cap silent 누락 수정 (cycle 3122, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3121 retro `e480c8be`) OK. 직전8(3114-3121) distinct=3(review-code(heavy)6+op-analysis(lite)1+info-arch1) — 2-chain lock 미충족. fix-incident gap=55/20 도달하나 `gh run list` 재확인(CI/Vercel Failure Dispatch 전부 skipped) + Supabase DNS ENOTFOUND 지속(known user-domain blocker) — actionable 0. lotto gap=24/30 미근접(picks/results cron 정상 날짜 확인). op-analysis gap=8/25 미근접. DESIGN.md 2.7일 신선.
