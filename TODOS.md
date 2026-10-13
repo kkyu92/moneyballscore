@@ -1,6 +1,12 @@
 
 
-## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/pipeline 최소-mention 3개, drift 0건 (cycle 3149, 2026-10-13)
+## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/pipeline/live.ts 전수 감사, drift 0건 + milestone 3150 skill-evolution 마커 (cycle 3150, 2026-10-13)
+
+진단: open issue 0건. approved plan 0/24(literal 'approved' 없음, plan #29 만료 2026-10-15 임박이나 Tier4 사용자 영역). 1차 방어선(cycle 3149 retro `c0c2fec9`) OK, 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3142-3149) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 미충족, 자유 선택. fix-incident gap=12/20·lotto gap=21/30·info-arch gap=2/30(직전 발화) 전부 미도달. op-analysis Supabase DNS 블락 지속(actionable 아님) skip. **milestone 체크: 3150 % 50 = 0 — trigger3 충족, 다른 trigger 평가 무관하게 skill-evolution-pending 마커 박제.**
+
+**감사 결과**: `packages/kbo-data/src/pipeline/live.ts`(366줄) 전수 read — `onConflict: DB_CONSTRAINTS.predictions` 실제 상수(`game_id,prediction_type,scoring_rule`)와 일치, `adjustWinProbability`/`extractReasoningHomeWinProb`/`computeWinnerTeamId`/`toNaverGameId`/`saveGameRecord` 전부 호출부-정의부 시그니처 교차검증 일치. 주석 claim 2건 검증: (1) migration 007 `debate_version DEFAULT 'v1-narrative'` 실제 존재 확인 — in_game upsert 의 명시적 `debate_version: null` 설명 정합. (2) `daily.ts` `getVerifyResults` 가 `status='postponed'` 게임 조회해 적중 집계하는 코드(라인 1468-1495) 실제 존재 — `live.ts markGamePostponed` 가 세팅한 status 를 실제로 소비함을 확인, "dead code 자동 activate" 주석 정합.
+
+**결론**: live.ts 366줄 전수 감사, drift 0건. 코드 변경 없음(retro-only). milestone(cycle 3150 % 50 = 0) 도달로 skill-evolution 강제 마커 박제 — 다음 사이클(3151) skill-evolution 자동 발화.
 
 진단: open issue 0건. approved plan 0/24. 1차 방어선(cycle 3148 retro `09bce820`) OK, 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3141-3148) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 미충족, 자유 선택. fix-incident gap=11/20·lotto gap=20/30·info-arch gap=1/30(직전 발화) 전부 미도달. op-analysis Supabase DNS ENOTFOUND 재확인 지속(actionable 아님) skip. cycle 3147 추천 계승 — `packages/kbo-data/src/pipeline/` 잔여 orchestrator 중 CHANGELOG mention 최소 3개(`db-constraints.ts` 3회/`model-version.ts` 3회/`schedule.ts` 5회, 총 219줄) 선정.
 
