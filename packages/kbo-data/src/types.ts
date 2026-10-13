@@ -163,8 +163,10 @@ export interface PredictionInput {
 
   /**
    * M-F1 park_weather factor input (cycle 1013).
-   * 결측 시 (legacy 호출자 + scoreParkWeather null 분기) factor=0.5 neutral.
-   * production weight=0 이라 effect 0. shadow cohort (v2.1-B-shadow) 에서만 weight>0.
+   * predictor 동기 — daily.ts PredictionInput 구성부 미배선 (cycle 2926 확인 — 이 필드는
+   * 항상 undefined). 결측 시 scoreParkWeather null 분기로 factor=0.5 neutral 처리되므로
+   * production 영향은 없음 (production weight=0 이기도 함). shadow cohort (v2.1-B-shadow)
+   * 에서만 weight>0.
    */
   weather?: import('./scrapers/weather').WeatherSnapshot | null;
   /** 돔구장 여부 — KBO 안 WO (고척) 만 true. weather 무시 noop. */
