@@ -11,4 +11,8 @@ describe("feed FEED_ISR_SECONDS source-of-truth guard (silent drift family wave 
     expect(ROUTE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*3600\b/);
   });
 
+  it("feed/route.ts force-dynamic (cycle 3138 — cookie-free supabase client made this route static-eligible; assertSelectOk's fail-loud throw would abort `next build` entirely if Next.js attempts to prerender it during a DB outage)", () => {
+    expect(ROUTE_SRC).toMatch(/export\s+const\s+dynamic\s*=\s*['"]force-dynamic['"]/);
+  });
+
 });
