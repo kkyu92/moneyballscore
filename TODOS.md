@@ -13192,3 +13192,17 @@ Supabase billing DNS 블락 직접 재확인(`ENOTFOUND utm...supabase.co`) — 
 **skill-evolution trigger 평가**: milestone(`3133 % 50 = 33`) 미충족. trigger5(직전20 inclusive, 3114-3133) — review-code(heavy) 다수 발화 지속, 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
 
 다음 사이클 추천 = review-code(heavy)(scripts/op-analysis-*.ts 완주, 다음 scope = apps/moneyball/src/app routes/components 재탐색 또는 supabase/migrations/ 최신 교차검증) 또는 fix-incident(gap=6/20)/lotto(gap=5/30)/info-arch(gap=13/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(2일 남음, Tier4 대기).**
+
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/pipeline 3-mention 축 5개, pre-cycle-207 normalize() drift 수정 (cycle 3146, 2026-10-13)
+
+진단: open issue 0건. 1차/2차 방어선 OK. 2-chain lock 재확인(직전8, 3139-3146) distinct=2(review-code(heavy)7+fix-incident1) — lock 발동 조건 충족하나 예외 룰(잠긴 chain 중 fix-incident 포함 시 lock 무시, 안전 우선) 적용되어 override. fix-incident gap=8/20·op-analysis gap=25+(Supabase billing DNS 블락 지속)·info-arch gap=25/30·lotto gap=17/30 전부 미도달 또는 저가치. cycle 3145 retro 명시 추천 계승.
+
+**감사 대상**: `backfill-sp.ts` / `backtest-bootstrap-ci-run.ts` / `backtest-manual-weights-run.ts` / `backtest-run.ts` / `shadow-cohort.ts` (packages/kbo-data/src/pipeline, 전수 read + call-site 교차검증).
+
+**발견 + 수정**: `backtest-bootstrap-ci-run.ts`/`backtest-manual-weights-run.ts` 의 local `normalize()` 가 `predictor.ts` cycle-207 수정(commit `113c5f8d`, PR #195 — SFR 등 음수 가능 stat 대응 diff-based 공식)을 전혀 반영 못 한 구버전 비율 공식(`homeVal/total`) 그대로 남아있었음 — 음수 SFR 입력 시 backtest harness 의 Brier 계산이 [0,1] 범위를 이탈해 silent corruption 가능. `predictor.ts` 공식 그대로 포팅해 수정. `backfill-sp.ts` 최종 로그가 `total/total=100%` tautology(분자=분모 동일 변수)였던 것도 발견 — 실제 분모(slotsNeeded, home/away SP 미보유 slot 수) 추가해 수정. `shadow-cohort.ts` 의 `ShadowComputeResult.appliedFactorCount` 는 계산되나 어떤 caller 도 미사용 — dead code 제거. `backtest-run.ts` 는 clean(해당 `normalize()` 미사용).
+
+검증: `pnpm tsc --noEmit` 신규 에러 0건, eslint clean, `@moneyball/kbo-data` 전체 96 files/1216 tests 전부 PASS, pre-push hook 전부 PASS. 직접 main commit+push 완료(`8850115c`).
+
+**skill-evolution trigger 평가**: milestone(`3146 % 50 = 46`) 미충족. trigger5(직전20 inclusive, 3127-3146) — review-code(heavy) 다수 발화 지속(16/20), 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy)(pipeline/ 잔여 7개 파일 — daily/db-constraints/live/mlb-pipeline/model-version/postview-daily/schedule/silent-drift-alert, 대부분 central/large orchestrator라 별도 heavy 세션 권장) 또는 info-architecture-review(gap=26/30, 근접) 또는 lotto(gap=18/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(임박, 익일 diagnosis 미처리시 자동 archive 예상).**
