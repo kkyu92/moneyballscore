@@ -144,6 +144,26 @@ describe('GET /api/health/pipelines (cycle 2811 MLB mode 6종 추가)', () => {
     expect(errCount).toBeGreaterThan(0);
   });
 
+  it('egress quota 402 (billing, known issue) → degraded + 200 (fail 아님)', async () => {
+    perModeData = {
+      announce: { created_at: isoHoursAgo(2) },
+    };
+    perModeError = {
+      message:
+        'Service for this project is restricted due to the following violations: exceed_egress_quota. The project owner must upgrade their plan or remove spend caps to restore service.',
+    };
+    const res = await callGet();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.overall).toBe('degraded');
+    const staleCount = Object.values(body.modes as Record<string, { status: string }>).filter(
+      (m) => m.status === 'stale',
+    ).length;
+    expect(staleCount).toBe(Object.keys(ALL_FRESH).length);
+    expect(body.modes.announce.detail).toContain('exceed_egress_quota');
+    expect(body.modes.announce.detail).toContain('user action pending');
+  });
+
   it('response 항상 cache-control no-store', async () => {
     perModeData = { ...ALL_FRESH };
     const res = await callGet();

@@ -78,7 +78,7 @@ describe('GET /api/seo/indexnow/ping', () => {
       new Response('{"errorCode":"InvalidRequestParameters","message":"test"}', { status: 422 }),
     );
     const res = await callGet({ authorization: 'Bearer test-secret' });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(502);
     const json = await res.json();
     expect(json.ok).toBe(false);
     expect(json.status).toBe(422);

@@ -71,12 +71,24 @@ async function checkMode(
       stale_threshold_hours: staleHours,
     };
   } catch (e) {
+    const detail = errMsg(e);
+    // /api/health checkPipeline() 와 동일 downgrade — Supabase billing quota 아웃티지
+    // 중엔 'error' 아닌 app/infra 문제로 분류 (사용자 조치 대기, 코드 bug 아님).
+    if (detail.includes('exceed_egress_quota')) {
+      return {
+        status: 'stale',
+        last_success_at: null,
+        hours_since: null,
+        stale_threshold_hours: staleHours,
+        detail: `Supabase billing quota exceeded (user action pending): ${detail}`,
+      };
+    }
     return {
       status: 'error',
       last_success_at: null,
       hours_since: null,
       stale_threshold_hours: staleHours,
-      detail: errMsg(e),
+      detail,
     };
   }
 }

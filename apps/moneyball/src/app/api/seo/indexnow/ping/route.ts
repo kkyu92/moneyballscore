@@ -52,12 +52,17 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   const responseBody = await response.text().catch(() => '');
 
-  return Response.json({
-    ok: response.ok,
-    status: response.status,
-    urlCount: urlList.length,
-    host: HOST,
-    timestamp: new Date().toISOString(),
-    indexnowResponse: responseBody.slice(0, 500),
-  });
+  // 호출 cron(indexnow-ping.yml) 은 HTTP status 만 보고 body 의 ok 필드는 안 읽음 —
+  // IndexNow API 실패를 outer status 로도 반영해야 silent swallow 안 됨.
+  return Response.json(
+    {
+      ok: response.ok,
+      status: response.status,
+      urlCount: urlList.length,
+      host: HOST,
+      timestamp: new Date().toISOString(),
+      indexnowResponse: responseBody.slice(0, 500),
+    },
+    { status: response.ok ? 200 : 502 },
+  );
 }

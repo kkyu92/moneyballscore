@@ -64,7 +64,14 @@ async function checkPipeline(): Promise<Check> {
     }
     return { status: 'warning', detail: 'No pipeline runs yet' };
   } catch (e) {
-    return { status: 'error', detail: errMsg(e) };
+    const detail = errMsg(e);
+    // checkSupabase() 와 동일 downgrade (line 42-44) — pipeline_runs select 도 동일 402
+    // exceed_egress_quota 에 노출되는 non-head GET. 부재 시 billing 아웃티지 기간에
+    // 이 check 만 'error' 로 남아 overall='fail' 유지 (health-alert.yml 계속 paging).
+    if (detail.includes('exceed_egress_quota')) {
+      return { status: 'warning', detail: `Supabase billing quota exceeded (user action pending): ${detail}` };
+    }
+    return { status: 'error', detail };
   }
 }
 
