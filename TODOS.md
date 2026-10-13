@@ -12941,6 +12941,20 @@ cycle 3118 next_recommended("factor-bias-bootstrap-ci.ts, count=1 티어 잔여 
 
 다음 사이클 추천 = review-code(heavy) 신규 축(`scripts/*.ts` 운영 스크립트 전수 감사 또는 `supabase/migrations/` 최신 몇 개 교차검증, count≤1 티어 완주로 packages/kbo-data/src 내부 잔여 축 소진) 또는 fix-incident(gap=3/20, 실제 incident 부재 재확인됨)/lotto(gap=2/30)/info-arch(gap=10/30) 자연 대기. **Supabase DNS ENOTFOUND 111+ cycle 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(2일 남음) — Tier4 사용자 결정 대기 계속.**
 
+## 🟢 SUCCESS — review-code(heavy): `scripts/backfill-*.ts` 8개 전수 감사, pagination drift 1건 수정 (cycle 3131, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3130 retro `c80ef413`) OK. 직전8 distinct=4(review-code(heavy) dominance 지속, 2-chain lock 미충족). fix-incident gap=3/20·op-analysis 25-cycle 창 0회(Supabase billing 블락 지속, 재확인 skip)·info-arch gap=10/30·lotto gap=2/30 전부 미근접. 직전3 cycle 모두 next_recommended_chain=review-code(heavy), cycle 3130 retro 가 명시적으로 `scripts/*.ts` 운영 스크립트 전수 감사 지목 — review-code(heavy) 채택, scope=`scripts/backfill-*.ts` 8개(1068줄, 미감사 티어).
+
+**감사 결과**: 8개 전수 read(home-win-prob/is-correct-shadow-fix/kbo-confirmed-postponed/kbo-stuck-verify/mlb-elo/mlb-factor-breakdown/mlb-schedule-status/tie-winner-null). DB 쿼리로 실제 row 수 확인 시도 — Supabase billing outage 로 `fetch failed`(기존 확인된 상태, 신규 drift 아님). 7개는 1회성 backfill 스크립트로 이미 실행 완료된 상태, 코드 자체 drift 없음.
+
+**발견**: `backfill-home-win-prob.ts` 만 sibling 패턴(is-correct-shadow-fix.ts/tie-winner-null.ts 가 쓰는 `PAGE=1000` 루프 + `range()` + safety stop)과 불일치 — `.limit(500)` 단일 조회만 사용. 대상 NULL row 가 500건 넘으면 조용히 잘리고 "total NULL home_win_prob rows: 500" 으로 완료인 양 보고하는 silent truncation 가능성. sibling과 동일한 pagination 루프로 교체(`e11e0633`).
+
+검증: `eslint scripts/backfill-home-win-prob.ts` clean. `pnpm lint`/`pnpm type-check`(turbo workspace 범위) 는 `scripts/` 자체를 커버 안 함(기존 알려진 gap, cycle 3128과 동일 패턴) — 파일 단위 eslint 로 대체 검증. 직접 main commit+push(R4).
+
+**skill-evolution trigger 평가**: milestone(`3131 % 50`) 미충족. trigger5(직전20 inclusive, 3112-3131) — review-code 계열 다수 발화 지속, 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속 — `scripts/` 잔여 23개(backtest*/cohort-cleanup/dev-*/export-predictions-tabpfn/measure-*/op-analysis-*.ts 7개/update-stale-data/run-pipeline 등, import-tabpfn-predictions·llm-context-baseline·smoke-umpire-scraper·run-pipeline·lotto.ts 는 이미 최근 cycle 에서 fix됨) 미감사. `op-analysis-*.ts` 그룹(7개) 우선 권장(Supabase billing 해소 후 op-analysis heavy 재개 대비 코드 신뢰성 확보). **Supabase DNS/billing outage 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(2일 남음) — Tier4 사용자 결정 대기 계속.**
+
 ## 🟢 SUCCESS — polish-ui(2-chain lock fallback): /en/reviews orphan loading.tsx 제거 (cycle 3123, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3122 retro `c48c50af`) OK. 직전8(3115-3122) distinct=2(review-code(heavy)7+info-architecture-review1) — 2-chain lock 발동, review-code(heavy)+info-architecture-review 후보 제외. fix-incident gap=56/20 도달하나 `gh run list` 재확인(CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped) actionable 신규 0 — skip. explore-idea saturation 직전15 14/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale/DESIGN.md 2.5일 신선) — 반복 패턴 동일 skip. lotto gap=25/30·op-analysis gap=9/25 전부 미근접. rule4 폴백 = `polish-ui` 강제 발화.
