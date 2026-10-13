@@ -36,7 +36,7 @@ export function DailyPredictionSummaryBar({
   return (
     <div
       className="flex flex-wrap items-center gap-2 text-xs"
-      aria-label="오늘의 예측 요약"
+      aria-label="예측 요약"
     >
       {/* 경기 수 */}
       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium">
