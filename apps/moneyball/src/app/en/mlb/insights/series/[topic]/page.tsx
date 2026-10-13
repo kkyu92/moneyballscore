@@ -8,6 +8,7 @@ import {
   getMlbSeriesByTopic,
   parseMlbSeriesTopic,
 } from "@/app/mlb/insights/insights-data";
+import { buildArticleJsonLd, buildBreadcrumbListJsonLd } from "@/lib/seo/json-ld";
 
 // /mlb/insights/series/[topic](KO) 의 EN mirror — plan #30 Phase 3, 문자열만 번역 +
 // locale="en" 전파 (mlb/insights hub/[date] EN mirror 와 동일 패턴). 데이터 조회는
@@ -72,20 +73,19 @@ export default async function EnMlbSeriesTopicPage({ params }: Props) {
   const team2Name = MLB_TEAMS[topic.team2].name;
   const pageUrl = `${SITE_URL}/en/mlb/insights/series/${topic.slug}`;
 
-  const articleJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "@id": pageUrl,
+  const articleJsonLd = buildArticleJsonLd({
+    url: pageUrl,
     headline: `${team1Name} vs ${team2Name} — MLB AI Insights Series`,
     description: `AI judge agent reasoning timeline across ${entries.length} ${team1Name} vs ${team2Name} games.`,
-    url: pageUrl,
     inLanguage: "en-US",
     datePublished: entries[entries.length - 1]?.date ?? "2026-09-29",
     dateModified: entries[0]?.date ?? "2026-09-29",
-    author: { "@type": "Organization", name: "MoneyBall Score", url: SITE_URL },
-    publisher: { "@type": "Organization", name: "MoneyBall Score", url: SITE_URL },
-    mainEntityOfPage: pageUrl,
-  };
+  });
+  const breadcrumbLd = buildBreadcrumbListJsonLd([
+    { name: "MLB Analysis", url: `${SITE_URL}/en/mlb` },
+    { name: "AI Insights", url: `${SITE_URL}/en/mlb/insights` },
+    { name: `${team1Name} vs ${team2Name}`, url: pageUrl },
+  ]);
 
   const correctN = entries.filter((e) => e.isCorrect === true).length;
   const wrongN = entries.filter((e) => e.isCorrect === false).length;
@@ -97,6 +97,10 @@ export default async function EnMlbSeriesTopicPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       <Breadcrumb
