@@ -1,5 +1,13 @@
 
 
+## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/pipeline/daily.ts 전수 감사 1675줄, drift 0건 (cycle 3152, 2026-10-13)
+
+진단: open issue 0건. approved plan 0/24 (plan #29 spec_only_deferred, 만료 2026-10-15 임박, Tier4 사용자 영역). 1차 방어선(cycle 3151 retro `286e36f6`) OK. 2-chain lock 재확인(직전8, 3144-3151) distinct=4(review-code(heavy)5+skill-evolution1+polish-ui1+info-architecture-review1) — 미충족, 자유 선택. fix-incident gap=13/20·lotto gap=22/30·info-arch gap=3/30 전부 미도달. op-analysis gap 25+ 트리거 도달했으나 Supabase 여전히 ENOTFOUND/curl 000(2026-10-11 billing 인시던트 지속) — actionable 아님, skip. cycle 3151 추천 계승 — pipeline/ 잔여 대형 orchestrator 중 가장 큰 미완전 감사 파일 `daily.ts`(1675줄) 선정.
+
+**감사 결과**: `daily.ts` 전체 2-part read(1676줄). 9개 의존 모듈 시그니처 교차검증 — `schedule.ts` `shouldPredictGame`(6-param: game/existingSet/dbId/nowMs/windowHours/allowLateWindow) 호출부 일치, `model-version.ts` `decideModelVersion`({hasApiKey, debateSucceeded, usingShadowV20Weights}) 일치, `db-constraints.ts` games=`league_id,external_game_id`/teamSeasonStats=`team_id,season` onConflict 값 일치, `notify-status-predicate.ts` `shouldNotifyPipelineStatus` predicate 로직 호출부 일치, `silent-drift-alert.ts` 4개 capture 함수(captureSilentDriftAlert/captureCreditExhaustedAlert/captureSparsePredictionAlert/captureConfidenceFlatAlert) 시그니처 일치, `final-reasoning.ts`/`winner-id.ts`/`accuracy-update.ts`/`prediction-history.ts`/`shadow-cohort.ts`(insertShadowRow/insertShadowRowV20) 전부 일치. 상수 검증: `PRODUCTION_COHORT_RULES=['v1.8','v1.8-credit-fail']`, `CURRENT_SCORING_RULE='v1.8'` 실제 정의 확인. 주석 claim 검증: migration 034 `game_datetime_utc` NOT NULL — 실제 `ALTER COLUMN game_datetime_utc SET NOT NULL` 존재 확인(주석 정합).
+
+**결론**: daily.ts 1676줄 전수 감사, drift 0건. 코드 변경 없음(retro-only). 다음 사이클 추천 = review-code(heavy) 계속(mlb-pipeline.ts 886줄/postview-daily.ts·silent-drift-alert.ts 부분감사 잔여) 또는 2-chain lock 재형성 시 fix-incident(gap=14/20)/lotto(gap=23/30) 자연 대기.
+
 ## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/pipeline/live.ts 전수 감사, drift 0건 + milestone 3150 skill-evolution 마커 (cycle 3150, 2026-10-13)
 
 진단: open issue 0건. approved plan 0/24(literal 'approved' 없음, plan #29 만료 2026-10-15 임박이나 Tier4 사용자 영역). 1차 방어선(cycle 3149 retro `c0c2fec9`) OK, 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3142-3149) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 미충족, 자유 선택. fix-incident gap=12/20·lotto gap=21/30·info-arch gap=2/30(직전 발화) 전부 미도달. op-analysis Supabase DNS 블락 지속(actionable 아님) skip. **milestone 체크: 3150 % 50 = 0 — trigger3 충족, 다른 trigger 평가 무관하게 skill-evolution-pending 마커 박제.**
