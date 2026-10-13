@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib 0-mention 5개 파일 전수 감사, drift 0건 (cycle 3127, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3126 retro `0bbeb9d5`) OK. 직전8 distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap=20/20 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skip) — actionable 부재. op-analysis gap=25/25 도달하나 Supabase DNS 재확인(nslookup NXDOMAIN 불변, 동일 billing 인시던트) — skip. lotto gap=29/30·info-arch gap=6/30 미근접.
+
+`packages/kbo-data` 0-mention tier 완전 소진(cycle 3126) 확인 후 신규 스코프 `apps/moneyball/src/lib`(26851줄) 선정. 서브디렉토리 파일별 CHANGELOG mention 전수 grep → `predictions/adjacentDates.ts`/`predictions/yesterdayDate.ts`/`mlb/buildMlbCalendarHeatmap.ts`/`mlb/buildMlbMatchupEloTrend.ts`/`mlb/buildMlbTeamEloTrend.ts` 5개 0-mention 파일 확인.
+
+본 메인 직접 전수 read(5개 파일, agent 위임 없이) + 호출부 교차검증 + KBO twin(`buildTeamEloTrend.ts`/`calendar/monthGrid.ts`) 대조. **drift 0건**: `adjacentDates.ts`는 cycle 2513 타임존 버그 수정 이력이 주석에 정확히 박제돼있고 Date.UTC 순수 캘린더 연산 확인. `buildMlbTeamEloTrend.ts`의 forward-fill avg 로직은 KBO twin과 동일 패턴(사례 27 family 재발 방지 주석 정확, cycle 3033 정정 반영 확인). `buildMlbCalendarHeatmap.ts`의 `/mlb/games/${date}` 링크는 실제 라우트 존재 확인(KBO twin과 다른 네이밍이나 의도된 차이). 5개 파일 전부 기존 vitest 커버리지 보유, `npx vitest run` 24/24 pass.
+
+검증: `vitest run` 5개 테스트 파일 24/24 pass. 코드 변경 없음(drift 0건 — 코드 수정 불필요).
+
+skill-evolution trigger 평가: milestone(3127%50=27) 미충족. trigger5 — review-code 직전20(3108-3127) 15회 발화(0회 아님), 9개 opt-out 제외. ship-0 미충족(직전10 success 9+retro-only 1).
+
+다음 사이클 추천 = review-code(heavy) 계속(`apps/moneyball/src/lib` 나머지 디렉토리 또는 components/ 재탐색) 또는 fix-incident(gap=21)/lotto(gap=30/30 도달 임박, 다음 토 전)/info-arch(gap=7) 자연 대기. **Supabase billing 조치 여전히 사용자 영역 Tier4 대기 지속.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data 0-mention 2개 파일 전수 감사, ELO_DIVIDER 하드코딩 drift 1건 수정 (cycle 3126, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/25(전부 non-approved). 2차 방어선(cycle 3125 retro `95c682d6`) OK. 직전8 distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap=59 재확인(gh run list CI/Vercel Failure Dispatch 전부 skip) — actionable 부재. op-analysis gap=202 재확인(nslookup NXDOMAIN 불변, 동일 Supabase billing 인시던트) — skip. lotto gap=28/30·info-arch gap=5/30 미근접.
