@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/{analysis,picks} 전수 감사, drift 0건 (cycle 3140, 2026-10-13)
+
+진단: open issue 0건. 1차 방어선(cycle 3139 retro `ea1b3665`) OK. 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3132-3139) distinct=3(review-code(heavy)6+explore-idea1+fix-incident1) — 미충족, 자유 선택. plan lookup — 23개 plan 파일 전부 `status: approved` 아님(전부 completed/archived/deferred 류) → 자율 매핑 대상 없음. gap-trigger 전부 미도달(fix-incident gap=2·op-analysis Supabase billing 블락 지속·info-arch gap≈19/30·lotto gap≈11/30). cycle 3139 retro 의 명시적 추천(review-code(heavy) 잔여 5개 복수파일 디렉토리: `components/{analysis,dashboard,picks,predictions,shared}`) 재개, 이번 사이클은 가장 작은 2개(analysis 13 + picks 12 = 25개 파일)로 스코프 축소(grep-count-depth 가드레일 준수 — 전수 read, grep count 비사용).
+
+**감사 결과(직접 전수 read)**:
+- `analysis/`(13개) 전부 clean: `AgentArgumentBox`/`BigMatchDebateCard`/`JudgeVerdictPanel` 3종 비대칭 강조(`emphasized`) 로직 일관, `DetailedFactorAnalysis`/`GameAnalysisProse`가 동일 `explainFactor` 헬퍼 공유하며 각기 다른 팩터 서브셋 사용(정량 해설 vs 종합 요약 — 의도된 분리), `MlbTeamStrengthGrid`/`TeamStrengthGrid` locale/league mirror 쌍 정합(MLB 쪽은 Elo 미구현이라 "진짜 전적" 대체 설계라고 주석 명시, 의도된 차이), `ThisWeekStatusFilter`(locale prop 없음) vs `YesterdayStatusFilter`(locale 지원) 비대칭을 실제 콜러(`app/analysis/page.tsx` KO 전용 vs `app/{,en/}mlb/analysis/page.tsx`)와 대조 — `ThisWeekStatusFilter`는 KO-only `/analysis` 페이지에서만 쓰여 locale 불필요가 맞음, drift 아님.
+- `picks/`(12개) 전부 clean: `data-pick-status` 값(`correct`/`incorrect`/`pending`, `MyPicksClient.tsx`)과 `PicksStatusFilter`의 hide-selector 값 전수 대조 — 정확 일치. 12개 컴포넌트 전부 실제 콜러 존재 확인(`FactorAgreementCard`/`PicksSortControl`/`PicksStatusFilter`/`PicksTrendChart`/`SharePicksButton`/`WeeklyHistorySection`/`WeeklyPicksSummary` → `MyPicksClient.tsx` 내부 조립, `DivergenceChip`/`UserVsAIScorecard` → `app/page.tsx`, `PickButton` → 6개 콜러) — 죽은 컴포넌트 0건(cycle 3139가 layout/에서 발견한 `PlaceholderLoginButton` 류 패턴 재확인했으나 본 2개 디렉토리엔 미해당). `app/page.tsx`의 `DivergenceChip`/`UserVsAIScorecard` 실제 호출부 prop shape 대조 결과도 일치.
+
+검증: 코드 변경 없음(drift 0건) — `pnpm type-check`/`lint`/`test` 재실행 불필요 판단(변경분 없음).
+
+**skill-evolution trigger 평가**: milestone(3140%50=40) 미충족. trigger5(직전20, 3121-3140, 포함) — review-code 계열 활발, 평가 대상 review-code 단독 미충족. ship-0 emergency stop 미충족(직전10 전부 success/retro-only clean, fail 없음).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 3개: `components/{dashboard,predictions,shared}`, 43개 파일) 또는 fix-incident(headers()-in-layout 713파일 이동은 여전히 사용자 확인 필요 — carry-over 플래그만) 또는 info-arch(gap≈19/30)/lotto(gap≈11/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(임박, 익일).**
+
+---
+
 ## 🟢 SUCCESS — review-code(heavy): components/{leaderboard,teams,layout} 전수 감사, drift 2건 수정 (cycle 3139, 2026-10-13)
 
 진단: open issue 0건. 2차 방어선(cycle 3138 retro `a7c7779f`) OK. 2-chain lock 재확인(직전8, 3131-3138) distinct=3(review-code(heavy)6+fix-incident1+explore-idea1) — 미충족, 자유 선택. gap-trigger 전부 미도달(fix-incident gap=0 방금 발화·op-analysis Supabase billing 블락 지속·info-arch 17/30·lotto 9/30). Vercel prod 배포(commit `59eed3a7`) Ready 확인, 그러나 homepage 재현 curl = 여전히 14.6초 — cycle 3138 이 flag 한 `app/layout.tsx` headers() 전체 앱 dynamic 강제 문제 재확인. fix 자체(Next.js multiple-root-layouts, route group 으로 non-en 전체 이동)는 알려져 있으나 **713개 파일 이동 필요** — CLAUDE.md 100+ 파일 변경 사용자 확인 규칙에 저촉, zero-touch 무인 사이클에서 자율 진행 불가 판단 → 보류(TODOS 플래그만). 대신 cycle 3136 retro 의 명시적 추천(review-code(heavy) 잔여 8개 복수파일 디렉토리) 재개, 이번 사이클은 가장 작은 3개(leaderboard 5 + teams 5 + layout 11 = 21개 파일, ~2400줄)로 스코프 축소.
