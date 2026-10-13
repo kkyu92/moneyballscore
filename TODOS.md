@@ -1,5 +1,17 @@
 
 
+## 🟡 RETRO-ONLY — info-architecture-review: 30-cycle gap 정시 도달, IA 15연속 재확정 (cycle 3121, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3120 retro `68767faf`) OK. 직전8(3113-3120) distinct=3 — 2-chain lock 미충족. info-arch gap 정확 30/30 도달(마지막 발화 cycle 3091) — cycle 3120 retro 추천 그대로 자연 발화.
+
+검증: 신규 page.tsx 0건(cycle 3091 체크포인트 이후), Header/Footer 변경 0건, breadcrumb 미보유 후보 18건(cycle 3091 시점 13건 대비 +5) 전수 재분류 — 증가분 4개(`mlb/reviews/{weekly,monthly}` + `en/mlb/reviews/{weekly,monthly}`)는 전부 redirect-only twin 라우트(코드 read 확인: computeWeekRange/computeMonthRange league/locale-agnostic 재사용, wave-660/cycle 2355/2356/plan#26 기 ship), 기존 KBO `reviews/weekly`·`reviews/monthly` 와 동일 known false-positive 패턴. 신규 미분류 drift 0건. sitemap.xml 동적 생성 구조 불변(cycle 3036 확인) 재검증 불필요.
+
+checkpoint 문서 `docs/design/ia-2026-10-13-cycle-3121-30-cycle-gap-checkpoint.md` 박제 + commit `b5b68a9f` push. "현 IA 충분" 15연속 재확정(…→3036→3064→3091→3121).
+
+skill-evolution trigger 평가: milestone(3121%50=21) 미충족. trigger5(직전20 inclusive, 3102-3121) — review-code 다수 fire, 0-fire chain 없음(평가 대상 review-code 단독) — 미충족. ship-0 emergency stop 미충족(직전10 success 8 + retro-only 2).
+
+다음 사이클 추천 = review-code(heavy) packages/kbo-data count=3 티어 또는 app/api mention-보유 route 재탐색 자연 연속. 다음 info-arch 30-cycle 재도달 = cycle 3151 근방(2-chain lock 재발 시 조기 발화 가능). **Supabase billing 조치 여전히 사용자 영역, plan #29 만료 2026-10-15(2일 남음) — Tier4 대기 계속.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src count=2 티어 14개 전수 감사, 신규 drift 0건 (cycle 3120, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3119 retro `7260a5f4`) OK. 직전8(3112-3119) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. fix-incident 마지막 cycle 3067(gap=53) 도달하나 `gh run list` 재확인(CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped) + Supabase DNS 재확인(ENOTFOUND 지속, 기존 known blocker) — actionable 신규 incident 부재 skip. op-analysis 마지막 cycle 3114(gap=6)·lotto 마지막 cycle 3098(gap=22)·info-arch 마지막 cycle 3091(gap=29, 근접이나 미달) 전부 미근접. explore-idea saturation 직전15 14/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale/DESIGN.md 2.7일 신선) — 반복 패턴 동일 skip.
