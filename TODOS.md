@@ -1,5 +1,25 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/{leaderboard,teams,layout} 전수 감사, drift 2건 수정 (cycle 3139, 2026-10-13)
+
+진단: open issue 0건. 2차 방어선(cycle 3138 retro `a7c7779f`) OK. 2-chain lock 재확인(직전8, 3131-3138) distinct=3(review-code(heavy)6+fix-incident1+explore-idea1) — 미충족, 자유 선택. gap-trigger 전부 미도달(fix-incident gap=0 방금 발화·op-analysis Supabase billing 블락 지속·info-arch 17/30·lotto 9/30). Vercel prod 배포(commit `59eed3a7`) Ready 확인, 그러나 homepage 재현 curl = 여전히 14.6초 — cycle 3138 이 flag 한 `app/layout.tsx` headers() 전체 앱 dynamic 강제 문제 재확인. fix 자체(Next.js multiple-root-layouts, route group 으로 non-en 전체 이동)는 알려져 있으나 **713개 파일 이동 필요** — CLAUDE.md 100+ 파일 변경 사용자 확인 규칙에 저촉, zero-touch 무인 사이클에서 자율 진행 불가 판단 → 보류(TODOS 플래그만). 대신 cycle 3136 retro 의 명시적 추천(review-code(heavy) 잔여 8개 복수파일 디렉토리) 재개, 이번 사이클은 가장 작은 3개(leaderboard 5 + teams 5 + layout 11 = 21개 파일, ~2400줄)로 스코프 축소.
+
+**감사 결과(직접 전수 read, grep-count-depth 가드레일 준수)**:
+- `leaderboard/`(5개) 전부 clean: `HallOfFame` 메달 SVG, `LeaderboardClient` 스트릭/표본 정렬 메타, `LeaderboardJoinModal`, `LeaderboardSortControl` CSS-order 트릭(`USER_LEADERBOARD_DISPLAY_LIMIT` 가 모든 가능 랭크 커버 — `fetchLeaderboard` 서버 쿼리가 이미 그 값으로 `.limit()` 거는 것까지 확인), `LeaderboardTable`.
+- `teams/`(5개) 전부 clean: `TeamEloChart`/`MlbTeamEloChart` locale mirror 쌍 정합, `TeamConvergencePickRecord`/`MlbTeamConvergencePickRecord` locale mirror 쌍 정합, `TeamRecentGamesFilter` 의 `data-team-game-location`/`result` CSS hide-selector 를 실제 caller(`app/teams/[code]/page.tsx`) 속성과 대조 — `pending` 상태 포함 정확 일치.
+- `layout/`(11개) 중 **2건 발견 + 수정**:
+  1. `Header.tsx` 모바일 `ThemeToggle` 이 `isEn` prop 없이 호출 — 바로 옆 모바일 검색 링크는 `aria-label={isEn ? "Search" : "검색"}` 로 분기하는데 `ThemeToggle` 만 기본값(false) 고정, `/en/mlb` 모바일에서 테마 토글 aria-label/title 이 한국어로 노출. `<ThemeToggle isEn={isEn} />` 로 수정.
+  2. `PlaceholderLoginButton.tsx` 는 자신의 테스트 파일 외 어디서도 import 되지 않는 완전 dead code — 실제 `/login` 라우트는 별도 standalone placeholder 페이지 사용, 이 컴포넌트에 연결된 적 없음. 컴포넌트 + 테스트 파일 삭제(45줄).
+- 부수 확인(코드 변경 불필요): `Header.tsx` MLB_NAV href 목록(16개 top-nav path) vs 실제 `src/app/en/mlb/*` page.tsx 인벤토리 전수 대조 — 전부 EN 미러 존재(코드 주석 claim 과 일치). `Footer.tsx` MLB sitemap 컬럼도 동일 대조 결과 정합, drift 없음. `NavLinks`/`LeagueSelector`/`MobileNav`/`ThemeProvider`/`CookieConsent`/`MegaMenu`/`nav-icon` 전부 clean.
+
+검증: `pnpm type-check`/`lint` clean. `pnpm test` 589개 파일/4649개 테스트 통과(dead test 파일 삭제로 파일 수 1개 감소, 예상대로). 최근 review-code(heavy) 관례(cycle 3131-3136) 따라 PR 없이 main 직접 commit(`5836b547`) + push, pre-push hook(lint+type-check+version-sync-guard) 통과.
+
+**skill-evolution trigger 평가**: milestone(3139%50=39) 미충족. trigger5(직전20, 3120-3139) — review-code 계열(heavy/lite 변형 포함) 14/20 활발, 평가 대상 review-code 단독 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 5개 복수파일 디렉토리: `components/{analysis,dashboard,picks,predictions,shared}`) 또는 fix-incident(headers()-in-layout 713파일 이동은 사용자 확인 필요 — carry-over 플래그만, 자율 진행 X) 또는 info-arch(gap=18/30)/lotto(gap=10/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(임박).**
+
+---
+
 ## 🟢 SUCCESS — fix-incident: lib/supabase/server.ts cookie-free, ISR 복원 44 호출부 (cycle 3138, 2026-10-13)
 
 진단: 2-chain lock 발동(직전8, 3130-3137, review-code(heavy)7+explore-idea1, distinct=2) — 두 chain 제외. 남은 pool 어떤 gap-trigger 도 미도달(fix-incident 10/20·info-arch 17/30·lotto 9/30·op-analysis Supabase billing 블락 지속) → 스킬 룰상 polish-ui 강제 fallback 대상. 그 진단 단계에서 production 직접 curl 점검 중 실제 인시던트 발견 — fallback 대신 fix-incident 로 전환.
