@@ -18,6 +18,12 @@ import { parseChangelog } from '@/lib/changelog/parse';
 import { listInsightsDates } from '@/lib/insights/loader';
 
 export const revalidate = 3600; // FEED_ISR_SECONDS (Next.js 16 Turbopack: literal required)
+// assertSelectOk 가 DB 에러를 throw (fail-loud, 의도된 런타임 500). cookie-free client
+// 전환(lib/supabase/server.ts) 후 Next.js 가 이 route 를 static 으로 prerender 시도 →
+// build 시점 DB 불가용(Supabase INACTIVE 등) 시 throw 가 `next build` 전체를 중단시킴.
+// force-dynamic 으로 prerender 자체를 건너뛰어 build 안전성 확보 — Cache-Control 헤더가
+// 이미 CDN 캐싱 담당하므로 런타임 동작(요청마다 재실행 후 헤더로 캐시)은 변경 없음.
+export const dynamic = 'force-dynamic';
 
 function escapeXml(str: string): string {
   return str
