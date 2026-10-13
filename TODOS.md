@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data count=4+ 티어 4개 전수 감사, drift 0건 (cycle 3125, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3124 retro `abda8681`) OK. 직전8(3117-3124) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap=58/20 도달하나 `gh run list` 재확인(CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped) — actionable 신규 인시던트 부재. op-analysis gap=201(!)/25 — 사상 최대 미발화 간격이나 Supabase DNS 직접 재확인(`nslookup` NXDOMAIN 불변, 2026-10-11 INACTIVE 인시던트 발생 후 105 cycle+ 경과, cycle 3114 RETRO-ONLY 가 이미 93-cycle 시점 재확인한 동일 블로커) — 또 재확인만 반복하는 건 저가치라 skip. lotto gap=27/30·info-arch gap=4/30 전부 미근접.
+
+cycle 3124 추천("count=4+ 티어") 채택 — `backtest/backtest-v2-helpers.ts`(실제 경로는 `src/backtest/`, 프롬프트의 `src/` 는 오기) + `notify/telegram.ts` + `pipeline/db-constraints.ts` + `scrapers/kbo-pitcher.ts` 4개. general-purpose agent 위임 — 전수 read + caller 교차검증 + db-constraints.ts 는 실제 migration 16개 UNIQUE 제약 전부와 1:1 대조.
+
+**결과: 4개 전부 clean, drift 0건**. `backtest-v2-helpers.ts`의 `computeProb` 가 production twin(`predictor.ts`/`shadow-cohort.ts`)과 정확히 일치 확인. `telegram.ts` 의 보조 `notifyError` bare catch 는 기능 버그 아님(실패 전에 이미 `errors[]` 배열에 기록 완료, Telegram 알림은 best-effort 중복 핑일 뿐). `db-constraints.ts` 16개 항목 전부 migration 001~050 실제 제약과 일치. `kbo-pitcher.ts` cell-index 주석(ERA=3/IP=10/HR=12/BB=13/HBP=14/SO=15) 파싱 코드와 정합, fancy-stats 병합 로직도 docstring 과 일치. 코드 변경 없음.
+
+skill-evolution trigger 평가: milestone(3125%50=25) 미충족. trigger5 — review-code 직전20(3106-3125) 6+회 발화라 0회 아님, 다른 9개는 영구 opt-out. ship-0 emergency stop 미충족(직전10 전부 success/clean).
+
+다음 사이클 추천 = review-code(heavy) 계속 — packages/kbo-data count≥5 티어(index.ts/backtest/index.ts/daily.ts/mlb-pipeline.ts/predictor.ts 등 핵심 파일, 이미 개별적으로 감사됐을 가능성 높아 재확인 성격) 또는 components/ 재탐색. 대안 = fix-incident(gap=59)/lotto(gap=28/30)/info-arch(gap=5/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역, Tier4 대기 계속(2026-10-11 인시던트 발생 후 105 cycle+ 경과 — 실제 경과일 2일, DNS NXDOMAIN 불변).**
+
 ## 🟢 SUCCESS — review-code(heavy): app/api 잔여 14개 route 전수 감사, health check 2종 billing-outage false-positive + indexnow silent-200 swallow 수정 (cycle 3124, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24(전부 non-approved status). 2차 방어선(cycle 3123 retro `e2f73f13`) OK. 직전8(3116-3123) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. fix-incident gap=20/20 정확 도달하나 `gh run list` 재확인(CI/Vercel Failure Dispatch 전부 success/skipped) — actionable 인시던트 부재. op-analysis gap=10/25·lotto gap=26/30·info-arch gap=3/30(방금 발화) 전부 미근접.
