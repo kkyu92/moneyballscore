@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — fix-incident: lotto-pick-update cron 실패 원인 수정 + 2026-10-17 picks 복구 (cycle 3128, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3127 retro `49bf5181`) OK. 직전8 distinct=3(review-code(heavy)6+polish-ui1+info-arch1) — 2-chain lock 미발동. fix-incident gap=61/20(actionable 반복 부재 확인) · op-analysis gap=80+(Supabase DNS 지속) · lotto gap=30/30 정확 도달(30-cycle trigger) + 다음 토(10-17) picks 파일 부재(cron freshness trigger 동시 충족) — lotto 진단 중 실제 cron 실패 로그 발견해 fix-incident 로 전환.
+
+**원인**: `lotto-pick-update` cron(2026-10-13 06:46 UTC, 오늘 3회 예정 fire 중 2건은 GH Actions schedule 기존 41% skip 이슈로 미실행, 1건만 실행되어 실패)이 "dhlottery+lottolyzer 모두 재조회 실패"로 exit 1. curl 재현 결과 dhlottery만 connection fail(httpcode 000), lottolyzer는 200 정상 응답(1245회, oldLast와 일치) — 즉 lottolyzer가 "이미 최신" 을 이미 독립 확인했는데도, `scripts/lotto.ts`의 `update()` 가 `latest<=oldLast` 분기에서 무조건 dhlottery reachabilityCheck 를 추가로 돌리고 그 결과만으로 "둘 다 실패" 로 오판하는 구조적 버그. dhlottery 일시 unreachable(흔한 패턴)이 lottolyzer 의 유효한 확인을 통째로 무시시킴.
+
+**수정**: `getLatestRound()` 성공 여부(`lottolyzerConfirmed`)를 추적해 성공 시 dhlottery reachability check 자체를 skip — lottolyzer 가 이미 신뢰 가능한 "최신 확인"을 제공했으면 즉시 "이미 최신" 처리. 수정 후 로컬에서 `update`/`pick-md "2026-10-17"` 재실행으로 1000세트 picks 파일 수동 생성(cron 이 다음 화요일까지 기다리면 토요일 추첨 전 picks 미게시 상태가 됐을 것 — 즉시 fallback 필요했음).
+
+검증: `tsc --noEmit`(lotto.ts 개별 clean, 나머지는 pre-existing 무관 스크립트 에러), `eslint scripts/lotto.ts` clean, pre-push hook(lint+type-check+version-sync-guard) 전부 PASS. 직접 main commit+push(R4, `b7b8c2d5`).
+
+**skill-evolution trigger 평가**: milestone(`3128 % 50 = 28`) 미충족. trigger5(직전20 inclusive, 3109-3128) — review-code(heavy) 계열 다수 발화(15/20) 지속, 미충족. ship-0 emergency stop 미충족(직전10 중 success 다수).
+
+다음 사이클 추천 = review-code(heavy)(dominance 지속, `scripts/*.ts` 운영 스크립트 전수 권장 — 본 사이클 버그가 스크립트 영역 미감사 신호) 또는 info-architecture-review(gap=8/30 자연 대기) 또는 lotto(gap=0 방금 발화, 재발 모니터만). **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(2일 남음, Tier4 대기).**
+
 ## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib 0-mention 5개 파일 전수 감사, drift 0건 (cycle 3127, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3126 retro `0bbeb9d5`) OK. 직전8 distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap=20/20 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skip) — actionable 부재. op-analysis gap=25/25 도달하나 Supabase DNS 재확인(nslookup NXDOMAIN 불변, 동일 billing 인시던트) — skip. lotto gap=29/30·info-arch gap=6/30 미근접.
