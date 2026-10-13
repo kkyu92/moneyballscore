@@ -13248,3 +13248,17 @@ Supabase billing DNS 블락 직접 재확인(`ENOTFOUND utm...supabase.co`) — 
 **skill-evolution trigger 평가**: milestone(`3146 % 50 = 46`) 미충족. trigger5(직전20 inclusive, 3127-3146) — review-code(heavy) 다수 발화 지속(16/20), 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
 
 다음 사이클 추천 = review-code(heavy)(pipeline/ 잔여 7개 파일 — daily/db-constraints/live/mlb-pipeline/model-version/postview-daily/schedule/silent-drift-alert, 대부분 central/large orchestrator라 별도 heavy 세션 권장) 또는 info-architecture-review(gap=26/30, 근접) 또는 lotto(gap=18/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(임박, 익일 diagnosis 미처리시 자동 archive 예상).**
+
+## 🟢 SUCCESS — skill-evolution(forced): phase 50, 84th 자가 진화 (cycle 3151, 2026-10-13)
+
+진단: skill-evolution-pending 마커 존재(cycle 3150 milestone, `3150 % 50 = 0`) — 메인 자율 X, 강제 발화. 1차 방어선(cycle 3150 retro `9d680c2d`) OK, 2차 방어선(직전 사이클 결손 감지) OK.
+
+**phase 50 (3131-3150) stats**: review-code(heavy) 80%(16/20, phase49 유지 — app/api coverage 완결 이후 `packages/kbo-data/src/pipeline/` 대형 orchestrator 축 소비: db-constraints/model-version/schedule/live.ts/save-game-record/backfill-records) + polish-ui 5%(3147) + info-architecture-review 5%(3148) + fix-incident 5%(3138) + explore-idea 5%(3137). success **100%(20/20)** — phase49 75% 대비 25pp 상승, fail/partial/interrupted 0건. 2-chain lock 미충족 유지(직전8 distinct=3). watch.sh hang kill 0건(**18 consecutive 50-cycle window**). 2차 방어선: 3101-3150 50 cycle 구간 전수 대조 — 결손 0건, **18 consecutive window** 무결손. PASS_ship 단일 grep 실측 **2778**(phase49 2705 대비 +73).
+
+**갱신 내용**: `~/.claude/skills/develop-cycle/MIGRATION-PATH.md` phase 50 entry append + `SKILL.md` 마이그레이션 path 표 "최신" row 갱신(83→84회 자가 진화, cycle 범위 3100→3150). 기존 룰 변경 없음(순수 상태 기록 갱신) — pnpm smoke 확인(repo 파일 변경 0, git status clean).
+
+milestone 커밋: `feat(skill): cycle 3150 milestone — skill-evolution 84회 (phase 50)` (`f8f677a1`, direct empty commit on main, phase 47-49 와 동일 패턴 — PR 미경유).
+
+**plan #29 만료 임박**: 2026-10-15(2일 남음) — Tier4 사용자 결정 대기 지속. 만료 시 다음 사이클 자동 archive 예정.
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/pipeline/` 잔여 대형 orchestrator — daily.ts 1675줄/mlb-pipeline.ts 886줄/postview-daily.ts 378줄/silent-drift-alert.ts 384줄) 또는 2-chain lock 미충족 지속 시 fix-incident(gap=13/20)/lotto(gap=22/30)/info-arch(gap=3/30, 직전 발화) 자연 대기. Supabase billing 조치 여전히 사용자 영역.
