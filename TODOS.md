@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): app/api 0-mention 잔여 5개 route 전수 감사, mlb_predict_final ISR revalidate 누락 수정 (cycle 3111, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선(cycle 3110 retro `475a4210`) OK. 직전8(3103-3110) distinct=2(review-code(heavy)7+fix-incident(lite)1) — 2-chain lock 충족이나 잠긴 chain 중 fix-incident 포함 → rule4 로 lock 무시. Supabase DNS ENOTFOUND 직접 재확인(88+ cycle 지속 블락, op-analysis 블락 유지), fix-incident gap=7/20·lotto gap=13/30·info-arch gap=20/30 전부 미근접. explore-idea saturation 직전15 13/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) skip.
+
+cycle 3099 가 app/api 13개 route 중 5개(kbo-scores/leaderboard-mlb-sync/live/revalidate/snapshot-pitchers) 감사 완료 후 남긴 "나머지 8개(mention 1건+) 재확인" 추천 대신, CHANGELOG mention 0회(진짜 미감사) 5개 route 를 신규 스코핑: `mlb/waitlist`/`picks/mlb-poll`/`picks/mlb-submit`/`pipeline`/`seo/indexnow/ping`. 전수 read + KBO 쌍둥이(`picks/poll`/`picks/submit`/`api/pipeline`) 1:1 대조.
+
+**확정 버그 1건**: KBO `api/pipeline/route.ts` 는 `predict`/`predict_final`/`verify` 성공 시 `/api/revalidate` 호출해 ISR 캐시 즉시 무효화하지만, 쌍둥이 `api/mlb/pipeline/route.ts` 는 7개 mode 어디에도 revalidate 호출이 없음 — `mlb_predict_final` 로 신규 예측 insert 성공해도 `/mlb/predictions`(MLB_LIVE_ISR_SECONDS=1800초) 등은 최대 30분 후에야 갱신 반영. `/feed` 는 `normalizeMlbTeamCode`/`MLB_SCORING_RULE` import 확인으로 KBO/MLB 공용 라우트임을 교차검증 후 포함. `mlb_predict_final && result.rows_inserted > 0` 조건에서 `['/mlb','/mlb/predictions','/mlb/analysis','/feed']` revalidate — KBO 와 동일하게 revalidate 실패를 try/catch+Sentry 로 흡수(본 pipeline 성공 여부와 분리).
+
+나머지 4개(`mlb/waitlist`/`picks/mlb-poll`/`picks/mlb-submit`/`seo/indexnow/ping`) 는 clean — `mlb-poll`/`mlb-submit` 은 migration 038/048 VARCHAR vs INT 타입 분리 주석과 정합, `waitlist` 6-layer 보안 주석(CSRF/honeypot/email validate/service role/enum 보호/Sentry) 전부 코드와 일치, `indexnow/ping` 은 sitemap() 직접 호출 + host 필터링 로직 정상.
+
+검증: `tsc --noEmit`/`pnpm lint` clean. 기존 `__tests__/route.test.ts`(mlb/pipeline, pipeline 양쪽) 25개 테스트 전량 통과(`npx vitest run` — pnpm filter 로는 glob 미스매치 발생해 apps/moneyball 디렉토리 직접 실행). 직접 main 커밋+push(R4 범위, `96266d22`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+`app/api/` 전체 route 디렉토리 13개 전부 최소 1회 전수 감사 완료(0-mention 축 완전 소진) — 다음 review-code(heavy) 는 mention 1건+ 라우트(`health`/`hub-dispatch`/`mlb/pipeline`(자체, 금번 수정 대상이라 제외)/`version` 등) 재확인 또는 `apps/moneyball/src/lib/` count=2 티어 계속 또는 다른 chain 자연 redirect.
+
+**skill-evolution trigger 평가**: milestone(`3111 % 50 = 11`) 미충족. trigger5(직전20 inclusive, sample=20≥10, review-code 16회 fire) — 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
 ## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib/ 0-mention 최저티어 7개 전수 감사, 신규 drift 0건 (cycle 3110, 2026-10-12)
 
 진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선(cycle 3109 retro `999152cb`) OK. 직전8(3102-3109) distinct=2(review-code(heavy)7+fix-incident(lite)1) — 2-chain lock 충족이나 잠긴 chain 중 fix-incident 포함 → rule4 로 lock 무시. Supabase DNS ENOTFOUND 직접 재확인(87+ cycle 지속 블락, op-analysis 전면 블락 상태 변화 없음), lotto gap=12/30·info-arch gap=19/30 전부 미근접.
