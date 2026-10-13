@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (RETRO-ONLY) — polish-ui: DESIGN.md 기존 drift 시그니처 3종 재검사, drift 0건 (cycle 3147, 2026-10-13)
+
+진단: open issue 0건. 1차 방어선(cycle 3146 retro `20430b15`) OK, 2차 방어선 OK. 2-chain lock 재확인(직전8, 3139-3146) distinct=1(review-code(heavy) 전부) — 조건(distinct≤2) literal 충족, 잠긴 chain 에 fix-incident 미포함(override 불가) → 룰 step3 적용, 다른 chain(fix-incident gap=8/20·lotto gap=17/30·info-arch gap=25/30·op-analysis Supabase billing DNS 블락 지속) 전부 자연 trigger 미도달 → fallback polish-ui 강제 발화.
+
+**감사 범위**: DESIGN.md 기존 박제 drift 시그니처 3종 재검사 — (1) `rounded-md` 리터럴(cycle 2602-2605 반복 발견 패턴) (2) `text-gray-400 dark:text-gray-400` flat 무전환(cycle 2619 문서화) (3) `text-[11px]` 레거시(cycle 2600 2xs 흡수 후 재발 여부). 추가로 최근 7일 신규 라우트 2개(`mlb/insights/series/[topic]` + `en` 트윈) Breadcrumb/rounded/gray 토큰 구조 diff 검증.
+
+**결과**: 전부 clean, drift 0건 — `rounded-md` 는 테스트 파일 주석/assertion 뿐 실 컴포넌트 0건, flat gray 패턴 0건, `text-[11px]` 레거시 0건(2xs 토큰 흡수 유지), en/非en 트윈 라우트 토큰 사용 diff 0(구조 일치). 코드 변경 없음(읽기 전용, retro-only).
+
+**skill-evolution trigger 평가**: milestone(`3147 % 50 = 47`) 미충족. trigger5(직전20 inclusive, 3128-3147) — review-code(heavy) 다수 발화 지속(평가 대상), 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 자연 복귀(`packages/kbo-data/src/pipeline/` 잔여 7개 central orchestrator 대형 파일 — daily/db-constraints/live/mlb-pipeline/model-version/postview-daily/schedule/silent-drift-alert) 또는 info-arch(gap=26/30, 근접) 자연 대기. Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(임박, Tier4 대기).
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/pipeline 2-mention 축 6개, drift 2건 수정 (cycle 3145, 2026-10-13)
 
 진단: open issue 0건. 1차 방어선(cycle 3144 retro `47fc3e1d`) OK, 2차 방어선 OK. 2-chain lock 재확인(직전8, 3137-3144) distinct=3(review-code(heavy)6+fix-incident1+explore-idea1) — 미충족, 자유 선택. plan lookup 24개 전부 non-approved. op-analysis Supabase DNS 블락 지속 skip. fix-incident gap=7/20·info-arch gap=24/30·lotto gap=16/30 전부 미도달. cycle 3144 retro 추천대로 `packages/kbo-data/src/pipeline/` sweep 계속 — CHANGELOG mention 2개 파일 6개(`backfill-records.ts`/`backtest-grid-run.ts`/`backtest-logistic-run.ts`/`backtest-v3-run.ts`/`final-reasoning.ts`/`save-game-record.ts`, 총 1015줄) 선정.
