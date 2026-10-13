@@ -1,5 +1,15 @@
 
 
+## 🟡 PARTIAL (ESCALATION) — fix-incident: moneyballscore.com Vercel 도메인 바인딩 완전 소실 신규 발견 (cycle 3167, 2026-10-13)
+
+진단: fix-incident gap=29/20 도달(last fire 3138) — Supabase billing outage(2026-10-11 발생, project_supabase_inactive_incident 메모리) 재확인 중 더 심각한 상위 레벨 장애 발견.
+
+**발견**: `dig NS moneyballscore.com` (시스템 리졸버 + 8.8.8.8 양쪽) = 0건 응답, `nslookup` = NXDOMAIN. `whois moneyballscore.com` = `status: ACTIVE` (만료 아님). `vercel domains inspect moneyballscore.com` → "Domain not found by moneyballscore.com under kkyu92s-projects". `vercel domains ls` → 팀 전체 0 Domains. `vercel project ls` → moneyballscore 프로젝트 Production URL 이 현재 `https://moneyballscore.vercel.app` (커스텀 도메인 아님). 즉 도메인 등록 자체는 살아있으나 Vercel 팀/프로젝트에서 도메인이 완전히 detach — 커스텀 도메인으로는 사이트 전체(DB 기능뿐 아니라 전부) 접근 불가 상태. 원인(수동 삭제/billing 연쇄/기타) 미확정.
+
+**조치 보류 이유**: `vercel domains add moneyballscore.com moneyballscore` 로 재연결 가능해 보이나 실 production 트래픽 도메인 변경(DNS/SSL 재발급 수반)이라 사용자 확인 없이 자율 실행 안 함 — 대화로 즉시 보고, 승인 대기.
+
+**결론**: 코드 변경 없음. PR 없음. 사용자 승인 대기 — 승인 시 `vercel domains add` 또는 registrar 네임서버 점검 즉시 실행.
+
 ## 🟢 SUCCESS (RETRO-ONLY) — polish-ui(2-chain lock fallback): DESIGN.md 토큰+breadcrumb 전수 재확인, drift 0건 (cycle 3166, 2026-10-13)
 
 진단: 2-chain lock 발동(직전8, 3158-3165 distinct=2: review-code(heavy)7+lotto(lite)1) — 둘 다 bug 아니라 lock 무시 불가, 제외. open issue 0건, approved plan 0/23(plan#29 spec_only_deferred 만료 2026-10-15 임박 2일 / plan#30 completed, 둘 다 non-approved). fix-incident gap=20/20·op-analysis gap=25/25 둘 다 도달하나 `gh run list` 재확인(CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped) + Supabase DNS 재확인(`curl -v https://www.moneyballscore.com/api/health` → "Could not resolve host", billing outage 지속) — actionable 아님. lotto gap=6/30·info-arch gap=18/30 전부 미근접. explore-idea saturation 직전15 13/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 70.1h 신선) — 수십 회 반복된 동일 skip 패턴. lock fallback 룰 적용 = polish-ui 강제 발화.
