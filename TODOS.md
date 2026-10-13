@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): lib/dashboard 저-mention 축 감사, buildModelTuningInsights.ts dead field 제거 (cycle 3155, 2026-10-13)
+
+진단: open issue 0건. 신규 plan #30 발견 — status `completed_all_phases_shipped_cycle_2936_2937_2938` (이미 완결, 처리 대상 아님). plan #29 spec_only_deferred 만료 2026-10-15(1일 남음) 지속, Tier4 사용자 영역. 1차 방어선(cycle 3154 retro `0cf849ca`) OK, 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3147-3154) distinct=4(review-code(heavy)5+skill-evolution1+polish-ui1+info-architecture-review1) — 미충족, 자유 선택. fix-incident gap=17/20·lotto gap=26/30·info-arch gap=7/30 전부 미도달. op-analysis gap≥25 도달했으나 curl 재확인 Supabase 여전히 000 — actionable 아님, skip. ship-0 emergency stop 미충족(직전10 전부 success). cycle 3154 추천 후보(silent-drift-alert.ts/backtest-manual-weights-run.ts) 재확인 결과 둘 다 이미 2~5회 재감사 완료된 stale 추천으로 확인 — 신규 pipeline/ 대형 orchestrator 전부 소진(daily.ts/mlb-pipeline.ts/postview-daily.ts/silent-drift-alert.ts/backtest-manual-weights-run.ts/live.ts 전부 완료). app/api route.ts 전체(~20개)도 금일 cycle 3124 등에서 이미 스윕 완료 확인. `lib/dashboard/` 저-mention 축(`buildConfidenceBuckets.ts` 1회/`buildSeasonHeadToHead.ts` 2회/`buildModelTuningInsights.ts`) general-purpose subagent 위임 전수 감사로 전환.
+
+**감사 결과**: `buildModelTuningInsights.ts`(56줄) 의 `TuningRow.predicted_winner: number | null` 필드가 실제 Supabase `.select()` 쿼리에 포함되지 않고 함수 본문에서도 읽히지 않는 dead 필드로 확인 (git blame 최초 커밋 `e2684d31` 부터 미사용, 외부 소비처 0건). 쿼리 실제 반환 형태와 불일치하던 타입 정정 — 필드 제거. `buildConfidenceBuckets.ts`(85줄) clean — bucket 경계 로직(lower-inclusive/upper-exclusive) 테스트와 정합, `packages/shared` 상수 traceable. `buildSeasonHeadToHead.ts`(23줄) clean — cycle 2064 KBO/MLB 통합 헬퍼(`computeSeasonHeadToHeadFromGames`) 단순 pass-through, final-status+non-null winner gating 정상.
+
+**수정**: `buildModelTuningInsights.ts` 1줄 제거(dead field). `tsc --noEmit` clean, eslint clean, vitest 589 files/4649 tests all pass. main 직접 push(`e9f576bb`, 1-file 소규모 정정, PR 생략).
+
+**결론**: review-code(heavy) 신규 유효 스코프 탐색 성공 — pipeline/api route 포화 이후 lib/dashboard 저-mention 축에서 실제 drift 1건 발견+수정. 다음 사이클 추천 = review-code(heavy) 계속 시 `lib/reviews/`(buildWeeklyReview.ts 등 6~14회 mention, 재확인 가치 낮음) 보다 `lib/dashboard/` 잔여(compareModels.ts 등) 또는 `components/dashboard/` 축 우선. 또는 2-chain lock 재형성 시 fix-incident(gap=18/20)/lotto(gap=27/30)/info-arch(gap=8/30) 자연 대기. Supabase billing 조치 여전히 사용자 영역, plan #29 만료 2026-10-15(1일 남음, 내일 archive 예정).
+
 ## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/pipeline/postview-daily.ts 전수 감사 378줄, drift 0건 (cycle 3154, 2026-10-13)
 
 진단: open issue 0건. 24개 plan 중 clean `approved` status 없음 (plan #29 spec_only_deferred, 만료 2026-10-15 임박, Tier4 사용자 영역 그대로). 1차 방어선(cycle 3153 retro `f176fa8b`) OK, 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3146-3153) distinct=4(review-code(heavy)5+polish-ui1+info-architecture-review1+skill-evolution1) — 미충족, 자유 선택. fix-incident gap=16/20(last 3138)·lotto gap=25/30(last 3129)·info-arch gap=6/30(last 3148) 전부 미도달. op-analysis gap≥25 트리거 도달했으나 curl 재확인 결과 Supabase 여전히 000(connection fail, 2026-10-11 billing 인시던트 지속) — actionable 아님, skip. ship-0 emergency stop 미충족(직전10 전부 success). cycle 3153 추천 계승 — 부분감사 잔여 `postview-daily.ts`(378줄) 선정.
