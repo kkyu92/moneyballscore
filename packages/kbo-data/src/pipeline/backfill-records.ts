@@ -8,7 +8,7 @@
  *   tsx ../../packages/kbo-data/src/pipeline/backfill-records.ts 2023 2024 2025 2026
  *
  * Rate limit: 요청 간 1.5초 (Naver 공식 robots 없지만 예의상).
- * Idempotent: 이미 저장된 경기는 덮어씀 (updated_at 갱신).
+ * Idempotent: 기본은 이미 저장된 경기 skip. `--force` 시에만 재조회·덮어씀 (updated_at 갱신).
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
