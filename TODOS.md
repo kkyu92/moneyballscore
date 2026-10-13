@@ -1,5 +1,22 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/predictions 재감사, DailyPredictionSummaryBar aria-label drift 1건 수정 (cycle 3142, 2026-10-13)
+
+진단: open issue 0건. 1차 방어선(cycle 3141 retro `f5daa101`) OK. 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3134-3141) distinct=3(review-code(heavy)6+explore-idea1+fix-incident1) — 미충족, 자유 선택. plan lookup — 24개 plan 파일 전부 `status: approved` 아님 → 자율 매핑 대상 없음. op-analysis Supabase DNS 재확인(`nslookup utmimgpccbrciwuuacyw.supabase.co` → NXDOMAIN) — billing 인시던트 지속, skip. fix-incident gap=4·info-arch gap=21/30·lotto gap=13/30 전부 미도달. cycle 3141 retro 의 명시적 추천대로 `components/predictions/`(25 non-test 파일) 선택.
+
+**정정**: 선정 당시 "미탐색 스코프" 로 가정했으나, 실제로는 cycle 3015 에서 이미 1회 전수 감사됨(FACTOR_CONTRIBUTION_SCALE + limit 하드코딩 drift 수정 이력) — 처음이 아닌 재감사. cycle 3141 retro 의 carry-over 기재 자체는 "잔여 디렉토리" 의미였고 never-audited 단정은 본 사이클 진단 단계의 과잉 해석이었음.
+
+**감사 결과(subagent 전수 read + 전체 call-site grep 교차검증, 25개 파일)**:
+- **확정 버그 1건 수정**: `DailyPredictionSummaryBar.tsx:39` `aria-label="오늘의 예측 요약"` 하드코딩 — 본 컴포넌트는 `/predictions/[date]` 아카이브 라우트에서 과거 날짜에도 렌더링됨(도입 커밋 `33050256`, wave-299 이 "과거 날짜 페이지에서도" 노출을 명시적 존재 이유로 서술) — `date`/`isToday` prop 부재라 스크린리더 사용자가 과거 날짜 조회 시 "오늘의" 라벨을 잘못 들음. "예측 요약" 으로 제네릭화.
+- 나머지 24개 파일 전부 clean: 전체 call site prop shape 대조, `packages/shared` 상수(`DEFAULT_WEIGHTS`/`NEUTRAL_FACTOR`/`HOME_ADVANTAGE`/`FACTOR_CONTRIBUTION_SCALE`/`ANALOG_MATCHUP_LIMIT`/`RIVALRY_MEMORY_LIMIT` 등) vs `predictor.ts` 실제 수식 대조 — 전부 일치. KBO-only 한글 하드코딩 전부 라우트 grep 으로 안전 확인(KBO 전용 `/en` 라우트 부재). TODO/FIXME/XXX 0건, 좀비 컴포넌트(zero call-site) 0건.
+- **경미 발견(수정 보류, 기록만)**: `globals.css:45-49` 주석이 `--color-error` 토큰 사용처를 "FactorWaterfallChart 2곳" 으로 과소 서술 — 실제 8+ 파일(picks/leaderboard/analysis/accuracy 등) 이 사용 중, 값 자체는 동일해 시각 버그 아님. 별도로 predictions/ 안 8개 파일 중 7개가 "오답" 의미에 리터럴 `red-*` 클래스를 쓰고 `YesterdayResultsSection.tsx` 만 시맨틱 `error` 토큰 사용 — 현재는 동색이나 DESIGN.md 의 red→token 마이그레이션 패턴과 불일치(향후 리브랜드 리스크). 둘 다 이번 사이클 범위 밖, 다음 design-system 발화 시 후보로 기록만.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean, pre-push hook(lint+type-check+version-sync-guard+vitest) 전부 PASS. 직접 main 커밋+push(R4 범위, `efed19ee`).
+
+**skill-evolution trigger 평가**: milestone(`3142 % 50 = 42`) 미충족. trigger5(직전20 inclusive, 3123-3142) — review-code(heavy) 계열 다수 발화 지속, 평가 대상(review-code) 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 신규 축 모색(`components/` 전체 디렉토리 최소 1회 스윕 완료 확인됨 — 다음은 `app/` 라우트 내부 page.tsx 로직 자체 또는 `lib/` 유틸리티 전수) 또는 info-arch(gap=22/30, 자연 대기) 또는 lotto(gap=14/30, 자연 대기). fix-incident(headers()-in-layout 713파일 이동)은 여전히 사용자 확인 필요 — carry-over 플래그만. design-system 후보 1건 누적(red-*/error 토큰 불일치) — 단독 trigger 로는 부족, 추가 누적 대기. **Supabase billing 조치 여전히 사용자 영역(DNS NXDOMAIN 재확인). plan #29 만료 2026-10-15(2일 이내, 임박, Tier4 대기).**
+
 ## 🟢 SUCCESS — review-code(heavy): components/{dashboard,shared} 전수 감사, drift 0건 (cycle 3141, 2026-10-13)
 
 진단: open issue 0건. 1차 방어선(cycle 3140 retro `e72936b3`) OK. 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3133-3140) distinct=3(review-code(heavy)6+explore-idea1+fix-incident1) — 미충족, 자유 선택. plan lookup — 24개 plan 파일 전부 `status: approved` 아님 → 자율 매핑 대상 없음. op-analysis gap≥25(3080-3140 구간 0회) trigger 충족했으나 Supabase DNS 재확인(`nslookup utmimgpccbrciwuuacyw.supabase.co` → NXDOMAIN) — billing 인시던트 지속으로 실행 불가, skip. fix-incident gap=3·info-arch gap=20/30·lotto gap=12/30 전부 미도달. cycle 3140 retro 의 명시적 추천(review-code(heavy) 잔여 `components/{dashboard,predictions,shared}`) 재개, dashboard(16)+shared(16)=32 non-test 파일로 스코프 축소, predictions(25)는 다음 사이클 이월.
