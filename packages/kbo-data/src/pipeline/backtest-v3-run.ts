@@ -9,7 +9,8 @@
  *     tsx ../../packages/kbo-data/src/pipeline/backtest-v3-run.ts
  *
  * 목적: 불펜 피로도·팀 타자 폼·팀 투수 컨디션 feature 의 개별 유의성 검증.
- * 결과 → v1.7 가중치 후보 도출.
+ * 결과 → v1.7 가중치 후보 도출 (cycle 23 작성 당시 목적 — v1.7 질문은 cycle 1460 에
+ * v1.7-revert → v1.8 로 이미 결론남, 본 스크립트는 그 이후 미실행된 과거 실험 도구).
  */
 
 import { createClient } from '@supabase/supabase-js';
