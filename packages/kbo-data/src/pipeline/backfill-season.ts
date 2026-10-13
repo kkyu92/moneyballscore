@@ -34,6 +34,7 @@ import { fetchNaverSchedule } from '../scrapers/naver-schedule';
 import { BACKFILL_POLITE_DELAY_MS, assertSelectOk, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { DB_CONSTRAINTS } from './db-constraints';
+import { computeWinnerTeamId } from './winner-id';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -136,17 +137,15 @@ async function main() {
         continue;
       }
 
-      // winner_team_id — status=final + 점수 있을 때만. DRAW 는 null.
-      let winnerTeamId: number | null = null;
-      if (
-        g.status === 'final' &&
-        typeof g.homeScore === 'number' &&
-        typeof g.awayScore === 'number'
-      ) {
-        if (g.homeScore > g.awayScore) winnerTeamId = homeId;
-        else if (g.awayScore > g.homeScore) winnerTeamId = awayId;
-        // tie → null
-      }
+      // winner_team_id — computeWinnerTeamId (winner-id.ts) 가 단일 source. status=final
+      // + 점수 있을 때만 결정, DRAW 는 null (daily.ts/live.ts 와 동일 helper 사용).
+      const winnerTeamId = computeWinnerTeamId(
+        g.status,
+        typeof g.homeScore === 'number' ? g.homeScore : null,
+        typeof g.awayScore === 'number' ? g.awayScore : null,
+        homeId,
+        awayId,
+      );
 
       const payload = {
         league_id: leagueId,

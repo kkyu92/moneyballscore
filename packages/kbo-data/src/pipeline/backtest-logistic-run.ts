@@ -18,7 +18,6 @@ import {
   fetchEloHistory,
   buildFeatures,
   computeMetrics,
-  modelCoinFlip,
   modelEloHomeAdv,
   makeRestricted,
   DEFAULT_RESTRICTED,

@@ -116,7 +116,10 @@ function computeFactors(f: GameFeatures): Record<string, number> {
   }
   factors.park_factor = Math.max(0.3, Math.min(0.7, park));
   factors.elo = normalize(f.homeElo, f.awayElo, true);
-  factors.sfr = normalize(f.homeSfr ?? 0, f.awaySfr ?? 0, true);
+  // sfr=0 on either side = Fancy Stats data gap (predictor.ts cycle 1904 wave-533 guard) — neutral.
+  const homeSfr = f.homeSfr ?? 0;
+  const awaySfr = f.awaySfr ?? 0;
+  factors.sfr = (homeSfr !== 0 && awaySfr !== 0) ? normalize(homeSfr, awaySfr, true) : 0.5;
   return factors;
 }
 

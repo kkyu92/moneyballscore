@@ -120,7 +120,7 @@ async function main() {
     // h2hMinN — 최소 표본수 (cycle 67 spec carry-over 후보 D, cycle 69 review-code heavy)
     // 2 = 기존 동작 / 3, 5 = 노이즈 완화 후보
     h2hMinN: [2, 3, 5],
-    // clamp 는 고정 (prod v1.5 와 동일)
+    // clamp 는 고정 (prod clampWinnerProb 과 동일. "v1.5" 라벨 = cycle 17 명명 잔재 — 현재 prod 는 v1.8)
   } as const;
 
   let total = 1;
