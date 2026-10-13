@@ -12980,3 +12980,17 @@ cycle 3118 next_recommended("factor-bias-bootstrap-ci.ts, count=1 티어 잔여 
 **skill-evolution trigger 평가**: milestone(`3132 % 50 = 32`) 미충족. trigger5(직전20, 3113-3132) — review-code(heavy) 계열 다수 발화 지속, 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
 
 다음 사이클 추천 = review-code(heavy)(scripts/ 티어 소진, 다음 후보 = apps/moneyball/src/app routes/components 또는 packages/kbo-data/src/agents) 또는 info-architecture-review(gap=12/30, 아직 미도달). **Supabase billing 조치 여전히 사용자 영역 — DNS unreachable 직접 재확인(ENOTFOUND). plan #29 만료 2026-10-15(임박, Tier4 대기).**
+
+## 🟢 SUCCESS — review-code(heavy): scripts/op-analysis-*.ts 7개 전수 감사, mlb-elo-backtest.ts pagination drift 1건 수정 (cycle 3133, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3132 retro `09aeaa43`) OK. 직전8 distinct=3(review-code(heavy)6+fix-incident1+lotto1) — 2-chain lock 미발동. fix-incident gap=5/20·op-analysis gap=25+(Supabase billing DNS 블락)·info-arch gap=12/30·lotto gap=4/30 전부 미도달. cycle 3131 retro가 명시 권장한 scripts/op-analysis-*.ts 7개 그룹 선택(carry-over read first).
+
+**감사 결과**: 7개 파일(brier-drift/ce-cohort/cohort/mlb-elo-backtest/postbreak-full/postbreak/war-check) 전수 read. 6개는 안전 — scoring_rule/date/season 필터로 표본 범위 제한되거나(postbreak/postbreak-full/ce-cohort/brier-drift/war-check) 또는 이미 PAGE 루프 구현(postbreak-full). `op-analysis-mlb-elo-backtest.ts` 1건에서 drift 발견: `mlb_schedule status='final'` 전체를 range 없는 단건 select로 조회 — MLB 풀시즌 ~2430경기로 PostgREST 1000행 기본 cap 초과 가능, ascending 정렬이라 초과 시 시즌 후반(WARM cohort 비중 높은 구간)이 잘려나가 backtest 표본 편향 위험. `backfill-home-win-prob.ts`/`update-stale-data.ts`(cycle 3130/3131/3132)와 동일 drift 클래스 — PAGE 루프(range 기반) 추가로 수정.
+
+검증: 해당 파일 eslint clean. `tsc --noEmit -p tsconfig.json` 신규 에러 0건(기존 module-not-found 에러는 scripts/ 전역 pre-existing 패턴, 수정과 무관 — `backfill-home-win-prob.ts` 대조 확인). pre-push hook(lint+type-check+version-sync-guard+vitest 3건) 전부 PASS. 직접 main commit+push(R4, `fae6a8eb`).
+
+Supabase billing DNS 블락 직접 재확인(`ENOTFOUND utm...supabase.co`) — live row count 검증은 billing 해소 후 가능, 이번 수정은 코드 레벨 정적 분석(쿼리 범위 + 예상 row count 추정)만으로 결정.
+
+**skill-evolution trigger 평가**: milestone(`3133 % 50 = 33`) 미충족. trigger5(직전20 inclusive, 3114-3133) — review-code(heavy) 다수 발화 지속, 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy)(scripts/op-analysis-*.ts 완주, 다음 scope = apps/moneyball/src/app routes/components 재탐색 또는 supabase/migrations/ 최신 교차검증) 또는 fix-incident(gap=6/20)/lotto(gap=5/30)/info-arch(gap=13/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(2일 남음, Tier4 대기).**
