@@ -12838,3 +12838,17 @@ cycle 3117 next_recommended("count=1 티어 잔여 계속") 채택 — packages/
 검증: `vitest run winner-id.test.ts scrapers-kbo-scraper-alert.test.ts agents-validator-logger.test.ts pipeline-daily-summary.test.ts` 30/30 passed. 코드 변경 없음.
 
 다음 사이클 추천 = review-code(heavy) `factor-bias-bootstrap-ci.ts`(count=1 티어 잔여 마지막 1개) 또는 info-arch gap=27/30 근접 모니터. **Supabase billing 조치 여전히 사용자 영역.**
+
+## 🟢 SUCCESS — polish-ui(2-chain lock fallback): /en/reviews orphan loading.tsx 제거 (cycle 3123, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3122 retro `c48c50af`) OK. 직전8(3115-3122) distinct=2(review-code(heavy)7+info-architecture-review1) — 2-chain lock 발동, review-code(heavy)+info-architecture-review 후보 제외. fix-incident gap=56/20 도달하나 `gh run list` 재확인(CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped) actionable 신규 0 — skip. explore-idea saturation 직전15 14/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale/DESIGN.md 2.5일 신선) — 반복 패턴 동일 skip. lotto gap=25/30·op-analysis gap=9/25 전부 미근접. rule4 폴백 = `polish-ui` 강제 발화.
+
+**디렉토리 전수 비교**: players/teams KO↔MLB hub `loading.tsx` 유무 차이(players 는 있고 mlb/players 는 없음)를 1차 발견했으나 교차검증 결과 mlb/players 는 async DB fetch 없는 static factor explainer 페이지라 loading.tsx 불필요 — 가짜 양성으로 판정, 수정 보류.
+
+**실제 발견**: `apps/moneyball/src/app/en/reviews/` 디렉토리가 `loading.tsx` 만 가지고 `page.tsx` 는 없음. git log 단일 커밋(`57a10d5a`, cycle 2963 polish-ui)이 "EN↔KO 패리티 결손(/en/reviews)" 전제로 loading.tsx 만 신설했으나, 그 전제 자체가 오류 — `/en/reviews/page.tsx` 는 애초 존재한 적 없음(git log follow 0건). `sitemap.ts` 도 `/en/mlb/reviews` 만 등록하고 `/en/reviews` 는 어디에도 참조 없음(내부 링크/hreflang alternates 전수 grep 0건) — 즉 해당 경로는 accessible 404 dead end + 순수 orphan dead code. `apps/moneyball/src/app/en/reviews/loading.tsx` + 빈 디렉토리 제거.
+
+검증: `tsc --noEmit` clean, `eslint` clean, `vitest run` 589 files/4647 tests 전부 PASS. 직접 main commit+push(R4, `05dd0667`), pre-push lint+type-check+version-sync-guard 전부 PASS.
+
+**skill-evolution trigger 평가**: milestone(`3123 % 50 = 23`) 미충족. trigger5(직전20 inclusive, 3104-3123) — review-code(heavy) 계열 다수 발화(15/20) 지속, 미충족. ship-0 emergency stop 미충족(직전10 중 success 8건).
+
+다음 사이클 추천 = review-code(heavy)(2-chain lock 해제 예상, 신규 스코프 `scripts/*.ts` 운영 스크립트 전수 권장) 또는 info-architecture-review(gap=2/30, 자연 대기) 또는 fix-incident(gap=57/20 지속이나 actionable 신규 0 반복 확인). **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(2일 남음).**
