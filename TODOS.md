@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib/ 0-mention 잔여 5개 전수 감사, 신규 drift 0건 (cycle 3115, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved status). 2차 방어선(cycle 3114 retro `05a151b6`) OK. 직전8(3107-3114) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 해제. fix-incident gap=11/20·lotto gap=17/30·info-arch gap=24/30·op-analysis gap=1(직전 사이클 발화) 전부 미근접, `gh run list` 재확인(CI Failure Dispatch 전부 skipped, 실제 인시던트 부재). explore-idea saturation 직전15 13/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 2.7일 신선) — 반복 패턴 동일 skip. design-system(DESIGN.md mtime 미달) 미충족.
+
+cycle 3112 next_recommended("lib count=2 잔여 계속") 채택 — CHANGELOG mention count 0건(진짜 미감사) 재스코핑: `accuracy/buildFactorAccuracy.ts`/`mlb/buildMlbCalendarHeatmap.ts`/`mlb/buildMlbMatchupEloTrend.ts`/`mlb/buildMlbTeamEloTrend.ts`/`predictions/yesterdayDate.ts` 5개 전수 read + caller/twin 교차검증(grep-count-depth 가드레일 준수).
+
+**교차검증 결과**: `buildFactorAccuracy.ts`(KBO, FACTOR_LABELS 10종 전체 매칭) vs `buildMlbFactorAccuracy.ts`(MLB twin, home/away flat 컬럼 직접비교 — 주석에 명시된 의도적 로직 차이, drift 아님). `buildMlbCalendarHeatmap.ts` — KBO `/calendar/page.tsx` 는 inline 쿼리(is_correct 직접 읽기 가능)이고 MLB 만 별도 lib 추출(is_correct 전량 NULL이라 derive 필요, 기존 주석 정합) — en/mlb + mlb 양쪽 페이지 동일 함수 재사용 확인, 드리프트 없음. `buildMlbMatchupEloTrend.ts`/`buildMlbTeamEloTrend.ts` — KBO 트윈과 병렬 구조(canonical 코드 매핑, forward-fill 평균) 주석 근거 재확인, cycle 3033 정정 반영 상태 유지 확인. `yesterdayDate.ts` — KBO/MLB `analysis-data.ts` 양쪽 공유 재사용 확인, 중복 구현 없음.
+
+검증: 코드 변경 없음(신규 drift 0건) — 별도 `tsc`/테스트 재실행 불필요. apps/moneyball/src/lib/ 0-mention 축 완전 소진(5개 전부 처리) — 다음 review-code(heavy) 는 count=2 티어 잔여(`use-leaderboard.ts`/`buildMatchupUpcoming.ts` 등) 또는 다른 디렉토리(packages/kbo-data) 자연 재탐색.
+
 ## 🟡 RETRO-ONLY — operational-analysis(lite): Supabase INACTIVE 93-cycle 재확인 (cycle 3114, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/23. 2-chain lock(직전8=3106-3113, review-code(heavy)7+polish-ui1, distinct=2) 발동 — 둘 다 fix-incident 아니라 rule4 예외 불성립, 둘 다 후보 제외. op-analysis gap=93(마지막 발화 cycle 3021) 가 chain pool 최장 미발화 — 유일 명확 트리거. fix-incident gap=10/20·lotto gap=16/30·info-arch gap=23/30 전부 미근접, explore-idea saturation 직전15=1/12 미충족, expand-scope 약한 트리거(직전4 전부 small-fix 집합) 포착했으나 1-cycle 수렴 리스크로 보류, design-system(DESIGN.md 2일 신선) 미충족.
