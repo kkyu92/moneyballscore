@@ -13344,3 +13344,23 @@ milestone 커밋: `feat(skill): cycle 3150 milestone — skill-evolution 84회 (
 **감사 결과**: `buildDailyAccuracy.ts`(41줄) 전체 read + caller(`dashboard/page.tsx` dailyInputs 매핑 — `overview.is_correct`+`game.game_date` 소스 일치, `DailyAccuracyChart.tsx` 타입 사용) 교차검증 clean. `compareModels.ts`(306줄) 전체 read + 4개 caller(`debug/model-comparison/page.tsx`, `CalibrationPlot.tsx`, `buildShadowCalibration.ts`, `buildMissReport.ts`) 교차검증 — `buildMissReport.ts` 의 로컬 `extractHomeWinProb`(NEUTRAL_FACTOR fallback) 는 `compareModels.ts` 원본(null fallback)과 다른 반환 타입 의도된 variant(각자 용도에 맞는 독립 구현, drift 아님). `predictions` 테이블 스키마(`001_initial_schema.sql`) 확인 결과 `league` 컬럼 자체가 없음 — KBO 전용 테이블(MLB 는 `mlb_games`/`mlb_team_stats` 등 완전 별도 테이블군 사용)이라 `debug/model-comparison` 쿼리에 league filter 불필요함을 구조적으로 확인(의도된 설계, 버그 아님).
 
 **결론**: 두 파일 347줄 전수 감사, drift 0건. `factor-accuracy.ts`(cycle 3003 기 완료) 포함 `lib/dashboard/` 디렉토리 전체(6개 파일) 이제 감사 완전 소진. 코드 변경 없음(retro-only). 다음 사이클 추천 = review-code(heavy) 계속 시 `lib/reviews/`(buildWeeklyReview.ts 등) 또는 `components/dashboard/` 잔여 축 신규 탐색, 또는 2-chain lock 재형성 시 fix-incident(gap=19/20)/lotto(gap=28/30)/info-arch(gap=9/30) 자연 대기. Supabase billing 조치 여전히 사용자 영역, plan #29 만료 2026-10-15(2일 남음).
+
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/pipeline/ 잔여 21개 파일(backtest-*.ts 7개+유틸14개) 전수 감사 + fix 6건, drift 실제 2건 (cycle 3161, 2026-10-13)
+
+진단: open issue 0건. 2-chain lock 미충족(직전8 distinct=3). fix-incident gap=23/20·op-analysis gap=47/25 둘 다 도달하나 Supabase billing outage(3일차 지속)로 actionable 아님 — 재확인만 반복 패턴. cycle 3159/3160 retro 양쪽이 공통 추천한 `pipeline/` 잔여 21개 파일(backtest-*.ts 7개 + accuracy-update/backfill-season/backfill-sp/backfill-weather/brier/daily-summary/db-error/factor-bias-bootstrap-ci/final-reasoning/notify-status-predicate/prediction-history/shadow-cohort/snapshot-pitchers/sync-batter-stats/winner-id, 총 3713줄) 채택.
+
+**감사 방법**: 서브에이전트(Explore) 2개 병렬 투입 — backtest-*.ts 7개 / 유틸 14개 각각 담당. 결과를 그대로 신뢰하지 않고 직접 grep/Read 재검증.
+
+**서브에이전트 오탐 2건 (반증 완료)**: brier.ts(`brierMean`/`brierBootstrapCI`/`COIN_FLIP_BRIER`)와 `shadowBrierDelta`를 "dead code"로 주장했으나, 재검증 결과 둘 다 실제 사용 중 — `brier.ts`는 `scripts/op-analysis-brier-drift.ts`가 상대경로로 직접 import(서브에이전트 grep 범위가 packages/apps 로 한정돼 scripts/ 누락), `shadowBrierDelta`는 `apps/moneyball/src/app/accuracy/shadow/page.tsx:116`에서 직접 호출. 변경 없음.
+
+**실제 fix 6건 (PR #3151, 머지 완료 `4714ab4d`)**:
+1. **sfr neutral guard 누락** — `backtest-bootstrap-ci-run.ts` + `backtest-manual-weights-run.ts` 의 sfr factor 계산이 cycle 3146 에 predictor.ts 와 normalize() 공식은 재동기화됐으나, predictor.ts 가 cycle 1904(wave-533)에 추가한 "sfr=0 양쪽 중 하나라도 = Fancy Stats data gap → neutral 0.5" 가드는 누락된 채였음. 주간 cron(`factor-backtest-weekly.yml`)이 소비하는 sfr 가중치 후보 평가치에 영향 가능한 실 drift — 가드 추가.
+2. **winner 로직 fork** — `backfill-season.ts` 가 `computeWinnerTeamId`(winner-id.ts, daily.ts/live.ts 공유 사용) 대신 인라인 재구현 보유. 현재 결과는 동일하나 winner-id.ts 추출 당시 막으려던 "두 번째 unguarded copy" 패턴 — 공유 helper 로 교체.
+3. `backtest-logistic-run.ts` dead import(`modelCoinFlip`, 실사용 0건, 인라인 `.fill(0.5)` 로 중복 구현) 제거.
+4-5. `backtest-grid-run.ts`/`backtest-v3-run.ts` stale 라벨 주석("v1.5"/"v1.7 가중치 후보 도출") — 형제 파일(bootstrap-ci-run/manual-weights-run)이 이미 보유한 "cycle 17/23 명명 잔재, 현재 prod v1.8" caveat 추가.
+
+**미변경 (behavior 변경 위험 판단)**: `backfill-weather.ts`/`sync-batter-stats.ts` 의 error-handling 채널 불일치(assertWriteOk 미사용) — assertWriteOk 는 throw, 기존 코드는 log+continue 라 전환 시 behavior 변경. 가치 대비 risk 과다 판단, 보류.
+
+**regression**: `pnpm --filter @moneyball/kbo-data test` 96 files/1216 tests PASS, `tsc --noEmit` clean. R7 자동 머지 적용(PR #3151 → `4714ab4dd120e48897a5d62e9329301f3071ef54`, state=MERGED 실측 확인).
+
+**결론**: `packages/kbo-data/src/pipeline/` 디렉토리 31개 파일 전체 감사 완결(cycle 3146 이후 누적). 다음 사이클 추천 = review-code(heavy) 계속 시 engine/scrapers/agents 등 신규 디렉토리 스코프, 또는 Supabase billing outage(4일차 진입 예정) 해소 시 operational-analysis(gap=47/25) 즉시 전환. plan #29 만료 2026-10-15(2일 남음, Tier4 사용자 결정 대기) 변화 없음.
