@@ -1,5 +1,22 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/hooks + src/config 전수 감사, drift 0건 (cycle 3135, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3134 retro `1710e616`) OK. 직전8 distinct=3(review-code(heavy)6+fix-incident1+lotto1) — 2-chain lock 미충족. fix-incident gap=7/20·op-analysis gap=25+(Supabase billing 블락 지속)·info-arch gap=14/30·lotto gap=6/30 — 전부 trigger 미도달. 직전 retro(3134) 추천 "info-architecture-review 또는 review-code(heavy)(신규 축)" 양쪽 조사 — info-arch 먼저 확인: breadcrumb 누락 18개 라우트 grep → 전부 설명 가능(홈/로그인/설정=top-level, debug/*=내부전용 7개, reviews 월간/주간 index 6개=순수 redirect 7~10줄, community=placeholder) → 실제 IA 결함 0, false positive 확정 skip. review-code(heavy) 로 전환 — scripts/+packages/kbo-data+components/+app/api 전부 과거 cycle 소진 확인 후 신규 미감사 스코프 `apps/moneyball/src/hooks`(2파일)+`src/config`(1파일) 선정(git log 감사 이력 0건).
+
+**감사 결과(직접 전수 read)**:
+- `use-kbo-scores.ts`(62L): SWR key 분기(오늘 KST vs 과거/미래 날짜 → null key 로 폴링 비활성) 정상, `isPolling`/`hasLiveGames` 파생값 일치.
+- `use-user-picks.ts`(73L): localStorage 키 `mb_user_picks_v1` 가 전역(league 구분 없음) 확인 — `PickButton` 컴포넌트가 KBO(`analysis`/`predictions/[date]`)와 MLB(`mlb/analysis`/`mlb/games/[date]`/`en/mlb/*`) 양쪽에서 공용 사용되길래 cross-league `gameId` 충돌 가설(KBO id=500과 MLB id=500이 같은 키 슬롯 덮어쓰기) 세웠으나, `001_initial_schema.sql` 확인 결과 `games` 테이블이 `league_id` FK 를 가진 단일 테이블(전역 serial PK, 리그별 재시작 없음) — 충돌 불가능 확정, 가설 기각.
+- `config/model.ts`(37L): `CURRENT_DEBATE_VERSION`/`CURRENT_MODEL_FILTER` 둘 다 실사용처 확인(`dashboard/page.tsx` 등 15개 파일 소비) — dead export 가설 기각.
+
+3개 파일 전부 clean, 코드 변경 0건.
+
+**skill-evolution trigger 평가**: milestone(3135%50=35) 미충족. trigger5(직전20 inclusive, 3116-3135) — review-code(heavy) 다수 지속, 9개 opt-out 제외 평가 대상 review-code 단독 미충족. ship-0 emergency stop 미충족(직전10 success 다수, 이번 cycle 포함 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 계속(middleware.ts 재확인 — 과거 1회 감사 cycle ~2900대, 또는 `packages/shared/src` 재탐색) 또는 info-architecture-review(gap=15/30, 이번 사이클 breadcrumb 가설 기각됨 — 다른 trigger 소스 필요) 또는 fix-incident(gap=8/20)/lotto(gap=7/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(임박, 2일 이내, Tier4 대기) · plan #30 만료 2026-10-18.**
+
+---
+
 ## 🟢 SUCCESS — review-code(heavy): scripts/ 잔여 미감사 5개 전수 감사, 3건 pagination drift 수정 (cycle 3134, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24(status 전부 completed/archived 류, "approved" exactly 매칭 없음). 2차 방어선(cycle 3133 retro `cae36395`) OK. 직전8 distinct=3(review-code(heavy)6+lotto1+fix-incident1) — 2-chain lock 미발동(≤2 아님). fix-incident gap=6/20 · op-analysis gap=25+(Supabase billing 지속 블락) · info-arch gap=13/30 · lotto gap=5/30 — 전부 trigger 미도달. 직전 retro(3133) 명시 추천 "review-code(heavy)" 그대로 따름 — scripts/ 31개 파일 중 backfill-*(8, cycle 3131)+op-analysis-*(7, cycle 3133)+저커밋 5개(cycle 3132) 기존 감사 완료, 잔여 미감사 5개(backfill-shadow-cohort/backtest/backtest-v2-candidate/export-predictions-tabpfn/import-tabpfn-predictions) 선정.
