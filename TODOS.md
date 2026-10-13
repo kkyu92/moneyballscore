@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data 0-mention 2개 파일 전수 감사, ELO_DIVIDER 하드코딩 drift 1건 수정 (cycle 3126, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/25(전부 non-approved). 2차 방어선(cycle 3125 retro `95c682d6`) OK. 직전8 distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap=59 재확인(gh run list CI/Vercel Failure Dispatch 전부 skip) — actionable 부재. op-analysis gap=202 재확인(nslookup NXDOMAIN 불변, 동일 Supabase billing 인시던트) — skip. lotto gap=28/30·info-arch gap=5/30 미근접.
+
+cycle 3125 추천(count≥5 핵심 파일 index/daily/predictor) 재검증 — CHANGELOG grep 결과 daily.ts/predictor.ts/mlb-pipeline.ts/validator.ts 전부 이미 다수 전체 감사 이력 확인(cycle 2469/2942/2468/1336 등) — 포화 재확인 성격이라 저가치 판단, 대신 `find ... | grep -c` 로 kbo-data 전체 파일 CHANGELOG mention count 0건 전수 재검색 → `backtest/models.ts`(116줄)+`pipeline/prediction-history.ts`(112줄) 2개가 진짜 미언급 파일로 확인되어 선정.
+
+본 메인 직접 전수 read(228줄, subagent 위임 없이). **확정 drift 1건**: `models.ts`의 `teamHomeAdvantagesInEloPt()`가 Elo pt 환산식에 리터럴 `400`을 사용 — 같은 파일 최상단에 이미 `ELO_DIVIDER`(=400, chess 표준 Elo divider)를 import 해 다른 함수(`sigmoidElo`/`HOME_ADV_ELO_DEFAULT`)에선 정상 참조하면서 이 함수만 매직넘버 유지. cycle 1304가 정리한 "hardcoded Elo 상수 → registry 참조" silent-drift family와 동일 클래스. `400` → `ELO_DIVIDER` 치환(값 동일, 동작 변화 없는 순수 리팩터). `prediction-history.ts`는 `actualWinner` 계산이 `is_correct=null`을 "틀림"으로 오판정하는 타입-레벨 허점이 있으나, 유일 production 호출부(`daily.ts::getPredictionHistory`)가 쿼리에서 `.not('is_correct','is',null)`로 이미 필터링해 해당 분기가 production 경로에서 도달 불가능함을 호출부 교차검증으로 확인 — 미수정.
+
+검증: `vitest backtest-models.test.ts` 6/6 pass, `tsc --noEmit`/`pnpm lint` clean. 직접 main 커밋+push(R4, `7bc3a9f3`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+`packages/kbo-data` 전체 파일이 이제 CHANGELOG mention ≥1 보유(0-mention tier 완전 소진). skill-evolution trigger 평가: milestone(3126%50=26) 미충족. trigger5 — review-code 직전20 15회 발화(0회 아님), 9개 opt-out 제외. ship-0 미충족(직전10 success 9+retro-only 1).
+
+다음 사이클 추천 = review-code(heavy) 신규 축(components/ 재탐색 또는 apps/moneyball/src/lib, scripts/ 디렉토리) 또는 fix-incident(gap=60)/lotto(gap=29/30, 다음 토 임박)/info-arch(gap=6/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역 Tier4 대기 지속.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data count=4+ 티어 4개 전수 감사, drift 0건 (cycle 3125, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3124 retro `abda8681`) OK. 직전8(3117-3124) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap=58/20 도달하나 `gh run list` 재확인(CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped) — actionable 신규 인시던트 부재. op-analysis gap=201(!)/25 — 사상 최대 미발화 간격이나 Supabase DNS 직접 재확인(`nslookup` NXDOMAIN 불변, 2026-10-11 INACTIVE 인시던트 발생 후 105 cycle+ 경과, cycle 3114 RETRO-ONLY 가 이미 93-cycle 시점 재확인한 동일 블로커) — 또 재확인만 반복하는 건 저가치라 skip. lotto gap=27/30·info-arch gap=4/30 전부 미근접.
