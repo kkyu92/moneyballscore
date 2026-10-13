@@ -55,6 +55,30 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await runMlbPipeline(mode, date, triggeredBy);
+
+    // ISR revalidation 트리거 — KBO pipeline/route.ts 동일 패턴(predict_final 즉시 노출).
+    //   누락 시 MLB_LIVE_ISR_SECONDS(1800초) 만료까지 최대 30분 신규 예측 미노출.
+    //   revalidate 실패는 pipeline 본 작업의 성공을 가리면 안 됨 (silent false-failure 방지).
+    if (mode === 'mlb_predict_final' && result.rows_inserted > 0) {
+      try {
+        const revalidateUrl = new URL('/api/revalidate', request.url);
+        await fetch(revalidateUrl.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${cronSecret}`,
+          },
+          body: JSON.stringify({
+            paths: ['/mlb', '/mlb/predictions', '/mlb/analysis', '/feed'],
+          }),
+        });
+      } catch (revalidateError) {
+        Sentry.captureException(revalidateError, {
+          tags: { layer: 'api-route', route: 'mlb-pipeline', mode, sub: 'revalidate' },
+        });
+      }
+    }
+
     return Response.json({ ok: true, result });
   } catch (e) {
     const message = errMsg(e);
