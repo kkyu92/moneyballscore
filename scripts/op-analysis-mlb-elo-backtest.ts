@@ -95,14 +95,22 @@ async function main() {
   }
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
-  const { data, error } = await sb
-    .from('mlb_schedule')
-    .select('game_datetime_utc, home_team_code, away_team_code, home_score, away_score')
-    .eq('status', 'final')
-    .order('game_datetime_utc', { ascending: true });
-  if (error) throw error;
-
-  const games = (data ?? []) as FinalGameRow[];
+  const games: FinalGameRow[] = [];
+  const PAGE = 1000;
+  let from = 0;
+  while (true) {
+    const { data, error } = await sb
+      .from('mlb_schedule')
+      .select('game_datetime_utc, home_team_code, away_team_code, home_score, away_score')
+      .eq('status', 'final')
+      .order('game_datetime_utc', { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) throw error;
+    if (!data?.length) break;
+    games.push(...(data as FinalGameRow[]));
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
   console.log(`대상 경기 ${games.length}건 (status='final')`);
 
   const gamesPlayed = new Map<string, number>();
