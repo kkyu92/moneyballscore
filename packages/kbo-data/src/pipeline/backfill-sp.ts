@@ -193,6 +193,13 @@ async function main() {
   const gameById = new Map<string, GameRow>();
   for (const g of games) gameById.set(g.external_game_id, g);
 
+  // SP 확보율 분모 — 실제로 채워야 할 slot 수 (경기당 최대 2: home/away).
+  let slotsNeeded = 0;
+  for (const g of games) {
+    if (!g.home_sp_id) slotsNeeded++;
+    if (!g.away_sp_id) slotsNeeded++;
+  }
+
   console.log(`📅 Range: ${startDate} ~ ${endDate}`);
   console.log(`🏟  Games missing SP: ${games.length}`);
   console.log(`⚾ Pitchers loaded: ${pitchers.length}`);
@@ -283,9 +290,11 @@ async function main() {
   console.log(`   games updated:    ${updated}`);
   console.log(`   errors:           ${errors}`);
 
+  // 주의: 분자(total)는 "매칭 시도 성공" 건수, 분모(slotsNeeded)는 "애초에 채워야
+  // 했던 slot 수" — 이전엔 분모가 total 자신이라 항상 100%로 찍히는 tautology였음.
   const total = matchedTeam + matchedName + created;
-  if (total > 0) {
-    console.log(`\nSP 확보율: ${total}/${total} = 100% (auto-create 포함)`);
+  if (slotsNeeded > 0) {
+    console.log(`\nSP 확보율: ${total}/${slotsNeeded} = ${((total / slotsNeeded) * 100).toFixed(1)}% (auto-create 포함)`);
   }
   if (dryRun) console.log('(dry run — DB unchanged)');
 }

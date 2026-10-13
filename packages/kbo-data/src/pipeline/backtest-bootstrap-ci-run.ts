@@ -59,10 +59,6 @@ function createAdminClient(): DB {
   });
 }
 
-function pct(x: number): string {
-  return (x * 100).toFixed(2) + '%';
-}
-
 function extract(
   games: BacktestGame[],
   eloHistory: EloHistory,
@@ -89,12 +85,18 @@ function extract(
   return { features, outcomes };
 }
 
+/**
+ * predictor.ts 의 normalize() 와 동일 — diff 기반 정규화 (cycle 207 수정 #195 반영).
+ * 구버전 비율 공식(homeVal/total) 은 SFR 등 음수 가능 stat 에서 [0,1] 범위를
+ * 이탈함 (예: home=-1, away=1 → -0.5). diff 기반은 음수 입력에서도 [0,1] 보장.
+ */
 function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): number {
+  if (!Number.isFinite(homeVal) || !Number.isFinite(awayVal)) return 0.5;
   if (homeVal === 0 && awayVal === 0) return 0.5;
   const total = Math.abs(homeVal) + Math.abs(awayVal);
   if (total === 0) return 0.5;
-  if (higherIsBetter) return homeVal / total;
-  return awayVal / total;
+  const diff = higherIsBetter ? homeVal - awayVal : awayVal - homeVal;
+  return (diff / total + 1) / 2;
 }
 
 function computeFactors(f: GameFeatures): Record<string, number> {

@@ -94,13 +94,17 @@ function extract(
 /**
  * predictor.ts 의 normalize() 와 동일 — 두 값을 0~1 범위로 정규화.
  * higherIsBetter=true: home 큰 값일수록 1 / false: home 작은 값일수록 1.
+ * diff 기반 정규화 (predictor.ts cycle 207 수정 #195 반영) — 구버전 비율 공식
+ * (homeVal/total) 은 SFR 등 음수 가능 stat 에서 [0,1] 범위를 이탈함 (예: home=-1,
+ * away=1 → -0.5). diff 기반은 음수 입력에서도 [0,1] 범위를 보장.
  */
 function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): number {
+  if (!Number.isFinite(homeVal) || !Number.isFinite(awayVal)) return 0.5;
   if (homeVal === 0 && awayVal === 0) return 0.5;
   const total = Math.abs(homeVal) + Math.abs(awayVal);
   if (total === 0) return 0.5;
-  if (higherIsBetter) return homeVal / total;
-  return awayVal / total;
+  const diff = higherIsBetter ? homeVal - awayVal : awayVal - homeVal;
+  return (diff / total + 1) / 2;
 }
 
 /**

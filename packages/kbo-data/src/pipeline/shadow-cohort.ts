@@ -25,7 +25,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export interface ShadowComputeResult {
   homeWinProb: number;
   factorTotal: number;
-  appliedFactorCount: number;
 }
 
 /**
@@ -42,14 +41,12 @@ export function computeShadowPrediction(
 
   let weightedSum = 0;
   let factorTotal = 0;
-  let appliedFactorCount = 0;
 
   for (const [key, weight] of Object.entries(SHADOW_WEIGHTS)) {
     factorTotal += weight as number;
     const raw = factors[key];
     if (typeof raw === 'number' && Number.isFinite(raw)) {
       weightedSum += raw * (weight as number);
-      if ((weight as number) > 0) appliedFactorCount += 1;
     } else {
       weightedSum += NEUTRAL_FACTOR * (weight as number);
     }
@@ -63,7 +60,6 @@ export function computeShadowPrediction(
   return {
     homeWinProb: Math.round(homeWinProb * 1000) / 1000,
     factorTotal,
-    appliedFactorCount,
   };
 }
 
@@ -188,14 +184,12 @@ export function computeShadowPredictionV20(
 
   let weightedSum = 0;
   let factorTotal = 0;
-  let appliedFactorCount = 0;
 
   for (const [key, weight] of Object.entries(SHADOW_V20_WEIGHTS)) {
     factorTotal += weight as number;
     const raw = factors[key];
     if (typeof raw === 'number' && Number.isFinite(raw)) {
       weightedSum += raw * (weight as number);
-      if ((weight as number) > 0) appliedFactorCount += 1;
     } else {
       weightedSum += NEUTRAL_FACTOR * (weight as number);
     }
@@ -209,7 +203,6 @@ export function computeShadowPredictionV20(
   return {
     homeWinProb: Math.round(homeWinProb * 1000) / 1000,
     factorTotal,
-    appliedFactorCount,
   };
 }
 
