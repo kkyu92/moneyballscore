@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): apps/moneyball/src/{lib,hooks} 저-mention 8개 파일 전수 감사, drift 0건 (cycle 3165, 2026-10-13)
+
+진단: open issue 0건. plan #29(spec_only_deferred, 만료 2026-10-15 임박)/#30(completed) 둘 다 non-approved — unprocessed approved plan 없음. 직전8(3157-3164) distinct=3(review-code(heavy)6+polish-ui1+lotto(lite)1) — 2-chain lock 미충족. fix-incident gap=21/20·op-analysis gap=26/25 둘 다 도달하나 Supabase 호스트 DNS 재확인(`curl -v https://www.moneyballscore.com/api/health` → "Could not resolve host") — billing outage 지속, 코드 fix 불가·actionable 아님(사용자 영역, 2026-10-11 발생). lotto gap=5/30·info-arch gap=17/30 전부 미근접.
+
+cycle 3164가 `packages/kbo-data/src` 패키지 전체(top-level 포함) 소진을 박제하며 다음 스코프로 `apps/moneyball/src/lib` 또는 `hooks` 신규 스코프를 명시 추천. CHANGELOG mention count grep(`lib/utils.ts`=2, `use-kbo-scores`=1, `pearson`=3, `is-origin-allowed`=4, `monthGrid`=6, `json-ld`/`feature-flags`=8, `design-tokens`=13) 기준 최저 8개 파일 선정(grep-count-depth 가드 적용 — count 자체를 감사 완료 지표로 쓰지 않고 전수 read로 재확인).
+
+**감사 내용**: `lib/utils.ts`(cn 헬퍼, 6줄) / `hooks/use-kbo-scores.ts`(SWR 폴링, `LiveScore['status']` 타입을 `app/api/kbo-scores/route.ts`와 대조 — `'scheduled'|'live'|'final'|'postponed'` 4종 vs 훅의 `hasLiveGames` 체크 `status==='live'` 정합, cycle 3099 cancel/suspended 구조적 필드 fix 이후 타입 정의와 훅 소비 측 drift 없음) / `hooks/use-user-picks.ts`(localStorage 30일 만료 pruning, try/catch silent fail 의도적) / `lib/stats/pearson.ts`(순수 함수, n<2·denom=0 가드 정상) / `lib/api/is-origin-allowed.ts`(CSRF origin 검증, cycle 2763 추출 로직) / `lib/calendar/monthGrid.ts`(KBO/MLB calendar 공유 7x6 grid, `toUtcDate` 순수 UTC 컴포넌트 연산 — cycle 2123 explore-idea가 수정한 타임존 버그 재발 없음 확인) / `lib/feature-flags.ts`(`@moneyball/shared` re-export, backwards-compat 주석 정확) / `lib/design-tokens.ts`(DESIGN.md 색상 토큰 + 22개 OG gradient 상수, silent drift family wave 141/144 단일 source 주석 정확).
+
+8개 파일 전부 drift 0건 — 코드 변경 없음(retro-only).
+
+**결론**: 다음 사이클 추천 = review-code(heavy) 계속 시 `apps/moneyball/src/lib/{accuracy,analysis,dashboard,debug,insights,matchup,mlb,predictions,reviews,standings,teams}` 등 대형 서브디렉토리(이미 CHANGELOG mention 다수 — 전수 재감사 수준 미확인) 또는 `apps/moneyball/src/app/` 라우트 내부 page.tsx 로직 신규 스코프. Supabase billing outage 지속(사용자 영역, plan #29 만료 2026-10-15 — 2일 남음, Tier4 대기).
+
 ## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/engine/ 전수 감사, drift 0건 (cycle 3162, 2026-10-13)
 
 진단: open issue 0건. plan #29(spec_only_deferred)/#30(completed_all_phases_shipped) 둘 다 non-approved — unprocessed approved plan 없음. 2-chain lock 미충족(직전8, 3154-3161 distinct=3: review-code(heavy)/polish-ui/lotto). fix-incident gap=24/20·op-analysis gap=48/25 둘 다 도달하나 Supabase billing outage 재확인(`/api/health` supabase+pipeline 여전히 fetch failed, DNS NXDOMAIN 지속, 인시던트 4일차) + `gh run list` CI Failure Dispatch 전부 skipped로 actionable 아님 — 반복 패턴.
