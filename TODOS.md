@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib/ CHANGELOG 0-mention 진짜 잔여 1개 전수 감사, 신규 drift 0건 (cycle 3116, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선(cycle 3115 retro `850d41a8`) OK. 직전8(3108-3115) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 해제 상태 유지. fix-incident gap=20+ 도달했으나 `gh run list` 재확인 — CI green, CI Failure Dispatch 전부 skipped, 실제 신규 incident 부재(Supabase INACTIVE 는 cycle 3114 op-analysis 가 93-cycle 재확인한 기존 blocker). lotto gap=18/30·info-arch gap=25/30 전부 미근접, explore-idea saturation 1/15 미충족.
+
+cycle 3115 next_recommended("count=2 잔여 또는 gap 자연 대기") 채택 — lib/ CHANGELOG mention count 재grep 결과 count=1 다수가 실제로는 과거 cycle(1519/1482/3115 등)에서 이미 개별 감사 완료된 파일들(grep-count-depth 가드레일 — count 낮다고 미감사로 추정 금지, 교차검증 필요)로 확인. 유일하게 "진짜 미감사" 잔여 = `accuracy/shadow-pair-prob.ts` — cycle 1624 가 후보로만 지목했을 뿐 이후 직접 audit 기록 부재.
+
+**감사 결과**: `pairProbForRow`/`extractProbText` 전수 read. 호출부는 `accuracy/shadow/page.tsx` 단일 — 쿼리 필터 `.in('scoring_rule', [CURRENT_SCORING_RULE, SHADOW_SCORING_RULE])` 를 파일 헤더 주석 서술("shadow row 는 factors 가중합, v1.8 row 는 regex fallback")과 교차검증 → 100% 일치. `tabpfn-import.ts` 의 "pairProbForRow() 도 'tabpfn-shadow' 분기가 없어 이 flat reasoning.homeWinProb 형태를 못 읽는다" 주석도 실제 코드(`ALL_SCORING_RULES`/`TABPFN_SCORING_RULE` 정의 + `/accuracy/shadow` 쿼리 필터)와 교차검증 — 정확. 전용 unit test(`shadow-pair-prob.test.ts`) + 회귀 test(`silent-drift-wave-239.test.ts`) 양쪽 커버 확인.
+
+코드 변경 없음(신규 drift 0건) — 별도 `tsc`/테스트 재실행 불필요. apps/moneyball/src/lib/ CHANGELOG 0-mention 축 사실상 완전 소진. 다음 review-code(heavy) 는 다른 디렉토리(packages/kbo-data) 재탐색 또는 fix-incident/lotto/info-arch gap 자연 대기 권장.
+
 ## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib/ 0-mention 잔여 5개 전수 감사, 신규 drift 0건 (cycle 3115, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/23(전부 non-approved status). 2차 방어선(cycle 3114 retro `05a151b6`) OK. 직전8(3107-3114) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 해제. fix-incident gap=11/20·lotto gap=17/30·info-arch gap=24/30·op-analysis gap=1(직전 사이클 발화) 전부 미근접, `gh run list` 재확인(CI Failure Dispatch 전부 skipped, 실제 인시던트 부재). explore-idea saturation 직전15 13/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 2.7일 신선) — 반복 패턴 동일 skip. design-system(DESIGN.md mtime 미달) 미충족.
