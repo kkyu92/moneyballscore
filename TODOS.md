@@ -1,5 +1,26 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): scripts/ 잔여 미감사 5개 전수 감사, 3건 pagination drift 수정 (cycle 3134, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24(status 전부 completed/archived 류, "approved" exactly 매칭 없음). 2차 방어선(cycle 3133 retro `cae36395`) OK. 직전8 distinct=3(review-code(heavy)6+lotto1+fix-incident1) — 2-chain lock 미발동(≤2 아님). fix-incident gap=6/20 · op-analysis gap=25+(Supabase billing 지속 블락) · info-arch gap=13/30 · lotto gap=5/30 — 전부 trigger 미도달. 직전 retro(3133) 명시 추천 "review-code(heavy)" 그대로 따름 — scripts/ 31개 파일 중 backfill-*(8, cycle 3131)+op-analysis-*(7, cycle 3133)+저커밋 5개(cycle 3132) 기존 감사 완료, 잔여 미감사 5개(backfill-shadow-cohort/backtest/backtest-v2-candidate/export-predictions-tabpfn/import-tabpfn-predictions) 선정.
+
+**감사 결과(Explore agent 전수 read, grep-count 대체 금지 가드레일 준수)**:
+- `backfill-shadow-cohort.ts`: CURRENT_SCORING_RULE(v1.8, 매일 신규 insert 되는 활성 production cohort) 단일 select(order asc, limit 없음) → 1000건 초과 시 최신 game 부터 silent 누락. **drift 수정**(PAGE 루프).
+- `backtest-v2-candidate.ts`: fetchV18Cohort/fetchTrainCohort 둘 다 동일 무제한 select(order desc) — 초과 시 오래된 row 부터 누락. **drift 수정**(PAGE 루프 2곳). fetchTeamCodeIdMap 은 teams 테이블(~10행) 이라 무관.
+- `import-tabpfn-predictions.ts`: `.in(gameIds)` 단일 호출 — IN 절 크기 무관 PostgREST max_rows=1000 캡 적용, CSV 1000행+(풀 시즌 재수출) 시 일부 game 조회 실패를 "not found in DB — skipped" 로 오탐 경고(실제 원인은 응답 캡인데 표시는 "DB 에 없음"). **drift 수정**(500단위 CHUNK 배치 루프).
+- `export-predictions-tabpfn.ts`: 기존 PAGE_SIZE=1000 루프 정상 적용 — CLEAN, 기준 패턴.
+- `backtest.ts`: DB 미접촉(스크레이퍼 fixture 기반) — pagination 무관. BACKTEST_SEASON=2025 하드코드가 CLI date arg 와 디커플링(2026 날짜 지정 시 여전히 2025 시즌 스탯 사용 가능) + 스크레이퍼 실패 날짜 silent continue 발견했으나 운영 pipeline 아닌 1회성 backtest 도구라 이번 사이클 범위 밖으로 분류(별도 trigger 시 재검토).
+
+검증: `eslint` 3개 파일 clean (scripts/ 는 turbo type-check 커버 밖 — 기존 알려진 gap, 파일 단위 eslint 가 established 검증 방법). `git push` 시 pre-push hook(turbo lint+type-check+version-sync-guard+vitest 3 passed) 전부 PASS. R4 직접 main commit+push(`04181f8b`).
+
+**scripts/ 31개 전수 감사 완결**: 이번 사이클로 cycle 3126(kbo-data 0-mention 2개)+3127(lib 0-mention 5개)+3130(factor-bias count=1)+3131(backfill 8개)+3132(저커밋 5개)+3133(op-analysis 7개)+3134(잔여 5개) 누적 — scripts/*.ts 전체 커버리지 완료.
+
+**skill-evolution trigger 평가**: milestone(`3134 % 50 = 34`) 미충족. trigger5(직전20 inclusive, 3115-3134) — review-code(heavy) 다수(15+/20) 지속, 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
+
+다음 사이클 추천 = info-architecture-review(gap=14/30, 자연 대기 지속) 또는 review-code(heavy) 신규 축(scripts/ 완결 이후 — packages/kbo-data/src/agents 또는 apps/moneyball/src/app 잔여 재탐색) 또는 lotto(gap=6/30, cooldown). **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(임박, 2일 이내, Tier4 대기) · plan #30 만료 2026-10-18.**
+
+---
+
 ## 🟢 SUCCESS — lotto(lite): cron 수정(3128) 재발 모니터 + 상태 점검 (cycle 3129, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3128 retro `86536e8e`) OK. 직전8 distinct=4(review-code(heavy)5+info-arch1+polish-ui1+fix-incident1) — 2-chain lock 미발동. fix-incident gap=1(방금 발화) · op-analysis 60-cycle 창 0회(Supabase billing 블락 지속, 외부 영역) · info-arch gap=8/30 · lotto 마지막 실제 chain_selected=3098, gap=31/30(trigger 도달, cycle 3128 은 lotto 진단 중 cron 버그 발견해 fix-incident 로 전환됐을 뿐 lotto chain 자체 재발화 아님) — 전 사이클 retro 명시적 "재발 모니터" 추천과 일치해 lotto(lite) 선택.
