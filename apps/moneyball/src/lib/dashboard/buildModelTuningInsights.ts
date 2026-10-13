@@ -9,7 +9,6 @@ import {
 
 interface TuningRow {
   factors: Record<string, number> | null;
-  predicted_winner: number | null;
   game: {
     home_team_id: number | null;
     winner_team_id: number | null;
