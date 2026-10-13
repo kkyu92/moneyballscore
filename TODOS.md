@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/pipeline 2-mention 축 6개, drift 2건 수정 (cycle 3145, 2026-10-13)
+
+진단: open issue 0건. 1차 방어선(cycle 3144 retro `47fc3e1d`) OK, 2차 방어선 OK. 2-chain lock 재확인(직전8, 3137-3144) distinct=3(review-code(heavy)6+fix-incident1+explore-idea1) — 미충족, 자유 선택. plan lookup 24개 전부 non-approved. op-analysis Supabase DNS 블락 지속 skip. fix-incident gap=7/20·info-arch gap=24/30·lotto gap=16/30 전부 미도달. cycle 3144 retro 추천대로 `packages/kbo-data/src/pipeline/` sweep 계속 — CHANGELOG mention 2개 파일 6개(`backfill-records.ts`/`backtest-grid-run.ts`/`backtest-logistic-run.ts`/`backtest-v3-run.ts`/`final-reasoning.ts`/`save-game-record.ts`, 총 1015줄) 선정.
+
+**감사 결과(subagent 전수 read + call-site 교차검증)**: `backtest-grid-run.ts`/`backtest-logistic-run.ts`/`backtest-v3-run.ts`/`final-reasoning.ts` 4개는 clean — 모든 literal/formula 가 `backtest/models.ts`/`logistic.ts`/`loader.ts`/`daily.ts` 콜사이트와 일치.
+
+**확정 drift 2건 수정**:
+- `save-game-record.ts:33` — Naver record `statusCode` 숫자 매핑 주석(`'1'=BEFORE, '2'=STARTED, '3'=종료진행, '4'=RESULT`)이 `naver-record.ts` 자체 문서(`RESULT/STARTED/BEFORE/CANCEL` 문자열 리터럴만 명시)와 모든 테스트 fixture 와 모순 — 검증 안 된 추정 주석으로 판단, 주석 + `skipStatusStrings` 의 근거 없는 `'1'` 항목 함께 제거. 부수 발견: `SaveResult.inserted`/`updated` 필드가 `created_at`(Postgres `DEFAULT NOW()`)와 `updated_at`(JS `Date.now()`) 두 클록 소스 비교로 산출되어 사실상 항상 오판정 — 양쪽 콜사이트(`backfill-records.ts`/`live.ts`) 모두 `.error`/`.skipped` 만 읽고 두 필드는 전혀 미사용 확인되어 dead code 로 같이 제거.
+- `backfill-records.ts` 헤더 doc — "이미 저장된 경기는 덮어씀" 이라 서술하지만 실제 기본 동작(`skipCovered = !force`)은 skip, `--force` 시만 덮어씀. 주석 반전 정정.
+
+검증: `tsc --noEmit`/`pnpm lint` clean, pre-push hook(lint+type-check+version-sync-guard) 전부 PASS. 직접 main 커밋+push(R4 범위, `9f1c1147`).
+
+**skill-evolution trigger 평가**: milestone(`3145 % 50 = 45`) 미충족. trigger5(직전20 inclusive, 3126-3145) — review-code(heavy) 다수 발화 지속, 평가 대상(review-code) 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/pipeline/` 잔여 13개, 3-mention 이상 축 — `backfill-sp.ts`/`backtest-bootstrap-ci-run.ts`/`backtest-manual-weights-run.ts`/`backtest-run.ts`/`shadow-cohort.ts` 등) 또는 info-arch(gap=25/30, 근접) 또는 lotto(gap=17/30) 자연 대기. Supabase billing 조치 여전히 사용자 영역(DNS NXDOMAIN 지속). plan #29 만료 2026-10-15(임박, Tier4 대기).
+
 ## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/pipeline 미감사 7개 추가 축, drift 0건 (cycle 3144, 2026-10-13)
 
 진단: open issue 0건. 1차 방어선(cycle 3143 retro `caa1df4b`) OK, 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3136-3143) distinct=3(review-code(heavy)6+explore-idea1+fix-incident1) — 미충족, 자유 선택. plan lookup 24개 전부 non-approved. op-analysis Supabase DNS 재확인(`utmimgpccbrciwuuacyw.supabase.co` → NXDOMAIN 지속, 2026-10-11 인시던트 그대로) skip. fix-incident gap=6/20·info-arch gap=23/30·lotto gap=15/30 전부 미도달. DESIGN.md 68h(신선) skip. cycle 3143 retro 추천대로 `packages/kbo-data/src/pipeline/` sweep 계속 — CHANGELOG mention 재계산 결과 1-mention 파일 7개(`backfill-season.ts`/`backfill-weather.ts`/`backtest-wayback-run.ts`/`factor-bias-bootstrap-ci.ts`/`notify-status-predicate.ts`/`snapshot-pitchers.ts`/`sync-batter-stats.ts`, 총 854줄) 선정.
