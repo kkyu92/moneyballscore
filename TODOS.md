@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src CHANGELOG 0-mention 진짜 2개 전수 감사, 신규 drift 0건 (cycle 3117, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선(cycle 3116 retro `fd7fa30c`) OK. 직전8(3109-3116) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 해제 상태. fix-incident 마지막 cycle 3104(gap=13)·lotto 마지막 cycle 3098(gap=19)·info-arch 마지막 cycle 3091(gap=26)·op-analysis 마지막 cycle 3114(gap=3) 전부 미근접. `gh run list` 재확인 — CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped, 실제 인시던트 부재. explore-idea saturation 14/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up stale/DESIGN.md 2.7일 신선) — 반복 패턴 동일 skip.
+
+cycle 3116 next_recommended("packages/kbo-data 재탐색") 채택 — apps/moneyball/src/lib/ 0-mention 축 완전 소진 확인 후 packages/kbo-data/src 전체(191개 .ts, __tests__ 제외) CHANGELOG mention count 재grep. 진짜 0-mention 2개 발견: `backtest/models.ts`, `pipeline/prediction-history.ts` (grep-count-depth 가드레일 준수 — count 뿐 아니라 전수 read + caller 교차검증).
+
+**교차검증 결과**: `backtest/models.ts` — modelCoinFlip/modelEloHomeAdv/makeRestricted/teamHomeAdvantagesInEloPt/DEFAULT_RESTRICTED 전수 read. HOME_ADV_ELO_DEFAULT = HOME_ADVANTAGE(0.015 실측치, CLAUDE.md) 환산값 주석과 코드 일치. 호출부 `backtest-run.ts`/`backtest-grid-run.ts`/`backtest-logistic-run.ts`/`backtest/index.ts` 4곳 전부 export 그대로 소비, DEFAULT_RESTRICTED 파라미터(kH2h=30/h2hMinN=2) 주석 근거(cycle 67/69)와 실제 값 일치. `pipeline/prediction-history.ts` — computePredictionHistory 전수 read. 주석 "cycle 2823 wiring fix" 실제 `daily.ts:1384` getPredictionHistory 호출부에서 `reverseTeamMap(teamIdMap)` 전달 확인 — 주석-코드 정합. `calibration-agent.ts` PredictionHistory interface(homeTeamAccuracy/awayTeamAccuracy/teamAccuracy/recentResults) shape 100% 일치.
+
+검증: `vitest run backtest-models.test.ts prediction-history.test.ts` 19/19 passed. 코드 변경 없음(신규 drift 0건) — packages/kbo-data 0-mention 축 완전 소진(2개 전부 처리). 다음 review-code(heavy)는 count=1 티어 잔여(`validator-logger.ts`/`walk-forward-helpers.ts`/`accuracy-update.ts` 등) 재탐색 또는 info-arch gap=26/30 근접 모니터 권장.
+
 ## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib/ CHANGELOG 0-mention 진짜 잔여 1개 전수 감사, 신규 drift 0건 (cycle 3116, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선(cycle 3115 retro `850d41a8`) OK. 직전8(3108-3115) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 해제 상태 유지. fix-incident gap=20+ 도달했으나 `gh run list` 재확인 — CI green, CI Failure Dispatch 전부 skipped, 실제 신규 incident 부재(Supabase INACTIVE 는 cycle 3114 op-analysis 가 93-cycle 재확인한 기존 blocker). lotto gap=18/30·info-arch gap=25/30 전부 미근접, explore-idea saturation 1/15 미충족.
