@@ -181,7 +181,7 @@ export function Header({ isEn = false }: { isEn?: boolean } = {}) {
               <path d="m21 21-4.35-4.35" />
             </svg>
           </Link>
-          <ThemeToggle />
+          <ThemeToggle isEn={isEn} />
           <MobileNav />
         </div>
       </div>
