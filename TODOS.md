@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (RETRO-ONLY) — polish-ui(2-chain lock fallback): DESIGN.md 토큰+breadcrumb 전수 재확인, drift 0건 (cycle 3166, 2026-10-13)
+
+진단: 2-chain lock 발동(직전8, 3158-3165 distinct=2: review-code(heavy)7+lotto(lite)1) — 둘 다 bug 아니라 lock 무시 불가, 제외. open issue 0건, approved plan 0/23(plan#29 spec_only_deferred 만료 2026-10-15 임박 2일 / plan#30 completed, 둘 다 non-approved). fix-incident gap=20/20·op-analysis gap=25/25 둘 다 도달하나 `gh run list` 재확인(CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped) + Supabase DNS 재확인(`curl -v https://www.moneyballscore.com/api/health` → "Could not resolve host", billing outage 지속) — actionable 아님. lotto gap=6/30·info-arch gap=18/30 전부 미근접. explore-idea saturation 직전15 13/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 70.1h 신선) — 수십 회 반복된 동일 skip 패턴. lock fallback 룰 적용 = polish-ui 강제 발화.
+
+**감사 내용**: DESIGN.md 토큰 vs 하드코딩 색상 전수 grep(`apps/moneyball/src/components` + `app` 전체) — `MlbTeamLogo.tsx`(주석 텍스트 매칭 false-positive, 실제 코드 아님), `lotto/page.tsx`(`var(--color-surface-card, #fff)` CSS var fallback 패턴, 기존 `HallOfFame.tsx`와 동일 정상 패턴, cycle 3157 확인분과 동일 카테고리), `lotto/opengraph-image.tsx`(next/og satori 렌더러가 CSS 변수 미지원이라 인라인 hex 필수 — `KBO_GRADIENT_LOTTO_135`는 이미 `design-tokens.ts`에서 import, 추가 발견된 3개 hex는 공식 로또645 볼 색상 티어(1-10 노랑 `#facc15`/11-20 파랑 `#3b82f6`/21-30 빨강 `#ef4444`/31-40 회색 `#6b7280`/41-45 초록 `#16a34a`)를 정확히 매핑 — 사이트 브랜드 토큰이 아닌 외부 표준색이라 토큰화 대상 아님).
+
+**경미 발견(수정 보류, 기록만)**: `lotto/opengraph-image.tsx`의 `color: "#fff"` 가 다른 22개 OG 라우트들의 `color: "white"` 키워드 표기와 다름 — 렌더링 결과 완전 동일(기능 차이 0), 별도 fix 불필요 수준의 트리비얼 나이트.
+
+Breadcrumb 누락 라우트 전수 재확인(`grep -L Breadcrumb` 18개) — 4개 리다이렉트 전용 mirror(`reviews/monthly`+`weekly` KBO/MLB/EN, 렌더링 콘텐츠 자체가 없어 breadcrumb 불필요, 쌍둥이 `reviews/page.tsx`/`reviews/misses/page.tsx`는 둘 다 보유 확인) + 3개 placeholder noindex(`login`/`settings`/`community`) + 6개 debug 내부 도구 + 1개 homepage(`app/page.tsx`, 루트라 불필요) — 전부 cycle 3157 확인분과 동일한 기존 의도 패턴, 신규 drift 0건.
+
+코드 변경 없음(retro-only). **결론**: 다음 사이클 추천 = lock cooldown(N=1) 만료 후 review-code(heavy) 복귀 또는 재잠김 시 fix-incident(gap=20/20 도달)/op-analysis(gap=25/25 도달) 자연 대기 — 둘 다 Supabase billing outage(사용자 영역) 미해결 지속 시 여전히 actionable 부재 skip 예상. plan #29 만료 2026-10-15(2일 남음, Tier4 대기) 변화 없음.
+
 ## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): apps/moneyball/src/{lib,hooks} 저-mention 8개 파일 전수 감사, drift 0건 (cycle 3165, 2026-10-13)
 
 진단: open issue 0건. plan #29(spec_only_deferred, 만료 2026-10-15 임박)/#30(completed) 둘 다 non-approved — unprocessed approved plan 없음. 직전8(3157-3164) distinct=3(review-code(heavy)6+polish-ui1+lotto(lite)1) — 2-chain lock 미충족. fix-incident gap=21/20·op-analysis gap=26/25 둘 다 도달하나 Supabase 호스트 DNS 재확인(`curl -v https://www.moneyballscore.com/api/health` → "Could not resolve host") — billing outage 지속, 코드 fix 불가·actionable 아님(사용자 영역, 2026-10-11 발생). lotto gap=5/30·info-arch gap=17/30 전부 미근접.
