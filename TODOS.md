@@ -1,5 +1,9 @@
 
 
+## 🟡 PARTIAL (RE-VERIFY, 변화 없음) — fix-incident: moneyballscore.com 도메인 + Supabase 양쪽 인시던트 지속 (cycle 3168, 2026-10-14)
+
+재검증 결과 cycle 3167 대비 변화 없음: `vercel domains inspect moneyballscore.com` 여전히 "Domain not found", `vercel domains ls` 여전히 0 Domains, Supabase 호스트 curl http_status=000. 둘 다 사용자 계정 레벨(registrar/Vercel 팀/Supabase billing) 조치 필요 — 코드로 해결 불가. 본 사이클은 대화로 직접 승인 요청 전환(아래 참조). 커밋/PR 없음.
+
 ## 🟡 PARTIAL (ESCALATION) — fix-incident: moneyballscore.com Vercel 도메인 바인딩 완전 소실 신규 발견 (cycle 3167, 2026-10-13)
 
 진단: fix-incident gap=29/20 도달(last fire 3138) — Supabase billing outage(2026-10-11 발생, project_supabase_inactive_incident 메모리) 재확인 중 더 심각한 상위 레벨 장애 발견.
