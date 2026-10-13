@@ -363,11 +363,16 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
       const { runDailyPipeline } = await loadPipeline();
       await runDailyPipeline('2026-04-22', 'announce', 'cron');
 
-      expect(vi.mocked(fetchNaverSchedule)).toHaveBeenCalledOnce();
-      const call = vi.mocked(fetchNaverSchedule).mock.calls[0];
-      expect(call[0]).toBe('2026-04-22');
+      // Naver API 10건 cap (cycle 3122 review-code heavy 실측) — 멀티데이 단일
+      // 호출이 silent truncate 되므로 day-by-day 로 14회 호출.
+      expect(vi.mocked(fetchNaverSchedule)).toHaveBeenCalledTimes(14);
+      const firstCall = vi.mocked(fetchNaverSchedule).mock.calls[0];
+      expect(firstCall[0]).toBe('2026-04-22');
+      expect(firstCall[1]).toBe('2026-04-22'); // day-by-day: from===to
       // end = start + 13일 (days=14 inclusive)
-      expect(call[1]).toBe('2026-05-05');
+      const lastCall = vi.mocked(fetchNaverSchedule).mock.calls[13];
+      expect(lastCall[0]).toBe('2026-05-05');
+      expect(lastCall[1]).toBe('2026-05-05');
 
       // games upsert (prefetch 경로) — announce 후 호출
       const upsertCall = mock._calls

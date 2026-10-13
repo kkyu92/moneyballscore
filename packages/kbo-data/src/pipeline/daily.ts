@@ -6,6 +6,7 @@ import {
   isV2ModelEnabled, isV21BShadowEnabled, isDebateEnabled,
   SHADOW_V20_WEIGHTS, DAY_MS,
   countNeutralFactors, PREDICTION_SPARSE_THRESHOLD, RECENT_FORM_GAMES,
+  BACKFILL_POLITE_DELAY_MS,
 } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchForecastWeather } from '../scrapers/weather';
@@ -1516,7 +1517,15 @@ async function getVerifyResults(
  *
  * 목적: 홈 empty-state "다음 경기 일정" 이 DB 에서 즉시 찾을 수 있도록.
  * 기존 fetchGames (KBO 공식) 는 단일 날짜만 받아 14회 호출 필요한데,
- * Naver API 는 fromDate-toDate 한 번에 가능.
+ * Naver API 는 fromDate-toDate 파라미터 자체는 범위로 받지만 응답을 **최대 10건
+ * 으로 cap** (cycle 3122 review-code heavy 실측 — 5일 범위 요청해도 처음 2일치
+ * 10건만 돌아오고 나머지는 silent 누락, naver-schedule.ts 모듈 docstring의
+ * "임의 기간 한 번에 조회 가능"은 이 cap 기준 부정확). 과거엔 여기서 fromDate~
+ * toDate 14일을 단일 호출로 넘겨 "일별 10경기 * 14일 = 140건" 을 기대했으나 실제로는
+ * 10건 cap 에 걸려 앞 1~2일치만 반영되고 나머지 12~13일이 매일 조용히 빠졌음
+ * (backfill-season.ts/backfill-sp.ts 는 이미 동일 cap 때문에 day-by-day 로 우회 중
+ * 이었음 — 본 함수만 그 패턴을 안 따라가 재발). 이제 day-by-day 로 순회 + politeness
+ * delay 로 우회.
  *
  * upsert onConflict=league_id,external_game_id → 기존 row 가 있으면 status·
  * score 만 patch (KBO 공식이 덮어쓴 후라도 일정 자체는 덮어쓰지 않음).
@@ -1534,21 +1543,27 @@ async function prefetchSchedule(
   const fromStr = startDate;
   const toStr = end.toISOString().slice(0, 10);
 
-  let scheduled: ScrapedGame[];
-  try {
-    // fields=all — basic 응답에는 stadium 등이 누락되어 UI 폴백 필요.
-    // all 이 응답 크기 3~4배지만 일별 10경기 * 14일 = 140건이라 무시 가능.
-    scheduled = await fetchNaverSchedule(fromStr, toStr, 'all');
-  } catch (e) {
-    return {
-      upserted: 0,
-      range: `${fromStr} ~ ${toStr}`,
-      error: errMsg(e),
-    };
+  const scheduled: ScrapedGame[] = [];
+  let lastErr: string | null = null;
+  for (let i = 0; i < days; i++) {
+    const d = new Date(`${startDate}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + i);
+    const dayStr = d.toISOString().slice(0, 10);
+    try {
+      // fields=all — basic 응답에는 stadium 등이 누락되어 UI 폴백 필요.
+      // 10건 cap 은 날짜 범위 전체 기준이라 1일씩 요청해야 모든 날짜가 반영됨.
+      const dayGames = await fetchNaverSchedule(dayStr, dayStr, 'all');
+      scheduled.push(...dayGames);
+    } catch (e) {
+      lastErr = errMsg(e);
+    }
+    if (i < days - 1) {
+      await new Promise((r) => setTimeout(r, BACKFILL_POLITE_DELAY_MS));
+    }
   }
 
   if (scheduled.length === 0) {
-    return { upserted: 0, range: `${fromStr} ~ ${toStr}`, error: null };
+    return { upserted: 0, range: `${fromStr} ~ ${toStr}`, error: lastErr };
   }
 
   const payload = scheduled

@@ -2,7 +2,11 @@
  * Naver 스포츠 스케줄 API — 월/주 단위 prefetch 용.
  *
  * KBO 공식 API (`GetKboGameList`) 는 단일 날짜만 받아 14일치 prefetch 에
- * 14회 + sleep 필요. Naver API 는 임의 기간 한 번에 조회 가능.
+ * 14회 + sleep 필요. Naver API 는 fromDate/toDate 파라미터로 임의 기간을 받긴
+ * 하지만 **응답을 최대 10건으로 cap** (cycle 3122 review-code heavy 실측 —
+ * 5일 범위 요청해도 처음 2일치 10건만 반환, 나머지 날짜는 silent 누락).
+ * 멀티데이 prefetch 가 필요하면 호출자가 day-by-day 로 순회해야 함
+ * (backfill-season.ts / backfill-sp.ts / daily.ts prefetchSchedule 참조).
  *
  * Endpoint: https://api-gw.sports.naver.com/schedule/games
  * 파라미터:
