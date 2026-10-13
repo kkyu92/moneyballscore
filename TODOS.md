@@ -1,5 +1,25 @@
 
 
+## 🟢 SUCCESS — fix-incident: lib/supabase/server.ts cookie-free, ISR 복원 44 호출부 (cycle 3138, 2026-10-13)
+
+진단: 2-chain lock 발동(직전8, 3130-3137, review-code(heavy)7+explore-idea1, distinct=2) — 두 chain 제외. 남은 pool 어떤 gap-trigger 도 미도달(fix-incident 10/20·info-arch 17/30·lotto 9/30·op-analysis Supabase billing 블락 지속) → 스킬 룰상 polish-ui 강제 fallback 대상. 그 진단 단계에서 production 직접 curl 점검 중 실제 인시던트 발견 — fallback 대신 fix-incident 로 전환.
+
+**근본 원인**: 홈페이지 200 응답이 **14.7초**(3회 재현) — `/predictions`·`/standings`·`/dashboard` 는 7-9초, 반면 `sitemap.xml` 은 0.2-0.7초. 코드 추적 결과 `lib/supabase/server.ts` 의 `createClient()` 가 `@supabase/ssr` + `cookies()` 조합 사용 — Next.js 가 이를 호출하는 **44개 지점 전체**(page.tsx 19개 + 공유 lib 빌더 25개) 를 dynamic 렌더링으로 강제해 `export const revalidate` 선언이 전부 무력화됨. `app/sitemap.ts` 는 이미 동일 원인을 자체 인라인 주석으로 진단하고 cookie-free 전용 클라이언트로 우회했었지만(존재조차 전파 안 됨), 나머지 43개 지점엔 한 번도 적용 안 됨.
+
+44개 호출부 전체 grep 결과 `.auth.`/`getUser`/`getSession` 사용 **0건** 확인 — `/login` 은 "회원 기능 박제 중" placeholder 페이지, 실제 Supabase Auth 세션 자체가 앱 어디에도 없음. cookie 의존은 순수 죽은 코드였음.
+
+**fix**: `lib/supabase/server.ts` 의 `createClient()` 자체를 cookie-free anon 클라이언트(`sitemap.ts` 의 `createSitemapClient` 패턴과 동일)로 재작성 — export 이름/시그니처 동일 유지, 44개 호출부 코드 변경 0건. 로컬 검증 중 부작용 발견: cookie 제거로 `app/feed/route.ts` 가 static 생성 가능 판정됨 → 이 route 의 `assertSelectOk` (의도된 fail-loud throw) 가 build 시점 prerender 시도 중 throw → `next build` 전체 중단(Supabase 불가용 상태에서). `export const dynamic = 'force-dynamic'` 추가로 해당 route 만 prerender 스킵(기존 런타임 동작과 동일 — 원래도 cookies() 때문에 항상 dynamic 이었음, Cache-Control 헤더가 CDN 캐싱 담당) — build 안전성 확보 후 shipped.
+
+검증: `pnpm type-check`/`lint`/`test`(4649개 전체 통과)/`next build` 로컬 전부 green. 신규 regression test 2건(`lib/supabase/__tests__/server-cookie-free.test.ts`, `feed-isr.test.ts` force-dynamic 케이스). PR #3150 R7 자동 머지(commit `59eed3a7`). Vercel prod 배포는 본 사이클 종료 시점 아직 빌드 중(217/290 static page 생성, fatal error 0건 — 다음 사이클에서 Ready 확인 필요).
+
+**명시적 미해결 scope**: 본 fix 만으로 홈페이지/predictions/standings 7-14초 지연이 해결되지 않음 — `app/layout.tsx` 의 root layout 이 `/en/*` locale 판별 목적으로 `headers()` 를 호출, 이게 앱 전체를 독립적으로 dynamic 강제함(로컬 `next build` route table 재확인 결과 본 fix 이후에도 모든 page.tsx 가 여전히 `ƒ Dynamic`, Revalidate 컬럼 없음). 이건 더 크고 위험한 별도 리팩토링(route-group 기반 이중 root layout, `/en` 전용 `<html lang>` 분리)이 필요 — 이번 인시던트 fix 범위 밖으로 명시적으로 분리, 후속 과제로 박제.
+
+**skill-evolution trigger 평가**: milestone(3138%50=38) 미충족. trigger5(직전20, 3119-3138) — review-code(heavy) 다수 존재, 평가 대상 review-code 단독 미충족.
+
+다음 사이클 추천 = Vercel prod 배포 Ready 확인(diagnosis 단계) 후 fix-incident 계속(`headers()`-in-layout 후속 — 범위 명확, 별도 리뷰 필요) 또는 review-code(heavy)/explore-idea(2-chain lock 1-cycle cooldown 만료) 재개.
+
+---
+
 ## 🟢 SUCCESS — explore-idea(lite): plan #29 최종 checkpoint, 사용자 live 질문 (cycle 3137, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/23(동일). 2차 방어선(cycle 3136 retro `bb0ac957`) OK. **2-chain alternation lock 발동** — 직전8(3129-3136) distinct=2(lotto1+review-code(heavy)7) → 두 chain 제외. 남은 pool 중 explore-idea saturation trigger(직전15, review-code+fix-incident+polish-ui+info-arch=14/15 ≥12) 충족 → explore-idea(lite) 선택. fix-incident gap=9/20·info-arch gap=16/30·op-analysis 60-cycle 0회(Supabase billing 블락, 아래서 재확인) — 전부 미도달.
