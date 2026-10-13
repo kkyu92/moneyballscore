@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (RETRO-ONLY) — lotto(lite): count_smoke 베이스라인 재확인 + cycle 3128 dhlottery/lottolyzer fix 검증 (cycle 3160, 2026-10-13)
+
+진단: 2-chain lock 발동(직전8, 3152-3159) distinct=2(review-code(heavy)7+polish-ui1) — 둘 다 bug 아니므로 lock 제외 대상. fix-incident gap=22/20·operational-analysis gap=46/25 둘 다 도달하나 Supabase billing outage(3일차, 사용자영역) 지속으로 actionable 아님. lotto gap=31/30 도달(last fire 3129) — 유일한 non-locked actionable 후보로 선택.
+
+**count_smoke**: 캐시 1245회차, 규칙 256개, 유효 7,705,415/전체 8,145,060(제거 439,645, 5.40%) — cycle 3129 baseline과 완전 동일. valid_delta=0, new_rules=0(신규 추첨 없음).
+
+**carry-over 추적**: cycle 3129 retro가 남긴 미해결 후속 — "cycle 3128 dhlottery/lottolyzer reachability fix 배포 후 실제 cron 재발화 미검증". `gh run list --workflow lotto-pick-update.yml` 확인 결과 최신 run(2026-10-13T06:46:27Z)이 FAILURE. 로그 확인(`gh run view --log-failed`) — "dhlottery+lottolyzer 모두 1245회차 재조회 실패"(이번엔 진짜 양쪽 다운, cycle 3128이 고친 "한쪽만 성공해도 둘 다 실패로 오판"하는 케이스와는 다름 — 정상적 fail-fast). 코드 재확인(`scripts/lotto.ts:1496-1519`) — `lottolyzerConfirmed` flag 기반 skip 로직 정상 intact, fix 자체는 건재. 단, fix 배포(09:18 UTC) 이후 신규 scheduled run 자체가 아직 미발생 — "실제 재발 여부 검증"은 다음 cron 자연 발화 시점까지 보류 상태 변화 없음.
+
+**picks 파일 확인**: `apps/moneyball/data/lotto-picks/2026-10-17.md`(87373 bytes) 존재 — 파일 내부 라벨은 "cron 자동 갱신"이나 실제론 cycle 3128이 fix 커밋(`b7b8c2d5`, 2026-10-13 18:18 KST)에 수동 재생성 번들해 배포 — 06:46 UTC 스케줄 실패로 생긴 공백을 메움, 사용자 영향 없음. `lotto-result-update`는 10/11 정상(256/256 PASS, 1245회 결과 반영) 확인 완료.
+
+**결론**: 코드 변경 없음(retro-only). 신규 rule 후보 없음. 다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 자연 복귀(`pipeline/` 잔여 21개 미감사 파일: backtest-*.ts 6개/accuracy-update/backfill-season/backfill-sp/backfill-weather/brier/daily-summary/db-error/factor-bias-bootstrap-ci/final-reasoning/notify-status-predicate/prediction-history/shadow-cohort/snapshot-pitchers/sync-batter-stats/winner-id) 또는 다음 pick-update 스케줄 cron 자연 재확인 시 fix 실검증 완료 처리. Supabase billing 조치 여전히 사용자 영역(3일차), plan #29 만료 2026-10-15(2일 남음).
+
 ## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/pipeline/ 잔여 6개 파일 전수 감사, drift 0건 (cycle 3159, 2026-10-13)
 
 진단: open issue 0건. plan #29 만료 2026-10-15(2일 남음, Tier4 사용자영역 유지). 1차 방어선(cycle 3158 retro `1f7d7864`) OK, 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3151-3158) distinct=3(review-code(heavy)6+skill-evolution1+polish-ui1) — 미충족, 자유 선택. gap trigger 3개 동시 충족: fix-incident gap=21/20(last 3138)·operational-analysis gap=45/25(last 3114)·lotto gap=30/30 정확 도달(last 3129). lotto 산출물 재확인 — `apps/moneyball/data/lotto-picks/2026-10-17.md`(오늘 생성, 다음 토요일 분) + `lotto-results/2026-10-10.md`(직전 토요일 분, 10/11 생성) 둘 다 신선 — cron 정상, actionable 아님.
