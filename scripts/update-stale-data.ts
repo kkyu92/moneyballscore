@@ -28,13 +28,22 @@ async function main() {
     process.exit(1);
   }
   const supabase = createClient(url, key, { auth: { persistSession: false } });
-  const { data, error } = await supabase
-    .from("predictions")
-    .select("is_correct, scoring_rule, confidence, verified_at")
-    .eq("prediction_type", "pre_game")
-    .not("is_correct", "is", null);
-  if (error) throw error;
-  const rows = (data ?? []) as PredRowMin[];
+  const PAGE = 1000;
+  let offset = 0;
+  const rows: PredRowMin[] = [];
+  while (true) {
+    const { data, error } = await supabase
+      .from("predictions")
+      .select("is_correct, scoring_rule, confidence, verified_at")
+      .eq("prediction_type", "pre_game")
+      .not("is_correct", "is", null)
+      .range(offset, offset + PAGE - 1);
+    if (error) throw error;
+    const chunk = (data ?? []) as PredRowMin[];
+    rows.push(...chunk);
+    if (chunk.length < PAGE) break;
+    offset += PAGE;
+  }
 
   const snap = buildStaleSnapshot({ rows, generatedAt: new Date() });
 
