@@ -32,18 +32,30 @@ async function main() {
   const sb = createClient(url, key);
 
   // Diagnose: count rows where home_win_prob IS NULL and reasoning.homeWinProb present
-  const { data: rows, error } = await sb
-    .from('predictions')
-    .select('id, confidence, home_win_prob, reasoning')
-    .eq('league', 'kbo')
-    .eq('scoring_rule', 'v1.8')
-    .is('home_win_prob', null)
-    .not('reasoning', 'is', null)
-    .gte('predicted_at', '2026-04-01')
-    .limit(500);
-
-  if (error) { console.error('query error:', error.message); process.exit(1); }
-  if (!rows?.length) { console.log('no rows to backfill'); return; }
+  // Pagination 의무 — supabase-js 기본 1000 row cap 과 무관하게 .limit(500) 단일 조회는
+  // 대상이 500건 넘으면 조용히 잘림 (sibling scripts 의 PAGE 루프 패턴과 불일치, cycle 3131 발견).
+  const PAGE = 500;
+  let offset = 0;
+  type Row = { id: number; confidence: number; home_win_prob: number | null; reasoning: unknown };
+  const rows: Row[] = [];
+  while (true) {
+    const { data: chunk, error } = await sb
+      .from('predictions')
+      .select('id, confidence, home_win_prob, reasoning')
+      .eq('league', 'kbo')
+      .eq('scoring_rule', 'v1.8')
+      .is('home_win_prob', null)
+      .not('reasoning', 'is', null)
+      .gte('predicted_at', '2026-04-01')
+      .order('id', { ascending: true })
+      .range(offset, offset + PAGE - 1);
+    if (error) { console.error('query error:', error.message); process.exit(1); }
+    rows.push(...((chunk ?? []) as Row[]));
+    if (!chunk || chunk.length < PAGE) break;
+    offset += PAGE;
+    if (offset > 100000) { console.error('safety stop — offset > 100000'); break; }
+  }
+  if (!rows.length) { console.log('no rows to backfill'); return; }
 
   const candidates = rows.filter((r) => {
     const reason = r.reasoning as { homeWinProb?: number } | null;
