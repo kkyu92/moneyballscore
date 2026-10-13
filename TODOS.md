@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — polish-ui (2-chain lock fallback): en/mlb series[topic] twin BreadcrumbList JSON-LD 누락 수정 (cycle 3113, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선(cycle 3112 retro `aff48ef9`) OK. 직전8(3105-3112) distinct=1(review-code(heavy) 전량) — 2-chain lock 발동, review-code 후보 제외. fix-incident gap=46/20 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) + Supabase DNS 재확인(ENOTFOUND 지속, 기존 known) — actionable 신규 없음 skip. explore-idea saturation 직전15 13/15 충족했으나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 3일 신선) — 반복 패턴 동일 skip. lotto gap=15/30·info-arch gap=22/30 전부 미근접. rule4 폴백 = `polish-ui` 강제 발화.
+
+신규 라우트(7일 이내 git log 확인: `en/mlb/insights/series/[topic]`+`mlb/insights/series/[topic]`, plan #30 Phase 3) twin diff 비교 중 실제 drift 발견: KO twin은 `buildArticleJsonLd`+`buildBreadcrumbListJsonLd` helper(`src/lib/seo/json-ld.ts`) 둘 다 사용하지만 EN mirror는 Article JSON-LD를 inline 객체로 중복구현하고 BreadcrumbList JSON-LD 자체가 아예 누락 — 시각적 `<Breadcrumb>` 컴포넌트는 양쪽 다 존재해 사용자 눈엔 동일하지만 구조화 데이터(검색엔진 breadcrumb rich result)만 비대칭. `buildArticleJsonLd`가 `inLanguage` override 지원 확인 후 EN 값(`en-US`) 유지하며 helper로 교체 + `breadcrumbLd` 생성·script 태그 추가로 KO twin과 1:1 정렬.
+
+DESIGN.md 색상 토큰 재검증(글로벌 hex grep 비교) — 일부 hex 가 globals.css/컴포넌트에 없어 보였으나 Decisions Log 상 과거 마이그레이션 완료 기록(히스토리 보존용)으로 확인, 실제 drift 아님(false positive 배제).
+
+검증: `tsc --noEmit`/lint clean, `seo-series-routing.test.ts` 4/4 + 전체 vitest 589 files/4647 tests green. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard PASS).
+
+**2-chain lock 예고**: 다음 cycle(3114) 진단 시 직전8(3106-3113) distinct=2(review-code 7 + polish-ui 1) 전망 — lock 유지 시 review-code/polish-ui 둘 다 제외 가능성. 다음 사이클 추천 = fix-incident(gap=47/20, 여전히 actionable 재확인 필요) 또는 lotto(gap=16/30)/info-arch(gap=23/30) 자연 대기, 또는 제3의 자연 trigger 발견 시 그대로 채택.
+
 ## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib/ count=1~2 티어 8개 전수 감사, 신규 drift 0건 (cycle 3112, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/23(전부 non-approved, status 전부 completed/archived/partial 계열). 2차 방어선(cycle 3111 retro `528603ad`) OK. 직전8(3104-3111) distinct=2(review-code(heavy)7+fix-incident(lite)1) — 2-chain lock 충족이나 잠긴 chain 중 fix-incident 포함 → rule4 로 lock 무시. Supabase DNS ENOTFOUND 직접 재확인(89+ cycle 지속 블락, op-analysis 전면 블락 상태 변화 없음), fix-incident gap=8/20·lotto gap=14/30·info-arch gap=21/30 전부 미근접.
