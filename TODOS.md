@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/pipeline 최소-mention 3개, drift 0건 (cycle 3149, 2026-10-13)
+
+진단: open issue 0건. approved plan 0/24. 1차 방어선(cycle 3148 retro `09bce820`) OK, 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3141-3148) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 미충족, 자유 선택. fix-incident gap=11/20·lotto gap=20/30·info-arch gap=1/30(직전 발화) 전부 미도달. op-analysis Supabase DNS ENOTFOUND 재확인 지속(actionable 아님) skip. cycle 3147 추천 계승 — `packages/kbo-data/src/pipeline/` 잔여 orchestrator 중 CHANGELOG mention 최소 3개(`db-constraints.ts` 3회/`model-version.ts` 3회/`schedule.ts` 5회, 총 219줄) 선정.
+
+**감사 결과**: (1) `db-constraints.ts` — DB_CONSTRAINTS 16개 테이블 전부 `supabase/migrations/*.sql` 실제 UNIQUE 제약과 교차검증. predictions 테이블의 composite UNIQUE(mig 030)와 별도 partial unique index(mig 038, MLB 전용) 2종 공존 확인했으나 `mlb-pipeline.ts` 가 의도적으로 delete-then-insert 패턴으로 partial index 를 우회(주석 명시) — drift 0. (2) `model-version.ts` — `decideModelVersion`(usingShadowV20Weights 파라미터 보유) vs `decidePostviewModelVersion`(파라미터 없음) 비대칭을 발견했으나 `postview-daily.ts` 가 SHADOW_V20_WEIGHTS 자체를 안 쓰는 구조(daily.ts 전용, `isV2ModelEnabled()` 현재 OFF)라 비대칭이 아닌 의도된 설계 — drift 0. (3) `schedule.ts` — `shouldPredictGame` 의 `allowLateWindow`(predict_final 전용, 사례 11 mitigation) + `estimateNotificationTime` 산식을 `daily.ts` 호출부와 교차검증 — drift 0.
+
+**결론**: 3개 파일 전수 read, drift 0건. 코드 변경 없음(retro-only).
+
+skill-evolution trigger 평가: milestone(`3149 % 50 = 49`) 미충족. trigger5(직전20 inclusive, 3130-3149) — review-code(heavy) 다수 발화 지속(평가 대상), 미충족. ship-0 emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/pipeline/` 잔여 대형 orchestrator — daily.ts 1675줄/live.ts 366줄/mlb-pipeline.ts 886줄/postview-daily.ts 378줄/silent-drift-alert.ts 384줄, heavy 집중 세션 권장) 또는 2-chain lock 재형성 시 fix-incident(gap=12/20)/lotto(gap=21/30) 자연 대기. Supabase billing 조치 여전히 사용자 영역, plan #29 만료 2026-10-15(임박).
+
 ## 🟢 SUCCESS (RETRO-ONLY) — info-architecture-review: 2-chain lock 조기 발화, 현 IA 충분 16연속 재확정 (cycle 3148, 2026-10-13)
 
 진단: open issue 0건. approved plan 0/24. 1차 방어선(cycle 3147 retro `3baab161`) OK, 2차 방어선(직전 사이클 결손 감지) OK. 2-chain lock 재확인(직전8, 3140-3147) distinct=2(review-code(heavy)7+polish-ui1) — 양쪽 모두 잠김(둘 다 fix-incident 아님, override 불가) → 룰 step3 fallback 대상(polish-ui) 자체가 잠겨있어 남은 pool 중 trigger 가장 근접한 chain 재선택: fix-incident gap=10/20·lotto gap=19/30·op-analysis(Supabase DNS NXDOMAIN 블락 지속, actionable 아님) 전부 info-arch gap=27/30 보다 멀어 info-architecture-review 선택.
