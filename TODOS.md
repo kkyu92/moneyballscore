@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data count=3 티어 14개 전수 감사, prefetchSchedule 10건-cap silent 누락 수정 (cycle 3122, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3121 retro `e480c8be`) OK. 직전8(3114-3121) distinct=3(review-code(heavy)6+op-analysis(lite)1+info-arch1) — 2-chain lock 미충족. fix-incident gap=55/20 도달하나 `gh run list` 재확인(CI/Vercel Failure Dispatch 전부 skipped) + Supabase DNS ENOTFOUND 지속(known user-domain blocker) — actionable 0. lotto gap=24/30 미근접(picks/results cron 정상 날짜 확인). op-analysis gap=8/25 미근접. DESIGN.md 2.7일 신선.
+
+cycle 3121 추천("count=3 티어") 채택 — CHANGELOG mention count==3 grep, 14개 식별(`backtest/{elo-history,logistic-regression}.ts` + `context/measurement.ts` + `factors/mlb-factor-detail.ts` + `pipeline/{backfill-sp,backtest-bootstrap-ci-run,backtest-manual-weights-run,backtest-run,final-reasoning,shadow-cohort}.ts` + `scrapers/{baseball-savant,fangraphs-mlb,naver-schedule,statsapi-mlb}.ts`). general-purpose agent 위임 — 전수 read + caller 교차검증.
+
+**확정 버그 1건**: `pipeline/daily.ts` 의 `prefetchSchedule()`(announce 모드 "다음 경기 일정" 선반영용)가 Naver schedule API 를 14일 범위 단일 호출로 사용 — 실측 확인 결과 이 API 는 범위 파라미터와 무관하게 응답을 **10건으로 cap**(5일 요청해도 앞 2일치만 반환). `backfill-season.ts`/`backfill-sp.ts` 는 이미 이 cap 을 알고 day-by-day 로 우회 중이었으나 `prefetchSchedule` 만 그 패턴을 안 따라가 매 실행마다 14일 중 ~12일이 조용히 누락됨. `naver-schedule.ts` 모듈 docstring("임의 기간 한번에 조회 가능")도 부정확 — 정정. day-by-day 순회 + `BACKFILL_POLITE_DELAY_MS` 로 수정, 테스트 갱신(14회 day-by-day 호출 기대).
+
+나머지 13개 파일 전부 clean (주석 vs 실제 caller/schema 정합 확인). `backtest-bootstrap-ci-run.ts`/`backtest-run.ts` 는 CI 미배선 수동 CLI(기존 레포 패턴, drift 아님). `backtest-manual-weights-run.ts` 는 `factor-backtest-weekly.yml` 실제 실행 대상 확인.
+
+검증: `pnpm --filter @moneyball/kbo-data exec vitest run` 96/96 파일 1216/1216 PASS. `tsc --noEmit`/`pnpm lint` clean. 직접 main 커밋+push(R4, `54281cfa`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+skill-evolution trigger 평가: milestone(3122%50=22) 미충족. trigger5 표본(직전20, 3103-3122) < 10 임계 — skip(자동 미충족). ship-0 emergency stop 미충족(직전10 success 8 + retro-only 2).
+
+다음 사이클 추천 = review-code(heavy) 계속 — packages/kbo-data count<=3 티어 완전 소진, count=4+ 티어 또는 app/api 잔여 mention-보유 route 재확인. 대안 = info-arch(gap=1/30 방금 리셋)/lotto(gap=24/30)/op-analysis(gap=8/25) 자연 대기, fix-incident(gap=55/20) actionable 인시던트 부재 확인 반복. **Supabase billing 조치 여전히 사용자 영역, plan #29 만료 2026-10-15(2일 남음) — Tier4 대기 계속.**
+
 ## 🟡 RETRO-ONLY — info-architecture-review: 30-cycle gap 정시 도달, IA 15연속 재확정 (cycle 3121, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24. 2차 방어선(cycle 3120 retro `68767faf`) OK. 직전8(3113-3120) distinct=3 — 2-chain lock 미충족. info-arch gap 정확 30/30 도달(마지막 발화 cycle 3091) — cycle 3120 retro 추천 그대로 자연 발화.
