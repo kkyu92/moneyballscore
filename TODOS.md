@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/engine/ 전수 감사, drift 0건 (cycle 3162, 2026-10-13)
+
+진단: open issue 0건. plan #29(spec_only_deferred)/#30(completed_all_phases_shipped) 둘 다 non-approved — unprocessed approved plan 없음. 2-chain lock 미충족(직전8, 3154-3161 distinct=3: review-code(heavy)/polish-ui/lotto). fix-incident gap=24/20·op-analysis gap=48/25 둘 다 도달하나 Supabase billing outage 재확인(`/api/health` supabase+pipeline 여전히 fetch failed, DNS NXDOMAIN 지속, 인시던트 4일차) + `gh run list` CI Failure Dispatch 전부 skipped로 actionable 아님 — 반복 패턴.
+
+cycle 3161이 `packages/kbo-data/src/pipeline/` 31개 파일 전체 감사를 완결하며 다음 스코프로 engine/scrapers/agents 신규 디렉토리를 명시 추천. 그 중 `engine/`(predictor.ts 216줄 + form.ts 68줄)을 채택 — 핵심 예측 엔진 로직이면서 2일 전(10/11) 수정 이력 있고 TODOS grep mention 3건뿐으로 상대적 저감사 상태(cycle 3001 grep-count-depth 가드 — mention 수를 감사 완료 지표로 오인 금지 원칙 적용, 직접 전수 read로 커버리지 확인).
+
+**감사 내용**: `predictor.ts` — `normalize()` NaN/non-finite 가드(cycle 2977) + 양쪽 zero 가드 확인. 10개 활성 factor(sp_fip/sp_xfip/lineup_woba/bullpen_fip/recent_form/war/head_to_head/park_factor/elo/sfr) 각각의 neutral-fallback 조건 검증 — sp_fip/sp_xfip는 null pair guard, war/sfr는 asymmetric-zero guard(cycle 1904 wave-533), park_factor는 [0.3,0.7] clamp. 주석에 박제된 가중치 수치(`sp_fip 0.15 / lineup_woba 0.15 / elo 0.10 / h2h 0.03 / park 0.04 / sfr 0.05` 등)를 `packages/shared/src/index.ts` DEFAULT_WEIGHTS(line 302-315)/ACTIVE_FACTOR_KEYS(line 321-332) 실제 값과 1:1 대조 — 합계 0.85, 10개 키 전부 일치, 주석 drift 없음. `clampWinnerProb`/`ELO_NEUTRAL_WIN_PCT` 단일 source(`packages/shared`) 참조 확인. park_weather/umpire_sz shadow factor(production weight=0)가 reasoning 생성 로직에서 impact=0으로 자동 배제되는 것도 확인.
+
+`form.ts` — `calculateRecentForm`/`calculateHeadToHead`가 `number | null` 반환하는데, `PredictionInput.homeRecentForm`/`awayRecentForm` 타입은 non-nullable `number` — 타입 불일치처럼 보였으나 실제 호출부(`daily.ts:692-718`)에서 `null` 시 `fetchRecentForm`/`fetchHeadToHead` KBO 스크래핑 fallback + 실패 시 `errors[]` 기록 후 neutral 기본값(0.5 / 0승0패) 대입 — null이 PredictionInput 조립 전에 완전히 해소됨 확인, 드리프트 아님.
+
+**regression**: `pnpm --filter @moneyball/kbo-data test -- engine`: 96 files / 1216 tests 전부 PASS.
+
+**결론**: 코드 변경 없음(retro-only, drift 0건). 다음 사이클 추천 = review-code(heavy) 계속 시 `scrapers/`(16개 파일, 2672줄) 또는 `agents/`(14개 파일, TODOS mention 41건이나 grep-count≠depth 가드 따라 실제 read 재확인 필요) 신규 스코프, 또는 Supabase outage(4일차) 해소 시 fix-incident/op-analysis 즉시 전환. plan #29 만료 2026-10-15(2일 남음, Tier4 사용자 결정 대기) 변화 없음.
+
 ## 🟢 SUCCESS (RETRO-ONLY) — lotto(lite): count_smoke 베이스라인 재확인 + cycle 3128 dhlottery/lottolyzer fix 검증 (cycle 3160, 2026-10-13)
 
 진단: 2-chain lock 발동(직전8, 3152-3159) distinct=2(review-code(heavy)7+polish-ui1) — 둘 다 bug 아니므로 lock 제외 대상. fix-incident gap=22/20·operational-analysis gap=46/25 둘 다 도달하나 Supabase billing outage(3일차, 사용자영역) 지속으로 actionable 아님. lotto gap=31/30 도달(last fire 3129) — 유일한 non-locked actionable 후보로 선택.
