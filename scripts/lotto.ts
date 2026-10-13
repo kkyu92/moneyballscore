@@ -1493,6 +1493,7 @@ async function update(): Promise<LottoRound[]> {
   console.log(`현재 데이터: ${rounds.length}회차 (최신 ${oldLast}회)\n`);
 
   let latest = await getLatestRound();
+  const lottolyzerConfirmed = latest > 0;
   let probedRounds: LottoRound[] = [];
   if (!latest) {
     console.warn('최신 회차 조회 실패 (lottolyzer) — dhlottery 직접 probe fallback');
@@ -1500,6 +1501,13 @@ async function update(): Promise<LottoRound[]> {
     latest = probedRounds.length > 0 ? probedRounds[probedRounds.length - 1].round : oldLast;
   }
   if (latest <= oldLast) {
+    if (lottolyzerConfirmed) {
+      // lottolyzer 가 이미 "최신 = oldLast" 를 독립적으로 확인 — dhlottery 가
+      // 일시적으로 unreachable 해도 "둘 다 실패" 아님. dhlottery reachability
+      // check 자체를 생략해 false "둘 다 실패" 오탐 차단.
+      console.log(`✅ 이미 최신 (${oldLast}회차, lottolyzer 확인)`);
+      return rounds;
+    }
     // probe 가 신규 회차를 못 찾았을 때 "진짜 최신" 과 "두 소스 전부 다운" 을 구별.
     // 이미 아는 회차(oldLast) 를 재조회해 네트워크 자체가 죽었는지 확인.
     const reachabilityCheck = await fetchRoundFromAPI(oldLast);
