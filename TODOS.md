@@ -1,5 +1,26 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/{glossary,live,players,seasons,share,standings,ui,search} 전수 감사, drift 0건 (cycle 3136, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/23(전부 completed/archived/spec_only_deferred, plan #29 만료 2026-10-15 임박 Tier4 대기 · plan #30 만료 2026-10-18). 2차 방어선(cycle 3135 retro `b62e08c1`) OK. 직전8 distinct=3(review-code(heavy)6+fix-incident1+lotto1) — 2-chain lock 미충족. fix-incident gap=8/20·op-analysis gap=25+(Supabase billing 블락 지속)·info-arch gap=15/30·lotto gap=7/30 — 전부 trigger 미도달. 직전 retro(3135) 추천대로 review-code(heavy) 신규 축 탐색 — middleware.ts 재확인(X-Frame-Options 제거 포함 보안 헤더/debug basic-auth 로직 clean, drift 0) 후 `apps/moneyball/src/components` 미감사 서브디렉토리(기존 accuracy/reviews/matchup/dashboard/picks 류만 과거 감사) 중 단일 파일 디렉토리 8개(glossary/live/players/seasons/share/standings/ui/search, 합계 1209줄) 선정.
+
+**감사 결과(직접 전수 read)**:
+- `GlossaryCategoryFilter.tsx`: localStorage 필터값 CSS selector 삽입 — `isCategorySlug` 타입가드로 enum 5값만 통과, injection 불가 확인. consumer(`app/glossary/page.tsx` data-glossary-category) 존재 확인.
+- `LiveScoreboard.tsx`: `status` switch(live/final/postponed/default) 가 `api/kbo-scores/route.ts` LiveScore 타입(scheduled/live/final/postponed) 과 정확히 일치. 기존 silent-drift 테스트(cycle 2621 홈배지 font-bold) 현재 코드와 일치 재확인.
+- `PitcherFipTrend.tsx`: FIP/xFIP min-max 범위 계산(null-safe) 정상, consumer(`app/players/[id]/page.tsx`) 배선 확인.
+- `SeasonStandingsSortControl.tsx`/`TeamAccuracySortControl.tsx`: 고정 랭크 CSS(12/20개) — cycle 3010 이 MonthlyTeamStatsSortControl 에서 발견한 "고정 20랭크가 MLB(30팀)에서 truncate" 패턴과 동일 구조이나, 본 두 컴포넌트는 KBO 전용 라우트(`/seasons/[year]`, `/standings`)에서만 쓰여 KBO_TEAM_COUNT(10) 대비 상한 여유 확인 — 재발 아님.
+- `ShareButtons.tsx`: `isEn` prop 배선 — 전체 16개 callsite 중 EN 5개(en/mlb/matchup, en/mlb/games, en/mlb/reviews/{misses,monthly,weekly}) 전부 `isEn` prop 명시 확인(wave 627-630 family 재발 없음).
+- `navigation-menu.tsx`: shadcn 벤더 boilerplate, `NavigationMenuIndicator` unexported/미사용이나 업스트림 패턴 유지 목적 — 코드 변경 범위 밖으로 분류.
+- `SearchClient.tsx`: `SearchEntryKind`(team/player/date/page) 가 유일 consumer(`app/search/page.tsx`) 의 kind 4종과 정확 일치. `SEARCH_FUSE_LIMIT`(60) ≥ `MAX_TOTAL_RESULTS`(24) 확인 — fuse 단계 truncation 없음. 기존 silent-drift 테스트(cycle 2620 tracking-wide, cycle 2622 hover:bg-gray-800/40) 현재 코드와 일치 재확인.
+
+8개 파일 전부 clean, 코드 변경 0건.
+
+**skill-evolution trigger 평가**: milestone(3136%50=36) 미충족. trigger5(직전20 inclusive, 3117-3136) — review-code(heavy) 다수 지속, 9개 opt-out 제외 평가 대상 review-code 단독 미충족. ship-0 emergency stop 미충족(직전10 success 다수, 이번 cycle 포함 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/{analysis,dashboard,layout,leaderboard,picks,predictions,shared,teams}` 8개 복수파일 디렉토리 — 이번 사이클은 단일파일 디렉토리만 선별, 복수파일 디렉토리는 범위상 분리 필요) 또는 info-architecture-review(gap=16/30, cycle 3135 breadcrumb 가설 기각됨 — 다른 trigger 소스 필요) 또는 fix-incident(gap=9/20)/lotto(gap=8/30) 자연 대기. **Supabase billing 조치 여전히 사용자 영역. plan #29 만료 2026-10-15(임박, 2일 이내, Tier4 대기) · plan #30 만료 2026-10-18.**
+
+---
+
 ## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/hooks + src/config 전수 감사, drift 0건 (cycle 3135, 2026-10-13)
 
 진단: open issue 0건, approved plan 0/24(전부 non-approved). 2차 방어선(cycle 3134 retro `1710e616`) OK. 직전8 distinct=3(review-code(heavy)6+fix-incident1+lotto1) — 2-chain lock 미충족. fix-incident gap=7/20·op-analysis gap=25+(Supabase billing 블락 지속)·info-arch gap=14/30·lotto gap=6/30 — 전부 trigger 미도달. 직전 retro(3134) 추천 "info-architecture-review 또는 review-code(heavy)(신규 축)" 양쪽 조사 — info-arch 먼저 확인: breadcrumb 누락 18개 라우트 grep → 전부 설명 가능(홈/로그인/설정=top-level, debug/*=내부전용 7개, reviews 월간/주간 index 6개=순수 redirect 7~10줄, community=placeholder) → 실제 IA 결함 0, false positive 확정 skip. review-code(heavy) 로 전환 — scripts/+packages/kbo-data+components/+app/api 전부 과거 cycle 소진 확인 후 신규 미감사 스코프 `apps/moneyball/src/hooks`(2파일)+`src/config`(1파일) 선정(git log 감사 이력 0건).
