@@ -13392,3 +13392,19 @@ milestone 커밋: `feat(skill): cycle 3150 milestone — skill-evolution 84회 (
 - `fetchArchiveWeather`/`fetchRetrosheetSeasonGames` 등 호출 체인 재확인 — 전부 기존 문서(cycle 2833 등)와 일치, 신규 미스매치 없음.
 
 **결론**: 16개 파일 2672줄 전수 감사, drift 0건. 코드 변경 없음(retro-only). `pnpm --filter @moneyball/kbo-data test` 96 files/1216 tests PASS 재확인(regression 없음). 다음 사이클 추천 = review-code(heavy) 계속 시 `agents/`(14개 파일, 4391줄 — validator.ts 51KB 단일 파일 분리 감사 필요) 신규 스코프, 또는 Supabase billing outage 해소 시 fix-incident/op-analysis 즉시 전환. plan #29 만료 2026-10-15(2일 남음, Tier4 사용자 결정 대기) 변화 없음.
+
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/{big-match,types,index}.ts 신규 스코프 전수 감사, weather 필드 주석 drift 수정 (cycle 3164, 2026-10-13)
+
+진단: open issue 0건, approved plan 0/30(plan#29 spec_only_deferred Tier4 만료 2026-10-15 2일 남음 불변, plan#30 completed). 2차 방어선(cycle 3163 retro `f566a75c`) OK. 직전8(3156-3163) distinct=3(review-code(heavy)6+lotto(lite)1+review-code(heavy)1... 실측: review-code(heavy)7+lotto(lite)1) — 2-chain lock 미충족. gap trigger: fix-incident 26/20(last 3138)·op-analysis 25+/25 둘 다 도달하나 `/api/health` 재확인 — Supabase supabase/pipeline 여전히 `fetch failed`(4일+ 지속, 코드 fix 불가) + `gh run list` CI Failure Dispatch 전부 skipped(실제 incident 0건) — 반복 패턴, skip. lotto(last 3160, 4/30)·info-arch(last 3148, 16/30)·polish-ui(last 3157, 7 cycle) 전부 미근접.
+
+**스코프 선정**: cycle 3161~3163 이 packages/kbo-data/src/{pipeline,engine,scrapers} 를 순차 완결하며 agents/context/backtest/factors/features/analytics/notify 전부 과거(3052-3102, 3075-3076, 2275 계열, 3090) 감사 완료 확인됨 — 패키지 내 유일 잔존 top-level 파일 3개(`big-match.ts` 189L, `types.ts` 294L, `index.ts` 162L)로 스코프 전환. big-match.ts 는 cycle 569 (2595+ cycle 전) 단발 JSDoc 정리 이후 재감사 이력 없음, types.ts/index.ts 는 전체 감사 이력 grep 0건.
+
+**감사 내용**: `big-match.ts` — WEIGHTS 4개 합 1.0 확인(0.35+0.25+0.20+0.20), JSDoc 서술과 실제 가중치/3단계 fallback(no-games/below-threshold/normal) 로직 1:1 일치, tiebreaker(gameId 오름차순) 결정론 보장 확인. `selectBigMatch` 실사용처 3곳(page.tsx/analysis-data.ts/mlb analysis page.tsx) 확인 — dead code 아님. `index.ts` — 전체 export 목록을 실제 소스 파일 대조, 누락/stale export 0건. `types.ts` — `SkippedGame.reason` 유니온 코멘트(6개 값) 를 `schedule.ts` 실제 `shouldPredictGame` 리턴값 + `daily.ts` debate_fallback_quant 로 교차검증, 100% 일치. `TEAM_NAME_MAP` 10개 코드(SSG→SK/두산→OB/키움→WO 등 레거시 코드 유지)는 팀명 변경 이력 반영된 의도된 매핑 확인.
+
+**발견 + 수정**: `PredictionInput.weather` 필드 JSDoc이 "결측 시 (legacy 호출자...)" 로 서술 — 일부 non-legacy 호출자가 weather 를 설정하는 것처럼 읽히나, 실제로는 `daily.ts` PredictionInput 구성부(line 720-732)가 weather/isDome 둘 다 전혀 설정 안 함(grep 0건) — `predictor.ts:128`(cycle 2926 이미 확인)과 인접 필드 `umpireSZScore`(cycle 2822 확인, types.ts 주석에 명시됨)는 이미 "항상 undefined" 사실을 명시하는데 `weather` 주석만 그 사실 누락. 형제 필드와 동일한 명시적 서술로 정정(`871d88c4`). 코드 동작 변경 없음, production weight=0 이라 실질 영향 없음 — 순수 문서 drift.
+
+**regression**: `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean, `pnpm --filter @moneyball/kbo-data test -- --run` 96 files/1216 tests 전부 PASS, pre-push lint+type-check+version-sync-guard 통과. main 직접 commit+push 완료.
+
+**skill-evolution trigger 평가**: milestone(`3164 % 50 = 14`) 미충족. trigger5(직전20 inclusive, review-code 단독 평가 대상) — 다수 발화 중, 표본 충분·미충족. ship-0 emergency stop 미충족(직전10 전부 success/retro-only, fail 0건).
+
+다음 사이클 추천 = packages/kbo-data 패키지 전체(pipeline/engine/scrapers/agents/context/backtest/factors/features/analytics/notify/big-match/types/index) 완전 소진 — 다음 review-code(heavy) 신규 스코프는 `apps/moneyball/src/` 쪽(lib/ 또는 hooks/ 재확인, 또는 app 라우트 내부 비즈니스 로직) 재탐색 권장. 또는 fix-incident(gap=27/20, 실제 incident 부재 재확인됨)/op-analysis(Supabase 블락 지속, 5일차 임박)/lotto(gap=5/30)/info-arch(gap=17/30) 자연 대기. **Supabase fetch failed 4일+ 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(2일 남음) — Tier4 사용자 결정 대기 계속.**
