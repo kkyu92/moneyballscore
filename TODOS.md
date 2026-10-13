@@ -13378,3 +13378,17 @@ milestone 커밋: `feat(skill): cycle 3150 milestone — skill-evolution 84회 (
 **regression**: `pnpm --filter @moneyball/kbo-data test` 96 files/1216 tests PASS, `tsc --noEmit` clean. R7 자동 머지 적용(PR #3151 → `4714ab4dd120e48897a5d62e9329301f3071ef54`, state=MERGED 실측 확인).
 
 **결론**: `packages/kbo-data/src/pipeline/` 디렉토리 31개 파일 전체 감사 완결(cycle 3146 이후 누적). 다음 사이클 추천 = review-code(heavy) 계속 시 engine/scrapers/agents 등 신규 디렉토리 스코프, 또는 Supabase billing outage(4일차 진입 예정) 해소 시 operational-analysis(gap=47/25) 즉시 전환. plan #29 만료 2026-10-15(2일 남음, Tier4 사용자 결정 대기) 변화 없음.
+
+## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): packages/kbo-data/src/scrapers/ 16개 파일 전수 감사, drift 0건 (cycle 3163, 2026-10-13)
+
+진단: open issue 0건. plan #29(spec_only_deferred)/#30(completed) 전부 non-approved. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+polish-ui1+lotto(lite)1). fix-incident gap=25/20(last 3138)·op-analysis gap=49/25(last 3114) 둘 다 도달하나 Supabase billing outage(`/api/health` 재확인 — `health.leagues`/`pipeline_runs` 여전히 fetch failed, `gh run list` CI Failure Dispatch 전부 skipped=신규 incident 아님) 지속으로 둘 다 actionable 아님(기존 패턴 재확인). lotto gap=3/30·info-arch gap=15/30 미도달. cycle 3162 추천(engine/ 완료 후 scrapers/ 또는 agents/) 따라 scrapers/(16개 파일, 2672줄) 채택 — agents/(4391줄, validator.ts 단일 파일 51KB 포함) 대비 작은 스코프로 완전 소진 가능 판단.
+
+**감사 방법**: 서브에이전트 미경유 — 본 메인이 16개 파일 전부 직접 Read (kbo-official.ts/fancy-stats.ts/kbo-live.ts/kbo-pitcher.ts/naver-record.ts/naver-schedule.ts/fangraphs.ts/fangraphs-mlb.ts/fetch-with-retry.ts/kbo-scraper-alert.ts/baseball-savant.ts/mlb-historical-bootstrap.ts/statsapi-mlb.ts/umpire.ts/weather.ts). cycle 3161 교훈(서브에이전트 grep 범위 한정으로 오탐 2건) 반영해 직접 read 우선.
+
+**확인된 기존 설계 (신규 drift 아님, 재확인만)**:
+- `kbo-official.ts` fetchHeadToHead의 `losses` 항상 0 반환 — 이미 문서화된 fallback-only 함수(DB 기반 calculateHeadToHead가 정상 path), 운영 영향 없음.
+- `scrapers/umpire.ts`의 `scrapeGameUmpires`는 `scripts/smoke-umpire-scraper.ts` 외 production caller 없음. `factors/umpire-sz.ts` 자체 주석(cycle 2822 확인)이 이미 "pipeline caller 없음, production weight 0"으로 명시 — shadow-only 의도된 dormant 상태, 신규 발견 아님.
+- `fetchBatterLeaders`(FanGraphs KBO wRC+/ISO)는 HTTP 실패 시 throw 없이 `[]` 반환(console.warn만, Sentry 미연동) — 형제 스크레이퍼(fangraphs-mlb.ts/baseball-savant.ts)와 비대칭이나, 소비처가 `team_season_stats`(write-only 감사 테이블, nullable 필드)뿐이라 예측엔진 영향 없음 — 개선 가치 낮다고 판단, 변경 보류.
+- `fetchArchiveWeather`/`fetchRetrosheetSeasonGames` 등 호출 체인 재확인 — 전부 기존 문서(cycle 2833 등)와 일치, 신규 미스매치 없음.
+
+**결론**: 16개 파일 2672줄 전수 감사, drift 0건. 코드 변경 없음(retro-only). `pnpm --filter @moneyball/kbo-data test` 96 files/1216 tests PASS 재확인(regression 없음). 다음 사이클 추천 = review-code(heavy) 계속 시 `agents/`(14개 파일, 4391줄 — validator.ts 51KB 단일 파일 분리 감사 필요) 신규 스코프, 또는 Supabase billing outage 해소 시 fix-incident/op-analysis 즉시 전환. plan #29 만료 2026-10-15(2일 남음, Tier4 사용자 결정 대기) 변화 없음.
