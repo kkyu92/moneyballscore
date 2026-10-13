@@ -41,16 +41,28 @@ function createAdminClient(): SupabaseClient {
 }
 
 async function fetchV18Cohort(db: SupabaseClient): Promise<BacktestPredictionRow[]> {
-  const result = await db
-    .from('predictions')
-    .select(
-      'game_id, scoring_rule, factors, games!inner(game_date, status, home_team_id, away_team_id, winner_team_id)',
-    )
-    .eq('scoring_rule', 'v1.8')
-    .eq('prediction_type', 'pre_game')
-    .order('game_id', { ascending: false });
-  if (result.error) throw new Error(`fetch v1.8 cohort: ${result.error.message}`);
-  return (result.data ?? []) as unknown as BacktestPredictionRow[];
+  // v1.8 은 매일 신규 insert 되는 활성 production cohort — PAGE 루프 (1000건 초과 시
+  // 단일 select silent truncation 위험, order desc 라 초과 시 가장 오래된 row 부터 누락)
+  const PAGE_SIZE = 1000;
+  const rows: BacktestPredictionRow[] = [];
+  let offset = 0;
+  while (true) {
+    const result = await db
+      .from('predictions')
+      .select(
+        'game_id, scoring_rule, factors, games!inner(game_date, status, home_team_id, away_team_id, winner_team_id)',
+      )
+      .eq('scoring_rule', 'v1.8')
+      .eq('prediction_type', 'pre_game')
+      .order('game_id', { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1);
+    if (result.error) throw new Error(`fetch v1.8 cohort: ${result.error.message}`);
+    const page = (result.data ?? []) as unknown as BacktestPredictionRow[];
+    rows.push(...page);
+    if (page.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+  return rows;
 }
 
 /**
@@ -61,16 +73,26 @@ async function fetchTrainCohort(
   db: SupabaseClient,
   trainScoringRules: readonly string[],
 ): Promise<BacktestPredictionRow[]> {
-  const result = await db
-    .from('predictions')
-    .select(
-      'game_id, scoring_rule, factors, games!inner(game_date, status, home_team_id, away_team_id, winner_team_id)',
-    )
-    .in('scoring_rule', trainScoringRules)
-    .eq('prediction_type', 'pre_game')
-    .order('game_id', { ascending: false });
-  if (result.error) throw new Error(`fetch train cohort: ${result.error.message}`);
-  return (result.data ?? []) as unknown as BacktestPredictionRow[];
+  const PAGE_SIZE = 1000;
+  const rows: BacktestPredictionRow[] = [];
+  let offset = 0;
+  while (true) {
+    const result = await db
+      .from('predictions')
+      .select(
+        'game_id, scoring_rule, factors, games!inner(game_date, status, home_team_id, away_team_id, winner_team_id)',
+      )
+      .in('scoring_rule', trainScoringRules)
+      .eq('prediction_type', 'pre_game')
+      .order('game_id', { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1);
+    if (result.error) throw new Error(`fetch train cohort: ${result.error.message}`);
+    const page = (result.data ?? []) as unknown as BacktestPredictionRow[];
+    rows.push(...page);
+    if (page.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+  return rows;
 }
 
 /**

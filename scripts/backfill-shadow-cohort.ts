@@ -67,22 +67,32 @@ async function main(): Promise<void> {
   console.log(`Target cohort: ${SHADOW_SCORING_RULE}`);
   console.log(`Mode: ${isDryRun ? 'DRY RUN (no insert)' : 'LIVE (insert)'}\n`);
 
-  // 1. 기존 v1.8 (= CURRENT_SCORING_RULE) row fetch
-  const fetchResult = await db
-    .from('predictions')
-    .select(
-      'game_id, predicted_winner, scoring_rule, factors, home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip, home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip, home_war_total, away_war_total, home_recent_form, away_recent_form, head_to_head_rate, park_factor, home_elo, away_elo, home_sfr, away_sfr, reasoning',
-    )
-    .eq('scoring_rule', CURRENT_SCORING_RULE)
-    .eq('prediction_type', 'pre_game')
-    .order('game_id', { ascending: true });
+  // 1. 기존 v1.8 (= CURRENT_SCORING_RULE) row fetch — PAGE 루프 (CURRENT_SCORING_RULE 은
+  // 매일 신규 insert 되는 활성 production cohort, 1000건 초과 시 단일 select silent truncation 위험)
+  const PAGE_SIZE = 1000;
+  const rows: ExistingV18Row[] = [];
+  let offset = 0;
+  while (true) {
+    const fetchResult = await db
+      .from('predictions')
+      .select(
+        'game_id, predicted_winner, scoring_rule, factors, home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip, home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip, home_war_total, away_war_total, home_recent_form, away_recent_form, head_to_head_rate, park_factor, home_elo, away_elo, home_sfr, away_sfr, reasoning',
+      )
+      .eq('scoring_rule', CURRENT_SCORING_RULE)
+      .eq('prediction_type', 'pre_game')
+      .order('game_id', { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1);
 
-  if (fetchResult.error) {
-    console.error('source fetch error:', fetchResult.error.message);
-    process.exit(2);
+    if (fetchResult.error) {
+      console.error('source fetch error:', fetchResult.error.message);
+      process.exit(2);
+    }
+
+    const page = (fetchResult.data ?? []) as ExistingV18Row[];
+    rows.push(...page);
+    if (page.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
   }
-
-  const rows = (fetchResult.data ?? []) as ExistingV18Row[];
   console.log(`Source rows: ${rows.length} 박제\n`);
 
   let inserted = 0;

@@ -57,20 +57,26 @@ async function main(): Promise<void> {
   const db = createClient(url, key);
 
   // Fetch game info: home_team_id, away_team_id, winner_team_id
+  // CHUNK_SIZE 단위 .in() 배치 — Supabase 는 .in() 입력 크기와 무관하게 결과셋을 max_rows(1000)
+  // 에서 자르므로, CSV row 수가 1000+ 일 경우(풀 시즌 재수출 등) 단일 .in() 호출만으론 silent truncation
+  const CHUNK_SIZE = 500;
   const gameIds = rows.map(r => r.game_id);
-  const { data: games, error: gErr } = await db
-    .from('games')
-    .select('id, home_team_id, away_team_id, winner_team_id')
-    .in('id', gameIds);
-
-  if (gErr) {
-    console.error('[tabpfn-import] games fetch failed:', gErr.message);
-    process.exit(1);
-  }
-
   const gameMap = new Map<number, { home_team_id: number; away_team_id: number; winner_team_id: number | null }>();
-  for (const g of (games ?? [])) {
-    gameMap.set(g.id, { home_team_id: g.home_team_id, away_team_id: g.away_team_id, winner_team_id: g.winner_team_id ?? null });
+  for (let i = 0; i < gameIds.length; i += CHUNK_SIZE) {
+    const chunk = gameIds.slice(i, i + CHUNK_SIZE);
+    const { data: games, error: gErr } = await db
+      .from('games')
+      .select('id, home_team_id, away_team_id, winner_team_id')
+      .in('id', chunk);
+
+    if (gErr) {
+      console.error('[tabpfn-import] games fetch failed:', gErr.message);
+      process.exit(1);
+    }
+
+    for (const g of (games ?? [])) {
+      gameMap.set(g.id, { home_team_id: g.home_team_id, away_team_id: g.away_team_id, winner_team_id: g.winner_team_id ?? null });
+    }
   }
 
   let skipped = 0;
