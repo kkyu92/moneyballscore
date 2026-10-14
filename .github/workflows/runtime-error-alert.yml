@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Smoke key production routes
         run: |
           set +e
@@ -90,3 +91,21 @@ jobs:
           fi
 
           echo "::notice::all ${#ROUTES[@]} routes ok."
+
+      - name: Dispatch failure to playbook hub
+        if: failure()
+        uses: ./.github/actions/compose-dispatch-payload
+        with:
+          event_type: worker-incident
+          title: "runtime-error-alert 실패 — production route 비정상 응답"
+          body: |
+            **Workflow**: runtime-error-alert
+            **Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            핵심 production route smoke 가 1개 이상 non-200 응답. 기존 ::error:: annotation 은 GH Actions 탭에서만 보여 사용자가 놓치기 쉬움 — 허브로 명시 dispatch.
+          type: incident
+          severity: error
+          fingerprint_keys: runtime-error-alert failure
+          environment: production
+          run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          playbook_pat: ${{ secrets.PLAYBOOK_PAT }}
