@@ -10,6 +10,7 @@ import {
   REVIEWS_HUB_RECENT_WEEKS, REVIEWS_HUB_RECENT_MONTHS,
   KBO_SEASON_YEAR,
   SMALL_SAMPLE_N,
+  PRODUCTION_COHORT_RULES,
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -19,7 +20,6 @@ import { ReviewsResultFilter } from "@/components/reviews/ReviewsResultFilter";
 import { ConvergenceTeamStatsBadges } from "@/components/reviews/ConvergenceTeamStatsBadges";
 import { ConvergenceHomeAwayBadges } from "@/components/reviews/ConvergenceHomeAwayBadges";
 import { ConvergenceDayOfWeekBadges } from "@/components/reviews/ConvergenceDayOfWeekBadges";
-import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
 import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, getConvergencePickDayOfWeekSplit, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
 
@@ -72,7 +72,7 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
         away_team:teams!games_away_team_id_fkey(code)
       )
     `)
-    .match(CURRENT_MODEL_FILTER)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .eq('prediction_type', 'pre_game')
     .not('is_correct', 'is', null)
     .order('created_at', { ascending: false })
