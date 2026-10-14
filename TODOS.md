@@ -13646,3 +13646,18 @@ milestone 커밋: `feat(skill): cycle 3150 milestone — skill-evolution 84회 (
 **regression**: `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm --filter moneyball exec vitest run` 589 files/4650 tests 전부 PASS. main 직접 commit+push(`771e9167`).
 
 다음 사이클 추천 = review-code(heavy) 계속 시 `apps/moneyball/src/lib/`(predictions/mlb) 잔여 재탐색 권장(picks/analysis 소진). domain/Supabase 상태 변화 시 fix-incident 즉시 전환. **plan #29 만료 2026-10-15(내일) — 사용자 응답 부재 시 자동 archive 처리 필요.**
+
+## 🟢 SUCCESS — review-code(heavy): app/api 5 route 전수 감사, hub-dispatch stale comment + leaderboard/sync 테스트 gap 수정 (cycle 3185, 2026-10-14)
+
+진단: open issue 0건. plan #29 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+fix-incident1+info-architecture-review1). ship-0 미충족. fix-incident gap 8·info-arch gap 6·lotto gap 15(cron 양쪽 신선 재확인) 전부 미근접. op-analysis gap 45+/25 — Supabase DNS 여전히 ENOTFOUND, 불변. cycle 3099 retro가 명시한 app/api 13개 route 중 미전수감사 잔여(health/hub-dispatch/leaderboard-sync/mlb/picks/pipeline/seo/sync-batter-stats/version) 중 소규모 5개(hub-dispatch 180줄+leaderboard/sync 77줄+sync-batter-stats 71줄+version 111줄+seo 155줄, 총 594줄) 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — 5개 route 전수 read, CRON_SECRET/API_KEY 가드 일관성, dead code(전역 caller grep), comment/logic mismatch, swallowed error 패턴, 테스트 커버리지 지시.
+
+**결과**: 2건 발견.
+- `hub-dispatch/route.ts`: non-prod 차단 가드 주석이 "401" 서술하지만 실제 응답은 403(HMAC mismatch 분기만 401 사용) — 주석만 정정, 동작 변화 없음.
+- `leaderboard/sync/route.ts`: 쌍둥이 `leaderboard/mlb-sync`는 cycle 2763부터 Origin/CSRF 테스트 보유하는데 본 route는 테스트 0건 — mlb-sync 테스트 10건 포팅(game_id 타입 차이 반영).
+- `sync-batter-stats`/`version`/`seo` 3개 route: drift 0건, CRON_SECRET 가드·Sentry 리포팅·swallowed error 전부 정상 확인.
+
+**regression**: `pnpm --filter moneyball exec vitest run`(신규 10 tests 포함) + `tsc --noEmit` + `pnpm lint` 전부 green. direct main push 완료(pre-push lint+type-check+version-sync-guard 전부 PASS, `869716fe`).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 app/api 잔여(health 651줄/mlb 459줄/picks 901줄/pipeline 223줄 — 큰 편이라 분할 권장) 또는 다양성 redirect로 lotto(gap 16) 선제 확인. op-analysis는 Supabase billing 미해결 지속 — 사용자 영역. plan #29 만료 2026-10-15(내일) — 다음 사이클 당일 도달 시 자동 archive 처리 확인 필요.
