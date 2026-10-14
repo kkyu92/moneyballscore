@@ -13564,3 +13564,17 @@ milestone 커밋: `feat(skill): cycle 3150 milestone — skill-evolution 84회 (
 **skill-evolution trigger 평가**: milestone(`3164 % 50 = 14`) 미충족. trigger5(직전20 inclusive, review-code 단독 평가 대상) — 다수 발화 중, 표본 충분·미충족. ship-0 emergency stop 미충족(직전10 전부 success/retro-only, fail 0건).
 
 다음 사이클 추천 = packages/kbo-data 패키지 전체(pipeline/engine/scrapers/agents/context/backtest/factors/features/analytics/notify/big-match/types/index) 완전 소진 — 다음 review-code(heavy) 신규 스코프는 `apps/moneyball/src/` 쪽(lib/ 또는 hooks/ 재확인, 또는 app 라우트 내부 비즈니스 로직) 재탐색 권장. 또는 fix-incident(gap=27/20, 실제 incident 부재 재확인됨)/op-analysis(Supabase 블락 지속, 5일차 임박)/lotto(gap=5/30)/info-arch(gap=17/30) 자연 대기. **Supabase fetch failed 4일+ 지속 — 사용자 billing 조치 필요. plan #29 만료 2026-10-15(2일 남음) — Tier4 사용자 결정 대기 계속.**
+
+## 🟢 SUCCESS — review-code(heavy): lib/picks + lib/analysis 전수 감사, reviews 허브 cohort mismatch 1건 수정 (cycle 3178, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/30(plan#29 spec_only_deferred 만료 2026-10-15 내일, Tier4 변화없음). 직전8 distinct=2(review-code(heavy)7+fix-incident1) → 2-chain lock 조건 충족이나 잠긴 chain 중 fix-incident 포함 → 안전 예외로 lock 무시. `gh run list` 확인 — CI Failure Dispatch 전부 skipped, 신규 incident 없음. domain/Supabase 상태 불변(Tier4, cycle 3177 3연속 재확인 후 반복 재검증 비actionable 판단, 이번 cycle 은 재검증 skip). cycle 3177 recommendation(apps/moneyball/src/lib/ accuracy/analysis/picks/predictions/mlb/reviews 잔여) 중 전수 감사 gap 최대(last full audit cycle 2900/2867, ~278+ cycle) picks(2파일)+analysis(4파일) 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — 6개 소스 파일 + 테스트 파일 전부 read, 전체 repo 호출부 cross-check 지시.
+
+**발견 + 수정**: 서브에이전트가 analysis/convergenceRecord.ts 감사 중 "plausible, low-confidence" 로 보고한 caller-side 관찰 — `/reviews` 허브(`app/reviews/page.tsx`)의 헤드라인 "총 검증/적중/적중률" 집계(`getVerifiedPredictions`)가 `CURRENT_MODEL_FILTER`(v1.8 단일값)를 쓰는 반면, 같은 페이지의 수렴픽 섹션들(`getRecentConvergencePickRecord` 등)은 `PRODUCTION_COHORT_RULES`(v1.8+v1.8-credit-fail)를 씀 — 직접 재검증 결과 `config/model.ts` 독스트링이 CURRENT_MODEL_FILTER 의도 사용처로 "/dashboard·/analysis" 만 명시(reviews 비언급) + reviews 전용 silent-drift guard test 4개(2573/2585/2588/2590) 전부 UI색상/radius 류이고 cohort 관련 가드 부재 확인 → cycle 3175(buildTeamFactorAverages.ts)·cycle 3176(buildAllTeamAccuracy) 와 동일 클래스(#1338 family) 의 신규(6번째) 재발로 판정, `.match(CURRENT_MODEL_FILTER)` → `.in('scoring_rule', PRODUCTION_COHORT_RULES)` 수정.
+
+**미변경(드리프트 아님 확인)**: `buildCommunityAccuracy.ts`(KBO/MLB 분리 의도적, is_correct NULL 설계 확인) / `buildPicksStats.ts`(tie-handling 회귀 테스트 존재, NEUTRAL_HI/LO 단일 source) / `computeMlbCompositeDuel.ts`/`computeCompositeDuel.ts`(factor 개수·threshold 모두 shared 상수와 일치) / `factor-explanations.ts`(DEFAULT_WEIGHTS v1.8 정합, PARK_FACTOR 이중 스케일 의도된 설계) / `lib/reviews/shared.ts`(`fetchPredictionRowsInRange`, 주/월 단위 날짜범위 쿼리라 전체-기간 수렴픽 집계와 스코프 자체가 달라 비교 대상 아님 — scope creep 회피).
+
+**regression**: `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm --filter moneyball exec vitest run` 589 files/4650 tests 전부 PASS. main 직접 commit+push(`771e9167`).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `apps/moneyball/src/lib/`(predictions/mlb) 잔여 재탐색 권장(picks/analysis 소진). domain/Supabase 상태 변화 시 fix-incident 즉시 전환. **plan #29 만료 2026-10-15(내일) — 사용자 응답 부재 시 자동 archive 처리 필요.**
