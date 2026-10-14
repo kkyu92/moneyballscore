@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib 9개 서브디렉토리 전수 감사, #1338 family 코호트 drift 1건 수정 (cycle 3208, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/25(변화 없음, plan #29 expiry 2026-10-15 임박). 2-chain lock 미충족(직전8(3200-3207) distinct=4, review-code 5/8 dominant but not locked). fix-incident gap=5/20·info-arch gap=29/30 미근접. op-analysis gap≥25 나 Supabase DNS NXDOMAIN + moneyballscore.com whois "No match"(HTTP 000) 재확인 — 양쪽 변화 없음, data-blocked 지속. cycle 3207 추천 scope(packages/kbo-data 소진 후 apps 비-api) 따라 `apps/moneyball/src/lib/{insights,picks,calendar,matchup,players,standings,leaderboard,accuracy,changelog}` 9개 서브디렉토리(72파일, ~8.5k줄) 선정.
+
+**전수 검증**: Agent 2개 병렬 full-read. insights/calendar/matchup/picks/standings/leaderboard/changelog 7개 디렉토리 = drift 0건(교차참조 주석 전부 grep 검증 일치, KBO/MLB twin 로직 의도적 분리 확인). `players/buildPitcherLeaderboard.ts`+`buildPitcherProfile.ts` 1건 confirmed — `CURRENT_MODEL_FILTER`(exact `scoring_rule='v1.8'`) 사용 중이라 legacy CE fallback cohort(`v1.8-credit-fail`) silent 배제 — `matchup/buildMatchupProfile.ts`/`teams/buildTeamProfile.ts`/`standings/buildTeamAccuracy.ts` 는 이미 동일 계열(#1338 family) 정정 완료했으나 players/ 만 누락, 회귀 테스트(`silent-drift.test.ts`)가 옛 동작을 lock-in 해 drift 미탐지 상태였음.
+
+**수정**: 두 파일 모두 `PRODUCTION_COHORT_RULES`(`['v1.8','v1.8-credit-fail']`) 기반 `.in("scoring_rule", ...)` 조회로 전환 + 회귀 테스트 2건을 새 쿼리 형태로 갱신. `pnpm exec tsc --noEmit` clean, `pnpm exec vitest run` 전체 590 files/4657 tests 통과. PR #3152 생성 → CI green → `--squash --auto --delete-branch` 머지 완료(commit 3a2a4807).
+
+**결론**: 투수 리더보드/프로필 페이지(`/players`, `/players/[id]`)의 avgFip 표본수·accuracyRate 가 CE fallback 소표본을 다시 포함하도록 정정 — team/matchup 페이지와 cohort 정합 회복. Supabase DNS NXDOMAIN + moneyballscore.com whois "No match"(HTTP 000) 양쪽 재확인 — 변화 없음, Tier4(사용자 registrar/Supabase billing 계정 직접 조치 필요) 지속. 다음 사이클 추천 = review-code(heavy) 잔여 scope(reviews/dashboard/mlb/debug/teams/predictions/seasons/lotto/supabase/api/seo/stats/v2-shadow-monitor/observability, mlb 디렉토리 35파일/5568줄로 큰 편이라 별도 scope 권장) 또는 fix-incident(gap=6/20) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): app/api 잔여 8개 route 전수 감사, drift 0건 — 디렉토리 전수감사 완료 (cycle 3206, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/25(변화 없음, plan #29 expiry 2026-10-15 임박 내일 — Tier4 불변, 자동 archive 대상 아님 status=spec_only_deferred). 2-chain lock 미충족(직전8(3198-3205) distinct=5: review-code 3/lotto 2/skill-evolution 1/polish-ui 1/fix-incident 1). fix-incident gap=3/20·info-arch gap=27/30 전부 미근접. op-analysis Supabase DNS NXDOMAIN 재확인(`dig utmimgpccbrciwuuacyw.supabase.co` NXDOMAIN, 여전히 미해석) — data-blocked 지속, gap=25+ 나 heavy 실행 불가. cycle 3204 retro 가 "app/api 전수 감사 거의 완료, 다양성 redirect 고려 시점" 언급 — 잔여 미감사 디렉토리(hub-dispatch/version/leaderboard/live/revalidate/snapshot-pitchers/sync-batter-stats) 식별 후 review-code(heavy) 계속 선택(자연 scope 마무리 우선, redirect 는 완료 후).
