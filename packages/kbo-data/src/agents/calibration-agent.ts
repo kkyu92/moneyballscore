@@ -42,6 +42,9 @@ interface PredictionHistory {
     homeTeam: TeamCode;
     awayTeam: TeamCode;
     predictedWinner: TeamCode;
+    // computed-but-unconsumed: prediction-history.ts 가 채우지만 buildStatsBlock
+    // 은 isCorrect(O/X 마크)만 렌더링하고 이 필드는 읽지 않음 (review-code heavy
+    // cycle 3195 확인). 상세 근거 = prediction-history.ts actualWinner 주석.
     actualWinner: TeamCode | null;
     isCorrect: boolean | null;
     homeWinProb: number;

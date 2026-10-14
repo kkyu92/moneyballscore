@@ -87,6 +87,14 @@ export function computePredictionHistory(
           homeTeam: homeCode,
           awayTeam: awayCode,
           predictedWinner: predictedCode,
+          // actualWinner — isCorrect 로부터 역산한 실제 승팀 코드. 현재 유일한
+          // 소비처인 calibration-agent.ts buildStatsBlock 은 isCorrect(O/X 마크)
+          // 만 렌더링하고 이 필드는 읽지 않음 (computed-but-unconsumed, review-code
+          // heavy cycle 3195 확인, fangraphs.ts bbPct/kPct 동일 패턴). 삭제하지
+          // 않는 이유: 타입 계약(calibration-agent.ts PredictionHistory interface)
+          // + 전용 테스트(prediction-history.test.ts cycle 2823)로 공개 계약이
+          // 이미 고정돼 있고, LLM 프롬프트에 "예측 vs 실제 승팀"을 명시적으로
+          // 노출하는 향후 개선(buildStatsBlock 라인 추가) 1줄로 바로 소비 가능.
           actualWinner: actualCode,
           isCorrect: r.is_correct,
           homeWinProb: r.home_win_prob ?? 0.5,
