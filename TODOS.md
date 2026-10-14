@@ -13717,3 +13717,15 @@ milestone 커밋: `feat(skill): cycle 3150 milestone — skill-evolution 84회 (
 **regression**: `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean, `vitest run src/__tests__/backtest`(8파일/68테스트) + 패키지 전체(`vitest run`, 96파일/1216테스트) 전부 PASS, eslint clean. main 직접 push 완료(`223af796`, pre-push lint+type-check+version-sync-guard 전부 통과).
 
 다음 사이클 추천 = review-code(heavy) 계속 시 lib/leaderboard·lib/standings(마지막 전수감사 cycle 2863/2866, 약 320+ cycle 전) 재탐색 권장. lotto gap 21/30(cron 정상 지속 확인 중) 또는 info-arch gap 11/30 자연 대기. domain/Supabase 상태 불변(Tier4) — 변화 있을 때만 재보고.
+
+## 🟢 SUCCESS — fix-incident: 허브 incident-followup reminder 6건 적체 조사+정리 (cycle 3190, 2026-10-14)
+
+진단: open issue 확인 시 `hub-dispatch` 라벨 0건이었으나, 라벨 없이 전체 조회하니 `lesson-pending` 라벨 reminder 6건이 최대 39일(9/2~10/6 발생) 체류 중인 걸 발견 — 기존 진단 루틴이 `--label hub-dispatch` 만 걸러 이 채널을 놓치고 있었음(진단 source 커버리지 갭). lotto gap=30/30 trigger(cron 양쪽 신선 확인: picks `2026-10-17.md`/results `2026-10-10.md`)·explore-idea saturation 직전15 15/15 충족도 동시 발견됐으나, 실제 미해결 incident 백로그가 더 높은 우선순위로 판단해 fix-incident 선택. 2-chain lock 미충족(직전8 distinct=3). ship-0 미충족(직전10 success 10/10). trigger5(skill-evolution) 미충족(직전20 review-code 15회).
+
+**조사 방법**: 6개 reminder(#3081/3082/3095/3120/3123/3145)의 hub incident(playbook #4006/4009/4242/4288/4300/4306) 원본 body에서 fingerprint별 commit/run URL/dpl_id 추출 → `gh run view --log-failed`(CI 2건) + `vercel inspect <dpl_id> --logs`(Vercel 3건) + PR 상태 조회(dependabot 1건)로 근본원인 재구성.
+
+**결과**: 6건 전부 코드측 조치 불필요로 결론 — (1) dependabot @types/node bump PR #1942 type-check 실패로 unmerged close, 영향 0 (2) `actions/setup-node` 러너 인프라 플레이크 (3) version-sync-guard CHANGELOG/package.json 커밋 순서 race, 다음 커밋서 자가 해소(현재 0.5.62.339 일치 재확인) (4)(5)(6) Vercel 배포 3건은 `State: failure`(진짜 실패, Canceled 아님)이나 `vercel inspect` 재조회 시 로그 보존기간 만료로 "Can't find the deployment" — 사후 근본원인 복구 구조적으로 불가능, 전부 코드 변경 없는 cron/retro 커밋에서 1회성 발생 + 재발 없음(`vercel ls` 현재 전체 Ready) 확인. `lesson:` commit(dcb22ab1)으로 교훈 박제("reminder는 3일 룰 전에 조사해야 Vercel 로그 소실을 피할 수 있다") 후 6건 전부 `gh issue close` (근거 코멘트 포함).
+
+**regression**: 코드 변경 없음(조사+이슈 정리만).
+
+다음 사이클 추천 = 진단 루틴에 `lesson-pending` 라벨도 주기적 확인 추가 고려(이번처럼 label 필터가 좁으면 백로그 누적 가능). lotto gap=30/30 trigger 충족 상태 유지 — 다음 사이클 lite 확인 권장. explore-idea saturation 15/15 도달했으나 4-source(open issue/approved plan/TODOS Next-Up/DESIGN.md) 재확인 필요.
