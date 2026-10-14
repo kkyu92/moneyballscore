@@ -1,5 +1,13 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): mlb pipeline route.ts+mlb-pipeline.ts(886줄)+db-constraints+silent-drift-alert 전수 교차검증, drift 0건 (cycle 3202, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/23(변화 없음, plan #29 expiry 2026-10-15 임박 Tier4 불변). 2-chain lock 미충족(직전8(3194-3201) distinct=4). fix-incident gap=12/20·info-arch gap=23/30·lotto gap=4(쿨다운) 전부 미근접. op-analysis gap=88/25 압도적이나 Supabase DNS NXDOMAIN 재확인(`dig`/`curl` 양쪽 미해석) — 여전히 actionable 아님. cycle 3200 retro 가 명시 추천한 scope(`apps/moneyball/src/app/api/mlb/pipeline/route.ts` + `packages/kbo-data/src/pipeline/mlb-pipeline.ts`) 자연 승계.
+
+**전수 검증**: route.ts(94줄, cycle 3200 ISR revalidate fix 이미 반영 확인) — VALID_MODES 7개가 mlb-pipeline.ts `MlbPipelineMode` union/`MLB_MODES` Set 7개와 완전 일치. mlb-pipeline.ts(886줄, 7 mode 핸들러 전수 read) — 수십 cycle 누적 silent-drift 가드 주석(cycle 2057~3139)이 이미 대부분 알려진 blind spot 문서화 상태. `db-constraints.ts` onConflict 문자열(mlbGames/mlbTeamStats/mlbTeamElo/mlbTeamEloHistory) 4건을 migrations 038/044/046/047 UNIQUE 제약과 직접 대조 — 전부 1:1 일치. `pipeline_runs.mode` VARCHAR(30)(migration 053)이 최장 모드 `mlb_walk_forward_measure`(24자) 수용 확인, `triggered_by` VARCHAR(20) clamp 도 route.ts 와 일치. `silent-drift-alert.ts`의 `SilentDriftPipelineMode` union + `MLB_SCRAPE_MODES` Set 이 7개 MLB mode 전부(predict_final 은 별도 분기) 커버 확인.
+
+**결론**: 코드 변경 없음(drift 0건, cycle 3196/3197/3200 과 동일 "확인 완료" 유형) — 이 영역은 cycle 2057~3139 사이 이미 다수 라운드 감사·fix 완료돼 밀도 높은 주석을 보유한 파일이라 신규 미발견 drift 가 희소함을 재확인. Supabase DNS NXDOMAIN(`utmimgpccbrciwuuacyw.supabase.co` 미해석) + `moneyballscore.com` whois "No match"(whois.verisign-grs.com 직접 조회) 양쪽 재확인 — 2026-10-11/2026-10-13 두 인시던트 모두 변화 없음, 프로덕션 사이트 전체 접근 불가 지속, 사용자 registrar/billing 직접 조치 필요(Tier4, 자율 해결 불가). 다음 사이클 추천 = fix-incident(gap=13/20)/info-arch(gap=24/30) 자연 대기 또는 review-code(heavy) 자매 라우트 재확인(신규 미감사 scope 희소, 다양성 redirect 고려 시점).
+
 ## 🟢 SUCCESS — skill-evolution (forced, trigger3 milestone): phase 51 — SKILL.md/MIGRATION-PATH.md 갱신 (cycle 3201, 85th 자가 진화, 2026-10-14)
 
 진단: cycle 3200 이 milestone(cycle_n%50==0) trigger3 충족 → `skill-evolution-pending` 마커 박제 → cycle 3201 이 forced skill-evolution 로 정상 소비(사례 19 mitigation 29th consecutive OK, pending 마커 발견 → 자율 선택 아닌 강제 chain).
