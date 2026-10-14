@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): lib/teams + hooks 8개 파일 전수 감사, buildTeamFactorAverages.ts CURRENT_MODEL_FILTER 누락 1건 수정 (cycle 3175, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/24(plan #29 spec_only_deferred, 만료 2026-10-15 내일 — cycle 3137 세션 중 사용자 직접 3択 질문 완료, 응답 대기 Tier4 변화 없음). 2-chain lock 미충족(직전8 distinct=3: fix-incident2/lotto(lite)1/review-code(heavy)5). ship-0 미충족(직전10: success8+partial2). **domain 재확인**: whois 여전히 "No match", `vercel domains ls` 0 domains — 변화 없음(Tier4). **Supabase 재확인**: health-alert.yml 최신 3-run 전부 overall=failure(2026-10-13 23:19/19:21/11:55) — 지속, 코드 fix 불가. explore-idea saturation 10/15(미충족, 12 임계), info-arch gap 27/30(미근접), lotto gap 6/30(미근접), fix-incident gap 7/20(미근접) — review-code(heavy) 자연 선택. cycle 3174 recommendation(apps/moneyball/src/ lib/hooks 재탐색) 채택, lib/teams(6파일, buildTeamProfile.ts 602줄 단일 모놀리스 포함, last full audit cycle 2952 — 223-cycle gap) + hooks/(2파일) 스코프 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — 8파일 전체 read + 테스트 cross-check + 전체 repo grep(caller 검증) 지시.
+
+**발견 + 수정**: `buildTeamFactorAverages.ts:109` — `/matchup/[teamA]/[teamB]` 페이지의 팩터 비교 섹션이 전체 히스토리(날짜/건수 제한 없음) 스캔 시 `CURRENT_MODEL_FILTER`(CURRENT_SCORING_RULE 단일값) 사용 중이었음. 같은 페이지 다른 섹션(`buildMatchupProfile.ts`)은 cycle 2409 에 이미 "사용자 가시 매치업 기록이라 legacy credit-fail production row 도 포함해야 함" 사유로 `PRODUCTION_COHORT_RULES`로 정정됐는데, `buildTeamFactorAverages.ts`는 그 정정 3일 *전*에 필터가 추가돼(`1b2217e7`, 8/20) 동기화 누락 — 같은 페이지 두 섹션의 표본(legacy `v1.8-credit-fail` ~25건 포함 여부)이 조용히 어긋나 있었음. `#1338` family 4번째 재발(buildTeamProfile/buildMatchupProfile/lib/insights/series.ts 에 이미 3회 적용된 동일 패턴). `.match(CURRENT_MODEL_FILTER)` → `.in("scoring_rule", PRODUCTION_COHORT_RULES)` 교체, 연관 테스트 2개(buildTeamFactorAverages.test.ts 쿼리체인 mock + silent-drift-cycle-2290.test.ts stale-pattern guard → corrected-pattern guard) 동기화.
+
+**미변경(드리프트 아님 확인)**: buildTeamEloTrend/buildTeamRecentForm/buildTeamStrengthSnapshot(CURRENT_MODEL_FILTER 의도된 좁은 필터, config/model.ts 문서화된 설계)/buildTeamUpcoming(scheduled 미래 경기만 조회라 legacy row 매칭 불가 — 필터 차이는 cosmetic)/buildTeamProfile.ts(602줄, cycle 2288/2399/2409/2952 이미 반복 감사 확인)/use-kbo-scores.ts/use-user-picks.ts — 전부 comment=logic=caller 일치.
+
+**regression**: `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm --filter moneyball exec vitest run src/lib/teams/` 6 files/28 tests PASS, eslint clean. main 직접 commit+push(`a9bd2a13`).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `apps/moneyball/src/lib/`(accuracy/analysis/picks/players/standings/predictions/mlb/reviews 등) 잔여 디렉토리 중 gap 큰 쪽 재탐색 권장(teams/hooks 소진). domain/Supabase 상태 변화 시 fix-incident 즉시 전환. **plan #29 만료 2026-10-15(내일) — 사용자 응답 부재 시 자동 archive 처리 필요.**
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/agents/ 14개 파일 전수 감사, validator.ts regex stale version literal 1건 수정 (cycle 3174, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/24(plan #29 spec_only_deferred 만료 2026-10-15 — 내일, Tier4 대기 변화 없음). 2-chain lock 미충족(직전8 distinct=4: polish-ui1/fix-incident2/lotto1/review-code(heavy)4). ship-0 미충족(직전10: success8+partial2). **domain 재확인**: `whois -h whois.verisign-grs.com moneyballscore.com` 여전히 "No match", `vercel domains ls` 0 domains — cycle 3167 최초 발견 이후 변화 없음(Tier4 사용자 registrar 영역). **Supabase 재확인**: health-alert.yml 최신 run(2026-10-13T23:19) overall=fail, `health.leagues`/`pipeline_runs` "fetch failed" 지속 — 4일+, 코드 fix 불가. op-analysis gap=74+(3100-3173 미발화)지만 동일 블락으로 actionable 아님. cycle 3173 recommendation(packages/kbo-data/src/agents/, 71-cycle gap, validator.ts 51KB) 그대로 채택.
