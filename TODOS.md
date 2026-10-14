@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (retro-only) — review-code(heavy): lib/matchup+lib/dashboard 11개 파일 전수 감사, drift 0건 (cycle 3184, 2026-10-14)
+
+진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). plan #30 completed. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+fix-incident1+info-architecture-review1). ship-0 미충족(직전10 success 다수). fix-incident gap 7·info-arch gap 5·lotto gap 15 전부 미근접(lotto cron 양쪽 신선 재확인 — `2026-10-17.md` picks + `2026-10-10.md` results). op-analysis gap 44+/25 — Supabase DNS(`utmimgpccbrciwuuacyw.supabase.co`) 여전히 ENOTFOUND, 불변. DESIGN.md mtime 3.5일(≥4주 미충족) — design-system 미근접. cycle 3183 recommendation(lib/matchup·stats·calendar·changelog·dashboard·debug·seasons·supabase 잔여) 중 CHANGELOG "전수 감사" grep 0건으로 확인된 lib/matchup(5파일)+lib/dashboard(6파일) 선정 — 둘 다 build*/compare* 함수 다수 보유해 최근 cohort mismatch 버그 클래스 재발 여부 확인 목적.
+
+**감사 방법**: Agent(general-purpose) 1개 — 11개 소스 파일 + 대응 테스트 전수 read, 소비 페이지(`app/matchup/[teamA]/[teamB]`, `app/dashboard`, `app/debug/model-comparison`) 교차 추적, cohort constant(PRODUCTION_COHORT_RULES/CURRENT_MODEL_FILTER/무필터) 각각 목적 일치 검증 + dead code(전역 caller grep) + stale 버전 리터럴 + comment/logic mismatch 지시.
+
+**결과**: 11개 전부 클린. DB 쿼리 보유 파일(`buildMatchupUpcoming.ts`→CURRENT_SCORING_RULE, `buildMatchupProfile.ts`→PRODUCTION_COHORT_RULES, `buildModelTuningInsights.ts`→CURRENT_MODEL_FILTER, `/debug/model-comparison` 쿼리→무필터)의 cohort 선택 전부 소비 페이지 목적과 일치(코드 내 cycle 2288/2289/2408/2409 cross-reference 주석으로 이미 과거 리뷰 거쳐 확정된 상태 확인). dead code 0건, stale 버전 리터럴 0건, comment/logic mismatch 0건. 저위험 비긴급 1건 — `buildMatchupProfile.ts:528-529`의 `predictedToWin` 분모가 아직 결과 미확정인 `scheduled` 경기도 포함(의도된 설계, 테스트에 명시적 주석 존재) → UI 라벨("적중 X/Y")이 이 사실을 안 드러내는 점만 노트, fix 임계 미달.
+
+**regression**: 코드 변경 없음(read-only audit, 클린 결과로 종료).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 app/api(pipeline/picks/health/leaderboard/version/live/kbo-scores/mlb/sync-batter-stats/hub-dispatch) 또는 lib/stats·calendar·changelog·debug·seasons·supabase·weather.ts 잔여 재탐색. 또는 다양성 redirect로 lotto(gap 15, 미근접 chain 중 최대) 선제 확인 고려. op-analysis는 Supabase billing 미해결 지속 — 사용자 영역. **plan #29 만료 2026-10-15(내일) — 다음 사이클 당일 도달 시 사용자 응답 부재 확인 후 자동 archive 처리 필요.**
+
 ## 🟢 SUCCESS — review-code(heavy): lib/seo+api/seo+v2-shadow-monitor+observability 9개 파일 전수 감사, dead code 1건 수정 (cycle 3183, 2026-10-14)
 
 진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). plan #30 completed. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+fix-incident1+info-architecture-review1). ship-0 미충족(직전10: success9+partial1). op-analysis gap 33+/25(Supabase DNS 장애 지속, 불변). fix-incident gap 6·info-arch gap 4·lotto gap 14 전부 미근접(lotto cron 양쪽 신선 확인). cycle 3182 recommendation(lib/charts/lib/seo/app/api 잔여 재탐색) 채택, 소규모 디렉토리 묶음(lib/seo+app/api/seo+v2-shadow-monitor+observability, 총 9파일) 선정.
