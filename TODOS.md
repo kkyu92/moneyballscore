@@ -1,5 +1,25 @@
 
 
+## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): components/{leaderboard,live,matchup} 16개 파일 전수 감사, drift 0건 (cycle 3173, 2026-10-14)
+
+진단: open issue 0건(`gh issue list --label hub-dispatch` 0). approved plan 0/24(plan #29 spec_only_deferred 만료 2026-10-15 — 내일, Tier4 대기 변화 없음; plan #30 completed). 2차 방어선(cycle 3172 retro `16c66686`) OK. 직전8(3165-3172) distinct=4(review-code(heavy)4/fix-incident2/polish-ui1/lotto1) — 2-chain lock 미충족. gap trigger: fix-incident 5/20(last 3168)·lotto 4/30(last 3169)·info-arch 25/30(last 3148) 전부 미근접. op-analysis gap=59/25 크게 초과하나 Supabase REST 직접 curl 재확인 — `utmimgpccbrciwuuacyw.supabase.co` DNS resolve 자체 실패(`Could not resolve host`) 지속, DB 쿼리 기반 측정 전부 차단 skip(기존 billing outage 패턴 재확인). review-code(heavy) 자연 선택.
+
+**부가 확인(액션 불요)**: `vercel domains ls` 재확인 — 여전히 0 domains(도메인 바인딩 소실 지속, cycle 3167 최초 발견 이후 변화 없음). `vercel ls --prod` 는 배포 자체는 queued→building→ready 정상 순환 확인(배포 파이프라인 자체는 정상, 도메인 바인딩만 끊긴 상태 — 신규 인시던트 아님).
+
+**스코프 선정**: cycle 3172 recommendation(components/ 잔여 저-mention: `leaderboard`/`live`/`matchup`) 그대로 채택. 3개 디렉토리 16개 파일(leaderboard 5 + live 2[테스트 포함] + matchup 11), 합계 ~2250줄.
+
+**감사 내용**: 본 메인 직접 전수 read(서브에이전트 미경유), 16개 파일 전부. 주요 교차검증: (1) `LeaderboardSortControl.tsx`의 CSS order 트릭(STREAK_ORDER_CSS/SAMPLE_ORDER_CSS, `length: USER_LEADERBOARD_DISPLAY_LIMIT`=50)이 cycle 3010이 발견한 "MLB 30팀 vs 20/12-rank 고정 CSS 상한 버그" 패턴과 형태가 유사해 교차검증 — `lib/leaderboard/server.ts`가 기본 `limit = USER_LEADERBOARD_DISPLAY_LIMIT`로 서버 사이드에서 이미 50명 cap 적용 확인(silent-drift-wave-289 테스트로 이미 가드됨) — entries 길이가 CSS 배열 길이를 초과할 수 없어 drift 아님. (2) `matchup/` KBO/MLB 7쌍(ConvergencePickRecord/EloChart/FactorCompare/RecentForm/SeasonHeadToHead) 전부 1:1 대조 — `MlbMatchupEloChart`는 KBO 컴포넌트에 위임(중복 제거 유지, cycle 2582 패턴), 나머지는 locale(ko/en) STRINGS 객체 패턴 일관 — 라벨·threshold·링크 전부 정합. (3) `live/LiveScoreboard.tsx` vs 인접 테스트(`silent-drift-cycle-2621.test.ts`) 홈 배지 `font-bold` 일치 재확인.
+
+**발견**: drift 0건. 코드 변경 없음(retro-only).
+
+**regression**: `pnpm vitest run apps/moneyball/src/components/{leaderboard,live,matchup}` 1 file/1 test PASS, `pnpm type-check`(turbo 4 packages) 전부 cache hit PASS.
+
+**skill-evolution trigger 평가**: milestone(`3173 % 50 = 23`) 미충족. trigger5(직전20 inclusive, 3154-3173) — review-code(heavy) 다수 지속, 미충족. ship-0 emergency stop 미충족(직전10 success 다수, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `packages/kbo-data/src/agents/`(last audit cycle 3102, 71 cycle 경과 — 14개 파일 4391줄, validator.ts 51KB 단일 파일 분리 감사 필요, 반복 carry-over된 스코프) 신규 채택 권장. fix-incident/op-analysis 는 Vercel 도메인(0 domains 지속)+Supabase billing(DNS resolve 실패 지속) 사용자 영역 미해결 지속 시 여전히 actionable 부재. **plan #29 만료 2026-10-15(내일) — 다음 사이클 만료 확인 시 archive 처리 필요.**
+
+---
+
 ## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): components/{standings,seasons,players,teams} 10개 파일 전수 감사, drift 0건 (cycle 3172, 2026-10-14)
 
 진단: 직전8(3164-3171) distinct=4(review-code(heavy)4/fix-incident2/polish-ui1/lotto1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24(plan #29 만료 2026-10-15 내일, Tier4 대기 변화없음). 2차 방어선(cycle 3171 retro `ec8674fd`) OK. fix-incident gap=4/20·lotto gap=3/30·info-arch gap=24/30 전부 미근접. op-analysis gap=58/25 크게 초과하나 Supabase REST 재확인 동일 http_status=000 지속 — DB 쿼리 기반 측정 전부 차단 skip. explore-idea 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 신선) skip. review-code(heavy) 자연 선택.
