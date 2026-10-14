@@ -69,7 +69,7 @@ export async function POST(
     request.nextUrl.searchParams.get('dry_run') === '1' ||
     request.nextUrl.searchParams.get('dry_run') === 'true';
 
-  // prod 외 환경에선 401 — 개발/preview 에서 실수로 허브에 노이즈 보내는 것 차단
+  // prod 외 환경에선 403 — 개발/preview 에서 실수로 허브에 노이즈 보내는 것 차단
   const envGuard = process.env.VERCEL_ENV;
   if (envGuard && envGuard !== 'production' && !dryRun) {
     return Response.json(
