@@ -1,5 +1,4 @@
 import {
-  KBO_TEAMS,
   shortTeamName,
   classifyWinnerProb,
   pickTierEmoji,
