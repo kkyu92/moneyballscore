@@ -14028,3 +14028,15 @@ Group B(factors/features/notify/scrapers, 5245줄) — vitest 96 files/1216 test
 **수정**: `umpire.ts` 주석 정정 — "daily pipeline 호출자" 암시 제거 + 현재 production 호출자 0건 + dead chain 상태 명시 (umpire-sz.ts 주석과 정합). 테스트 영향 범위(`scrapers/__tests__` + `factors/__tests__` 11 files/89 tests) 재실행 통과. direct main commit(`47af92b6`) + push 완료(comment-only fix, R4 커버, PR 불필요).
 
 **결론**: Supabase DNS NXDOMAIN + moneyballscore.com whois "No match" 양쪽 재확인 — 변화 없음, Tier4 불변. `packages/kbo-data/src` 8개 디렉토리 신규 영역 전수감사 완료(이번 사이클). 다음 사이클 추천 = fix-incident(gap=5/20) 또는 info-arch(gap=29/30, 임계 근접) 자연 대기, 또는 review-code(heavy) 잔여 scope(`packages/kbo-data/src/{agents,pipeline}` + `apps/moneyball/src/app` 비-api 영역 — layout/page 류) 고려.
+
+## cycle 3215 — op-analysis(lite) blocked, critical incident escalation FAIL (2026-10-14)
+
+op-analysis(lite) 선택(25-cycle gap trigger, 마지막 발화 cycle 2924) → `scripts/op-analysis-ce-cohort.ts` 실행 즉시 Supabase DNS NXDOMAIN 차단.
+
+재확인 결과 기존 추적 중인 두 critical incident 모두 3일+ 미해결:
+- **moneyballscore.com**: registry whois `No match for domain` — 도메인 미등록 상태 (2026-10-13 최초 발견). 스쿼팅 위험, 사용자 registrar 긴급 조치 필요.
+- **Supabase DB**: DNS NXDOMAIN 지속 (org billing restriction, 2026-10-11 최초 발견). 전체 DB 기능 down.
+
+Vercel 배포 자체는 정상(`*.vercel.app` 빌드/서빙 OK). 둘 다 코드로 자율 해결 불가 — 사용자 직접 조치(registrar 재등록, Supabase billing dashboard) 필요.
+
+**결정**: 46-cycle 요청 중 1 cycle 만 진행 후 signal next_n=0 으로 zero-touch 자동 진행 중단 — CLAUDE.md "드리프트 발견 시 플래닝 전 사용자에게 먼저 보고" 원칙 적용. 사용자가 두 incident 해결 후 재개 권장.
