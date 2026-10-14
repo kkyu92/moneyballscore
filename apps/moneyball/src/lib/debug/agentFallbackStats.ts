@@ -5,7 +5,7 @@
 //   quantOnly ("에이전트 토론 불가" fallback)
 // agentError 카테고리:
 //   hallucinated_number / invented_player_name / banned_phrase /
-//   server_error_529 / other_api_error / other
+//   unclassified_claim / server_error_529 / other_api_error / other
 
 export interface PredictionForFallback {
   id: number;
