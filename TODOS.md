@@ -1,5 +1,27 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/app 비-api 신규 scope(11개 route dir) 전수 감사, 콘텐츠 드리프트 4건 수정 (cycle 3213, 2026-10-14)
+
+진단: open issue 0건. approved plan 변화 없음(29/30 deferred/completed, plan #29 만료 2026-10-15 임박). 2-chain lock 미충족(직전8(3205-3212) distinct=3: review-code6/lotto1/info-arch1). fix-incident gap=10/20·lotto gap=8/30 전부 미근접. op-analysis Supabase DNS NXDOMAIN 재확인 불변, domain whois "No match" 재확인 불변 — 둘 다 Tier4 불변. `gh run list` 재확인 — CI Failure Dispatch 전부 skipped, 신규 인시던트 없음. cycle 3212 추천(review-code(heavy) 신규 scope: `apps/moneyball/src/app` 비-api 라우트) 따라 자연 선택 — CHANGELOG grep 전수 대조로 0회 언급 route dir 12개(about/calendar/community/feed/glossary/guide/leaderboard/login/privacy/settings/terms/v2-shadow-monitor) 확정, kbo-data(cycle 3207/3212)+lib(cycle 3180/3208/3209/3211)+app/api(cycle 3204/3206) 3대 영역 완결 이후 신규 축.
+
+**전수 검증**: Agent 2개 병렬 — about/glossary/guide/community(4dir, 1685줄) + calendar/feed/leaderboard/privacy/terms/login/settings/v2-shadow-monitor(8dir, 2134줄), 총 31 비-테스트 파일 전수 read + cross-reference(KBO_TEAMS, model-version-labels, layout.tsx 실제 스크립트, CookieConsent.tsx 등).
+
+**발견 + 수정 (4건, 전부 콘텐츠/텍스트 드리프트 — 로직 버그 아님)**:
+1. `about/page.tsx` 파크팩터 FAQ — 광주 KIA 챔피언스 필드(중립)/사직 LT(약 타자 친화) 서술이 `KBO_TEAMS` 실제 parkNote 와 뒤바뀜. 정정.
+2. `about/page.tsx` 50:50 FAQ — `WINNER_PROB_CLAMP_MIN/MAX` 원시 소수(0.15~0.85)를 그대로 텍스트 노출, 나머지 페이지 퍼센트 표기 관례와 불일치. `Math.round(x*100)}%` 변환.
+3. `about/page.tsx` FAQ TOC 앵커 — `scroll-mt-20` 이 `<section>` 에만 있고 점프 타깃인 `<h2 id="faq-title">` 엔 없어 다른 섹션과 달리 헤더에 가려짐. h2 에도 추가.
+4. `glossary/opengraph-image.tsx` OG 태그 목록 — `"ERA+"` 가 `glossary/data.ts` 에 존재한 적 없는 용어(cycle 783 도입 이후 지속). `"ERA"` 로 정정.
+
+**추가 발견 (분리 커밋, `privacy/page.tsx`)**: 개인정보처리방침 쿠키/제3자 섹션이 Google Analytics(실제 `layout.tsx` 전역 로드 + `CookieConsent.tsx` 고지 대상)를 누락 — Vercel Analytics/AdSense 만 명시. Google Analytics 쿠키(`_ga`/`_gid`) + Google LLC 항목 추가.
+
+**미변경(드리프트 아님 확인)**: 나머지 27파일 전부 clean — calendar ISR 상수/leaderboard KST 초기화 로직/v2-shadow-monitor era 라벨(v1.8/v2.0-shadow/v2.1-B-shadow, CLAUDE.md v2.1-B rejected 결론과 정합)/login·settings stub 의도적 placeholder/terms 정적 법률 텍스트 전부 실제 코드·상수와 일치 확인.
+
+**regression**: `pnpm --filter moneyball exec tsc --noEmit` clean, `eslint` scoped clean, 영향 디렉토리 vitest(calendar/feed/leaderboard/v2-shadow-monitor/glossary/guide) 전부 PASS. direct main commit(`1fee35a0` about/glossary/privacy 통합 — 단일 commit, 메시지 내 "privacy 별도 커밋" 서술은 작성 중 계획 변경으로 stale, 실제론 3파일 단일 commit) + push 완료, PR 불필요(콘텐츠 드리프트 수정, 100+ 파일 아님).
+
+**결론**: `apps/moneyball/src/app` 비-api 디렉토리 중 CHANGELOG mention 0회였던 12개 전부 신규 전수 감사 완료(11개 dir + privacy). 남은 미감사 app/ 서브트리 = 없음(기존 analysis/accuracy/dashboard/insights/matchup/methodology/mlb/picks/players/predictions/reviews/search/seasons/standings/teams/en 전부 과거 CHANGELOG mention 1건 이상 보유).
+
+다음 사이클 추천 = fix-incident(gap=11/20) 또는 lotto(gap=9/30) 자연 대기, 또는 review-code(heavy) 신규 축 탐색(components/ 서브디렉토리 재확인 — 과거 "전수 완료" 결론을 이번처럼 CHANGELOG grep 재검증해볼 가치, 또는 app/api 기존 8개 route 중 전수 감사 미실시분 재확인). Supabase DNS·domain whois 양쪽 Tier4 불변 — 사용자 조치 전까지 op-analysis data-blocked 지속. plan #29 만료 2026-10-15(1일 남음) — Tier4 대기 계속.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/{agents,pipeline} 전수 감사, kbo-data 전체 스윕 완료 (cycle 3212, 2026-10-14)
 
 진단: open issue 0건. approved plan 변화 없음. 2-chain lock 미충족(직전8(3204-3211) distinct=3: review-code6/lotto1/info-arch1). fix-incident gap=9/20·lotto gap=7/30(lotto(lite) 3205 발화)·op-analysis gap=25+(미발화) 전부 미근접 또는 data-blocked. Supabase DNS NXDOMAIN 재확인 불변, domain whois "No match" 불변 — 둘 다 Tier4 사용자 조치 대기 지속. heartbeat-stale GH Actions 1건 실패 확인했으나 원인 = 동일 Supabase 다운(기존 추적 인시던트의 증상, 신규 아님) → fix-incident 트리거 아님. cycle 3211 추천(review-code(heavy) 신규 scope: packages/kbo-data/src/{agents,pipeline}) 따라 자연 선택 — cycle 3207 이 8개 디렉토리(analytics/backtest/context/engine/factors/features/notify/scrapers) 감사하며 agents(15파일)/pipeline(29파일) 2곳만 scope 밖으로 남겨둔 상태였음.
