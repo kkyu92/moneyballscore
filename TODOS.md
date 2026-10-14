@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (retro-only) — review-code(heavy): lib/mlb 18개 파일 전수 감사, drift 0건 (cycle 3180, 2026-10-14)
+
+진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, Tier4 불변). 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)5+fix-incident1+info-architecture-review1+lotto1). ship-0 미충족(직전10: success9+partial1). **op-analysis gap 60+/25(최장 미발화) 재확인 — Supabase DNS 장애 지속(`utmimgpccbrciwuuacyw.supabase.co` ENOTFOUND, `pnpm tsx scripts/op-analysis-ce-cohort.ts` 실행 재시도로 직접 확인), DB 접근 자체 불가로 actionable 아님(cycle 3176 결론 재확인)**. lotto cron 정상(picks/results 양쪽 신선), fix-incident gap 3·info-arch gap 1 미근접 — cycle 3179 recommendation(lib/predictions 또는 lib/mlb 재탐색) 채택, 최근 KBO lib/teams+players+standings 연속 5회 cohort mismatch 수정 패턴의 MLB 병렬 구조 노출 가설 검증 목적으로 lib/mlb(18파일) 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — 18개 소스 파일 + 18개 테스트 파일 전수 read, KBO 동일 버그 클래스·git log 비교·caller grep 교차검증 지시.
+
+**결과**: scoring_rule 쿼리하는 14개 파일 전부 `MLB_PRODUCTION_COHORT_RULES` 일관 사용 확인 — KBO 쪽에서 5연속 발견된 cohort mismatch(CURRENT_MODEL_FILTER 혼용) 버그 클래스가 MLB 쪽엔 애초에 존재하지 않음. stale 버전 리터럴 0건(`packages/kbo-data` validator.ts fix는 MLB 쪽 대응 파일 자체가 없음), dead code 0건(`fetchMlbHistoricalAnalogs` 최초 unused로 보였으나 `MlbHistoricalAnalogMatchup.tsx` 소비 확인), comment/logic mismatch 0건. 저위험 비긴급 발견 3건 — (1)(2) `buildMlbMatchupUpcoming.test.ts`/`buildMlbTeamUpcoming.test.ts` 가 cycle 2950 `captureFallback` 분기 테스트 누락 (3) `buildMlbTeamEloTrend.ts` 쿼리에 `.limit()` 없음(KBO `buildEloTrend.ts` cycle 3061 truncation 버그와 달리 limit 자체가 없어 현재 활성 버그 아님, 미래 성장 가드 부재만) — 전부 fix 임계 미달로 액션 없음.
+
+**regression**: 코드 변경 없음(read-only audit).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `lib/predictions`(gap 182, 7파일 소규모) 또는 `lib/accuracy`/`lib/analysis` 잔여 재탐색. op-analysis는 Supabase billing 미해결 지속 — 사용자 영역, 코드 fix 불가. **plan #29 만료 2026-10-15(내일) — 다음 사이클 자동 archive 처리 확인 필요.**
+
 ## 🟢 SUCCESS (retro-only) — info-architecture-review: 30-cycle gap checkpoint, 현 IA 충분 17연속 재확정 (cycle 3179, 2026-10-14)
 
 진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, Tier4 불변). 2-chain lock 미충족(직전8 distinct=2: review-code(heavy)7+fix-incident1 — lock 조건 충족하나 fix-incident 포함 예외 룰로 무시). domain 재확인(whois "No match") — 변화 없음(Tier4). health-alert.yml 최신 3-run 전부 failure(Supabase billing 지속) — 기존 인시던트, actionable 아님. **info-architecture-review 마지막 발화 cycle 3148 → gap=31 ≥ 30(trigger 9 충족) + 직전20(3159-3178) 0회 발화(0회 발화 우선 검토 룰 중복 충족)** — review-code(heavy) 9/10 success streak 지속 중이나 diversity redirect 목적 자율 선택.
