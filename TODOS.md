@@ -1,5 +1,23 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/{agents,pipeline} 전수 감사, kbo-data 전체 스윕 완료 (cycle 3212, 2026-10-14)
+
+진단: open issue 0건. approved plan 변화 없음. 2-chain lock 미충족(직전8(3204-3211) distinct=3: review-code6/lotto1/info-arch1). fix-incident gap=9/20·lotto gap=7/30(lotto(lite) 3205 발화)·op-analysis gap=25+(미발화) 전부 미근접 또는 data-blocked. Supabase DNS NXDOMAIN 재확인 불변, domain whois "No match" 불변 — 둘 다 Tier4 사용자 조치 대기 지속. heartbeat-stale GH Actions 1건 실패 확인했으나 원인 = 동일 Supabase 다운(기존 추적 인시던트의 증상, 신규 아님) → fix-incident 트리거 아님. cycle 3211 추천(review-code(heavy) 신규 scope: packages/kbo-data/src/{agents,pipeline}) 따라 자연 선택 — cycle 3207 이 8개 디렉토리(analytics/backtest/context/engine/factors/features/notify/scrapers) 감사하며 agents(15파일)/pipeline(29파일) 2곳만 scope 밖으로 남겨둔 상태였음.
+
+**전수 검증**: Agent 2개 병렬 — agents/ 15파일 + pipeline/ 29파일, 총 44 비-테스트 파일 전수 read + cross-reference grep (callers, cron/workflow 등록, knip.json entry point 확인).
+
+**발견 + 수정 (2건, 둘 다 daily.ts 주석 내 stale 라인 참조 — 로직 버그 아님)**:
+1. `daily.ts:814` — `versionDecision (line 678+)` 참조가 실제 정의 위치(834행)와 어긋남 (파일 성장으로 라인 이동). "(정의: 아래 834행)"으로 정정.
+2. `daily.ts:1234` — predict_final GAP 감지 참조 "위 라인 1049" 가 실제 동일 개념 블록(1098행 부근)과 어긋남. "위 라인 1098"로 정정.
+
+**미변경(드리프트 아님 확인)**: agents/ 15파일 전부 drift 0 — CURRENT_SCORING_RULE v1.8 정합, CREDIT_EXHAUSTED 폴백 설명 정확, KOREAN_FAMILY_NAMES 회귀가드 테스트 연결 확인 등. pipeline/ 나머지 27파일도 cron/workflow 등록 vs 코드 일치(cloudflare-worker decideMode 등), backtest-*/backfill-* 수동 스크립트 knip.json entry point 확인(죽은 코드 아님), silent-drift-alert.ts 전체 export 실사용 확인.
+
+**regression**: `pnpm --filter kbo-data exec tsc --noEmit` clean, pre-push hook(lint+type-check+버전동기+vitest) 전부 PASS. direct main commit(`8bb56fd8`) + push 완료(comment-only fix, PR 불필요).
+
+**결론**: `packages/kbo-data/src/*` 전체 디렉토리(10개) 전수 감사 스윕 완료 (8dir cycle 3207 → agents+pipeline cycle 3212). lib/* (cycle 3180/3208/3209/3211) + app/api (cycle 3204/3206) + kbo-data/* (cycle 3207/3212) 3대 영역 모두 전수 스윕 완결.
+
+다음 사이클 추천 = fix-incident(gap=10/20) 또는 lotto(gap=8/30) 자연 대기, 또는 review-code(heavy) 신규 scope 탐색(`apps/moneyball/src/app` 비-api 라우트 page.tsx/component 류, 아직 전수 감사 안 됨). Supabase DNS·domain whois 양쪽 Tier4 불변 — 사용자 조치 전까지 op-analysis data-blocked 지속.
+
 ## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib 잔여 7개 소형 디렉토리 전수 감사, lib/* 전체 스윕 완료 (cycle 3211, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/23 불변(29/30 deferred/completed). 2-chain lock 미충족(직전8(3203-3210) distinct=4: review-code5/lotto1/info-arch1/fix-incident1). fix-incident gap=8/20·info-arch gap=1/30(방금 발화)·lotto gap=6/30 전부 미근접. op-analysis gap=97 나 Supabase DNS NXDOMAIN 재확인(`nslookup utmimgpccbrciwuuacyw.supabase.co` → NXDOMAIN) 불변, data-blocked 지속. domain whois 재확인(`whois -h whois.verisign-grs.com moneyballscore.com` → "No match") 불변. cycle 3210 추천(review-code(heavy) 계속) 따라 자연 선택, scope는 git log 교차검증 — lib/mlb(cycle 3180 완료)·lib 9dir(cycle 3208: insights/picks/calendar/matchup/players/standings/leaderboard/accuracy/changelog)·lib 6dir(cycle 3209: reviews/dashboard/teams/predictions/seasons/lotto) 제외한 잔여 `lib/{api,debug,observability,seo,stats,supabase,v2-shadow-monitor}` 7개 소형 디렉토리(12파일)로 전체 lib/* 스윕 마무리.
