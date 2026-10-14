@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — fix-incident: cron 알림 4종 silent dispatch gap 차단 (cycle 3203, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/23(변화 없음). 2-chain lock 미충족(직전8(3195-3202) distinct=4). fix-incident gap=13/20·info-arch gap=24/30 미근접. op-analysis gap=89/25 압도적이나 Supabase DNS NXDOMAIN 재확인(여전히 미해석) — data-blocked 지속. `gh run list` 로 scheduled workflow 최근 실패 확인(CLAUDE.md 사례 17 패턴) 중 health-alert.yml 이 2026-10-11 20:23 부터 72h+ 연속 매시간 실패(Supabase 인시던트) 발견.
+
+**발견**: ci-failure-dispatch.yml 은 "CI" workflow 만 구독해 이 실패를 못 잡음. health-alert/deploy-drift-alert/runtime-error-alert/heartbeat-stale 4개 cron 알림 workflow 전부 `::error::` GH Actions annotation 만 남기고 외부(허브/텔레그램) dispatch 가 없어 — 72시간 연속 production 실패가 silent 상태로 방치되는 구조적 gap 확인.
+
+**수정**: ci-failure-dispatch.yml/pat-expiry-check.yml 이 이미 쓰는 `compose-dispatch-payload` composite action 재사용(DRY) — 4개 workflow 모두에 `if: failure()` dispatch step 추가. 고정 fingerprint_keys(workflow명 기반)로 반복 실패가 허브에서 하나의 진행중 인시던트로 수렴하도록 설계(시간당 스팸 방지). checkout 없던 3개(health-alert/runtime-error-alert/heartbeat-stale)에 `actions/checkout` 추가, health-alert timeout 1→2분.
+
+**검증**: `pnpm test` 590 files/4657 tests 전체 통과. `gh workflow run health-alert.yml` 수동 트리거로 실제 dispatch 발사 확인(`dispatched to playbook (worker-incident, fp=health-alert-failure)`) — 이론이 아닌 실측 검증. direct main commit(`95a19929`) + push 완료 (workflow-only, R4 커버, PR 불필요).
+
+**결론**: Supabase DNS NXDOMAIN + moneyballscore.com whois "No match" 양쪽 재확인 — 변화 없음, 여전히 Tier4(사용자 registrar/billing 직접 조치 필요). 이 부분 자체는 반복 확인 이상 진전 불가하나, 그 인시던트를 "잡아내는 알림 인프라" 의 실제 silent gap 은 이번에 해소. 다음 사이클 추천 = review-code(heavy) 또는 fix-incident(gap=13/20)/info-arch(gap=24/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): mlb pipeline route.ts+mlb-pipeline.ts(886줄)+db-constraints+silent-drift-alert 전수 교차검증, drift 0건 (cycle 3202, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/23(변화 없음, plan #29 expiry 2026-10-15 임박 Tier4 불변). 2-chain lock 미충족(직전8(3194-3201) distinct=4). fix-incident gap=12/20·info-arch gap=23/30·lotto gap=4(쿨다운) 전부 미근접. op-analysis gap=88/25 압도적이나 Supabase DNS NXDOMAIN 재확인(`dig`/`curl` 양쪽 미해석) — 여전히 actionable 아님. cycle 3200 retro 가 명시 추천한 scope(`apps/moneyball/src/app/api/mlb/pipeline/route.ts` + `packages/kbo-data/src/pipeline/mlb-pipeline.ts`) 자연 승계.
