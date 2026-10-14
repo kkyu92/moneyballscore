@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): lib/calendar+changelog+supabase+seasons+stats+debug+weather.ts 12개 파일 전수 감사, 주석 drift 1건 수정 (cycle 3188, 2026-10-14)
+
+진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+polish-ui1+fix-incident1). ship-0 미충족(직전10 success 10). op-analysis gap 25+/25(Supabase DNS `utmimgpccbrciwuuacyw.supabase.co` 재확인 — `dig` 응답 공란, 불변) — actionable 아님. fix-incident gap 1·info-arch gap 9·lotto gap 19 전부 미근접(lotto cron 양쪽 신선 — picks `2026-10-17.md`/results `2026-10-10.md`). 신규 라우트 `-mtime -7` 전수 매칭은 checkout 부작용으로 비신뢰 신호 판단, IA trigger 기각. cycle 3187 recommendation(review-code(heavy)) 채택, lib 잔여 영역(calendar/changelog/supabase/seasons/stats/debug/weather.ts) 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — 12개 소스 파일(calendar 1 + changelog 2 + supabase 2 + seasons 1 + stats 1 + debug 4 + weather 1) + 대응 테스트 전수 read, 소비 페이지/라우트 교차 추적, dead code(전역 caller grep) + stale 상수(CURRENT_SCORING_RULE 등) + comment/logic mismatch + cohort/schema drift 지시.
+
+**결과**: dead code 0건, stale 상수 0건, cohort/schema drift 0건. **1건 발견+수정**: `lib/debug/agentFallbackStats.ts` 헤더 주석의 agentError 카테고리 나열에 `categorizeAgentError()` 실제 분기인 `unclassified_claim` 이 누락돼 있었음 — comment/logic mismatch, 로직 변경 없이 주석만 정정. `pnpm --filter moneyball test` 전체 스위트 590 파일/4657 테스트 전부 통과.
+
+**regression**: 주석 전용 변경, 동작 영향 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속 시 app/api 잔여(health/kbo-scores/live/mlb/picks/pipeline/revalidate/snapshot-pitchers/sync-batter-stats/version) 재탐색. 또는 다양성 redirect로 lotto(gap 19, 미근접 chain 중 최대) 고려. op-analysis는 Supabase DNS 장애 지속 — 사용자 영역 불변.
+
 ## 🟢 SUCCESS (retro-only) — fix-incident: 도메인 소실 인시던트 코드측 영향 조사, 이미 격리 확인 (cycle 3187, 2026-10-14)
 
 진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). plan #30 completed. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+polish-ui1+info-architecture-review1). ship-0 미충족(직전10 success 9+partial 1). op-analysis gap 25+/25(Supabase DNS `utmimgpccbrciwuuacyw.supabase.co` ENOTFOUND 재확인, 불변) — actionable 아님. fix-incident gap 10/20·info-arch gap 8/30·lotto gap 18/30 전부 미근접. cycle 3186 recommendation("도메인 하드코딩 참조/canonical URL 등 소실 상황 대비 안전장치 점검") 채택 — 도메인 인시던트가 어제(cycle 3186)보다 한 단계 더 깊어진 상태(Vercel 프로젝트 도메인 0건) 재확인됐기 때문에 코드측 실제 영향 범위를 직접 조사.
