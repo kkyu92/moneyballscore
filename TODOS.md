@@ -1,5 +1,23 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): scripts/ 재탐색 — op-analysis-cohort.ts cron 자동 소비 스크립트 pagination drift 1건 + measure-context-layer-brier.ts 1건 수정 (cycle 3171, 2026-10-14)
+
+진단: 직전8(3163-3170) distinct=4(review-code(heavy)4/fix-incident2/polish-ui1/lotto1) — 2-chain lock 미충족. open issue 0건, approved plan 0/24(plan #29 spec_only_deferred, 만료 2026-10-15 임박 1일 — Tier4 사용자 결정 대기, 변화 없음). 2차 방어선(cycle 3170 retro `76403431`) OK. fix-incident gap=3/20·lotto gap=2/30 전부 미근접, op-analysis gap=57/25 도달하나 Supabase REST 재확인 http_status=000 지속(billing outage, 사용자 영역) — actionable 아님. info-arch gap=23/30 미근접. explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime ~4일 신선) — 수십 회 반복된 동일 skip 패턴. review-code(heavy) 자연 선택.
+
+**스코프 선정**: CHANGELOG 파일명 문자열 grep 으로 "0-mention" 13개 스코프 후보 도출했으나(backfill-* 6/dev-*/llm-context-baseline/measure-context-layer-brier/op-analysis-cohort/run-pipeline/smoke-umpire-scraper), 실제로는 cycle 3126/3127/3130~3134 가 이미 대부분 감사 완료(CHANGELOG 가 그룹 요약만 적어 파일명 문자열이 안 남은 것 — **grep-count≠audit-depth 가드레일 재확인 사례**, git log --grep "pagination"/TODOS 커밋 본문 대조로 교차검증). scripts/ 31개 파일을 전수 교차대조한 결과 진짜 미감사 잔여 = `llm-context-baseline.ts`/`measure-context-layer-brier.ts`/`measure-n178-vs-n165.ts`/`run-pipeline.ts`/`smoke-umpire-scraper.ts` 5개(`lotto.ts` 는 lotto 체인 자체 영역이라 제외) — 금번 스코프로 채택.
+
+**감사 결과**: `llm-context-baseline.ts`/`run-pipeline.ts`/`smoke-umpire-scraper.ts` 3개 전수 read — clean(1회성 측정/CLI/smoke 도구, drift 0). `measure-n178-vs-n165.ts`(cycle 1549 축 C 전용 1회성 진단 스크립트, 이미 목적 완수되어 재실행 안 될 dead script) 도 동일 pagination 공백 있으나 재사용 가치 없어 수정 범위 제외(판단 기록만). **`measure-context-layer-brier.ts`**: predictions 단일 select(range 없음) — PostgREST 1000행 cap 초과 시 silent truncation. **drift 수정**(PAGE=1000 루프 + range + safety stop, sibling 패턴 적용).
+
+**추가 발견(원래 스코프 밖, cross-check 중 재확인)**: `op-analysis-cohort.ts`(op-analysis-weekly cron 이 매주 자동 소비하는 활성 스크립트)를 cycle 3133 retro 가 "범위 제한 필터 보유로 안전"이라 판정했던 이력을 직접 파일 재확인한 결과, **실제로는 범위 제한 필터 자체가 없고** 현재 row 수(n=582, 2026-09-28 아티팩트 기준)가 우연히 1000 미만일 뿐이었음을 확인 — cycle 3133 판정이 false negative. 매주 ~20-30건씩 증가 중이라 수개월 내 1000 cap 도달 시 주간 cron 산출물(accuracy/Brier/요일/tier 분포)이 조용히 잘릴 확정 경로. **drift 수정**(동일 PAGE 루프 패턴 적용).
+
+검증: `pnpm lint:scripts`(eslint scripts) clean. `pnpm type-check`(turbo, 4 packages) 전부 cache hit PASS — scripts/ 는 turbo type-check 스코프 밖(기존 알려진 gap, 루트 `tsc --noEmit` 은 모노레포 path alias 미해결로 1842건 무관 에러 — pre-existing 확인, git stash 로 베이스라인 동일 검증). 직접 main commit+push(R4, `52baae2b`), pre-push hook(lint+type-check+version-sync-guard+vitest 3개) 전부 PASS. Supabase billing outage 로 실측 row count 재확인(live query)은 불가 — artifact 날짜(2026-09-28) 기준 n=582 사용.
+
+**skill-evolution trigger 평가**: milestone(`3171 % 50 = 21`) 미충족. trigger5(직전20 inclusive, 3152-3171) — review-code(heavy) 다수 지속, 미충족. ship-0 emergency stop 미충족(직전10 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `measure-n178-vs-n165.ts` dead-script 정리(삭제 또는 pagination 방치 명시 주석, 저가치) 또는 `apps/moneyball/src/app` 라우트 내부 page.tsx 로직 재탐색(cycle 3161 carry-over), 또는 fix-incident/op-analysis 둘 다 Supabase billing + Vercel 도메인(사용자 영역) 미해결 지속 시 여전히 actionable 부재 skip 예상. **plan #29 만료 2026-10-15(내일, Tier4 대기) — 다음 사이클 만료 시 자동 archive 처리 필요.**
+
+---
+
 ## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): app/api 잔여 8개 디렉토리(13 route.ts) 전수 감사, drift 0건 (cycle 3170, 2026-10-14)
 
 진단: 직전8(3162-3169) distinct=4(review-code(heavy)4/fix-incident2/polish-ui1/lotto1) — 2-chain lock 미충족. fix-incident gap=2/20 미도달 + 도메인(`vercel domains inspect` 여전히 "Domain not found", `vercel domains ls` 0개)/Supabase(REST curl http_status=000) 3번째 재확인은 cycle 3169 자체 판단("3번째 동일 결론 반복은 저가치") 그대로 유지 — skip. op-analysis last=3114, gap=56/25 크게 초과하나 Supabase REST 재확인 동일 http_status=000 지속 — DB 쿼리 기반 측정 전부 차단 skip. info-arch gap=22/30·lotto gap=1/30 전부 미근접. explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0건/approved plan 0/23/TODOS Next-Up 부재/DESIGN.md mtime 10/10 23:43 = ~77h 신선) — skip. review-code(heavy) 자연 선택 — cycle 3099 retro가 "전수 감사 미실시"로 명시한 `app/api/{health,hub-dispatch,mlb,picks,pipeline,seo,sync-batter-stats,version}` 8개 디렉토리(13 route.ts, 총 ~1404줄)를 금번 스코프로 채택.
