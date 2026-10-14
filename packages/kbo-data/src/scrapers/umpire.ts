@@ -11,10 +11,14 @@
  * 안전:
  *   - HTTP fail / API 응답 변경 → throw (호출자 catch → league-avg fallback)
  *   - 4 umpire 미박제 → throw (selector drift 차단)
- *   - rate limit 호출자 보장 (본 함수 1회 호출 = 0 sleep, daily pipeline 안 외부 loop 시 2초 sleep)
+ *   - rate limit 호출자 보장 (본 함수 1회 호출 = 0 sleep, 외부 loop 호출 시 2초 sleep 호출자 책임)
  *
  * 데이터 source: Naver sports record API (`api-gw.sports.naver.com/schedule/games/.../record`).
  * naver-record.ts 의 fetchNaverRecord 와 동일 API. 본 파일은 umpire 필드만 추출.
+ *
+ * 현재 production 호출자 없음 (review-code(heavy) cycle 3207 확인) — scripts/smoke-umpire-scraper.ts
+ * 수동 smoke test 뿐. daily pipeline 미연결 = umpire-sz.ts factor 가 league-avg fallback 만 받는 이유
+ * (umpire-sz.ts cycle 2822 주석과 정합, scraper→DB→factor 체인 전체 end-to-end dead).
  */
 
 import { NAVER_BROWSER_USER_AGENT, NAVER_SPORTS_API_BASE } from '@moneyball/shared';
