@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (retro-only) — review-code(heavy): lib/predictions 6개 파일 전수 감사, drift 0건 (cycle 3181, 2026-10-14)
+
+진단: open issue 0건. plan #29(spec_only_deferred, status≠approved) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)5+fix-incident1+info-architecture-review1+lotto1). ship-0 미충족(직전10: success9+partial1). op-analysis gap 25+/25(최장 미발화)지만 Supabase DNS 장애 지속 재확인 불필요(cycle 3176/3180 반복 확인 결론 불변). fix-incident gap 4·info-arch gap 2·lotto gap 12 전부 미근접. `gh run list` CI Failure Dispatch 전부 skipped(신규 incident 없음), domain whois "No match" 변화 없음(Tier4) — cycle 3180 recommendation(lib/predictions, gap 182) 채택.
+
+**감사 방법**: Agent(general-purpose) 1개 — `apps/moneyball/src/lib/predictions/` 6개 소스 파일(adjacentDates/estimateTime/factorLabels/judgeReasoning/tierStats/v2Predictor) + 테스트 전수 read, cohort constant 교차검증(CURRENT_MODEL_FILTER vs PRODUCTION_COHORT_RULES) + stale 버전 리터럴 + dead code + comment/logic mismatch 지시.
+
+**결과**: 6개 전부 순수 함수(직접 DB 쿼리 X) — dead code 0건, stale 버전 리터럴 0건, comment/logic mismatch 0건. 1건 후보 발견(`tierStats.ts`): `buildTierRates()` 소비자 2곳이 다른 cohort 공급 — 홈(`app/page.tsx` getSeasonAccuracy, `PRODUCTION_COHORT_RULES`) vs 대시보드(`app/dashboard/page.tsx` getOverview, `CURRENT_MODEL_FILTER`). `packages/shared/src/model-version-labels.ts` 문서 교차검증 결과 **의도된 설계로 확인** — dashboard 는 `/accuracy`(`CURRENT_SCORING_RULE` 전용, "baseline 분석") 와 동일 성격의 "모델 버전별 성과 비교" 전용 페이지(metadata description 에 "모델 버전별 v1.5~v1.8 성과 비교" 명시) 라 CURRENT_MODEL_FILTER 단독이 올바름 — 과거 5연속 발견된 "같은 페이지 두 섹션 혼용" 버그 클래스와 달리 본 건은 "다른 목적의 두 페이지가 각자 설계대로 다른 cohort" 라 드리프트 아님. estimateTime.ts 테스트 커버리지 0건(유일 소비자 `PlaceholderCard.tsx` 확인, 로직 자체는 검증됨) — 저위험 비긴급, fix 임계 미달.
+
+**regression**: 코드 변경 없음(read-only audit, false-positive 판정으로 종료).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `lib/accuracy`/`lib/analysis` 잔여 재탐색. op-analysis/domain 은 사용자 영역 변화 없음. **plan #29 만료 2026-10-15(내일) — 다음 사이클 당일 도달 시 사용자 응답 부재 확인 후 자동 archive 처리 검토.**
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): lib/mlb 18개 파일 전수 감사, drift 0건 (cycle 3180, 2026-10-14)
 
 진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, Tier4 불변). 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)5+fix-incident1+info-architecture-review1+lotto1). ship-0 미충족(직전10: success9+partial1). **op-analysis gap 60+/25(최장 미발화) 재확인 — Supabase DNS 장애 지속(`utmimgpccbrciwuuacyw.supabase.co` ENOTFOUND, `pnpm tsx scripts/op-analysis-ce-cohort.ts` 실행 재시도로 직접 확인), DB 접근 자체 불가로 actionable 아님(cycle 3176 결론 재확인)**. lotto cron 정상(picks/results 양쪽 신선), fix-incident gap 3·info-arch gap 1 미근접 — cycle 3179 recommendation(lib/predictions 또는 lib/mlb 재탐색) 채택, 최근 KBO lib/teams+players+standings 연속 5회 cohort mismatch 수정 패턴의 MLB 병렬 구조 노출 가설 검증 목적으로 lib/mlb(18파일) 선정.
