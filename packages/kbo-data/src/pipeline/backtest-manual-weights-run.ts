@@ -7,7 +7,9 @@
  *  - manual   = factor × weight 가산합 (단순 add)
  *
  * 본 스크립트 = wayback test set (2024) 에 manual scoring 직접 적용해서
- * v1.5 / v1.6 / logistic 4-feature / logistic 7-feature 4 모델 Brier 비교.
+ * v1.5 / v1.6 / logistic 4-feature / logistic 7-feature Brier 비교 (H4 핵심 비교군).
+ * 이후 cycle 56/903 에서 v2.1-A/B/C + v2.0-cycle231 가중치 후보 비교도 동일 harness 에
+ * 추가돼, 실제 출력은 coin_flip 포함 9개 모델 비교 (4개 한정 아님).
  *
  * 결과 분기:
  *  - manual v1.5 > logistic    → H4 확정 (구조 mismatch). prod 격차 일부 설명.
@@ -114,16 +116,22 @@ function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): n
 function computeFactors(f: GameFeatures): Record<string, number> {
   const factors: Record<string, number> = {};
 
-  // 1. sp_fip — Wayback team FIP (있으면). 없으면 4.50 default.
-  const homeFip = f.homeFip ?? 4.5;
-  const awayFip = f.awayFip ?? 4.5;
-  factors.sp_fip = normalize(homeFip, awayFip, false);
+  // 1. sp_fip — Wayback team FIP. 양쪽 다 있을 때만 비교 — 한쪽만 결측이면
+  // (seasonStatsBySeason 이 팀별 독립 lookup 이라 비대칭 결측 가능) 실측값을
+  // 임의 default 와 비교하는 왜곡 방지 (predictor.ts cycle 2977 WAR/SFR 가드와 동일 패턴).
+  factors.sp_fip = (f.homeFip != null && f.awayFip != null)
+    ? normalize(f.homeFip, f.awayFip, false)
+    : 0.5;
 
   // 2. sp_xfip — backtest 미존재. 중립.
   factors.sp_xfip = 0.5;
 
-  // 3. lineup_woba
-  factors.lineup_woba = normalize(f.homeWoba ?? 0, f.awayWoba ?? 0, true);
+  // 3. lineup_woba — 양쪽 다 있을 때만 비교. `?? 0` 류 default 는 wOBA 실제 스케일
+  // (~0.320 평균) 과 거리가 멀어 한쪽 결측 시 normalize() 출력을 극단으로 왜곡시킴 —
+  // sp_fip 와 동일 비대칭 결측 가드 적용.
+  factors.lineup_woba = (f.homeWoba != null && f.awayWoba != null)
+    ? normalize(f.homeWoba, f.awayWoba, true)
+    : 0.5;
 
   // 4. bullpen_fip — backtest 미존재. 중립.
   factors.bullpen_fip = 0.5;
