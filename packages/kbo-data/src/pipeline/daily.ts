@@ -811,7 +811,7 @@ export async function runDailyPipeline(
           //
           // trade-off — 1차 cron 시점 quant 박제 = 5/5 보장 + summary 자연 발사
           //   vs 다음 cron retry 안 더 좋은 LLM 응답 받을 가능성. 5/5 + 알림 우선.
-          // versionDecision (line 678+) 가 debateSucceeded=false 시 model_version 강등
+          // versionDecision (정의: 아래 834행) 가 debateSucceeded=false 시 model_version 강등
           //   = /debug/model-comparison Brier 분류 정합.
           skippedDetail.push({
             game: `${game.awayTeam}v${game.homeTeam}@${game.gameTime}`,
@@ -1231,8 +1231,8 @@ async function handleDailySummaryNotification(
   let stage = 'init';
   try {
     stage = 'expected-calc';
-    // status 'live' 도 expected 제외 — predict_final GAP 감지(cycle 936 fix, 위 라인
-    // 1049)와 동일 개념의 expected 산정인데 'live' 제외가 누락돼있었음. live 경기가
+    // status 'live' 도 expected 제외 — predict_final GAP 감지(cycle 936 fix, 아래 라인
+    // 1098)와 동일 개념의 expected 산정인데 'live' 제외가 누락돼있었음. live 경기가
     // expected 를 부풀리면 todayTotal<expected 로 판정돼 strict mode(predict)에서
     // summary Telegram 알림이 그날 계속 skip 되고 predict_final(last-chance)까지
     // 미뤄지는 silent delay 발생 (cycle 2239 review-code heavy 발견).
