@@ -16,13 +16,15 @@ interface FanGraphsBatterData {
   team: TeamCode;
   wrcPlus: number;
   iso: number;
+  /** 스크랩·파싱만 수행, 현재 소비처 없음(문서용/향후 사용 대비 — 2026-10 review-code(heavy) 확인, daily.ts 호출부는 wrcPlus/iso 만 추출). */
   bbPct: number;
+  /** bbPct 와 동일 — 현재 소비처 없음. */
   kPct: number;
 }
 
 /**
  * FanGraphs KBO 타자 리더보드에서 팀 집계 데이터 수집
- * wRC+, ISO, BB%, K%
+ * wRC+, ISO, BB%, K% (단 BB%/K% 는 현재 daily.ts 에서 미소비 — CLAUDE.md "보조/검증" 용도로만 수집)
  */
 export async function fetchBatterLeaders(season: number): Promise<FanGraphsBatterData[]> {
   const url = `${BASE_URL}/batting?season=${season}&split=&team=0&type=1&month=0&pos=all`;
