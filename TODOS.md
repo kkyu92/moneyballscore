@@ -13920,3 +13920,15 @@ milestone 커밋: `feat(skill): cycle 3150 milestone — skill-evolution 84회 (
 **regression**: 코드 변경 없음(조사+이슈 정리만).
 
 다음 사이클 추천 = 진단 루틴에 `lesson-pending` 라벨도 주기적 확인 추가 고려(이번처럼 label 필터가 좁으면 백로그 누적 가능). lotto gap=30/30 trigger 충족 상태 유지 — 다음 사이클 lite 확인 권장. explore-idea saturation 15/15 도달했으나 4-source(open issue/approved plan/TODOS Next-Up/DESIGN.md) 재확인 필요.
+
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src analytics/backtest/context/engine/factors/features/notify/scrapers 전수 감사, dead-chain 주석 drift 1건 수정 (cycle 3207, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/25(변화 없음, plan #29 expiry 2026-10-15 내일 — Tier4 불변). 2-chain lock 미충족(직전8(3199-3206) distinct=5: review-code 4/polish-ui 1/skill-evolution 1/fix-incident 1/lotto 1). fix-incident gap=4/20·info-arch gap=28/30·lotto gap=2 전부 미근접. op-analysis Supabase DNS NXDOMAIN 재확인(여전히 미해석, data-blocked 지속). `gh run list` 재확인 — 신규 incident 없음(CI/dispatch 전부 정상 패턴). DESIGN.md mtime 4일 전(4주 미경과) — design-system trigger 미충족. cycle 3206 retro 가 "app/api 전수감사 완료, 다음 scope = packages/kbo-data/src/{analytics,backtest,context,engine,factors,features,notify,scrapers}(미감사)" 명시 추천 → review-code(heavy) 같은 chain이나 완전 신규 scope로 자연 선택(diversity-in-scope, app/api와 별개 영역).
+
+**전수 검증**: 2개 agent 병렬 디스패치, 62개 파일/~9400줄 전부 full read (grep count 아닌 실제 read, cycle 3001 가드레일 준수). Group A(analytics/backtest/context/engine, 4167줄) — predictor.ts v1.8 가중치 주석을 `packages/shared/src/index.ts` DEFAULT_WEIGHTS 와 직접 대조 확인(완전 일치), domain.ts h2h window "50" 주석을 daily.ts:686/:1379 실제 `.limit(50)` 과 교차검증, 모든 "미사용으로 보이는" export 전부 scripts/*.ts harness 또는 /about,/methodology 페이지에서 실사용 확인. drift 0건, 1건 저위험 cosmetic(stale-data-snapshot.ts v18Target=150 기본값 — v2.0 결정 이미 n=178서 확정, 현재 n≈400 이라 진행률 섹션이 항상 100%+ 표시되나 기능 버그 아님, 액션 불필요 판단).
+
+Group B(factors/features/notify/scrapers, 5245줄) — vitest 96 files/1216 tests 전체 통과 확인 포함. rate limit(2초 딜레이)/Referer 헤더(KBO `/ws/Main.asmx` + Naver API) 양쪽 정상 유지 확인, telegram.ts 에러 swallow 없음(throw on non-ok) 확인. **실제 drift 1건 발견**: `scrapers/umpire.ts:14` 주석이 "daily pipeline 안 외부 loop 시 2초 sleep" 호출자 존재를 암시했으나 grep 재확인 결과 production 호출자 0건(`scripts/smoke-umpire-scraper.ts` 수동 smoke test 뿐) — `umpire-sz.ts` cycle 2822 주석("scoreUmpireSZ 현재 pipeline caller 없음")과 모순되는 stale 주석. scraper→DB(`umpire_stats`)→factor scorer 체인 전체가 end-to-end dead 상태임이 재확인됨.
+
+**수정**: `umpire.ts` 주석 정정 — "daily pipeline 호출자" 암시 제거 + 현재 production 호출자 0건 + dead chain 상태 명시 (umpire-sz.ts 주석과 정합). 테스트 영향 범위(`scrapers/__tests__` + `factors/__tests__` 11 files/89 tests) 재실행 통과. direct main commit(`47af92b6`) + push 완료(comment-only fix, R4 커버, PR 불필요).
+
+**결론**: Supabase DNS NXDOMAIN + moneyballscore.com whois "No match" 양쪽 재확인 — 변화 없음, Tier4 불변. `packages/kbo-data/src` 8개 디렉토리 신규 영역 전수감사 완료(이번 사이클). 다음 사이클 추천 = fix-incident(gap=5/20) 또는 info-arch(gap=29/30, 임계 근접) 자연 대기, 또는 review-code(heavy) 잔여 scope(`packages/kbo-data/src/{agents,pipeline}` + `apps/moneyball/src/app` 비-api 영역 — layout/page 류) 고려.
