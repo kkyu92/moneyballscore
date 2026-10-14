@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data pipeline/{db-error,winner-id,final-reasoning,save-game-record}.ts 전수 감사, drift 0건 (cycle 3196, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/23(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 직전8(3188-3195) distinct=2(review-code(heavy)6+fix-incident1+polish-ui1 — 실제론 distinct 재확인 결과 review-code(heavy) dominant) 재확인했으나 안전 예외(fix-incident 포함) 불필요 — lock 자체 미충족. op-analysis 재확인: `dig utmimgpccbrciwuuacyw.supabase.co` NXDOMAIN(exit 6) + curl 000 — Supabase DNS 여전히 미해결, gap 82-cycle(마지막 실질 fire cycle 3114) 이나 외부 인프라 불변이라 skip 유지. lotto gap=27/30(마지막 fire cycle 3169)·info-arch gap=17/30(마지막 체크포인트 cycle 3179)·fix-incident gap=6/20 전부 미근접. explore-idea 최근 15 중 review-code+fix-incident+polish-ui+info-arch 비율 미충족. approved plan 0건. `packages/kbo-data/src/pipeline/` 안 CHANGELOG 언급 0회 파일 2개(`db-error.ts`/`winner-id.ts`, 각 490B/767B) + 저빈도 2회 파일 2개(`final-reasoning.ts`/`save-game-record.ts`) 선정 — cycle 3001 grep-count-depth 가드레일 따라 전수 read 로 커버리지 직접 확인.
+
+**감사 방법**: Agent(general-purpose) 1개 — 4개 파일 전수 read + 전체 레포 exported symbol caller grep + 대응 테스트 파일 교차검증.
+
+**결과**: 전부 drift 0건.
+- `db-error.ts`: cycle 147 migration path 재노출 shim, `assertSelectOk`/`assertWriteOk` 둘 다 `daily.ts` 소비 확인 + 전용 테스트 일치.
+- `winner-id.ts`: `computeWinnerTeamId` 4개 호출부(`live.ts`/`daily.ts`×2/`backfill-season.ts`+ script) 전부 `winner_team_id` upsert 에 직접 소비.
+- `final-reasoning.ts`: 서브에이전트가 1차로 "comment vs code mismatch" 로 플래그(헤더 주석의 "quant fallback 시각화 source" 문구 vs `apps/moneyball/.../game/[id]/page.tsx:660-674` 가 debate 부재 시 정적 placeholder 렌더 — 해당 root 필드 미사용). 메인이 직접 주석+`pipeline-final-reasoning.test.ts` 재대조한 결과 **false positive** 확인 — 주석 자체가 이미 "root 필드는 의도 보존(향후용), 진짜 drift 는 UI 가 새로 직접 읽는 코드 추가될 때만(현재 0건)" 명시해 agent 가 발견한 현재 미소비 상태와 정확히 일치. 수정 불필요.
+- `save-game-record.ts`: `SaveResult.skipped`/`gameId` 가 호출부별 비대칭 소비(`backfill-records.ts` 전부 소비 vs `live.ts` 일부만) — 틀린 주장 없음, silent drift 아님.
+
+**검증**: 코드 변경 없음(순수 감사) — tsc/test 재실행 불필요, regression 0.
+
+다음 사이클 추천 = review-code(heavy) 계속 시 저빈도 pipeline 잔여(`schedule.ts`/`model-version.ts`/`db-constraints.ts` 등, 1000~3000 CHANGELOG 언급선 — 소형 아니면 skip) 또는 다양성 redirect로 lotto(gap 27/30, 10/18 토 다음 추첨 접근) 자연 대기 권장 — pipeline/ 저빈도 신규 미감사 파일 재고가 빠르게 소진 중, 다음다음 사이클부턴 다른 영역(`scripts/`/`apps/moneyball/src/components/`) 전환 검토 필요.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data pipeline/{prediction-history,brier,daily-summary,accuracy-update}.ts 전수 감사, 미소비 필드 문서화 (cycle 3195, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/23(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 직전8(3187-3194) distinct=2(review-code(heavy)6+fix-incident2) 충족했으나 잠긴 chain 중 하나가 fix-incident → 룰에 따라 lock 무시. op-analysis gap 25+/25 도달 재확인(`dig`/`curl` 재검증, Supabase DNS 여전히 미해결 — NXDOMAIN) skip. lotto gap=26/30·info-arch gap=16/30·fix-incident gap=5/20 전부 미근접. explore-idea saturation 직전15 3/12 미충족. approved plan 0건(plan #29 상태 spec_only_deferred, Tier4 불변). cycle 3194 추천(scrapers/kbo-live.ts·kbo-pitcher.ts·naver-schedule.ts)은 재검증 결과 전부 이미 cycle 2975(kbo-live/kbo-pitcher 전수 fix 완료)+cycle 3099(naver-schedule cancel/suspended 필드 cross-reference)에서 다뤄진 stale 추천 확인 — app/api/ 전체 route 도 과거 다회 전수 스윕 확인(line 254 13개 route 묶음 감사 등). 대신 `packages/kbo-data/src/pipeline/` 안 CHANGELOG 0회 언급 파일 grep 으로 진짜 미감사 4개(`prediction-history.ts` 112줄/`brier.ts` 59줄/`daily-summary.ts` 48줄/`accuracy-update.ts` 34줄) 선정.
