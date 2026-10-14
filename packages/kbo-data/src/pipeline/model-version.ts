@@ -40,7 +40,7 @@ export function decideModelVersion({
 }: {
   hasApiKey: boolean;
   debateSucceeded: boolean;
-  // SHADOW_V20_WEIGHTS 로 실제 확률을 계산한 row (isV2ModelEnabled()=true, daily.ts:709)
+  // SHADOW_V20_WEIGHTS 로 실제 확률을 계산한 row (isV2ModelEnabled()=true, daily.ts:738)
   // 는 scoring_rule 도 그 사실을 반영해야 함 — 안 그러면 CURRENT_SCORING_RULE('v1.8')
   // 필터에 의존하는 baseline calibration(/accuracy, CURRENT_MODEL_FILTER)이 다른
   // 가중치로 계산된 row 를 조용히 섞어 오염시킴. default false = 기존 동작 유지.
