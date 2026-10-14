@@ -188,11 +188,11 @@ const FAQS = [
   },
   {
     q: "왜 가끔 예측이 50:50 으로 표시되나요?",
-    a: `두 팀의 종합 전력이 거의 동일하다고 모델이 판단한 경우입니다. 박빙 경기는 변수가 많아 일부러 극단으로 보정하지 않습니다(심판 에이전트가 ${WINNER_PROB_CLAMP_MIN} ~ ${WINNER_PROB_CLAMP_MAX} 범위로 제한). 박빙 예측은 적중률이 자연히 낮으니 베팅 참고로 부적합합니다.`,
+    a: `두 팀의 종합 전력이 거의 동일하다고 모델이 판단한 경우입니다. 박빙 경기는 변수가 많아 일부러 극단으로 보정하지 않습니다(심판 에이전트가 ${Math.round(WINNER_PROB_CLAMP_MIN * 100)}% ~ ${Math.round(WINNER_PROB_CLAMP_MAX * 100)}% 범위로 제한). 박빙 예측은 적중률이 자연히 낮으니 베팅 참고로 부적합합니다.`,
   },
   {
     q: "팀 페이지의 파크팩터(Park Factor) 는 무엇인가요?",
-    a: "구장의 득점 환경 차이를 100 기준으로 표시한 지표입니다. 105 이상 = 타자 친화 (홈런·득점 많음), 95 이하 = 투수 친화. 잠실 (LG/OB) 은 투수 친화로, 사직 (LT) 은 중립으로, 광주 KIA 챔피언스 필드는 타자 친화로 분류됩니다.",
+    a: "구장의 득점 환경 차이를 100 기준으로 표시한 지표입니다. 105 이상 = 타자 친화 (홈런·득점 많음), 95 이하 = 투수 친화. 잠실 (LG/OB) 은 투수 친화로, 광주 KIA 챔피언스 필드는 중립으로, 사직 (LT) 은 약 타자 친화로 분류됩니다.",
   },
   {
     q: "특정 경기가 예측 목록에 없는 이유가 무엇인가요?",
@@ -428,7 +428,7 @@ export default async function AboutPage() {
         aria-labelledby="faq-title"
         className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6"
       >
-        <h2 id="faq-title" className="text-xl font-bold mb-4">
+        <h2 id="faq-title" className="scroll-mt-20 text-xl font-bold mb-4">
           자주 묻는 질문 (FAQ)
         </h2>
         <div className="space-y-2">

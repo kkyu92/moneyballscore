@@ -72,7 +72,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {["FIP", "wOBA", "WAR", "ERA+", "BABIP"].map((tag) => (
+          {["FIP", "wOBA", "WAR", "ERA", "BABIP"].map((tag) => (
             <div
               key={tag}
               style={{

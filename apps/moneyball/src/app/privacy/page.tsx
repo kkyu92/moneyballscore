@@ -78,6 +78,19 @@ const SECTIONS = [
             집계 도구. 개인 식별자 없이 해시 기반으로 방문 단위를 추정합니다.
           </li>
           <li>
+            <strong>Google Analytics</strong> — 방문자 행동 통계 분석을 위해
+            쿠키(_ga, _gid 등)를 설정합니다. 사용자는{" "}
+            <a
+              href="https://adssettings.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-500 hover:underline"
+            >
+              Google 광고 설정
+            </a>
+            에서 Google 애널리틱스 활용 광고 개인 최적화를 거부할 수 있습니다.
+          </li>
+          <li>
             <strong>Google AdSense</strong> — 관심 기반 광고 노출을 위해
             쿠키(DoubleClick, IDE 등)를 설정할 수 있습니다.
             사용자는{" "}
@@ -119,6 +132,19 @@ const SECTIONS = [
             <strong>Vercel Inc.</strong> — 호스팅 및 방문자 통계. (
             <a
               href="https://vercel.com/legal/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-500 hover:underline"
+            >
+              정책
+            </a>
+            )
+          </li>
+          <li>
+            <strong>Google LLC</strong> — Google Analytics(방문자 통계) 및
+            Google AdSense(광고 노출) 운영. (
+            <a
+              href="https://policies.google.com/privacy"
               target="_blank"
               rel="noopener noreferrer"
               className="text-brand-500 hover:underline"
