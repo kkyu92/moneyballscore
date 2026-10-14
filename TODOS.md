@@ -1,5 +1,18 @@
 
 
+## 🟡 PARTIAL(retro-only) — polish-ui(2-chain lock fallback): 3-후보 실측 결과 drift 0건 (cycle 3199, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/spec-only-deferred, plan #29 만료 내일 Tier4 불변). 2-chain lock 발동 — 직전8(3191-3198) distinct=2(review-code(heavy)7+lotto(lite)1), 둘 다 bug 아니라 안전 예외 미적용 → 둘 다 제외. explore-idea saturation 수치 충족(직전15 13/15)이나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 2026-10-10 23:43 ~3일 신선) — 수십 회 반복된 확립 skip 패턴 재확인. fix-incident gap=9/20·info-arch gap=20/30·op-analysis(Supabase DNS NXDOMAIN 지속 외부 블락) 전부 미근접/actionable 아님. Lock fallback 룰(SKILL.md "어떤 chain 도 trigger 없으면 polish-ui 강제") 적용.
+
+**실측 3-후보 전수 검증** (코드 read, 그러나 모두 drift 아님으로 귀결):
+1. **`border-gray-N/opacity` 8곳** (cycle 2625 문서화 예외) — grep 재확인 결과 정확히 동일 8줄 유지, 신규 이탈 0건.
+2. **raw hex color 재확인** (`apps/moneyball/src/app`) — `lotto/opengraph-image.tsx`(next/og ImageResponse 는 CSS var 미지원, 리터럴 정당) + `HallOfFame.tsx` 금/은/동 메달 SVG 색상(rank1/2 는 `var(--token, #hex)` fallback 패턴, rank3 textColor 만 순수 `'#ffffff'`) — `--color-brand-*` 토큰이 light/dark 단일 정의(globals.css 재확인, dark: 변형 없음) 라 테마 무관 고정값, 대비 문제 없음 — 의도된 선택 확인, 버그 아님.
+3. **`/mlb/postseason` "준비 중" 카피 stale 의심** — `games_found=1`(2026-10-14) 확인(`gh run view` mlb-schedule-status-backfill 로그) = 정규시즌 아직 진행 중, "정규시즌 종료 후 활성" 카피 여전히 정확 — stale 아님.
+
+**부수 발견** (actionable 아니나 기록): `mlb-schedule-status-backfill` cron 이 `gh run list` 상 5일 연속(10/9~10/13) green "success" 표시되지만 실제 응답 body 는 매번 `rows_inserted:0` + `errors:["mlb_schedule upsert: TypeError: fetch failed"]`(Supabase DNS NXDOMAIN billing outage, 기존 known-issue) — `mlb-pipeline.ts` 추적 결과 `captureSilentDriftAlert`(MLB_SCRAPE_MODES 분기, `gamesFound>0 && rowsInserted===0` → Sentry warning) 가 이미 이 정확한 케이스를 커버하도록 설계돼 있음(사례 11 family 확장 인프라, cycle 813/886/1363) — 신규 코드 갭 아님, 기존 alert 인프라 설계대로 작동 확인. GH Actions 워크플로 자체는 HTTP status 만 체크(`STATUS != 200` 조건) 라 body errors 는 Sentry 채널에만 의존 — 의도된 설계(DB 재시도 폭주 방지 목적 추정), 수정 불필요 판단.
+
+**결론**: 코드 변경 없음(3-후보 전부 drift 아님, 기존 alert 인프라 정상 확인). 다음 사이클 추천 = review-code(heavy) cooldown(N=1) 해제 복귀(`apps/moneyball/src/components/` 또는 `scripts/` 신규 축) 또는 fix-incident(gap=9/20)/info-arch(gap=20/30) 자연 대기. Supabase DNS NXDOMAIN 지속(사용자 billing 조치 필요, 변화 없음), plan #29 만료 내일(2026-10-15, Tier4 불변).
+
 ## 🟢 SUCCESS — lotto(lite): 30-cycle gap 체크포인트 cron 정상 확인 (cycle 3198, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/23(plan #29 만료 내일 Tier4 불변). 1차 방어선(cycle 3197 retro `d605ffd4`) OK. 2차 방어선 — cycle 3196 `cycle_state.json` 파일 자체는 누락(retro commit `1c70cb9b`는 존재, 두 layer 독립 — 커밋 결손 아니므로 백필 불요). 2-chain lock 직전8(3190-3197) distinct=2(fix-incident1+review-code(heavy)6) 충족하나 잠긴 chain 중 fix-incident 포함 → 안전 예외로 lock 무시, 자유 선택 유지. fix-incident gap=8/20·info-arch gap=19/30·op-analysis gap≥25(Supabase DNS NXDOMAIN 재확인, `dig` 응답 없음 — 외부 인프라 블락 지속) 전부 미근접/actionable 아님. lotto gap=29/30(마지막 fire cycle 3169) — 거의 도달. review-code(heavy) 가 직전 7/8 dominant 이고 cycle 3195/3197 양쪽 모두 "diversity redirect(lotto)" 를 차순위로 명시 추천 — pipeline/ 재탐색 전 `accuracy-update.ts`/`brier.ts`/`daily-summary.ts` 를 재조사했으나 TODOS grep 재확인 결과 cycle 3107/3108/3117/3118/3143/13598 라인 등 이미 3회 이상 중복 감사된 stale 후보(grep-count-depth 가드레일 재확인 사례) — pipeline/ 신규 축 소진 확정, lotto 로 전환.
