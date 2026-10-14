@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): lib/players + lib/standings 8개 파일 전수 감사, buildAllTeamAccuracy cohort mismatch 수정 (cycle 3176, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/30(plan#29 spec_only_deferred, 만료 2026-10-15 내일 불변). 2-chain lock 미충족(직전8 distinct=3: fix-incident1/lotto1/review-code(heavy)6). domain 재확인(whois "No match" + `vercel domains ls` 0건, DNS resolve 실패) — 변화 없음(Tier4). Supabase 재확인 불필요(`/api/health` 대신 `gh run list` 확인, CI Failure Dispatch 전부 skipped=신규 incident 없음). op-analysis gap 60+/25(최장 미발화, DB 접근 자체가 Supabase outage로 막혀 actionable 아님 반복 확인), info-arch gap 28/30·lotto gap 7/30·fix-incident gap 8/20 전부 미근접 — review-code(heavy) streak(6연속 SUCCESS) 자연 지속, cycle 3175 recommendation(apps/moneyball/src/lib/ 잔여 중 gap 큰 쪽) 따라 mention count 최저(3회씩) players/(4파일)+standings/(4파일) 선정.
+
+**감사 방법**: 서브에이전트 미경유 — 본 메인이 8개 파일 전부 직접 Read.
+
+**발견 + 수정**: `/standings` 페이지가 `buildAllTeamAccuracy`(구 `CURRENT_MODEL_FILTER`=v1.8만)와 `buildEloTrend`(`PRODUCTION_COHORT_RULES`=v1.8+v1.8-credit-fail)를 같은 페이지에서 혼용 — 같은 페이지 두 섹션 표본이 조용히 어긋나 있었음(`#1338` family 5번째 재발, cycle 3175 바로 다음 재발). 홈페이지(`app/page.tsx`)도 동일 패턴 — `getSeasonAccuracy`는 이미 `PRODUCTION_COHORT_RULES`를 쓰는데 `buildAllTeamAccuracy`만 구 필터였음. `/accuracy` 페이지는 `CURRENT_MODEL_FILTER`를 baseline 정합 목적으로 의도적으로 사용 중(config/model.ts 문서화, `rows`/`teamRows` 동일 cohort 유지 필요한 설계) — 전역 치환 대신 `buildAllTeamAccuracy`에 optional `cohort` 파라미터 추가(기본값 = 기존 동작 유지, `/accuracy`·`/teams` 영향 없음), `/standings`·`/(home)`만 호출부에서 `PRODUCTION_COHORT_RULES` 명시 전달.
+
+**미변경(드리프트 아님 확인)**: `buildMatchupData`/`buildTeamBiasAnalysis`(`/accuracy` 전용 소비, cohort mismatch 없음) / `buildPitcherProfile.ts`·`buildPitcherLeaderboard.ts`(각 페이지 내 단독 소비, 혼용 없음) / `buildBatterLeaderboard.ts`(batter_stats 테이블 기반, scoring_rule 개념 자체 없음 — 비교 대상 아님) / `buildPitcherFipTrend.ts`·`computeMagicNumber.ts`·`buildStandings.ts`(순수 함수/단순 wrapper, drift 없음).
+
+**regression**: `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm --filter moneyball exec vitest run` 589 files/4650 tests 전부 PASS. main 직접 commit+push(`e40d668a`).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `apps/moneyball/src/lib/`(accuracy/analysis/picks/predictions/mlb/reviews) 잔여 디렉토리 재탐색 권장(players/standings 소진). domain/Supabase 상태 변화 시 fix-incident 즉시 전환. **plan #29 만료 2026-10-15(내일) — 사용자 응답 부재 시 자동 archive 처리 필요.**
+
 ## 🟢 SUCCESS — review-code(heavy): lib/teams + hooks 8개 파일 전수 감사, buildTeamFactorAverages.ts CURRENT_MODEL_FILTER 누락 1건 수정 (cycle 3175, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/24(plan #29 spec_only_deferred, 만료 2026-10-15 내일 — cycle 3137 세션 중 사용자 직접 3択 질문 완료, 응답 대기 Tier4 변화 없음). 2-chain lock 미충족(직전8 distinct=3: fix-incident2/lotto(lite)1/review-code(heavy)5). ship-0 미충족(직전10: success8+partial2). **domain 재확인**: whois 여전히 "No match", `vercel domains ls` 0 domains — 변화 없음(Tier4). **Supabase 재확인**: health-alert.yml 최신 3-run 전부 overall=failure(2026-10-13 23:19/19:21/11:55) — 지속, 코드 fix 불가. explore-idea saturation 10/15(미충족, 12 임계), info-arch gap 27/30(미근접), lotto gap 6/30(미근접), fix-incident gap 7/20(미근접) — review-code(heavy) 자연 선택. cycle 3174 recommendation(apps/moneyball/src/ lib/hooks 재탐색) 채택, lib/teams(6파일, buildTeamProfile.ts 602줄 단일 모놀리스 포함, last full audit cycle 2952 — 223-cycle gap) + hooks/(2파일) 스코프 선정.
