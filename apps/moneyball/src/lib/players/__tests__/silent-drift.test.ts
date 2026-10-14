@@ -171,27 +171,29 @@ describe("players lib — cycle 173 silent drift family `.error` 미체크 회�
     );
   });
 
-  it("buildPitcherLeaderboard — CURRENT_MODEL_FILTER match 호출 확인", async () => {
+  it("buildPitcherLeaderboard — PRODUCTION_COHORT_RULES in() 호출 확인 (#1338 family, CE row 포함)", async () => {
     supabaseMock = makeSupabaseMock({ pitcherPredictionsError: null });
     const { buildPitcherLeaderboard } = await import("../buildPitcherLeaderboard");
     await buildPitcherLeaderboard();
     const predsBuilder = supabaseMock.from.mock.results.find(
       (_r, i) => supabaseMock.from.mock.calls[i]?.[0] === "predictions",
     )?.value as Record<string, { mock: { calls: unknown[][] } }> | undefined;
-    expect(predsBuilder?.match).toHaveBeenCalledWith(
-      expect.objectContaining({ scoring_rule: expect.any(String) }),
+    expect(predsBuilder?.in).toHaveBeenCalledWith(
+      "scoring_rule",
+      expect.arrayContaining(["v1.8", "v1.8-credit-fail"]),
     );
   });
 
-  it("buildPitcherProfile — CURRENT_MODEL_FILTER match 호출 확인", async () => {
+  it("buildPitcherProfile — PRODUCTION_COHORT_RULES in() 호출 확인 (#1338 family, CE row 포함)", async () => {
     supabaseMock = makeSupabaseMock({ pitcherProfilePredsError: null });
     const { buildPitcherProfile } = await import("../buildPitcherProfile");
     await buildPitcherProfile(42).catch(() => {});
     const predsBuilder = supabaseMock.from.mock.results.find(
       (_r, i) => supabaseMock.from.mock.calls[i]?.[0] === "predictions",
     )?.value as Record<string, { mock: { calls: unknown[][] } }> | undefined;
-    expect(predsBuilder?.match).toHaveBeenCalledWith(
-      expect.objectContaining({ scoring_rule: expect.any(String) }),
+    expect(predsBuilder?.in).toHaveBeenCalledWith(
+      "scoring_rule",
+      expect.arrayContaining(["v1.8", "v1.8-credit-fail"]),
     );
   });
 });
