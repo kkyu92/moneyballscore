@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data notify+analytics 2파일 전수 감사, dead import 1건 수정 (cycle 3192, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/30(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 미충족(직전8 3184-3191 distinct=3: review-code(heavy)5+polish-ui1+fix-incident2). domain whois 재확인 — 여전히 `No match`(변화없음, registrar 영역). Supabase REST 재확인 — `http_status=000`(변화없음, billing 영역). 둘 다 코드 fix 불가 재확인. fix-incident gap=2/20·lotto gap=23/30·info-arch gap=13/30 전부 미근접. explore-idea saturation 직전15 15/15(역대 최고치) 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime ~84h 신선) — 수십 회 반복된 동일 skip 패턴.
+
+**스코프 정정**: cycle 3191 retro가 "app/api 대형 잔여(health 651/mlb 459/picks 901줄)"로 추천했으나, 실측 결과 `health/route.ts`=138줄·`mlb/pipeline/route.ts`=94줄·`picks/*` 5파일 합계=807줄로 전혀 다름 — app/api 18개 route 는 cycle 937/3099/3124/3185/3191 누적으로 이미 전체 완전 커버리지 완료 확인(추천치 stale/오류). 대체로 TODOS 0-mention(진짜 미감사) `packages/kbo-data/src/notify`(telegram.ts 257줄) + `analytics`(stale-data-snapshot.ts 208줄) 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — 2개 소스 파일 전수 read + 전역 caller grep(dead export 확인) + 테스트 mock-gap 확인 + env var parity(.env.example/sentry-scrub.ts) + Supabase 스키마 교차검증(stale-data-snapshot 소비처인 `scripts/update-stale-data.ts`의 `predictions` 테이블 컬럼 대조) 지시.
+
+**결과**: 1건 발견+수정 — `telegram.ts:2` `KBO_TEAMS` import 전역 사용처 0건(dead import), `noUnusedLocals` 미설정으로 typecheck silent pass 확인 후 제거. 나머지 전부 clean — 5개 export 전부 live caller 보유, `wave_177` silent-drift 주석이 실제 throw 로직과 정확히 일치(회귀 테스트 보유), env var 3곳 일치, stale-data-snapshot.ts 순수함수(직접 DB 접근 없음)이고 소비처 컬럼/스코어링룰 전부 정합, 테스트 양쪽 mock-gap 0건(실제 메시지 텍스트/edge case 검증).
+
+**검증**: `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean. `pnpm --filter @moneyball/kbo-data test` 96파일/1216테스트 통과. `pnpm --filter moneyball test` 590파일/4657테스트 통과(telegram.ts 원문 참조하는 silent-drift-wave 스위트 포함). 직접 main 커밋+push(R4, `337ade32`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**regression**: 1줄 삭제(미사용 import), 동작 영향 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속 시 packages/kbo-data 내 저-mention 축(`engine`/`features`/`__tests__` 등) 재확인, 또는 다양성 redirect로 lotto(gap 23/30, 접근 중) 자연 대기. domain(whois No match)/Supabase(REST 000) 둘 다 사용자 영역 불변 — plan #29 만료(내일, 2026-10-15) 도달 시 Tier4 재평가 필요.
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): app/api 5 route(kbo-scores/live/revalidate/snapshot-pitchers/pipeline) 전수 감사, drift 0건 (cycle 3191, 2026-10-14)
 
 진단: open issue 0건(`hub-dispatch` + 라벨無 양쪽 재확인). plan #29(spec_only_deferred) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변) — plan 29 는 status=approved 아니라 unprocessed-plan 자동매핑 대상 아님(전체 plan 10~30 재확인, approved 0건). 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)5+fix-incident2+polish-ui1). ship-0 미충족(직전10 success 10/10). op-analysis gap 25/25 재도달(직전25 cycle 0회 발화, `dig utmimgpccbrciwuuacyw.supabase.co` 재확인 공란 — Supabase DNS 장애 불변) — actionable 아님. fix-incident gap 1/20(직전 cycle 3190 발화 직후)·info-arch gap 12/30·lotto gap 22/30(cron 양쪽 신선 — picks `2026-10-17.md`/results `2026-10-10.md`, cycle 3190 retro의 "gap=30/30" 서술은 재계산 결과 오차로 확인 — 실제 last fire=3169, gap=22) 전부 미근접. improvement saturation 직전15 = 5/12(explore-idea 미충족). DESIGN.md mtime 3.5일(≥4주 미충족). cycle 3189 recommendation(review-code(heavy) app/api 잔여) 채택 — cycle 3185 가 이미 처리한 5개(hub-dispatch/leaderboard-sync/sync-batter-stats/version/seo) 제외한 잔여 8개(health/kbo-scores/live/mlb/picks/pipeline/revalidate/snapshot-pitchers) 중 소규모 5개(kbo-scores 155줄+live 61줄+revalidate 21줄+snapshot-pitchers 58줄+pipeline 223줄, 총 518줄) 선정 — health(651)/mlb(459)/picks(901) 대형 3개는 다음 사이클 이월.
