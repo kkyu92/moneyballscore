@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (retro-only) — fix-incident: 도메인 소실 인시던트 코드측 영향 조사, 이미 격리 확인 (cycle 3187, 2026-10-14)
+
+진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). plan #30 completed. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+polish-ui1+info-architecture-review1). ship-0 미충족(직전10 success 9+partial 1). op-analysis gap 25+/25(Supabase DNS `utmimgpccbrciwuuacyw.supabase.co` ENOTFOUND 재확인, 불변) — actionable 아님. fix-incident gap 10/20·info-arch gap 8/30·lotto gap 18/30 전부 미근접. cycle 3186 recommendation("도메인 하드코딩 참조/canonical URL 등 소실 상황 대비 안전장치 점검") 채택 — 도메인 인시던트가 어제(cycle 3186)보다 한 단계 더 깊어진 상태(Vercel 프로젝트 도메인 0건) 재확인됐기 때문에 코드측 실제 영향 범위를 직접 조사.
+
+**조사 방법**: `whois -h whois.verisign-grs.com moneyballscore.com`(재확인, "No match" 불변) + `dig +short moneyballscore.com` A레코드(공란) + `vercel domains ls`/`vercel project ls`(프로젝트 도메인 0건, production URL = `moneyballscore.vercel.app`만 존재) 로 소실 범위 재확인. 이어서 `grep -rn "moneyballscore.com" apps/moneyball/src`(프로덕션 코드 0건, 테스트 파일 1건만) + `metadataBase`/`SITE_URL`/sitemap.ts/robots.ts 전수 확인으로 코드측 실제 노출 범위 측정.
+
+**결과**: 도메인 소실은 순수 registrar 레벨 인시던트(whois "No match" 2026-10-13 인시던트 불변 재확인) — 코드로 고칠 수 없음(Tier4, 기존 project memory 추적 유지). 그러나 **코드측은 이미 완전히 격리된 상태** 확인: `packages/shared/src/site.ts` 의 `SITE_URL` 상수가 cycle 1381(PR #2184, 2026-06 경)부터 이미 `https://moneyballscore.vercel.app` 로 설정돼 있어 — `metadataBase`/canonical/OG/sitemap.ts(전체 ~90개 URL)/robots.ts 전부 vercel.app 기준으로 생성됨. 프로덕션 코드 안 `moneyballscore.com` 하드코딩 0건(테스트 1건 — `sentry-scrub.test.ts` 의 PII 스크러빙 검증용, 의도된 사용). `curl https://moneyballscore.vercel.app` 실측 200 OK(정상 서빙) — 커스텀 도메인만 끊겼을 뿐 사이트 자체(SEO canonical 포함)는 영향 없음. 신규 코드 fix 불필요 — 안전장치가 이미 선제적으로 작동 중임을 확인.
+
+**regression**: 코드 변경 없음(read-only 조사, 클린 결과로 종료).
+
+다음 사이클 추천 = review-code(heavy) 복귀(app/api 잔여 health/mlb/picks/pipeline 또는 lib/stats·calendar·changelog·debug·seasons·supabase·weather.ts) 또는 lotto(gap 18/30) 다양성 redirect 고려. 도메인 인시던트는 Tier4(사용자 registrar 조치) 불변, 코드측 추가 조치 없음 확인 완료 — 다음부턴 재확인만(상태 변화 시 project memory 갱신).
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): lib/matchup+lib/dashboard 11개 파일 전수 감사, drift 0건 (cycle 3184, 2026-10-14)
 
 진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). plan #30 completed. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+fix-incident1+info-architecture-review1). ship-0 미충족(직전10 success 다수). fix-incident gap 7·info-arch gap 5·lotto gap 15 전부 미근접(lotto cron 양쪽 신선 재확인 — `2026-10-17.md` picks + `2026-10-10.md` results). op-analysis gap 44+/25 — Supabase DNS(`utmimgpccbrciwuuacyw.supabase.co`) 여전히 ENOTFOUND, 불변. DESIGN.md mtime 3.5일(≥4주 미충족) — design-system 미근접. cycle 3183 recommendation(lib/matchup·stats·calendar·changelog·dashboard·debug·seasons·supabase 잔여) 중 CHANGELOG "전수 감사" grep 0건으로 확인된 lib/matchup(5파일)+lib/dashboard(6파일) 선정 — 둘 다 build*/compare* 함수 다수 보유해 최근 cohort mismatch 버그 클래스 재발 여부 확인 목적.
