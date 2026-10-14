@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { captureFallback } from "@/lib/observability/captureFallback";
 import {
   assertSelectOk,
   computeFactorAveragesFromPerspectives,
+  PRODUCTION_COHORT_RULES,
   type FactorPerspective,
   type TeamCode,
 } from "@moneyball/shared";
@@ -61,6 +61,13 @@ export const EMPTY_FACTOR_AVERAGES: TeamFactorAverages = {
  * buildTeamProfile.ts 도 동일 8팩터 평균을 필요로 하지만 (topPitchers/recentGames 와
  * 같은 쿼리에서 함께 뽑아내야 해서) 쿼리 자체는 별개 — 평균 계산 로직은 packages/shared
  * 단일 source (computeFactorAveragesFromPerspectives, cycle 2040 review-code heavy).
+ *
+ * scoring_rule 필터 = PRODUCTION_COHORT_RULES(v1.8 + v1.8-credit-fail) — 같은 매치업
+ * 페이지의 buildMatchupProfile.ts 가 이미 이 쿼리와 동일 이유로 정정됐음(cycle 2409,
+ * "사용자 가시 매치업 기록이라 legacy credit-fail production row 도 포함해야 함").
+ * 본 함수는 전체 히스토리(날짜/건수 제한 없음)를 스캔하므로 CURRENT_SCORING_RULE 단일
+ * 필터로는 그 legacy row 가 조용히 누락돼 같은 페이지 안에서 두 빌더의 표본이 어긋남
+ * (review-code heavy 감사, cycle 3175 — #1338 family 재발).
  */
 export async function buildTeamFactorAverages(
   teamCode: TeamCode,
@@ -102,7 +109,7 @@ export async function buildTeamFactorAverages(
         game:games!inner(home_team_id, away_team_id)
       `,
     )
-    .match(CURRENT_MODEL_FILTER)
+    .in("scoring_rule", PRODUCTION_COHORT_RULES)
     .eq("prediction_type", "pre_game")
     .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`, {
       foreignTable: "game",
