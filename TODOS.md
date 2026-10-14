@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data scrapers/fangraphs.ts 전수 감사, 미소비 필드 문서화 (cycle 3194, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/23(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 미충족(직전8 3186-3193 distinct=3: review-code(heavy)5+fix-incident2+polish-ui1). Supabase DNS ENOTFOUND 재확인(변화없음, 코드 fix 불가) — op-analysis gap 25+/25 도달하나 외부 블락 지속으로 skip. domain whois "No match" 재확인(변화없음, registrar 영역). fix-incident gap=4/20·lotto gap=25/30·info-arch gap=15/30 전부 미근접. explore-idea saturation 직전15 4/12 미충족. cycle 3193 추천 "factors/ 잔여(mlb-elo.ts/mlb-waterfall.ts)" 재검증 결과 CHANGELOG 문맥 대조(단순 grep count 아닌 실제 기사 내용 read) 결과 둘 다 이미 cycle 2243/389/414/417/944(mlb-elo) + cycle 2702/944/3201/492(mlb-waterfall) 에서 전수 재감사 완료 확인 — stale 추천이었음. 대신 `scrapers/fangraphs.ts`(KBO FanGraphs 스크레이퍼, 111줄)가 CHANGELOG 상 단 2회 passing mention(cycle 2278=MLB 자매파일 fix 중 인용만/cycle 2975=13개 파일 batch 묶음, 단독 전수 read 이력 없음) 뿐임을 확인 — 진짜 미감사 스코프로 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — fangraphs.ts 전수 read + 유일 호출부(`pipeline/daily.ts`) + 의존 모듈(`fancy-stats.ts`) + 기존 테스트(`scrapers-fangraphs-nan-fallback.test.ts`) 교차검증, rate-limit 상수 실측 대조, dead-export grep 지시.
+
+**결과**: NaN-fallback/rate-limit(`SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS=3000ms`)/cell-index 전부 코드-주석-테스트 일치, drift 0건. **발견 1건**: `bbPct`/`kPct` 필드가 스크랩·파싱·평균 계산까지 되지만 유일 호출부(`daily.ts:595-600`)가 `wrcPlus`/`iso` 만 추출해 즉시 버려짐(computed-but-unconsumed, cycle 1689 `GAME_DETAIL_FACTOR_ROWS` 와 동일 버그 클래스). `team_season_stats` 테이블에도 대응 컬럼 없음, 레포 전체 소비처 0건 확인. 삭제 대신 JSDoc 문서화로 처리(`MLB_ELO_K_POSTSEASON` 선례 따름 — house convention).
+
+**검증**: `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean. `pnpm --filter @moneyball/kbo-data test` 96파일/1216테스트 전체 통과. 직접 main 커밋+push(R4, `fd8240dc`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**regression**: 없음(주석 전용 변경, 동작 영향 0).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `scrapers/`(13개 중 fangraphs.ts 제외 나머지 — kbo-live.ts/kbo-pitcher.ts/naver-schedule.ts 는 Oct 신규 수정이라 재확인 가치 있음) 또는 다양성 redirect로 lotto(gap 25/30, 접근 중, 10/18 토 다음 추첨) 자연 대기. op-analysis(Supabase DNS NXDOMAIN 지속)/domain(whois No match) 둘 다 사용자 영역 불변 — plan #29 만료(내일, 2026-10-15) 도달 시 Tier4 재평가 필요.
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): packages/kbo-data factors/mlb-factor-detail.ts+mlb-form.ts+context/domain.ts 전수 감사, drift 0건 (cycle 3193, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/23(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 미충족(직전8 3185-3192 distinct=3: review-code(heavy)5+fix-incident2+polish-ui1). lotto gap=24/30·fix-incident gap=3/20·info-arch gap=14/30 전부 미근접. op-analysis gap 80+ cycle(Supabase DNS NXDOMAIN 지속, dig 공란 재확인 — 코드 fix 불가). explore-idea saturation 직전15 4/12 미충족. cycle 3192 추천 "engine/features 저-mention 축" 재검증 결과 engine/(predictor.ts 57회·form.ts 15회 mention — 이미 heavily audited) 대신 실측 최저 mention 3파일(factors/mlb-factor-detail.ts·factors/mlb-form.ts 각 5회, context/domain.ts 8회) 선정.
