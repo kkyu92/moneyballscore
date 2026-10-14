@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data pipeline/{db-constraints,model-version}.ts 전수 감사, stale 주석 1건 수정 (cycle 3197, 2026-10-14)
+
+진단: open issue 0건. plan #29 Tier4(만료 내일, 처리 대상 아님). 2-chain lock 직전8(3189-3196) distinct=2(review-code(heavy)7+fix-incident1) 충족하나 잠긴 chain 중 fix-incident 포함 → 안전 예외로 lock 무시. op-analysis gap 25+/25(Supabase DNS NXDOMAIN 지속)/lotto gap 28/30/info-arch gap 18/30 전부 미도달. cycle 3196 추천 따라 `packages/kbo-data/src/pipeline/` 저빈도 CHANGELOG 언급 파일 2개(`db-constraints.ts` 4회/`model-version.ts` 7회) 선정 — cycle 3001 grep-count-depth 가드레일 따라 전수 read.
+
+**감사 방법**: Agent(general-purpose) 1개 — 2개 파일 전수 read + 전체 레포 exported symbol caller grep(16개 DB_CONSTRAINTS 키 전부 + decideModelVersion/decidePostviewModelVersion) + 대응 migration/테스트 교차검증.
+
+**결과**: `db-constraints.ts` drift 0건 — 16개 키 전부 호출부 소비 확인 + `supabase/migrations/` 전수 대조(001~050 범위) 값 일치, `retroBuckets`→`calibration_buckets` 의도된 네이밍 불일치만(버그 아님). `model-version.ts` — 반환 필드 전부(`model_version`/`debate_version`/`scoring_rule`) 호출부(`daily.ts`/`postview-daily.ts`/`live.ts`) 소비 확인, 테스트(`pipeline-model-version.test.ts`) 현재 동작과 일치. **발견 1건**: `model-version.ts:43` 주석이 `isV2ModelEnabled()` 호출 위치를 `daily.ts:709`로 지칭하나 실제 위치는 `daily.ts:738`(daily.ts 리팩터링으로 29줄 이동, 주석 미동기) — 수정.
+
+**검증**: `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean. `pnpm --filter @moneyball/kbo-data test` 96파일/1216테스트 전체 통과. 직접 main 커밋+push(R4, `bfbecef0`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**regression**: 없음(주석 전용 변경).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 pipeline/ 잔여 저빈도 파일(`shadow-cohort.ts`/`backtest-sp` 류 3회선) 또는 다양성 redirect로 lotto(gap 28/30, 10/18 토 추첨 임박) 자연 전환 권장 — pipeline/ 저빈도 미감사 재고 거의 소진, 다음다음 사이클부턴 `scripts/` 또는 `apps/moneyball/src/components/` 전환 검토.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data pipeline/{db-error,winner-id,final-reasoning,save-game-record}.ts 전수 감사, drift 0건 (cycle 3196, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/23(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 직전8(3188-3195) distinct=2(review-code(heavy)6+fix-incident1+polish-ui1 — 실제론 distinct 재확인 결과 review-code(heavy) dominant) 재확인했으나 안전 예외(fix-incident 포함) 불필요 — lock 자체 미충족. op-analysis 재확인: `dig utmimgpccbrciwuuacyw.supabase.co` NXDOMAIN(exit 6) + curl 000 — Supabase DNS 여전히 미해결, gap 82-cycle(마지막 실질 fire cycle 3114) 이나 외부 인프라 불변이라 skip 유지. lotto gap=27/30(마지막 fire cycle 3169)·info-arch gap=17/30(마지막 체크포인트 cycle 3179)·fix-incident gap=6/20 전부 미근접. explore-idea 최근 15 중 review-code+fix-incident+polish-ui+info-arch 비율 미충족. approved plan 0건. `packages/kbo-data/src/pipeline/` 안 CHANGELOG 언급 0회 파일 2개(`db-error.ts`/`winner-id.ts`, 각 490B/767B) + 저빈도 2회 파일 2개(`final-reasoning.ts`/`save-game-record.ts`) 선정 — cycle 3001 grep-count-depth 가드레일 따라 전수 read 로 커버리지 직접 확인.
