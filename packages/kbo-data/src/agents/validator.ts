@@ -248,7 +248,7 @@ const CLAIM_TYPE_SIGNALS: Array<{ type: string; patterns: RegExp[] }> = [
   // 2. 두 수치 비교 — 비교 연산자 또는 대조 어휘
   { type: 'comparison', patterns: [/[<>]|보다\s*(높|낮|많|적)/, /대비/, /차이/, /격차/] },
   // 3. 팩터 기여도 해석
-  { type: 'factor_contribution', patterns: [/팩터|기여|가중치|모델|v1\.5|v2/] },
+  { type: 'factor_contribution', patterns: [/팩터|기여|가중치|모델|v\d+(\.\d+)?/] },
   // 4. 상대전적 요약
   { type: 'head_to_head', patterns: [/상대\s*전적|최근\s*\d+경기|\d+승\s*\d+패/] },
   // 5. 통계 추론 — 파크팩터·경향 해석
