@@ -43,13 +43,25 @@ async function main() {
     process.exit(1);
   }
   const supabase = createClient(url, key, { auth: { persistSession: false } });
-  const { data, error } = await supabase
-    .from("predictions")
-    .select("is_correct, scoring_rule, confidence, verified_at")
-    .eq("prediction_type", "pre_game")
-    .not("is_correct", "is", null);
-  if (error) throw error;
-  const rows = (data ?? []) as PredRow[];
+  // Pagination 의무 — supabase-js 기본 1000 row cap, 단일 조회는 대상이 1000건
+  // 넘으면 조용히 잘림 (cycle 3131 발견 패턴, cycle 3171 본 파일 재발 확인).
+  const PAGE = 1000;
+  let offset = 0;
+  const rows: PredRow[] = [];
+  while (true) {
+    const { data, error } = await supabase
+      .from("predictions")
+      .select("is_correct, scoring_rule, confidence, verified_at")
+      .eq("prediction_type", "pre_game")
+      .not("is_correct", "is", null)
+      .order("id", { ascending: true })
+      .range(offset, offset + PAGE - 1);
+    if (error) throw error;
+    rows.push(...((data ?? []) as PredRow[]));
+    if (!data || data.length < PAGE) break;
+    offset += PAGE;
+    if (offset > 100000) { console.error("safety stop — offset > 100000"); break; }
+  }
   const total = rows.length;
   const correct = rows.filter((r) => r.is_correct).length;
 

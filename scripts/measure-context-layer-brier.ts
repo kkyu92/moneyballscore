@@ -51,14 +51,26 @@ async function main() {
   }
   const supabase = createClient(url, key, { auth: { persistSession: false } });
 
-  const { data, error } = await supabase
-    .from('predictions')
-    .select('predicted_winner, confidence, is_correct, predicted_at, games(home_team_id)')
-    .eq('prediction_type', 'pre_game')
-    .not('is_correct', 'is', null)
-    .not('predicted_at', 'is', null);
-  if (error) throw error;
-  const rows = (data ?? []) as unknown as PredRow[];
+  // Pagination 의무 — supabase-js 기본 1000 row cap, 단일 조회는 대상이 1000건
+  // 넘으면 조용히 잘림 (cycle 3131 발견 패턴, cycle 3171 본 파일 재발 확인).
+  const PAGE = 1000;
+  let offset = 0;
+  const rows: PredRow[] = [];
+  while (true) {
+    const { data, error } = await supabase
+      .from('predictions')
+      .select('predicted_winner, confidence, is_correct, predicted_at, games(home_team_id)')
+      .eq('prediction_type', 'pre_game')
+      .not('is_correct', 'is', null)
+      .not('predicted_at', 'is', null)
+      .order('id', { ascending: true })
+      .range(offset, offset + PAGE - 1);
+    if (error) throw error;
+    rows.push(...((data ?? []) as unknown as PredRow[]));
+    if (!data || data.length < PAGE) break;
+    offset += PAGE;
+    if (offset > 100000) { console.error('safety stop — offset > 100000'); break; }
+  }
 
   const pre: JudgmentRecord[] = [];
   const post: JudgmentRecord[] = [];
