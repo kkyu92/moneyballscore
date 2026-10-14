@@ -1,5 +1,23 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib 잔여 7개 소형 디렉토리 전수 감사, lib/* 전체 스윕 완료 (cycle 3211, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/23 불변(29/30 deferred/completed). 2-chain lock 미충족(직전8(3203-3210) distinct=4: review-code5/lotto1/info-arch1/fix-incident1). fix-incident gap=8/20·info-arch gap=1/30(방금 발화)·lotto gap=6/30 전부 미근접. op-analysis gap=97 나 Supabase DNS NXDOMAIN 재확인(`nslookup utmimgpccbrciwuuacyw.supabase.co` → NXDOMAIN) 불변, data-blocked 지속. domain whois 재확인(`whois -h whois.verisign-grs.com moneyballscore.com` → "No match") 불변. cycle 3210 추천(review-code(heavy) 계속) 따라 자연 선택, scope는 git log 교차검증 — lib/mlb(cycle 3180 완료)·lib 9dir(cycle 3208: insights/picks/calendar/matchup/players/standings/leaderboard/accuracy/changelog)·lib 6dir(cycle 3209: reviews/dashboard/teams/predictions/seasons/lotto) 제외한 잔여 `lib/{api,debug,observability,seo,stats,supabase,v2-shadow-monitor}` 7개 소형 디렉토리(12파일)로 전체 lib/* 스윕 마무리.
+
+**전수 검증**: Agent 1개 — 12개 비-테스트 .ts 파일 전수 read + cross-reference grep.
+
+**발견 + 수정 (2건, 둘 다 stale 주석 — 로직 버그 아님)**:
+1. `debug/silentDriftStats.ts` verify-mode 주석 — "정확한 verified count는 별도 query 필요"라는 근사치 서술이 cycle 2832 `daily.ts` fix(predictions 컬럼이 verify-mode 에서 이제 `verifiedCount.value` 정확 반영, 과거엔 0 하드코딩) 이후 갱신 안 됨. 주석 정정.
+2. `supabase/server.ts` 주석 — "app/sitemap.ts 가 이미 2026-XX 에..." 미채워진 placeholder 날짜. git log로 실제 선례 커밋(`da59de31`, 2026-04-23 "sitemap을 정적 prerender로 전환") 추적해 날짜 채움.
+
+**미변경(드리프트 아님 확인)**: 나머지 10개 파일(`is-origin-allowed.ts`/`agentFallbackStats.ts`/`factorDeltaStats.ts`/`pipelineStats.ts`/`captureFallback.ts`/`seo/json-ld.ts`/`stats/pearson.ts`/`supabase/admin.ts`/`v2-shadow-monitor/{loader,parse}.ts`) 전부 주석-코드 cross-check 일치 확인.
+
+**regression**: `pnpm --filter moneyball exec tsc --noEmit` clean, vitest 7개 영향 디렉토리 9 files/54 tests 전부 PASS. direct main commit(`fe79ac28`) + push 완료(comment-only fix, R4 커버, PR 불필요).
+
+**결론**: `apps/moneyball/src/lib/*` 전체 디렉토리 전수 감사 스윕 완료 (mlb → 9dir → 6dir → 잔여 7dir, 4 사이클에 걸쳐 완결). Supabase DNS·domain whois 양쪽 Tier4 불변.
+
+다음 사이클 추천 = fix-incident(gap=9/20) 또는 lotto(gap=7/30) 자연 대기, 또는 review-code(heavy) 신규 영역(`apps/moneyball/src/app` 비-api 라우트, 또는 `packages/kbo-data/src/{agents,pipeline}`) 탐색. info-arch는 막 발화(gap=1)라 재선택 부적절.
+
 ## 🟢 SUCCESS — info-architecture-review: 30-cycle gap checkpoint, 18연속 "현 IA 충분" 재확정 (cycle 3210, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/25(plan #30 = completed_all_phases_shipped, 신규 approved 없음). 2-chain lock 미충족(직전8(3202-3209) distinct=3: review-code(heavy)6+fix-incident1+lotto1). info-arch 마지막 발화 cycle 3179, gap=31≥30 (trigger 9 충족, cycle 3209 retro가 예고한 그대로).
