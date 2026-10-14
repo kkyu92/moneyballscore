@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (retro-only) — review-code(heavy): lib/accuracy+lib/analysis 8개 파일 전수 감사, drift 0건 (cycle 3182, 2026-10-14)
+
+진단: open issue 0건. plan #29(spec_only_deferred, status≠approved) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). plan #30(completed, 신규 처리 대상 아님). 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+info-architecture-review1+fix-incident1). ship-0 미충족(직전10: success9+partial1). op-analysis gap 200+/25(최장 미발화, Supabase DNS ENOTFOUND 재확인 — `utmimgpccbrciwuuacyw.supabase.co` 여전히 미해석, billing 인시던트 지속으로 actionable 아님, 반복 결론 불변). fix-incident gap 5·info-arch gap 3·lotto gap 13 전부 미근접. `gh run list` CI 전부 success/skipped(신규 incident 없음), domain whois "No match" 변화 없음(Tier4 재확인) — cycle 3181 recommendation(lib/accuracy/lib/analysis 잔여 재탐색) 채택.
+
+**감사 방법**: Agent(general-purpose) 1개 — `apps/moneyball/src/lib/accuracy/`(4개 소스+2개 테스트) + `apps/moneyball/src/lib/analysis/`(4개 소스+8개 테스트) 전수 read, cohort constant 교차검증(CURRENT_MODEL_FILTER vs PRODUCTION_COHORT_RULES/MLB_PRODUCTION_COHORT_RULES) + stale 버전 리터럴 + dead code + comment/logic mismatch 지시.
+
+**결과**: 16개 파일 전부 클린. 이 스코프의 유일한 DB 쿼리 파일 `convergenceRecord.ts`(875줄)는 KBO/MLB 양쪽 모두 이미 올바른 production cohort 상수(`PRODUCTION_COHORT_RULES`/`MLB_PRODUCTION_COHORT_RULES`) 사용 확인 — 최근 5연속(lib/teams~lib/predictions) 발견된 cohort mismatch 버그 클래스가 이 디렉토리엔 존재하지 않음. 나머지 7개 소스 파일(`buildAccuracyData`/`buildFactorAccuracy`/`buildShadowCalibration`/`shadow-pair-prob`/`computeCompositeDuel`/`computeMlbCompositeDuel`/`factor-explanations`)는 전부 순수 함수(DB 쿼리 없음) — `buildAccuracyData.ts`의 `buildV18SubCohort`가 의도적으로 `CURRENT_SCORING_RULE` 단독 필터링하는 점도 캐스트 컨텍스트(v1.8 전용 서브코호트 분석) 확인으로 드리프트 아님 판정. dead code 0건(전 export 호출자 확인), stale 버전 리터럴 0건(`factor-explanations.test.ts`의 "v1.7-revert" 라벨은 실제 가중치값(0.15)이 v1.8과 동일해 기능 버그 아님), comment/logic mismatch 0건. `buildFactorAccuracy.ts` 전용 테스트 파일 부재(간접 커버리지만 존재) 발견했으나 로직 단순 + 저위험이라 fix 임계 미달.
+
+**regression**: 코드 변경 없음(read-only audit, 클린 결과로 종료).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 lib/accuracy+lib/analysis 양쪽 소진 확인됨 — `lib/charts`/`lib/seo`/`app/api` 잔여 디렉토리 재탐색 또는 다양성 redirect(fix-incident/info-arch/lotto 중 gap 가장 큰 lotto) 검토 권장. op-analysis는 Supabase billing 미해결 지속(200+ cycle 미발화) — 사용자 영역, 코드 fix 불가. plan #29 만료 2026-10-15(내일) — 다음 사이클 당일 도달 시 자동 archive 처리 확인 필요.
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): lib/predictions 6개 파일 전수 감사, drift 0건 (cycle 3181, 2026-10-14)
 
 진단: open issue 0건. plan #29(spec_only_deferred, status≠approved) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)5+fix-incident1+info-architecture-review1+lotto1). ship-0 미충족(직전10: success9+partial1). op-analysis gap 25+/25(최장 미발화)지만 Supabase DNS 장애 지속 재확인 불필요(cycle 3176/3180 반복 확인 결론 불변). fix-incident gap 4·info-arch gap 2·lotto gap 12 전부 미근접. `gh run list` CI Failure Dispatch 전부 skipped(신규 incident 없음), domain whois "No match" 변화 없음(Tier4) — cycle 3180 recommendation(lib/predictions, gap 182) 채택.
