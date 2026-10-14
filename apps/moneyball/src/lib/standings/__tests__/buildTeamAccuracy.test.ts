@@ -10,6 +10,7 @@ function makeMock(opts: MockOptions = {}) {
   const builder = {
     select: vi.fn().mockReturnThis(),
     match: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     not: vi.fn().mockResolvedValue({
       data: opts.error ? null : (opts.data ?? []),
@@ -87,13 +88,19 @@ describe("buildAllTeamAccuracy", () => {
     expect(result).toEqual([]);
   });
 
-  it("CURRENT_MODEL_FILTER 적용 — match 호출 확인", async () => {
+  it("기본 cohort = CURRENT_MODEL_FILTER(v1.8 단일값) — in() 호출 확인", async () => {
     supabaseMock = makeMock({ data: [] });
     await buildAllTeamAccuracy();
     const builder = supabaseMock.from.mock.results[0].value;
-    expect(builder.match).toHaveBeenCalledWith(
-      expect.objectContaining({ scoring_rule: expect.any(String) }),
-    );
+    expect(builder.in).toHaveBeenCalledWith("scoring_rule", [expect.any(String)]);
+    expect(builder.in.mock.calls[0][1]).toHaveLength(1);
+  });
+
+  it("cohort 옵션 전달 시 그대로 in() 에 사용 (standings/home 의 PRODUCTION_COHORT_RULES 일치 목적, #1338 family)", async () => {
+    supabaseMock = makeMock({ data: [] });
+    await buildAllTeamAccuracy({ cohort: ["v1.8", "v1.8-credit-fail"] });
+    const builder = supabaseMock.from.mock.results[0].value;
+    expect(builder.in).toHaveBeenCalledWith("scoring_rule", ["v1.8", "v1.8-credit-fail"]);
   });
 });
 

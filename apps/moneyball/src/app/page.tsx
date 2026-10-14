@@ -599,7 +599,7 @@ export default async function HomePage() {
     getWeekAheadSchedule(),
     getYesterdayResults(),
     buildStandings(),
-    buildAllTeamAccuracy(),
+    buildAllTeamAccuracy({ cohort: PRODUCTION_COHORT_RULES }),
     getRecentWeeksAccuracy(),
   ]);
   const games = gamesR.status === "fulfilled" ? gamesR.value : captureFallback(gamesR.reason, [] as HomeGame[], { route: "/", source: "getTodayPredictions" });

@@ -1,8 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk, SMALL_SAMPLE_N, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, SMALL_SAMPLE_N, type ScoringRule, type TeamCode } from "@moneyball/shared";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { fetchStandings, type StandingRow } from "@moneyball/kbo-data";
 import { captureFallback } from "@/lib/observability/captureFallback";
+
+/**
+ * 호출자가 cohort 를 명시 안 하면 CURRENT_MODEL_FILTER(scoring_rule=v1.8만) 유지.
+ * /accuracy 는 이 기본값에 의존(baseline 정합 — rows 와 동일 cohort, config/model.ts
+ * 문서 참조). /standings·/(home) 은 buildEloTrend/다른 쿼리와 동일 페이지에서
+ * PRODUCTION_COHORT_RULES(v1.8+v1.8-credit-fail) 를 쓰고 있어 cohort mismatch
+ * (#1338 family) 였음 — 호출부에서 명시적으로 PRODUCTION_COHORT_RULES 전달하도록 분리
+ * (review-code heavy 감사, cycle 3176).
+ */
+const DEFAULT_COHORT: readonly ScoringRule[] = [CURRENT_MODEL_FILTER.scoring_rule];
 
 export interface TeamAccuracyRow {
   teamCode: TeamCode;
@@ -58,7 +68,10 @@ interface TeamBiasRow {
   biasGap: number | null; // predictedWinRate - actualWinPct
 }
 
-export async function buildAllTeamAccuracy(): Promise<TeamAccuracyRow[]> {
+export async function buildAllTeamAccuracy(
+  options: { cohort?: readonly ScoringRule[] } = {},
+): Promise<TeamAccuracyRow[]> {
+  const cohort = options.cohort ?? DEFAULT_COHORT;
   const supabase = await createClient();
 
   const result = await supabase
@@ -72,7 +85,7 @@ export async function buildAllTeamAccuracy(): Promise<TeamAccuracyRow[]> {
       )
     `,
     )
-    .match(CURRENT_MODEL_FILTER)
+    .in("scoring_rule", cohort)
     .eq("prediction_type", "pre_game")
     .not("is_correct", "is", null);
 

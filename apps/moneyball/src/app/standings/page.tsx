@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT, KBO_PLAYOFF_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record, SMALL_SAMPLE_N, VENUE_RECORD_MIN_GAMES, VENUE_WIN_RATE_HIGH, VENUE_WIN_RATE_LOW } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_PLAYOFF_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record, SMALL_SAMPLE_N, VENUE_RECORD_MIN_GAMES, VENUE_WIN_RATE_HIGH, VENUE_WIN_RATE_LOW, PRODUCTION_COHORT_RULES } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -111,7 +111,7 @@ export default async function StandingsPage() {
   // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
   const [standingsR, teamAccuracyR, eloTrendR] = await Promise.allSettled([
     buildStandings(),
-    buildAllTeamAccuracy(),
+    buildAllTeamAccuracy({ cohort: PRODUCTION_COHORT_RULES }),
     buildEloTrend(),
   ]);
   const standings = standingsR.status === "fulfilled" ? standingsR.value : captureFallback(standingsR.reason, [], { route: "/standings", source: "buildStandings" });
