@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS (retro-only) — review-code(heavy): packages/kbo-data factors/mlb-factor-detail.ts+mlb-form.ts+context/domain.ts 전수 감사, drift 0건 (cycle 3193, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/23(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 미충족(직전8 3185-3192 distinct=3: review-code(heavy)5+fix-incident2+polish-ui1). lotto gap=24/30·fix-incident gap=3/20·info-arch gap=14/30 전부 미근접. op-analysis gap 80+ cycle(Supabase DNS NXDOMAIN 지속, dig 공란 재확인 — 코드 fix 불가). explore-idea saturation 직전15 4/12 미충족. cycle 3192 추천 "engine/features 저-mention 축" 재검증 결과 engine/(predictor.ts 57회·form.ts 15회 mention — 이미 heavily audited) 대신 실측 최저 mention 3파일(factors/mlb-factor-detail.ts·factors/mlb-form.ts 각 5회, context/domain.ts 8회) 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — 3개 소스 파일 + 직접 의존 파일(mlb-waterfall.ts/mlb-overview.ts/mlb-pipeline.ts/agent-context.ts/양쪽 game-detail page.tsx/양쪽 테스트 파일) 전수 read, dead-export grep, comment-formula 대조, DB 교차검증 지시.
+
+**결과**: drift/버그 0건. dead code 0건(KBO_DOMAIN_KB test-only 는 cycle 2927 기 문서화된 의도 유지). comment/formula 전부 실측 일치(EXCLUDED_DETAIL_FACTORS 10개 키 정합, formatMlbFactorValue 스케일 정합, TIME_WINDOWS 값 h2h_window.games=50/recent_form.games=RECENT_FORM_GAMES/h2h_recent_games.games=5 전부 호출부와 일치). 판단보류 2건(domain.ts 는 KBO 전용 설계 — MLB 는 debate/LLM-agent 레이어 자체가 없어 mlb-form.ts 가 참조 안 하는 게 아키텍처상 정상, MLB_RECENT_FORM_GAMES 단일 상수 부재는 범위 확장이라 보류 / renderTimeWindowsForLLM 테스트의 h2h_recent_games 미검증은 경미 커버리지 gap, 둘 다 fix 대상 아님).
+
+**검증**: `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean. `pnpm --filter @moneyball/kbo-data test` 96파일/1216테스트 전체 통과. 코드 변경 없음(retro-only, 커밋 없음).
+
+**regression**: 없음(변경 0건).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 factors/ 잔여(mlb-elo.ts 29회/mlb-waterfall.ts 17회 — mention 은 있으나 전수 read 이력 불명확) 또는 scrapers/fangraphs.ts(5회, 최저) 재탐색. 또는 다양성 redirect로 lotto(gap 25/30, 접근 중) 자연 대기. op-analysis(Supabase DNS NXDOMAIN 80+ cycle)/domain(whois No match) 둘 다 사용자 영역 불변 — plan #29 만료(내일, 2026-10-15) 도달 시 Tier4 재평가 필요.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data notify+analytics 2파일 전수 감사, dead import 1건 수정 (cycle 3192, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/30(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 미충족(직전8 3184-3191 distinct=3: review-code(heavy)5+polish-ui1+fix-incident2). domain whois 재확인 — 여전히 `No match`(변화없음, registrar 영역). Supabase REST 재확인 — `http_status=000`(변화없음, billing 영역). 둘 다 코드 fix 불가 재확인. fix-incident gap=2/20·lotto gap=23/30·info-arch gap=13/30 전부 미근접. explore-idea saturation 직전15 15/15(역대 최고치) 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime ~84h 신선) — 수십 회 반복된 동일 skip 패턴.
