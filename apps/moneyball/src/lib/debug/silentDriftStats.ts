@@ -8,9 +8,11 @@ export interface PipelineRunForDrift {
   games_found: number;
   predictions: number;
   created_at: string;
-  // verify mode 의 verified_count = updateAccuracy fire 결과
-  // 본 helper 는 mode='verify' 일 때 games_found > 0 + predictions = 0 = silent drop 가정.
-  // 정확한 verified count 는 별도 query 필요 — 본 helper 는 pipeline_runs 기반 proxy.
+  // verify mode 의 predictions 컬럼 = verifiedCount (daily.ts cycle 2832 fix 이전엔
+  // verify mode 전부 하드코딩 0 이라 이 컬럼이 항상 0 — 모든 verify run 이 silent 로
+  // 오판정되는 self-defeat bug 였음. cycle 2832 이후 verifyResults.length 를 그대로
+  // 반영해 아래 games_found > 0 + predictions = 0 판정이 정확한 verified=0 신호가 됨
+  // (별도 query 불필요).
 }
 
 interface SilentDriftEvent {
@@ -51,7 +53,7 @@ export function buildSilentDriftCohort(runs: PipelineRunForDrift[]): SilentDrift
       alert_type: 'predict_final_silent_drift' as const,
     }));
 
-  // verify: games_found > 0 + predictions = 0 proxy (verified_count 별도 query 필요)
+  // verify: games_found > 0 + predictions(=verifiedCount) = 0 (cycle 2832 fix 이후 정확)
   const verifySilent: SilentDriftEvent[] = verifyRuns
     .filter((r) => r.games_found > 0 && r.predictions === 0)
     .map((r) => ({
