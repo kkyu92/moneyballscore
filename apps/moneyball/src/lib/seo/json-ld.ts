@@ -1,151 +1,20 @@
 /**
- * schema.org JSON-LD builders — SportsEvent / SportsTeam / Person / Article / BreadcrumbList.
+ * schema.org JSON-LD builders — Article / BreadcrumbList.
  *
- * 실제 사용처 (cycle 2832 확인): `insights/series/[topic]/page.tsx` 만 본 모듈
- * import. `predictions/[date]/page.tsx` 는 동일 이름(`buildSportsEventJsonLd`/
- * `buildArticleJsonLd`)의 로컬 함수를 별도로 포크해 사용 중 — 본 모듈 미참조,
- * 로직도 갈라져 있음(comment-drift, 통합은 별도 스코프). `insights/page.tsx`
- * (topic 리스트) / `analysis/game/[id]/page.tsx` / `guide/page.tsx` 는 여전히
- * 자체 inline JSON-LD 유지 — 본 모듈로 추출된 적 없음(위 "패턴 정합" 서술은
- * 실현 안 된 계획, 코드 기준 stale).
- *
- * 사용 패턴:
- * ```tsx
- * <script
- *   type="application/ld+json"
- *   dangerouslySetInnerHTML={{ __html: JSON.stringify(buildSportsEventJsonLd({...})) }}
- * />
- * ```
+ * 실제 사용처 (cycle 3183 재확인): `insights/series/[topic]/page.tsx` (ko/en/mlb
+ * 3개) 만 본 모듈 import, `buildArticleJsonLd`/`buildBreadcrumbListJsonLd` 둘만
+ * 소비. `predictions/[date]/page.tsx` 는 동일 이름(`buildSportsEventJsonLd`/
+ * `buildArticleJsonLd`)의 로컬 함수를 별도로 포크해 사용 중 — 본 모듈 미참조.
+ * `insights/page.tsx` (topic 리스트) / `analysis/game/[id]/page.tsx` /
+ * `guide/page.tsx` 는 여전히 자체 inline JSON-LD 유지 — 본 모듈로 추출된 적 없음.
+ * `buildSportsEventJsonLd`/`buildSportsTeamJsonLd`/`buildPersonJsonLd` 는
+ * production 소비자 0 (테스트에서만 참조) 확인 후 cycle 3183 제거.
  */
 
-import { KBO_DEFAULT_GAME_TIME, KBO_TEAMS, type TeamCode, SITE_URL, KBO_OFFICIAL_URL } from "@moneyball/shared";
+import { SITE_URL } from "@moneyball/shared";
 
 export { SITE_URL };
 const SITE_NAME = "MoneyBall Score";
-const ORG_NAME = "Korea Baseball Organization";
-const ORG_URL = KBO_OFFICIAL_URL;
-
-/** SportsEvent 입력 */
-interface SportsEventInput {
-  gameId: number;
-  homeTeam: TeamCode;
-  awayTeam: TeamCode;
-  /** YYYY-MM-DD */
-  gameDate: string;
-  /** HH:mm:ss or HH:mm (default 18:30) */
-  gameTime?: string | null;
-  /** "scheduled" | "live" | "final" | "postponed" | "canceled" */
-  status?: string;
-  /** override stadium name (else uses KBO_TEAMS[home].stadium) */
-  stadium?: string | null;
-  /** explicit URL (else `${SITE_URL}/analysis/game/{id}`) */
-  url?: string;
-}
-
-function eventStatusIri(status: string | undefined): string {
-  switch (status) {
-    case "postponed":
-      return "https://schema.org/EventPostponed";
-    case "final":
-    case "completed":
-      return "https://schema.org/EventCompleted";
-    case "canceled":
-    case "cancelled":
-      return "https://schema.org/EventCancelled";
-    default:
-      return "https://schema.org/EventScheduled";
-  }
-}
-
-export function buildSportsEventJsonLd(input: SportsEventInput) {
-  const homeFullName = KBO_TEAMS[input.homeTeam].name;
-  const awayFullName = KBO_TEAMS[input.awayTeam].name;
-  const stadium = input.stadium ?? KBO_TEAMS[input.homeTeam].stadium;
-  const time = (input.gameTime ?? KBO_DEFAULT_GAME_TIME).slice(0, 5);
-  const startDateIso = `${input.gameDate}T${time}:00+09:00`;
-  const url = input.url ?? `${SITE_URL}/analysis/game/${input.gameId}`;
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "SportsEvent",
-    name: `${awayFullName} vs ${homeFullName}`,
-    description: `KBO 리그 ${awayFullName} vs ${homeFullName} 경기 (${input.gameDate} ${time}, ${stadium}).`,
-    startDate: startDateIso,
-    sport: "Baseball",
-    eventStatus: eventStatusIri(input.status),
-    location: {
-      "@type": "Place",
-      name: stadium,
-      address: { "@type": "PostalAddress", addressCountry: "KR" },
-    },
-    homeTeam: { "@type": "SportsTeam", name: homeFullName },
-    awayTeam: { "@type": "SportsTeam", name: awayFullName },
-    url,
-    organizer: {
-      "@type": "SportsOrganization",
-      name: ORG_NAME,
-      url: ORG_URL,
-    },
-  };
-}
-
-/** SportsTeam 입력 */
-interface SportsTeamInput {
-  team: TeamCode;
-  /** explicit URL (else `${SITE_URL}/teams/{code}`) */
-  url?: string;
-  /** explicit logo URL */
-  logo?: string;
-}
-
-export function buildSportsTeamJsonLd(input: SportsTeamInput) {
-  const info = KBO_TEAMS[input.team];
-  const url = input.url ?? `${SITE_URL}/teams/${input.team.toLowerCase()}`;
-  return {
-    "@context": "https://schema.org",
-    "@type": "SportsTeam",
-    name: info.name,
-    sport: "Baseball",
-    url,
-    ...(input.logo ? { logo: input.logo } : {}),
-    location: { "@type": "Place", name: info.stadium },
-    memberOf: {
-      "@type": "SportsOrganization",
-      name: ORG_NAME,
-      url: ORG_URL,
-    },
-  };
-}
-
-/** Person (player) 입력 */
-interface PersonInput {
-  name: string;
-  /** 포지션 (예: "Pitcher", "First Baseman") */
-  jobTitle?: string;
-  /** 소속 팀 코드 */
-  team?: TeamCode;
-  /** explicit URL */
-  url?: string;
-}
-
-export function buildPersonJsonLd(input: PersonInput) {
-  const affiliation = input.team
-    ? {
-        affiliation: {
-          "@type": "SportsTeam",
-          name: KBO_TEAMS[input.team].name,
-        },
-      }
-    : {};
-  return {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: input.name,
-    ...(input.jobTitle ? { jobTitle: input.jobTitle } : {}),
-    ...(input.url ? { url: input.url } : {}),
-    ...affiliation,
-  };
-}
 
 /** Article 입력 */
 interface ArticleInput {

@@ -5,11 +5,8 @@ import {
   listSeriesTopics,
 } from "../series";
 import {
-  buildSportsEventJsonLd,
   buildArticleJsonLd,
   buildBreadcrumbListJsonLd,
-  buildSportsTeamJsonLd,
-  buildPersonJsonLd,
   SITE_URL,
 } from "@/lib/seo/json-ld";
 
@@ -88,48 +85,6 @@ describe("getSeriesByTopic — CE cohort inclusion (cycle 3061)", () => {
 });
 
 describe("seo/json-ld helpers", () => {
-  it("buildSportsEventJsonLd shape — SportsEvent + 필수 필드", () => {
-    const ld = buildSportsEventJsonLd({
-      gameId: 42,
-      homeTeam: "LG",
-      awayTeam: "HT",
-      gameDate: "2026-05-28",
-      gameTime: "18:30",
-      status: "scheduled",
-    });
-    expect(ld["@context"]).toBe("https://schema.org");
-    expect(ld["@type"]).toBe("SportsEvent");
-    expect(ld.sport).toBe("Baseball");
-    expect(ld.eventStatus).toBe("https://schema.org/EventScheduled");
-    expect(ld.name).toContain("KIA");
-    expect(ld.name).toContain("LG");
-    expect(ld.startDate).toBe("2026-05-28T18:30:00+09:00");
-    expect(ld.url).toBe(`${SITE_URL}/analysis/game/42`);
-    expect(ld.homeTeam.name).toBe("LG 트윈스");
-    expect(ld.awayTeam.name).toBe("KIA 타이거즈");
-    expect(ld.location.name).toContain("서울");
-  });
-
-  it("buildSportsEventJsonLd — final 상태 = EventCompleted, postponed = EventPostponed", () => {
-    const final = buildSportsEventJsonLd({
-      gameId: 1,
-      homeTeam: "LG",
-      awayTeam: "HT",
-      gameDate: "2026-05-28",
-      status: "final",
-    });
-    expect(final.eventStatus).toBe("https://schema.org/EventCompleted");
-
-    const postponed = buildSportsEventJsonLd({
-      gameId: 2,
-      homeTeam: "LG",
-      awayTeam: "HT",
-      gameDate: "2026-05-28",
-      status: "postponed",
-    });
-    expect(postponed.eventStatus).toBe("https://schema.org/EventPostponed");
-  });
-
   it("buildArticleJsonLd shape — Article + ko-KR + Organization author/publisher", () => {
     const ld = buildArticleJsonLd({
       url: `${SITE_URL}/insights/series/ht-vs-lg`,
@@ -156,23 +111,5 @@ describe("seo/json-ld helpers", () => {
     expect(ld.itemListElement[0].position).toBe(1);
     expect(ld.itemListElement[2].position).toBe(3);
     expect(ld.itemListElement[2].name).toBe("KIA vs LG");
-  });
-
-  it("buildSportsTeamJsonLd + buildPersonJsonLd basic shape", () => {
-    const team = buildSportsTeamJsonLd({ team: "LG" });
-    expect(team["@type"]).toBe("SportsTeam");
-    expect(team.sport).toBe("Baseball");
-    expect(team.url).toBe(`${SITE_URL}/teams/lg`);
-
-    const person = buildPersonJsonLd({
-      name: "오스틴 딘",
-      jobTitle: "First Baseman",
-      team: "LG",
-    });
-    expect(person["@type"]).toBe("Person");
-    expect(person.jobTitle).toBe("First Baseman");
-    expect((person as { affiliation: { name: string } }).affiliation.name).toBe(
-      "LG 트윈스",
-    );
   });
 });
