@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/agents/ 14개 파일 전수 감사, validator.ts regex stale version literal 1건 수정 (cycle 3174, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/24(plan #29 spec_only_deferred 만료 2026-10-15 — 내일, Tier4 대기 변화 없음). 2-chain lock 미충족(직전8 distinct=4: polish-ui1/fix-incident2/lotto1/review-code(heavy)4). ship-0 미충족(직전10: success8+partial2). **domain 재확인**: `whois -h whois.verisign-grs.com moneyballscore.com` 여전히 "No match", `vercel domains ls` 0 domains — cycle 3167 최초 발견 이후 변화 없음(Tier4 사용자 registrar 영역). **Supabase 재확인**: health-alert.yml 최신 run(2026-10-13T23:19) overall=fail, `health.leagues`/`pipeline_runs` "fetch failed" 지속 — 4일+, 코드 fix 불가. op-analysis gap=74+(3100-3173 미발화)지만 동일 블락으로 actionable 아님. cycle 3173 recommendation(packages/kbo-data/src/agents/, 71-cycle gap, validator.ts 51KB) 그대로 채택.
+
+**감사 방법**: Explore 서브에이전트 2개 병렬 — (A) validator.ts/judge-agent.ts/debate.ts/calibration-agent.ts/retro.ts/postview.ts 6파일, (B) llm.ts/llm-deepseek.ts/llm-ollama.ts/personas.ts/team-agent.ts/mlb-retro.ts/rivalry-memory.ts/types.ts/validator-logger.ts 8파일. cycle 3161 교훈(서브에이전트 grep 범위가 packages/apps 로 한정돼 scripts/ import 누락 → 오탐) 반영해 양쪽 agent에게 scripts/·supabase/·.github/workflows/ 포함 전체 repo cross-check 명시 지시.
+
+**발견 + 수정**: `validator.ts:251` CLAIM_TYPE_SIGNALS 의 `factor_contribution` claim-type regex가 `/팩터|기여|가중치|모델|v1\.5|v2/` — 구버전 리터럴(v1.5, v2) 하드코딩. 현재 prod scoring rule은 `CURRENT_SCORING_RULE='v1.8'`이고, 이 값이 `judge-agent.ts:23`/`debate.ts:86`를 통해 실제 judge reasoning 텍스트에 직접 주입되므로 리터럴 "v1.5"/"v2"는 현재 출력과 매칭될 일이 없음. 같은 alternation 안 "모델"/"가중치" 일반 단어가 대부분 케이스를 이미 커버해 practical impact는 낮았으나(관측 가능한 오탐 없음), 과거 이미 두 번 수정된 동일 class의 stale-version-literal drift(`6406511e` wave-239, `477d7ebe` wave-220)와 동일 패턴이라 `v\d+(\.\d+)?` 일반 패턴으로 교체 — 향후 버전 승격 시 재발 구조적 차단.
+
+**미변경(드리프트 아님 확인)**: 나머지 13개 파일 — LLM provider dispatch(`llm.ts`/`llm-deepseek.ts`/`llm-ollama.ts` retry/backoff 산술 및 모델 매핑), `PERSONA_VERSION`(`v2-persona4`, 테스트로 고정), `team-agent.ts`의 validator threshold 주석(strict/lenient WARN_LIMIT) vs `validator.ts` 실제 상수, `mlb-retro.ts`의 "MLB predictions.factors 컬럼 없음"/"is_correct 항상 NULL" 설계 확인, `rivalry-memory.ts`의 "never throws" 계약(호출부 `team-agent.ts`가 try/catch 없이 의존) — 전부 comment=logic=caller 일치, 실제 drift 0건.
+
+**regression**: `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean, `pnpm --filter @moneyball/kbo-data test -- --run` 96 files/1216 tests 전부 PASS, pre-push lint+type-check+version-sync-guard 통과. main 직접 commit+push(`093909d6`).
+
+다음 사이클 추천 = packages/kbo-data 패키지(pipeline/engine/scrapers/agents/top-level) 거의 소진 — 다음 review-code(heavy)는 `apps/moneyball/src/` 쪽 lib/hooks/app 라우트 비즈니스 로직 재탐색 권장. 또는 domain(Tier4, 재확인만 가능)/Supabase outage(4일+, 사용자 billing 조치 필요) 상태 변화 시 fix-incident/op-analysis 즉시 전환. **plan #29 만료 2026-10-15(1일 남음, 임박) — Tier4 대기 계속.**
+
 ## 🟢 SUCCESS (RETRO-ONLY) — review-code(heavy): components/{leaderboard,live,matchup} 16개 파일 전수 감사, drift 0건 (cycle 3173, 2026-10-14)
 
 진단: open issue 0건(`gh issue list --label hub-dispatch` 0). approved plan 0/24(plan #29 spec_only_deferred 만료 2026-10-15 — 내일, Tier4 대기 변화 없음; plan #30 completed). 2차 방어선(cycle 3172 retro `16c66686`) OK. 직전8(3165-3172) distinct=4(review-code(heavy)4/fix-incident2/polish-ui1/lotto1) — 2-chain lock 미충족. gap trigger: fix-incident 5/20(last 3168)·lotto 4/30(last 3169)·info-arch 25/30(last 3148) 전부 미근접. op-analysis gap=59/25 크게 초과하나 Supabase REST 직접 curl 재확인 — `utmimgpccbrciwuuacyw.supabase.co` DNS resolve 자체 실패(`Could not resolve host`) 지속, DB 쿼리 기반 측정 전부 차단 skip(기존 billing outage 패턴 재확인). review-code(heavy) 자연 선택.
