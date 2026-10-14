@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): lib/seo+api/seo+v2-shadow-monitor+observability 9개 파일 전수 감사, dead code 1건 수정 (cycle 3183, 2026-10-14)
+
+진단: open issue 0건. plan #29(spec_only_deferred) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). plan #30 completed. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+fix-incident1+info-architecture-review1). ship-0 미충족(직전10: success9+partial1). op-analysis gap 33+/25(Supabase DNS 장애 지속, 불변). fix-incident gap 6·info-arch gap 4·lotto gap 14 전부 미근접(lotto cron 양쪽 신선 확인). cycle 3182 recommendation(lib/charts/lib/seo/app/api 잔여 재탐색) 채택, 소규모 디렉토리 묶음(lib/seo+app/api/seo+v2-shadow-monitor+observability, 총 9파일) 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — 9개 파일 전수 read, cohort constant 교차검증 + stale 버전 리터럴 + dead code(전역 caller grep) + comment/logic mismatch + 테스트 커버리지 지시.
+
+**결과**: 이 스코프는 DB 쿼리 파일이 전혀 없어 cohort mismatch 버그 클래스 자체가 해당 없음. 대신 `lib/seo/json-ld.ts`에서 dead code 발견 — `buildSportsEventJsonLd`/`buildSportsTeamJsonLd`/`buildPersonJsonLd` 3개 함수가 production 소비자 0 (predictions/[date]/page.tsx 는 동일 이름의 별도 로컬 함수를 포크해 사용, 본 모듈 미참조) — `series.test.ts`에서만 참조되던 순수 사장 코드. 3함수 + 관련 interface(`SportsEventInput`/`SportsTeamInput`/`PersonInput`)/헬퍼(`eventStatusIri`) 삭제, 불필요해진 import(`KBO_TEAMS`/`KBO_DEFAULT_GAME_TIME`/`TeamCode`/`KBO_OFFICIAL_URL`) + 상수(`ORG_NAME`/`ORG_URL`) 정리 — 파일 205→91줄. `series.test.ts` 대응 테스트 3건 제거(7→5). 나머지 8개 파일(`api/seo/indexnow/ping`, `v2-shadow-monitor/{parse,loader}`, `observability/captureFallback`) 전부 클린 — indexnow ping route는 실제 cron(`indexnow-ping.yml`)에 정상 연결 확인, v2-shadow-monitor 파싱 로직은 테스트와 일치, captureFallback은 60+ 콜사이트에서 정상 사용 확인.
+
+**regression**: vitest series.test.ts 7→5 passed, `tsc --noEmit` clean. direct main push 완료(pre-push lint/type-check 전부 green).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 app/api(pipeline/picks/health/leaderboard/version/live/kbo-scores/mlb/revalidate) 또는 lib/matchup·stats·calendar·changelog·dashboard·debug·reviews·seasons·supabase·weather.ts 잔여 재탐색. 또는 다양성 redirect로 lotto(gap 14, 미근접 chain 중 최대) 선제 확인 고려. op-analysis는 Supabase billing 미해결 지속 — 사용자 영역. plan #29 만료 2026-10-15(내일) — 다음 사이클 당일 도달 시 자동 archive 처리 확인 필요.
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): lib/accuracy+lib/analysis 8개 파일 전수 감사, drift 0건 (cycle 3182, 2026-10-14)
 
 진단: open issue 0건. plan #29(spec_only_deferred, status≠approved) 만료 2026-10-15(내일, 당일 미도달, Tier4 불변). plan #30(completed, 신규 처리 대상 아님). 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)6+info-architecture-review1+fix-incident1). ship-0 미충족(직전10: success9+partial1). op-analysis gap 200+/25(최장 미발화, Supabase DNS ENOTFOUND 재확인 — `utmimgpccbrciwuuacyw.supabase.co` 여전히 미해석, billing 인시던트 지속으로 actionable 아님, 반복 결론 불변). fix-incident gap 5·info-arch gap 3·lotto gap 13 전부 미근접. `gh run list` CI 전부 success/skipped(신규 incident 없음), domain whois "No match" 변화 없음(Tier4 재확인) — cycle 3181 recommendation(lib/accuracy/lib/analysis 잔여 재탐색) 채택.
