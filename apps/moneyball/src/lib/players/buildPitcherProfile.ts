@@ -7,8 +7,8 @@ import {
   type TeamCode,
   RECENT_FORM_GAMES,
   PITCHER_TEAM_RECORD_MIN_GAMES,
+  PRODUCTION_COHORT_RULES,
 } from '@moneyball/shared';
-import { CURRENT_MODEL_FILTER } from "@/config/model";
 
 export interface PitcherAppearance {
   gameId: number;
@@ -149,7 +149,7 @@ export async function buildPitcherProfile(
       `,
     )
     .eq("prediction_type", "pre_game")
-    .match(CURRENT_MODEL_FILTER)) as unknown as SelectResult<AppearanceRow[]>;
+    .in("scoring_rule", PRODUCTION_COHORT_RULES as readonly string[])) as unknown as SelectResult<AppearanceRow[]>;
 
   const { data: preds } = assertSelectOk(
     predsResult,

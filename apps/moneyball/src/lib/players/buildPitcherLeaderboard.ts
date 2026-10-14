@@ -5,8 +5,8 @@ import {
   shortTeamName,
   type SelectResult,
   type TeamCode,
+  PRODUCTION_COHORT_RULES,
 } from "@moneyball/shared";
-import { CURRENT_MODEL_FILTER } from "@/config/model";
 
 interface PitcherLeaderboardRow {
   playerId: number;
@@ -136,7 +136,7 @@ export async function buildPitcherLeaderboard(options: {
       `,
     )
     .eq("prediction_type", "pre_game")
-    .match(CURRENT_MODEL_FILTER)) as unknown as SelectResult<Row[]>;
+    .in("scoring_rule", PRODUCTION_COHORT_RULES as readonly string[])) as unknown as SelectResult<Row[]>;
 
   const { data } = assertSelectOk(queryResult, "buildPitcherLeaderboard predictions");
   const rows = (data ?? []) as Row[];
