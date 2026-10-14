@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data pipeline/{prediction-history,brier,daily-summary,accuracy-update}.ts 전수 감사, 미소비 필드 문서화 (cycle 3195, 2026-10-14)
+
+진단: open issue 0건. approved plan 0/23(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 직전8(3187-3194) distinct=2(review-code(heavy)6+fix-incident2) 충족했으나 잠긴 chain 중 하나가 fix-incident → 룰에 따라 lock 무시. op-analysis gap 25+/25 도달 재확인(`dig`/`curl` 재검증, Supabase DNS 여전히 미해결 — NXDOMAIN) skip. lotto gap=26/30·info-arch gap=16/30·fix-incident gap=5/20 전부 미근접. explore-idea saturation 직전15 3/12 미충족. approved plan 0건(plan #29 상태 spec_only_deferred, Tier4 불변). cycle 3194 추천(scrapers/kbo-live.ts·kbo-pitcher.ts·naver-schedule.ts)은 재검증 결과 전부 이미 cycle 2975(kbo-live/kbo-pitcher 전수 fix 완료)+cycle 3099(naver-schedule cancel/suspended 필드 cross-reference)에서 다뤄진 stale 추천 확인 — app/api/ 전체 route 도 과거 다회 전수 스윕 확인(line 254 13개 route 묶음 감사 등). 대신 `packages/kbo-data/src/pipeline/` 안 CHANGELOG 0회 언급 파일 grep 으로 진짜 미감사 4개(`prediction-history.ts` 112줄/`brier.ts` 59줄/`daily-summary.ts` 48줄/`accuracy-update.ts` 34줄) 선정.
+
+**감사 방법**: Agent(general-purpose) 1개 — 4개 파일 전수 read + 전체 레포 caller grep(daily.ts/calibration-agent.ts/telegram.ts/op-analysis-brier-drift.ts/backfill-kbo-stuck-verify.ts) + 대응 테스트 파일 교차검증.
+
+**결과**: brier.ts/daily-summary.ts/accuracy-update.ts 3개는 drift 0건(모든 필드 소비 확인, 에러 처리 정상, 주석-코드 일치). **발견 1건**: `prediction-history.ts` 의 `actualWinner`(isCorrect 역산 승팀 코드)가 `calibration-agent.ts` 타입 계약에 고정되고 전용 테스트(cycle 2823)까지 있지만, 유일 소비처 `buildStatsBlock` 은 isCorrect(O/X 마크)만 렌더링하고 이 필드를 읽지 않음 — fangraphs.ts bbPct/kPct(cycle 3194)와 동일 computed-but-unconsumed 클래스. 삭제 대신 JSDoc 문서화(prediction-history.ts 주석 + calibration-agent.ts interface 포인터 주석).
+
+**검증**: `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean. `pnpm --filter @moneyball/kbo-data test` 96파일/1216테스트 전체 통과. 직접 main 커밋+push(R4, `6330552a`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**regression**: 없음(주석 전용 변경, 동작 영향 0).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `pipeline/` 잔여 0~1-mention 파일(`db-error.ts`/`winner-id.ts`/`final-reasoning.ts`/`save-game-record.ts` 등 소형) 또는 다양성 redirect로 lotto(gap 26/30, 10/18 토 다음 추첨 접근 중) 자연 대기. op-analysis(Supabase DNS NXDOMAIN 지속)/domain(whois No match) 둘 다 사용자 영역 불변 — plan #29 만료(내일, 2026-10-15) 도달 시 Tier4 재평가 필요.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data scrapers/fangraphs.ts 전수 감사, 미소비 필드 문서화 (cycle 3194, 2026-10-14)
 
 진단: open issue 0건. approved plan 0/23(plan #29 만료 2026-10-15 내일, Tier4 불변). 2-chain lock 미충족(직전8 3186-3193 distinct=3: review-code(heavy)5+fix-incident2+polish-ui1). Supabase DNS ENOTFOUND 재확인(변화없음, 코드 fix 불가) — op-analysis gap 25+/25 도달하나 외부 블락 지속으로 skip. domain whois "No match" 재확인(변화없음, registrar 영역). fix-incident gap=4/20·lotto gap=25/30·info-arch gap=15/30 전부 미근접. explore-idea saturation 직전15 4/12 미충족. cycle 3193 추천 "factors/ 잔여(mlb-elo.ts/mlb-waterfall.ts)" 재검증 결과 CHANGELOG 문맥 대조(단순 grep count 아닌 실제 기사 내용 read) 결과 둘 다 이미 cycle 2243/389/414/417/944(mlb-elo) + cycle 2702/944/3201/492(mlb-waterfall) 에서 전수 재감사 완료 확인 — stale 추천이었음. 대신 `scrapers/fangraphs.ts`(KBO FanGraphs 스크레이퍼, 111줄)가 CHANGELOG 상 단 2회 passing mention(cycle 2278=MLB 자매파일 fix 중 인용만/cycle 2975=13개 파일 batch 묶음, 단독 전수 read 이력 없음) 뿐임을 확인 — 진짜 미감사 스코프로 선정.
