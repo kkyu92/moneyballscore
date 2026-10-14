@@ -13699,3 +13699,21 @@ milestone 커밋: `feat(skill): cycle 3150 milestone — skill-evolution 84회 (
 **regression**: 코드 변경 없음(라이브 감사 불가로 fix loop 진입 전 조기 종료, 정적 grep 결과 클린).
 
 다음 사이클 추천 = 2-chain lock cooldown 1회 소모(cycle 225 룰) — review-code(heavy)/info-architecture-review 복귀 가능. fix-incident gap 10/20·lotto gap 18/30 아직 미도달. 도메인 인시던트는 사용자 registrar 조치 대기, 코드 fix 불가 — 재등록 전까지 매 사이클 중복 보고보다 변화 있을 때만 갱신 권장.
+
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/pipeline backtest-*-run.ts 4개 재탐색, 비대칭-null 팩터 버그 1건 수정 (cycle 3189, 2026-10-14)
+
+진단: open issue 0건. plan #30 전 단계 이미 shipped(cycle 2936-2938), plan #29 만료 내일(2026-10-15)이나 Tier4 사용자 결정 대기 불변 — unprocessed approved plan 0건. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy)7+polish-ui1+fix-incident1). fix-incident gap 2/20·info-arch gap 10/30·lotto gap 20/30(cron 양쪽 신선 확인: picks 최신 2026-10-17.md=다음 토요일, results 최신 2026-10-10.md=직전 토요일 — 둘 다 정상, trigger 미충족)·op-analysis 지속 블락(Supabase DNS, Tier4) 전부 미도달/비actionable. domain whois 재확인 — "No match" 불변. review-code(heavy) 100% success streak 지속 중이라 다양성 redirect 없이 자연 계속, 스코프는 git log 교차검증으로 실제 최후 감사 시점 찾아 선정(`packages/kbo-data/src/pipeline/backtest-{manual-weights,grid,v3,wayback}-run.ts` — 서브에이전트 투입 전엔 cycle 2686/2694(400+ cycle 전)로 추정했으나 실제론 cycle 3161 PR #3151 이 이미 1차 스윕 완료한 상태, 진단 단계 git log 재확인 부정확했음을 서브에이전트가 실행 중 발견·정정).
+
+**감사 방법**: Agent(general-purpose) 1개 — 4개 파일 전수 read + 전체 repo 호출부 cross-check + DB 컬럼 drift 확인(해당없음, loader.ts 경유) + 테스트 커버리지 점검 지시.
+
+**발견 + 수정**: `backtest-manual-weights-run.ts` 2건.
+1. 헤더 docstring "4 모델" 비교 서술 — cycle 56/903 추가(v2.1-A/B/C, v2.0-cycle231 등)로 실제 9모델 출력, stale 정정.
+2. `computeFactors()`: `sp_fip`/`lineup_woba` 가 `f.homeFip ?? 4.5`/`f.homeWoba ?? 0` 형태로 편측 결측을 비대칭 기본값으로 `normalize()`에 흘림 — `sfr`(cycle 1904 wave-533)·`predictor.ts` WAR/SFR(cycle 2977) 과 동일 버그 클래스가 이 2개 팩터에만 누락돼있던 것. `homeWoba`/`awayWoba`/`homeFip`/`awayFip` 는 팀별 독립 lookup(`seasonStatsBySeason.get(team)`)이라 편측 결측 실제 도달 가능 — 특히 wOBA 기본값 0 은 실제 스케일(~0.320)과 거리가 멀어 왜곡 컸음. `(a!=null && b!=null) ? normalize(...) : 0.5` 대칭 가드로 수정.
+
+**미변경(드리프트 아님 확인)**: `backtest-grid-run.ts`/`backtest-v3-run.ts`(cycle 3161 PR #3151 이 stale v1.5/v1.7 라벨 캐비앗 이미 수정 확인, 신규 drift 0) / `backtest-wayback-run.ts`(드리프트 0, LAMBDA=0.01 주석 커밋 `5dcb5462` 대조 확인).
+
+**테스트 갭 플래그(미수정)**: 4개 CLI 스크립트 전부 전용 테스트 파일 없음 — 기존 레포 패턴(간접 테스트 `__tests__/backtest-*.test.ts` 8파일/68테스트)이나, 이번에 고친 `normalize()`/`computeFactors()`/`manualScore()` 로컬 함수는 파일 내부에만 존재해 직접 테스트 커버리지 0 — 회귀는 수동 리뷰로만 catch 가능한 상태 지속.
+
+**regression**: `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean, `vitest run src/__tests__/backtest`(8파일/68테스트) + 패키지 전체(`vitest run`, 96파일/1216테스트) 전부 PASS, eslint clean. main 직접 push 완료(`223af796`, pre-push lint+type-check+version-sync-guard 전부 통과).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 lib/leaderboard·lib/standings(마지막 전수감사 cycle 2863/2866, 약 320+ cycle 전) 재탐색 권장. lotto gap 21/30(cron 정상 지속 확인 중) 또는 info-arch gap 11/30 자연 대기. domain/Supabase 상태 불변(Tier4) — 변화 있을 때만 재보고.
