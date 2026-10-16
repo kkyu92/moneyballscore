@@ -1,5 +1,13 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): lib/dashboard+matchup+v2-shadow-monitor+lotto 전수 감사 clean (cycle 3256, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/22(전부 completed/archived/superseded). 2차 방어선: cycle 3255 retro commit(`0a3ff509`) 존재 확인. 2-chain lock 미충족(직전8(3248-3255) distinct=4: review-code(heavy)5+polish-ui1+skill-evolution1+lotto(lite)1). fix-incident gap=15/20·info-arch gap=16/30 전부 미근접. lotto gap=3/30(쿨다운). op-analysis Supabase INACTIVE 재확인 지속 구조적 블락(변화 없음). DESIGN.md mtime 5.3일(신선) — design-system 미근접. explore-idea saturation 직전15 12/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 신선) — 확립된 skip 패턴. `gh run list` clean(실제 incident 無, 기존 Supabase DNS 실패만). **cycle 3255 retro 가 "review-code(heavy) 최근 5회 중 4회 PARTIAL — diminishing returns, 다양성 redirect 고려" 명시 권고했으나 대체 trigger 전무(2-chain lock 자체는 기술적으로 미충족, distinct=4) — 신선한 스코프 선정으로 재도전**: CHANGELOG mention-count 는 감사 완료 지표로 신뢰 불가(cycle 3001 교훈) 전제하에 파일명 단위 재확인 후 `lib/dashboard`(6파일)+`lib/matchup`(5파일)+`lib/v2-shadow-monitor`(2파일)+`lib/lotto`(4파일) 17개 파일 신규 전수 read 스코프 채택(agent 위임).
+
+**결과**: 17개 파일 + `__tests__` 전수 read, KBO/MLB twin 교차검증(`buildMatchupEloTrend.ts` vs `buildMlbMatchupEloTrend.ts` — try/catch 비대칭이 의도된 설계 확인: KBO 는 내부 `buildEloTrend()` 가 이미 fail-soft, MLB 는 별도 테이블 직접 쿼리라 자체 가드 필요), `assertSelectOk`/`captureFallback` 에러처리 컨벤션 일관 확인, comment-vs-behavior 전부 정합(KST bucketing/PRODUCTION_COHORT_RULES 등), dead code 0건(전부 page.tsx 또는 wave-* 회귀 테스트가 소비). 93개 테스트 전부 통과. **신규 drift 0건 — clean, 커밋 없음.**
+
+검증: 코드 변경 없음(감사만), `npx vitest run` 93 tests green. 다음 사이클 추천 = fix-incident(gap=16/20, 가장 근접) 또는 review-code(heavy) 의도적 회피 + polish-ui/info-architecture-review 다양성 redirect 고려(2-chain lock 기술적 미충족이나 5/6 연속 PARTIAL-clean 수율 저하 확인됨). **Supabase INACTIVE 5일+ 지속 — 사용자 billing 조치 필요(변화 없음).**
+
 ## 🟡 PARTIAL — review-code(heavy): assertSelectOk try/catch 비대칭 11개 파일 호출망 재분류 clean (cycle 3255, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/22(전부 non-approved status). 2차 방어선: cycle 3254 retro commit(`ea4a5a47`) 존재 확인. 2-chain lock 미충족(직전8(3247-3254) distinct=4: review-code(heavy)4+polish-ui1+skill-evolution1+lotto(lite)1). fix-incident gap=14/20·info-arch gap=15/30 전부 미근접. lotto gap=2/30(쿨다운). op-analysis Supabase INACTIVE 지속 구조적 블락(6일+, 변화 없음). DESIGN.md mtime 141h(신선) — design-system 미근접. `gh run list` 재확인 — `heartbeat-stale` 신규 1건 실패, 로그 확인 결과 동일 기존 근본원인(DNS 미응답/Supabase INACTIVE), 신규 액션 불필요. cycle 3252/3254 carry-over 추천대로 "`assertSelectOk` try/catch 비대칭 — 11개 파일 전체를 의도된 설계 vs 개별 drift 로 1:1 재분류" 스코프 채택.
