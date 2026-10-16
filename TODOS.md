@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS (retro-only) — review-code(heavy): components/accuracy + components/shared 전수 감사, 드리프트 0건 (cycle 3225, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23. 2-chain lock 탐지(직전8(3218-3224) distinct=2: review-code(heavy)7+fix-incident1) — 그러나 룰 4(잠긴 chain 중 fix-incident 포함 시 lock 무시) 적용돼 정상 진행. op-analysis gap=25+/25 trigger 충족하나 Supabase DNS 재확인 여전히 NXDOMAIN(2026-10-11 incident, 지속) — Tier4 블락 불변. info-arch gap=15/30·lotto gap=11/30·fix-incident gap=8/20 전부 미근접. cycle 3219 추천(components/ 잔여 — analysis/matchup/accuracy/shared) 중 analysis+matchup 은 cycle 3220 완료, 이번엔 accuracy+shared 선택.
+
+**감사 대상**: `components/accuracy/`(7파일, CommunityVsAICard/FactorAccuracyTable/CalibrationPlot/MlbAccuracyDashboard/TeamBiasTable/ModelVersionHistory/TeamMatchupCards) + `components/shared/`(16파일, PWAInstallButton/LanguageSwitch/RelatedLinks/WebVitalsReporter/Breadcrumb/QuantOnlyBadge/MlbTeamLogo/TeamLogo/KofiWidget/MiniGameCard/AnalysisLink/SearchForm/EmptyState/ServiceWorkerRegister/FavoriteTeamFilter/TableOfContents) — `packages/shared` 상수(KBO_TEAMS/MLB_TEAMS/model-version-labels) + `lib/accuracy`/`lib/mlb` 팩터 빌더 + 실제 app/** 호출부 교차검증.
+
+**발견**: 드리프트 0건. `FactorAccuracyTable` KBO 전용 한국어 하드코딩(영문 KBO accuracy 페이지 자체 부재로 도달 불가 확인) / `CalibrationPlot`의 `CALIBRATION_FULL_N=100` 과 `V2_PROMOTION_COHORT_N=150` 은 서로 다른 의도된 임계값(single-source 위반 아님) / `MlbTeamLogo` vs `TeamLogo` 로고 파일 10+30개 전수 매칭 확인 / `calibrationGap` 부호 규약(`avgConf-acc`, 양수=과신) UI 분기와 일치 / heatmap 게이팅 threshold(`verifiedN>=10`) KBO·MLB 양쪽 일관 — 전부 false positive 기각.
+
+**regression**: `vitest run src/components/accuracy src/components/shared` 8파일 30 tests 전부 PASS + `tsc --noEmit` clean. 코드 변경 없음 — PR/커밋 불필요, retro-only.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여(insights/live/players/reviews/search/seasons/share/teams/ui/glossary) 계속 또는 op-analysis(Supabase 복구 시) 또는 fix-incident(gap 자연대기).
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): repo 전체 최종-커밋일 기준 최고령 소형 파일 12개 전수 감사, 드리프트 0건 (cycle 3224, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23. 2-chain lock 미충족(직전8(3216-3223) distinct=3: review-code1+fix-incident1+review-code(heavy)6). fix-incident gap=7/20·lotto gap=10/30·info-arch gap=14/30 전부 미근접. op-analysis gap 296+ 대폭 초과하나 Supabase DNS 재확인 여전히 NXDOMAIN(2026-10-11 incident, 5일+ 경과, 변화 없음) — actionable 아님. skill-evolution trigger 미충족(review-code 직전20 14회 발화).
