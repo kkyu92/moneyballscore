@@ -9,11 +9,14 @@ import { syncBatterStats } from '@moneyball/kbo-data';
  * CRON_SECRET 보호. 매일 1회 실행 예상.
  * body.season (선택, 기본: 현재 연도) 만 받음.
  *
- * 정원: 약 50-100 선수(Top 리더들). /players 타자 Top 10 소스.
+ * 정원: 실측 보통 10-20명 (4 테이블 union 기준, MIN_EXPECTED_BATTERS=8 하한 —
+ * packages/kbo-data/src/pipeline/sync-batter-stats.ts 참조). /players 타자 Top 10 소스.
  */
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
+  // .trim() — 대시보드 값에 트레일링 개행이 섞이면 비교가 영구 실패 (동일 클래스
+  // 버그 cycle 3217: LLM_BACKEND_HAIKU / INDEXNOW_KEY). defensive 적용.
+  const cronSecret = process.env.CRON_SECRET?.trim();
 
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });

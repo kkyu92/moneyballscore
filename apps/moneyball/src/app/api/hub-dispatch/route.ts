@@ -78,8 +78,10 @@ export async function POST(
     );
   }
 
-  const secret = process.env.SENTRY_WEBHOOK_SECRET;
-  const pat = process.env.PLAYBOOK_PAT;
+  // .trim() — 대시보드 값에 트레일링 개행이 섞이면 HMAC/Bearer 비교가 영구 실패
+  // (동일 클래스 버그 cycle 3217: LLM_BACKEND_HAIKU / INDEXNOW_KEY). defensive 적용.
+  const secret = process.env.SENTRY_WEBHOOK_SECRET?.trim();
+  const pat = process.env.PLAYBOOK_PAT?.trim();
   if (!secret || !pat) {
     return Response.json(
       {
