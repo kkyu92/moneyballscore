@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): methodology/about AI 에이전트 백엔드 claim drift 수정 (cycle 3242, 2026-10-16)
+
+진단: open issue 0건, approved plan 0/21(전부 non-approved). 2-chain lock 미충족(직전8(3234-3241) distinct=5). fix-incident gap=0(직전 사이클 3241 직발화)·info-arch gap=1(직전 사이클 3240 직발화)·lotto gap=27/30(미근접) 전부 skip. op-analysis gap=25+(trigger7 도달)이나 Supabase DNS 재확인(`node dns lookup` ENOTFOUND + `vercel env pull` 프로젝트 연결 정상, DB 호스트만 지속 NXDOMAIN) — 계속 블락. cycle 3239 추천 "app/ 잔여 스코프(accuracy+analysis+matchup+methodology+predictions)" 중 CHANGELOG mention count 최저(7건)+최소 크기(763줄)+전수 스윕 이력 0인 `methodology/` 선택(큰 클러스터 accuracy 1271줄/analysis 2860줄은 1 사이클 내 분할 필요해 보류).
+
+**발견 1**: `methodology/page.tsx` 가 "AI 토론 fallback 시 사후 학습(팀별 메모리)도 적용 안 됨" 이라 서술했으나 `retro.ts:generateAgentMemories` 는 `debate_version` 필터가 없어 토론 성공/실패 무관하게 오답 전체에 사후 학습 적용됨 — 거짓 서술 정정.
+
+**발견 2 (핵심)**: `methodology/page.tsx` + `about/page.tsx` FAQ 모두 "AI 토론 에이전트 4개 전부 Claude(Haiku×3+Sonnet×1)" 라 서술. `vercel env pull` 로 프로덕션 실측 — `LLM_BACKEND_HAIKU="deepseek\n"` 확인. `llm.ts:getBackend()` 는 역할별 env var 우선 라우팅하며, cycle 3217 이 trim() 누락 버그(trailing newline 때문에 등호 비교 전부 실패 → silent 'claude' fallback)를 고쳐 이 hybrid 라우팅이 실제로 작동하게 만든 바 있음 — 그 결과 홈팀/원정팀/보정 3개 에이전트는 실제로 DeepSeek 에서 실행되고, 심판 에이전트만 `LLM_BACKEND_SONNET=claude` 로 Claude Sonnet 유지. 사이트 문구가 cycle 3217 이후로 stale. 두 페이지 모두 "AI 에이전트 4개(비용 효율 모델 3개 + Claude Sonnet 심판 1개)"로 정정 + 3개 에이전트 카드 헤더의 하드코딩 "(Haiku)" 라벨 제거.
+
+**zero-finding**: 10팩터 가중치/HOME_ADVANTAGE/BRIER_BASELINE/WINNER_PROB_CLAMP 등 모든 수치 상수는 `@moneyball/shared` 실시간 import 확인(하드코딩 아님). 데이터 소스 3종(KBO 공식/Fancy Stats/FanGraphs) claim 정확(Naver/Open-Meteo는 의도적으로 목록 제외, umpire.ts 는 실제 dead code). og-image/twitter-image 구조 정상(sibling about/ 패턴과 동일). Footer 링크 정상. 기존 drift-wave 테스트 4개 전부 PASS 유지.
+
+**플래그만(수정 보류)**: `Header.tsx` `KBO_NAV` 에 `/methodology` 링크 부재(MLB_NAV/LOTTO_LINKS 는 각자 methodology variant 보유) — IA 일관성 이슈, 본 스코프(methodology 디렉토리) 밖이라 info-arch 체인 또는 사용자 판단으로 이관.
+
+커밋: `d6b79f24` (직접 main, R4 범위). `tsc --noEmit`/eslint clean, vitest 11 files/39 tests PASS, pre-push hook(lint+type-check+version-sync-guard) 전부 PASS.
+
+다음 사이클 추천 = review-code(heavy) 계속(accuracy/analysis/matchup/predictions 중 analysis 2860줄은 별도 분할 필요) 또는 info-arch 체인에서 Header KBO_NAV methodology 링크 누락 건 픽업. op-analysis는 Supabase 복구 전까지 계속 블락.
+
 ## 🟢 SUCCESS — fix-incident: indexnow-ping 502 regression 근본원인 규명+수정 (cycle 3241, 2026-10-16)
 
 진단: open issue 0건, approved plan 0건. 직전8(3234-3241) distinct=4 — 2-chain lock 미충족. fix-incident 20-cycle gap trigger(7) 도달(마지막 발화 cycle 3217, gap=24). `gh run list --status failure` 실측: health-alert/heartbeat-stale/deploy-drift-alert 반복 실패는 기존 추적 중인 Supabase DNS 단절 인시던트(2026-10-11, Tier4 블락) 재확인일 뿐 신규 아님. indexnow-ping 은 2026-10-14부터 연속 HTTP 502 — 신규 regression으로 분리.
