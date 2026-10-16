@@ -1,5 +1,17 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): packages/kbo-data/src/pipeline 저-mention 11개 파일 전수 감사, 신규 drift 0건 (cycle 3286, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3285 retro commit(`346b6f21`) 존재 확인. 2-chain lock 미충족(직전8(3278-3285) distinct=3: review-code(heavy)6+fix-incident(lite)1+lotto(lite)1). gap 전부 미근접(fix-incident 5/20·op-analysis 10/25·info-arch 16/30·lotto 3/30). explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 신선 — mtime 145h) — 확립된 skip 패턴. cycle 3285(`app/en` 완결) 이후 신규 축으로 `packages/kbo-data/src/pipeline/` CHANGELOG mention-count 최하위 파일군 선정(grep-count-depth 가드레일 — cycle 3001 교훈 적용, mention 0~2건 파일 전수 확인).
+
+**결과**: 본 메인 직접 전수 read(agent 위임 없음) — `prediction-history.ts`(mention 0) / `db-error.ts` / `winner-id.ts` / `daily-summary.ts` / `factor-bias-bootstrap-ci.ts` / `accuracy-update.ts` / `backfill-weather.ts` / `backtest-wayback-run.ts` / `backfill-season.ts`(각 mention 1) / `notify-status-predicate.ts` / `save-game-record.ts`(각 mention 2) 총 11개 파일. 전부 주석-코드 정합 확인: `prediction-history.ts` actualWinner computed-but-unconsumed 필드(cycle 3195 self-aware 주석 정확) / `db-error.ts` shim(cycle 147 정합) / `winner-id.ts` 동점 NULL 처리 + 호출부(`daily.ts`/`live.ts`/`backfill-season.ts`) 전수 확인(전부 `computeWinnerTeamId` 사용) — `mlb-historical-bootstrap.ts` 의 tie-unsafe 인라인 패턴(`homeScore > awayScore ? home : away`)은 재확인 결과 cycle 2833 에 이미 "DB-write/CLI/cron 어디에도 미연결" 확인된 dead code라 비actionable(grep 0 hit 재확인) / `daily-summary.ts` ghost-notification 가드 주석 vs 실제 `daily.ts` 호출부(`assertSelectOk` + `summary.length===0` 가드) 정합 / `accuracy-update.ts` N+1 회피 주석 vs `Promise.all` 호출부 정합 / `notify-status-predicate.ts` predicate 로직 완전 일치 / `save-game-record.ts` `assertWriteOk` try/catch 패턴(cycle 170) 정합.
+
+**결론**: 신규 drift 0건, 코드 변경 없음. `pipeline/` 내 잔여 2-mention 파일(`backfill-records`/`backtest-grid-run`/`backtest-logistic-run`/`backtest-v3-run`, 4개)은 금번 미확인.
+
+검증: 코드 변경 없음(감사만). skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3286%50≠0, trigger5 직전20(3267-3286) review-code(heavy) 다회 발화로 0회 chain 없음, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전10(3276-3285) success 8건, retro-only 1건, partial 1건, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 계속(`pipeline/` 잔여 2-mention 파일 4개) 또는 fix-incident(6/20)/op-analysis(11/25)/info-arch(17/30)/lotto(4/30) gap 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): app/en 한글 sweep 완결 확인, 신규 drift 0건 (cycle 3285, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/24(전부 completed/archived/non-approved). 2차 방어선: cycle 3284 retro commit(`b15e8f35`) 존재 확인. 2-chain lock 미충족(직전8(3277-3284) distinct=4). gap 전부 미근접(fix-incident 4/20·op-analysis 9/25·info-arch 15/30·lotto 2/30). explore-idea saturation 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 신선 — mtime 6.7일) — 확립된 skip 패턴. cycle 3284 추천대로 `app/en` 잔여 한글 grep hit 영역(`reviews/misses`/`reviews/monthly`/`reviews/weekly`/`games/[date]/[slug]`) 채택.
