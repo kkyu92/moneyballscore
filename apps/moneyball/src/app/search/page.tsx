@@ -193,8 +193,9 @@ const STATIC_PAGES: Array<{
   { slug: '/terms', label: '이용약관', keywords: 'terms 이용약관 legal' },
 ];
 
-async function buildSearchIndex(): Promise<SearchEntry[]> {
+async function buildSearchIndex(): Promise<{ entries: SearchEntry[]; degraded: boolean }> {
   const entries: SearchEntry[] = [];
+  let degraded = false;
 
   // 1) Teams — 10 fixed.
   for (const [code, t] of TEAM_ENTRIES) {
@@ -247,6 +248,7 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
       }
     }
   } catch (err) {
+    degraded = true;
     Sentry.captureException(err, { tags: { silent_drift_family: 'wave_176', component: 'search', op: 'build-index-players' } });
   }
 
@@ -282,10 +284,11 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
       }
     }
   } catch (err) {
+    degraded = true;
     Sentry.captureException(err, { tags: { silent_drift_family: 'wave_176', component: 'search', op: 'build-index-dates' } });
   }
 
-  return entries;
+  return { entries, degraded };
 }
 
 export default async function SearchPage({ searchParams }: PageProps) {
@@ -294,19 +297,20 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
   // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
   // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
-  // buildSearchIndex/matchTeams 는 captureFallback 비가드(fail-loud) — 동시성 유지 위해 별도 promise 로 분리.
+  // buildSearchIndex 는 내부에서 players/dates DB 오류를 catch-and-log 로 흡수(fail-silent) 하므로
+  // 반환값에 degraded 플래그를 실어 dbDegraded 파생에 합류시킴 (동시성 유지 위해 별도 promise 로 분리).
   const searchIndexPromise = buildSearchIndex();
   const teamHitsPromise = Promise.resolve(q ? matchTeams(q) : []);
   const [playerHitsR, dateHitsR] = await Promise.allSettled([
     q ? searchPlayers(q) : Promise.resolve<PlayerHit[]>([]),
     q ? searchDates(q) : Promise.resolve<DateHit[]>([]),
   ]);
-  const searchIndex = await searchIndexPromise;
+  const { entries: searchIndex, degraded: searchIndexDegraded } = await searchIndexPromise;
   const teamHits = await teamHitsPromise;
   const playerHits = playerHitsR.status === "fulfilled" ? playerHitsR.value : captureFallback(playerHitsR.reason, [] as PlayerHit[], { route: '/search', source: 'searchPlayers' });
   const dateHits = dateHitsR.status === "fulfilled" ? dateHitsR.value : captureFallback(dateHitsR.reason, [] as DateHit[], { route: '/search', source: 'searchDates' });
 
-  const dbDegraded = [playerHitsR, dateHitsR].some((r) => r.status === "rejected");
+  const dbDegraded = searchIndexDegraded || [playerHitsR, dateHitsR].some((r) => r.status === "rejected");
 
   const totalHits = teamHits.length + playerHits.length + dateHits.length;
   const isExactDate = ISO_DATE_RE.test(q);
