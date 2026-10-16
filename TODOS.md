@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): search/page.tsx buildSearchIndex DB 실패 degraded 배너 미반영 수정 (cycle 3245, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(28/30 전부 completed, 나머지 비해당). 2-chain lock 미충족(직전8(3237-3244) distinct=3: review-code(heavy)6+info-architecture-review1+fix-incident1). gap trigger: fix-incident 4/20·info-arch 5/30 전부 미근접. lotto picks `2026-10-17.md`/results `2026-10-10.md` 양쪽 신선, 트리거 미충족. op-analysis `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(6일째) 계속 블락. cycle 3244 가 추천한 matchup(137줄)/predictions(424줄)/teams[code](643줄) 셋 다 git log 확인 결과 최근 다회 집중 수정·전용 테스트 보유(teams[code]는 review-code-cycle-2249 포함 4+ 건) — 대신 `app/**/page.tsx` 전체 라인수 스캔에서 `search/page.tsx`(470줄, 전용 `__tests__` 디렉토리 0건, 다회 브로드 스윕(Korean wrap/DB배너/컬럼정리)에만 묻어간 이력)를 독립 스코프로 선택.
+
+**전수 감사**: general-purpose agent 위임 — `search/page.tsx`(470줄) 전수 read + import 체인(`SearchClient`/`Breadcrumb`/`TeamLogo`) + `packages/shared` SEARCH_* 상수군 + `players`/`games` 마이그레이션 스키마 + `STATIC_PAGES`(49개 라우트) 실존 여부 교차검증.
+
+**확정 버그 1건**: `buildSearchIndex`(players/dates DB 조회, line 227/254)가 `assertSelectOk` 예외를 catch 해 Sentry 기록만 하고 빈 섹션으로 조용히 반환(fail-silent) — 그런데 바로 위 comment(commit `be0a43f9`, cycle 3045)는 이를 "fail-loud"라 잘못 명시. `dbDegraded` 배너는 `playerHitsR`/`dateHitsR`(`?q=` 쿼리 전용 경로)만 보고 파생돼, `?q=` 없이 접속 시 DB 장애로 플레이어/날짜 인덱스가 통째로 비어도 "일시적인 서비스 장애" 배너가 안 뜸. `buildSearchIndex` 반환 타입을 `{ entries, degraded }`로 바꾸고 `dbDegraded` 파생에 합류, 잘못된 comment 정정.
+
+**zero-finding**: SEARCH_* 6개 상수 전부 `packages/shared` 단일 source 일치(wave 292/293 기존 수정 유지), `KBO_TEAMS`/`MLB_TEAM_COUNT`/`MLB_FACTOR_COUNTS` 하드코딩 중복 0건, `players.team_id` FK명/`games.game_date` DATE 타입 스키마 정합, `STATIC_PAGES` 49개 라우트 전부 실존, SMALL_SAMPLE_N/scoring_rule 게이트 해당無(예측 확률 미노출 페이지).
+
+커밋: `6f748a8d` (직접 main + push, pre-push hook lint+type-check+version-sync-guard 전부 PASS). 신규 회귀 테스트 `silent-drift-cycle-3245.test.ts`(4 assertion) PASS.
+
+다음 사이클 추천 = review-code(heavy) 계속(standings/players/dashboard/v2-preview 등 중형 app/ 라우트 — 전용 테스트 보유하되 커밋 이력이 주로 UI/폰트 스윕인 파일 우선 검토) 또는 fix-incident(4/20)/info-arch(5/30)/lotto gap 자연 대기. op-analysis는 Supabase INACTIVE 복구(사용자 billing 조치 필요) 전까지 계속 블락 — 6일째 미해결.
+
 ## 🟢 SUCCESS — review-code(heavy): accuracy/page.tsx scoring_rule 코호트 히트맵 죽은 render 게이트 수정 (cycle 3244, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/22(전부 completed/archived/superseded, plan#29 이미 만료→`_archive` 이동 확인). 2-chain lock 미충족(직전8(3236-3243) distinct=4: expand-scope/review-code(heavy)/info-architecture-review/fix-incident). gap trigger: fix-incident 2/20·info-arch 3/30·lotto 29/30 전부 미근접(lotto cron 양쪽 신선: picks `2026-10-17.md`/results `2026-10-10.md` 확인, 트리거 미충족). op-analysis gap 129(직전 3114)지만 Supabase `npx supabase projects list` 실측 재확인 — `status: "INACTIVE"` 지속(2026-10-11 시작, 6일째) 계속 블락. explore-idea saturation 직전15 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 5.8일 신선) — 확립된 skip 패턴 재확인. cycle 3243 추천대로 `accuracy/page.tsx`(1271줄) 단독 스코프 선택 — cycle 3234 가 components/accuracy(컴포넌트 디렉토리, 3건 소형 수정)만 건드려서 이 라우트 파일 자체의 독립 전수 감사는 미실시였음.
