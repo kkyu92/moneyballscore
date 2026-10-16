@@ -63,11 +63,16 @@ const STRINGS: Record<"ko" | "en", Strings> = {
 };
 
 // plan #24 Phase 2a — KBO MatchupFactorCompare.tsx 의 MLB 대응. KBO 는 8팩터(FIP/xFIP/
-// wOBA/불펜FIP/최근폼/Elo/SFR/WAR)지만 MLB 는 buildMlbTeamProfile 이 이미 확립한 7팩터
-// (spFip/lineupWoba/bullpenFip/recentForm/elo/lineupXwoba/lineupBarrelPct)만 존재 —
-// xFIP/SFR/WAR 는 MLB 파이프라인 자체가 미수집 (Phase 1 team profile parity 시점부터
-// gap). MetricRegistry 에 xwoba/barrel_pct slug 가 없어(KBO 전용 10팩터 registry)
-// 라벨/힌트를 이 컴포넌트에 로컬로 둠 — glossary 앵커도 미보유 항목은 일반 /glossary 로 연결.
+// wOBA/불펜FIP/최근폼/Elo/SFR/WAR)지만 이 컴포넌트는 buildMlbTeamFactorAverages.ts 가
+// 수집하는 7팩터(spFip/lineupWoba/bullpenFip/recentForm/elo/lineupXwoba/lineupBarrelPct)만
+// 표시 — xFIP/WAR 는 mlb-pipeline.ts 가 실제로 저장함(home_sp_xfip/away_sp_xfip,
+// home_war_total/away_war_total — computeMlbCompositeDuel.ts 도 이 값으로 duel 계산 중)에도
+// buildMlbTeamFactorAverages.ts 가 아직 집계하지 않는 builder-level gap (표시 확장 시 그쪽
+// SELECT 컬럼만 추가하면 됨). SFR(defense_sfr) 만 MLB 파이프라인 자체가 진짜 미구현
+// placeholder — computeMlbCompositeDuel.ts cycle 2771 정정과 동일 결론, 본 주석 정정은 그
+// 결론이 이 파일엔 반영 안 돼있던 drift (review-code sweep). MetricRegistry 에 xwoba/
+// barrel_pct slug 가 없어(KBO 전용 10팩터 registry) 라벨/힌트를 이 컴포넌트에 로컬로 둠 —
+// glossary 앵커도 미보유 항목은 일반 /glossary 로 연결.
 // locale prop — KBO matchup 은 KO 전용이지만 MLB matchup 은 Phase 1 부터 KO+EN 양쪽
 // 라우트가 있어(en/mlb/matchup) 팩터 비교도 동일 parity 유지.
 function buildFactors(locale: "ko" | "en"): FactorRow[] {

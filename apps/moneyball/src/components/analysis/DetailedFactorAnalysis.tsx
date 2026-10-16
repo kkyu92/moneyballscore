@@ -1,4 +1,5 @@
 import {
+  ACTIVE_FACTOR_KEYS,
   CURRENT_SCORING_RULE,
   DEFAULT_WEIGHTS,
   KBO_FACTOR_COUNT,
@@ -37,8 +38,12 @@ export function DetailedFactorAnalysis({
   const homeName = shortTeamName(homeTeam);
   const awayName = shortTeamName(awayTeam);
 
+  // shadow-only factor (park_weather, umpire_sz — weight=0, predictor.ts 가 항상 factors 에
+  // 0.5 neutral 로 기록) 는 `key in DEFAULT_WEIGHTS` 로 걸러지지 않아 과거엔 여기 섞여
+  // 들어왔다 (라벨 매핑 없어 raw key 그대로 노출 + 바로 위 헤더의 "KBO_FACTOR_COUNT 팩터"
+  // 문구와 실제 렌더된 row 수가 어긋남). ACTIVE_FACTOR_KEYS 로 production 10개만 필터링.
   const rows = Object.entries(factors)
-    .filter(([key]) => key in DEFAULT_WEIGHTS)
+    .filter(([key]) => ACTIVE_FACTOR_KEYS.includes(key as (typeof ACTIVE_FACTOR_KEYS)[number]))
     .sort(([a], [b]) => {
       const wa = DEFAULT_WEIGHTS[a as keyof typeof DEFAULT_WEIGHTS] ?? 0;
       const wb = DEFAULT_WEIGHTS[b as keyof typeof DEFAULT_WEIGHTS] ?? 0;
