@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { SITE_HOST } from "@moneyball/shared";
+import { SITE_HOST, INSIGHTS_LIMIT } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -72,7 +72,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {["Judge", "Reasoning", "Timeline", "Recent 30", "AI Debate"].map((tag) => (
+          {["Judge", "Reasoning", "Timeline", `Recent ${INSIGHTS_LIMIT}`, "AI Debate"].map((tag) => (
             <div
               key={tag}
               style={{
@@ -100,7 +100,7 @@ export default function Image() {
           }}
         >
           <span>{SITE_HOST}/insights</span>
-          <span>Recent 30 · Updated Daily</span>
+          <span>Recent {INSIGHTS_LIMIT} · Updated Daily</span>
         </div>
       </div>
     ),

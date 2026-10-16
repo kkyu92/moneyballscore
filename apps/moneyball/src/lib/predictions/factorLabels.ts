@@ -6,19 +6,6 @@ import { RECENT_FORM_GAMES } from "@moneyball/shared";
 export const NEUTRAL_LO = 0.45;
 export const NEUTRAL_HI = 0.55;
 
-const PRODUCTION_SLUGS: MetricSlug[] = [
-  "sp_fip",
-  "sp_xfip",
-  "lineup_woba",
-  "bullpen_fip",
-  "recent_form",
-  "war",
-  "head_to_head",
-  "park_factor",
-  "elo",
-  "sfr",
-];
-
 export const FACTOR_LABELS: Record<string, string> = {
   sp_fip: "선발 투수력",
   sp_xfip: "선발 잠재력",
@@ -71,8 +58,11 @@ export const FACTOR_LABELS_SHORT: Record<string, string> = {
 
 // MetricRegistry.ko_name 단일 source — silent drift 차단 (wave 52).
 // glossary lib + methodology FACTOR_WEIGHTS + LLM agent prompt 와 동일 source.
+// PRODUCTION_SLUGS(10) 대신 MetricRegistry 전체 키(12, shadow factor park_weather/umpire_sz 포함)를
+// 사용 — factor-accuracy.ts의 analyzeFactorAccuracy가 DEFAULT_WEIGHTS 전체(shadow 포함)를
+// 진단 대상으로 삼기 때문에 PRODUCTION_SLUGS 한정 시 shadow factor 행이 raw slug로 렌더됨 (cycle 3228).
 export const FACTOR_LABELS_TECHNICAL: Record<string, string> = Object.fromEntries(
-  PRODUCTION_SLUGS.map((slug) => [slug, MetricRegistry[slug].ko_name]),
+  (Object.keys(MetricRegistry) as MetricSlug[]).map((slug) => [slug, MetricRegistry[slug].ko_name]),
 );
 
 /** wave-454: game/[id] 팩터 칩 용어집 링크 anchor 맵 (cycle 1814) · wave-456 상대 팀 우세 팩터 칩 용어집 링크 (cycle 1816) — slug → /glossary#{anchor} */

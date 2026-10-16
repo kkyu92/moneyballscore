@@ -64,9 +64,9 @@ export default async function SeriesTopicPage({ params }: Props) {
   const topic = parseSeriesTopic(slug);
   if (!topic) notFound();
 
-  // DB 장애(예: Supabase egress quota, cycle 2939)가 435쌍 전체 사전렌더를 도는 이 라우트의
-  // 빌드를 넘어 전체 production 빌드를 죽이면 안 됨 — 0건으로 degrade (fix-incident cycle 2946,
-  // insights/[date] 의 generateStaticParams degrade 패턴을 page body DB 호출에 재적용).
+  // DB 장애(예: Supabase egress quota, cycle 2939)가 45쌍(KBO 10팀 C(10,2)) 전체 사전렌더를 도는
+  // 이 라우트의 빌드를 넘어 전체 production 빌드를 죽이면 안 됨 — 0건으로 degrade (fix-incident
+  // cycle 2946, insights/[date] 의 generateStaticParams degrade 패턴을 page body DB 호출에 재적용).
   let entries: Awaited<ReturnType<typeof getSeriesByTopic>> = [];
   try {
     entries = await getSeriesByTopic(topic);

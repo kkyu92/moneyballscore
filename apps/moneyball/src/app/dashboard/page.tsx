@@ -10,7 +10,7 @@ import { ModelTuningInsights } from "@/components/dashboard/ModelTuningInsights"
 import { buildDailyAccuracy } from "@/lib/dashboard/buildDailyAccuracy";
 import { buildConfidenceBuckets } from "@/lib/dashboard/buildConfidenceBuckets";
 import { buildModelTuningInsights } from "@/lib/dashboard/buildModelTuningInsights";
-import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
+import { CURRENT_MODEL_FILTER } from "@/config/model";
 import {
   KBO_FACTOR_COUNT,
   KBO_SEASON_YEAR,
@@ -211,9 +211,9 @@ export default async function DashboardPage() {
       >
         이 페이지의 모든 지표는{" "}
         <span className="font-mono text-gray-700 dark:text-gray-200">
-          {CURRENT_DEBATE_VERSION}
+          {CURRENT_SCORING_RULE}
         </span>{" "}
-        토론 기반 예측만 집계합니다. 예측 총 {totalPredCount}경기 · 검증 완료 {total}경기.
+        모델 예측만 집계합니다. 예측 총 {totalPredCount}경기 · 검증 완료 {total}경기.
       </aside>
 
       {/* 요약 카드 */}
