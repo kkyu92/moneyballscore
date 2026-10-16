@@ -14783,3 +14783,19 @@ Footer.tsx 디스클로저 chevron duration(`transition-transform` vs `duration-
 **regression**: 코드 변경 없음(0 findings).
 
 다음 사이클 추천 = 2-chain lock 재평가(직전8 재계산) 후 review-code(heavy) 쿨다운 만료 시 복귀 또는 fix-incident(18/20)/info-arch(25/30)/lotto(21/30) gap 자연 대기. op-analysis는 Supabase 복구 전까지 계속 블락.
+
+## 🟢 SUCCESS — review-code(heavy): packages/shared core + hooks + config/model.ts 전수 감사, TABPFN_SCORING_RULE 미사용 상수 1건 수정 (cycle 3271, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived). 2차 방어선: cycle 3270 retro commit(`09e8afb3`) 존재 확인. 2-chain lock 미충족(직전8(3263-3270) distinct=3: lotto/review-code(heavy)/info-architecture-review). gap 전부 미근접(fix-incident 10/20·op-analysis 9/25·lotto 8/30). cycle 3270 next_recommended = review-code(heavy).
+
+**스코프 선정**: components/·api routes·lib/ 는 최근 스윕(cycle 3264~3269)으로 소진 근접 확인(cycle 3269 메모) — 아직 미방문인 `packages/shared/src/` 핵심 모듈(korean/rivalries/db-error/site/feature-flags/model-version-labels/mlb-teams/index) + `apps/moneyball/src/hooks/`(use-kbo-scores/use-user-picks) + `config/model.ts` 선정 (최장기 미방문 전략 연속).
+
+**감사 방법**: Agent(general-purpose) 1개 — 11개 파일(+test siblings) 전수 read, 각 export 의 실제 consumer cross-grep(`apps/moneyball/src/`, `packages/kbo-data/src/`), comment-vs-code 정합, 하드코딩 literal vs shared registry 대조, KBO/MLB scope 혼동 여부 지시.
+
+**결과**: 1건 발견 — `packages/shared/src/model-version-labels.ts:97` `TABPFN_SCORING_RULE` 상수가 docstring 에 정확히 `apps/moneyball/src/lib/tabpfn-import.ts` + `scripts/import-tabpfn-predictions.ts` 를 소비처로 명시했음에도 실제로는 import 되지 않고 `'tabpfn-shadow'` 문자열이 3곳(tabpfn-import.ts 타입 필드 + 값 2곳, scripts 의 `model_version` 1곳)에 독립 하드코딩 — 전형적 silent drift family 패턴. 3곳 모두 `TABPFN_SCORING_RULE` import 로 교체. 그 외 10개 파일 전부 clean(orphan export 0건, comment-drift 0건, KBO/MLB scope 혼동 0건 — rivalries.ts 의 MLB 미적용은 `mlb/analysis/page.tsx` 명시적 주석으로 의도 확인).
+
+**검증**: `apps/moneyball` `pnpm type-check` 신규 에러 0건. root `tsc --noEmit` 의 tabpfn 관련 에러 2건(`@supabase/supabase-js` 모듈해석)은 git stash 대조로 수정 이전부터 존재한 pre-existing 에러 확인(내 변경과 무관). `tabpfn-export.test.ts` 21 tests + 관련 3 tests 통과. direct main push(단독 1-commit, PR 생략 — R4 직접 커밋 패턴), pre-push hook(lint+type-check+version-sync-guard) 통과.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3271%50=21≠0, trigger5 표본≥10 충족이나 review-code 직전20 윈도우 다회 발화로 0회 아님). marker 미박제. ship-0 emergency stop 미충족(직전10(3262-3270) success 다수 포함).
+
+다음 사이클 추천 = review-code(heavy) 계속(packages/shared 잔여 파일 또는 packages/kbo-data/src/pipeline/) 또는 fix-incident/op-analysis/lotto gap 자연 대기(전부 아직 미근접).
