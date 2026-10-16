@@ -1,5 +1,23 @@
 
 
+## 🟢 SUCCESS (retro-only) — review-code(heavy): repo 전체 최종-커밋일 기준 최고령 소형 파일 12개 전수 감사, 드리프트 0건 (cycle 3224, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23. 2-chain lock 미충족(직전8(3216-3223) distinct=3: review-code1+fix-incident1+review-code(heavy)6). fix-incident gap=7/20·lotto gap=10/30·info-arch gap=14/30 전부 미근접. op-analysis gap 296+ 대폭 초과하나 Supabase DNS 재확인 여전히 NXDOMAIN(2026-10-11 incident, 5일+ 경과, 변화 없음) — actionable 아님. skill-evolution trigger 미충족(review-code 직전20 14회 발화).
+
+**스코프 전환**: cycle 3223이 "디렉토리 전수 스윕 포화 → 파일 단위 최종 감사 cycle 오래된 대형 파일" 축을 확립했으나, 이번엔 한 단계 더 — "git log 최종 커밋일(mtime) 기준 repo 전체 최고령 소스 파일" 축으로 전환(리뷰 이력과 무관하게 순수 최종 수정일만 기준). `git ls-files` + `git log -1 --format=%ct` 전체 조회로 최고령 12개 비-테스트 소스 파일 선정 — 전부 2026-04월 마지막 커밋(현재 기준 약 6개월 미재방문).
+
+**감사 대상**: `lib/supabase/admin.ts`(21줄) / `components/shared/AnalysisLink.tsx`(42줄) / `app/reviews/weekly+monthly/page.tsx`(각 7줄) / `kbo-data/pipeline/winner-id.ts` / `kbo-data/pipeline/accuracy-update.ts`(+daily.ts 호출부 Promise.all 패턴 교차검증) / `shared/src/korean.ts`(조사 자동선택 ro()/josa() 6개 docstring 예시 전수 검산) / `kbo-data/pipeline/db-error.ts`(shim) / `kbo-data/big-match.ts`(가중치 합계 1.0 검증) / `shared/src/rivalries.ts` / `lib/predictions/judgeReasoning.ts`(+debate.ts/postview.ts fallback prefix 문자열 교차검증) / `components/dashboard/chart-format.ts` / `lib/predictions/tierStats.ts`(+classifyWinnerProb 교차검증).
+
+**발견**: 드리프트 0건. 전부 docstring/주석이 실제 로직과 100% 일치. `korean.ts`의 `ro()` 조사 함수 — docstring 6개 예시(LG→로, 두산→으로, 서울→로, 1-0→으로, 2-1→로, 5-3→으로) 전부 수동 검산 PASS. `judgeReasoning.ts`의 fallback prefix(`에이전트 토론 불가`, `사후 분석 LLM 실패`) 가 `debate.ts`/`postview.ts` 실제 reasoning 문자열과 정확히 일치 확인(새 fallback 경로 추가로 인한 누락 없음, grep 전수 확인).
+
+**false positive 기각**: `AnalysisLink.tsx` subtle variant 의 `hover:text-brand-600`에 dark: 변형이 없어 처음엔 의심했으나, `matchup/[teamA]/[teamB]/page.tsx`·`search/page.tsx` 등 기존 코드 다수가 이미 동일 패턴(hover 상태 dark: 생략)을 쓰고 있어 drift 아님 확인. `rivalries.ts`의 `HH-KT: 충청 라이벌` 표기는 KT 홈구장이 실제론 수원(경기)이라 지리적으로 의아했으나, git blame 추적 결과 cycle 584 이전 "CEO 리뷰 Q2 + Eng 리뷰 C1 결정(2026-04-15)"으로 명시된 의도된 비즈니스 결정 — domain-decision 영역이라 수정 범위 제외.
+
+**regression**: 코드 변경 없음(drift 0건 확정) — PR/커밋 불필요, retro-only.
+
+**패턴**: 디렉토리 전수 스윕 + "최종 감사 cycle 오래된 대형 파일" 축 둘 다 포화 국면에서, "최종 커밋일 기준 repo 전체 최고령 파일" 축이 3번째 유효 후보로 확인 — 단, 이번 결과는 대형/자주 수정 파일(`shared/index.ts`, `daily.ts` 등)과 달리 소형 유틸 파일은 애초에 로직이 단순/견고해 drift가 거의 안 쌓인다는 역설적 확인(= "오래 안 건드림" ≠ "drift 누적", 안정적 소형 파일군일 가능성도 큼). 향후 이 축 재사용 시 소형 파일 먼저 소진 후 중형 파일(100-300줄 대) 쪽으로 좁혀가는 게 효율적.
+
+다음 사이클 추천 = review-code(heavy) 계속(이번 소형-최고령 축은 사실상 소진 — 다음은 `components/predictions/HistoricalAnalogMatchup.tsx`/`FactorBreakdown.tsx` 등 cycle 3218 이후 세부 재확인) 또는 fix-incident/lotto/info-arch(gap 자연대기) 또는 op-analysis(Supabase 복구 시 최우선). Supabase DNS NXDOMAIN 지속(사용자 billing 조치 필요, 변화 없음).
+
 ## 🟢 SUCCESS — review-code(heavy): debug/factor-correlation 재감사 (last audit cycle 2485), stale comment 1건 수정 (cycle 3223, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(plan #30 completed, 나머지 completed/archived/deferred). 2-chain lock 미충족(직전8(3215-3222) distinct=3: fix-incident2+review-code1+review-code(heavy)5). fix-incident gap=6/20·info-arch gap=13/30·lotto gap=9/30 전부 미근접. op-analysis gap 25+/25 — Supabase DNS 재확인 여전히 `ENOTFOUND`(org billing 미해결, Tier4 사용자 조치 필요 지속, 변화 없음). `gh run list` 최근 CI 전부 success/skipped — fix-incident 신규 신호 없음. 2차 방어선(cycle 3222 retro `67802618`) OK.
