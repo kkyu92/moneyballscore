@@ -1,5 +1,17 @@
 
 
+## ⚪ RETRO-ONLY — polish-ui (diversity redirect): 신규 드리프트 0건, fix-incident gh run 필터 blind spot 재현했으나 전부 기존 Supabase 원인 (cycle 3257, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 non-approved status). 2차 방어선: cycle 3256 retro commit(`d8a1e670`) 존재 확인. 2-chain lock 미충족(직전8(3249-3256) distinct=4: review-code(heavy)5+polish-ui1+skill-evolution1+lotto(lite)1). **cycle 3256 retro가 "review-code(heavy) 5/6 clean/PARTIAL — diminishing returns, 다양성 redirect(polish-ui/info-arch) 고려" 명시 권고** — info-arch는 17 cycle 전(3240) checkpoint가 breadcrumb 18건/신규라우트 0건/nav구조 불변 전부 재확인 완료해 중복이라 제외, 가장 최근 실제 drift(KBO 테이블 레이아웃, cycle 3250)를 찾아낸 polish-ui 채택.
+
+**fix-incident 재확인 과정에서 진단 routine blind spot 재현**: 기본 `gh run list`(필터 없음)는 develop-cycle 자체 커밋이 만드는 CI run이 많아 scheduled workflow가 밀려나 "전부 success/skipped"로 보임 — `--workflow` 필터로 개별 조회하니 `health-alert`/`heartbeat-stale`/`deploy-drift-alert`가 최근 수일 연속 실패 중이었음(CLAUDE.md 사례 17과 동일 blind spot 패턴). 로그 추적 결과 전부 기존 **Supabase INACTIVE(2026-10-11~, 5일+ 경과)** 단일 근본원인(`fetch failed`/`Could not resolve host`) — `data-refresh-weekly` 실패도 동일(stale-data snapshot이 DB 의존), `lotto-pick-update` 1건(10/13)은 dhlottery/lottolyzer 네트워크 일시 장애로 다음 run(10/17 예정)에 자연 해소 예상. 신규 actionable 없음, fix-incident skip 유지.
+
+**polish-ui 라이브 점검**: `moneyballscore.vercel.app` 홈/standings/predictions 데스크톱 + 홈 모바일 반응형, 콘솔 에러 0건. 홈페이지 "분석 방법론" 그룹 가중치(선발FIP+xFIP 20%/타선wOBA 15%/불펜+수비 15.0%/최근폼+상대전적 13%/Elo+WAR 18%/구장+홈어드밴티지 5.5%)가 CLAUDE.md v1.8 개별 가중치 합산(15+5=20, 10+5=15, 10+3=13, 10+8=18, 4+1.5=5.5)과 정확히 일치 확인 — 드리프트 없음. standings Elo 컬럼 "-" 공백 + 홈 서비스장애 배너 + predictions 빈 상태는 전부 기존 추적 중인 Supabase INACTIVE 재확인일 뿐 신규 아님(predictions 빈 상태 카피 자체는 적절). 모바일 레이아웃 오버플로/터치타겟 이슈 없음.
+
+**regression**: 코드 변경 없음(0 findings, 전부 confirm-only). commit 불필요 — cycle-retro/TODOS 커밋만.
+
+다음 사이클 추천 = review-code(heavy) 복귀(잔여: app/ page.tsx KBO 단일-page 그룹 또는 packages/kbo-data 잔여 스코프, 반드시 CHANGELOG/TODOS grep으로 완전히 새 스코프 확인 후 진입) 또는 fix-incident(gap=17/20)/info-arch(gap=18/30, 정규 지점 cycle 3270) gap 자연 대기. op-analysis는 Supabase billing 조치 전까지 계속 블락.
+
 ## 🟡 PARTIAL — review-code(heavy): lib/dashboard+matchup+v2-shadow-monitor+lotto 전수 감사 clean (cycle 3256, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/22(전부 completed/archived/superseded). 2차 방어선: cycle 3255 retro commit(`0a3ff509`) 존재 확인. 2-chain lock 미충족(직전8(3248-3255) distinct=4: review-code(heavy)5+polish-ui1+skill-evolution1+lotto(lite)1). fix-incident gap=15/20·info-arch gap=16/30 전부 미근접. lotto gap=3/30(쿨다운). op-analysis Supabase INACTIVE 재확인 지속 구조적 블락(변화 없음). DESIGN.md mtime 5.3일(신선) — design-system 미근접. explore-idea saturation 직전15 12/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 신선) — 확립된 skip 패턴. `gh run list` clean(실제 incident 無, 기존 Supabase DNS 실패만). **cycle 3255 retro 가 "review-code(heavy) 최근 5회 중 4회 PARTIAL — diminishing returns, 다양성 redirect 고려" 명시 권고했으나 대체 trigger 전무(2-chain lock 자체는 기술적으로 미충족, distinct=4) — 신선한 스코프 선정으로 재도전**: CHANGELOG mention-count 는 감사 완료 지표로 신뢰 불가(cycle 3001 교훈) 전제하에 파일명 단위 재확인 후 `lib/dashboard`(6파일)+`lib/matchup`(5파일)+`lib/v2-shadow-monitor`(2파일)+`lib/lotto`(4파일) 17개 파일 신규 전수 read 스코프 채택(agent 위임).
