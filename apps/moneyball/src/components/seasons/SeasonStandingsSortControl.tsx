@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import { KBO_TEAM_COUNT } from '@moneyball/shared';
 
-type SeasonStandingsSortMode = 'winRate' | 'runDiff' | 'sample';
+export type SeasonStandingsSortMode = 'winRate' | 'runDiff' | 'sample';
 
 const STORAGE_SORT = 'mb_season_standings_sort_v1';
 
@@ -57,8 +57,12 @@ const SAMPLE_ORDER_CSS = Array.from(
   (_, i) => `[data-season-standings-list] [data-sample-rank="${i}"]{order:${i};}`,
 ).join('');
 
+export function useSeasonStandingsSortMode(): SeasonStandingsSortMode {
+  return useSyncExternalStore(subscribe, readSort, getServerSnapshot);
+}
+
 export function SeasonStandingsSortControl() {
-  const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
+  const sort = useSeasonStandingsSortMode();
 
   return (
     <div className="flex flex-wrap items-center gap-2">

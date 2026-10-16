@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT, KBO_PLAYOFF_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record, SMALL_SAMPLE_N, VENUE_RECORD_MIN_GAMES, VENUE_WIN_RATE_HIGH, VENUE_WIN_RATE_LOW, PRODUCTION_COHORT_RULES } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_PLAYOFF_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record, VENUE_RECORD_MIN_GAMES, VENUE_WIN_RATE_HIGH, VENUE_WIN_RATE_LOW, PRODUCTION_COHORT_RULES } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -9,6 +9,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { EloTrendChart } from "@/components/dashboard/EloTrendChart";
 import { TeamAccuracySortControl } from "@/components/standings/TeamAccuracySortControl";
+import { TeamAccuracyList } from "@/components/standings/TeamAccuracyList";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 import { captureFallback } from "@/lib/observability/captureFallback";
 
@@ -319,60 +320,7 @@ export default async function StandingsPage() {
               <h2 id="prediction-accuracy-title" className="text-base font-bold">MoneyBall 예측 적중률</h2>
               <span className="text-xs text-gray-400 dark:text-gray-500">팀별 · 시즌 누적</span>
             </div>
-            {(() => {
-              const sampleRankMap = new Map<string, number>();
-              [...teamAccuracy]
-                .sort((a, b) => b.verifiedN - a.verifiedN)
-                .forEach((row, idx) => sampleRankMap.set(row.teamCode, idx));
-              return (
-            <ul className="space-y-2" data-team-accuracy-list>
-              {teamAccuracy.map((row, i) => {
-                const pct = row.accuracyRate != null ? Math.round(row.accuracyRate * 100) : null;
-                const barWidth = pct ?? 0;
-                const sampleRank = sampleRankMap.get(row.teamCode) ?? 0;
-                const isReliable = row.verifiedN >= SMALL_SAMPLE_N;
-                return (
-                  <li
-                    key={row.teamCode}
-                    className="flex items-center gap-3"
-                    data-accuracy-rank={i}
-                    data-sample-rank={sampleRank}
-                  >
-                    <span className="w-5 text-xs text-gray-400 dark:text-gray-500 tabular-nums text-right shrink-0">
-                      {i + 1}
-                    </span>
-                    <Link
-                      href={`/teams/${row.teamCode}`}
-                      className="flex items-center gap-2 min-w-[6rem] hover:opacity-80 transition-opacity shrink-0"
-                    >
-                      <TeamLogo team={row.teamCode} size={20} />
-                      <span className="text-sm font-medium whitespace-nowrap">{shortTeamName(row.teamCode)}</span>
-                    </Link>
-                    <div className="flex-1 flex items-center gap-2">
-                      <div className="flex-1 bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-full h-1.5">
-                        <div
-                          className="bg-brand-500 h-1.5 rounded-full transition-all"
-                          style={{ width: `${barWidth}%` }}
-                        />
-                      </div>
-                      <span
-                        className={`text-sm font-semibold tabular-nums w-10 text-right ${
-                          isReliable ? "" : "text-gray-400 dark:text-gray-500"
-                        }`}
-                      >
-                        {pct != null ? `${pct}%` : "-"}
-                      </span>
-                    </div>
-                    <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums shrink-0">
-                      {row.correctN}/{row.verifiedN}
-                      {!isReliable && row.verifiedN > 0 && <span className="ml-1">참고용</span>}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-              );
-            })()}
+            <TeamAccuracyList rows={teamAccuracy} />
           </div>
         </section>
       )}

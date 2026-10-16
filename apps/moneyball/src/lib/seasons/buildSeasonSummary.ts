@@ -8,7 +8,7 @@ import {
   type TeamCode,
 } from "@moneyball/shared";
 
-interface TeamRecord {
+export interface TeamRecord {
   code: TeamCode;
   name: string;
   wins: number;

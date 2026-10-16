@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import { KBO_TEAM_COUNT } from '@moneyball/shared';
 
-type SortMode = 'accuracy' | 'sample';
+export type SortMode = 'accuracy' | 'sample';
 
 const STORAGE_SORT = 'mb_standings_team_accuracy_sort_v1';
 
@@ -47,8 +47,12 @@ function writeSort(value: SortMode): void {
 
 const SAMPLE_ORDER_CSS = Array.from({ length: KBO_TEAM_COUNT }, (_, i) => `[data-team-accuracy-list] [data-sample-rank="${i}"]{order:${i};}`).join('');
 
+export function useTeamAccuracySortMode(): SortMode {
+  return useSyncExternalStore(subscribe, readSort, getServerSnapshot);
+}
+
 export function TeamAccuracySortControl() {
-  const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
+  const sort = useTeamAccuracySortMode();
 
   return (
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-3">
