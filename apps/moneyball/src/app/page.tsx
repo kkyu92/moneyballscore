@@ -697,6 +697,7 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
+      <h1 className="sr-only">KBO AI 승부예측 — MoneyBall Score</h1>
       {dbDegraded && (
         <div
           role="status"
