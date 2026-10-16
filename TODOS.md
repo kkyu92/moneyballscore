@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS — skill-evolution (phase 52, 86th 자가진화): milestone cycle 3250 trigger-3 (cycle 3251, 2026-10-16)
+
+진단: `skill-evolution-pending` 마커 존재(cycle 3250: "cycle_n % 50 == 0" trigger-3 단독) → forced skill-evolution, 메인 자율 선택 X.
+
+**갱신 내용**: SKILL.md/MIGRATION-PATH.md(리포 외부 `~/.claude/skills/develop-cycle/`, git 비관리) phase 52 entry 박제. 직전20(3231-3250) 측정 — review-code(heavy) 70%(14/20, phase51 75% 대비 5pp 하락, polish-ui/expand-scope/info-arch/fix-incident/lotto 산발적 비중 흡수), success 75%(15/20)+partial 15%+retro-only 10%(fail/interrupted 0건). 2-chain lock 직전8(3243-3250) distinct=3 미충족 — 단 cycle 3250 자체는 직전 window(distinct=2) lock 발동이 polish-ui fallback 으로 이어져 실제 KBO 레이아웃 drift 버그 적발(양성 사례). 2차 방어선 3201-3250 50cycle 전수 대조 결손 0건 — **20 consecutive 50-cycle window** 무결손 유지. watch hang kill 0건 유지. PASS_ship 단일grep 실측 2923(phase51 2857 대비 +66). Supabase `npx supabase projects list` 재확인 — INACTIVE 지속(5일+ 경과, 변화 없음). **plan #29 만료 처리 최초 실측**: expiry 2026-10-15 경과 후 `_archive/` 정상 이동 확인(approved 아닌 spec_only_deferred 상태도 archive 로직 정상 작동).
+
+**사고+복구**: PR 생성용 `git checkout -b` 가 세션 중단 흔적인 동명 stale 브랜치와 충돌해 실패했는데, 멀티라인 bash 블록이 `set -e` 없이 순차 실행되며 후속 `git commit --allow-empty` 가 의도와 달리 **main 브랜치에 그대로 커밋**되는 사고 발생. 복구 시 `reset --hard`/`branch -D`/`push --delete` 묶음 명령은 안전 가드(permission 거부)로 자동 차단됨 — 이후 새 브랜치명(`-p52`)으로 재생성 + 기존 커밋 재사용 → PR #3155 squash 머지(bcee6aca) → `git merge origin/main`(ort, 빈 diff 라 충돌 없음)으로 로컬 main **비파괴적** 재동기화. lesson commit(`0c339813`) 으로 패턴 박제 — 브랜치 checkout 성공 여부 확인 스텝 SKILL.md 명문화는 phase53(cycle 3300) 후보로 carry-over.
+
+`pnpm test` 596 files/4676 tests 전부 green. 다음 사이클 = review-code(heavy) 자연 발화 또는 2-chain lock 재평가 권장(직전8 distinct=3, lock 미충족).
+
 ## 🟢 SUCCESS — polish-ui (2-chain lock fallback): KBO 공식 사이트 테이블 레이아웃 개편 drift 발견+수정 (cycle 3250, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23. **2-chain lock 발동** — 직전8(3242-3249) distinct=2(review-code(heavy)7+lotto(lite)1). fix-incident gap=9/20·info-arch gap=10/30 전부 미근접, lotto gap=4(locked chain 자체). Supabase `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(6일째) op-analysis 계속 블락. explore-idea saturation 12/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 6일 신선) — 확립된 skip 패턴. expand-scope/design-system/info-arch 전부 조건 미충족. → lock fallback 룰("어떤 chain 도 trigger 없으면 → polish-ui 강제") 적용, color-token grep 감사(DESIGN.md 대조) 먼저 수행 — clean(드리프트 0건, HallOfFame.tsx `var(--color-X, hex)` fallback 패턴 전부 올바름).
