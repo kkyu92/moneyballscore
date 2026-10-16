@@ -1,6 +1,14 @@
 
 
-## ⚪ PARTIAL — review-code(heavy): picks/mlb API cluster + mlb/waitlist + mlb/pipeline twin-audit clean (cycle 3249, 2026-10-16)
+## 🟢 SUCCESS — polish-ui (2-chain lock fallback): KBO 공식 사이트 테이블 레이아웃 개편 drift 발견+수정 (cycle 3250, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23. **2-chain lock 발동** — 직전8(3242-3249) distinct=2(review-code(heavy)7+lotto(lite)1). fix-incident gap=9/20·info-arch gap=10/30 전부 미근접, lotto gap=4(locked chain 자체). Supabase `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(6일째) op-analysis 계속 블락. explore-idea saturation 12/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 6일 신선) — 확립된 skip 패턴. expand-scope/design-system/info-arch 전부 조건 미충족. → lock fallback 룰("어떤 chain 도 trigger 없으면 → polish-ui 강제") 적용, color-token grep 감사(DESIGN.md 대조) 먼저 수행 — clean(드리프트 0건, HallOfFame.tsx `var(--color-X, hex)` fallback 패턴 전부 올바름).
+
+**실행**: `/design-review` 호출해 프로덕션 실측(`https://moneyballscore.vercel.app`, prod alias — per-deployment URL은 Vercel SSO 게이트로 403) 홈페이지 스크린샷 확인. "KBO 팀 순위" 카드에서 KT `90승 5패` 같은 비정상 기록 발견(144경기 중 90승 5패 = .947 승률은 KBO 역사상 불가능 수준) — koreabaseball.com `TeamRankDaily.aspx` 직접 curl 대조 결과 실제 기록은 `90승 49패 5무`(승률 .647, 수치 일치). **근본 원인**: KBO 측이 테이블 컬럼 순서를 개편(연속 컬럼 추가 + 승/패/무 순서 변경 + 최근10경기/홈 순서 변경, 10열→12열) — `packages/kbo-data/src/scrapers/kbo-official.ts`의 `fetchStandings()`가 여전히 구 레이아웃(4=무/5=패/8=홈/9=최근10) 가정, 신 레이아웃(4=패/5=무/8=최근10경기/9=연속/10=홈/11=방문)과 어긋나 전 팀 패/무가 뒤바뀌어 표시되고 있었음(홈페이지 + `/standings` 전체 노출). `recent10` 필드도 실제 최근10 기록 대신 연속(streak) 문자열을 담고 있었고, 홈 성적 파싱("45-2-24" = 승-무-패 3분할)도 2-group dash regex로 무를 패로 오인하던 부가 버그 발견.
+
+**수정**: 컬럼 인덱스를 실측 레이아웃에 맞게 교정(cells.length 가드 10→11) + 홈 성적 3-group "W-D-L" regex 신규(2-group fallback 유지) + `scrapers-kbo-official.test.ts`에 cycle 3250 실측 캡처 데이터(KT 90/49/5, 승률 0.647) 기반 regression 테스트 3건 추가. `pnpm test`(turbo, 4676 tests) + `pnpm lint` 전부 green. PR 없이 main 직접 커밋(`f6d1aa61`) + push, CI 확인 중.
+
+**메타**: polish-ui 강제 fallback이 순수 색상/CSS 폴리시가 아니라 외부 사이트(koreabaseball.com) 레이아웃 변경발 데이터 정확성 버그를 우연히 적발한 사례 — color-token grep만으로는 안 잡히는 클래스. 다음 사이클 = 2-chain lock 재평가(review-code(heavy)+polish-ui 조합 가능성) 또는 fix-incident/info-arch gap 자연 대기.
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/spec_only_deferred). 2-chain lock 결정 시점 미충족(직전8(3241-3248) distinct=3: review-code(heavy)6+fix-incident1+lotto(lite)1 — 단 3242-3249 window 는 distinct=2 로 다음 cycle 3250 lock 예상). Supabase `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(2026-10-11~, 5일+, op-analysis 계속 블락). fix-incident gap=8/20·info-arch gap=9/30·lotto gap=3/30 전부 미근접. cycle 3248 retro carry-over("review-code(heavy) 계속 가능") 직접 이어감 — CHANGELOG mention 0건인 app/api 경로(`picks/mlb-poll`/`picks/mlb-submit`/`mlb/waitlist`) 신규 선정.
 
