@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — operational-analysis(heavy): Supabase 재복구 확인 + n 동결 원인 확정 (KBO 시즌 종료) (cycle 3276, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3275 retro commit(`1c73b093`) 존재 확인. 2-chain lock 미충족(직전8(3268-3275) distinct=4). 직전 3 사이클(3273-3275) 전부 review-code(heavy) — 다양성 redirect 신호. `npx supabase projects list` 재확인 결과 `status: ACTIVE_HEALTHY`(기존 TODOS 3271~3275 "Supabase 복구 전까지 블락" 서술과 모순) → op-analysis 재시도 선택.
+
+**실행**: `scripts/op-analysis-ce-cohort.ts` 재실행(harness 변경 없음). REST API(`/rest/v1/predictions`) HTTP 200 실데이터 확인, 홈페이지 "일시적인 서비스 장애" 배너 소멸 확인 — Supabase 실제 복구 재확인.
+
+**발견(원인 확정)**: n=448(CE 401/비CE 47) 수치가 cycle 3262 와 완전 동일한 이유를 `games` 테이블 직접 조회로 규명 — KBO(league_id=1) 2026 정규시즌 최종 경기일 `2026-10-04`. `pipeline_runs` 조회 결과 `predict_final`/`verify` 모드가 매일(오늘자 포함) 정상 실행되며 `predictions=0, games_found=0` 으로 정확히 no-op — 시즌 종료로 신규 경기 자체가 없는 정상 상태(파이프라인 고장 아님). 기존 TODOS(cycle 3271~3275)의 "op-analysis는 Supabase 복구 전까지 계속 블락" 서술은 stale — Supabase 는 이미 복구됐고, 실제 블로커는 시즌 종료. CE/비CE 격차 8.0pp 그대로(LLM 부가가치 우세 결론 28회 연속 재확인). CREDIT_EXHAUSTED(Anthropic 크레딧, 별개 사안) 지속 확인.
+
+**regression**: 코드 변경 없음(측정 + CLAUDE.md 서술 정정만, retro-only).
+
+skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3276%50≠0, 직전20 윈도우 review-code 다회 발화로 0회 chain 없음). marker 미박제. ship-0 emergency stop 미충족(직전10 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 복귀 또는 info-arch(6/30)/fix-incident(15/20)/lotto(13/30) gap 자연 대기. op-analysis 다음 재측정은 KBO 2027 시즌 개막 또는 gap 25-cycle 주기 권장(포스트시즌 기간 신규 n 유입 가능성 낮음).
+
 ## 🟢 SUCCESS — review-code(heavy): components/leaderboard 전수 감사, 내 순위 배너 sort-aware 버그 수정 (cycle 3275, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3274 retro commit(`5dbd4315`) 존재 확인. 2-chain lock 미충족(직전8(3267-3274) distinct=3: review-code(heavy)6+info-architecture-review1+polish-ui1). gap 전부 미근접(fix-incident 14/20·op-analysis 13/25·info-arch 5/30·lotto 12/30). explore-idea saturation 10/15 미충족. `components/leaderboard`(5파일, 652줄) 가 CHANGELOG mention 0회 — grep-count≠감사깊이 가드레일(cycle 3001) 적용해 전수 read 스코프로 선정.
