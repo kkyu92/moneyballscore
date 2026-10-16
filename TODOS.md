@@ -14340,3 +14340,15 @@ Footer.tsx 디스클로저 chevron duration(`transition-transform` vs `duration-
 **패턴**: review-code(heavy) components/ 스윕 누적 — picks+layout(3219) → dashboard+insights(3228) → predictions(3229) → teams+reviews+search+live+share(3230) → lib/ 최상위(3231) → en/mlb twin(3232) → analysis+matchup(3233) → accuracy+shared(3234, 본 cycle) 순. FactorAccuracyTable 타입 제약 = "locale dict 누락" drift 계열의 사전 차단형 수정(사후 발견이 아닌 컴파일타임 가드 추가) — 새로운 수정 양식.
 
 다음 사이클 추천 = review-code(heavy) 잔여(app/ page.tsx 111개 중 미감사 서브셋 재확인) 또는 fix-incident(18/20)/info-arch(25/30)/lotto(21/30) gap 자연 대기. op-analysis는 Supabase 복구 전까지 계속 블락.
+
+## ⚪ RETRO-ONLY — polish-ui (2-chain lock fallback): 신규 CSS drift 미발견, Supabase 단절 재확인 (cycle 3235, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건(plan#29 이미 만료/archived). 2-chain lock 탐지(직전8(3227-3234) distinct=2: review-code(heavy)7+expand-scope1) → review-code(heavy)/expand-scope 제외. 잔여 gap trigger 전부 미달(fix-incident 18/20·info-arch 25/30·lotto 21/30), op-analysis는 Supabase DNS ENOTFOUND 지속 블락(Tier4, `dig`/`curl` 재확인 변화 없음). lock rule step3에 따라 polish-ui 강제 발화.
+
+**점검**: DESIGN.md 명시 drift 패턴(`rounded-md` 리터럴/flat gray text/chevron duration 역할) 전부 grep clean — review-code(heavy) 가 이미 소진한 영역. 실사이트(`moneyballscore.vercel.app`, 안정 alias) 라이브 점검: 홈페이지 + /standings + 반응형 3뷰(mobile/tablet/desktop) 스크린샷 + 콘솔 에러 확인.
+
+**발견**: 신규 CSS/디자인 드리프트 0건. 홈 "일시적인 서비스 장애" 배너 + /standings 최근10·홈원정·Elo 컬럼 전부 "-" 공백 = 기존 추적 중인 Supabase DNS 단절(Tier4, 사용자 billing 조치 대기) 증상 재확인일 뿐 신규 아님. 쿠키 동의 배너가 스크린샷 중간에 겹쳐 보이는 현상은 `CookieConsent.tsx:62` `fixed bottom-0` 포지션 소스 확인 결과 전체페이지 스크린샷 스티칭 도구의 아티팩트로 반증(실제 버그 아님).
+
+**regression**: 코드 변경 없음(0 findings).
+
+다음 사이클 추천 = 2-chain lock 재평가(직전8 재계산) 후 review-code(heavy) 쿨다운 만료 시 복귀 또는 fix-incident(18/20)/info-arch(25/30)/lotto(21/30) gap 자연 대기. op-analysis는 Supabase 복구 전까지 계속 블락.
