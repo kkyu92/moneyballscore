@@ -46,18 +46,32 @@ describe('getMlbMonthHeatmap', () => {
     vi.clearAllMocks();
   });
 
-  it('스케줄 0건이면 빈 Map', async () => {
+  it('스케줄 0건이면 빈 Map, degraded=false', async () => {
     supabaseMock = makeSupabaseMock({ schedule: [] });
     const { getMlbMonthHeatmap } = await import('../buildMlbCalendarHeatmap');
-    const result = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
-    expect(result.size).toBe(0);
+    const { byDate, degraded } = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
+    expect(byDate.size).toBe(0);
+    expect(degraded).toBe(false);
   });
 
-  it('스케줄 select 실패 시 throw 대신 빈 Map degrade (cycle 2949 captureFallback)', async () => {
+  it('스케줄 select 실패 시 throw 대신 빈 Map degrade + degraded=true 반영 (cycle 3247 dbDegraded 배너 연동)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { getMlbMonthHeatmap } = await import('../buildMlbCalendarHeatmap');
-    const result = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
-    expect(result.size).toBe(0);
+    const { byDate, degraded } = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
+    expect(byDate.size).toBe(0);
+    expect(degraded).toBe(true);
+  });
+
+  it('predictions select 실패 시도 degraded=true 반영', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', game_date: '2026-08-01', status: 'final', home_score: 5, away_score: 2 },
+      ],
+      predsError: { message: 'boom' },
+    });
+    const { getMlbMonthHeatmap } = await import('../buildMlbCalendarHeatmap');
+    const { degraded } = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
+    expect(degraded).toBe(true);
   });
 
   it('final 경기는 verified/correct 집계, 미완료 경기는 total 만 증가', async () => {
@@ -74,12 +88,13 @@ describe('getMlbMonthHeatmap', () => {
       ],
     });
     const { getMlbMonthHeatmap } = await import('../buildMlbCalendarHeatmap');
-    const result = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
+    const { byDate, degraded } = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
+    expect(degraded).toBe(false);
 
-    const day1 = result.get('2026-08-01');
+    const day1 = byDate.get('2026-08-01');
     expect(day1).toEqual({ total: 2, verified: 2, correct: 1 });
 
-    const day2 = result.get('2026-08-02');
+    const day2 = byDate.get('2026-08-02');
     expect(day2).toEqual({ total: 1, verified: 0, correct: 0 });
   });
 
@@ -91,7 +106,7 @@ describe('getMlbMonthHeatmap', () => {
       preds: [],
     });
     const { getMlbMonthHeatmap } = await import('../buildMlbCalendarHeatmap');
-    const result = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
-    expect(result.size).toBe(0);
+    const { byDate } = await getMlbMonthHeatmap('2026-08-01', '2026-08-31');
+    expect(byDate.size).toBe(0);
   });
 });

@@ -224,6 +224,7 @@ describe("buildMlbMatchupProfile — silent drift family `.error` 미체크 회�
     expect(profile.finalGames).toBe(0);
     expect(profile.games).toEqual([]);
     expect(profile.streak).toBeNull();
+    expect(profile.degraded).toBe(true);
   });
 
   it("predictions select error → throw 대신 record 는 유지, AI 예측 정확도만 0 degrade (cycle 2949 captureFallback)", async () => {
@@ -248,6 +249,15 @@ describe("buildMlbMatchupProfile — silent drift family `.error` 미체크 회�
     const profile = await buildMlbMatchupProfile(pair);
     expect(profile.finalGames).toBe(1);
     expect(profile.predictionAccuracy).toEqual({ verified: 0, correct: 0, rate: null });
+    expect(profile.degraded).toBe(true);
+  });
+
+  it("DB 에러 없음 → degraded=false", async () => {
+    supabaseMock = makeSupabaseMock([], []);
+    const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
+    const pair = mlbCanonicalPair("NYY", "BOS")!;
+    const profile = await buildMlbMatchupProfile(pair);
+    expect(profile.degraded).toBe(false);
   });
 });
 

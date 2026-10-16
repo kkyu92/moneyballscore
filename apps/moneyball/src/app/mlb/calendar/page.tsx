@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { SITE_URL, CALENDAR_ISR_HOURS, ACCURACY_GOOD_RATE, ACCURACY_BASELINE, WEEKDAY_LABELS_KO_MON_FIRST } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks';
 import { getKstMonthInfo, buildEmptyGrid, type MonthInfo, type DayCell } from '@/lib/calendar/monthGrid';
 import { getMlbMonthHeatmap } from '@/lib/mlb/buildMlbCalendarHeatmap';
 
@@ -10,25 +11,30 @@ import { getMlbMonthHeatmap } from '@/lib/mlb/buildMlbCalendarHeatmap';
 // KBO calendar/page.tsx 병렬 복제(월 grid 골격은 @/lib/calendar/monthGrid 공유),
 // 집계 쿼리만 MLB 전용(mlb_schedule + predictions.league='mlb', deriveMlbOutcome 사용
 // — MLB predictions.is_correct 는 전량 NULL 이라 KBO 처럼 DB row 직접 못 읽음).
+// getMlbMonthHeatmap 은 내부에서 DB 오류를 catch-and-log 로 흡수(fail-silent) 하므로
+// { byDate, degraded } shape 로 반환받아 dbDegraded 배너에 반영 (cycle 3245 search 패턴).
 
 export const revalidate = 3600; // CALENDAR_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
-async function getMonthHeatmap(info: MonthInfo): Promise<DayCell[]> {
+async function getMonthHeatmap(info: MonthInfo): Promise<{ cells: DayCell[]; degraded: boolean }> {
   const cells = buildEmptyGrid(info);
-  const byDate = await getMlbMonthHeatmap(info.firstDay, info.lastDay);
+  const { byDate, degraded } = await getMlbMonthHeatmap(info.firstDay, info.lastDay);
 
-  return cells.map((cell) => {
-    if (!cell.inMonth) return cell;
-    const agg = byDate.get(cell.date);
-    if (!agg) return cell;
-    return {
-      ...cell,
-      totalPredictions: agg.total,
-      verifiedN: agg.verified,
-      correctN: agg.correct,
-      accuracyRate: agg.verified > 0 ? agg.correct / agg.verified : null,
-    };
-  });
+  return {
+    cells: cells.map((cell) => {
+      if (!cell.inMonth) return cell;
+      const agg = byDate.get(cell.date);
+      if (!agg) return cell;
+      return {
+        ...cell,
+        totalPredictions: agg.total,
+        verifiedN: agg.verified,
+        correctN: agg.correct,
+        accuracyRate: agg.verified > 0 ? agg.correct / agg.verified : null,
+      };
+    }),
+    degraded,
+  };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -71,7 +77,7 @@ function accuracyBadge(rate: number | null, verifiedN: number): string {
 
 export default async function MlbCalendarPage() {
   const info = getKstMonthInfo();
-  const cells = await getMonthHeatmap(info);
+  const { cells, degraded: dbDegraded } = await getMonthHeatmap(info);
 
   const monthTotal = cells.reduce(
     (acc, c) => {
@@ -90,9 +96,25 @@ export default async function MlbCalendarPage() {
 
   const weekHeaders = WEEKDAY_LABELS_KO_MON_FIRST;
 
+  const related: RelatedLink[] = [
+    { href: '/mlb/predictions', label: '예측 hub', hint: '전체 카드 모음' },
+    { href: '/mlb/accuracy', label: '누적 적중률', hint: '캘리브레이션 + 트렌드' },
+    { href: '/mlb/reviews', label: '예측 리뷰', hint: '주간 / 월간' },
+    { href: '/mlb/standings', label: '순위', hint: '시즌 standings' },
+  ];
+
   return (
     <main className="max-w-4xl mx-auto space-y-6 py-4">
       <Breadcrumb items={[{ href: '/mlb', label: 'MLB 분석' }, { label: '월별 캘린더' }]} />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">{info.monthLabel} MLB 승부예측 캘린더</h1>
@@ -178,6 +200,8 @@ export default async function MlbCalendarPage() {
           description="해당 월 MLB 경기가 시작되면 자동으로 집계됩니다."
         />
       )}
+
+      <RelatedLinks title="관련 페이지" items={related} />
     </main>
   );
 }

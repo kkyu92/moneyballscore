@@ -1,15 +1,26 @@
 import type { Metadata } from "next";
-import { SITE_URL, MLB_TEAMS, mlbShortTeamName } from "@moneyball/shared";
-import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
+import { SITE_URL, SMALL_SAMPLE_N, MLB_TEAMS, mlbShortTeamName } from "@moneyball/shared";
+import { buildMlbAccuracySummary, EMPTY_MLB_ACCURACY_SUMMARY } from "@/lib/mlb/buildMlbAccuracySummary";
 import { buildAllMlbTeamAccuracy, buildMlbMatchupData, buildMlbTeamBiasAnalysis } from "@/lib/mlb/buildMlbTeamAccuracy";
 import { buildMlbFactorAccuracy } from "@/lib/mlb/buildMlbFactorAccuracy";
 import { buildMlbCommunityVsAI } from "@/lib/mlb/buildMlbCommunityAccuracy";
+import type { CommunityVsAIResult } from "@/lib/picks/buildCommunityAccuracy";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbAccuracyDashboard } from "@/components/accuracy/MlbAccuracyDashboard";
 import { FactorAccuracyTable } from "@/components/accuracy/FactorAccuracyTable";
 import { TeamMatchupCards } from "@/components/accuracy/TeamMatchupCards";
 import { TeamBiasTable } from "@/components/accuracy/TeamBiasTable";
 import { CommunityVsAICard } from "@/components/accuracy/CommunityVsAICard";
+
+const EMPTY_COMMUNITY_VS_AI: CommunityVsAIResult = {
+  communityGames: 0,
+  communityCorrect: 0,
+  communityAccuracy: null,
+  aiGamesWithPoll: 0,
+  aiCorrectWithPoll: 0,
+  aiAccuracyWithPoll: null,
+};
 
 export const revalidate = 3600; // ACCURACY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -30,7 +41,11 @@ export const metadata: Metadata = {
 };
 
 export default async function MlbAccuracyPage() {
-  const [summary, teamRows, matchupData, factorAccuracyRows, biasRows, communityStats] = await Promise.all([
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당
+  // 금지 lint 룰 준수). KBO accuracy/page.tsx 와 동일 패턴(cycle 3247, 기존 Promise.all
+  // 은 DB 장애가 발생해도 내부 builder 가 전부 fail-silent 로 흡수해 배너가 뜨지 않았음).
+  const [summaryR, teamRowsR, matchupDataR, factorAccuracyRowsR, biasRowsR, communityStatsR] = await Promise.allSettled([
     buildMlbAccuracySummary('ko'),
     buildAllMlbTeamAccuracy(),
     buildMlbMatchupData(),
@@ -38,11 +53,44 @@ export default async function MlbAccuracyPage() {
     buildMlbTeamBiasAnalysis(),
     buildMlbCommunityVsAI(),
   ]);
+  const summary = summaryR.status === 'fulfilled' ? summaryR.value : captureFallback(summaryR.reason, EMPTY_MLB_ACCURACY_SUMMARY, { route: '/mlb/accuracy', source: 'buildMlbAccuracySummary' });
+  const teamRowsResult = teamRowsR.status === 'fulfilled' ? teamRowsR.value : captureFallback(teamRowsR.reason, { rows: [], degraded: true } as Awaited<ReturnType<typeof buildAllMlbTeamAccuracy>>, { route: '/mlb/accuracy', source: 'buildAllMlbTeamAccuracy' });
+  const matchupData = matchupDataR.status === 'fulfilled' ? matchupDataR.value : captureFallback(matchupDataR.reason, { matchups: [], homeAway: [], degraded: true } as Awaited<ReturnType<typeof buildMlbMatchupData>>, { route: '/mlb/accuracy', source: 'buildMlbMatchupData' });
+  const factorAccuracyResult = factorAccuracyRowsR.status === 'fulfilled' ? factorAccuracyRowsR.value : captureFallback(factorAccuracyRowsR.reason, { rows: [], degraded: true } as Awaited<ReturnType<typeof buildMlbFactorAccuracy>>, { route: '/mlb/accuracy', source: 'buildMlbFactorAccuracy' });
+  const biasRowsResult = biasRowsR.status === 'fulfilled' ? biasRowsR.value : captureFallback(biasRowsR.reason, { rows: [], degraded: true } as Awaited<ReturnType<typeof buildMlbTeamBiasAnalysis>>, { route: '/mlb/accuracy', source: 'buildMlbTeamBiasAnalysis' });
+  const communityStatsResult = communityStatsR.status === 'fulfilled' ? communityStatsR.value : captureFallback(communityStatsR.reason, { stats: EMPTY_COMMUNITY_VS_AI, degraded: true } as Awaited<ReturnType<typeof buildMlbCommunityVsAI>>, { route: '/mlb/accuracy', source: 'buildMlbCommunityVsAI' });
+
+  const teamRows = teamRowsResult.rows;
+  const factorAccuracyRows = factorAccuracyResult.rows;
+  const biasRows = biasRowsResult.rows;
+  const communityStats = communityStatsResult.stats;
+
+  // 각 builder 는 내부에서 DB 오류를 catch-and-log 로 흡수(fail-silent)하므로 Promise.allSettled
+  // 의 reject 만으로는 장애를 못 잡음 — 각 반환값의 degraded 플래그를 합류 (cycle 3247 fix,
+  // 기존엔 Promise.all + 이 6개 builder 가 전부 성공한 것처럼 보여 배너가 뜬 적이 없었음).
+  const dbDegraded =
+    [summaryR, teamRowsR, matchupDataR, factorAccuracyRowsR, biasRowsR, communityStatsR].some((r) => r.status === 'rejected') ||
+    summary.degraded ||
+    teamRowsResult.degraded ||
+    matchupData.degraded ||
+    factorAccuracyResult.degraded ||
+    biasRowsResult.degraded ||
+    communityStatsResult.degraded;
+
   const standingsAvailable = biasRows.some((r) => r.actualWinPct != null);
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       <Breadcrumb items={[{ label: 'MLB', href: '/mlb' }, { label: 'AI 적중 기록' }]} className="mb-2" />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
 
       <header className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white space-y-1">
         <h1 className="text-2xl font-bold">MLB AI 적중 기록</h1>
@@ -95,7 +143,7 @@ export default async function MlbAccuracyPage() {
             <h2 className="text-lg font-bold">팀별 상대 강약 분석</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               각 팀 경기에서 AI가 어떤 상대팀을 만날 때 잘 맞추고 못 맞추는지 분석합니다.
-              n=1 결과는 연하게 표시됩니다 (표본 1건). 홈/원정 적중률은 각 n을 함께 표시합니다.
+              소표본(n&lt;{SMALL_SAMPLE_N}) 결과는 연하게 표시됩니다. 홈/원정 적중률은 각 n을 함께 표시합니다.
             </p>
           </div>
           <TeamMatchupCards

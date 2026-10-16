@@ -29,8 +29,9 @@ interface MlbPredMiniRow {
 export async function getMlbMonthHeatmap(
   firstDay: string,
   lastDay: string,
-): Promise<Map<string, MlbCalendarDayAgg>> {
+): Promise<{ byDate: Map<string, MlbCalendarDayAgg>; degraded: boolean }> {
   const supabase = await createClient();
+  let degraded = false;
 
   const scheduleResult = await supabase
     .from('mlb_schedule')
@@ -41,10 +42,11 @@ export async function getMlbMonthHeatmap(
   try {
     ({ data: scheduleData } = assertSelectOk(scheduleResult, 'getMlbMonthHeatmap mlb_schedule'));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/calendar', source: 'getMlbMonthHeatmap mlb_schedule' });
   }
   const scheduleRows = (scheduleData ?? []) as MlbScheduleRow[];
-  if (scheduleRows.length === 0) return new Map();
+  if (scheduleRows.length === 0) return { byDate: new Map(), degraded };
 
   const predResult = await supabase
     .from('predictions')
@@ -60,6 +62,7 @@ export async function getMlbMonthHeatmap(
   try {
     ({ data: predData } = assertSelectOk(predResult, 'getMlbMonthHeatmap predictions'));
   } catch (err) {
+    degraded = true;
     predData = captureFallback(err, [], { route: '/mlb/calendar', source: 'getMlbMonthHeatmap predictions' });
   }
   const predByExternalId = new Map<string, MlbPredMiniRow>();
@@ -91,5 +94,5 @@ export async function getMlbMonthHeatmap(
     byDate.set(s.game_date, cur);
   }
 
-  return byDate;
+  return { byDate, degraded };
 }

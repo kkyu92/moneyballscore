@@ -29,8 +29,9 @@ interface PredMiniRow {
  * 직접 있어 join 불필요 (deriveMlbOutcome.ts 주석 참조 — is_correct 는 전량 NULL이라 여기서
  * home_win_prob + 실제 스코어로 직접 derive).
  */
-export async function buildAllMlbTeamAccuracy(): Promise<MlbTeamAccuracyRow[]> {
+export async function buildAllMlbTeamAccuracy(): Promise<{ rows: MlbTeamAccuracyRow[]; degraded: boolean }> {
   const supabase = await createClient();
+  let degraded = false;
 
   const scheduleResult = await supabase
     .from('mlb_schedule')
@@ -41,10 +42,11 @@ export async function buildAllMlbTeamAccuracy(): Promise<MlbTeamAccuracyRow[]> {
   try {
     ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildAllMlbTeamAccuracy mlb_schedule'));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildAllMlbTeamAccuracy mlb_schedule' });
   }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
-  if (scheduleRows.length === 0) return [];
+  if (scheduleRows.length === 0) return { rows: [], degraded };
 
   const predResult = await supabase
     .from('predictions')
@@ -58,6 +60,7 @@ export async function buildAllMlbTeamAccuracy(): Promise<MlbTeamAccuracyRow[]> {
   try {
     ({ data: predData } = assertSelectOk(predResult, 'buildAllMlbTeamAccuracy predictions'));
   } catch (err) {
+    degraded = true;
     predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildAllMlbTeamAccuracy predictions' });
   }
   const predByExternalId = new Map<string, PredMiniRow>();
@@ -89,7 +92,7 @@ export async function buildAllMlbTeamAccuracy(): Promise<MlbTeamAccuracyRow[]> {
     bump(s.away_team_code, isCorrect);
   }
 
-  return Array.from(acc.entries())
+  const rows = Array.from(acc.entries())
     .map(([teamCode, v]) => ({
       teamCode: teamCode as MlbTeamCode,
       verifiedN: v.verifiedN,
@@ -97,6 +100,7 @@ export async function buildAllMlbTeamAccuracy(): Promise<MlbTeamAccuracyRow[]> {
       accuracyRate: v.verifiedN > 0 ? v.correctN / v.verifiedN : null,
     }))
     .sort((a, b) => (b.accuracyRate ?? -1) - (a.accuracyRate ?? -1) || a.teamCode.localeCompare(b.teamCode));
+  return { rows, degraded };
 }
 
 interface MlbMatchupRow {
@@ -123,8 +127,10 @@ interface MlbTeamHomeAwayRow {
 export async function buildMlbMatchupData(): Promise<{
   matchups: MlbMatchupRow[];
   homeAway: MlbTeamHomeAwayRow[];
+  degraded: boolean;
 }> {
   const supabase = await createClient();
+  let degraded = false;
 
   const scheduleResult = await supabase
     .from('mlb_schedule')
@@ -135,10 +141,11 @@ export async function buildMlbMatchupData(): Promise<{
   try {
     ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbMatchupData mlb_schedule'));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbMatchupData mlb_schedule' });
   }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
-  if (scheduleRows.length === 0) return { matchups: [], homeAway: [] };
+  if (scheduleRows.length === 0) return { matchups: [], homeAway: [], degraded };
 
   const predResult = await supabase
     .from('predictions')
@@ -152,6 +159,7 @@ export async function buildMlbMatchupData(): Promise<{
   try {
     ({ data: predData } = assertSelectOk(predResult, 'buildMlbMatchupData predictions'));
   } catch (err) {
+    degraded = true;
     predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbMatchupData predictions' });
   }
   const predByExternalId = new Map<string, PredMiniRow>();
@@ -219,7 +227,7 @@ export async function buildMlbMatchupData(): Promise<{
     }),
   );
 
-  return { matchups, homeAway };
+  return { matchups, homeAway, degraded };
 }
 
 interface MlbTeamBiasRow {
@@ -240,8 +248,9 @@ interface MlbTeamBiasRow {
  * final 경기 스코어를 갖고 있어 별도 standings 스크래퍼 없이 완료 경기 승패로 직접
  * derive (deriveMlbOutcome 의 predictedHomeWin/actualHomeWin 재사용, cycle 2117 통합 로직).
  */
-export async function buildMlbTeamBiasAnalysis(): Promise<MlbTeamBiasRow[]> {
+export async function buildMlbTeamBiasAnalysis(): Promise<{ rows: MlbTeamBiasRow[]; degraded: boolean }> {
   const supabase = await createClient();
+  let degraded = false;
 
   const scheduleResult = await supabase
     .from('mlb_schedule')
@@ -252,10 +261,11 @@ export async function buildMlbTeamBiasAnalysis(): Promise<MlbTeamBiasRow[]> {
   try {
     ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbTeamBiasAnalysis mlb_schedule'));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbTeamBiasAnalysis mlb_schedule' });
   }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
-  if (scheduleRows.length === 0) return [];
+  if (scheduleRows.length === 0) return { rows: [], degraded };
 
   const predResult = await supabase
     .from('predictions')
@@ -269,6 +279,7 @@ export async function buildMlbTeamBiasAnalysis(): Promise<MlbTeamBiasRow[]> {
   try {
     ({ data: predData } = assertSelectOk(predResult, 'buildMlbTeamBiasAnalysis predictions'));
   } catch (err) {
+    degraded = true;
     predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbTeamBiasAnalysis predictions' });
   }
   const predByExternalId = new Map<string, PredMiniRow>();
@@ -306,7 +317,7 @@ export async function buildMlbTeamBiasAnalysis(): Promise<MlbTeamBiasRow[]> {
     bump(s.away_team_code, !predictedHomeWin, !actualHomeWin, isCorrect);
   }
 
-  return Array.from(acc.entries())
+  const rows = Array.from(acc.entries())
     .map(([code, { totalN, predictedWinN, verifiedN, correctN, actualWinN }]) => {
       const predictedWinRate = totalN > 0 ? predictedWinN / totalN : null;
       const actualWinPct = totalN > 0 ? actualWinN / totalN : null;
@@ -326,4 +337,5 @@ export async function buildMlbTeamBiasAnalysis(): Promise<MlbTeamBiasRow[]> {
     })
     .filter((r) => r.totalN >= SMALL_SAMPLE_N)
     .sort((a, b) => Math.abs(b.biasGap ?? 0) - Math.abs(a.biasGap ?? 0));
+  return { rows, degraded };
 }

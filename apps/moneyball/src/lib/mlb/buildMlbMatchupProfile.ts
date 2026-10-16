@@ -93,6 +93,7 @@ interface MlbMatchupProfile {
   closeGame: MlbMatchupCloseGameStats | null;
   homeAwayEdge: MlbMatchupHomeAwaySplit | null;
   summary: string;
+  degraded: boolean;
 }
 
 interface ScheduleRow {
@@ -314,6 +315,7 @@ export async function buildMlbMatchupProfile(
   };
 
   const supabase = await createClient();
+  let degraded = false;
 
   // mlb_schedule 은 StatsAPI 컨벤션 저장 — canonical(Baseball-Reference) 코드로 그대로 필터링하면
   // 7팀(TBR/CHW/KCR/SDP/SFG/ARI/WSN)에서 항상 0건 매칭(silent empty, cycle 2081).
@@ -335,6 +337,7 @@ export async function buildMlbMatchupProfile(
       `buildMlbMatchupProfile mlb_schedule ${pair.codeA} vs ${pair.codeB}`,
     ));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupProfile mlb_schedule' });
   }
   const scheduleRows = scheduleData ?? [];
@@ -371,6 +374,7 @@ export async function buildMlbMatchupProfile(
       closeGame: null,
       homeAwayEdge: null,
     }),
+    degraded,
   };
 
   if (scheduleRows.length === 0) return emptyResult;
@@ -392,6 +396,7 @@ export async function buildMlbMatchupProfile(
       `buildMlbMatchupProfile predictions ${pair.codeA} vs ${pair.codeB}`,
     ));
   } catch (err) {
+    degraded = true;
     predData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupProfile predictions' });
   }
 
@@ -522,5 +527,6 @@ export async function buildMlbMatchupProfile(
     closeGame,
     homeAwayEdge,
     summary,
+    degraded,
   };
 }

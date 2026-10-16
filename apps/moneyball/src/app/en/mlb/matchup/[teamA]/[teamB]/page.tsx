@@ -166,8 +166,9 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
   // Promise.allSettled lets us tell a backend outage apart from "no data yet" —
   // the fulfilled/rejected status is a pure derived value (no `let` reassignment
   // inside the component body, which this repo's lint rule blocks).
-  // buildMlbMatchupProfile is not captureFallback-guarded (fail-loud) — kept as a
-  // separate promise so it still runs concurrently with the allSettled batch below.
+  // buildMlbMatchupProfile catches mlb_schedule/predictions DB errors internally
+  // (fail-silent) and surfaces them via profile.degraded — kept as a separate promise
+  // so it still runs concurrently with the allSettled batch below (cycle 3247).
   const profilePromise = buildMlbMatchupProfile(pair);
   const [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR] = await Promise.allSettled([
     buildMlbTeamFactorAverages(pair.codeA),
@@ -189,7 +190,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
   const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupEloTrend" });
   const upcomingMatchup = upcomingMatchupR.status === "fulfilled" ? upcomingMatchupR.value : captureFallback(upcomingMatchupR.reason, [], { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupUpcoming" });
 
-  const dbDegraded = [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR].some((r) => r.status === "rejected");
+  const dbDegraded = profile.degraded || [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR].some((r) => r.status === "rejected");
 
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
   const summary = buildSummaryEn(profile);

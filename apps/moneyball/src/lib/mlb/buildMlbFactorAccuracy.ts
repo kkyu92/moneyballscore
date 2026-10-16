@@ -94,8 +94,9 @@ interface ScheduleFinalRow {
   away_score: number | null;
 }
 
-export async function buildMlbFactorAccuracy(locale: 'ko' | 'en' = 'ko'): Promise<FactorAccuracyRow[]> {
+export async function buildMlbFactorAccuracy(locale: 'ko' | 'en' = 'ko'): Promise<{ rows: FactorAccuracyRow[]; degraded: boolean }> {
   const supabase = await createClient();
+  let degraded = false;
 
   const scheduleResult = await supabase
     .from('mlb_schedule')
@@ -105,10 +106,11 @@ export async function buildMlbFactorAccuracy(locale: 'ko' | 'en' = 'ko'): Promis
   try {
     ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbFactorAccuracy mlb_schedule'));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbFactorAccuracy mlb_schedule' });
   }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
-  if (scheduleRows.length === 0) return [];
+  if (scheduleRows.length === 0) return { rows: [], degraded };
 
   const predResult = await supabase
     .from('predictions')
@@ -123,6 +125,7 @@ export async function buildMlbFactorAccuracy(locale: 'ko' | 'en' = 'ko'): Promis
   try {
     ({ data: predData } = assertSelectOk(predResult, 'buildMlbFactorAccuracy predictions'));
   } catch (err) {
+    degraded = true;
     predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbFactorAccuracy predictions' });
   }
 
@@ -177,7 +180,7 @@ export async function buildMlbFactorAccuracy(locale: 'ko' | 'en' = 'ko'): Promis
 
   const labels = locale === 'en' ? MLB_FACTOR_LABELS_EN : MLB_FACTOR_LABELS_KO;
 
-  return ALL_FACTOR_KEYS
+  const rows = ALL_FACTOR_KEYS
     .map((key) => ({
       key,
       label: labels[key],
@@ -188,4 +191,5 @@ export async function buildMlbFactorAccuracy(locale: 'ko' | 'en' = 'ko'): Promis
     }))
     .filter((r) => r.n > 0)
     .sort((a, b) => b.accuracy - a.accuracy);
+  return { rows, degraded };
 }

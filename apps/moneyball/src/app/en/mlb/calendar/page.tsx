@@ -20,22 +20,25 @@ function monthLabelEn(info: MonthInfo): string {
   });
 }
 
-async function getMonthHeatmap(info: MonthInfo): Promise<DayCell[]> {
+async function getMonthHeatmap(info: MonthInfo): Promise<{ cells: DayCell[]; degraded: boolean }> {
   const cells = buildEmptyGrid(info);
-  const byDate = await getMlbMonthHeatmap(info.firstDay, info.lastDay);
+  const { byDate, degraded } = await getMlbMonthHeatmap(info.firstDay, info.lastDay);
 
-  return cells.map((cell) => {
-    if (!cell.inMonth) return cell;
-    const agg = byDate.get(cell.date);
-    if (!agg) return cell;
-    return {
-      ...cell,
-      totalPredictions: agg.total,
-      verifiedN: agg.verified,
-      correctN: agg.correct,
-      accuracyRate: agg.verified > 0 ? agg.correct / agg.verified : null,
-    };
-  });
+  return {
+    cells: cells.map((cell) => {
+      if (!cell.inMonth) return cell;
+      const agg = byDate.get(cell.date);
+      if (!agg) return cell;
+      return {
+        ...cell,
+        totalPredictions: agg.total,
+        verifiedN: agg.verified,
+        correctN: agg.correct,
+        accuracyRate: agg.verified > 0 ? agg.correct / agg.verified : null,
+      };
+    }),
+    degraded,
+  };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -86,7 +89,7 @@ function accuracyBadge(rate: number | null, verifiedN: number): string {
 export default async function MlbCalendarPageEn() {
   const info = getKstMonthInfo();
   const label = monthLabelEn(info);
-  const cells = await getMonthHeatmap(info);
+  const { cells, degraded: dbDegraded } = await getMonthHeatmap(info);
 
   const monthTotal = cells.reduce(
     (acc, c) => {
@@ -108,6 +111,15 @@ export default async function MlbCalendarPageEn() {
   return (
     <main className="max-w-4xl mx-auto space-y-6 py-4">
       <Breadcrumb items={[{ href: '/en/mlb', label: 'MLB Analysis' }, { label: 'Monthly Calendar' }]} locale="en" />
+
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          Some data may be temporarily unavailable due to a service disruption. Please try again shortly.
+        </div>
+      )}
 
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">{label} MLB Prediction Calendar</h1>

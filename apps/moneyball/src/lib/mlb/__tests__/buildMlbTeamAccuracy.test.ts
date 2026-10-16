@@ -40,23 +40,30 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: () => Promise.resolve(supabaseMock),
 }));
 
+// cycle 3247 — 반환 shape 이 bare 배열/객체에서 { rows/matchups+homeAway, degraded } 로 변경됨.
+// mlb/accuracy 페이지가 Promise.all 로 이 builder 들을 호출했는데, 이 builder 들은 내부에서
+// DB 오류를 catch-and-log 로 흡수(fail-silent)해 절대 reject 하지 않아 Promise.allSettled 로
+// 바꿔도 DB 장애 배너가 못 뜨던 silent drift — degraded 플래그를 반환값에 실어 전달.
+
 describe('buildAllMlbTeamAccuracy', () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it('final 경기 없으면 빈 배열', async () => {
+  it('final 경기 없으면 빈 배열, degraded=false', async () => {
     supabaseMock = makeSupabaseMock({ schedule: [] });
     const { buildAllMlbTeamAccuracy } = await import('../buildMlbTeamAccuracy');
-    const result = await buildAllMlbTeamAccuracy();
-    expect(result).toEqual([]);
+    const { rows, degraded } = await buildAllMlbTeamAccuracy();
+    expect(rows).toEqual([]);
+    expect(degraded).toBe(false);
   });
 
-  it('schedule select 실패 시 throw 대신 빈 배열 degrade (cycle 2949 captureFallback)', async () => {
+  it('schedule select 실패 시 throw 대신 빈 배열 degrade + degraded=true (cycle 3247)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { buildAllMlbTeamAccuracy } = await import('../buildMlbTeamAccuracy');
-    const result = await buildAllMlbTeamAccuracy();
-    expect(result).toEqual([]);
+    const { rows, degraded } = await buildAllMlbTeamAccuracy();
+    expect(rows).toEqual([]);
+    expect(degraded).toBe(true);
   });
 
   it('홈/원정 양팀에 동일 판정을 집계 (경기 관련 팀 기준, KBO 정합)', async () => {
@@ -71,9 +78,10 @@ describe('buildAllMlbTeamAccuracy', () => {
       ],
     });
     const { buildAllMlbTeamAccuracy } = await import('../buildMlbTeamAccuracy');
-    const result = await buildAllMlbTeamAccuracy();
-    const byCode = new Map(result.map((r) => [r.teamCode, r]));
+    const { rows, degraded } = await buildAllMlbTeamAccuracy();
+    const byCode = new Map(rows.map((r) => [r.teamCode, r]));
 
+    expect(degraded).toBe(false);
     expect(byCode.get('NYY')).toEqual({ teamCode: 'NYY', verifiedN: 1, correctN: 1, accuracyRate: 1 });
     expect(byCode.get('BOS')).toEqual({ teamCode: 'BOS', verifiedN: 2, correctN: 1, accuracyRate: 0.5 });
     expect(byCode.get('NYM')).toEqual({ teamCode: 'NYM', verifiedN: 1, correctN: 0, accuracyRate: 0 });
@@ -91,10 +99,10 @@ describe('buildAllMlbTeamAccuracy', () => {
       ],
     });
     const { buildAllMlbTeamAccuracy } = await import('../buildMlbTeamAccuracy');
-    const result = await buildAllMlbTeamAccuracy();
+    const { rows } = await buildAllMlbTeamAccuracy();
     // NYY accuracyRate=1 (verifiedN=1), BOS accuracyRate=0.5 (verifiedN=2), NYM accuracyRate=0 (verifiedN=1)
     // verifiedN 내림차순이면 BOS 가 1등이 되지만, accuracyRate 내림차순이면 NYY 가 1등이어야 함
-    expect(result.map((r) => r.teamCode)).toEqual(['NYY', 'BOS', 'NYM']);
+    expect(rows.map((r) => r.teamCode)).toEqual(['NYY', 'BOS', 'NYM']);
   });
 
   it('예측 없는 경기는 skip (external_game_id 매칭 없음)', async () => {
@@ -103,8 +111,8 @@ describe('buildAllMlbTeamAccuracy', () => {
       preds: [],
     });
     const { buildAllMlbTeamAccuracy } = await import('../buildMlbTeamAccuracy');
-    const result = await buildAllMlbTeamAccuracy();
-    expect(result).toEqual([]);
+    const { rows } = await buildAllMlbTeamAccuracy();
+    expect(rows).toEqual([]);
   });
 });
 
@@ -113,18 +121,18 @@ describe('buildMlbMatchupData', () => {
     vi.clearAllMocks();
   });
 
-  it('final 경기 없으면 빈 matchups/homeAway', async () => {
+  it('final 경기 없으면 빈 matchups/homeAway, degraded=false', async () => {
     supabaseMock = makeSupabaseMock({ schedule: [] });
     const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
     const result = await buildMlbMatchupData();
-    expect(result).toEqual({ matchups: [], homeAway: [] });
+    expect(result).toEqual({ matchups: [], homeAway: [], degraded: false });
   });
 
-  it('schedule select 실패 시 throw 대신 빈 matchups/homeAway degrade (cycle 2949 captureFallback)', async () => {
+  it('schedule select 실패 시 throw 대신 빈 matchups/homeAway degrade + degraded=true (cycle 3247)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
     const result = await buildMlbMatchupData();
-    expect(result).toEqual({ matchups: [], homeAway: [] });
+    expect(result).toEqual({ matchups: [], homeAway: [], degraded: true });
   });
 
   it('상대전적 양방향 집계 + 홈/원정 split', async () => {
@@ -139,8 +147,9 @@ describe('buildMlbMatchupData', () => {
       ],
     });
     const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
-    const { matchups, homeAway } = await buildMlbMatchupData();
+    const { matchups, homeAway, degraded } = await buildMlbMatchupData();
 
+    expect(degraded).toBe(false);
     const nyyVsBos = matchups.find((m) => m.teamCode === 'NYY' && m.opponentCode === 'BOS');
     const bosVsNyy = matchups.find((m) => m.teamCode === 'BOS' && m.opponentCode === 'NYY');
     expect(nyyVsBos).toEqual({ teamCode: 'NYY', opponentCode: 'BOS', n: 2, correct: 1, accuracyRate: 0.5 });
@@ -162,7 +171,7 @@ describe('buildMlbMatchupData', () => {
     });
     const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
     const result = await buildMlbMatchupData();
-    expect(result).toEqual({ matchups: [], homeAway: [] });
+    expect(result).toEqual({ matchups: [], homeAway: [], degraded: false });
   });
 });
 
@@ -171,18 +180,20 @@ describe('buildMlbTeamBiasAnalysis', () => {
     vi.clearAllMocks();
   });
 
-  it('final 경기 없으면 빈 배열', async () => {
+  it('final 경기 없으면 빈 배열, degraded=false', async () => {
     supabaseMock = makeSupabaseMock({ schedule: [] });
     const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
-    const result = await buildMlbTeamBiasAnalysis();
-    expect(result).toEqual([]);
+    const { rows, degraded } = await buildMlbTeamBiasAnalysis();
+    expect(rows).toEqual([]);
+    expect(degraded).toBe(false);
   });
 
-  it('schedule select 실패 시 throw 대신 빈 배열 degrade (cycle 2949 captureFallback)', async () => {
+  it('schedule select 실패 시 throw 대신 빈 배열 degrade + degraded=true (cycle 3247)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
-    const result = await buildMlbTeamBiasAnalysis();
-    expect(result).toEqual([]);
+    const { rows, degraded } = await buildMlbTeamBiasAnalysis();
+    expect(rows).toEqual([]);
+    expect(degraded).toBe(true);
   });
 
   it('biasGap = predictedWinRate - actualWinPct, 실제 승패는 mlb_schedule final 스코어로 직접 derive (외부 standings 불필요)', async () => {
@@ -204,15 +215,15 @@ describe('buildMlbTeamBiasAnalysis', () => {
       ],
     });
     const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
-    const result = await buildMlbTeamBiasAnalysis();
-    const nyy = result.find((r) => r.teamCode === 'NYY');
+    const { rows } = await buildMlbTeamBiasAnalysis();
+    const nyy = rows.find((r) => r.teamCode === 'NYY');
     expect(nyy).toBeDefined();
     expect(nyy!.predictedWinRate).toBeCloseTo(0.6);
     expect(nyy!.actualWinPct).toBeCloseTo(1.0);
     expect(nyy!.biasGap).toBeCloseTo(-0.4);
     // 결과는 |biasGap| 내림차순
-    for (let i = 0; i < result.length - 1; i++) {
-      expect(Math.abs(result[i].biasGap ?? 0)).toBeGreaterThanOrEqual(Math.abs(result[i + 1].biasGap ?? 0));
+    for (let i = 0; i < rows.length - 1; i++) {
+      expect(Math.abs(rows[i].biasGap ?? 0)).toBeGreaterThanOrEqual(Math.abs(rows[i + 1].biasGap ?? 0));
     }
   });
 
@@ -224,8 +235,8 @@ describe('buildMlbTeamBiasAnalysis', () => {
       preds: [{ external_game_id: 'g1', home_win_prob: 0.7 }],
     });
     const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
-    const result = await buildMlbTeamBiasAnalysis();
-    expect(result).toEqual([]);
+    const { rows } = await buildMlbTeamBiasAnalysis();
+    expect(rows).toEqual([]);
   });
 
   it('예측 없는 경기는 skip', async () => {
@@ -234,7 +245,7 @@ describe('buildMlbTeamBiasAnalysis', () => {
       preds: [],
     });
     const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
-    const result = await buildMlbTeamBiasAnalysis();
-    expect(result).toEqual([]);
+    const { rows } = await buildMlbTeamBiasAnalysis();
+    expect(rows).toEqual([]);
   });
 });

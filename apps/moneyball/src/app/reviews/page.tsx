@@ -8,7 +8,7 @@ import {
   assertSelectOk, REVIEWS_RECENT_LIMIT, SITE_URL,
   FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT,
   REVIEWS_HUB_RECENT_WEEKS, REVIEWS_HUB_RECENT_MONTHS,
-  KBO_SEASON_YEAR,
+  KBO_SEASON_YEAR, KBO_SEASON_START_DATE,
   SMALL_SAMPLE_N,
   PRODUCTION_COHORT_RULES,
 } from '@moneyball/shared';
@@ -85,7 +85,9 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
 export default async function ReviewsPage() {
   // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
   // getVerifiedPredictions 결과를 {status, value|reason} 모양으로 분리 수신 (컴포넌트 내 재할당 금지 lint 룰 준수).
-  // 나머지 수렴 픽 집계 함수들은 captureFallback 비가드(fail-loud) — 동시성 유지 위해 별도 Promise.all.
+  // 나머지 수렴 픽 집계 함수들(fetchConvergencePickDetailedResults)은 내부에서 DB 오류를
+  // catch-and-log 로 흡수하는 fail-soft — throw 하지 않고 빈 배열로 조용히 degrade. 동시성
+  // 유지 위해 별도 Promise.all (cycle 3247 fix — 과거 "fail-loud" 서술은 실제 로직과 불일치).
   const predictionsPromise = getVerifiedPredictions().then(
     (value) => ({ status: "fulfilled" as const, value }),
     (reason) => ({ status: "rejected" as const, reason }),
@@ -104,8 +106,13 @@ export default async function ReviewsPage() {
     strongDayOfWeekSplit,
     completeDayOfWeekSplit,
   ] = await Promise.all([
-    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG),
-    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE),
+    // "수렴 픽 전체 성적" 카드 — CONVERGENCE_RECORD_ALL_LIMIT 는 날짜 범위(startDate)와 짝을
+    // 이뤄야 "전체" 조회가 됨(주석 참조, packages/shared/src/index.ts). startDate 생략 시
+    // 45일 lookback(CONVERGENCE_RECORD_LOOKBACK_DAYS) 으로 조용히 fallback 돼 "전체 성적"
+    // 라벨과 달리 최근 45일치만 집계되던 버그 — KBO_SEASON_START_DATE 로 시즌 전체 지정
+    // (cycle 3247 fix, 다른 시즌 카드들과 동일 패턴).
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG, KBO_SEASON_START_DATE),
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE, KBO_SEASON_START_DATE),
     // wave-592: 강수렴 픽 현재 streak + 시즌 최장 streak
     getConvergencePickStreak(FACTOR_PICK_STRONG),
     getConvergencePickBestStreak(),

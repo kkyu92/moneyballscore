@@ -4,7 +4,8 @@ import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_E
 import {
   SITE_URL,
   MLB_SCORING_RULE,
-  HOME_ADVANTAGE_PCT,
+  HOME_ELO_BONUS,
+  ELO_DIVIDER,
   MLB_TEAM_COUNT,
   MLB_HEAD_TO_HEAD_PAIRS,
 } from "@moneyball/shared";
@@ -18,6 +19,15 @@ const TOTAL = MLB_FACTOR_COUNTS.total;
 const PLACEHOLDER_WEIGHT_SUM_PCT = Math.round(
   MLB_PLACEHOLDER_FACTOR_KEYS.reduce((sum, key) => sum + MLB_BASE_WEIGHTS[key], 0) * 100,
 );
+// MLB home advantage is NOT a single fixed constant like KBO's HOME_ADVANTAGE_PCT (+1.5pp) —
+// it's the sum of (1) HOME_ELO_BONUS baked into the elo factor's weight and (2) a separate
+// flat home_elo_bonus weight applied at half value (computeMlbProbability, mlb-base.ts). At a
+// fully neutral matchup the two sum to the pipeline's documented 0.556 constant (cycle 2057
+// pre-fix value, see mlb-pipeline.ts comment) — the old "same +1.5pp as KBO" claim here did
+// not match the actual mlb-base.ts logic (cycle 3247 fix).
+const HOME_ELO_EMBEDDED_PCT = MLB_BASE_WEIGHTS.elo * (HOME_ELO_BONUS / ELO_DIVIDER) * 100;
+const HOME_FLAT_BONUS_PCT = MLB_BASE_WEIGHTS.home_elo_bonus * 0.5 * 100;
+const HOME_NEUTRAL_TOTAL_PCT = (HOME_ELO_EMBEDDED_PCT + HOME_FLAT_BONUS_PCT).toFixed(1);
 const TITLE_EN = "MLB Prediction Methodology | MoneyBall Score";
 const SUMMARY_EN = `How MoneyBall Score builds MLB game predictions — data sources, ${TOTAL}-factor quantitative model, verification method, and how it differs from the KBO model.`;
 
@@ -118,7 +128,8 @@ export default function MlbMethodologyEnPage() {
             equivalent.
           </li>
           <li>
-            <strong>FanGraphs MLB</strong> — starter/bullpen FIP·xFIP, lineup wOBA, WAR, defensive SFR.
+            <strong>FanGraphs MLB</strong> — starter/bullpen FIP·xFIP, lineup wOBA, WAR. Defensive SFR has no
+            MLB-specific source yet and is a neutral placeholder (see Limits section below).
           </li>
         </ul>
       </section>
@@ -132,8 +143,10 @@ export default function MlbMethodologyEnPage() {
           WAR, head-to-head, park factor, Elo, defensive SFR) plus 4 Statcast-only factors. Team Elo ratings
           aren&apos;t sourced externally like KBO&apos;s — we run our own K-factor update loop (<code>K={MLB_ELO_K}</code>,{" "}
           <code>K={MLB_ELO_K_POSTSEASON}</code> in the postseason, values cited from FiveThirtyEight&apos;s published
-          MLB Elo model) after every game. Home teams get the same empirically measured home-field bonus as KBO
-          (+{HOME_ADVANTAGE_PCT.toFixed(1)}pp).
+          MLB Elo model) after every game. Home-field advantage isn&apos;t a single fixed value like KBO&apos;s —
+          it&apos;s the sum of a home Elo bonus ({HOME_ELO_BONUS} Elo) baked into the elo factor, plus a separate
+          flat home_elo_bonus weight. At a fully neutral matchup (every factor tied) the two sum to about{" "}
+          +{HOME_NEUTRAL_TOTAL_PCT}pp — structurally larger than KBO&apos;s single measured constant (+1.5pp).
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           Note: defensive SFR, starter xwOBA-against, and wOBA standard deviation (
@@ -141,7 +154,10 @@ export default function MlbMethodologyEnPage() {
           pages, but since no MLB-specific data source exists for them yet, a neutral
           team-agnostic value is fixed in the win-probability calculation above — they
           don&apos;t actually move the number. Recent form, head-to-head, and Elo are all
-          real measured values feeding into the calculation.
+          real measured values feeding into the calculation. Starter FIP and bullpen FIP also
+          currently share the same team-level FIP number (no starter-specific FIP source yet) —
+          they&apos;re two weighted copies of one measurement, not independent inputs, until a
+          dedicated source is added (KBO&apos;s version keeps starter/bullpen fully separate).
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           Full weight table, definitions, and sources are on{" "}

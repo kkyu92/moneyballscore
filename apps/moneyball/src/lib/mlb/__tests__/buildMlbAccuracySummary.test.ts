@@ -45,22 +45,24 @@ describe('buildMlbAccuracySummary', () => {
     vi.clearAllMocks();
   });
 
-  it('final 경기 없으면 빈 summary', async () => {
+  it('final 경기 없으면 빈 summary, degraded=false', async () => {
     supabaseMock = makeSupabaseMock({ schedule: [] });
     const { buildMlbAccuracySummary } = await import('../buildMlbAccuracySummary');
     const result = await buildMlbAccuracySummary();
     expect(result.verifiedN).toBe(0);
     expect(result.accuracyRate).toBeNull();
     expect(result.brier).toBeNull();
+    expect(result.degraded).toBe(false);
   });
 
-  it('schedule select 실패 시 throw 대신 빈 summary degrade (cycle 2949 captureFallback)', async () => {
+  it('schedule select 실패 시 throw 대신 빈 summary degrade + degraded=true (cycle 3247)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { buildMlbAccuracySummary } = await import('../buildMlbAccuracySummary');
     const result = await buildMlbAccuracySummary();
     expect(result.verifiedN).toBe(0);
     expect(result.accuracyRate).toBeNull();
     expect(result.brier).toBeNull();
+    expect(result.degraded).toBe(true);
   });
 
   it('home_win_prob + 실제 스코어로 정확도/Brier 를 derive', async () => {

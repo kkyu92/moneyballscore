@@ -45,18 +45,20 @@ describe('buildMlbFactorAccuracy', () => {
     vi.clearAllMocks();
   });
 
-  it('final 경기 없으면 빈 배열', async () => {
+  it('final 경기 없으면 빈 배열, degraded=false', async () => {
     supabaseMock = makeSupabaseMock({ schedule: [] });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result, degraded } = await buildMlbFactorAccuracy();
     expect(result).toEqual([]);
+    expect(degraded).toBe(false);
   });
 
-  it('schedule select 실패 시 throw 대신 빈 배열 degrade (cycle 2949 captureFallback)', async () => {
+  it('schedule select 실패 시 throw 대신 빈 배열 degrade + degraded=true (cycle 3247)', async () => {
     supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result, degraded } = await buildMlbFactorAccuracy();
     expect(result).toEqual([]);
+    expect(degraded).toBe(true);
   });
 
   it('lower-is-better(FIP) 팩터는 낮은 쪽 팀을 우세로 판정', async () => {
@@ -73,7 +75,7 @@ describe('buildMlbFactorAccuracy', () => {
       ],
     });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result } = await buildMlbFactorAccuracy();
     const spFip = result.find((r) => r.key === 'sp_fip');
     expect(spFip).toBeDefined();
     expect(spFip!.n).toBe(2);
@@ -91,7 +93,7 @@ describe('buildMlbFactorAccuracy', () => {
       ],
     });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result } = await buildMlbFactorAccuracy();
     const woba = result.find((r) => r.key === 'lineup_woba');
     expect(woba!.n).toBe(1);
     expect(woba!.accuracy).toBe(1);
@@ -106,7 +108,7 @@ describe('buildMlbFactorAccuracy', () => {
       ],
     });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result } = await buildMlbFactorAccuracy();
     expect(result.find((r) => r.key === 'sp_fip')).toBeUndefined();
     expect(result.find((r) => r.key === 'war')).toBeUndefined();
   });
@@ -117,7 +119,7 @@ describe('buildMlbFactorAccuracy', () => {
       preds: [{ external_game_id: 'g1', home_win_prob: 0.6, home_sp_fip: 3.0, away_sp_fip: 4.0 }],
     });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result } = await buildMlbFactorAccuracy();
     expect(result).toEqual([]);
   });
 
@@ -127,7 +129,7 @@ describe('buildMlbFactorAccuracy', () => {
       preds: [{ external_game_id: 'g1', home_win_prob: 0.6, home_sp_fip: 3.0, away_sp_fip: 4.0 }],
     });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy('en');
+    const { rows: result } = await buildMlbFactorAccuracy('en');
     expect(result.find((r) => r.key === 'sp_fip')?.label).toBe('Starter FIP');
   });
 
@@ -146,7 +148,7 @@ describe('buildMlbFactorAccuracy', () => {
       ],
     });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result } = await buildMlbFactorAccuracy();
     const elo = result.find((r) => r.key === 'elo');
     const recentForm = result.find((r) => r.key === 'recent_form');
     expect(elo?.n).toBe(1);
@@ -167,7 +169,7 @@ describe('buildMlbFactorAccuracy', () => {
       ],
     });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result } = await buildMlbFactorAccuracy();
     const h2h = result.find((r) => r.key === 'head_to_head');
     expect(h2h?.n).toBe(2);
     expect(h2h?.accuracy).toBe(0.5);
@@ -180,7 +182,7 @@ describe('buildMlbFactorAccuracy', () => {
       preds: [{ external_game_id: 'g1', home_win_prob: 0.6, head_to_head_rate: 0.5 }],
     });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result } = await buildMlbFactorAccuracy();
     expect(result.find((r) => r.key === 'head_to_head')).toBeUndefined();
   });
 
@@ -198,7 +200,7 @@ describe('buildMlbFactorAccuracy', () => {
       ],
     });
     const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
-    const result = await buildMlbFactorAccuracy();
+    const { rows: result } = await buildMlbFactorAccuracy();
     const spFipIdx = result.findIndex((r) => r.key === 'sp_fip');
     const warIdx = result.findIndex((r) => r.key === 'war');
     expect(spFipIdx).toBeLessThan(warIdx);

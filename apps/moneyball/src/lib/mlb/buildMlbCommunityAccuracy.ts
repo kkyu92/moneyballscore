@@ -30,18 +30,22 @@ const EMPTY: CommunityVsAIResult = {
 
 // /mlb/accuracy · /en/mlb/accuracy 의 "커뮤니티 vs AI 대결" 섹션 데이터 소스 (explore-idea
 // heavy, cycle 2544 — KBO /accuracy 에는 있었지만 MLB 쪽 parity 부재였던 gap).
-export async function buildMlbCommunityVsAI(): Promise<CommunityVsAIResult> {
+// CommunityVsAIResult 자체는 KBO computeCommunityVsAI(순수 동기 함수)와 공유 타입이라
+// degraded 필드를 얹지 않고, 본 async wrapper 전용으로 별도 반환 shape 사용(cycle 3247).
+export async function buildMlbCommunityVsAI(): Promise<{ stats: CommunityVsAIResult; degraded: boolean }> {
   const supabase = await createClient();
+  let degraded = false;
 
   const pollResult = await supabase.from('mlb_pick_poll_events').select('external_game_id, pick');
   let pollData: PollRow[] | null;
   try {
     ({ data: pollData } = assertSelectOk(pollResult, 'buildMlbCommunityVsAI mlb_pick_poll_events'));
   } catch (err) {
+    degraded = true;
     pollData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbCommunityVsAI mlb_pick_poll_events' });
   }
   const pollRows = (pollData ?? []) as PollRow[];
-  if (pollRows.length === 0) return EMPTY;
+  if (pollRows.length === 0) return { stats: EMPTY, degraded };
 
   const scheduleResult = await supabase
     .from('mlb_schedule')
@@ -53,10 +57,11 @@ export async function buildMlbCommunityVsAI(): Promise<CommunityVsAIResult> {
   try {
     ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbCommunityVsAI mlb_schedule'));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbCommunityVsAI mlb_schedule' });
   }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
-  if (scheduleRows.length === 0) return EMPTY;
+  if (scheduleRows.length === 0) return { stats: EMPTY, degraded };
 
   const predResult = await supabase
     .from('predictions')
@@ -69,9 +74,10 @@ export async function buildMlbCommunityVsAI(): Promise<CommunityVsAIResult> {
   try {
     ({ data: predData } = assertSelectOk(predResult, 'buildMlbCommunityVsAI predictions'));
   } catch (err) {
+    degraded = true;
     predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbCommunityVsAI predictions' });
   }
   const predRows = (predData ?? []) as PredMiniRow[];
 
-  return computeMlbCommunityVsAI(pollRows, scheduleRows, predRows);
+  return { stats: computeMlbCommunityVsAI(pollRows, scheduleRows, predRows), degraded };
 }

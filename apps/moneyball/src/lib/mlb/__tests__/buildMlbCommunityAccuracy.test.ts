@@ -57,20 +57,22 @@ describe('buildMlbCommunityVsAI', () => {
     vi.clearAllMocks();
   });
 
-  it('poll 없으면 빈 결과 (조회 자체를 스킵)', async () => {
+  it('poll 없으면 빈 결과 (조회 자체를 스킵), degraded=false', async () => {
     supabaseMock = makeSupabaseMock({ poll: [] });
     const { buildMlbCommunityVsAI } = await import('../buildMlbCommunityAccuracy');
-    const result = await buildMlbCommunityVsAI();
+    const { stats: result, degraded } = await buildMlbCommunityVsAI();
     expect(result.communityGames).toBe(0);
     expect(result.communityAccuracy).toBeNull();
+    expect(degraded).toBe(false);
   });
 
-  it('poll select 실패 시 throw 대신 빈 결과 degrade (cycle 2949 captureFallback)', async () => {
+  it('poll select 실패 시 throw 대신 빈 결과 degrade + degraded=true (cycle 3247)', async () => {
     supabaseMock = makeSupabaseMock({ pollError: { message: 'boom' } });
     const { buildMlbCommunityVsAI } = await import('../buildMlbCommunityAccuracy');
-    const result = await buildMlbCommunityVsAI();
+    const { stats: result, degraded } = await buildMlbCommunityVsAI();
     expect(result.communityGames).toBe(0);
     expect(result.communityAccuracy).toBeNull();
+    expect(degraded).toBe(true);
   });
 
   it('final 경기 없으면 빈 결과', async () => {
@@ -83,8 +85,9 @@ describe('buildMlbCommunityVsAI', () => {
       schedule: [],
     });
     const { buildMlbCommunityVsAI } = await import('../buildMlbCommunityAccuracy');
-    const result = await buildMlbCommunityVsAI();
+    const { stats: result, degraded } = await buildMlbCommunityVsAI();
     expect(result.communityGames).toBe(0);
+    expect(degraded).toBe(false);
   });
 
   it('poll + final 경기 + 예측을 합쳐 커뮤니티/AI 정확도를 산출', async () => {
@@ -98,10 +101,11 @@ describe('buildMlbCommunityVsAI', () => {
       preds: [{ external_game_id: 'g1', home_win_prob: 0.6 }],
     });
     const { buildMlbCommunityVsAI } = await import('../buildMlbCommunityAccuracy');
-    const result = await buildMlbCommunityVsAI();
+    const { stats: result, degraded } = await buildMlbCommunityVsAI();
     expect(result.communityGames).toBe(1);
     expect(result.communityCorrect).toBe(1);
     expect(result.aiGamesWithPoll).toBe(1);
     expect(result.aiCorrectWithPoll).toBe(1);
+    expect(degraded).toBe(false);
   });
 });

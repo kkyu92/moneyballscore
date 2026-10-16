@@ -4,7 +4,8 @@ import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_E
 import {
   SITE_URL,
   MLB_SCORING_RULE,
-  HOME_ADVANTAGE_PCT,
+  HOME_ELO_BONUS,
+  ELO_DIVIDER,
   MLB_TEAM_COUNT,
   MLB_HEAD_TO_HEAD_PAIRS,
 } from "@moneyball/shared";
@@ -14,6 +15,15 @@ import { TableOfContents } from "@/components/shared/TableOfContents";
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 const TOTAL = MLB_FACTOR_COUNTS.total;
+// MLB 홈 어드밴티지는 KBO 의 단일 고정 상수(HOME_ADVANTAGE_PCT=+1.5%p)가 아니라 두 항목의
+// 합산 — (1) elo 팩터 가중치(10%) 안에 내장된 HOME_ELO_BONUS(24 Elo, mlb-base.ts
+// computeMlbFactorContributions) + (2) 별도 home_elo_bonus 가중치(10%)의 절반이 무조건
+// 가산되는 flat 보너스(computeMlbProbability). 중립 매치업(모든 팩터 동률) 기준 두 항목 합이
+// 실제 pipeline 상수 0.556(cycle 2057 이전 전량 적용값, mlb-pipeline.ts 주석 참조)과 정확히
+// 일치 — 과거 "KBO 와 동일 +1.5%p" 서술은 mlb-base.ts 실제 로직과 불일치했음(cycle 3247 fix).
+const HOME_ELO_EMBEDDED_PCT = MLB_BASE_WEIGHTS.elo * (HOME_ELO_BONUS / ELO_DIVIDER) * 100;
+const HOME_FLAT_BONUS_PCT = MLB_BASE_WEIGHTS.home_elo_bonus * 0.5 * 100;
+const HOME_NEUTRAL_TOTAL_PCT = (HOME_ELO_EMBEDDED_PCT + HOME_FLAT_BONUS_PCT).toFixed(1);
 // MLB_PLACEHOLDER_FACTOR_KEYS(mlb-base.ts) 단일 source — factors 페이지와 동일 배열 참조
 // (cycle 2512 fix, 이전엔 recent_form/head_to_head 를 stale 하게 이 목록에 포함).
 const PLACEHOLDER_WEIGHT_SUM_PCT = Math.round(
@@ -112,7 +122,8 @@ export default function MlbMethodologyPage() {
             발사각·속도 기반 batted-ball 품질 측정, KBO 모델엔 없는 MLB 전용 layer.
           </li>
           <li>
-            <strong>FanGraphs MLB</strong> — 선발/불펜 FIP·xFIP, 타선 wOBA, WAR, 수비 SFR.
+            <strong>FanGraphs MLB</strong> — 선발/불펜 FIP·xFIP, 타선 wOBA, WAR. 수비 SFR 은 MLB 전용 소스가
+            아직 없어 중립값 placeholder(아래 한계 섹션 참조).
           </li>
         </ul>
       </section>
@@ -125,14 +136,18 @@ export default function MlbMethodologyPage() {
           KBO 10팩터 동등(FIP·xFIP·wOBA·불펜FIP·최근폼·WAR·상대전적·구장보정·Elo·수비SFR) + Statcast 전용 4팩터를
           더한 {TOTAL}팩터 가중 합산 모델입니다. 팀별 Elo 레이팅은 KBO Fancy Stats 처럼 외부에서 받아오지 않고
           자체 구현한 K-factor 갱신 로직(<code>K={MLB_ELO_K}</code>, 포스트시즌 <code>K={MLB_ELO_K_POSTSEASON}</code>{" "}
-          — FiveThirtyEight MLB Elo 모델의 공개 문헌 값 인용)으로 경기 결과마다 갱신합니다. 홈팀에는 KBO 와 동일한
-          실측 어드밴티지(+{HOME_ADVANTAGE_PCT.toFixed(1)}%p)를 가산합니다.
+          — FiveThirtyEight MLB Elo 모델의 공개 문헌 값 인용)으로 경기 결과마다 갱신합니다. 홈팀 어드밴티지는 KBO
+          처럼 단일 고정값이 아니라 두 항목의 합산입니다 — elo 팩터 안에 내장된 홈 Elo 보너스({HOME_ELO_BONUS} Elo)
+          + 별도 home_elo_bonus 가중치의 flat 가산. 중립 매치업(모든 팩터 동률) 기준 두 항목 합은 약{" "}
+          +{HOME_NEUTRAL_TOTAL_PCT}%p — KBO 의 단일 실측 상수(+1.5%p)보다 구조적으로 큽니다.
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           단, 수비 SFR·선발 xwOBA-against·wOBA 표준편차 3개(합 {PLACEHOLDER_WEIGHT_SUM_PCT}%)는 팀/매치업 페이지엔
           참고용으로 표시되지만, MLB 전용 데이터 소스가 아직 없어 위 승률 계산 자체에는 팀 구분 없는 중립값이 고정
           입력되어 반영되지 않습니다 (KBO 버전은 실측 반영). 최근폼·상대전적·Elo 는 실측값이 위 승률 계산에도
-          연결되어 있습니다.
+          연결되어 있습니다. 또한 선발FIP·불펜FIP 는 현재 선발 전용 FIP 데이터 소스가 없어 동일 팀 전체 FIP
+          값을 공유합니다 — 두 팩터가 독립 측정치가 아니라 같은 숫자를 두 번 가중하는 것이라는 점에 유의하세요
+          (전용 데이터 소스 확보 전까지 임시 처리, KBO 버전은 선발/불펜 완전 분리).
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           가중치 표 전체와 각 팩터의 정의·출처는{" "}

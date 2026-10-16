@@ -111,7 +111,9 @@ export default async function MlbMatchupPage({ params }: PageProps) {
 
   // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
   // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
-  // buildMlbMatchupProfile 은 captureFallback 비가드(fail-loud) — 동시성 유지 위해 별도 promise 로 분리.
+  // buildMlbMatchupProfile 은 내부에서 mlb_schedule/predictions DB 오류를 catch-and-log 로
+  // 흡수(fail-silent) 하므로 profile.degraded 플래그를 dbDegraded 파생에 합류 (동시성 유지 위해
+  // 별도 promise 로 분리, cycle 3247).
   const profilePromise = buildMlbMatchupProfile(pair);
   const [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR] = await Promise.allSettled([
     buildMlbTeamFactorAverages(pair.codeA),
@@ -133,7 +135,7 @@ export default async function MlbMatchupPage({ params }: PageProps) {
   const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupEloTrend" });
   const upcomingMatchup = upcomingMatchupR.status === "fulfilled" ? upcomingMatchupR.value : captureFallback(upcomingMatchupR.reason, [], { route: "/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupUpcoming" });
 
-  const dbDegraded = [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR].some((r) => r.status === "rejected");
+  const dbDegraded = profile.degraded || [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR].some((r) => r.status === "rejected");
 
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 

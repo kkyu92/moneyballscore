@@ -35,6 +35,7 @@ interface MlbAccuracySummary {
   brierTrend: BrierTrendPoint[];
   scoringRuleDayHeatmap: ScoringRuleDayCell[];
   cohortWeekHeatmap: ScoringRuleWeekCell[];
+  degraded: boolean;
 }
 
 interface ScheduleFinalRow {
@@ -49,7 +50,7 @@ interface PredMiniRow {
   home_win_prob: number | null;
 }
 
-const EMPTY_SUMMARY: MlbAccuracySummary = {
+export const EMPTY_MLB_ACCURACY_SUMMARY: MlbAccuracySummary = {
   verifiedN: 0,
   correctN: 0,
   accuracyRate: null,
@@ -62,6 +63,7 @@ const EMPTY_SUMMARY: MlbAccuracySummary = {
   brierTrend: [],
   scoringRuleDayHeatmap: [],
   cohortWeekHeatmap: [],
+  degraded: false,
 };
 
 // KBO `predictions.is_correct`/`confidence` 는 DB row 에 이미 채워져 buildAccuracyData
@@ -70,6 +72,7 @@ const EMPTY_SUMMARY: MlbAccuracySummary = {
 // bucketize/brierScore/buildConfidenceTiers 를 그대로 재사용(로직 중복 회피).
 export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promise<MlbAccuracySummary> {
   const supabase = await createClient();
+  let degraded = false;
 
   const scheduleResult = await supabase
     .from('mlb_schedule')
@@ -80,10 +83,11 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
   try {
     ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbAccuracySummary mlb_schedule'));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbAccuracySummary mlb_schedule' });
   }
   const scheduleRows = (scheduleData ?? []) as ScheduleFinalRow[];
-  if (scheduleRows.length === 0) return EMPTY_SUMMARY;
+  if (scheduleRows.length === 0) return { ...EMPTY_MLB_ACCURACY_SUMMARY, degraded };
 
   const predResult = await supabase
     .from('predictions')
@@ -97,6 +101,7 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
   try {
     ({ data: predData } = assertSelectOk(predResult, 'buildMlbAccuracySummary predictions'));
   } catch (err) {
+    degraded = true;
     predData = captureFallback(err, [], { route: '/mlb/accuracy', source: 'buildMlbAccuracySummary predictions' });
   }
   const predByExternalId = new Map<string, PredMiniRow>();
@@ -125,7 +130,7 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
     });
   }
 
-  if (rows.length === 0) return EMPTY_SUMMARY;
+  if (rows.length === 0) return { ...EMPTY_MLB_ACCURACY_SUMMARY, degraded };
 
   const correctN = rows.filter((r) => r.is_correct).length;
 
@@ -142,5 +147,6 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
     brierTrend: buildBrierTrend(rows),
     scoringRuleDayHeatmap: buildScoringRuleDayHeatmap(rows),
     cohortWeekHeatmap: buildScoringRuleWeekHeatmap(rows),
+    degraded,
   };
 }
