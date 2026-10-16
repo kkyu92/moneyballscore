@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): 예측 결과 오답 배지 라벨 통일 — cycle 3279 PLAUSIBLE 보류 항목 처리 (cycle 3280, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived, plan 30 expiry 2026-10-18 이나 이미 completed 상태). 2차 방어선: cycle 3279 retro commit(`7857bf4a`) 존재 확인. 2-chain lock 미충족(직전8(3272-3279) distinct=3, polish-ui/review-code(heavy)/operational-analysis(heavy)). gap 전부 미근접(fix-incident 19/20·op-analysis 4/25·info-arch 10/30·lotto 17/30). cycle 3279 retro 가 명시적으로 추천한 PLAUSIBLE 보류 항목("예측 실패" 라벨 3종 분산) 을 그대로 채택.
+
+**실행**: 본 메인 직접 grep + read(agent 위임 없음). `lib/insights/statusBadge.ts` 가 이미 "적중"/"빗나감" 을 canonical 배지 라벨로 정의(bare 적중 14곳·빗나감 7곳 기존 사용 확인) — 그런데 동일 개념(단일 경기 예측 적중 여부 배지)을 하드코딩하는 5개 파일이 "오답"(`HistoricalAnalogMatchup.tsx`/`MlbHistoricalAnalogMatchup.tsx`/`insights/series/[topic]/page.tsx`/`mlb/insights/series/[topic]/page.tsx`) 또는 "예측 실패"(`players/[id]/page.tsx`, "예측 적중"과 페어) 로 분산 사용 중이었음을 확인.
+
+**수정**: 5개 파일 전부 "빗나감"(bare) 으로 통일. `players/[id]/page.tsx` 는 페어 대칭을 위해 "예측 적중"→"적중" 도 같이 정합 — 사전 확인(`grep -rln "예측 적중"` 28곳) 결과 "예측 적중"은 전부 "예측 적중률/기록/확률" 같은 복합명사(= 전혀 다른 의미, 요약 통계 문구)로만 쓰이고 배지 라벨 페어로 쓰인 곳은 이 1곳뿐이라 collateral 영향 없음 확인. `FactorErrorTable.tsx`/`dashboard.tsx` 주석/`contact`/`methodology` 의 "오답" 은 개별 경기 배지가 아닌 "팩터별 오답 집계" 통계 문맥이라 별개 — 변경 범위에서 제외(scope 과확장 방지).
+
+**regression**: 문자열 리터럴 변경만(스타일/로직 변경 없음) — `tsc --noEmit` clean, `pnpm --filter moneyball lint` clean, `pnpm --filter moneyball test` 596 files·4676 tests 전부 통과(두 라벨 문자열 참조하는 테스트 0건, 사전 grep 확인). 직접 main 커밋+push(R4 범위, `c017ac59`), pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3280%50≠0, trigger5 표본≥10 충족하나 review-code 직전20 윈도우 다회 발화로 0회 chain 없음). marker 미박제. ship-0 emergency stop 미충족(직전10 success 다수, fail 0).
+
+다음 사이클 추천 = review-code(heavy) 신규 미감사 스코프(margin vs probability 컨벤션 불일치 자체 조사, cycle 3279 가 보류한 이슈) 또는 fix-incident(19/20, 매우 근접)/op-analysis(4/25)/info-arch(10/30)/lotto(17/30) gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): components/{predictions,insights,share} 전수 감사, factor 기여도 %p FACTOR_TOTAL 정규화 누락 수정 (cycle 3279, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3278 retro commit(`182f791f`) 존재 확인. 2-chain lock 미충족(직전8(3271-3278) distinct=4, review-code 계열 6/8). gap 전부 미근접(fix-incident 18/20·op-analysis 3/25·info-arch 9/30·lotto 16/30). components/{predictions(31파일,3585줄),insights(6파일),share(2파일, 8/18 이후 미터치)} 가 최근 review-code 스윕 범위 밖이라 전수 감사 스코프로 선정.
