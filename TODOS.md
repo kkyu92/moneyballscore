@@ -1,5 +1,15 @@
 
 
+## ⚪ RETRO-ONLY — expand-scope: 2-chain lock(review-code(heavy)+polish-ui) fallback, 신규 확장 기회 미발견 (cycle 3236, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건(plan#30 completed_all_phases_shipped, 나머지 전부 completed/archived). 2nd 방어선(cycle 3235 retro `1d256dd6`) OK. 2-chain lock 발동 — 직전8(3228-3235) distinct=2(review-code(heavy)7+polish-ui1) — 둘 다 bug 아니라 rule4 예외 불성립, 둘 다 제외. gap trigger 4종 전부 미근접/블락: fix-incident 18/20·info-arch 25/30·lotto 21/30·op-analysis gap=49/25 충족이나 Supabase DNS ENOTFOUND 재확인(`node dns lookup`/REST `curl` http_status=000, 변화 없음) actionable 아님. explore-idea saturation 직전15(3221-3235) 2/15 — saturation 자체 미충족(review-code(heavy) 연속 성공 streak 이 saturation 계산 윈도우에서도 review-code 비중 낮게 샘플링된 구간이라 미충족, 과거와 다른 결과). lock fallback(폴리시-ui 강제)이 그 자체 locked chain이라 적용 불가 — 남은 pool 중 expand-scope 조건(1, 직전4(3232-3235) 전부 {review-code,polish-ui} 안) 유일 명시적 충족, cycle 3079/3227 precedent 동일 해법 재적용.
+
+**재탐색**: office-hours skip(자동 fire 환경, 기존 선례 패턴). TODOS Next-Up 섹션 부재, DESIGN.md mtime 5.5일(신선), Supabase billing 영역 변화 없음(ENOTFOUND 지속). `/mlb/postseason` "준비 중" 카피 재확인 — TODOS cycle 3221 근처 기록대로 `games_found=1`(2026-10-14 기준 정규시즌 진행 중) 확인돼 여전히 정확한 상태(stale 아님, 활성화 조건 미충족). plan #30(MLB insights parity)은 이미 전체 완결(cycle 2936-2938) — 신규 unprocessed scope 없음.
+
+**결론**: 157 cycle 전(cycle 3079)·9 cycle 전(cycle 3227)과 동일하게 확장 가치 부족 재확인 — 코드 변경 0건, retro-only.
+
+다음 사이클 추천 = review-code(heavy) 2-chain lock 쿨다운 만료 후 복귀(잔여: app/ 라우트 레벨 page.tsx 재확인 또는 packages/kbo-data/src/agents/ 재확인) 또는 fix-incident(18/20)/info-arch(25/30)/lotto(21/30) gap 자연 대기. op-analysis 는 Supabase 복구 전까지 계속 블락.
+
 ## 🟢 SUCCESS — review-code(heavy): apps/moneyball/src/lib/ 최상위 7개 파일 전수 감사, 드리프트 0건 (cycle 3231, 2026-10-16)
 
 진단: open issue 0건. approved plan 0건(전부 completed/archived). 2-chain lock 미충족(직전8(3223-3230) distinct=3: review-code(heavy)6+polish-ui1+expand-scope1). gap trigger 4종 전부 미근접/블락: fix-incident 14/20·info-arch 21/30·lotto 17/30·op-analysis Supabase DNS ENOTFOUND 재확인(지속, Tier4 변화 없음). cycle 3230 추천대로 `apps/moneyball/src/lib/` 최상위 7개 파일(742줄, 디렉토리 단위 전수 감사 이력 없음 — CHANGELOG mention 은 있으나 전수 read 는 미실시) 선택.
