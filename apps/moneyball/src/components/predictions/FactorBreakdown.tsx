@@ -124,15 +124,20 @@ function getStatLabel(
   return null;
 }
 
+// predictor.ts 정합: homeWinProb = Σ(factorValue*weight)/factorTotal — factorTotal(가중치 합, DEFAULT_WEIGHTS
+// 기준 0.85) 로 나누지 않으면 개별 factor 기여도 합이 marginPp 의 factorTotal 배(≈85%)만 재현 (silent drift,
+// FactorWaterfallChart.tsx 의 동일 정규화와 단일 source 정합, cycle 3279).
+const FACTOR_TOTAL: number = Object.values(DEFAULT_WEIGHTS).reduce((sum: number, w) => sum + w, 0);
+
 /**
  * factor 의 win prob 기여도 (percentage point).
  * value ∈ [0,1], NEUTRAL_FACTOR=중립. NEUTRAL_FACTOR 에서 멀어진 만큼 × weight × FACTOR_CONTRIBUTION_SCALE(200,
- * = ×2 home prob 변화 -1~+1 의 ×100 %p 환산) — factor-explanations.ts contributionPp 와 단일 source 정합
- * (silent drift family — 하드코딩 `* 2 * 100` 대신 shared 상수 참조).
+ * = ×2 home prob 변화 -1~+1 의 ×100 %p 환산) ÷ FACTOR_TOTAL — factor-explanations.ts contributionPp 와
+ * 단일 source 정합 (silent drift family — 하드코딩 `* 2 * 100` 대신 shared 상수 참조).
  * 음수 = away 유리, 양수 = home 유리.
  */
 export function contributionPp(value: number, weight: number): number {
-  return (value - NEUTRAL_FACTOR) * weight * FACTOR_CONTRIBUTION_SCALE;
+  return ((value - NEUTRAL_FACTOR) * weight * FACTOR_CONTRIBUTION_SCALE) / FACTOR_TOTAL;
 }
 
 function labelFor(key: string): string {

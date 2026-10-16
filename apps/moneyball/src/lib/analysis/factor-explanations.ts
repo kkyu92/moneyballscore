@@ -59,8 +59,13 @@ function determineFavor(value: number): "home" | "away" | "neutral" {
   return "neutral";
 }
 
+// predictor.ts 정합: homeWinProb = Σ(factorValue*weight)/factorTotal — factorTotal(가중치 합, DEFAULT_WEIGHTS
+// 기준 0.85) 로 나누지 않으면 개별 factor 기여도 합이 marginPp 의 factorTotal 배(≈85%)만 재현 (silent drift,
+// FactorWaterfallChart.tsx 의 동일 정규화와 단일 source 정합, cycle 3279).
+const FACTOR_TOTAL: number = Object.values(DEFAULT_WEIGHTS).reduce((sum: number, w) => sum + w, 0);
+
 function contributionPp(value: number, weight: number): number {
-  return Math.round((value - NEUTRAL_FACTOR) * weight * FACTOR_CONTRIBUTION_SCALE);
+  return Math.round(((value - NEUTRAL_FACTOR) * weight * FACTOR_CONTRIBUTION_SCALE) / FACTOR_TOTAL);
 }
 
 function fmtFip(v: number | null | undefined): string {
