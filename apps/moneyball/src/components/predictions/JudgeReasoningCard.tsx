@@ -11,8 +11,9 @@ interface JudgeReasoningCardProps {
 }
 
 /**
- * /predictions/[date] 페이지에서 각 경기 카드 아래 노출되는 AI 분석 박스.
- * judge agent가 남긴 300-500자 블로그용 reasoning + 양팀 에이전트 요약을 함께 보여준다.
+ * /predictions/[date], /insights/[date] 페이지에서 경기 카드 아래 노출되는 AI 분석 박스.
+ * judge agent가 남긴 reasoning(호출처별 길이 다름 — 사전 debate verdict는 ≤300자 타겟,
+ * postview 사후 분석은 300-500자) + 양팀 에이전트 요약을 함께 보여준다.
  *
  * 목적: thin content 회피, SEO 실제 본문 확보, 베터에게 "왜 이 예측"을 한눈에 전달.
  */
