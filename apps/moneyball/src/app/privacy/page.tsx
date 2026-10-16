@@ -33,9 +33,9 @@ const SECTIONS = [
     body: (
       <>
         <p>
-          MoneyBall Score는 회원가입, 로그인, 결제, 댓글, 개인 식별 정보 입력이
-          필요한 어떠한 기능도 제공하지 않습니다. 서비스 운영 목적으로 다음의
-          최소 범위 기술 정보만을 수집합니다.
+          MoneyBall Score는 회원가입, 로그인, 결제, 댓글, 실명·연락처 등 개인
+          식별 정보 입력이 필요한 기능을 제공하지 않습니다. 서비스 운영 목적으로
+          다음 정보를 수집합니다.
         </p>
         <ul className="list-disc pl-5 space-y-1 mt-2">
           <li>
@@ -47,6 +47,18 @@ const SECTIONS = [
             서버 접근 로그: IP 주소, 요청 경로, 응답 코드, 타임스탬프 — Vercel
             인프라 수준의 일반 로그이며, 보안 및 장애 대응 목적으로 30일 이내
             자동 폐기됩니다.
+          </li>
+          <li>
+            <Link href="/picks" className="text-brand-500 hover:underline">
+              승부예측 참여(Picks)
+            </Link>{" "}
+            기능 이용 시: 브라우저에 자동 생성·저장되는 기기 식별값(device
+            ID)과 이용자가 직접 입력한 닉네임, 선택한 경기 예측 결과. 실명이나
+            연락처가 아니며, 닉네임은{" "}
+            <Link href="/leaderboard" className="text-brand-500 hover:underline">
+              리더보드
+            </Link>
+            에 공개 표시됩니다.
           </li>
         </ul>
       </>
@@ -154,8 +166,9 @@ const SECTIONS = [
             )
           </li>
           <li>
-            <strong>Supabase Inc.</strong> — 예측 데이터 저장. 방문자 개인정보는
-            저장되지 않습니다. (
+            <strong>Supabase Inc.</strong> — 예측 데이터 저장. Picks 기능
+            이용 시 기기 식별값·닉네임·예측 선택도 함께 저장되며, 실명·연락처
+            등 식별 정보는 저장되지 않습니다. (
             <a
               href="https://supabase.com/privacy"
               target="_blank"
@@ -196,8 +209,10 @@ const SECTIONS = [
         <li>Vercel Analytics 집계 데이터: 서비스 제공자 정책에 따름 (최대 1년).</li>
         <li>서버 접근 로그: 30일 이내 자동 삭제.</li>
         <li>
-          본 서비스가 자체 DB에 저장하는 사용자 개인정보는 없습니다. 따라서
-          열람·정정·삭제 요청 대상이 되는 개인정보도 보유하지 않습니다.
+          Picks 기능의 기기 식별값·닉네임·예측 기록은 이용자가 서비스를
+          이용하는 동안 보관되며, 아래 문의처로 요청 시 열람·정정·삭제할 수
+          있습니다. 그 외 본 서비스가 자체 DB에 저장하는 개인 식별 정보는
+          없습니다.
         </li>
       </ul>
     ),
