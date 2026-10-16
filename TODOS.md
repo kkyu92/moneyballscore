@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — fix-incident: Supabase INACTIVE 5일+ 인시던트 해소 — restore API 재시도로 billing 조치 없이 복구 (cycle 3261, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 non-approved status). 2차 방어선: cycle 3260 retro commit(`84ac9352`) 존재 확인. 2-chain lock 미충족(직전8(3253-3260) distinct=3: review-code(heavy)6+polish-ui1+lotto(lite)1). **fix-incident gap=20/20 정확 도달** — 7번 trigger(마지막 fix-incident 발화 cycle 3241 이후 20 사이클 경과) 자연 발화. `gh run list --json conclusion -q 'select(.conclusion=="failure")'` 로 Oct 11 이후 scheduled workflow 실패 재확인 — `health-alert`(10/16 12:32) + `heartbeat-stale`(10/16 12:12) 2건, 양쪽 전부 cycle 3250+ 반복 확인되던 Supabase INACTIVE 단일 근본원인(`fetch failed`).
+
+**실행**: `supabase projects list` + Management API(`GET /v1/projects`) 로 상태 재확인 — `status: "INACTIVE"` 지속(2026-10-11~, 5일+). **이전 사이클들의 전제("billing 조치 필요, restore API 402 차단")를 그대로 반복하지 않고 restore API 재시도**(`POST /v1/projects/{ref}/restore`, body `{}`) — 결과 **HTTP 200**(402 아님). Org plan 재확인 = 여전히 `free`(변화 없음, billing 결제 발생 안 함). 상태 폴링: `COMING_UP` → `RESTORING` → `ACTIVE_HEALTHY`(약 70초 소요). prod `/api/health` 재확인 — `overall: "ok"`, supabase "4 leagues", pipeline "Last run: 2026-10-04 (mlb_shadow_train) - success", kbo_api/deploy_alias 전부 ok. **실측 fire 1회 PASS로 success 확정**(isolated smoke 아닌 실제 production 응답 확인).
+
+**중요 정정 (R5 체크포인트 대조)**: 기존 auto-memory(`project_supabase_inactive_incident_2026_10_11.md`)와 다수 cycle retro(3250~3260)가 "restore API 402 차단 → 사용자 billing 조치 필수, 본 메인 자율 해결 불가"로 박제해왔으나, 이번 재시도에서 **402 재현 안 됨 — 단순 재시도만으로 HTTP 200 + 정상 복구**. Free-tier Supabase 프로젝트의 자동 일시정지(장기 미활동) 는 재시도 가능한 일반 restore 플로우이지 영구 billing 차단이 아니었을 가능성 — 향후 유사 INACTIVE 재발 시 "사용자 조치 필요"로 단정하지 말고 restore API 재시도부터 먼저 시도할 것(비용 가드 위반 아님 — restore 자체는 결제 액션이 아닌 일반 API 호출).
+
+**잔여 관찰 (추가 조치 안 함, 범위 외)**: `pipeline_runs` 최신 레코드가 2026-10-03/04 (Oct 5~16 공백, outage 시작일 10/11 보다 이전부터 공백) — `daily-pipeline.yml`/`mlb-pipeline.yml` 모두 `workflow_dispatch`만(스케줄 cron 없음, 실제 데이터 파이프라인은 외부 Cloudflare Worker dispatch 라 GH Actions 밖). 이 gap이 시즌 종료/휴식기로 인한 정상 상태인지 Worker 자체 이슈인지는 미확인 — 다음 op-analysis 또는 fix-incident 사이클에서 Cloudflare Worker 디스패치 상태 직접 확인 권장(Supabase 복구와 별개 이슈, 섣불리 결합 짓지 않음).
+
+검증: 코드 변경 없음(순수 인프라 API 호출 + 실측 검증). `pnpm` 빌드/테스트 영향 없음(파일 변경 0). cycle-retro/TODOS/lesson 커밋만.
+
+다음 사이클 추천 = review-code(heavy) 복귀(cross-file twin 비교 심화) 또는 info-arch(gap=21/30)/lotto(gap=9/30, 쿨다운) 자연 대기. **op-analysis Supabase 블락 해제됨 — 다음 op-analysis(gap 근접 시) 재개 가능, CE/비CE 재측정 정상 진행 가능.**
+
 ## 🟡 PARTIAL — review-code(heavy): scripts/ 0-mention 11개 파일 전수 감사 clean (cycle 3260, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 non-approved status). 2차 방어선: cycle 3259 retro commit(`a26b78ab`) 존재 확인. 2-chain lock 미충족(직전8(3252-3259) distinct=3: review-code(heavy)6+lotto(lite)1+polish-ui1). fix-incident gap=19/20·info-arch gap=20/30·lotto gap=7/30(쿨다운) 전부 미근접. op-analysis Supabase INACTIVE 구조적 블락 지속(5일+, DNS ENOTFOUND 재확인). DESIGN.md mtime 142h(5.9일, 신선). explore-idea saturation 직전15 2/15 — 미충족. `gh run list` clean(CI Failure Dispatch 전부 skipped, 실제 incident 無). cycle 3259 추천(`getProductionMetrics`/`renderMetricForLLM` Step 3 Agent 통합 여부) 재확인 — 여전히 외부 호출처 0건, 의도된 staged API 그대로(신규 정보 없음). packages/kbo-data 전체 서브디렉토리 + apps/moneyball lib/app 거의 전부 CHANGELOG mention-count sweep 상 최소 1회 이상 감사 이력 보유 확인(engine/contact/v2-preview 포함 재확인) — `scripts/` 디렉토리(31개 파일)에서 CHANGELOG 0-mention 11개(run-pipeline/smoke-umpire-scraper/backfill-kbo-confirmed-postponed/backfill-home-win-prob/backfill-tie-winner-null/measure-context-layer-brier/llm-context-baseline/dev-backend-compare/backfill-is-correct-shadow-fix/backfill-shadow-cohort/backfill-kbo-stuck-verify) 를 진짜 미감사 스코프로 채택.
