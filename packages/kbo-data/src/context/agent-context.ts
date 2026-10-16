@@ -198,15 +198,20 @@ export function buildAgentContext(ctx: GameContext, today: Date = new Date()): A
 // 같은 실제 없는 서술을 유발할 위험이 있었음 — 3개 소비처 전부 본 helper 로 단일화.
 const DATA_GAP_ZERO_SLUGS: ReadonlySet<MetricSlug> = new Set(['war', 'sfr']);
 
+/** war/sfr 값이 데이터 갭 sentinel(0)인지 — formatGapAwareStat/formatMetricLine 공통 조건, 단일 source. */
+function isDataGapZero(slug: MetricSlug, value: number): boolean {
+  return DATA_GAP_ZERO_SLUGS.has(slug) && value === 0;
+}
+
 /** war/sfr 값이 데이터 갭 sentinel(0)이면 raw 숫자 대신 명시적 갭 표기. */
 export function formatGapAwareStat(slug: MetricSlug, value: number): string {
-  return DATA_GAP_ZERO_SLUGS.has(slug) && value === 0 ? '데이터 없음(집계 갭)' : String(value);
+  return isDataGapZero(slug, value) ? '데이터 없음(집계 갭)' : String(value);
 }
 
 function formatMetricLine(slug: MetricSlug, obs: MetricObservation): string {
   const m = obs.metric;
   const fmt = (v: number) =>
-    DATA_GAP_ZERO_SLUGS.has(slug) && v === 0
+    isDataGapZero(slug, v)
       ? '데이터 없음(집계 갭)'
       : m.unit === 'percent'
         ? `${v.toFixed(1)}%`
