@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/leaderboard 전수 감사, 내 순위 배너 sort-aware 버그 수정 (cycle 3275, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3274 retro commit(`5dbd4315`) 존재 확인. 2-chain lock 미충족(직전8(3267-3274) distinct=3: review-code(heavy)6+info-architecture-review1+polish-ui1). gap 전부 미근접(fix-incident 14/20·op-analysis 13/25·info-arch 5/30·lotto 12/30). explore-idea saturation 10/15 미충족. `components/leaderboard`(5파일, 652줄) 가 CHANGELOG mention 0회 — grep-count≠감사깊이 가드레일(cycle 3001) 적용해 전수 read 스코프로 선정.
+
+**실행**: Agent(general-purpose) 1개 — 5개 파일 전수 read + 전체 repo 호출부/상수 grep-verify. CONFIRMED 1건 + PLAUSIBLE 3건(낮은 심각도, 코드 변경 보류).
+
+**수정 1건**: `LeaderboardTable.tsx` 의 고정 "내 순위" 배너(`myRank`, line 53)가 `effectiveSort` 와 무관하게 항상 `entries` 배열(accuracy 기준) `findIndex` 로 계산 — per-row rank(line 112-117, `streakRankMap`/`sampleRankMap` 기반)는 정렬 모드 따라 바뀌는데 배너 숫자만 고정돼 사용자가 연속순/표본순 전환 시 테이블과 배너 순위 불일치. per-row 로직과 동일하게 `myStreakRank`/`mySampleRank` lookup 분기 추가해 통일.
+
+**보류 3건(PLAUSIBLE, 코드 변경 없음)**: `HallOfFame.tsx` 메달 숫자 SVG 가 유일하게 `fontFamily="system-ui"` 오버라이드(Pretendard 통일 원칙과 불일치하나 단일 작은 glyph, 영향 미미) / `LeaderboardSortControl.tsx` 의 `LeaderboardSortMode` 타입 export 가 직접 import-by-name 호출처 없음(hook 반환 타입으로만 간접 소비, 진짜 dead export 아닐 가능성) / `HallOfFame.tsx` "위" vs `LeaderboardTable.tsx` "등" 동일 개념 용어 불일치(코스메틱).
+
+**regression**: `tsc --noEmit` clean. `pnpm --filter moneyball lint` clean. `pnpm --filter moneyball test` 596 files·4676 tests 전부 통과. 직접 main commit+push(R4, `3acde3d6`), pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3275%50≠0, trigger5 표본≥10 충족하나 review-code 직전20 윈도우 다회 발화로 0회 아님). marker 미박제. ship-0 emergency stop 미충족(직전10 success 다수, fail 0).
+
+다음 사이클 추천 = review-code(heavy) 계속(보류 3건 중 `HallOfFame.tsx` 폰트 오버라이드 제거 고려, 또는 components/{accuracy,glossary,search,shared,standings,teams} 잔여 재스윕) 또는 fix-incident(14/20)/op-analysis(13/25)/info-arch(5/30, 재발화 직후)/lotto(12/30) gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): review 배지 한글 리터럴 단일화 (cycle 3274, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3273 retro commit(`9f4f5ba0`) 존재 확인. 2-chain lock 미충족(직전8(3266-3273) distinct=4). gap 전부 미근접(fix-incident 13/20·op-analysis 12/25·info-arch 4/30·lotto 11/30). explore-idea saturation 10/15 미충족. cycle 3273 PLAUSIBLE 보류 3건 중 "박빙·고확신·대역전 배지 한글 리터럴 중복" carry-over 직접 소비.
