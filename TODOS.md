@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS (retro-only) — review-code(heavy): MLB insights/series EN mirror + loading.tsx 4개 신규 scope 전수 감사, drift 0건 (cycle 3221, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23. 2-chain lock 미충족(직전8(3213-3220) distinct=4: review-code(heavy)4+lotto1+fix-incident2+review-code1). fix-incident gap=4/20·lotto gap=7/30·info-arch gap=11/30 전부 미근접. op-analysis gap 296+(last fire 2924)로 크게 초과하나 Supabase DNS NXDOMAIN 재확인 여전히 공란(5일+ 경과, Tier4 블락 불변) — actionable 아님. explore-idea saturation 직전15 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 stale(2026-04-25~05-04 사용자 영역 항목뿐)/DESIGN.md mtime ~5.6일 신선) — 수십 회 반복된 established skip 패턴 재확인. lotto cron 양쪽 신선(picks `2026-10-17.md`/results `2026-10-10.md`) — 트리거 미충족.
+
+**스코프 재검토**: cycle 3220 추천(`components/ 잔여 accuracy/shared`) 실측 검증 결과 이미 cycle 3025/3039/3096/3141/3182 에서 복수 회 감사 완료 확인 — 스코프 정정. `components/`(전체 20개 디렉토리) + `packages/kbo-data`(cycle 3212 "전체 스윕 완료" 선언) + `scripts/`(cycle 3134 "31개 전수 감사 완결" 선언) 전부 포화 상태. 최근 14일 신규/추가 파일(`git log --since="14 days ago" --diff-filter=A`) 확인 → `apps/moneyball/src/app/{mlb,en/mlb}/insights/series/[topic]/page.tsx`(EN mirror 신규) + 4개 `loading.tsx`(mlb/insights, en/mlb/insights, mlb/standings, mlb/wild-card) + `leaderboard-sync-validation.ts`(cycle 3216 추출) 로 전환 — 아직 감사 이력 0건인 진짜 신선 scope.
+
+**감사 방법**: ko/en `page.tsx` diff 전체 대조(번역/locale/canonical/OG/JSON-LD) + KBO twin(`/insights/series/[topic]`) 구조 대조(force-static 부재 = plan #30 Phase 3 문서화된 의도적 분기 확인) + breadcrumb 패턴 대조(`mlb/insights/[date]` 기존 패턴과 "MLB 분석" 시작 동일 확인, "홈" 생략이 MLB 전역 established 패턴임을 교차검증) + `wild-card`/`standings` loading skeleton row 수 vs `buildMlbWildcardStandings`/`buildMlbDivisionStandings` 실제 pool 크기(12/30) 대조.
+
+**결과**: 0건. EN mirror 번역/locale/canonical/hreflang/JSON-LD(Article+BreadcrumbList) 전부 정확, KBO twin 대비 `generateStaticParams` 부재는 의도된 설계(435쌍 전체 사전렌더 빌드비용 회피, on-demand ISR). breadcrumb "MLB 분석" 시작 패턴이 `mlb/insights/[date]` 와 정확히 일치. `wild-card` loading 이 실제 pool(리그당 12팀) 보다 적은 6-row skeleton 표시하나 이는 흔한 근사 skeleton 패턴(cosmetic, 정확한 row 수 매칭이 요구사항 아님) — 버그 아님 판단. `leaderboard-sync-validation.ts`(17줄) 도 cycle 3216 추출 그대로 clean.
+
+**regression**: 코드 변경 없음(순수 read-only 감사, 발견 0건).
+
+**패턴**: review-code(heavy) 가 기존 디렉토리 포화(components/kbo-data/scripts 전부 "완결" 선언) 도달 시 `git log --since="N days ago" --diff-filter=A` 로 신규/추가 파일 scope 전환 — grep-count-depth 가드레일(cycle 3001) 준수한 "진짜 미감사" scope 발굴 방법 1건 추가 박제.
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `app/api` 잔여 재확인 또는 최근 14일 diff 재확인 반복, 또는 fix-incident(gap 자연대기)/lotto(gap 자연대기). Supabase DNS NXDOMAIN 지속(사용자 billing 조치 대기, 변화 없음), op-analysis 여전히 Tier4 블락.
+
 ## 🟢 SUCCESS — review-code(heavy): components/analysis + components/matchup 전수 감사, 실버그 1건+주석드리프트 1건 수정 (cycle 3220, 2026-10-16)
 
 진단: open issue 0건. approved plan 0건(plan #29 2026-10-15 만료). 2-chain lock 미충족(직전8(3212-3219) distinct=4: review-code(heavy)/lotto/fix-incident/review-code). fix-incident(last 3217)/lotto(last 3214)/info-arch(last 3210) 전부 gap 미근접. op-analysis 25-cycle gap 충족이나 Supabase DNS 재확인 여전히 NXDOMAIN(5일+ 경과, Tier4 블락 불변) — 이미 알려진 상태, 중단 사유 아님. domain whois "No match" 재확인도 `project_dotcom_domain_permanent_non_issue` 패턴(영구 non-issue) 그대로. cycle 3219 추천대로 components/ 스윕 이어서 analysis(1421줄)+matchup(1412줄) 선택.
