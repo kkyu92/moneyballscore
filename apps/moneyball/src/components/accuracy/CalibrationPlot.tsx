@@ -191,5 +191,4 @@ export function CalibrationPlot({ series, totalN }: CalibrationPlotProps) {
 export const CALIBRATION_COLORS = {
   v18: brand[600],
   shadow: semantic.warning,
-  v20: semantic.info,
 } as const;

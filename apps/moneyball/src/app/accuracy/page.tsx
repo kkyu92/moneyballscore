@@ -430,7 +430,7 @@ export default async function AccuracyPage() {
           label="전체 적중률"
           value={`${(overallAcc * 100).toFixed(1)}%`}
           sub={`${correct}/${n} 적중`}
-          accent={overallAcc >= ACCURACY_BASELINE}
+          accent={overallAcc >= ACCURACY_BASELINE && n >= SMALL_SAMPLE_N}
         />
         <StatCard
           label="Brier Score"

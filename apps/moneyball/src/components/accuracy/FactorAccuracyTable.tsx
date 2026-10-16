@@ -110,9 +110,10 @@ export function FactorAccuracyTable({
   rows: FactorAccuracyRow[];
   overallN: number;
   overallAcc: number;
-  sport?: 'kbo' | 'mlb';
-  locale?: 'ko' | 'en';
-}) {
+} & (
+  | { sport?: 'kbo'; locale?: never }
+  | { sport: 'mlb'; locale?: 'ko' | 'en' }
+)) {
   if (rows.length === 0) return null;
   const baselinePct = Math.round(overallAcc * 100);
   const copy = sport === 'mlb' ? (COPY.mlb[locale] ?? COPY.mlb.ko) : COPY.kbo.ko;
