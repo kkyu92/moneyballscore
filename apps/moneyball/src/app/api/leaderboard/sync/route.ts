@@ -4,20 +4,8 @@ import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
 import { NICKNAME_MIN_CHARS, NICKNAME_MAX_CHARS } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isOriginAllowed } from '@/lib/api/is-origin-allowed';
+import { isValidNickname, isValidDeviceId } from '@/lib/api/leaderboard-sync-validation';
 import type { LeaderboardSyncPayload } from '@/lib/leaderboard/types';
-
-// 닉네임 검증: NICKNAME_MIN_CHARS~NICKNAME_MAX_CHARS자, 기본 XSS 방지
-function isValidNickname(n: string): boolean {
-  if (typeof n !== 'string') return false;
-  const trimmed = n.trim();
-  if (trimmed.length < NICKNAME_MIN_CHARS || trimmed.length > NICKNAME_MAX_CHARS) return false;
-  if (/<|>|&|"|'|`/.test(trimmed)) return false;
-  return true;
-}
-
-function isValidDeviceId(id: string): boolean {
-  return typeof id === 'string' && /^[0-9a-f-]{36}$/.test(id);
-}
 
 export async function POST(req: NextRequest) {
   if (!isOriginAllowed(req.headers.get('origin'))) {

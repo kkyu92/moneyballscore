@@ -4,22 +4,12 @@ import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
 import { NICKNAME_MIN_CHARS, NICKNAME_MAX_CHARS } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isOriginAllowed } from '@/lib/api/is-origin-allowed';
+import { isValidNickname, isValidDeviceId } from '@/lib/api/leaderboard-sync-validation';
 import type { MlbLeaderboardSyncPayload } from '@/lib/leaderboard/types';
 
 // sync/route.ts (KBO) 의 external_game_id 버전 — mlb_user_picks(050) 는
 // game_id INT REFERENCES games(id) 대신 external_game_id VARCHAR(20) REFERENCES
 // mlb_schedule(external_game_id) 라 별도 route 필요 (048 과 동일 분리 사유).
-function isValidNickname(n: string): boolean {
-  if (typeof n !== 'string') return false;
-  const trimmed = n.trim();
-  if (trimmed.length < NICKNAME_MIN_CHARS || trimmed.length > NICKNAME_MAX_CHARS) return false;
-  if (/<|>|&|"|'|`/.test(trimmed)) return false;
-  return true;
-}
-
-function isValidDeviceId(id: string): boolean {
-  return typeof id === 'string' && /^[0-9a-f-]{36}$/.test(id);
-}
 
 export async function POST(req: NextRequest) {
   if (!isOriginAllowed(req.headers.get('origin'))) {
