@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/context/ 전수 감사, formatMetricLine 갭-체크 조건 중복 정리 (cycle 3259, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 non-approved status). 2차 방어선: cycle 3258 retro commit(`753127e8`) 존재 확인. 2-chain lock 미충족(직전8(3251-3258) distinct=4: review-code(heavy)5+skill-evolution1+lotto(lite)1+polish-ui1). fix-incident gap=18/20·info-arch gap=19/30·lotto gap=6/30(쿨다운) 전부 미근접. op-analysis Supabase INACTIVE 구조적 블락 지속(5일+). DESIGN.md mtime 5.9일(신선). explore-idea saturation 12/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 신선) — 확립된 skip 패턴. 전역 CHANGELOG mention-count sweep(app/lib/packages/scripts 전부) 결과 거의 모든 디렉토리가 최소 1회 이상 감사 이력 보유(feed/calendar/contact/picks/players 포함) — 디렉토리 단위가 아닌 세부 cross-check 수준 미감사 스코프로 `packages/kbo-data/src/context/`(agent-context/measurement/domain/metrics, 1707줄) 채택.
+
+**결과**: 4개 파일 + 4개 테스트 파일 전수 read(agent 위임) — 전체 clean(error swallow 0건, 가중치 전부 `DEFAULT_WEIGHTS` 직접 참조로 독립 하드코딩 없음, 86 테스트 전부 현재 동작 정합). 2건 발견: (1) `getProductionMetrics`/`renderMetricForLLM`(metrics.ts:218-242) 실사용처 0건이나 "Step 3 Agent 통합 전 단독 사용 가능" 명시 의도된 staged API — 삭제 보류. (2) **확정 drift-risk**: `agent-context.ts:192-198` 주석이 "3개 소비처 전부 본 helper(`formatGapAwareStat`)로 단일화"라 명시하지만, 같은 파일 `formatMetricLine`의 `fmt`는 실제로 `formatGapAwareStat`를 호출하지 않고 `DATA_GAP_ZERO_SLUGS.has(slug) && value===0` 조건을 독립적으로 재구현 — 현재는 일치하나 향후 sentinel 조건을 한쪽만 바꾸면 조용히 갈라질 구조. `isDataGapZero()` 헬퍼로 조건 단일화해 두 함수가 공유하도록 리팩터.
+
+검증: `pnpm turbo type-check`/`pnpm lint` 전부 clean(4 패키지). `npx vitest run packages/kbo-data/src/context` 86 tests green. 직접 main 커밋+push(R4, `d3c01d53`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+다음 사이클 추천 = review-code(heavy) 계속(`getProductionMetrics`/`renderMetricForLLM` 의 "Step 3 Agent 통합" 실제 진행 여부 확인 또는 신규 cross-file twin 비교) 또는 fix-incident(gap=19/20)/info-arch(gap=20/30)/lotto(gap=7/30, 쿨다운) 자연 대기. **Supabase INACTIVE 5일+ 지속 — 사용자 billing 조치 필요(변화 없음).**
+
 ## 🟢 SUCCESS — review-code(heavy): app/ KBO 단일-page 그룹 8개 전수 감사, guide.tsx FAQ 하드코딩 drift 수정 (cycle 3258, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 non-approved status). 2차 방어선: cycle 3257 retro commit(`cb5f484b`) 존재 확인. 2-chain lock 미충족(직전8(3250-3257) distinct=4: review-code(heavy)4+polish-ui2+lotto(lite)1+skill-evolution1). fix-incident gap=17/20·info-arch gap=18/30·lotto gap=5/30(쿨다운) 전부 미근접. op-analysis Supabase ENOTFOUND 구조적 블락 지속(5일+). DESIGN.md mtime 5.9일(신선). explore-idea saturation 12/15 충족하나 4-source 재확인 negative — 확립된 skip 패턴. cycle 3257 retro 권고대로 CHANGELOG mention 0건인 `app/{about,privacy,terms,settings,login,community,glossary,guide}` 8개 KBO 단일-page 그룹 신규 스코프 채택.
