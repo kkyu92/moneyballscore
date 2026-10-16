@@ -1,5 +1,23 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): debug/factor-correlation 재감사 (last audit cycle 2485), stale comment 1건 수정 (cycle 3223, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(plan #30 completed, 나머지 completed/archived/deferred). 2-chain lock 미충족(직전8(3215-3222) distinct=3: fix-incident2+review-code1+review-code(heavy)5). fix-incident gap=6/20·info-arch gap=13/30·lotto gap=9/30 전부 미근접. op-analysis gap 25+/25 — Supabase DNS 재확인 여전히 `ENOTFOUND`(org billing 미해결, Tier4 사용자 조치 필요 지속, 변화 없음). `gh run list` 최근 CI 전부 success/skipped — fix-incident 신규 신호 없음. 2차 방어선(cycle 3222 retro `67802618`) OK.
+
+**스코프 재검토**: app/api(13 route 전체) / packages/kbo-data(전체 스윕 완료 cycle 3212) / apps/moneyball/src/lib(전체 서브디렉토리) / components(전체) / app 비-api 전체 / scripts(31개 전수) / .github/workflows(12개) / packages/shared — 전부 복수 회 감사 이력 확인(디렉토리 단위로 git log 교차검증), 신규 미감사 scope 없음 확정. 대신 "가장 오래 재방문 안 된 큰 파일" 축으로 전환 — `debug/factor-correlation/page.tsx`(546줄) 가 최종 전체 감사 cycle 2485(weekdayOf off-by-one fix) 이후 약 738 cycle 미재방문(이후 레지스트리 리팩터링 다수가 이 파일을 건드리지 않고 지나감) 확인, 재감사 대상 선정.
+
+**감사 방법**: 파일 전체 read(546줄) — DB 쿼리(games.status='final' 필터 다른 파일과 일치 확인) / weather JSON 필드(tempC/precipMm/precipPct/windSpeedKmh, archive-vs-forecast fallback 우선순위) / HOME_ADVANTAGE·SUPABASE_PAGE_SIZE·WEEKDAY_LABELS_KO 레지스트리 참조 / weekdayOf UTC 정오 앵커 로직(monthGrid.ts 동일 계열 버그 주석과 교차검증) / 상단 파일 헤더 주석 vs 본문 인라인 주석 vs 화면 노출 텍스트 3곳 날짜범위 서술 일치 여부.
+
+**발견**: 라인 145 인라인 주석이 "2024+2025 백필 완료 + 2026 진행분"이라 적혀있었으나 실제 쿼리는 `gte('game_date','2023-01-01')`이고 파일 헤더(라인 7)·화면 노출 텍스트(라인 281) 둘 다 "2023 시즌 ~ 2026 진행분"으로 일치 — 2023 시즌 백필 완료 후 인라인 주석만 갱신 안 된 stale comment. 정정.
+
+**false positive 기각**: weather 필드 fallback(mm 우선 → pct) 로직 정확(scrapers/weather.ts 스키마와 일치). games.status='final' 필터 다른 파일(buildMlbTeamAccuracy.ts 등) 과 동일 리터럴. weekdayOf UTC 정오 앵커 = monthGrid.ts toUtcDate 주석과 동일 계열, 버그 아님. SplitSection의 `showRuns` prop이 6회 호출 전부 true(선택적 false 분기 미사용)는 vestigial flexibility일 뿐 버그 아님(기각).
+
+**regression**: `tsc --noEmit` clean, direct main commit(`595d2dd9`)+push, pre-push hook(lint+type-check+version-sync-guard+vitest) 전부 PASS. 100+ 파일 아님, PR 불필요.
+
+**패턴**: 전면 디렉토리 스윕이 포화된 국면에서는 "디렉토리 단위 미감사" 대신 "파일 단위 최종 감사 cycle 번호" 축으로 전환하는 게 유효 — grep으로 직접 파일명 매칭되는 cycle-retro 커밋만 찾으면 수백 cycle 전 1회성 감사 이후 방치된 대형 파일을 짚어낼 수 있음(본 cycle 738-cycle gap 사례).
+
+다음 사이클 추천 = review-code(heavy) 계속(동일 "최종 감사 cycle 오래된 대형 파일" 축 — 예: `components/predictions/MlbHistoricalAnalogMatchup.tsx` 등 재확인) 또는 fix-incident(gap 자연대기)/op-analysis(Supabase 복구 시). Supabase DNS NXDOMAIN 지속(사용자 billing 조치 필요, 변화 없음).
+
 ## 🟢 SUCCESS — review-code(heavy): app/api 잔여 8개 route 전수 감사, CRON_SECRET trim 버그 repo-wide 수정 (cycle 3222, 2026-10-16)
 
 진단: open issue 0건. approved plan 0건(plan #30 status=completed_all_phases_shipped, 나머지 전부 completed/archived/deferred). 2-chain lock 미충족(직전8(3214-3221) distinct=4: review-code(heavy)4+lotto1+fix-incident2+review-code1). fix-incident gap=5/20·info-arch gap=12/30·lotto gap=8/30 전부 미근접. op-analysis 여전히 Supabase DNS NXDOMAIN 블락(변화 없음). 2차 방어선(cycle 3221 retro `aa4f5cee`) OK. cycle 3221 추천(`app/api 잔여 재확인`) 따라 cycle 3099 가 미감사로 남겨뒀던 8개 route(health/hub-dispatch/leaderboard-sync/mlb/picks/pipeline/seo/sync-batter-stats/version — CHANGELOG mention 은 있으나 전수 감사 이력 불명확) 중 실제 미감사 7개(health 2개+hub-dispatch+pipeline+version+mlb/pipeline+mlb/waitlist, picks 5개+seo/indexnow+sync-batter-stats) 선정, Agent 2개 병렬 전수 read.
