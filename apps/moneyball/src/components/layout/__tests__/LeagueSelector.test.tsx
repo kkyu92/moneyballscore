@@ -38,7 +38,7 @@ describe("LeagueSelector", () => {
     expect(mlbTab).toHaveAttribute("href", "/mlb");
     unmount();
 
-    // sub-NAV switches: leagueFromPath('/mlb') → 'mlb', LEAGUE_NAVS.mlb → 6 sub-route (1 top-level + 3 경기·팀 + 2 포스트시즌)
+    // sub-NAV switches: leagueFromPath('/mlb') → 'mlb', LEAGUE_NAVS.mlb → 16 sub-route (1 top-level + 13 경기·팀 + 2 포스트시즌)
     const league = leagueFromPath("/mlb");
     expect(league).toBe("mlb");
     const mlbNav = LEAGUE_NAVS[league];

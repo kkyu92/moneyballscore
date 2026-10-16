@@ -67,7 +67,7 @@ export function localizeNavItems(items: NavItem[], pathname: string): NavItem[] 
 }
 
 // KBO_NAV: Header = primary path only (Footer = exhaust, IA hierarchy 룰).
-// 1 top-level (오늘) + 4 group (예측·기록 5 / 팀·선수 4 / 리뷰·시즌 3 / 커뮤니티 2) = 5 hover zone.
+// 1 top-level (오늘) + 4 group (예측·기록 6 / 팀·선수 4 / 리뷰·시즌 3 / 커뮤니티 2) = 5 hover zone.
 // accuracy/shadow (v2.1-B rejected) → noindex, direct-URL only, no nav link
 // (wave-384 IA cleanup 당시 "footer only" 였으나 이후 footer sitemap 정리 때 완전
 // 제외됨 — 코멘트만 stale 로 남아있던 것 cycle 2800 info-arch review 에서 발견 정정)
