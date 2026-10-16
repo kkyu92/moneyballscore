@@ -1,5 +1,21 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): lib/{leaderboard,picks,insights,debug} 전수 감사, 신규 drift 0건 (cycle 3291, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3290 retro commit(`e42f1749`) 존재 확인. 2-chain lock 미충족(직전8(3283-3290) distinct=3: lotto(lite)1+review-code(heavy)6+fix-incident(lite)1). gap 전부 미근접(fix-incident 1/20·op-analysis 15/25·info-arch 21/30·lotto 8/30). explore-idea saturation 직전15(3276-3290) 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 6.1일 신선) — 확립된 skip 패턴 유지. cycle 3289 추천 carry-over(`lib/leaderboard`/`lib/picks`/`lib/insights`/`lib/debug` 저-mention 축) 직접 소비.
+
+**실행**: Agent(general-purpose) 1개 — 4개 디렉토리 13개 파일(`leaderboard/{types,server,use-leaderboard}.ts` / `picks/{buildCommunityAccuracy,buildPicksStats}.ts` / `insights/{topFactors,loader,statusBadge,series}.ts` / `debug/{agentFallbackStats,factorDeltaStats,silentDriftStats,pipelineStats}.ts`) 전수 read + 전체 repo cross-grep.
+
+**결과**: 13개 파일 전부 comment-code 정합 확인, 신규 drift 0건. 주요 확인 포인트 — `LeaderboardMode` weekly backward-compat 주석 vs 실제 UI 미사용 일치 / `buildCommunityAccuracy.ts` 의 `computeMlbCommunityVsAI` 가 `buildMlbCommunityAccuracy.ts`(cycle 3247) 경유로 실제 wiring 확인(dead code 아님) / `buildPicksStats.ts` 의 `RECENT_FORM_GAMES`(10)/`PICKS_TREND_HALF`(5)/`PICKS_TREND_THRESHOLD`(0.1) 전부 `packages/shared` 값과 일치 / `debug/agentFallbackStats.ts` 7개 `agentError` 카테고리 전부 `packages/kbo-data/src/agents/validator.ts` 생성처와 일치 / `debug/pipelineStats.ts` 5개 reject reason 전부 `schedule.ts` `ShouldPredictReason` union 과 일치.
+
+**보류 1건(PLAUSIBLE, 코드 변경 없음)**: `buildCommunityAccuracy.ts:72-76` 의 cycle 2544 "커뮤니티 vs AI 섹션 부재" 서술은 cycle 3247 구현 이후 문자적으론 stale 이나, 함수 분리 배경을 설명하는 historical-narration 성격이라 비actionable 판단, 미수정.
+
+**regression**: `pnpm vitest run src/lib/leaderboard src/lib/picks src/lib/insights src/lib/debug` 13 test files·140 tests 전부 통과. `pnpm type-check` clean. 코드 변경 없음(감사만).
+
+검증: skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3291%50=41≠0, trigger5 직전20(N-19..N=3272-3291) review-code 다회 발화로 0회 chain 없음, trigger1 chain-evolution 누적 10건은 장기 지속 상태로 신규 trigger 아님, trigger2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전9(3282-3290) success 4건, partial 5건, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 재탐색(lib/{leaderboard,picks,insights,debug} 저-mention 축 소진 — components 계열 미방문분 또는 packages/shared 재검증) 또는 op-analysis(15/25)/info-arch(21/30)/lotto(8/30) gap 자연 대기.
+
 ## 🟢 SUCCESS — fix-incident(lite): pipeline_runs 13일 블랙아웃 근본원인 규명 (cycle 3290, 2026-10-16/17)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived). 2차 방어선: cycle 3289 retro commit(`8023bd55`) 존재 확인. **2-chain lock 탐지**(직전8(3282-3289) distinct=2, review-code(heavy) 7/8 + lotto(lite) 1/8) → 양쪽 이번 사이클 후보 제외. 제외 후 gap 재확인 — fix-incident 29/20(마지막 3261) + op-analysis 28/25(마지막 3262) 둘 다 trigger 충족, fix-incident 가 상대 초과율 더 큼(145% vs 112%) + 트리거(7) 명시 "pipeline_runs 에러율 + debug commit 강제 점검" 조건에 직접 부합해 fix-incident(lite) 채택.
