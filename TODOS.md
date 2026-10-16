@@ -1,5 +1,16 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): apps/moneyball/src/lib/ 전수 감사 clean (cycle 3266, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 non-approved, plan#30 2026-10-18 만료 임박, 재처리 대상 아님). 2차 방어선: cycle 3265 retro commit(`8ea2a6ab`) 존재 확인. 2-chain lock 미충족(직전8(3258-3265) distinct≥5: review-code(heavy)3+review-code1+polish-ui1+operational-analysis1+lotto1+fix-incident1). gap 전부 미근접(fix-incident 5/20·op-analysis 4/25·info-arch 26/30·lotto 3/30). 직전3 cycle(3263-3265) next_recommended_chain 전부 "review-code(heavy) 복귀" 일치 — cycle 3265 가 명시 이월한 `lib/` 영역 선정(app/api 13개 디렉토리 전수 완주 후속).
+
+**실행**: 본 메인 직접 전수 read(7개 파일, 742줄, agent 위임 없음). `hub-dispatch.ts`(277L) — PII 2차 스크럽 regex 순서(email→JWT→token→GitHub PAT→UUID→hex, 구체적 패턴 먼저) 의도된 설계 확인, `scrubUrlString` URL 필드 무조건 적용 주석과 실제 호출부 일치. `tabpfn-export.ts`(139L) — pure transform, 결측값 drop 판정 로직(`extractFactors`/`deriveHomeWinProb`/`deriveHomeWon`) 전부 명시적 null-guard. `tabpfn-import.ts`(110L) — 주석에 "write-only today(cycle 2832 확인), /accuracy/shadow 미연결" 한계 명시, 코드와 일치(buildTabpfnPredictionInsert 가 `tabpfn-shadow` insert 만 수행, 조회 경로 없음 — 의도된 스코프). `weather.ts`(99L) — asymmetric-null 가드(rawTemp 미가드 시 NaN 노출 이력) 주석대로 실제 `typeof rawTemp !== 'number'` 체크 존재 확인. `design-tokens.ts`(97L) — 순수 상수 export, DESIGN.md 토큰과 색상 값 직접 대조(brand/accent/semantic/surface) 일치. `feature-flags.ts`(14L) — `@moneyball/shared` 단일 source re-export, backwards-compat 주석대로 실제 import path 유지 확인. `utils.ts`(6L) — 단순 cn() 헬퍼, 이슈 없음.
+- **확정 버그 0건** — 7개 파일 전부 clean. 코드 변경 없음.
+
+검증: 코드 변경 없음(읽기 전용 감사). `apps/moneyball/src/lib/` 전수 커버리지 완료(7/7 파일). skill-evolution trigger 5개 평가 — 전부 미충족(trigger1 전체 누적 10건이나 신규 신호 아님 — 과거 cycle 들도 일관되게 미평가 대상 취급, trigger3 milestone 3266%50≠0, trigger5 review-code 직전20 윈도우(3247-3266) 12회 발화로 0회 아님) — 마커 미박제. ship-0 emergency stop 미충족(직전10(3256-3265) 중 success 5건 존재).
+
+다음 사이클 추천 = info-architecture-review(gap=26/30, 근접) 또는 fix-incident(gap=5/20)/op-analysis(gap=4/25)/lotto(gap=3/30) 자연 대기. review-code(heavy) 는 lib/ 완주 후 다음 발화 시 `apps/moneyball/src/components/` 영역 재탐색 필요.
+
 ## 🟡 PARTIAL — review-code(heavy): app/api/{health,mlb,picks} 잔여 3개 대형 route 전수 감사 clean (cycle 3265, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(plan#30 completed, 재처리 대상 아님). 2차 방어선: cycle 3264 retro commit(`3d6c8552`) 존재 확인. 2-chain lock 미충족(직전8(3257-3264) distinct=6). gap 전부 미근접(fix-incident 4/20·op-analysis 3/25·info-arch 25/30·lotto 2/30). 직전3 cycle(3262-3264) next_recommended_chain 전부 "review-code(heavy) 복귀" 일치 — cycle 3099/3264 이월 `app/api/{health,mlb,picks}` 잔여 3개 대형 route 선정.
