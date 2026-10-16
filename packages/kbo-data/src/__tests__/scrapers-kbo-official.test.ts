@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fetchGames } from '../scrapers/kbo-official';
+import { fetchGames, fetchStandings } from '../scrapers/kbo-official';
 import weekendMixed from './fixtures/kbo-api/weekend-mixed.json';
 import rainCancellation from './fixtures/kbo-api/rain-cancellation.json';
 import allFinished from './fixtures/kbo-api/all-finished.json';
@@ -244,5 +244,65 @@ describe('fetchGames — status 파싱 regression 보호', () => {
       // 5경기 × 2팀 = 10팀 KBO 전부 등장 기대
       expect(teams.size).toBe(10);
     });
+  });
+});
+
+describe('fetchStandings — 컬럼 순서 regression 보호 (cycle 3250, KBO 레이아웃 개편 드리프트)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function mockStandingsHtml(html: string) {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => html,
+    } as unknown as Response);
+  }
+
+  // cycle 3250 당시 실제 TeamRankDaily.aspx 라이브 응답에서 캡처한 레이아웃:
+  // 순위/팀명/경기/승/패/무/승률/게임차/최근10경기/연속/홈/방문 (12열)
+  const LIVE_LAYOUT_HTML = `
+    <table><tbody>
+      <tr>
+        <td>1</td><td>KT</td><td>144</td><td>90</td><td>49</td><td>5</td>
+        <td>0.647</td><td>0</td><td>9승1무0패</td><td>10승</td>
+        <td>45-2-24</td><td>45-3-25</td>
+      </tr>
+      <tr>
+        <td>2</td><td>삼성</td><td>144</td><td>83</td><td>58</td><td>3</td>
+        <td>0.589</td><td>8</td><td>4승0무6패</td><td>4패</td>
+        <td>43-1-29</td><td>40-2-29</td>
+      </tr>
+    </tbody></table>
+  `;
+
+  it('패/무 컬럼을 뒤바꾸지 않고 실제 승률(승/(승+패))과 일치시킨다', async () => {
+    mockStandingsHtml(LIVE_LAYOUT_HTML);
+    const rows = await fetchStandings();
+
+    expect(rows).toHaveLength(2);
+    const kt = rows[0];
+    expect(kt.wins).toBe(90);
+    expect(kt.losses).toBe(49);
+    expect(kt.draws).toBe(5);
+    // 0.647 ≈ 90 / (90 + 49)
+    expect(kt.wins / (kt.wins + kt.losses)).toBeCloseTo(kt.winPct, 2);
+  });
+
+  it('최근10경기 필드는 연속(streak) 문자열이 아닌 실제 최근10 기록을 담는다', async () => {
+    mockStandingsHtml(LIVE_LAYOUT_HTML);
+    const rows = await fetchStandings();
+    expect(rows[0].recent10).toBe('9승1무0패');
+    expect(rows[1].recent10).toBe('4승0무6패');
+  });
+
+  it('홈 성적은 "승-무-패" 3분할 포맷에서 무를 제외한 승/패만 추출한다', async () => {
+    mockStandingsHtml(LIVE_LAYOUT_HTML);
+    const rows = await fetchStandings();
+    // "45-2-24" = 45승 2무 24패 → homeWins=45, homeLosses=24 (무 제외)
+    expect(rows[0].homeWins).toBe(45);
+    expect(rows[0].homeLosses).toBe(24);
   });
 });

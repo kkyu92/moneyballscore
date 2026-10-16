@@ -248,8 +248,13 @@ export interface StandingRow {
 /**
  * KBO 공식 팀 순위표 — TeamRankDaily.aspx 전체 파싱.
  *
- * 컬럼 순서 (0-indexed):
- *   0=순위, 1=팀, 2=경기, 3=승, 4=무, 5=패, 6=승률, 7=게임차, 8=홈, 9=최근10
+ * 컬럼 순서 (0-indexed, cycle 3250 재확인 — 실제 페이지 <th> 라벨 기준):
+ *   0=순위, 1=팀명, 2=경기, 3=승, 4=패, 5=무, 6=승률, 7=게임차,
+ *   8=최근10경기, 9=연속, 10=홈("W-D-L" 형식, 예: "45-2-24"), 11=방문
+ *
+ * 과거(cycle 50 당시) 페이지는 4=무/5=패/8=홈/9=최근10 순서였으나 KBO 측 레이아웃
+ * 개편(연속 컬럼 추가 + 무/패, 최근10/홈 순서 변경)으로 드리프트 — 패/무 swap은
+ * 전 팀 손실 횟수가 틀리게 표시되는 사용자 가시 버그였음 (cycle 3250 review 중 발견).
  */
 export async function fetchStandings(): Promise<StandingRow[]> {
   const url = `${BASE_URL}/Record/TeamRank/TeamRankDaily.aspx`;
@@ -266,7 +271,7 @@ export async function fetchStandings(): Promise<StandingRow[]> {
 
   $('table tbody tr').each((_, row) => {
     const cells = $(row).find('td');
-    if (cells.length < 10) return;
+    if (cells.length < 11) return;
 
     const rankText = cells.eq(0).text().trim();
     const teamName = cells.eq(1).text().trim();
@@ -276,30 +281,34 @@ export async function fetchStandings(): Promise<StandingRow[]> {
     const rank = parseInt(rankText, 10) || rows.length + 1;
     const games = parseInt(cells.eq(2).text().trim(), 10) || 0;
     const wins = parseInt(cells.eq(3).text().trim(), 10) || 0;
-    const draws = parseInt(cells.eq(4).text().trim(), 10) || 0;
-    const losses = parseInt(cells.eq(5).text().trim(), 10) || 0;
+    const losses = parseInt(cells.eq(4).text().trim(), 10) || 0;
+    const draws = parseInt(cells.eq(5).text().trim(), 10) || 0;
     const winPctText = cells.eq(6).text().trim();
     const winPct = parseFloat(winPctText) || 0;
     const gbText = cells.eq(7).text().trim();
     const gamesBehind = gbText === '-' || gbText === '' ? null : parseFloat(gbText) || 0;
 
-    // wave-329: column 8 = 홈 성적 ("7-3" or "7승3패" or "7-3-0")
-    const homeText = cells.eq(8).text().trim();
+    const recent10 = cells.eq(8).text().trim();
+
+    // 홈 성적 — "45-2-24"(승-무-패) 또는 "7승3패" 형식
+    const homeText = cells.eq(10).text().trim();
     let homeWins: number | undefined;
     let homeLosses: number | undefined;
-    const dashMatch = homeText.match(/^(\d+)-(\d+)/);
-    if (dashMatch) {
-      homeWins = parseInt(dashMatch[1], 10);
-      homeLosses = parseInt(dashMatch[2], 10);
+    const dashMatch3 = homeText.match(/^(\d+)-(\d+)-(\d+)$/);
+    const dashMatch2 = homeText.match(/^(\d+)-(\d+)$/);
+    if (dashMatch3) {
+      homeWins = parseInt(dashMatch3[1], 10);
+      homeLosses = parseInt(dashMatch3[3], 10);
+    } else if (dashMatch2) {
+      homeWins = parseInt(dashMatch2[1], 10);
+      homeLosses = parseInt(dashMatch2[2], 10);
     } else {
-      const korMatch = homeText.match(/(\d+)승(\d+)패/);
+      const korMatch = homeText.match(/(\d+)승\D*?(\d+)패/);
       if (korMatch) {
         homeWins = parseInt(korMatch[1], 10);
         homeLosses = parseInt(korMatch[2], 10);
       }
     }
-
-    const recent10 = cells.eq(9).text().trim();
 
     rows.push({ rank, teamCode, games, wins, draws, losses, winPct, gamesBehind, recent10, homeWins, homeLosses });
   });
