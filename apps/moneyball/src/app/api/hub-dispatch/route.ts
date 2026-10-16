@@ -83,6 +83,10 @@ export async function POST(
   const secret = process.env.SENTRY_WEBHOOK_SECRET?.trim();
   const pat = process.env.PLAYBOOK_PAT?.trim();
   if (!secret || !pat) {
+    Sentry.captureMessage('hub-dispatch missing secrets', {
+      level: 'error',
+      tags: { layer: 'api-route', route: 'hub-dispatch' },
+    });
     return Response.json(
       {
         status: 'error',
@@ -159,6 +163,11 @@ export async function POST(
 
   if (!ghRes.ok) {
     const errBody = await ghRes.text();
+    Sentry.captureMessage('hub-dispatch GitHub relay failure', {
+      level: 'error',
+      tags: { layer: 'api-route', route: 'hub-dispatch' },
+      extra: { status: ghRes.status, body: errBody.slice(0, 200), fingerprint: payload.fingerprint },
+    });
     return Response.json(
       {
         status: 'error',

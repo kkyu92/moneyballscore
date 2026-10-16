@@ -5,7 +5,7 @@ import { SITE_HOST } from '@moneyball/shared';
 // IndexNow ping endpoint.
 // 매일 1회 cron 호출 → 본 앱 sitemap() 직접 호출 → URL 추출 → IndexNow API POST.
 // Bing / Naver / Yandex / Seznam 동시 ping (단일 endpoint, 자동 분배).
-// Google 은 IndexNow 미지원 (2026-05 기준) → Google 색인은 sitemap.xml 만 의존.
+// Google 은 IndexNow 미지원 → Google 색인은 sitemap.xml 만 의존.
 // spec: https://www.indexnow.org/documentation
 
 const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/IndexNow';
