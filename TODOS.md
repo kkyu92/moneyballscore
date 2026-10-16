@@ -1,5 +1,17 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): app/en 한글 sweep 완결 확인, 신규 drift 0건 (cycle 3285, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/24(전부 completed/archived/non-approved). 2차 방어선: cycle 3284 retro commit(`b15e8f35`) 존재 확인. 2-chain lock 미충족(직전8(3277-3284) distinct=4). gap 전부 미근접(fix-incident 4/20·op-analysis 9/25·info-arch 15/30·lotto 2/30). explore-idea saturation 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 신선 — mtime 6.7일) — 확립된 skip 패턴. cycle 3284 추천대로 `app/en` 잔여 한글 grep hit 영역(`reviews/misses`/`reviews/monthly`/`reviews/weekly`/`games/[date]/[slug]`) 채택.
+
+**결과**: 본 메인 직접 grep+read(agent 위임 없음). 4개 page.tsx 전부 한글 grep hit = 코드 주석만(실제 렌더 0건). 의심 후보 `resultLabel`(matchup/team 상세 테이블)은 이미 영문("Correct"/"Missed"/"Pending"/"Wrong") 하드코딩 확인. `buildMlbMissReport`/`buildMlbMonthlyReview`/`buildMlbWeeklyReview`/`buildMlbFactorInsights` 전부 `locale` param 정상 전달 확인. 공유 컴포넌트(`MlbGameOverview`/`MlbFactorWaterfallChart`/`MlbDetailedFactorAnalysis`/`MlbHighlightCard`/`MissesSortControl`/`WeeklyGamesSortControl`/`MonthlyTeamStatsSortControl`) 전부 `locale === 'en'` 분기로 영문 텍스트 정상 렌더 확인(`MlbGameOverview` 는 최초 한글 grep 매치로 의심했으나 `if (locale === 'en') return (...)` 이른 분기로 완전 분리된 구조 확인, false alarm). `mlb/insights/series/[topic]/page.tsx`/`mlb/analysis`/`mlb/factors`/`mlb/accuracy`/`mlb/predictions`/`mlb/reviews` 잔여 grep hit 파일도 전부 comment-only 재확인.
+
+**결론**: cycle 1277(최장 공백 2007 사이클) 부터 누적된 `app/en`(78 files) 한글 노출 스코프 — cycle 3284(insights 배지 수정) + 본 cycle(나머지 영역 clean 확인)으로 완결. 신규 drift 0건, 코드 변경 없음.
+
+검증: 코드 변경 없음(감사만). skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3285%50=35≠0, trigger5 직전20(3266-3285) review-code 다회 발화로 0회 chain 없음, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전10(3275-3284) success 9건, retro-only 1건, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 탐색(app/en 완결, 잔여 미방문 축 재점검 필요 — 예: `packages/kbo-data/src/pipeline/` 또는 `lib/analysis` 세부) 또는 fix-incident(5/20)/op-analysis(10/25)/info-arch(16/30)/lotto(3/30) gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): app/en(78 files) insights 상태 배지 한글 노출 수정 (cycle 3284, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived). 2차 방어선: cycle 3283 retro commit(`19d3a50e`) 존재 확인. 2-chain lock 미충족(직전8(3276-3283) distinct=4: review-code(heavy)/operational-analysis(heavy)/fix-incident(lite)/lotto(lite)). gap 전부 미근접(fix-incident 3/20·op-analysis 8/25·info-arch 14/30·lotto 1/30 방금 발화).
