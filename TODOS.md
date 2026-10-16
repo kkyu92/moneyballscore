@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): app/en(78 files) insights 상태 배지 한글 노출 수정 (cycle 3284, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived). 2차 방어선: cycle 3283 retro commit(`19d3a50e`) 존재 확인. 2-chain lock 미충족(직전8(3276-3283) distinct=4: review-code(heavy)/operational-analysis(heavy)/fix-incident(lite)/lotto(lite)). gap 전부 미근접(fix-incident 3/20·op-analysis 8/25·info-arch 14/30·lotto 1/30 방금 발화).
+
+**스코프 선정**: review-code grep-history 역탐색 — login/community/settings(cycle 3237)·debug(cycle 3223) 최근 재감사 완료 확인 후, `app/en`(78 files, 마지막 감사 cycle 1277 = 2007 사이클 최장 공백) 식별. 전역 한글 문자열 grep 결과 대부분 코드 주석(false positive)이었으나, `en/mlb/insights/page.tsx` + `en/mlb/insights/[date]/page.tsx` 2곳이 `insightsStatusBadge`(KO 전용 label 6종: 취소/적중/빗나감/진행중/결과 대기/예정) 결과를 번역 없이 그대로 렌더 — 영문 페이지(문자열만 번역 의도로 작성된 EN mirror)에 한글 배지가 노출되는 CONFIRMED 버그 발견. 대조군으로 `matchup/[teamA]/[teamB]/page.tsx`는 자체 `TIER_LABEL_EN` 매핑으로 이미 정상 처리되어 있어 동일 패턴 재사용.
+
+**수정(CONFIRMED 1건)**: `lib/insights/statusBadge.ts` 에 `insightsStatusBadgeLabelEn` 매퍼 추가(KO→EN 6개 라벨: 취소→Postponed, 적중→Hit, 빗나감→Miss, 진행중→Live, 결과 대기→Pending, 예정→Scheduled). 두 EN 페이지에서 `badge.label` → `insightsStatusBadgeLabelEn(badge.label)` 적용.
+
+**regression**: `tsc --noEmit` clean. `pnpm --filter moneyball lint` clean. `pnpm --filter moneyball test` 596 files·4676 tests 전부 통과(기존 `statusBadge.test.ts`는 KO label 검증 그대로 유지 — 신규 매퍼는 별도 export, 회귀 없음). 직접 main 커밋+push(R4, `e37ab788`), pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3284%50≠0, trigger5 직전20(3265-3284) review-code 다회 발화로 0회 chain 없음, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전10 success 다수, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 계속 — `app/en` 나머지 한글 grep hit 영역(reviews/misses, reviews/monthly, reviews/weekly, games/[date]/[slug] 등, 이번 사이클은 insights만 확인·코드 주석 vs 실제 렌더 분리 재확인 필요) 또는 다른 gap 자연 대기.
+
 ## 🟢 SUCCESS — lotto(lite): 30-사이클 gap 점검, cron 정상 확인 (cycle 3283, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/spec_only_deferred). 2차 방어선: cycle 3282 retro commit(`27de6697`) 존재 확인. 2-chain lock 미충족(직전8(3275-3282) distinct=3, review-code(heavy) 6 + operational-analysis(heavy) 1 + fix-incident(lite) 1). lotto gap=30(마지막 발화 cycle 3253) trigger(6) 정확 도달 — 다른 chain gap 전부 미근접(fix-incident 2/20·op-analysis 7/25·info-arch 13/30).
