@@ -1,5 +1,23 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/ 최장기 미방문 17개 소형 컴포넌트 전수 감사, 하드코딩 팀수 1건 수정 (cycle 3268, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 non-approved). 2차 방어선: cycle 3267 retro commit(`0d029516`) 존재 확인. 2-chain lock 미충족(직전8(3260-3267) distinct=4: review-code/review-code(heavy)/operational-analysis/lotto/fix-incident). gap 전부 미근접(fix-incident 7/20·op-analysis 6/25·info-arch 28/30 근접하나 미도달·lotto 5/30). 직전3 cycle(3265-3267) 전부 review-code(heavy), next_recommended 모두 "review-code(heavy) 신규 스코프 또는 gap 자연 대기" — app/api·lib·packages/kbo-data·scripts·MLB/KBO 라우트 전부 소진 확인된 상태라 신규 축 탐색.
+
+**스코프 선정**: `git log -1 --format="%ci"` 로 `apps/moneyball/src/components/**/*.tsx`(비-테스트) 전수 최종 커밋일 정렬 — 2026-04-16(`AnalysisLink.tsx`)부터 2026-05-20(`WebVitalsReporter.tsx`) 사이 17개 파일이 최종 터치 이후 5개월+ 미재방문 확인(이후 dark-mode-token 기계적 스윕에만 걸림, 로직/주석 전용 리뷰 이력 없음) — debug.ts/factor-correlation.ts 재감사(cycle 2485→3223, 738-cycle 공백) 와 동일 "최장기 미방문 파일" 전략 적용.
+
+**감사 방법**: Agent(general-purpose) 1개 — 17개 파일 전수 read, 각 컴포넌트 실 소비처 cross-grep(앱 라우트 전체), 주석-로직 정합, 하드코딩 literal vs shared 상수, dead code, filter/sort 로직의 실데이터 enum 정합 지시.
+
+**결과**: 17개 중 16개 clean(전부 실사용 확인, orphan 0건). **1건 발견+수정**: `standings/TeamAccuracySortControl.tsx:47` — KBO standings 표본순 정렬 CSS 가 팀 수를 리터럴 `20`으로 하드코딩. 실제 KBO 10팀(`@moneyball/shared`의 `KBO_TEAM_COUNT=10`), 동일 페이지(`standings/page.tsx`)의 다른 소비처는 이미 `KBO_TEAM_COUNT` 참조 중(`guide/page.tsx`, `sitemap.ts` 등도 동일 상수 사용) — 이 파일만 소스오브트루스 미참조. 여분 CSS rule 10개가 현재 unused 상태라 가시 버그는 아니었으나, 팀 수 변경 시 silent 불일치 가능한 silent-drift-family 패턴과 동일. `KBO_TEAM_COUNT` import + 리터럴 치환.
+
+**regression**: `tsc --noEmit` clean, `eslint` clean, `pnpm --filter moneyball test` 596 files/4676 tests 전부 통과. direct main commit(`d683fe14`)+push, pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+**패턴**: review-code(heavy) 가 디렉토리 단위 스코프(app/api, lib/, packages 등) 소진 후 "git 최종 터치일 기준 최장기 미방문 파일" 축으로 스코프 선정 전략을 디렉토리 레벨(components/)에 처음 적용 — 기존엔 단일 파일(factor-correlation.ts)에만 썼던 전략의 일반화. 발견 패턴 자체는 기존 KBO_TEAM_COUNT/MLB_TEAM_COUNT silent-drift-family(wave 76 등)의 N+1번째 재발.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3268%50≠0, trigger5 review-code 직전20 윈도우(3249-3268) 다회 발화로 0회 아님). marker 미박제. ship-0 emergency stop 미충족(직전10(3259-3268) success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속(components/ 중간 시기(2026-05-20~2026-06 초) 미방문 잔여 파일 또는 info-architecture-review(gap=29/30, 다음 사이클 도달) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): lotto/seasons/terms/v2-preview/v2-shadow-monitor page.tsx 6개 전수 감사, drift 2건 수정 (cycle 3267, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3266 retro commit(`65db0945`) 존재 확인. 2-chain lock 미충족(직전8(3259-3266) distinct=4: review-code/fix-incident/operational-analysis/lotto). gap 전부 미근접(fix-incident 6/20·op-analysis 5/25·info-arch 27/30·lotto 4/30). 직전3 cycle(3264-3266) 전부 review-code(heavy) outcome=partial(clean) — app/api·lib/ 스코프 소진 확인 후 신규 스코프 탐색.
