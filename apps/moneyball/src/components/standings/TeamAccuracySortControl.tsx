@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
+import { KBO_TEAM_COUNT } from '@moneyball/shared';
 
 type SortMode = 'accuracy' | 'sample';
 
@@ -44,7 +45,7 @@ function writeSort(value: SortMode): void {
   }
 }
 
-const SAMPLE_ORDER_CSS = Array.from({ length: 20 }, (_, i) => `[data-team-accuracy-list] [data-sample-rank="${i}"]{order:${i};}`).join('');
+const SAMPLE_ORDER_CSS = Array.from({ length: KBO_TEAM_COUNT }, (_, i) => `[data-team-accuracy-list] [data-sample-rank="${i}"]{order:${i};}`).join('');
 
 export function TeamAccuracySortControl() {
   const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
