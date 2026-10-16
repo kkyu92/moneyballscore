@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/analysis + components/matchup 전수 감사, 실버그 1건+주석드리프트 1건 수정 (cycle 3220, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건(plan #29 2026-10-15 만료). 2-chain lock 미충족(직전8(3212-3219) distinct=4: review-code(heavy)/lotto/fix-incident/review-code). fix-incident(last 3217)/lotto(last 3214)/info-arch(last 3210) 전부 gap 미근접. op-analysis 25-cycle gap 충족이나 Supabase DNS 재확인 여전히 NXDOMAIN(5일+ 경과, Tier4 블락 불변) — 이미 알려진 상태, 중단 사유 아님. domain whois "No match" 재확인도 `project_dotcom_domain_permanent_non_issue` 패턴(영구 non-issue) 그대로. cycle 3219 추천대로 components/ 스윕 이어서 analysis(1421줄)+matchup(1412줄) 선택.
+
+**스코프**: Agent 2개 병렬 전수 read — `components/analysis`(12파일) + `components/matchup`(11파일, KBO+MLB 양쪽). cross-reference: `packages/shared`(DEFAULT_WEIGHTS/ACTIVE_FACTOR_KEYS/KBO_FACTOR_COUNT/FACTOR_PICK_STRONG 등), `packages/kbo-data/src/engine/predictor.ts`, `packages/kbo-data/src/pipeline/mlb-pipeline.ts`, `lib/analysis/factor-explanations.ts`, `lib/mlb/buildMlbTeamFactorAverages.ts`, 기존 테스트, DESIGN.md.
+
+**발견 + 수정 (실버그 1건 + 주석드리프트 1건)**:
+1. **실버그**: `DetailedFactorAnalysis.tsx` 의 row 필터가 `key in DEFAULT_WEIGHTS` 사용 — 그러나 `DEFAULT_WEIGHTS` 는 10개 production factor + shadow-only 2개(`park_weather`/`umpire_sz`, weight=0) 총 12키. `predictor.ts` 가 shadow pair 를 항상 neutral 0.5 로 `factors` 에 기록해 필터를 통과, `FACTOR_LABELS_TECHNICAL` 에 매핑 없어 raw key(`"park_weather"`/`"umpire_sz"`) 그대로 노출 — 바로 위 헤더의 "KBO_FACTOR_COUNT(10)개 팩터" 문구와 실제 렌더 12 row 가 어긋남. 형제 컴포넌트 `FactorBreakdown.tsx` 는 이미 `SHADOW_FACTOR_KEYS` + 라벨 + 뱃지로 올바르게 처리 중이었으나 `DetailedFactorAnalysis.tsx` 에는 전파 안 됨. `ACTIVE_FACTOR_KEYS` 필터로 정정 + 12키 입력 시 정확히 10 row 만 렌더되고 raw key 노출 없음을 검증하는 회귀 테스트 추가.
+2. **주석드리프트**: `MlbMatchupFactorCompare.tsx` 가 "xFIP/SFR/WAR 는 MLB 파이프라인 자체가 미수집"이라 주석 — 그러나 `mlb-pipeline.ts` 는 xFIP/WAR 둘 다 실제 기록 중이고 `computeMlbCompositeDuel.ts` 가 이미 소비(cycle 2771 에서 정정됨). 그 정정이 본 파일엔 전파 안 돼 stale. SFR 만 진짜 pipeline-level placeholder, xFIP/WAR 는 builder-level(`buildMlbTeamFactorAverages.ts`) 집계 누락으로 정정.
+
+**regression**: `vitest run src/components`(37 files, 111 tests) 전부 PASS + `tsc --noEmit` clean + `eslint` clean. direct main commit(`4c3f440a`) + push, pre-push hook(lint+type-check+tests) green.
+
+**패턴**: '부분 수정의 전파 누락' — 형제 컴포넌트(FactorBreakdown)나 다른 파일(computeMlbCompositeDuel 주석)에서 이미 고쳐진 교훈이 유사 코드의 다른 위치엔 전파 안 되는 사례. review-code(heavy) silent drift family 의 변형(이번엔 "주석 vs 코드"가 아니라 "이 파일 vs 이미 고쳐진 형제 파일").
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여(accuracy 1331줄/shared 1424줄 등) 또는 op-analysis(Supabase 복구 시) 또는 fix-incident(gap 자연 대기).
+
 ## 🟢 SUCCESS — review-code(heavy): components/predictions + components/dashboard 전수 감사, 드리프트 0건 (cycle 3218, 2026-10-16)
 
 진단: open issue 0건. approved plan 없음(plan #29 empty/archived, plan #30 completed_all_phases_shipped). 2-chain lock 미충족(직전8(3210-3217) distinct=5: review-code(heavy)3/fix-incident2/review-code1/lotto1/info-arch1). fix-incident gap=0(직전 cycle 3217 방금 발화), lotto gap=4, info-arch gap=8 — 전부 미근접. op-analysis 25-cycle gap 도달(last fire 2924)했으나 Supabase DNS NXDOMAIN 재확인 불변(`dig` 빈 응답, Tier4 블락 지속). domain whois "No match" 4번째 재확인(status=ACTIVE 지만 verisign-grs lookup 빈 응답) — `project_dotcom_domain_permanent_non_issue` 메모리 패턴과 완전 일치(3회 재발 거짓경보 + 금번 4회째), chain 중단 사유 아님으로 판단(cycle 3215 의 "critical escalation FAIL" 판단 정정 — 실제로는 비-이슈). cycle 3217 추천대로 review-code(heavy) 신규 scope 선택 — lib/*, kbo-data, app routes 전부 스윕 완료된 반면 `apps/moneyball/src/components/` (20개 서브디렉토리) 는 한 번도 전수 감사 대상 된 적 없음 확인.
