@@ -4,6 +4,7 @@ import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, PRODU
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 import { GLOSSARY_TERM_COUNT } from "@/app/glossary/data";
+import { FAQ_COUNT } from "@/app/about/page";
 
 const TOC_ITEMS = [
   { id: "cards", label: "예측 카드 해석" },
@@ -306,7 +307,7 @@ export default function GuidePage() {
           >
             <h3 className="font-semibold mb-1">소개 + FAQ</h3>
             <p className="text-xs text-gray-600 dark:text-brand-400">
-              서비스 정체성 + 자주 묻는 질문 15건.
+              서비스 정체성 + 자주 묻는 질문 {FAQ_COUNT}건.
             </p>
           </Link>
         </div>

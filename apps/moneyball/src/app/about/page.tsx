@@ -216,6 +216,8 @@ const FAQS = [
   },
 ];
 
+export const FAQ_COUNT = FAQS.length;
+
 export default async function AboutPage() {
   // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
   // {status, value|reason} 모양으로 순수 파생값(dbDegraded) 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
