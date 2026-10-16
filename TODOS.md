@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — polish-ui: 2-chain lock fallback, lotto og-image 컬러 하드코딩 → ballColor() 단일화 (cycle 3272, 2026-10-16)
+
+트리거: 직전8(3264-3271) distinct=2 (review-code 7 + info-architecture-review 1) — 2-chain alternation lock 발동. 잠긴 chain 중 fix-incident 없어 lock 정상 적용(review-code/info-architecture-review 후보 제외). 나머지 chain(fix-incident gap 11/20, op-analysis gap 10/25, lotto gap 9/30, explore-idea saturation 10/15) 전부 trigger 미충족 → lock 룰의 명시적 fallback(polish-ui 강제) 적용.
+
+검증: DESIGN.md 색상 팔레트 전수 grep. HallOfFame.tsx(`var(--color-x, #hex)`)·ShareButtons.tsx(Facebook/Twitter 브랜드색) 는 정당. **발견**: `lotto/opengraph-image.tsx` 가 `n<=10/20/30/40` range + 하드코딩 hex(`#facc15`/`#3b82f6`/`#ef4444`/`#6b7280`/`#16a34a`/`#713f12`) 로 로또볼 색상을 독립 재구현 — 동일 로직이 이미 `picks-loader.ts` 의 `ballColor()` 로 단일화되어 `page.tsx`/`archive/[date]/page.tsx` 가 사용 중(Tailwind `BALL_BG` 맵 경유). og-image 는 satori 렌더러라 Tailwind className 불가해 독자적으로 hex 하드코딩한 것으로 추정 — 값 자체는 Tailwind 등가와 일치했으나 소스오브트루스 미참조.
+
+수정: `picks-loader.ts` 에 `LOTTO_BALL_HEX`(ballColor semantic name → hex bg/text) export 추가, `opengraph-image.tsx` 가 `ballColor(n)` + `LOTTO_BALL_HEX` 참조하도록 교체. `LottoBallColor` 타입도 export.
+
+regression: `tsc --noEmit` clean / `eslint` clean / `pnpm --filter moneyball test` 596 files·4676 tests 전부 통과. direct main commit(`82d8ff28`)+push, pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3272%50=22≠0, 표본≥10 충족이나 review-code 직전20 윈도우 다회 발화로 0회 아님). marker 미박제. ship-0 emergency stop 미충족(직전10 success 다수).
+
+다음 사이클 = lock cooldown N=1 만료 후 재평가(직전8 윈도우에 polish-ui 편입되어 distinct 변동 예상) — info-architecture-review 또는 review-code(heavy) 자연 재개 가능성, 그 외 fix-incident/op-analysis/lotto gap 자연 대기.
+
 ## ⚪ RETRO-ONLY — info-architecture-review: 30-cycle gap checkpoint, 20연속 "현 IA 충분" (cycle 3270, 2026-10-16)
 
 trigger: 마지막 info-architecture-review 발화 cycle 3240, gap=30 (threshold). 2-chain lock 미충족(직전8(3262-3269) distinct=3: operational-analysis/lotto/review-code(heavy)).
