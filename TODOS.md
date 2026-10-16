@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — fix-incident(lite): pipeline_runs 13일 블랙아웃 근본원인 규명 (cycle 3290, 2026-10-16/17)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived). 2차 방어선: cycle 3289 retro commit(`8023bd55`) 존재 확인. **2-chain lock 탐지**(직전8(3282-3289) distinct=2, review-code(heavy) 7/8 + lotto(lite) 1/8) → 양쪽 이번 사이클 후보 제외. 제외 후 gap 재확인 — fix-incident 29/20(마지막 3261) + op-analysis 28/25(마지막 3262) 둘 다 trigger 충족, fix-incident 가 상대 초과율 더 큼(145% vs 112%) + 트리거(7) 명시 "pipeline_runs 에러율 + debug commit 강제 점검" 조건에 직접 부합해 fix-incident(lite) 채택.
+
+**점검(lite)**: `pipeline_runs` REST 조회 중 **실제 이상 신호 발견** — 2026-10-03 21:17 UTC 이후 2026-10-16 13:17 UTC 까지 13일간 행 0건(KBO+MLB 전 모드 포함, REST count 쿼리로 10-04~10-11 구간 0건 직접 확인). `/investigate` 축소판 진행: `gh run list` 로 `health-alert`/`deploy-drift-alert` 최근 실행 이력 조회 → 둘 다 2026-10-14~10-16 다수 `failure` 확인, 최신 failure 로그(`run 38901215084`, 10-16 12:32 UTC) 본문에 `supabase: TypeError: fetch failed` 명시. `curl /api/health` 직접 재확인(2회, 15:57/15:58 UTC) = `overall: ok` 전체 정상.
+
+**근본원인 (compound, 단일 사건 아님)**: (1) cycle 2939 `Supabase egress quota exceeded` 인시던트(기존 65+일 지속된 402-degraded 상태가 악화, 약 10/4~10/10) → (2) 기존 메모리에 박제된 Supabase project `INACTIVE` 상태(10/10 18:42 KST ~ 10/16, cycle 3261 에서 restore API 재시도로 해소) 로 직결 — 두 사건이 시간상 연속이라 13일 블랙아웃 = 단일 연속 degradation. 추가로 cycle 3261 "RESOLVED" 기록 이후에도 `health-alert` 가 10/16 12:32 UTC (restore 로부터 8시간+ 경과 시점) 까지 간헐적 `fetch failed` 지속 — 완전 안정화는 10/16 ~15:00 UTC 경(`deploy-drift-alert` 연속 success + 본 cycle 직접 curl 확인) 확정. auto-memory `project_supabase_inactive_incident_2026_10_11.md` 에 이 tail-flakiness + compound root-cause 상세 addendum 박제 완료.
+
+**결론**: 코드 버그 아님 — 외부 Supabase 인프라 장애(이미 cost-guard 상 자율 upgrade 불가 영역, cycle 2939 에서 이미 FAIL+meta-pattern dispatch 완료된 사안의 연속). 코드 변경 불필요. 현재 전체 healthy 재확인 완료.
+
+검증: 코드 변경 없음(진단 전용, 실제 인시던트 원인 규명 + memory 정합). skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3290%50=40≠0, trigger5 직전20(3271-3290) review-code(heavy) 다회 발화로 0회 chain 없음, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전10(3281-3290) success 다수, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 2-chain lock cooldown(N=1) 만료 후 복귀 자연 가능(`lib/leaderboard`/`lib/picks`/`lib/insights`/`lib/debug` 저-mention 축) 또는 op-analysis(28/25, gap 여전 초과 — 다음 자연 발화 후보 1순위)/info-arch(21/30)/lotto(28/30) gap 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): lib/stats·observability·calendar 전수 감사, 신규 drift 0건 (cycle 3289, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3288 retro commit(`f3e6351e`) 존재 확인. 2-chain lock 미충족(직전8(3281-3288) distinct=3: fix-incident(lite)1+review-code(heavy)6+lotto(lite)1). gap 전부 미근접(fix-incident 8/20·op-analysis 13/25·info-arch 19/30·lotto 6/30). explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재) — 확립된 skip 패턴. cycle 3288(`lib/analysis` 완결) 이후 신규 축으로 `apps/moneyball/src/lib/` 서브디렉토리 git log mention-count 최하위군 선정 — `lib/stats`(1) / `lib/observability`(2) / `lib/calendar`(2).
