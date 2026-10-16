@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { shortTeamName } from "@moneyball/shared";
+import { REVIEW_BADGE_CLOSE_HIT, REVIEW_BADGE_HIGH_CONFIDENCE_HIT, shortTeamName } from "@moneyball/shared";
 import type { WeeklyHighlight } from "@/lib/reviews/shared";
 
 // wave-598: monthly/weekly 리뷰 페이지에 동일 정의가 중복되던 컴포넌트 통합 (silent drift family).
@@ -15,9 +15,9 @@ export function HighlightCard({
     ? shortTeamName(h.predictedWinnerCode)
     : null;
   const badgeClass =
-    h.badge === "박빙 적중"
+    h.badge === REVIEW_BADGE_CLOSE_HIT
       ? "bg-purple-500/15 text-purple-600 dark:text-purple-300"
-      : h.badge === "고확신 적중"
+      : h.badge === REVIEW_BADGE_HIGH_CONFIDENCE_HIT
         ? "bg-brand-500/15 text-brand-600 dark:text-brand-300"
         : "bg-red-500/15 text-red-600 dark:text-red-300";
   return (

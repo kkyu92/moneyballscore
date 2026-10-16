@@ -1,4 +1,4 @@
-import { ACCURACY_STRONG_RATE, ACCURACY_WEAK_RATE, classifyWinnerProb, mlbShortTeamName, SMALL_SAMPLE_N, type MlbTeamCode } from '@moneyball/shared';
+import { ACCURACY_STRONG_RATE, ACCURACY_WEAK_RATE, classifyWinnerProb, mlbShortTeamName, REVIEW_BADGE_BIG_MISS, REVIEW_BADGE_CLOSE_HIT, REVIEW_BADGE_HIGH_CONFIDENCE_HIT, SMALL_SAMPLE_N, type MlbTeamCode } from '@moneyball/shared';
 import type { WeekRange } from "./computeWeekRange";
 import {
   buildMlbFactorInsights,
@@ -49,17 +49,17 @@ function pickHighlights(rows: MlbPredictionRow[]): MlbWeeklyHighlight[] {
   const closeHit = mapped
     .filter((h) => h.isCorrect && classifyWinnerProb(h.winnerProb) === 'tossup')
     .sort((a, b) => a.winnerProb - b.winnerProb)[0];
-  if (closeHit) closeHit.badge = "박빙 적중";
+  if (closeHit) closeHit.badge = REVIEW_BADGE_CLOSE_HIT;
 
   const highHit = mapped
     .filter((h) => h.isCorrect && classifyWinnerProb(h.winnerProb) === 'confident')
     .sort((a, b) => b.winnerProb - a.winnerProb)[0];
-  if (highHit && highHit !== closeHit) highHit.badge = "고확신 적중";
+  if (highHit && highHit !== closeHit) highHit.badge = REVIEW_BADGE_HIGH_CONFIDENCE_HIT;
 
   const bigMiss = mapped
     .filter((h) => !h.isCorrect && classifyWinnerProb(h.winnerProb) !== 'tossup')
     .sort((a, b) => b.winnerProb - a.winnerProb)[0];
-  if (bigMiss) bigMiss.badge = "대역전 실패";
+  if (bigMiss) bigMiss.badge = REVIEW_BADGE_BIG_MISS;
 
   return [closeHit, highHit, bigMiss].filter(
     (h): h is MlbWeeklyHighlight => !!h && !!h.badge,
@@ -92,15 +92,15 @@ function buildSummary(
       ? ""
       : mlbShortTeamName(topHighlight.predictedHomeWin ? topHighlight.homeCode : topHighlight.awayCode);
     const topPct = Math.round(topHighlight.winnerProb * 100);
-    if (topHighlight.badge === "박빙 적중") {
+    if (topHighlight.badge === REVIEW_BADGE_CLOSE_HIT) {
       text += isEn
         ? ` The most impressive result was ${topHighlight.awayName} vs ${topHighlight.homeName} — a nail-biter the model called correctly at just ${topPct}% win probability.`
         : ` 가장 인상적인 결과는 ${topHighlight.awayName} vs ${topHighlight.homeName} — 예측 적중 확률 ${topPct}%의 박빙 경기를 맞춘 사례.`;
-    } else if (topHighlight.badge === "고확신 적중") {
+    } else if (topHighlight.badge === REVIEW_BADGE_HIGH_CONFIDENCE_HIT) {
       text += isEn
         ? ` On ${topHighlight.gameDate}, a ${winner} win prediction hit at ${topPct}% confidence, reinforcing trust in the model's high-confidence range.`
         : ` ${topHighlight.gameDate} ${winner} 승리 예측이 ${topPct}% 적중 확률로 맞아떨어지며 강한 예측 구간의 신뢰도를 보여줬습니다.`;
-    } else if (topHighlight.badge === "대역전 실패") {
+    } else if (topHighlight.badge === REVIEW_BADGE_BIG_MISS) {
       text += isEn
         ? ` However, there was an upset too — a ${topPct}% confidence pick on ${topHighlight.awayName} vs ${topHighlight.homeName} missed.`
         : ` 다만 ${topHighlight.awayName} vs ${topHighlight.homeName}에서 ${topPct}% 적중 확률 예측이 빗나가는 이변도 있었습니다.`;

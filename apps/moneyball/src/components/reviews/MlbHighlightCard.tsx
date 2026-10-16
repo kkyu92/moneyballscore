@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { mlbShortTeamName } from "@moneyball/shared";
+import { mlbShortTeamName, REVIEW_BADGE_CLOSE_HIT, REVIEW_BADGE_HIGH_CONFIDENCE_HIT } from "@moneyball/shared";
 import type { MlbWeeklyHighlight } from "@/lib/reviews/mlb-shared";
 
 // HighlightCard.tsx(KBO) 의 MLB 대응. 재사용 불가 이유: MlbWeeklyHighlight 는
@@ -25,15 +25,15 @@ export function MlbHighlightCard({
       ? null
       : mlbShortTeamName(h.predictedHomeWin ? h.homeCode : h.awayCode);
   const badgeClass =
-    h.badge === "박빙 적중"
+    h.badge === REVIEW_BADGE_CLOSE_HIT
       ? "bg-purple-500/15 text-purple-600 dark:text-purple-300"
-      : h.badge === "고확신 적중"
+      : h.badge === REVIEW_BADGE_HIGH_CONFIDENCE_HIT
         ? "bg-brand-500/15 text-brand-600 dark:text-brand-300"
         : "bg-red-500/15 text-red-600 dark:text-red-300";
   const badgeLabel = isEn
-    ? h.badge === "박빙 적중"
+    ? h.badge === REVIEW_BADGE_CLOSE_HIT
       ? "Nail-biter hit"
-      : h.badge === "고확신 적중"
+      : h.badge === REVIEW_BADGE_HIGH_CONFIDENCE_HIT
         ? "High-confidence hit"
         : "Big upset miss"
     : h.badge;

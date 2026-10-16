@@ -7,6 +7,7 @@ import {
   assertSelectOk,
   shortTeamName,
   winnerProbOf,
+  type ReviewHighlightBadge,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -26,7 +27,7 @@ export interface WeeklyHighlight {
   // 예측 승자 적중 확률 (max(hwp, 1-hwp)). 퍼센트 표기 anchor.
   winnerProb: number;
   isCorrect: boolean;
-  badge: "박빙 적중" | "고확신 적중" | "대역전 실패" | null;
+  badge: ReviewHighlightBadge;
 }
 
 export interface WeeklyTeamStat {

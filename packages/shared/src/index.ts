@@ -94,6 +94,14 @@ export {
 } from './model-version-labels';
 export type { ScoringRule, ModelVersion, DebateVersion } from './model-version-labels';
 
+// review 하이라이트 배지 라벨 단일 source (cycle 3274 통합)
+export {
+  REVIEW_BADGE_CLOSE_HIT,
+  REVIEW_BADGE_HIGH_CONFIDENCE_HIT,
+  REVIEW_BADGE_BIG_MISS,
+} from './review-badge-labels';
+export type { ReviewHighlightBadge } from './review-badge-labels';
+
 // KBO 팀 코드 (KBO 공식 API 코드 기준)
 // parkPf: 구장 보정 계수 index (100 = 중립, 100+ 타자 친화, 100- 투수 친화).
 // parkNote: 사용자 가시 구장 특성 설명 — 팩터 수렴 픽 구장 대결 UI 표시 (wave-422).

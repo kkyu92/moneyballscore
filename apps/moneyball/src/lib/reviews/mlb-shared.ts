@@ -11,6 +11,7 @@ import {
   mlbShortTeamName,
   normalizeMlbTeamCode,
   type MlbTeamCode,
+  type ReviewHighlightBadge,
   type SelectResult,
 } from "@moneyball/shared";
 
@@ -34,7 +35,7 @@ export interface MlbWeeklyHighlight {
   // 예측 승자 적중 확률 (max(hwp, 1-hwp)) — deriveMlbOutcome().confidence 와 동일 0.5~1 스케일.
   winnerProb: number;
   isCorrect: boolean;
-  badge: "박빙 적중" | "고확신 적중" | "대역전 실패" | null;
+  badge: ReviewHighlightBadge;
 }
 
 export interface MlbWeeklyTeamStat {

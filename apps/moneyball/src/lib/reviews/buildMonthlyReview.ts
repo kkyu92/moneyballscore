@@ -3,6 +3,9 @@ import {
   ACCURACY_WARN_RATE,
   classifyWinnerProb,
   MIN_VERIFIED_GAMES_HEDGE,
+  REVIEW_BADGE_BIG_MISS,
+  REVIEW_BADGE_CLOSE_HIT,
+  REVIEW_BADGE_HIGH_CONFIDENCE_HIT,
   SMALL_SAMPLE_N,
 } from '@moneyball/shared';
 import type { MonthRange } from "./computeMonthRange";
@@ -53,17 +56,17 @@ function pickHighlights(rows: PredictionRow[], limit = 6): WeeklyHighlight[] {
   const closeHits = mapped
     .filter((h) => h.isCorrect && classifyWinnerProb(h.winnerProb) === 'tossup')
     .sort((a, b) => a.winnerProb - b.winnerProb);
-  closeHits.slice(0, 2).forEach((h) => tag(h, "박빙 적중"));
+  closeHits.slice(0, 2).forEach((h) => tag(h, REVIEW_BADGE_CLOSE_HIT));
 
   const highHits = mapped
     .filter((h) => h.isCorrect && classifyWinnerProb(h.winnerProb) === 'confident')
     .sort((a, b) => b.winnerProb - a.winnerProb);
-  highHits.slice(0, 2).forEach((h) => tag(h, "고확신 적중"));
+  highHits.slice(0, 2).forEach((h) => tag(h, REVIEW_BADGE_HIGH_CONFIDENCE_HIT));
 
   const bigMisses = mapped
     .filter((h) => !h.isCorrect && classifyWinnerProb(h.winnerProb) !== 'tossup')
     .sort((a, b) => b.winnerProb - a.winnerProb);
-  bigMisses.slice(0, 2).forEach((h) => tag(h, "대역전 실패"));
+  bigMisses.slice(0, 2).forEach((h) => tag(h, REVIEW_BADGE_BIG_MISS));
 
   return picked.slice(0, limit);
 }
