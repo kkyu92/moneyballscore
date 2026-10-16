@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): app/api 잔여 8개 route 전수 감사, CRON_SECRET trim 버그 repo-wide 수정 (cycle 3222, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건(plan #30 status=completed_all_phases_shipped, 나머지 전부 completed/archived/deferred). 2-chain lock 미충족(직전8(3214-3221) distinct=4: review-code(heavy)4+lotto1+fix-incident2+review-code1). fix-incident gap=5/20·info-arch gap=12/30·lotto gap=8/30 전부 미근접. op-analysis 여전히 Supabase DNS NXDOMAIN 블락(변화 없음). 2차 방어선(cycle 3221 retro `aa4f5cee`) OK. cycle 3221 추천(`app/api 잔여 재확인`) 따라 cycle 3099 가 미감사로 남겨뒀던 8개 route(health/hub-dispatch/leaderboard-sync/mlb/picks/pipeline/seo/sync-batter-stats/version — CHANGELOG mention 은 있으나 전수 감사 이력 불명확) 중 실제 미감사 7개(health 2개+hub-dispatch+pipeline+version+mlb/pipeline+mlb/waitlist, picks 5개+seo/indexnow+sync-batter-stats) 선정, Agent 2개 병렬 전수 read.
+
+**발견 1 (버그 repo-wide, 확정+수정)**: cycle 3217 이 `LLM_BACKEND_*`/`INDEXNOW_KEY` 에서 고친 "대시보드 값 trailing newline → 비교 영구 실패" 버그 클래스가 `CRON_SECRET`/`SENTRY_WEBHOOK_SECRET`/`PLAYBOOK_PAT` 전반에 미수정 상태로 남아있음을 두 에이전트가 각각 발견(agent1: pipeline/mlb-pipeline/hub-dispatch, agent2: live/snapshot-pitchers/revalidate/seo-indexnow/sync-batter-stats 까지 grep 으로 전수 확인). 본 메인이 직접 전체 8개 route 에 `.trim()` 적용(cycle 3217 과 동일 defensive 패턴, no-op on already-clean value).
+
+**발견 2 (stale-comment, 확정+수정)**: `sync-batter-stats/route.ts` 독스트링이 "정원 약 50-100명" 주장 — 실제 파이프라인(`packages/kbo-data/src/pipeline/sync-batter-stats.ts`, 같은날 2026-04-18 이지만 23분 늦게 작성)은 실측 "10-20명, MIN_EXPECTED_BATTERS=8" 로 이미 정정되어 있었으나 route 쪽 독스트링만 stale 유지. 정정.
+
+**false positive 기각**: KBO/MLB picks poll·submit twin route 라인별 diff 클린(동일 origin check/validation/upsert 패턴). `triggeredBy` 타입 캐스트 비대칭(KBO union vs MLB string) = 함수 시그니처 차이일 뿐 무해. `mlb/waitlist` ON CONFLICT 주석이 실제론 insert+23505 catch 로 구현 = 동작 동일, 기각. MLB pipeline 의 `maxDuration=300` vs KBO pipeline 부재 + MLB pipeline 에 Telegram notify 부재(KBO 만 있음) 는 둘 다 product-decision 영역 플래그만(수정 안함, 증거 부족).
+
+**regression**: `tsc --noEmit` clean, `eslint` clean, 영향 vitest 34개 테스트(picks/seo/sync-batter-stats/live/snapshot-pitchers/revalidate) 전부 PASS. direct main commit(`a1206702`)+push, pre-push hook(lint+type-check+version-sync-guard) 전부 PASS. 100+ 파일 아님, PR 불필요.
+
+**패턴**: review-code(heavy) 가 한 cycle 안에서 고친 버그(cycle 3217 trim fix)도 "같은 commit 안의 다른 유사 변수" 까지는 안 번지고 동일 파일 재방문 때만 잡히는 경우 多 — 이번엔 명시적으로 "동일 클래스 버그 전체 grep" 을 agent 프롬프트에 포함시켜 8개 route 한번에 해소. 향후 trim/sanitize 류 fix 발견 시 grep 전수 확인을 fix 범위에 기본 포함 권장.
+
+다음 사이클 추천 = review-code(heavy) 계속(남은 미감사 scope 탐색 — app/api 는 이제 전체 13개 route 디렉토리 중 감사 이력 확보, 다음은 `apps/moneyball/src/app/api/mlb/{waitlist 외}` 재확인 또는 `packages/kbo-data` 재스윕) 또는 fix-incident(gap 자연대기)/op-analysis(Supabase 복구 시). Supabase DNS NXDOMAIN 지속(사용자 billing 조치 필요, 변화 없음).
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): MLB insights/series EN mirror + loading.tsx 4개 신규 scope 전수 감사, drift 0건 (cycle 3221, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23. 2-chain lock 미충족(직전8(3213-3220) distinct=4: review-code(heavy)4+lotto1+fix-incident2+review-code1). fix-incident gap=4/20·lotto gap=7/30·info-arch gap=11/30 전부 미근접. op-analysis gap 296+(last fire 2924)로 크게 초과하나 Supabase DNS NXDOMAIN 재확인 여전히 공란(5일+ 경과, Tier4 블락 불변) — actionable 아님. explore-idea saturation 직전15 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 stale(2026-04-25~05-04 사용자 영역 항목뿐)/DESIGN.md mtime ~5.6일 신선) — 수십 회 반복된 established skip 패턴 재확인. lotto cron 양쪽 신선(picks `2026-10-17.md`/results `2026-10-10.md`) — 트리거 미충족.
