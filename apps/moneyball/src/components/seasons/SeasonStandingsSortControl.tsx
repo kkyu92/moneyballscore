@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
+import { KBO_TEAM_COUNT } from '@moneyball/shared';
 
 type SeasonStandingsSortMode = 'winRate' | 'runDiff' | 'sample';
 
@@ -47,12 +48,12 @@ function writeSort(value: SeasonStandingsSortMode): void {
 }
 
 const RUNDIFF_ORDER_CSS = Array.from(
-  { length: 12 },
+  { length: KBO_TEAM_COUNT },
   (_, i) => `[data-season-standings-list] [data-rundiff-rank="${i}"]{order:${i};}`,
 ).join('');
 
 const SAMPLE_ORDER_CSS = Array.from(
-  { length: 12 },
+  { length: KBO_TEAM_COUNT },
   (_, i) => `[data-season-standings-list] [data-sample-rank="${i}"]{order:${i};}`,
 ).join('');
 
