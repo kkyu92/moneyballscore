@@ -50,11 +50,13 @@ interface PageParams {
 }
 
 // 실제 dl breakdown 에 렌더되는 팩터만 정의 — KO page.tsx(cycle 2108 review-code heavy)와
-// 동일 패턴, 카운트가 array.length 로 self-sync.
+// 동일 패턴, 카운트가 array.length 로 self-sync. statcast 플래그 + count 는 KO
+// page.tsx(cycle 2765 review-code heavy) metadata description parity (EN 미반영 drift 정정).
 const GAME_DETAIL_FACTOR_ROWS: Array<{
   label: string;
   homeKey: keyof PredictionDetailRow;
   awayKey: keyof PredictionDetailRow;
+  statcast?: boolean;
 }> = [
   { label: "SP FIP", homeKey: "home_sp_fip", awayKey: "away_sp_fip" },
   { label: "SP xFIP", homeKey: "home_sp_xfip", awayKey: "away_sp_xfip" },
@@ -66,14 +68,15 @@ const GAME_DETAIL_FACTOR_ROWS: Array<{
   // length count, the real pair-encoding lives in the waterfallInput below.
   { label: "Head-to-Head", homeKey: "head_to_head_rate", awayKey: "head_to_head_rate" },
   { label: "Elo", homeKey: "home_elo", awayKey: "away_elo" },
-  { label: "Lineup xwOBA", homeKey: "home_lineup_xwoba", awayKey: "away_lineup_xwoba" },
-  { label: "Barrel%", homeKey: "home_lineup_barrel_pct", awayKey: "away_lineup_barrel_pct" },
+  { label: "Lineup xwOBA", homeKey: "home_lineup_xwoba", awayKey: "away_lineup_xwoba", statcast: true },
+  { label: "Barrel%", homeKey: "home_lineup_barrel_pct", awayKey: "away_lineup_barrel_pct", statcast: true },
 ];
+const GAME_DETAIL_STATCAST_COUNT = GAME_DETAIL_FACTOR_ROWS.filter((r) => r.statcast).length;
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { date, slug } = await params;
   const title = `${slug} ${date} Analysis | MoneyBall Score`;
-  const description = `${slug} ${GAME_DETAIL_FACTOR_ROWS.length}-factor breakdown + waterfall.`;
+  const description = `${slug} ${GAME_DETAIL_FACTOR_ROWS.length}-factor breakdown (Statcast ${GAME_DETAIL_STATCAST_COUNT}) + waterfall.`;
   return {
     title,
     description,

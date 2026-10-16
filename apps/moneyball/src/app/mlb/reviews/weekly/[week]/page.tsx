@@ -272,6 +272,11 @@ export default async function MlbWeeklyReviewPage({ params }: PageProps) {
             >
               {pctLabel}
             </p>
+            {review.verifiedGames < SMALL_SAMPLE_N && (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                소표본(n&lt;{SMALL_SAMPLE_N})
+              </p>
+            )}
           </div>
         </section>
       )}

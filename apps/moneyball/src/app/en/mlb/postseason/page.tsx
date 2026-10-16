@@ -168,7 +168,7 @@ export default function MlbPostseasonHubEn() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ Live Postseason bracket + per-series {MLB_FACTOR_COUNTS.total}-factor predictions = coming soon (activates after regular season ends).
+          ※ This hub started as a Header NAV broken-link recovery layer. Live Postseason bracket + per-series {MLB_FACTOR_COUNTS.total}-factor predictions = coming soon (activates after regular season ends).
         </p>
         <p>
           ※ Related: <Link href="/en/mlb/wild-card" className="underline">/en/mlb/wild-card</Link> · <Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link> · <Link href="/en/mlb" className="underline">/en/mlb</Link> hub.

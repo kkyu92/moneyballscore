@@ -134,7 +134,7 @@ export default async function EnMlbInsightsHubPage() {
             const badge = insightsStatusBadge(item.status, item.isCorrect);
             const homeName = mlbShortTeamName(item.homeTeam);
             const awayName = mlbShortTeamName(item.awayTeam);
-            const topFactors = selectTopFactors(item.factors);
+            const topFactors = selectTopFactors(item.factors, undefined, 'en');
             return (
               <li
                 key={`${item.gameId}-${item.date}`}
