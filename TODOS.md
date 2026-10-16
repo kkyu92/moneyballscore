@@ -1,5 +1,16 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): app/api/{health,mlb,picks} 잔여 3개 대형 route 전수 감사 clean (cycle 3265, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(plan#30 completed, 재처리 대상 아님). 2차 방어선: cycle 3264 retro commit(`3d6c8552`) 존재 확인. 2-chain lock 미충족(직전8(3257-3264) distinct=6). gap 전부 미근접(fix-incident 4/20·op-analysis 3/25·info-arch 25/30·lotto 2/30). 직전3 cycle(3262-3264) next_recommended_chain 전부 "review-code(heavy) 복귀" 일치 — cycle 3099/3264 이월 `app/api/{health,mlb,picks}` 잔여 3개 대형 route 선정.
+
+**실행**: 본 메인 직접 전수 read(9개 파일, 938줄, agent 위임 없음). `health/route.ts`(138L) — Supabase 402 billing quota downgrade 패턴(cycle 2996/2999 known-good) 정합. `health/pipelines/route.ts`(129L) — 10개 mode staleness 체크 주석의 cron schedule(`'17 0-14 * * *'` KBO / `'17 18-22,10 * * *'` MLB)을 실제 `.github/workflows/daily-pipeline.yml` + `mlb-pipeline.yml` 과 직접 대조 — 정합 확인. `mlb/waitlist/route.ts`(92L) — CSRF/honeypot/email validate/service-role/enumeration 방어 6-layer 정합. `mlb/pipeline/route.ts`(96L) — CRON_SECRET `.trim()` 방어(cycle 3217 클래스) + `triggeredBy` VARCHAR(20) clamp(cycle 2078 클래스) + revalidate silent-false-failure 방지 정합. `picks/{submit,mlb-submit}`(62L+69L) — KBO(INT FK game_id) vs MLB(VARCHAR(20) external_game_id) twin route parity 확인. `picks/{poll,mlb-poll}`(59L+59L) — 동일 twin parity 확인. `picks/results/route.ts`(234L, 최대) — KBO `CURRENT_SCORING_RULE` app-level fallback vs MLB `MLB_PRODUCTION_COHORT_RULES` DB-level 배열 필터, 상이한 설계지만 데이터 모델 차이(cohort 배열 확장성 대비) 의도된 설계로 확인 — 드리프트 아님.
+- **확정 버그 0건** — 9개 파일 전부 clean. 코드 변경 없음.
+
+검증: 코드 변경 없음(읽기 전용 감사). `app/api/` 13개 디렉토리 전수 커버리지 완료 — leaderboard(cycle 3185/3216/3238/3252) + hub-dispatch/sync-batter-stats/version/seo/pipeline(cycle 3264) + health/mlb/picks(금번) 전부 감사 이력 확보. skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3265%50≠0, trigger5 review-code 직전20 윈도우 0회 아님) — 마커 미박제.
+
+다음 사이클 추천 = info-architecture-review(gap=25/30, 근접) 또는 fix-incident/lotto gap 자연 대기. review-code(heavy) 는 app/api 전수 완주로 다음 발화 시 lib/ 또는 components/ 영역 재탐색 필요.
+
 ## 🟡 PARTIAL — review-code(heavy): app/api/{hub-dispatch,sync-batter-stats,version,seo/indexnow,pipeline} 전수 감사 clean (cycle 3264, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 non-approved, plan#30 2026-09-18 생성 — status=`completed_all_phases_shipped_cycle_2936_2937_2938`, 재처리 대상 아님). 2차 방어선: cycle 3263 retro commit(`6c4c17a3`) 존재 확인. 2-chain lock 미충족(직전8(3256-3263) distinct=5: review-code(heavy)4+polish-ui1+fix-incident1+operational-analysis1+lotto1). gap 전부 미근접(fix-incident 3/20·op-analysis 2/25·info-arch 24/30·lotto 1/30, `gh run list` scheduled workflow 최근 15건 failure 0건). 직전3 cycle(3261-3263) next_recommended_chain 전부 "review-code(heavy) 복귀" 일치 — cycle 3099 에서 미완으로 남긴 `app/api/{health,hub-dispatch,leaderboard-sync,mlb,picks,pipeline,seo,sync-batter-stats,version}` 8개 route(CHANGELOG mention 1건 이상이나 전수 감사 미실시) 중 소형 5개(hub-dispatch 182L/sync-batter-stats 74L/version 30L/seo-indexnow-ping+indexnowKey 119L/pipeline 121L, 합계 ~526줄) 선정.
