@@ -1,5 +1,17 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): packages/kbo-data/src/pipeline 저-mention 잔여 4개 파일 전수 감사, 신규 drift 0건 (cycle 3287, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3286 retro commit(`216e854e`) 존재 확인. 2-chain lock 미충족(직전8(3279-3286) distinct=3: review-code(heavy)5+fix-incident(lite)1+lotto(lite)1). gap 전부 미근접(fix-incident 6/20·op-analysis 11/25·info-arch 17/30·lotto 4/30). explore-idea saturation 직전15 충족 가능하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재) — 확립된 skip 패턴. cycle 3286 추천대로 `packages/kbo-data/src/pipeline/` 잔여 2-mention 파일 4개(`backfill-records.ts`/`backtest-grid-run.ts`/`backtest-logistic-run.ts`/`backtest-v3-run.ts`) 채택.
+
+**결과**: 본 메인 직접 전수 read(agent 위임 없음) — 4개 파일(백필 CLI 1개 + 백테스트 실험 CLI 3개, 총 840줄) 전부 주석-코드 정합 확인. `backfill-records.ts` idempotent/--force 동작 주석과 `skipCovered` 분기 일치. `backtest-grid-run.ts` 로그 라인의 `DEFAULT_RESTRICTED` 하드코딩 레이블(`kElo=1.0, kH2h=30, kPark=2`)을 실제 `models.ts` DEFAULT_RESTRICTED 값과 대조 — 현재 일치(latent risk는 있으나 actionable drift 아님, 값 변경 시에만 문제화). `backtest-logistic-run.ts`/`backtest-v3-run.ts`는 LAMBDA=0.01 고정 근거 주석(cycle 22/23 bootstrap-ci 결론)과 실제 코드 일치.
+
+**결론**: 신규 drift 0건, 코드 변경 없음. `pipeline/` 저-mention 파일군(cycle 3286 11개 + 본 cycle 4개 = 15개) 전수 감사 완료. 잔여 17개 파일(`daily.ts`/`live.ts`/`schedule.ts`/`model-version.ts`/`brier.ts`/`silent-drift-alert.ts` 등)은 고-mention 파일로 과거 다회 개별 감사 이력 보유 — 저-mention 축 자체는 금번으로 소진.
+
+검증: 코드 변경 없음(감사만). skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3287%50=37≠0, trigger5 직전20(3268-3287) review-code(heavy)+review-code 다회 발화로 0회 chain 없음 — 평가 대상 review-code 단독, trigger1 chain-evolution 누적 10건은 장기 지속 상태로 신규 trigger 아님, trigger2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전10(3278-3287) success 6건, retro-only 1건, partial 3건, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 탐색 필요(`pipeline/` 저-mention 축 소진 — 다른 디렉토리 저-mention 재점검 또는 고-mention 파일 재검증 전환) 또는 fix-incident(7/20)/op-analysis(12/25)/info-arch(18/30)/lotto(5/30) gap 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): packages/kbo-data/src/pipeline 저-mention 11개 파일 전수 감사, 신규 drift 0건 (cycle 3286, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3285 retro commit(`346b6f21`) 존재 확인. 2-chain lock 미충족(직전8(3278-3285) distinct=3: review-code(heavy)6+fix-incident(lite)1+lotto(lite)1). gap 전부 미근접(fix-incident 5/20·op-analysis 10/25·info-arch 16/30·lotto 3/30). explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 신선 — mtime 145h) — 확립된 skip 패턴. cycle 3285(`app/en` 완결) 이후 신규 축으로 `packages/kbo-data/src/pipeline/` CHANGELOG mention-count 최하위 파일군 선정(grep-count-depth 가드레일 — cycle 3001 교훈 적용, mention 0~2건 파일 전수 확인).
