@@ -271,6 +271,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {strongConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
+                  {strongConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
                 </p>
               </div>
             )}
@@ -283,6 +284,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {completeConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
+                  {completeConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
                 </p>
               </div>
             )}
