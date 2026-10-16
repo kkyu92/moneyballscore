@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/predictions 전수 감사, JudgeReasoningCard stale 주석 1건 수정 (cycle 3229, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건(plan#30 은 completed_all_phases_shipped). 2-chain lock 미충족(직전8(3221-3228) distinct=3: review-code(heavy)6+expand-scope1+polish-ui1). gap trigger 4종 전부 미근접/블락: fix-incident 11/20·info-arch 18/30·lotto 14/30·op-analysis Supabase DNS ENOTFOUND 지속(6일+ 경과, Tier4 변화 없음). explore-idea saturation 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 6일 신선, cycle 3227 과 동일 결론) — skip. cycle 3228 추천대로 `components/predictions`(3584줄, 레포 내 최대 미감사 단일 영역) 선택.
+
+**전수 검증**: Agent 2개 병렬 — KBO-side(18개 컴포넌트 + lib + packages/shared 교차검증 + __tests__ 기존 silent-drift 가드 확인) / MLB-side(6개 컴포넌트 + KBO 트윈 diff + mlb-base/mlb-waterfall/mlb-overview/mlb-factor-detail 계산 모듈 + 소비 라우트), 전부 전수 read.
+
+**발견+수정 (1건)**: `JudgeReasoningCard.tsx`(predictions/[date] 카드 하단 AI 분석 박스, insights/[date] 와 공유) 의 doc comment 가 "judge agent 가 남긴 300-500자 블로그용 reasoning" 이라고 단일 수치로 적어뒀으나, 실제론 호출처 2곳이 다른 소스 사용 — `/insights/[date]` 는 postview 사후 분석(`postview.ts` 실측 300-500자 스펙, 주석 정확) 이지만 `/predictions/[date]` 는 사전 debate verdict(`judge-agent.ts` 프롬프트 타겟 ≤300자, success-path 는 1000자에서만 안전 truncate, 300-500자 밴드 강제 없음) — 자매 파일 postview.ts 스펙을 그대로 복붙해온 것으로 판명. 호출처별 길이 타겟이 다름을 명시하도록 주석 정정.
+
+**MLB-side 발견**: 없음 — combinatorial pair comment(C(30,2)=435 등) KBO/MLB 역전 없음, FACTOR_CONTRIBUTION_SCALE/RIVALRY_MEMORY_LIMIT/ANALOG_MATCHUP_LIMIT 전부 shared 상수 정합, placeholder factor(SFR) 문구 `MLB_PLACEHOLDER_FACTOR_KEYS` 와 일치, KBO↔MLB 트윈 구조 정합(의도된 공식 차이는 각자 올바르게 반영).
+
+**regression**: `tsc --noEmit` clean, eslint clean. 직접 main 커밋(`053089c8`)+push, pre-push hook(lint+type-check+version-sync-guard) 전부 PASS.
+
+다음 사이클 추천 = review-code(heavy) 잔여 영역 탐색(teams/reviews/search/live/share 소형 영역 묶음, 또는 app/ 라우트 레벨 page.tsx 전수 재확인) 또는 fix-incident(11/20)/info-arch(18/30)/lotto(14/30) gap 자연 대기. op-analysis 는 Supabase 복구 전까지 계속 블락.
+
 ## 🟢 SUCCESS — review-code(heavy): components/dashboard+insights 전수 감사, silent drift 4건 수정 (cycle 3228, 2026-10-16)
 
 진단: open issue 0건. approved plan 0건. 2-chain lock 미충족(직전8(3220-3227) distinct=3: review-code(heavy)6+polish-ui1+expand-scope1). gap trigger 4종 전부 미근접/블락: fix-incident 11/20·info-arch 18/30·lotto 14/30·op-analysis Supabase DNS NXDOMAIN 지속(Tier4, 변화 없음). cycle 3225/3227 양쪽이 추천한 review-code(heavy) 재개 — picks→layout→analysis→matchup→accuracy→shared 이후 남은 미감사 scope 중 components/dashboard(2632줄, lib 포함)+components/insights(963줄, lib 포함) 선택.
