@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): app/ KBO 단일-page 그룹 8개 전수 감사, guide.tsx FAQ 하드코딩 drift 수정 (cycle 3258, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 non-approved status). 2차 방어선: cycle 3257 retro commit(`cb5f484b`) 존재 확인. 2-chain lock 미충족(직전8(3250-3257) distinct=4: review-code(heavy)4+polish-ui2+lotto(lite)1+skill-evolution1). fix-incident gap=17/20·info-arch gap=18/30·lotto gap=5/30(쿨다운) 전부 미근접. op-analysis Supabase ENOTFOUND 구조적 블락 지속(5일+). DESIGN.md mtime 5.9일(신선). explore-idea saturation 12/15 충족하나 4-source 재확인 negative — 확립된 skip 패턴. cycle 3257 retro 권고대로 CHANGELOG mention 0건인 `app/{about,privacy,terms,settings,login,community,glossary,guide}` 8개 KBO 단일-page 그룹 신규 스코프 채택.
+
+**결과**: `about.tsx`(가중치/FAQ/데이터소스 CLAUDE.md v1.8 및 실제 상수 정합 재확인), `privacy.tsx`/`terms.tsx`(법적 고지 + 실제 analytics/adsense 배선(`layout.tsx`) 1:1 대조 — Vercel Analytics/Google Analytics/AdSense 전부 실사용 확인, drift 없음), `settings`/`login`/`community`(placeholder 3건 의도된 상태 재확인), `glossary.tsx`(clean). **확정 drift 1건**: `guide/page.tsx`가 `about.tsx`의 FAQS 배열 길이(15)를 "자주 묻는 질문 15건" 하드코딩 문자열로 별도 유지 — `glossary/data.ts`의 `GLOSSARY_TERM_COUNT`(배열.length export) 패턴과 불일치, FAQS 증감 시 silent stale 될 구조. `about/page.tsx`에 `export const FAQ_COUNT = FAQS.length` 추가 + `guide/page.tsx` import 교체로 수정.
+
+검증: `tsc --noEmit`/`pnpm lint` clean. `npx vitest run` glossary/guide/about 7 tests green. 직접 main 커밋+push(R4, `4e06a930`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여: packages/kbo-data 신규 축 또는 app/ 나머지 단일-page) 또는 fix-incident(gap=18/20)/info-arch(gap=19/30)/lotto(gap=6/30, 쿨다운) 자연 대기. **Supabase ENOTFOUND 5일+ 지속 — 사용자 billing 조치 필요(변화 없음).**
+
 ## ⚪ RETRO-ONLY — polish-ui (diversity redirect): 신규 드리프트 0건, fix-incident gh run 필터 blind spot 재현했으나 전부 기존 Supabase 원인 (cycle 3257, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 non-approved status). 2차 방어선: cycle 3256 retro commit(`d8a1e670`) 존재 확인. 2-chain lock 미충족(직전8(3249-3256) distinct=4: review-code(heavy)5+polish-ui1+skill-evolution1+lotto(lite)1). **cycle 3256 retro가 "review-code(heavy) 5/6 clean/PARTIAL — diminishing returns, 다양성 redirect(polish-ui/info-arch) 고려" 명시 권고** — info-arch는 17 cycle 전(3240) checkpoint가 breadcrumb 18건/신규라우트 0건/nav구조 불변 전부 재확인 완료해 중복이라 제외, 가장 최근 실제 drift(KBO 테이블 레이아웃, cycle 3250)를 찾아낸 polish-ui 채택.
