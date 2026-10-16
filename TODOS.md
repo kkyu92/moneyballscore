@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — fix-incident: indexnow-ping 3일 연속 실패 조사 중 LLM_BACKEND_HAIKU 트레일링 개행 실측 버그 발견 + trim() 방어 2곳 수정 (cycle 3217, 2026-10-16)
+
+진단: open issue 0건. approved plan 없음(전부 completed/archived/pending-user-step, status="approved" 0건). 2-chain lock 미충족(직전8(3209-3216) distinct=4: review-code(heavy)5/info-arch1/lotto1/fix-incident1). fix-incident 최근 발화 cycle 3215(2 사이클 전, gap 미충족), lotto 최근 3214(3 사이클 전), info-arch 최근 3210(7 사이클 전) — 3개 모두 주기 보정 trigger 미도달. op-analysis 25-cycle gap(3192-3216 0회) 도달했으나 Supabase DNS NXDOMAIN 재확인 불변(Tier4 블락 지속). `gh run list` 로 scheduled workflow 직접 점검 — `indexnow-ping` 이 2026-10-14/15/16 3일 연속 실패(이전엔 장기간 success) 발견, `heartbeat-stale`(기존 추적 Supabase 인시던트 증상)와 구분되는 신규 regression으로 판단해 fix-incident 선택.
+
+**조사**: indexnow-ping 실패 로그 = IndexNow API `{"errorCode":"SiteVerificationNotCompleted"}`. `git log`로 과거 수정 이력 추적 — cycle 3124(2026-10-13, PR 없음 direct commit `a5e61e7f`)가 "업스트림 실패해도 항상 outer 200 반환하던 silent swallow"를 502로 바꾼 것 확인 → 즉 IndexNow 검증 자체는 이 silent swallow 수정 이전부터(어쩌면 cycle 772 최초 출시 2026-05-20 이후 쭉) 계속 실패해왔는데 outer 200 때문에 5개월간 전혀 안 보였던 것. 키 파일 route(`[indexnowKey].txt`)는 직접 curl 테스트(틀린 key→404 정상)로 라우팅 로직 자체는 건강함을 확인, Vercel 배포 보호/robots.txt 차단도 배제. 실제 INDEXNOW_KEY 값은 Vercel이 "Sensitive" 타입으로 마스킹해 조회 불가(의도된 보안 설계, 우회 시도 안 함).
+
+**실제 발견**: 조사 중 `apps/moneyball/.env.production.local`(로컬 스냅샷) 에서 `LLM_BACKEND_HAIKU="deepseek\n"` — 트레일링 개행이 리터럴로 박제된 걸 확인. `packages/kbo-data/src/agents/llm.ts` `getBackend()` 가 `process.env[roleKey]?.toLowerCase()` 로 trim 없이 비교해, `'deepseek\n' !== 'deepseek'` 때문에 haiku 역할(team-agent/calibration-agent/postview) 이 의도된 저비용 deepseek 백엔드 대신 매번 무음으로 기본값 'claude' 로 떨어지고 있었음 — CLAUDE.md 장기 추적 CREDIT_EXHAUSTED 소진 패턴의 숨은 기여 요인일 가능성(확정은 못함, 과거 호출량 재측정 불가).
+
+**수정**: `llm.ts` 3곳(`getBackend` role/global, `fallbackRaw`) 전부 `.trim()` 추가. INDEXNOW_KEY도 동일 클래스 위험이라 ping route + `[indexnowKey].txt` route 양쪽 `.trim()` 방어 추가(직접 재현은 못했으나 keyLocation 파일 내용과 POST body key가 바이트 단위로 어긋나면 영구 검증 실패하는 구조라 비용 없는 안전 조치). 회귀 테스트 3건 신규(`agents-llm.test.ts` 트레일링 개행 deepseek 라우팅 1건, indexnow ping route.test.ts 1건, `[indexnowKey].txt` 신규 route.test.ts 파일 전체).
+
+**regression**: `pnpm --filter kbo-data exec vitest run agents-llm.test.ts`(31 passed) + `pnpm --filter moneyball exec vitest run` indexnow ping + `[indexnowKey].txt` route(10 passed) + `tsc --noEmit` 양쪽 clean + eslint 양쪽 clean. direct main commit(`167897fe`) + push, pre-push hook(lint+type-check+version-sync-guard) green.
+
+**미해결**: indexnow-ping 의 "SiteVerificationNotCompleted" 자체는 IndexNow 외부 검증 상태라 이번 trim 수정으로 해소 보장 X. 다음 fix-incident 자연 발화 시 cron 재성공 여부 확인 필요(trim 적용 전후 INDEXNOW_KEY 실제 값이 개행 포함이었는지는 Sensitive 마스킹 때문에 끝내 직접 확인 불가 — 간접 evidence(LLM_BACKEND_HAIKU 동일 클래스 확인)만으로 판단).
+
+다음 사이클 추천 = review-code(heavy) components/ 재검증 또는 app/api 잔여 scope, 또는 fix-incident(indexnow cron 2~3일 후 재확인), op-analysis(Supabase 복구 전까지 Tier4 블락 지속).
+
 ## 🟢 SUCCESS — lotto(lite): 2-chain lock(직전8 distinct=2: review-code(heavy)6+info-arch1) redirect, 45-cycle gap trigger 도달, cron 정상 재확인 (cycle 3214, 2026-10-14)
 
 진단: open issue 0건. 2-chain lock 충족(직전8(3206-3213) distinct=2: review-code(heavy)6 + info-architecture-review1, 둘 다 fix-incident 아님 → lock 발동, 두 chain 후보 제외). 제외 후 남은 pool 재평가 — fix-incident gap=11/20 미근접, op-analysis gap=25+/25(Supabase DNS NXDOMAIN 지속 블락, Tier4, heavy 불가), lotto gap=45/30(last fire cycle 3169) 가장 강한 trigger로 lotto 선택.
