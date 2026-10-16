@@ -1,5 +1,24 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): mlb/{matchup,calendar,methodology,accuracy,reviews} 5개 pair 버그 발견+수정 (cycle 3247, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(plan#29 만료 후 `_archive` 이동 유지). 2-chain lock 미충족(직전8(3240-3246) distinct=4: review-code(heavy)5+info-arch1+fix-incident1+lotto(lite)1). fix-incident gap=6/20·info-arch gap=7/30·lotto gap=1/30 전부 미근접. Supabase `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(6일째) op-analysis 계속 블락. explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 신선) — 기존 skip 패턴. app/api 전체 13개 route 과거 다회 소진 확인 후 신규 축 탐색 — mlb/{matchup,calendar,methodology,accuracy,insights,reviews} 6개 page 클러스터가 KBO twin 대비 commit count 현저히 낮아(2~8건 vs KBO 11+건) under-audited scope 선정.
+
+**전수 감사**: 6개 pair 각각 KBO twin 과 대조 전수 read — matchup/calendar/methodology/accuracy 는 독립 deep-dive agent 4개 병렬 투입 + 1개 consolidated self-check agent 로 교차검증. **메타 발견**: consolidated self-check 가 matchup pair 를 "clean" 으로 오판했으나 독립 deep-dive agent 가 실제 버그 적발 — 단일 self-check 보다 pair 별 독립 deep-dive 가 신뢰도 높음을 확인.
+
+**발견+수정 5건**:
+1. `mlb/calendar`(KO+EN) — `getMlbMonthHeatmap` 이 DB 오류를 내부에서 catch-and-log(fail-silent)로 흡수하지만 degraded 플래그 미반환 → `dbDegraded` 배너가 영구히 안 뜸. `{byDate, degraded}` 반환으로 수정 + KO 전용 `RelatedLinks` 섹션 신규 추가(KBO twin 대비 누락 확인).
+2. `mlb/matchup/[teamA]/[teamB]`(KO+EN) — `buildMlbMatchupProfile` 실제론 guarded(fail-silent)인데 comment 가 KBO 코드 copy-paste 로 "fail-loud" 잘못 주장 + `profilePromise` 가 `dbDegraded` 파생 밖에서 await 돼 DB 장애 시 배너 미표시. `MlbMatchupProfile` interface 에 `degraded` 필드 추가 + 파생값 합류.
+3. `mlb/methodology`(KO+EN) — 홈 어드밴티지가 "KBO 와 동일 +1.5%p" 라는 서술이 실제 `mlb-base.ts` 로직(elo 팩터 내장 `HOME_ELO_BONUS` + 별도 `home_elo_bonus` flat 가산, 중립 매치업 기준 합 ~+5.6%p — pipeline 의 기존 문서화된 0.556 상수와 정확히 일치 재확인)과 불일치 — 정정. `defense_sfr` FanGraphs 소스 오기재(실제론 placeholder) 정정 + `sp_fip`/`bullpen_fip` 현재 단일 소스 공유 사실 고지 추가.
+4. `mlb/accuracy`(KO+EN) — 6개 builder(`buildMlbAccuracySummary`/`buildAllMlbTeamAccuracy`/`buildMlbMatchupData`/`buildMlbFactorAccuracy`/`buildMlbTeamBiasAnalysis`/`buildMlbCommunityVsAI`) 전부 fail-silent 라 기존 `Promise.all`→`allSettled` 전환만으론 무효 — 각 반환값에 `degraded` 필드 threading(blast radius 확인: array-returning 4개는 이 2개 accuracy page 외 비소비 확인 후 shape 변경 진행). "n=1 결과는 연하게 표시됩니다" 문구도 실제 게이트 `SMALL_SAMPLE_N=5` 와 불일치해 정정.
+5. `reviews/page.tsx`(KO, MLB twin 없음) — "수렴 픽 전체 성적" 카드가 `getRecentConvergencePickRecord` 호출 시 `startDate` 생략 → 45일 lookback 으로 silent fallback(라벨은 시즌 전체 주장, 같은 파일 내 다른 5개 자매 함수는 전부 `KBO_SEASON_START_DATE` 패턴 준수). 3번째 인자로 추가. "fail-loud" 오기 comment 도 정정(실제론 fail-soft).
+
+**보류**: `insights` page — dedup guard 부재(composite unique 로 동일 game_id 2행 가능) + `selectTopFactors` KBO-shaped allowlist 가 MLB Statcast 전용 키 drop — 둘 다 MLB `predictions.factors`/`reasoning` 이 cycle 2924 이후 100% NULL 상태라 현재 unreachable, 영향 0 — 수정 보류(다음 재점검 = MLB factors 실측 연결 시).
+
+**검증**: `tsc --noEmit` clean, `eslint` clean(수정 파일 전체), `vitest` 596 files/4676 tests 전부 PASS(기존 builder test 5개 파일을 `{rows,degraded}`/`{stats,degraded}` shape 반영 갱신 + wave-590 회귀 테스트 갱신 포함). direct main commit `4723e617`(22 files) + push, pre-push hook green.
+
+다음 사이클 추천 = review-code(heavy) 계속(`mlb/predictions` 398줄 미감사 잔존, app/api 전체 소진 후 `packages/kbo-data` 잔여 또는 `components/` 재스윕) 또는 fix-incident(6/20)/info-arch(7/30)/lotto(1/30) gap 자연 대기. insights 2건 dormant 이슈는 MLB factors 실측 연결 시 재점검 필요(carry-over). op-analysis 는 Supabase 복구 전까지 계속 블락 — 6일째 미해결.
+
 ## 🟢 SUCCESS — lotto(lite): 30-cycle gap 주기 보정, cron 정상 재확인 (cycle 3246, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/superseded, plan#29 만료 후 `_archive` 이동 상태 유지). 2-chain lock 미충족(직전8(3238-3245) distinct=3: review-code(heavy)6+info-architecture-review1+fix-incident1). gap trigger: fix-incident 5/20·info-arch 6/30 전부 미근접. explore-idea saturation 직전15 3/15 미충족. op-analysis `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(2026-10-11 시작, 7일째) 계속 블락. **lotto gap=32/30 (last fire cycle 3214) — 장기 미발화 주기 보정 trigger(7) 충족, lite 자동 권장** — cron 산출물 freshness 자체는 양호(picks `2026-10-17.md`/results `2026-10-10.md` 양쪽 최신)하나, 본 trigger는 cron 상태와 무관한 독립 주기 점검이라 자연 발화.
