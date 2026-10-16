@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/teams+reviews+search+live+share 전수 감사, LiveScoreboard opacity drift 1건 수정 (cycle 3230, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건. 2-chain lock 미충족(직전8(3222-3229) distinct=3: review-code(heavy)6+polish-ui1+expand-scope1). gap trigger 4종 전부 미근접/블락: fix-incident 13/20·info-arch 20/30·lotto 16/30·op-analysis Supabase DNS 여전히 미해결(`dig`/`curl` 재확인, 6일+ 경과, Tier4 변화 없음). cycle 3229 추천대로 teams/reviews/search/live/share 소형 영역 묶음(2065줄, 이력상 전용 전수 감사 미실시) 선택.
+
+**전수 검증**: Agent 2개 병렬 — teams+reviews(components 15파일+lib/teams+lib/reviews+MLB twin+소비 page.tsx+packages/shared 교차검증) / search+live+share(components 3파일+인접 predictions/picks 컴포넌트+기존 silent-drift-cycle-2620/2621/2622 테스트 선독해+소비 route+packages/shared 교차검증), 전부 전수 read.
+
+**teams+reviews 발견**: 없음 — 의심 후보 7건 전부 반증(MLB EN 설명 문구 차이=의도된 스타일, route 태그 정확, scoring_rule 필터 scope 정합, confToWinProb 이중변환 아님 확인, UPCOMING_CONVERGENCE_TEAM_LIMIT 재사용 합법, most-accurate parity bug는 이미 fix됨, TeamRecentGamesFilter MLB twin 부재=미구현 기능이지 drift 아님). 영역 자체가 cycle 1992~3175 사이 반복 감사된 영역으로 이미 clean.
+
+**search+live+share 발견+수정 (1건)**: `LiveScoreboard.tsx`(78/98/104행) 3개 브랜드 pill 배지("승"/"홈"/"승")가 `dark:bg-brand-900/50` 사용 — 리포 전체 동일 역할 배지(MiniGameCard/PredictionCard/PlaceholderCard/PickButton/MyPicksClient/WeeklyPicksSummary/AgentVoteCard/ModelVersionHistory/HistoricalAnalogMatchup/MlbHistoricalAnalogMatchup, 14건 전부)는 `/40` 사용. cycle 2621 회귀 테스트가 같은 줄의 font-weight 버그(font-semibold→font-bold) 고치며 opacity 값은 `/50` 그대로 expected string 에 박제 — 잘못된 값이 테스트로 고정됨. `/40` 으로 정정 + cycle 2621 테스트 expected string 수정 + cycle 3230 신규 회귀 테스트 추가(3개 배지 전부 `/40` 가드).
+
+**lower-confidence 플래그(미수정)**: `PredictionsSearchBox`(KBO) vs `MlbPredictionsSearchBox`(MLB) 의 `resolveTeamCode` 매칭 우선순위 구조가 다름(KBO=전체 short-name pass 우선 / MLB=per-team 병합 pass) — 현재 로스터엔 충돌 케이스 없어 실제 버그 trigger 안 함, latent twin-divergence 로만 기록.
+
+**regression**: `tsc --noEmit` clean, eslint clean, vitest 전체 593 files/4665 tests 전부 PASS. direct main commit(`4a08a640`)+push, pre-push hook(lint+type-check+version-sync-guard) 전부 PASS.
+
+다음 사이클 추천 = review-code(heavy) 잔여 영역 탐색(app/ 라우트 레벨 page.tsx 전수 재확인, 또는 lib/ 최상위 유틸 모듈 전수 재확인) 또는 fix-incident(13/20)/info-arch(20/30)/lotto(16/30) gap 자연 대기. op-analysis 는 Supabase 복구 전까지 계속 블락.
+
 ## 🟢 SUCCESS — review-code(heavy): components/predictions 전수 감사, JudgeReasoningCard stale 주석 1건 수정 (cycle 3229, 2026-10-16)
 
 진단: open issue 0건. approved plan 0건(plan#30 은 completed_all_phases_shipped). 2-chain lock 미충족(직전8(3221-3228) distinct=3: review-code(heavy)6+expand-scope1+polish-ui1). gap trigger 4종 전부 미근접/블락: fix-incident 11/20·info-arch 18/30·lotto 14/30·op-analysis Supabase DNS ENOTFOUND 지속(6일+ 경과, Tier4 변화 없음). explore-idea saturation 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 6일 신선, cycle 3227 과 동일 결론) — skip. cycle 3228 추천대로 `components/predictions`(3584줄, 레포 내 최대 미감사 단일 영역) 선택.
