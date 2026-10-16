@@ -2183,8 +2183,21 @@ function scoreBacktest(rounds: LottoRound[]): void {
     percentiles[`p${p}`] = winningScores[idx];
   }
 
-  // top 50 cutoff (50세트 추천 cutoff 가정) — 50세트 = top 약 0.65% (50/7.7M) 단 본 backtest 는 1등 조합만, 가설 분리.
-  // 본 backtest 결과 → 1등 조합 score 분포가 top 50% 안에 들면 추천 50세트 안 들 가능성 있음 evidence.
+  // top LOTTO_PICK_COUNT cutoff 가정 — count_valid 는 이미 박제된 lotto-data.json 재사용
+  // (여기서 countValid() 재계산 시 8.1M 조합 전수 순회 중복 비용 발생 — 기존 박제 값 best-effort 재사용).
+  // silent drift 재발 방지 (cycle 3267 review-code heavy) — 과거 "50세트/0.65%" 하드코딩이
+  // LOTTO_PICK_COUNT 1000 전환 이후에도 본 스크립트에 남아있어 재실행 시 apps/moneyball/data/
+  // lotto-score-backtest.json 의 note/limitations 를 구 값으로 되돌릴 위험이 있었음.
+  let validPoolSize: number | null = null;
+  try {
+    const lottoDataPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-data.json');
+    const parsed = JSON.parse(readFileSync(lottoDataPath, 'utf-8')) as { count_valid?: number };
+    validPoolSize = typeof parsed.count_valid === 'number' ? parsed.count_valid : null;
+  } catch {
+    validPoolSize = null;
+  }
+  const poolSizeLabel = validPoolSize ? `${(validPoolSize / 1_000_000).toFixed(1)}M` : '7.7M';
+  const cutoffPct = validPoolSize ? ((LOTTO_PICK_COUNT / validPoolSize) * 100).toFixed(2) : '0.01';
 
   const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-score-backtest.json');
   const out = {
@@ -2192,10 +2205,10 @@ function scoreBacktest(rounds: LottoRound[]): void {
     n_rounds: rounds.length,
     score_stats: stats,
     score_percentiles: percentiles,
-    note: 'N=1000+ 1등 조합 unpopularityScore 분포. 실제 50세트 추천 cutoff 와 비교 시 top 0.65% 가정 (50/7.7M valid pool). 1등 조합 평균 score 가 cutoff 보다 낮으면 추천 모델 약점 evidence.',
+    note: `N=1000+ 1등 조합 unpopularityScore 분포. 실제 ${LOTTO_PICK_COUNT}세트 추천 cutoff 와 비교 시 top ${cutoffPct}% 가정 (${LOTTO_PICK_COUNT}/${poolSizeLabel} valid pool). 1등 조합 평균 score 가 cutoff 보다 낮으면 추천 모델 약점 evidence.`,
     limitations: [
-      'unpopularityScore 가 valid pool 전체 (7.7M) 분포 아님 — 1등 조합 만의 분포',
-      '실제 50세트 cutoff 는 valid pool 안 추정 top 0.65% — 본 통계와 직접 비교 X',
+      `unpopularityScore 가 valid pool 전체 (${poolSizeLabel}) 분포 아님 — 1등 조합 만의 분포`,
+      `실제 ${LOTTO_PICK_COUNT}세트 cutoff 는 valid pool 안 추정 top ${cutoffPct}% — 본 통계와 직접 비교 X`,
       'N=2 prod OOS (1224 + 1225) evidence 와 분리 — backtest 는 historical 1등 조합 분포만',
     ],
   };

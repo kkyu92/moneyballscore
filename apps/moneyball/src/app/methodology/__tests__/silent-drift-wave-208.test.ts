@@ -28,7 +28,7 @@ describe('silent drift wave 208 — stale weight-adjustment claims → v1.8 유�
     expect(SHADOW_MONITOR_SRC).not.toMatch(/v2\.0\s*가중치\s*확정\s*결정의\s*근거/);
   });
 
-  it('v2-shadow-monitor says "v1.8 유지 확정 결정의 근거"', () => {
-    expect(SHADOW_MONITOR_SRC).toMatch(/v1\.8\s*유지\s*확정\s*결정의\s*근거/);
+  it('v2-shadow-monitor says "<CURRENT_SCORING_RULE> 유지 확정 결정의 근거" (cycle 3267: literal v1.8 → derived constant, drift-proof)', () => {
+    expect(SHADOW_MONITOR_SRC).toMatch(/\{CURRENT_SCORING_RULE\}\s*유지\s*확정\s*결정의\s*근거/);
   });
 });
