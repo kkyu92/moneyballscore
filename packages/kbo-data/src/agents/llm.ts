@@ -61,12 +61,15 @@ type LLMBackend = 'claude' | 'ollama' | 'deepseek';
  */
 function getBackend(role: 'haiku' | 'sonnet'): LLMBackend {
   const roleKey = role === 'haiku' ? 'LLM_BACKEND_HAIKU' : 'LLM_BACKEND_SONNET';
-  const roleRaw = process.env[roleKey]?.toLowerCase();
+  // .trim() 필수 — Vercel 대시보드에서 값을 붙여넣을 때 트레일링 개행이 섞여 들어오면
+  // (실측: LLM_BACKEND_HAIKU="deepseek\n") 등호 비교가 전부 실패해 조용히 'claude' 기본값으로
+  // 떨어진다. hybrid 비용 설계(haiku 역할=deepseek 저비용)가 무음 무력화되는 사례(cycle 3217).
+  const roleRaw = process.env[roleKey]?.trim().toLowerCase();
   if (roleRaw === 'ollama') return 'ollama';
   if (roleRaw === 'deepseek') return 'deepseek';
   if (roleRaw === 'claude') return 'claude';
 
-  const globalRaw = process.env.LLM_BACKEND?.toLowerCase();
+  const globalRaw = process.env.LLM_BACKEND?.trim().toLowerCase();
   if (globalRaw === 'ollama') return 'ollama';
   if (globalRaw === 'deepseek') return 'deepseek';
   return 'claude';
@@ -175,7 +178,7 @@ export async function callLLM<T>(
   const result = await callClaude(options, parseResponse);
 
   // CREDIT_EXHAUSTED 자동 failover (사용자 env 설정 필요: LLM_BACKEND_FALLBACK + DEEPSEEK_API_KEY)
-  const fallbackRaw = process.env.LLM_BACKEND_FALLBACK?.toLowerCase();
+  const fallbackRaw = process.env.LLM_BACKEND_FALLBACK?.trim().toLowerCase();
   if (
     !result.success &&
     typeof result.error === 'string' &&

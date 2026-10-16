@@ -73,6 +73,19 @@ describe('GET /api/seo/indexnow/ping', () => {
     expect(body.urlList).toHaveLength(3);
   });
 
+  // cycle 3217 — Vercel 대시보드 값에 트레일링 개행 섞이는 사례 실측(LLM_BACKEND_HAIKU
+  // 동일 클래스 버그) → INDEXNOW_KEY 도 같은 위험. keyLocation 파일 내용(별도 route)과
+  // POST body 의 key 가 바이트 단위로 어긋나면 IndexNow ownership 검증이 영구 실패한다.
+  it('INDEXNOW_KEY 에 트레일링 개행 → trim 후 POST body/keyLocation 양쪽 깨끗한 key 사용', async () => {
+    process.env.INDEXNOW_KEY = 'abc123def456\n';
+    const res = await callGet({ authorization: 'Bearer test-secret' });
+    expect(res.status).toBe(200);
+    const [, init] = fetchMock.mock.calls[0];
+    const body = JSON.parse(init.body);
+    expect(body.key).toBe('abc123def456');
+    expect(body.keyLocation).toBe('https://moneyballscore.vercel.app/abc123def456.txt');
+  });
+
   it('IndexNow API 실패 → ok=false + response body 박제', async () => {
     fetchMock.mockResolvedValue(
       new Response('{"errorCode":"InvalidRequestParameters","message":"test"}', { status: 422 }),

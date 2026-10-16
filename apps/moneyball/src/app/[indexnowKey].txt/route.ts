@@ -13,7 +13,8 @@ export async function GET(
   { params }: { params: Promise<Record<string, string>> },
 ): Promise<Response> {
   const { indexnowKey } = await params;
-  const key = process.env.INDEXNOW_KEY;
+  // .trim() — ping route 와 동일 defensive 처리 (cycle 3217), 짝 유지 필수.
+  const key = process.env.INDEXNOW_KEY?.trim();
   if (!key || indexnowKey !== key) {
     return new Response('not found', { status: 404 });
   }

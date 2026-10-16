@@ -19,7 +19,11 @@ export async function GET(request: NextRequest): Promise<Response> {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const key = process.env.INDEXNOW_KEY;
+  // .trim() 필수 — 대시보드 값에 트레일링 개행이 섞이면 keyLocation 파일 내용과
+  // POST 로 전송하는 key 가 바이트 단위로 달라져 IndexNow 측 ownership 검증이
+  // 영구히 실패한다 (실측: packages/kbo-data/src/agents/llm.ts LLM_BACKEND_HAIKU
+  // 동일 클래스 버그, cycle 3217). [indexnowKey].txt route 의 trim 과 반드시 짝 유지.
+  const key = process.env.INDEXNOW_KEY?.trim();
   if (!key) {
     return Response.json({ error: 'INDEXNOW_KEY env not configured' }, { status: 503 });
   }

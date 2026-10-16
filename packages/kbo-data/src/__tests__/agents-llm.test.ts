@@ -362,6 +362,29 @@ describe('callLLM retry/backoff', () => {
     expect(result.creditExhaustedFallback).toBeUndefined();
   });
 
+  // cycle 3217 — 실측 production env 값 "deepseek\n" (트레일링 개행) 이 비교 실패를
+  // 유발해 hybrid 저비용 설계(haiku=deepseek)가 무음으로 claude 기본값에 떨어지던 버그
+  it('LLM_BACKEND_HAIKU="deepseek\\n" (트레일링 개행) → trim 후 deepseek 백엔드로 정상 라우팅', async () => {
+    const fetchMock = vi.fn();
+    global.fetch = fetchMock as unknown as typeof fetch;
+    process.env.LLM_BACKEND_HAIKU = 'deepseek\n';
+    delete process.env.DEEPSEEK_API_KEY;
+
+    const result = await callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+
+    // trim 없으면 'deepseek\n' !== 'deepseek' 로 claude 로 떨어져 fetchMock 이 호출됨.
+    // trim 적용 시 deepseek 경로로 가고, DEEPSEEK_API_KEY 없어 fetch 호출 없이 즉시 에러.
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('DEEPSEEK_API_KEY');
+    expect(result.llmBackend).toBe('deepseek');
+
+    delete process.env.LLM_BACKEND_HAIKU;
+  });
+
   // cycle 461 — credit balance too low 실제 incident → raw JSON leak 차단 검증
   it('credit balance too low 400 → CREDIT_EXHAUSTED 분류 (raw JSON leak 차단)', async () => {
     const creditErrorBody = {
