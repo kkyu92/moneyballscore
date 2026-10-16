@@ -14321,3 +14321,22 @@ Footer.tsx 디스클로저 chevron duration(`transition-transform` vs `duration-
 **패턴**: review-code(heavy) components/ 스윕 누적 — picks+layout(3219) → dashboard+insights(3228) → predictions(3229) → teams+reviews+search+live+share(3230) → lib/ 최상위(3231) → en/mlb twin(3232) → analysis+matchup(3233, 본 cycle) 순. 신규 drift 無 2연속(lib/ 0건 + analysis/matchup 0건) — 코드베이스 안정화 신호, 과거 silent drift family 다발 구간(cycle 86~122) 대비 명확한 개선.
 
 다음 사이클 추천 = review-code(heavy) 잔여(app/ page.tsx 111개 중 KBO 단일-page 그룹 재확인 또는 components/ 잔여 — accuracy/1331줄, shared/1424줄) 또는 fix-incident(17/20)/info-arch(24/30)/lotto(20/30) gap 자연 대기. op-analysis는 Supabase 복구 전까지 계속 블락.
+
+## 🟢 SUCCESS — review-code(heavy): components/accuracy + components/shared 전수 감사, 드리프트 3건 수정 (cycle 3234, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건(전부 completed/archived/superseded). 2-chain lock 미충족(직전8(3227-3234) distinct=3: polish-ui/expand-scope/review-code(heavy)). review-code(heavy) streak 7연속(3228-3234) 전부 success — dominance-positive, silent drift family detection channel. gap trigger 4종: fix-incident 17/20·info-arch 24/30·lotto 20/30 미근접, op-analysis 25/25 도달했으나 Supabase DNS NXDOMAIN 재확인(utmimgpccbrciwuuacyw.supabase.co, 2026-10-11 인시던트 지속) — Tier4 블락 유지. cycle 3233 추천대로 components/accuracy(1265줄)+components/shared(1074줄) 선택.
+
+**전수 검증**: Agent 2개 병렬 — accuracy/ 7파일(packages/shared 상수 전수 cross-check: SMALL_SAMPLE_N/ACCURACY_BASELINE/STATS_RELIABLE_MIN_N 등), shared/ 16파일(TeamLogo↔MlbTeamLogo twin diff, LanguageSwitch 실제 라우트 구조 대조, Breadcrumb 누락 18개 페이지 전부 기존 의도된 제외 재확인).
+
+**발견 + 수정 (3건, accuracy/만)**:
+1. `FactorAccuracyTable.tsx`: `locale?: 'ko'|'en'` prop이 sport='kbo'일 때도 무조건 받지만 실제론 `COPY.kbo.ko` 고정이라 silently 무시됨(`COPY.kbo`엔 en variant 자체가 없음) — 현재 `/en/accuracy`(KBO 영문) 라우트 부재라 inert 하지만, 본 리포의 기존 "locale dict 누락" 드리프트 계열과 동일 패턴. 판별유니언 타입으로 `sport='kbo'`일 때 `locale`을 `never`로 제한 — 향후 KBO 영문 페이지 추가 시 컴파일타임 차단.
+2. `CalibrationPlot.tsx`: `CALIBRATION_COLORS.v20` 키 호출부 0건(미출시 v2.0 계열 잔재) — 제거.
+3. `accuracy/page.tsx`: KBO 전체 적중률 StatCard accent가 `overallAcc >= ACCURACY_BASELINE`만 체크, MLB twin(`MlbAccuracyDashboard.tsx`)은 `&& verifiedN >= SMALL_SAMPLE_N` 게이트 추가로 보유 — twin divergence. KBO n은 항상 수백대라 현재 inert하나 parity 위해 게이트 추가.
+
+**shared/**: 0건 — TeamLogo(PNG)/MlbTeamLogo(SVG unoptimized) 차이는 Next.js 이미지 최적화 제약에 따른 의도된 분기(드리프트 아님), LanguageSwitch 순수 prop-driven(내부 경로 생성 로직 無), Breadcrumb 미사용 18페이지 전부 기존 TODOS 박제된 의도된 제외(redirect stub/noindex/debug) 재확인.
+
+**regression**: `tsc --noEmit` clean, eslint scoped clean, vitest 5 files 20 tests 전부 PASS. direct main commit(`e8e4b294`) + push, pre-push hook green.
+
+**패턴**: review-code(heavy) components/ 스윕 누적 — picks+layout(3219) → dashboard+insights(3228) → predictions(3229) → teams+reviews+search+live+share(3230) → lib/ 최상위(3231) → en/mlb twin(3232) → analysis+matchup(3233) → accuracy+shared(3234, 본 cycle) 순. FactorAccuracyTable 타입 제약 = "locale dict 누락" drift 계열의 사전 차단형 수정(사후 발견이 아닌 컴파일타임 가드 추가) — 새로운 수정 양식.
+
+다음 사이클 추천 = review-code(heavy) 잔여(app/ page.tsx 111개 중 미감사 서브셋 재확인) 또는 fix-incident(18/20)/info-arch(25/30)/lotto(21/30) gap 자연 대기. op-analysis는 Supabase 복구 전까지 계속 블락.
