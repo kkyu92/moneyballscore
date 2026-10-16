@@ -1,5 +1,25 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): lotto/seasons/terms/v2-preview/v2-shadow-monitor page.tsx 6개 전수 감사, drift 2건 수정 (cycle 3267, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3266 retro commit(`65db0945`) 존재 확인. 2-chain lock 미충족(직전8(3259-3266) distinct=4: review-code/fix-incident/operational-analysis/lotto). gap 전부 미근접(fix-incident 6/20·op-analysis 5/25·info-arch 27/30·lotto 4/30). 직전3 cycle(3264-3266) 전부 review-code(heavy) outcome=partial(clean) — app/api·lib/ 스코프 소진 확인 후 신규 스코프 탐색.
+
+**스코프 선정**: app/api, lib/, packages/kbo-data/context, scripts/, MLB app 전체(cycle 3062/3232/3239/3247), KBO app 단일페이지(cycle 3063/3258), reviews twins(cycle 3239) 전부 최근 감사 완료 확인. `lotto/page.tsx`, `lotto/methodology/page.tsx`, `seasons/[year]/page.tsx`, `terms/page.tsx`, `v2-preview/page.tsx`, `v2-shadow-monitor/page.tsx` 6개는 design-token 기계적 스윕(rounded-md 정렬, text-[Npx] 토큰화 등)만 받고 전용 전수 read 미실시 확인 후 선택.
+
+**발견 + 수정 (2건)**:
+1. `scripts/lotto.ts` `scoreBacktest()` — `"50세트"`/`"top 0.65% (50/7.7M)"` 하드코딩 stale cutoff 텍스트, `LOTTO_PICK_COUNT` 1000 전환 이후에도 생성기만 구 값 유지. 디스크 `lotto-score-backtest.json`은 이미 수동 수정되어 `1000세트`/`0.01%` 표시 중이었으나, 다음 cron 재실행 시 생성기가 그대로 구 값으로 silent 역행할 위험. `LOTTO_PICK_COUNT` + `lotto-data.json`의 `count_valid` 기반 동적 계산으로 수정.
+2. `v2-shadow-monitor/page.tsx` 헤더 prose — era 목록(`v2.0-shadow · v2.1-B-shadow · v1.5 · v1.6 · v1.7-revert`)과 `"v1.8"`을 리터럴 하드코딩. 동일 파일이 메타데이터/JSON-LD 용으로 이미 `ERA_COVERAGE_LABEL`(`PRODUCTION_ERA_HISTORY`/`SHADOW_*` 파생) 상수를 보유했으나 본문 prose엔 미적용 — 향후 era 이력 변경 시 메타데이터와 화면 텍스트 desync 위험. `ERA_COVERAGE_LABEL_PROSE` 신설(`·` 구분자 버전) + `CURRENT_SCORING_RULE` 치환.
+
+**clean 확인**: `seasons/[year]/page.tsx` `Promise.all`(not `allSettled`) 패턴은 `teams/[code]/page.tsx`와 다르지만 실제 재사용 출처인 `reviews/monthly/[month]/page.tsx`(wave-605/606)와 동일 fail-loud 패턴이라 일관성 확인. `v2-preview/page.tsx` v2.1-B weight-delta 수치는 `packages/shared`의 `V2_1_B_WEIGHTS`와 정확히 일치. `terms/page.tsx` 날짜/링크 git history 대조 clean. `LOTTO_RULE_COUNT`/`LOTTO_PICK_COUNT`/`LOTTO_TOP_PICK_COUNT`/`V2_PROMOTION_COHORT_N` 전부 source of truth 일치. unused import/dead code 0건.
+
+**regression**: `tsc --noEmit` clean, `eslint`(v2-shadow-monitor page) clean. 1차 `pnpm --filter moneyball test` 실행 시 `silent-drift-wave-208.test.ts` 1건 fail(과거 `v1\.8\s*유지\s*확정\s*결정의\s*근거` 리터럴 정규식 검증이 `{CURRENT_SCORING_RULE}` 템플릿 전환으로 매치 실패) — 테스트를 템플릿 리터럴 패턴 검증으로 갱신 후 2차 재실행 596 files/4676 tests 전부 PASS. direct main commit(`fc050662`)+push, pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+**패턴**: review-code(heavy) 가 api/lib/scripts/MLB-app/KBO-app 주요 영역 소진 후에도 "design-token 기계적 스윕만 받고 전용 read 미실시" 서브셋을 찾아 전환 — 3연속 clean partial(3264-3266) 직후 success 복귀. 두 발견 모두 "생성기/메타데이터는 최신인데 렌더 경로의 다른 한쪽(본문 prose / cron 생성기)만 구 값 유지" 라는 동일 drift 패턴(부분 수정 후 잔여 경로 누락) — 과거 "locale dict 누락" 계열과 유사한 "이중 소스 중 하나만 갱신" family.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3267%50≠0, trigger5 review-code 직전20 윈도우(3248-3267) 다회 발화로 0회 아님). marker 미박제. ship-0 emergency stop 미충족(직전10(3258-3267) 중 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 탐색 또는 info-architecture-review(gap=28/30, 근접)/fix-incident(gap=7/20)/lotto(gap=5/30) 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): apps/moneyball/src/lib/ 전수 감사 clean (cycle 3266, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 non-approved, plan#30 2026-10-18 만료 임박, 재처리 대상 아님). 2차 방어선: cycle 3265 retro commit(`8ea2a6ab`) 존재 확인. 2-chain lock 미충족(직전8(3258-3265) distinct≥5: review-code(heavy)3+review-code1+polish-ui1+operational-analysis1+lotto1+fix-incident1). gap 전부 미근접(fix-incident 5/20·op-analysis 4/25·info-arch 26/30·lotto 3/30). 직전3 cycle(3263-3265) next_recommended_chain 전부 "review-code(heavy) 복귀" 일치 — cycle 3265 가 명시 이월한 `lib/` 영역 선정(app/api 13개 디렉토리 전수 완주 후속).
