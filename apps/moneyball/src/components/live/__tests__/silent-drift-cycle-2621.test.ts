@@ -13,7 +13,7 @@ describe("silent-drift-cycle-2621: LiveScoreboard 홈 badge weight matches sibli
   it("home badge uses font-bold, not font-semibold", () => {
     const content = readFileSync(join(LIVE_DIR, "LiveScoreboard.tsx"), "utf-8");
     expect(content).toContain(
-      'rounded text-3xs font-bold bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 leading-none"\n            aria-label="홈팀"'
+      'rounded text-3xs font-bold bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 leading-none"\n            aria-label="홈팀"'
     );
     expect(content).not.toContain("text-3xs font-semibold");
   });
