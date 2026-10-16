@@ -14871,3 +14871,19 @@ Footer.tsx 디스클로저 chevron duration(`transition-transform` vs `duration-
 skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3271%50=21≠0, trigger5 표본≥10 충족이나 review-code 직전20 윈도우 다회 발화로 0회 아님). marker 미박제. ship-0 emergency stop 미충족(직전10(3262-3270) success 다수 포함).
 
 다음 사이클 추천 = review-code(heavy) 계속(packages/shared 잔여 파일 또는 packages/kbo-data/src/pipeline/) 또는 fix-incident/op-analysis/lotto gap 자연 대기(전부 아직 미근접).
+
+## 🟢 SUCCESS — review-code(heavy): app/api/{health,hub-dispatch,seo/indexnow/ping,sync-batter-stats,version} 전수 감사, hub-dispatch 자가 에러 Sentry 미보고 수정 (cycle 3277, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3276 retro commit(`fda2d02e`) 존재 확인. 2-chain lock 미충족(직전8(3269-3276) distinct=4: review-code(heavy)5+info-arch1+polish-ui1+op-analysis(heavy)1). gap 전부 미근접(fix-incident 16/20·info-arch 7/30·lotto 14/30, op-analysis 는 직전 사이클 방금 발화). review-code(heavy) 직전5 전부 success — dominance-positive streak 재확인, redirect 불필요. cycle 3099 추천 carry-over(app/api 8개 route 중 전수 감사 미실시 5개) 직접 소비 — 저commit-count 5개(health 18/hub-dispatch 12/seo-ping 7/sync-batter-stats 6/version 2) 선정.
+
+**실행**: Agent(general-purpose) 1개 — 5개 route.ts + 테스트 파일 전수 read + 전체 repo 컨벤션 cross-grep.
+
+**수정 1건(CONFIRMED)**: `hub-dispatch/route.ts`(Sentry webhook→playbook 허브 릴레이 라우트)가 정작 자기 실패(SENTRY_WEBHOOK_SECRET/PLAYBOOK_PAT 누락 500, GitHub dispatch 실패 502)에는 다른 모든 cron route(sync-batter-stats/pipeline/mlb/pipeline/live/snapshot-pitchers)와 달리 `Sentry.captureException`/`captureMessage` 호출이 전혀 없어 webhook 배달 UI 밖에서 완전히 안 보이는 상태 — silent drift 클래스(자기 자신이 "에러를 허브에 보고하는 라우트"인데 자기 에러만 안 보임). 두 실패 경로에 sibling 컨벤션(`tags: {layer:'api-route', route:'hub-dispatch'}`) 동일 적용(401/400 은 기대된 보안 거부라 미보고 유지 — 실제 운영 실패 2건만 보고 대상).
+
+**보류 2건(PLAUSIBLE, 코드 변경 없음/코스메틱만)**: `health`/`version`(+health/pipelines) 의 CRON_SECRET 가드 부재는 읽기전용 진단 엔드포인트 3개 일관 예외로 판단, 미변경. `seo/indexnow/ping/route.ts` 의 "(2026-05 기준)" 스테일 날짜 코멘트는 제거(코스메틱).
+
+**regression**: `tsc --noEmit` clean. `pnpm --filter moneyball lint` clean. `pnpm --filter moneyball test` 596 files·4676 tests 전부 통과. 직접 main commit+push(R4, `f7f71fee`), pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3277%50≠0, trigger5 표본≥10 충족하나 직전20 윈도우 review-code 다회 발화로 0회 chain 없음). marker 미박제. ship-0 emergency stop 미충족(직전10 success 다수, fail 0).
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/api/{leaderboard/sync,mlb,picks,pipeline}` 잔여 전수 감사 또는 기존 CONFIRMED 패턴 재스윕) 또는 fix-incident(17/20)/info-arch(8/30)/lotto(15/30) gap 자연 대기.
