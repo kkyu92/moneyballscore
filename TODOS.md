@@ -1,5 +1,17 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): app/api/{hub-dispatch,sync-batter-stats,version,seo/indexnow,pipeline} 전수 감사 clean (cycle 3264, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 non-approved, plan#30 2026-09-18 생성 — status=`completed_all_phases_shipped_cycle_2936_2937_2938`, 재처리 대상 아님). 2차 방어선: cycle 3263 retro commit(`6c4c17a3`) 존재 확인. 2-chain lock 미충족(직전8(3256-3263) distinct=5: review-code(heavy)4+polish-ui1+fix-incident1+operational-analysis1+lotto1). gap 전부 미근접(fix-incident 3/20·op-analysis 2/25·info-arch 24/30·lotto 1/30, `gh run list` scheduled workflow 최근 15건 failure 0건). 직전3 cycle(3261-3263) next_recommended_chain 전부 "review-code(heavy) 복귀" 일치 — cycle 3099 에서 미완으로 남긴 `app/api/{health,hub-dispatch,leaderboard-sync,mlb,picks,pipeline,seo,sync-batter-stats,version}` 8개 route(CHANGELOG mention 1건 이상이나 전수 감사 미실시) 중 소형 5개(hub-dispatch 182L/sync-batter-stats 74L/version 30L/seo-indexnow-ping+indexnowKey 119L/pipeline 121L, 합계 ~526줄) 선정.
+
+**실행**: 본 메인 직접 전수 read(5 route + 1 twin 교차대조, agent 위임 없음). `hub-dispatch/route.ts` — HMAC 검증(dry_run 에서도 동일 gate)·PII 재스크럽·no-relay 태그 전부 정합. `sync-batter-stats/route.ts` — CRON_SECRET 가드 + 207 partial-failure 패턴 레포 컨벤션 일치. `version/route.ts` — 단순 메타데이터 응답, 이슈 없음. `seo/indexnow/ping/route.ts` + `[indexnowKey].txt/route.ts` — cycle 3217/3241 과거 fix(`.trim()` 짝, generateStaticParams static 전환) 주석과 실제 코드 정합 재확인. `pipeline/route.ts` — mode 검증(400 반환)·VARCHAR(20) clamp(cycle 2078 재발 방지)·predict/predict_final vs verify revalidate 경로 분기(verify 만 `/dashboard` 포함) 전부 의도된 설계 확인, `daily.ts` 의 `predictionsGenerated` 필드명 교차검증(DB 컬럼≠TS 필드 드리프트 클래스 재확인, 불일치 없음).
+- 교차대조로 `mlb/pipeline/route.ts` 도 열람 — KBO 와 달리 `verify` mode 자체가 없고 `mlb-retro.ts` 주석("MLB 는 verify 모드가 없어 mlb_walk_forward_measure 호출부에 얹음")이 의도된 설계임을 확인, 드리프트 아님.
+- **확정 버그 0건** — 5개 route + twin 비교 전부 clean. 코드 변경 없음.
+
+검증: 코드 변경 없음(읽기 전용 감사). `app/api/` 13개 디렉토리 중 cycle 3099 기준 미감사 8개 중 5개(hub-dispatch/sync-batter-stats/version/seo/pipeline) 금번 완료 — 잔여 3개(health 651L/mlb 461L/picks 901L, 대형) 다음 review-code(heavy) 사이클로 이월. skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3264%50≠0, trigger5 review-code 직전20 윈도우 0회 아님) — 마커 미박제.
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/api/{health,mlb,picks}` 잔여 3개 대형 route) 또는 info-arch(gap=25/30, 근접)/fix-incident(gap=4/20)/lotto(gap=2/30) 자연 대기.
+
 ## 🟢 SUCCESS — lotto(lite): 49-cycle 공백 재가동, cron 정상 확인 (cycle 3263, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 non-approved, plan#30 expiry 2026-10-18 임박). 2차 방어선: cycle 3262 retro commit(`66db05cf`) 존재 확인. 2-chain lock 미충족(직전8(3255-3262) distinct=4: review-code(heavy)4+polish-ui1+fix-incident1+operational-analysis1+lotto1). fix-incident gap=2/20·op-analysis gap=1/25 전부 막 발화 직후. info-arch gap=22/30 미근접. **lotto gap=49/30(마지막 발화 cycle 3214) — 최장 미발화 chain trigger 충족**, 최우선 자율 선택.
