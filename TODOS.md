@@ -14887,3 +14887,19 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3271
 skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3277%50≠0, trigger5 표본≥10 충족하나 직전20 윈도우 review-code 다회 발화로 0회 chain 없음). marker 미박제. ship-0 emergency stop 미충족(직전10 success 다수, fail 0).
 
 다음 사이클 추천 = review-code(heavy) 계속(`app/api/{leaderboard/sync,mlb,picks,pipeline}` 잔여 전수 감사 또는 기존 CONFIRMED 패턴 재스윕) 또는 fix-incident(17/20)/info-arch(8/30)/lotto(15/30) gap 자연 대기.
+
+## 🟢 SUCCESS — review-code(heavy): components/{accuracy,glossary,search,shared,standings,teams} 전수 감사, standings/seasons 순위번호 sort-aware 버그 수정 (cycle 3278, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3277 retro commit(`c2eea980`) 존재 확인. 2-chain lock 미충족(직전8(3270-3277) distinct=5). gap 전부 미근접(fix-incident 17/20·info-arch 8/30·lotto 15/30, explore-idea saturation 10/15). cycle 3275 retro carry-over(components/{accuracy,glossary,search,shared,standings,teams} 잔여 재스윕 추천) 직접 소비.
+
+**실행**: Agent(general-purpose) 1개 — 6개 디렉토리 42개 파일 전수 read + 전체 repo cross-grep.
+
+**수정 1건(CONFIRMED)**: `/standings` 페이지의 팀별 예측 적중률 목록이 "표본순" 정렬 선택 시 CSS order 로 행만 재배치하고 좌측 순위 숫자(`{i+1}`)는 항상 기본(정확도순) 인덱스 그대로 표시 — cycle 3275 에서 수정한 leaderboard 내 순위 배너 버그(`LeaderboardTable.tsx`)와 동일한 "sort-aware rank 미반영" 패턴. 동일 gap 이 `/seasons/[year]` 페이지(득실순/표본순 정렬)에도 존재함을 교차 확인해 함께 수정. `TeamAccuracySortControl.tsx`/`SeasonStandingsSortControl.tsx` 에 `useTeamAccuracySortMode()`/`useSeasonStandingsSortMode()` hook 추가, 목록 렌더링을 `TeamAccuracyList.tsx`/`SeasonStandingsTable.tsx` client 컴포넌트로 추출해 `LeaderboardTable.tsx` 와 동일하게 선택된 정렬 모드 기준 rank 를 계산하도록 통일.
+
+**보류 1건(PLAUSIBLE, 코드 변경 없음)**: `AnalysisLink.tsx` 주석이 "PredictionCard, BigMatchDebateCard 등에서 공통 사용"이라 서술하나 `BigMatchDebateCard.tsx` 는 실제로 직접 스타일링한 `<Link>` 를 쓰고 있어 stale 주석 — 런타임 영향 없어 미수정.
+
+**regression**: `tsc --noEmit` clean. `pnpm --filter moneyball lint` clean. `pnpm --filter moneyball test` 596 files·4676 tests 전부 통과(기존 `standings-small-sample-hedge.test.ts` 의 source-grep 대상을 추출된 `TeamAccuracyList.tsx` 로 갱신해 회귀 방지). 직접 main commit+push(R4, `09092e0b`), pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278%50=28≠0, trigger5 표본13≥10 충족하나 직전20 윈도우 review-code 13회 발화로 0회 chain 없음). marker 미박제. ship-0 emergency stop 미충족(직전9 outcome 중 success 다수, fail 0).
+
+다음 사이클 추천 = review-code(heavy) 계속(components/{analysis,dashboard,insights,layout,matchup,picks,predictions,share} 잔여 미방문) 또는 fix-incident(18/20)/info-arch(9/30)/lotto(16/30) gap 자연 대기.
