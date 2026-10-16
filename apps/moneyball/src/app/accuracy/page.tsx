@@ -562,7 +562,7 @@ export default async function AccuracyPage() {
       )}
 
       {/* 최근 예측 폼 */}
-      {recentForm.total >= 5 && (
+      {recentForm.total >= SMALL_SAMPLE_N && (
         <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
             <h2 className="text-lg font-bold">최근 예측 폼</h2>
@@ -712,7 +712,7 @@ export default async function AccuracyPage() {
         </section>
       )}
 
-      {scoringRuleDayHeatmap.length > 0 && rows.length >= 10 && (
+      {scoringRuleDayHeatmap.some((c) => c.n > 0) && versionHistoryRows.length >= 10 && (
         <section
           id="scoring-rule-day-heatmap"
           className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
@@ -853,7 +853,7 @@ export default async function AccuracyPage() {
       )}
 
       {/* AI 확신도별 분석 */}
-      {n >= 5 && (
+      {n >= SMALL_SAMPLE_N && (
         <section id="confidence" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
           <div>
             <h2 className="text-lg font-bold">AI 확신도별 분석</h2>
