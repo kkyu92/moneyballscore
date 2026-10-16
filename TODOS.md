@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/predictions + components/dashboard 전수 감사, 드리프트 0건 (cycle 3218, 2026-10-16)
+
+진단: open issue 0건. approved plan 없음(plan #29 empty/archived, plan #30 completed_all_phases_shipped). 2-chain lock 미충족(직전8(3210-3217) distinct=5: review-code(heavy)3/fix-incident2/review-code1/lotto1/info-arch1). fix-incident gap=0(직전 cycle 3217 방금 발화), lotto gap=4, info-arch gap=8 — 전부 미근접. op-analysis 25-cycle gap 도달(last fire 2924)했으나 Supabase DNS NXDOMAIN 재확인 불변(`dig` 빈 응답, Tier4 블락 지속). domain whois "No match" 4번째 재확인(status=ACTIVE 지만 verisign-grs lookup 빈 응답) — `project_dotcom_domain_permanent_non_issue` 메모리 패턴과 완전 일치(3회 재발 거짓경보 + 금번 4회째), chain 중단 사유 아님으로 판단(cycle 3215 의 "critical escalation FAIL" 판단 정정 — 실제로는 비-이슈). cycle 3217 추천대로 review-code(heavy) 신규 scope 선택 — lib/*, kbo-data, app routes 전부 스윕 완료된 반면 `apps/moneyball/src/components/` (20개 서브디렉토리) 는 한 번도 전수 감사 대상 된 적 없음 확인.
+
+**스코프**: `components/predictions`(25파일, 3361줄, 최대 규모) + `components/dashboard`(15파일, 1865줄) — Agent 2개 병렬 전수 read + cross-reference(`packages/shared` DEFAULT_WEIGHTS/KBO_TEAMS/FACTOR_CONTRIBUTION_SCALE, `packages/kbo-data` predictor.ts/mlb-base.ts, `lib/design-tokens.ts`, `lib/dashboard/*`, migration SQL).
+
+**결과**: 양쪽 0건. predictions = FactorBreakdown/FactorWaterfallChart 기여도 공식이 predictor.ts 수식과 대수적으로 일치, MLB placeholder factor 표기 정확, confidence 임계값 일치 — wave-91~533 과거 fix 들이 온전히 유지됨 확인. dashboard = 색상 임계값 코멘트(brand-500/700 hex) vs 실제 CSS 일치, FactorErrorTable 의 bias 부호 convention 이 postview.ts 정의와 일치, DEFAULT_WEIGHTS 10-factor 퍼센트가 CLAUDE.md 문서와 정확히 일치, BrierTrendChart 의 n=46/37% 주석 historical record 와 일치 — wave-255~260/cycle 1298~2195 과거 fix 들이 온전히 유지됨 확인.
+
+**regression**: 코드 변경 없음(순수 read-only 감사, 발견 0건 → edit 불필요).
+
+**미해결**: Supabase DNS NXDOMAIN 지속(2026-10-11~, 5일+ 경과) — op-analysis DB 의존 작업 여전히 Tier4 블락. 사용자 대시보드 조치 대기 중.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 18개 서브디렉토리(picks 1793줄/matchup 1412줄/analysis 1364줄/accuracy 1265줄/layout 1174줄/shared 1074줄 등 순으로 우선) 또는 fix-incident(indexnow cron 2일 경과 재확인) 또는 lotto(gap 근접 시).
+
 ## 🟢 SUCCESS — fix-incident: indexnow-ping 3일 연속 실패 조사 중 LLM_BACKEND_HAIKU 트레일링 개행 실측 버그 발견 + trim() 방어 2곳 수정 (cycle 3217, 2026-10-16)
 
 진단: open issue 0건. approved plan 없음(전부 completed/archived/pending-user-step, status="approved" 0건). 2-chain lock 미충족(직전8(3209-3216) distinct=4: review-code(heavy)5/info-arch1/lotto1/fix-incident1). fix-incident 최근 발화 cycle 3215(2 사이클 전, gap 미충족), lotto 최근 3214(3 사이클 전), info-arch 최근 3210(7 사이클 전) — 3개 모두 주기 보정 trigger 미도달. op-analysis 25-cycle gap(3192-3216 0회) 도달했으나 Supabase DNS NXDOMAIN 재확인 불변(Tier4 블락 지속). `gh run list` 로 scheduled workflow 직접 점검 — `indexnow-ping` 이 2026-10-14/15/16 3일 연속 실패(이전엔 장기간 success) 발견, `heartbeat-stale`(기존 추적 Supabase 인시던트 증상)와 구분되는 신규 regression으로 판단해 fix-incident 선택.
