@@ -245,8 +245,8 @@ export default async function PlayerProfilePage({ params }: PageProps) {
                     a.isCorrect == null
                       ? "예정"
                       : a.isCorrect
-                        ? "예측 적중"
-                        : "예측 실패";
+                        ? "적중"
+                        : "빗나감";
                   const resultClass =
                     a.isCorrect == null
                       ? "text-gray-500 dark:text-gray-400"

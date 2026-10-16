@@ -172,7 +172,7 @@ export default async function SeriesTopicPage({ params }: Props) {
                         : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"
                     }`}
                   >
-                    {e.isCorrect ? "적중" : "오답"}
+                    {e.isCorrect ? "적중" : "빗나감"}
                   </span>
                 )}
               </div>

@@ -203,7 +203,7 @@ export async function HistoricalAnalogMatchup({
                   )}
                   {isWrong && (
                     <span className="rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-0.5 font-semibold">
-                      오답
+                      빗나감
                     </span>
                   )}
                 </div>
