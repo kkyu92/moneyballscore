@@ -14088,3 +14088,22 @@ Vercel 배포 자체는 정상(`*.vercel.app` 빌드/서빙 OK). 둘 다 코드�
 **결론**: lib/leaderboard + lib/standings 2대 영역 완결(실버그 1건 발견+수정 — silent drift family 신규 사례). Supabase Tier4·domain non-issue 양쪽 상태 변화 없음.
 
 다음 사이클 추천 = review-code(heavy) components/ 전면 재검증(grep-count-depth 가드레일 적용) 또는 fix-incident(gap=1, 미근접) 자연 대기. op-analysis 는 Supabase 복구 전까지 계속 블락.
+
+## 🟢 SUCCESS — review-code(heavy): components/picks + components/layout 전수 감사, layout 드리프트 3건 수정 (cycle 3219, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건. 2-chain lock 미충족(직전8 distinct=4). fix-incident/lotto/info-arch 전부 gap 미근접. op-analysis 25-cycle gap 도달했으나 Supabase DNS NXDOMAIN 불변(5일+ 경과) — Tier4 블락 지속. cycle 3218 추천대로 components/ 스윕 이어서 picks(1793줄)+layout(1174줄) 선택.
+
+**picks**: 13파일 전수 read, packages/shared(COMMUNITY_DIVERGE_MIN/MIN_POLL_TOTAL/ACTIVE_FACTOR_KEYS 등)+factorLabels+buildPicksStats+API routes 교차검증 — 0건. 이미 cycle 2619 자체 drift 회귀 테스트 보유한 클린 영역.
+
+**layout**: 10파일+9테스트 전수 read, Header/Footer/MegaMenu/LeagueSelector + 실제 route 목록 + DESIGN.md 교차검증 — 3건 발견 수정:
+- `Header.tsx`: KBO_NAV 그룹 아이템 수 코멘트(예측·기록 5→6) — insights/calendar/dashboard 등 추가되며 stale
+- `MegaMenu.tsx`: `item.items.length===5` 전용 width 분기 제거 — 실데이터(KBO/MLB NAV) 어느 그룹도 5개 아님(6+로 성장), orphan 된 dead code
+- `LeagueSelector.test.tsx`: MLB 경기·팀 그룹 아이템 수 코멘트(3→13, 총 6→16) stale 정정
+
+Footer.tsx 디스클로저 chevron duration(`transition-transform` vs `duration-200`) 불일치는 DESIGN.md 가 "desktop nav dropdown + 모바일 아코디언"으로 명시 scope — footer sitemap 은 범위 밖으로 판단해 미수정(판단 보류, 다음 polish-ui/design 발화 시 재확인 가치).
+
+**regression**: `pnpm --filter moneyball exec vitest run src/components/layout`(45 passed) + `tsc --noEmit` clean + eslint clean. direct main commit(`526502c3`) + push, pre-push hook green.
+
+**패턴**: '코드는 성장, 주석/분기는 고정' — 그룹에 아이템 추가될 때 아이템수 하드코딩 코멘트와 그 코멘트 근거로 만들어진 특수분기(=5 전용 width)가 함께 stale 화되는 사례. review-code(heavy) silent drift family 의 일반형.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여(analysis 1421줄/matchup 1412줄/accuracy 1331줄/shared 1424줄 등) 또는 op-analysis(Supabase 복구 시) 또는 fix-incident(gap 자연 대기).
