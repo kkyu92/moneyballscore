@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/{predictions,insights,share} 전수 감사, factor 기여도 %p FACTOR_TOTAL 정규화 누락 수정 (cycle 3279, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3278 retro commit(`182f791f`) 존재 확인. 2-chain lock 미충족(직전8(3271-3278) distinct=4, review-code 계열 6/8). gap 전부 미근접(fix-incident 18/20·op-analysis 3/25·info-arch 9/30·lotto 16/30). components/{predictions(31파일,3585줄),insights(6파일),share(2파일, 8/18 이후 미터치)} 가 최근 review-code 스윕 범위 밖이라 전수 감사 스코프로 선정.
+
+**실행**: Agent(general-purpose) 1개 — 39개 파일 전수 read + 전체 repo grep-verify. CONFIRMED 1건(FACTOR_TOTAL 정규화 누락) + PLAUSIBLE 1건(코스메틱, 보류).
+
+**수정 1건(CONFIRMED)**: `FactorBreakdown.tsx`(components/predictions, `/insights/[date]` 차트 모드)와 `factor-explanations.ts`(lib/analysis, `explainFactor`→`DetailedFactorAnalysis` narrative — `/analysis/game/[id]` 및 MLB 게임 상세 페이지)의 `contributionPp` 가 `predictor.ts`의 실제 공식 `homeWinProb = weightedSum/factorTotal`(+ HOME_ADVANTAGE 별도 가산, packages/kbo-data/src/engine/predictor.ts:156-159 확인) 중 `/factorTotal` 정규화를 빠뜨림. `FactorWaterfallChart.tsx`는 이미 동일 상황에서 `/FACTOR_TOTAL`(DEFAULT_WEIGHTS 합=0.85) 정규화를 적용 중(자체 주석에 명시적 근거 존재) — 두 구현이 **같은 `/analysis/game/[id]` 페이지에 나란히 렌더**(`DetailedFactorAnalysis` + `FactorWaterfallChart`, page.tsx:757/767)되면서 동일 factor·동일 경기에 다른 %p 표시. 직접 수식 검증(predictor.ts 소스 재도출)으로 FactorWaterfallChart 쪽이 모델과 정합함을 확인 — marginPp/OVERVIEW_CLOSE_PP 등 "margin" 컨벤션(×200 scale)은 그대로 두고, 빠진 `/FACTOR_TOTAL` 정규화만 두 곳에 동일 적용(FACTOR_CONTRIBUTION_SCALE 자체는 변경 안 함 — margin vs probability 컨벤션 차이는 별개 설계 이슈로 미해결 보류). 수정 전 narrative 의 개별 factor 기여도 합이 실제 전체 marginPp 의 85%만 재현하던 과소표기 버그.
+
+**보류 1건(PLAUSIBLE)**: "예측 실패" 라벨이 컴포넌트마다 "실패"/"빗나감"/"오답" 3종 한글 리터럴로 분산 — 코스메틱, 코드 변경 보류.
+
+**regression**: 수식 변경에 따른 테스트 4건 기대값 갱신(FACTOR_TOTAL=0.85 반영 재계산) — `FactorBreakdownChart.test.tsx` 2건 + `factor-explanations.test.ts` 1건. `tsc --noEmit` clean. `pnpm --filter moneyball lint` clean. `pnpm --filter moneyball test` 596 files·4676 tests 전부 통과. 직접 main commit+push(R4, `5a71a90f`), pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3279%50≠0, trigger5 표본≥10 충족하나 review-code 직전20 윈도우 다회 발화로 0회 chain 없음). marker 미박제. ship-0 emergency stop 미충족(직전10 success 다수, fail 0).
+
+다음 사이클 추천 = review-code(heavy) 잔여 PLAUSIBLE 보류 항목(Korean 라벨 리터럴 통일) 처리 또는 margin vs probability 컨벤션 불일치 자체를 별도 조사 대상으로 검토, 또는 fix-incident(18/20, 근접)/op-analysis(3/25)/info-arch(9/30)/lotto(16/30) gap 자연 대기.
+
 ## 🟢 SUCCESS — operational-analysis(heavy): Supabase 재복구 확인 + n 동결 원인 확정 (KBO 시즌 종료) (cycle 3276, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3275 retro commit(`1c73b093`) 존재 확인. 2-chain lock 미충족(직전8(3268-3275) distinct=4). 직전 3 사이클(3273-3275) 전부 review-code(heavy) — 다양성 redirect 신호. `npx supabase projects list` 재확인 결과 `status: ACTIVE_HEALTHY`(기존 TODOS 3271~3275 "Supabase 복구 전까지 블락" 서술과 모순) → op-analysis 재시도 선택.
