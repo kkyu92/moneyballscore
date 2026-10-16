@@ -1,5 +1,13 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): lib/standings+changelog+leaderboard 전수 감사 clean (cycle 3252, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/22(전부 non-approved status, plan#29 만료 `_archive` 이동 유지). 2-chain lock 미충족(직전8(3244-3251) distinct=4: review-code(heavy)5+lotto(lite)1+polish-ui1+skill-evolution1). Supabase `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(2026-10-11~, 6일+ 경과, 변화 없음) op-analysis 계속 블락(gap≥25 충족하나 구조적 블락). fix-incident gap=11/20·info-arch gap=12/30·lotto gap=6/30 전부 미근접. DESIGN.md mtime 5.9일(신선) — design-system 미근접. explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 신선) — 확립된 skip 패턴. CHANGELOG mention count 최하위 3개 디렉토리(`lib/standings`=2/`lib/changelog`=3/`lib/leaderboard`=3) 선정 — grep-count 를 "감사 완료" 로 오인하지 않기 위해 3개 디렉토리 전체(`buildEloTrend.ts`/`buildStandings.ts`/`buildTeamAccuracy.ts`/`computeMagicNumber.ts`/`parse.ts`/`renderMarkdown.tsx`/`server.ts`/`use-leaderboard.ts`/`types.ts`, 총 9파일) 본 메인 직접 전수 read.
+
+**결과**: 버그 0건, 전부 clean. `computeMagicNumber.ts`(cycle 3216 이미 정정됨)/`buildEloTrend.ts`(predictions!inner 다건 대비 cohort 필터 정상)/`buildTeamAccuracy.ts`(cycle 3176 cohort 분리 주석 정확, 3개 export 함수 전부 로직 정합) 전부 clean, 테스트 커버리지 보유(`__tests__/` 3파일). `lib/changelog`(CHANGELOG.md 파서+렌더러, 순수 함수) clean. `lib/leaderboard/server.ts` 가 `assertSelectOk` 를 try/catch 없이 호출(에러 시 throw → 페이지 error.tsx 로 전파)하는 패턴을 발견했으나, 전체 레포 grep 결과(`assertSelectOk` 보유 20+ 파일 중 11개가 동일하게 try-block 0개) 이미 광범위하게 존재하는 **의도된 설계**(`db-error.ts` 주석: "호출 site 가 catch 또는 errors[] push 결정" — fail-loud 허용은 명시적 선택지) 확인, 신규 drift 아님 — 액션 없음.
+
+검증: `tsc --noEmit`/`pnpm lint` clean(코드 변경 없음, 감사만). 다음 사이클 추천 = review-code(heavy) 계속(`app/api/{health,mlb,picks,pipeline,seo,version}` 등 mention 보유하나 전수 감사 이력 불명확한 route, 또는 `assertSelectOk` try/catch 비대칭 패턴 — 11개 파일 전체를 "의도된 설계 vs 개별 drift" 로 1:1 재분류하는 별도 스코프) 또는 fix-incident(gap=12/20)/info-arch(gap=13/30)/lotto(gap=7/30) 자연 대기. **Supabase INACTIVE 6일+ 지속 — 사용자 billing 조치 필요(변화 없음).**
+
 ## 🟢 SUCCESS — skill-evolution (phase 52, 86th 자가진화): milestone cycle 3250 trigger-3 (cycle 3251, 2026-10-16)
 
 진단: `skill-evolution-pending` 마커 존재(cycle 3250: "cycle_n % 50 == 0" trigger-3 단독) → forced skill-evolution, 메인 자율 선택 X.
