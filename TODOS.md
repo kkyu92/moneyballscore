@@ -1,5 +1,15 @@
 
 
+## ⚪ PARTIAL — review-code(heavy): mlb/predictions(KO+EN) twin-audit clean (cycle 3248, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/spec_only_deferred). 2-chain lock 미충족(직전8(3240-3247) distinct=4: review-code(heavy)5+info-arch1+fix-incident1+lotto(lite)1). Supabase `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(2026-10-11~, op-analysis 계속 블락). fix-incident gap=7/20·info-arch gap=8/30 전부 미근접, lotto 직전 발화 cycle 3246(gap reset). cycle 3247 retro 가 명시적으로 남긴 carry-over(mlb/predictions 398줄 미감사) 직접 이어감.
+
+**전수 감사**: `mlb/predictions/page.tsx`(398줄) + `en/mlb/predictions/page.tsx`(407줄) vs KBO `predictions/page.tsx`(424줄) + `predictions/[date]/page.tsx`(632줄) 전수 read, 호출하는 헬퍼 전부(`deriveMlbOutcome`/`captureFallback`/`db-error.ts`/`model-version-labels.ts`/`classifyWinnerProb`/`normalizeMlbTeamCode`) 추적 read. 독립 deep-dive agent 1개 투입.
+
+**결과**: 버그 0건, clean parity 확인. 지난 cycle 3240-3247 연속 silent-drift 발견 streak(5 pair 5건)가 처음 끊김 — 해당 클러스터는 전용 테스트 파일(`mlb-predictions-page.test.ts`)까지 갖춰 parity 가 이미 잘 관리된 영역으로 확인. 구조적 차이 3건은 의도된 설계(버그 아님): (1) MLB 는 `[date]` 상세 라우트 대신 기존 `/mlb/games/[date]` 로 드릴다운(games FK 모델 차이) (2) `en/predictions`(KBO EN mirror) 부재는 기존 scope 차이(KBO Korean-primary) (3) KBO 의 CREDIT_EXHAUSTED 배너가 MLB 에 없는 건 MLB 파이프라인이 LLM debate 자체를 호출 안 해서(`reasoning`/`debate_version` 항상 NULL) 해당 없음 확인.
+
+코드 변경 없음, commit 없음(twin-audit 결과만 박제). 다음 review-code(heavy) = `components/` 또는 `packages/kbo-data` 로 스코프 전환 권장. op-analysis 는 Supabase 복구 전까지 계속 블락(5일+ 경과).
+
 ## 🟢 SUCCESS — review-code(heavy): mlb/{matchup,calendar,methodology,accuracy,reviews} 5개 pair 버그 발견+수정 (cycle 3247, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(plan#29 만료 후 `_archive` 이동 유지). 2-chain lock 미충족(직전8(3240-3246) distinct=4: review-code(heavy)5+info-arch1+fix-incident1+lotto(lite)1). fix-incident gap=6/20·info-arch gap=7/30·lotto gap=1/30 전부 미근접. Supabase `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(6일째) op-analysis 계속 블락. explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 신선) — 기존 skip 패턴. app/api 전체 13개 route 과거 다회 소진 확인 후 신규 축 탐색 — mlb/{matchup,calendar,methodology,accuracy,insights,reviews} 6개 page 클러스터가 KBO twin 대비 commit count 현저히 낮아(2~8건 vs KBO 11+건) under-audited scope 선정.
