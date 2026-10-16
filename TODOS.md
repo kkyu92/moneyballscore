@@ -14040,3 +14040,21 @@ op-analysis(lite) 선택(25-cycle gap trigger, 마지막 발화 cycle 2924) → 
 Vercel 배포 자체는 정상(`*.vercel.app` 빌드/서빙 OK). 둘 다 코드로 자율 해결 불가 — 사용자 직접 조치(registrar 재등록, Supabase billing dashboard) 필요.
 
 **결정**: 46-cycle 요청 중 1 cycle 만 진행 후 signal next_n=0 으로 zero-touch 자동 진행 중단 — CLAUDE.md "드리프트 발견 시 플래닝 전 사용자에게 먼저 보고" 원칙 적용. 사용자가 두 incident 해결 후 재개 권장.
+
+## 🟢 SUCCESS — review-code(heavy): lib/leaderboard+lib/standings 전수 감사, magic number 승률 버그 수정 (cycle 3216, 2026-10-16)
+
+진단: open issue 0건. 승인 plan 0건(plan #29 만료 2026-10-15 + status=deferred(never approved) → archive). 2-chain lock 미충족(직전8(3208-3215) distinct=4: review-code/info-arch/lotto/fix-incident). op-analysis gap=25+/25 trigger 충족이나 Supabase DNS NXDOMAIN 재확인(여전히 다운) — Tier4 구조적 블락 지속, 선택 제외. domain whois "No match" 재확인됐으나 **허브 메모리가 세션 시작 직전(05:40) 정정** — `project_dotcom_domain_permanent_non_issue` 박제: 3회째 거짓경보, chain 중단 사유 절대 금지로 명문화. cycle 3215 의 signal next_n=0 halt 자체가 오판이었음(허브가 교정). Supabase 다운도 이미 알려진+사용자 결정 완료("다음 billing cycle 대기") 상태라 중단 사유 아님 — 둘 다 무시하고 사용자 원 N=45 그대로 진행. cycle 3214 추천(review-code(heavy) 잔여 scope: lib/leaderboard+lib/standings, 350+ cycle 미감사) 따라 선택.
+
+**전수 검증**: Agent 2개 병렬 — lib/leaderboard(3)+components/leaderboard(5)+api/leaderboard/{sync,mlb-sync}(2)+leaderboard/page.tsx(1, 11파일) / lib/standings(4)+components/standings(1)+standings/page.tsx(1, 6파일). grep-count-depth 가드레일(cycle 3001) 적용 — 과거 cycle 2991/2992 가 낮은 grep count 로 건너뛴 `api/leaderboard/sync/route.ts` 명시적으로 포함.
+
+**발견 + 수정 (버그 1건 + 리팩터 1건)**:
+1. **실버그**: `computeMagicNumber.ts` 의 유효성 guard 가 `leader.wins <= chaser.wins` 로 원시 승수만 비교 — 그러나 모든 호출부(`standings/page.tsx`, MLB `standings`/`wild-card` 4곳)가 넘기는 건 순위(승률 기준, KBO 공식 rank)순 정렬된 row. 경기수가 팀마다 다를 수 있어(우천취소 등) 승수는 적어도 승률이 높아 실제론 순위상 앞서는 팀이 존재 가능 — 이 경우 guard 가 오발동해 유효한 매직넘버를 `null` 로 silent 은닉(/standings 뱃지 누락). 기존 테스트(`computeMagicNumber.test.ts`)의 "동률/역전" 케이스 자체가 실은 버그 재현 케이스였음(라벨만 잘못 붙음). guard 를 `leader.winPct <= chaser.winPct` 로 정정 + 정확한 버그 시나리오 회귀 테스트 추가.
+2. **리팩터**: `api/leaderboard/sync/route.ts` + `mlb-sync/route.ts` 에 `isValidNickname`/`isValidDeviceId` 완전 중복 — `is-origin-allowed.ts` 추출 선례(cycle 2763)와 동일 사유로 `lib/api/leaderboard-sync-validation.ts` 신설 후 통합.
+
+**미변경(드리프트 아님 확인)**: leaderboard 쪽 `weekly` 모드 — 코드/뷰는 살아있으나 현재 호출처 0건, 단 "하위호환 유지" 주석이 이미 의도 명시(실제 drift 아님, 단순 미사용) → 삭제 보류. 나머지 leaderboard(use-leaderboard 훅 키/네임스페이스, 상수 single-source, DB_CONSTRAINTS, origin/CSRF 패턴), standings(buildEloTrend 과거 truncation 버그 정상 수정 확인, buildTeamAccuracy 코호트 정합, KBO_TEAMS/상수 전부 일치) 전부 clean.
+
+**regression**: `tsc --noEmit` clean, `eslint` scoped clean, 영향 vitest 7개 파일 42 tests 전부 PASS, pre-push hook(lint+type-check+tests) 통과. direct main commit(`3a1c3cbc`) + push 완료 — 100+ 파일 아님, PR 불필요.
+
+**결론**: lib/leaderboard + lib/standings 2대 영역 완결(실버그 1건 발견+수정 — silent drift family 신규 사례). Supabase Tier4·domain non-issue 양쪽 상태 변화 없음.
+
+다음 사이클 추천 = review-code(heavy) components/ 전면 재검증(grep-count-depth 가드레일 적용) 또는 fix-incident(gap=1, 미근접) 자연 대기. op-analysis 는 Supabase 복구 전까지 계속 블락.
