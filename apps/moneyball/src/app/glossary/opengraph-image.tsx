@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
+import { GLOSSARY_TERM_COUNT } from "./data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -61,7 +62,7 @@ export default function Image() {
             display: "flex",
           }}
         >
-          25 Sabermetric Terms
+          {GLOSSARY_TERM_COUNT} Sabermetric Terms
         </div>
 
         <div

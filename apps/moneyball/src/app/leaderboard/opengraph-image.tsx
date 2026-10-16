@@ -5,7 +5,7 @@ import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "Leaderboard - Top Pickers This Week & Season";
+export const alt = "Leaderboard - Top Pickers Monthly & Season";
 
 export default function Image() {
   return new ImageResponse(
@@ -61,7 +61,7 @@ export default function Image() {
             display: "flex",
           }}
         >
-          Top Pickers · Weekly & Season
+          Top Pickers · Monthly & Season
         </div>
 
         <div
@@ -72,7 +72,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {["Weekly", "Season", "Streak", "Accuracy", "Samples"].map((tag) => (
+          {["Monthly", "Season", "Streak", "Accuracy", "Samples"].map((tag) => (
             <div
               key={tag}
               style={{

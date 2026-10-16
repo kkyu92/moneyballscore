@@ -30,6 +30,7 @@ export const metadata: Metadata = {
 export default function ChangelogPage() {
   const entries = parseChangelog();
   const latestDate = entries.find((e) => e.date)?.date ?? null;
+  const oldestDate = [...entries].reverse().find((e) => e.date)?.date ?? null;
   const totalCycles = entries.filter((e) => e.cycle !== null).length;
 
   const articleJsonLd = {
@@ -41,7 +42,7 @@ export default function ChangelogPage() {
       'KBO 승부예측 모델·기능·운영 변경 이력. 가중치 튜닝과 적중률 분석을 사이클 단위로 모두 공개.',
     url: PAGE_URL,
     mainEntityOfPage: PAGE_URL,
-    datePublished: '2026-04-13',
+    datePublished: oldestDate ?? '2026-04-14',
     dateModified: latestDate ?? new Date().toISOString().slice(0, 10),
     author: {
       '@type': 'Organization',

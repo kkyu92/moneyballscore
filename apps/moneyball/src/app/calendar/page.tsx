@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { assertSelectOk, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, SITE_URL, ACCURACY_GOOD_RATE, WEEKDAY_LABELS_KO_MON_FIRST } from '@moneyball/shared';
+import { assertSelectOk, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, SITE_URL, ACCURACY_GOOD_RATE, ACCURACY_BASELINE, WEEKDAY_LABELS_KO_MON_FIRST } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -96,7 +96,7 @@ function accuracyClass(rate: number | null, verifiedN: number): string {
     return 'bg-gray-50 dark:bg-[var(--color-surface-card)] text-gray-400 dark:text-gray-500';
   }
   if (rate >= ACCURACY_GOOD_RATE) return 'bg-brand-500/15 text-brand-600 dark:text-brand-300';
-  if (rate >= 0.5) return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300';
+  if (rate >= ACCURACY_BASELINE) return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300';
   return 'bg-red-500/10 text-red-600 dark:text-red-300';
 }
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY, SUNDAY_CAP_CONFIDENCE_PCT, WINNER_PROB_CONFIDENT_PCT, WINNER_PROB_LEAN_PCT, BRIER_BASELINE, MIN_LEADERBOARD_PICKS, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
+import { GLOSSARY_TERM_COUNT } from "@/app/glossary/data";
 
 const TOC_ITEMS = [
   { id: "cards", label: "예측 카드 해석" },
@@ -296,7 +297,7 @@ export default function GuidePage() {
           >
             <h3 className="font-semibold mb-1">용어 사전</h3>
             <p className="text-xs text-gray-600 dark:text-brand-400">
-              25 세이버메트릭스 지표 정의 + 우리 모델 가중치.
+              {GLOSSARY_TERM_COUNT} 세이버메트릭스 지표 정의 + 우리 모델 가중치.
             </p>
           </Link>
           <Link
