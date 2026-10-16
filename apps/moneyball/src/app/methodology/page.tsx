@@ -336,26 +336,26 @@ export default function MethodologyPage() {
           4. AI 에이전트 토론
         </h2>
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-          정량 모델이 1차 승률을 계산한 뒤 Claude 4종 (Haiku × 3 + Sonnet × 1)
-          이 토론을 진행합니다.
+          정량 모델이 1차 승률을 계산한 뒤 AI 에이전트 4개(비용 효율 모델 3개 +
+          Claude Sonnet 심판 1개)가 토론을 진행합니다.
         </p>
         <div className="space-y-3">
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
-            <h3 className="font-semibold mb-1">홈팀 에이전트 (Haiku)</h3>
+            <h3 className="font-semibold mb-1">홈팀 에이전트</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
               홈팀 입장에서 우호적인 지표를 강조. &quot;선발 FIP 3.20 로 리그 상위
               10%, 최근 5경기 4승&quot; 등 옹호 논리 생성.
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
-            <h3 className="font-semibold mb-1">원정팀 에이전트 (Haiku)</h3>
+            <h3 className="font-semibold mb-1">원정팀 에이전트</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
               원정팀 입장에서 우호적인 지표를 강조. 두 에이전트는 같은 raw 데이터
               를 받지만 서로 다른 각도로 해석.
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
-            <h3 className="font-semibold mb-1">보정 에이전트 (Haiku)</h3>
+            <h3 className="font-semibold mb-1">보정 에이전트</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
               과거 예측 이력(5경기+)을 회고해 팀별 편향·모델 약점을 최대 ±5%
               보정 힌트로 산출. 심판에게 제안으로만 전달되며 강제 적용은 아님.
@@ -376,7 +376,8 @@ export default function MethodologyPage() {
         </p>
         <p className="text-xs text-gray-500 dark:text-brand-400">
           ※ AI 토론 서버에 일시적으로 연결이 안 될 경우 이 단계를 건너뛰고
-          정량 모델 결과만 사용합니다 (사후 학습도 이 경우 적용되지 않음).
+          정량 모델 결과만 사용합니다. 사후 분석(팀별 메모리 학습)은 AI 토론
+          성공 여부와 무관하게 오답 전체에 적용됩니다.
           최근 AI 토론 적용 비율은{" "}
           <Link href="/accuracy" className="text-brand-500 hover:underline">
             /accuracy
