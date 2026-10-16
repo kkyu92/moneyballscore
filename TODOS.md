@@ -1,5 +1,17 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): apps/moneyball/src/lib/analysis 전수 감사, 신규 drift 0건 (cycle 3288, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/22(전부 completed/archived/non-approved). 2차 방어선: cycle 3287 retro commit(`aed112c5`) 존재 확인. 2-chain lock 미충족(직전8(3280-3287) distinct=3: review-code(heavy)6+fix-incident(lite)1+lotto(lite)1). gap 전부 미근접(fix-incident 6/20·op-analysis 12/25·info-arch 18/30·lotto 25/30). explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재) — 확립된 skip 패턴. cycle 3287 추천대로 `packages/kbo-data/src/pipeline/` 저-mention 축 소진 확인 후 신규 축 `apps/moneyball/src/lib/analysis/`(6개 소스 파일, 테스트 제외) 채택.
+
+**결과**: 본 메인 직접 전수 read(agent 위임 없음) — `computeMlbCompositeDuel.ts`/`computeCompositeDuel.ts`/`factor-explanations.ts`/`convergenceRecord.ts`(874줄, 4파일 합계 ~2500줄) 전부 주석-코드 정합 확인. `computeMlbCompositeDuel.ts` 주석 "6팩터 집계, MLB_COMPOSITE_DUEL_MIN_VALID(3/6)" vs 실제 `packages/shared` 값(3) 일치. `computeCompositeDuel.ts` 주석 "COMPOSITE_DUEL 10팩터" vs 실제 factorEntries 10개 + `COMPOSITE_DUEL_MIN_VALID`(4) 일치. `factor-explanations.ts`의 cycle 3279 FACTOR_TOTAL 정규화 수정(주석 "DEFAULT_WEIGHTS 기준 0.85") vs 실제 `DEFAULT_WEIGHTS` 합(15+5+15+10+10+8+3+4+10+5=85%) 일치. `convergenceRecord.ts`의 KBO/MLB 양쪽 `FACTOR_PICK_STRONG`(8)/`FACTOR_PICK_COMPLETE`(10)/`MLB_FACTOR_PICK_STRONG`(5)/`MLB_FACTOR_PICK_COMPLETE`(6) 주석 수치 전부 `packages/shared` 실제 값과 일치.
+
+**결론**: 신규 drift 0건, 코드 변경 없음. `pnpm vitest run src/lib/analysis/__tests__` 94 tests 전부 pass 확인.
+
+검증: 코드 변경 없음(감사만). skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3288%50≠0, trigger5 직전20(3269-3288) review-code(heavy) 다회 발화로 0회 chain 없음, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전10(3279-3288) success 6건, retro-only 1건, partial 3건, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 탐색(`lib/analysis` 완결 — 다른 디렉토리 저-mention 재점검 또는 고-mention 재검증 전환) 또는 fix-incident(6/20)/op-analysis(12/25)/info-arch(18/30)/lotto(25/30, 트리거 근접) gap 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): packages/kbo-data/src/pipeline 저-mention 잔여 4개 파일 전수 감사, 신규 drift 0건 (cycle 3287, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3286 retro commit(`216e854e`) 존재 확인. 2-chain lock 미충족(직전8(3279-3286) distinct=3: review-code(heavy)5+fix-incident(lite)1+lotto(lite)1). gap 전부 미근접(fix-incident 6/20·op-analysis 11/25·info-arch 17/30·lotto 4/30). explore-idea saturation 직전15 충족 가능하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재) — 확립된 skip 패턴. cycle 3286 추천대로 `packages/kbo-data/src/pipeline/` 잔여 2-mention 파일 4개(`backfill-records.ts`/`backtest-grid-run.ts`/`backtest-logistic-run.ts`/`backtest-v3-run.ts`) 채택.
