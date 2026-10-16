@@ -1,5 +1,23 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): components/dashboard+insights 전수 감사, silent drift 4건 수정 (cycle 3228, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건. 2-chain lock 미충족(직전8(3220-3227) distinct=3: review-code(heavy)6+polish-ui1+expand-scope1). gap trigger 4종 전부 미근접/블락: fix-incident 11/20·info-arch 18/30·lotto 14/30·op-analysis Supabase DNS NXDOMAIN 지속(Tier4, 변화 없음). cycle 3225/3227 양쪽이 추천한 review-code(heavy) 재개 — picks→layout→analysis→matchup→accuracy→shared 이후 남은 미감사 scope 중 components/dashboard(2632줄, lib 포함)+components/insights(963줄, lib 포함) 선택.
+
+**전수 검증**: Agent 2개 병렬 — dashboard(components 15파일+lib 6파일+app/dashboard route+packages/shared 교차검증) / insights(components 2파일+lib 4파일+app/insights 3라우트+mlb/insights+en/mlb/insights 미러+packages/shared 교차검증), 전부 전수 read.
+
+**발견+수정 (4건)**:
+1. `/dashboard` 페이지 캡션이 "토론 기반 예측만 집계"라고 표시하지만 실제 `CURRENT_MODEL_FILTER`는 cycle 2209부터 `scoring_rule` 기준(CE fallback row가 `debate_version=null`이라 구 필터가 조용히 제외했던 문제의 fix) — 캡션만 갱신 안 됨. `CURRENT_SCORING_RULE` 표시로 정정.
+2. `FACTOR_LABELS_TECHNICAL`이 `PRODUCTION_SLUGS`(10개, weight>0 팩터만) 기준이라 `analyzeFactorAccuracy`(DEFAULT_WEIGHTS 전체 12개, shadow factor `park_weather`/`umpire_sz` 포함을 진단)가 만든 리포트에서 shadow factor 행이 `ModelTuningInsights`/`FactorErrorTable`에 raw snake_case key로 렌더(한글 레이블 없음). `MetricRegistry` 전체 키(12개) 기준으로 변경.
+3. KBO `insights/series/[topic]/page.tsx` 주석이 "435쌍"(MLB 30팀 C(30,2) 수치)을 MLB 미러에서 그대로 복붙 — KBO는 10팀 C(10,2)=45쌍. 45쌍으로 정정.
+4. `insights/opengraph-image.tsx`가 "Recent 30"을 두 곳에 하드코딩 — `INSIGHTS_LIMIT` 상수 참조로 변경(값 변경 시 silent stale 차단).
+
+**미수정(낮은 확신, 플래그만)**: MLB insights 라우트(`mlb/insights`, `en/mlb/insights` 전 variant) 전부 OG 이미지 부재 — KBO insights와 다른 모든 MLB 라우트 패밀리는 보유. plan #30 scope 의도적 축소인지 불명확, drift 단정 어려워 fix 보류.
+
+**regression**: `tsc --noEmit` clean, eslint clean, vitest 전체 592 files/4664 tests 전부 PASS. direct main commit(`a529a7f8`)+push, pre-push hook green.
+
+다음 사이클 추천 = review-code(heavy) 잔여(`components/predictions` 3584줄 최대 미감사 단일 영역, 또는 teams/reviews/search/live/share 소형 영역 묶음) 또는 fix-incident/lotto/info-arch gap 자연 대기.
+
 ## ⚪ RETRO-ONLY — expand-scope: 2-chain lock(review-code(heavy)+polish-ui) fallback, 신규 확장 기회 미발견 (cycle 3227, 2026-10-16)
 
 진단: open issue 0건. approved plan 0건(전부 completed/archived, plan#29 만료 2026-10-15 경과 후 `_archive` 이동 확인). 2-chain lock 발동 — 직전8(3219-3226) distinct=2(review-code(heavy)7+polish-ui1, cycle 3079/2147 동일 locked pair 선례) — 둘 다 bug 아니라 rule4 예외 불성립, 둘 다 제외. gap trigger 4종 전부 미근접/블락: fix-incident 10/20·lotto 13/30·info-arch 17/30·op-analysis 100+/25 충족이나 Supabase DNS NXDOMAIN 지속(2026-10-11 incident, 5일+ 경과, 변화 없음) actionable 아님. explore-idea saturation 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime ~6일 신선) — 확립된 skip 패턴 재확인. DESIGN.md 4주 미경과로 design-system 미충족. lock fallback(polish-ui 강제)이 그 자체 locked chain이라 적용 불가 — 남은 pool 중 expand-scope 조건(1, 직전4(3223-3226) 모두 {review-code,polish-ui} 안) 유일 명시적 충족, cycle 3079 precedent 동일 해법 재적용.
