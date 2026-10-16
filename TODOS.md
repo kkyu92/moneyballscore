@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — polish-ui: 홈페이지 h1 누락 수정 (2-chain lock fallback) (cycle 3226, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23. 2-chain lock 탐지(직전8(3218-3225) distinct=1: review-code(heavy) 8연속, 잠긴 chain에 fix-incident 미포함) — 룰대로 review-code(heavy) 이번 사이클 제외. op-analysis gap 25+/25 유일 강트리거지만 Supabase DNS 재확인 여전히 NXDOMAIN(5일+ 경과, 변화 없음) — actionable 아님. fix-incident gap=9/20·info-arch gap=16/30·lotto gap=12/30 전부 미근접. DESIGN.md 알려진 drift grep 패턴(rounded-md, flat gray tier) 0건. 룰 3단계(강 트리거 chain 부재 시 polish-ui fallback) 적용.
+
+**방법**: grep만으론 drift 없음 확인 후, 실제 live 사이트(`moneyballscore.vercel.app`) 브라우저 방문 + DOM 조회로 런타임 레벨 점검. 풀페이지 스크린샷에서 쿠키 동의 배너가 "경기별 예측" 섹션과 겹치는 것처럼 보였으나, `getComputedStyle` 실측 결과 `fixed bottom-0 inset-x-0 z-50`로 정상 구현 — full-page screenshot이 고정 요소를 스크롤 위치 하나에 합성하는 도구 artifact로 판명, 기각(실제 사용 시 정상 하단 고정).
+
+**실제 발견**: 홈페이지 heading 전수 조회 — `<h1>` 0개, `<h2>`부터 시작(6개 섹션 헤딩). `apps/moneyball/src/app` 전체 111개 `page.tsx` 중 104개가 정확히 1개의 `<h1>` 보유하는 site-wide 컨벤션 확인. 누락 7개 중 6개(`reviews/weekly`·`reviews/monthly` ko+en+mlb 미러, 7줄짜리 순수 redirect stub)는 시각 콘텐츠가 없어 예외 — 홈페이지(`app/page.tsx`)만 실제 콘텐츠 페이지인데 h1 누락으로 확정.
+
+**수정**: `app/page.tsx` 최상단 wrapper 안에 `<h1 className="sr-only">KBO AI 승부예측 — MoneyBall Score</h1>` 추가(기존 skip-link와 동일 sr-only 패턴, 시각 변화 없음, a11y/SEO heading landmark 복구).
+
+**검증**: `tsc --noEmit` clean + `vitest run home-isr.test.ts placeholders.test.tsx` 7 tests PASS + pre-push hook(lint+type-check+version-sync-guard) 전부 PASS 확인 후 main 직접 push (commit `02f3d27d`).
+
+다음 사이클 추천 = review-code(heavy) 재개(lock cooldown N=1, components/ 잔여 insights/live/players/reviews/search/seasons/share/teams/ui/glossary) 또는 fix-incident/lotto/info-arch(gap 자연대기). op-analysis는 Supabase 복구 전까지 계속 블락.
+
 ## 🟢 SUCCESS (retro-only) — review-code(heavy): components/accuracy + components/shared 전수 감사, 드리프트 0건 (cycle 3225, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23. 2-chain lock 탐지(직전8(3218-3224) distinct=2: review-code(heavy)7+fix-incident1) — 그러나 룰 4(잠긴 chain 중 fix-incident 포함 시 lock 무시) 적용돼 정상 진행. op-analysis gap=25+/25 trigger 충족하나 Supabase DNS 재확인 여전히 NXDOMAIN(2026-10-11 incident, 지속) — Tier4 블락 불변. info-arch gap=15/30·lotto gap=11/30·fix-incident gap=8/20 전부 미근접. cycle 3219 추천(components/ 잔여 — analysis/matchup/accuracy/shared) 중 analysis+matchup 은 cycle 3220 완료, 이번엔 accuracy+shared 선택.
