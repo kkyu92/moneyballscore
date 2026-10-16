@@ -1,5 +1,15 @@
 
 
+## 🟢 SUCCESS — operational-analysis(lite): Supabase 해소 직후 338-cycle 공백 깨고 CE/비CE 재측정 (cycle 3262, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3261 retro commit(`6d837a83`) 존재 확인. 2-chain lock 미충족(직전8(3254-3261) distinct=3: review-code(heavy)5+polish-ui1+fix-incident1). **cycle 3261 fix-incident 가 Supabase INACTIVE 해소 — op-analysis 구조적 블락(수개월) 최초 해제** 직후 직전 op-analysis 실측 발화(cycle 2924) 이후 338-cycle 최장 공백 재가동이 최우선 자율 선택.
+
+**실행**: `scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행(코드 변경 없음) — 전체 n=448 (CE n=401 / 비CE n=47, CE 증가분 +48 = 8월 잔여+9월 전체+10월 초 반영). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp (cycle 2924 8.9pp 대비 축소). overlap 월(05/06/07) 통제 격차 10.8pp 그대로 — **27회 연속 LLM 부가가치 우세 결론 재확인**. CREDIT_EXHAUSTED(Anthropic 크레딧 소진, Supabase 호스팅 인시던트와 별개 사안) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 107일+ 경과) 상태 변화 없음.
+
+CLAUDE.md 예측 엔진 가중치 섹션에 cycle 3262 측정 엔트리 append (기존 cycle 2924 엔트리 뒤). 코드 변경 없음(순수 측정 + 문서), `pnpm` 테스트 영향 없음.
+
+다음 사이클 추천 = review-code(heavy) 복귀 또는 info-arch/fix-incident/lotto gap 자연 대기. op-analysis 구조적 블락 해제 완료 — 향후 25-cycle 주기 정상 재가동 예상.
+
 ## 🟢 SUCCESS — fix-incident: Supabase INACTIVE 5일+ 인시던트 해소 — restore API 재시도로 billing 조치 없이 복구 (cycle 3261, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 non-approved status). 2차 방어선: cycle 3260 retro commit(`84ac9352`) 존재 확인. 2-chain lock 미충족(직전8(3253-3260) distinct=3: review-code(heavy)6+polish-ui1+lotto(lite)1). **fix-incident gap=20/20 정확 도달** — 7번 trigger(마지막 fix-incident 발화 cycle 3241 이후 20 사이클 경과) 자연 발화. `gh run list --json conclusion -q 'select(.conclusion=="failure")'` 로 Oct 11 이후 scheduled workflow 실패 재확인 — `health-alert`(10/16 12:32) + `heartbeat-stale`(10/16 12:12) 2건, 양쪽 전부 cycle 3250+ 반복 확인되던 Supabase INACTIVE 단일 근본원인(`fetch failed`).
