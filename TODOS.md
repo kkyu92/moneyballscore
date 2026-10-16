@@ -1,5 +1,23 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): app/ calendar+changelog+glossary+guide+leaderboard 전수 감사, 드리프트 4건 수정 (cycle 3238, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건(plan 3~30 전부 completed/archived/superseded). 2-chain lock 미충족(직전8(3230-3237) distinct=3: review-code(heavy)6+polish-ui1+expand-scope1). fix-incident gap 21/20 도달했으나 `gh run list` 재확인(전부 success/skipped) + Supabase DNS 재확인(지속 NXDOMAIN, 기존 추적 인시던트) — 신규 incident 부재 확인 후 cycle 3237 추천대로 review-code(heavy) app/ 라우트 레벨(calendar/changelog/glossary/guide/leaderboard) 선택.
+
+**전수 검증**: Explore agent 위임 — 23개 파일(5개 라우트 그룹의 page.tsx+OG/Twitter image+api route+관련 lib/test) 전수 read, CHANGELOG.md/`packages/shared` 상수/기존 `__tests__` 교차검증.
+
+**발견 + 수정 (4건)**:
+1. `leaderboard/{opengraph-image,twitter-image}.tsx`: "Top Pickers · Weekly & Season" + `"Weekly"` 태그가 구식 카피 — 실제 리더보드는 `commit a8edc72f`(2026-05-29) 이후 monthly/season/all 3탭 구조로, `LeaderboardMode`의 `weekly`는 "backward compat 위해 유지"라고 명시된 죽은 값. "Monthly & Season"/`"Monthly"` 로 교체.
+2. `changelog/page.tsx`: JSON-LD `datePublished: '2026-04-13'` 하드코딩이 실제 최초 CHANGELOG entry/첫 커밋(2026-04-14)보다 하루 빠름. `entries` 배열에서 가장 오래된 날짜를 동적 산출하도록 교체(재발 방지).
+3. `glossary/opengraph-image.tsx` + `guide/page.tsx`: 용어 수 "25" 하드코딩이 `GLOSSARY_TERM_COUNT` 미사용 — `methodology/page.tsx`가 이미 겪은 wave-79 드리프트(용어 추가/삭제 시 silent stale)와 동일 계열, 현재값은 일치하지만 가드 부재. `GLOSSARY_TERM_COUNT` import 로 교체.
+4. `calendar/page.tsx` + `mlb/calendar/page.tsx` + `en/mlb/calendar/page.tsx`: `accuracyClass()` 중간 등급 판정이 `ACCURACY_GOOD_RATE` 바로 아래 줄에서 `0.5` 리터럴 사용 — `ACCURACY_BASELINE`(동일 0.5)이 이미 `ScoringRuleDayHeatmap`/`WinnerProbBucketChart`/`RollingAccuracyChart` 등 7+ 컴포넌트에서 이 정확한 의미로 쓰이는 상수. 3파일 전부 `ACCURACY_BASELINE` 참조로 교체.
+
+**regression**: `tsc --noEmit` clean, `eslint` scoped clean, vitest 8 files 46 tests 전부 PASS. direct main commit(`c413bace`) + push, pre-push hook(lint+type-check+version-sync-guard+test) green.
+
+**zero-finding 영역**: `api/leaderboard/{sync,mlb-sync}/route.ts` — origin 검증(CSRF 가드) + Supabase 에러 Sentry 전파 + KBO/MLB 스키마 분기 전부 의도된 설계, 기존 대칭 테스트로 locked 확인. KBO 팩터 가중치(`glossary/data.ts`) 전부 `@moneyball/shared` 동적 참조 일치.
+
+다음 사이클 추천 = review-code(heavy) app/ 잔여 스코프(111개 page.tsx 중 미감사 서브셋) 또는 fix-incident(실제 incident 부재 재확인 필요)/info-arch(28/30)/lotto(24/30) gap 자연 대기. op-analysis는 Supabase 복구 전까지 계속 블락.
+
 ## 🟢 SUCCESS — review-code(heavy): about/privacy/terms/settings/login/community 전수 감사, privacy false claim 1건 수정 (cycle 3237, 2026-10-16)
 
 진단: open issue 0건. approved plan 0건(전부 completed/archived). 2-chain lock 미충족(직전8(3229-3236) distinct=3: review-code(heavy)6+polish-ui1+expand-scope1). gap trigger 4종 전부 미근접/블락: fix-incident 20/20 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재·lotto 23/30·info-arch 27/30·op-analysis Supabase DNS ENOTFOUND 재확인(지속, 변화 없음). `apps/moneyball/src/app/{about,privacy,terms,settings,login,community}` CHANGELOG mention 0건 — 신규 스코프 선정.
