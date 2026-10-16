@@ -14287,3 +14287,23 @@ Footer.tsx 디스클로저 chevron duration(`transition-transform` vs `duration-
 **패턴**: '코드는 성장, 주석/분기는 고정' — 그룹에 아이템 추가될 때 아이템수 하드코딩 코멘트와 그 코멘트 근거로 만들어진 특수분기(=5 전용 width)가 함께 stale 화되는 사례. review-code(heavy) silent drift family 의 일반형.
 
 다음 사이클 추천 = review-code(heavy) components/ 잔여(analysis 1421줄/matchup 1412줄/accuracy 1331줄/shared 1424줄 등) 또는 op-analysis(Supabase 복구 시) 또는 fix-incident(gap 자연 대기).
+
+## 🟢 SUCCESS — review-code(heavy): en/mlb 27페이지 전수 감사, 드리프트 6건 수정 (cycle 3232, 2026-10-16)
+
+진단: open issue 0건, approved plan 0건(전부 completed/archived/superseded/deferred). 2-chain lock 미충족(직전8 distinct=3: review-code/polish-ui/expand-scope). cycle 3231 추천(app/ 라우트 레벨 page.tsx 111개 중 미감사 서브셋) 따라 선택 — KBO `/mlb/**/page.tsx` 27개는 cycle 3062 전수감사 완료, `/en/mlb/**/page.tsx` 27개 쌍둥이는 종합 스윕 commit이 없고 피스밀 drift fix만 존재(07abbdc6/d7211d17/933706ac 등) 해서 미감사 scope로 확정.
+
+**전수 검증**: Agent 2개 병렬 — 27쌍 전부 KO(`/mlb/*`) 대응 페이지와 교차검증(배너/JSON-LD/ISR/하드코딩 문자열/crash guard parity).
+
+**발견 + 수정 (6건)**:
+1. **신규 버그**: `lib/insights/topFactors.ts`의 `selectTopFactors()`가 `FACTOR_LABELS`(한글) 고정이라 `en/mlb/insights` hub+`[date]` 양쪽 페이지에 "선발 투수력" 등 한글 factor 라벨이 영문 페이지에 그대로 노출. `locale: 'ko'|'en'` 파라미터 추가 — 기존 존재했으나 미사용이던 `FACTOR_LABELS_EN` 분기, 기존 KO 3개 호출부는 동작 유지.
+2. `en/mlb/games/[date]/[slug]`: `generateMetadata` SEO 설명문이 cycle 2765 KO Statcast factor count 추가분 미반영 — Statcast 카운트 계산 후 설명문 동기화.
+3. `en/mlb/postseason`: 푸터 origin note 문장("This hub started as a Header NAV broken-link recovery layer.") 누락(wild-card twin엔 존재) — 복원.
+4-5. `mlb/reviews/monthly/[month]` + `mlb/reviews/weekly/[week]` (KO 쪽): 소표본(n&lt;5) 적중률 디스클레이머가 EN twin(cycle 2574)+KBO-league 컨벤션엔 있는데 MLB KO 본문엔 없었음 — **역방향 drift**(EN이 먼저 반영된 채 KO가 뒤처진 희귀 케이스) — 추가.
+
+**미변경(clean 확인)**: 나머지 21쌍 — `factors`(EN 하드코딩 영문 라벨은 `MetricRegistry`에 `en_name` 필드 자체가 없어 의도된 설계, drift 아님), `mlb` 톱허브(KO의 "KBO 상세 대시보드" 카드는 `/en/accuracy` 부재라 EN에서 정당하게 생략), `matchup/[teamA]/[teamB]`(EN 독립 `buildSummaryEn()`이 공유 `buildMatchupSummaryText`의 모든 절을 정확히 미러) 등 전부 hardcoded 문자열/ISR/JSON-LD/배너 parity 일치 확인.
+
+**regression**: `tsc --noEmit` clean, eslint scoped clean, vitest 16 files 148 tests 전부 PASS. direct main commit(`3ecb7639`) + push, pre-push hook green.
+
+**패턴**: en/mlb twin silent drift family 재확인 — (a) 기능 추가가 KO→EN 단방향으로만 propagate 되는 일반형(insights label, postseason footer, games SEO) + (b) 역방향 사례 최초 발견(reviews monthly/weekly, EN이 먼저 고도화되고 KO 본진이 뒤처짐) — 두 방향 모두 존재함을 본 cycle이 입증, 다음 twin 감사 시 양방향 diff 필수.
+
+다음 사이클 추천 = review-code(heavy) 잔여(app/ page.tsx 111개 중 KBO 단일-page 그룹 재확인 또는 lib/ 나머지 서브디렉토리) 또는 fix-incident(16/20)/info-arch(23/30)/lotto(19/30) gap 자연 대기.
