@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { LOTTO_RULE_COUNT } from "@moneyball/shared";
-import { getLatestLottoPicks } from "@/lib/lotto/picks-loader";
+import { getLatestLottoPicks, ballColor, LOTTO_BALL_HEX } from "@/lib/lotto/picks-loader";
 import { KBO_GRADIENT_LOTTO_135, accent, brand } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -57,21 +57,24 @@ export default function LottoHubOgImage() {
                 {["A", "B", "C", "D", "E"][i]}
               </span>
               <div style={{ display: "flex", gap: 6 }}>
-                {set.numbers.map((n) => (
-                  <span
-                    key={n}
-                    style={{
-                      width: 36, height: 36,
-                      borderRadius: "50%",
-                      background: n <= 10 ? "#facc15" : n <= 20 ? "#3b82f6" : n <= 30 ? "#ef4444" : n <= 40 ? "#6b7280" : "#16a34a",
-                      color: n <= 10 ? "#713f12" : "#fff",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 13, fontWeight: 700,
-                    }}
-                  >
-                    {n}
-                  </span>
-                ))}
+                {set.numbers.map((n) => {
+                  const { bg, text } = LOTTO_BALL_HEX[ballColor(n)];
+                  return (
+                    <span
+                      key={n}
+                      style={{
+                        width: 36, height: 36,
+                        borderRadius: "50%",
+                        background: bg,
+                        color: text,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 13, fontWeight: 700,
+                      }}
+                    >
+                      {n}
+                    </span>
+                  );
+                })}
               </div>
               <span style={{ color: brand[200], fontSize: 13,
           display: "flex",

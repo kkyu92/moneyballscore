@@ -150,7 +150,7 @@ export function getLatestLottoResult(): LottoResult | null {
   return { date, ...parsed };
 }
 
-type LottoBallColor = "yellow" | "blue" | "red" | "gray" | "green";
+export type LottoBallColor = "yellow" | "blue" | "red" | "gray" | "green";
 
 export function ballColor(n: number): LottoBallColor {
   if (n <= 10) return "yellow";
@@ -159,3 +159,13 @@ export function ballColor(n: number): LottoBallColor {
   if (n <= 40) return "gray";
   return "green";
 }
+
+// Tailwind bg-{color}-{shade} 등가 hex — opengraph-image.tsx 등 Tailwind className 사용 불가(satori 인라인 style 전용) 소비처용.
+// page.tsx BALL_BG 의 bg-yellow-400/bg-blue-500/bg-red-500/bg-gray-500/bg-green-600 과 동일 색상.
+export const LOTTO_BALL_HEX: Record<LottoBallColor, { bg: string; text: string }> = {
+  yellow: { bg: "#facc15", text: "#713f12" },
+  blue: { bg: "#3b82f6", text: "#fff" },
+  red: { bg: "#ef4444", text: "#fff" },
+  gray: { bg: "#6b7280", text: "#fff" },
+  green: { bg: "#16a34a", text: "#fff" },
+};
