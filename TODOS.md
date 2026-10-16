@@ -1,5 +1,20 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): about/privacy/terms/settings/login/community 전수 감사, privacy false claim 1건 수정 (cycle 3237, 2026-10-16)
+
+진단: open issue 0건. approved plan 0건(전부 completed/archived). 2-chain lock 미충족(직전8(3229-3236) distinct=3: review-code(heavy)6+polish-ui1+expand-scope1). gap trigger 4종 전부 미근접/블락: fix-incident 20/20 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재·lotto 23/30·info-arch 27/30·op-analysis Supabase DNS ENOTFOUND 재확인(지속, 변화 없음). `apps/moneyball/src/app/{about,privacy,terms,settings,login,community}` CHANGELOG mention 0건 — 신규 스코프 선정.
+
+**전수 검증**: general-purpose agent 위임 — 6개 파일(about 482줄/privacy 301줄/terms 257줄/settings·login·community 각 ~15줄) + OG/twitter 이미지 생성기 전수 read, `packages/shared`/Supabase migrations/API routes/`cloudflare-worker/wrangler.toml` 교차검증.
+
+**확정 버그 1건**: `privacy/page.tsx` 가 "회원가입/개인식별정보 입력 기능 없음" + "자체 DB 저장 개인정보 없음, 열람·정정·삭제 대상 없음" 이라 서술하지만, 실제로 `/picks` 기능이 device_id + 이용자 입력 닉네임 + 예측 선택을 Supabase `user_picks` 테이블(`supabase/migrations/024_user_picks_leaderboard.sql`, `050_mlb_user_picks.sql`)에 upsert 하고 `/leaderboard` 에 닉네임을 공개 표시(`api/leaderboard/{sync,mlb-sync}/route.ts`). about 페이지 FAQ 자체가 이 기능을 설명하는데 privacy 페이지만 반영 안 된 상태. 섹션 1(수집 정보)/4(Supabase 항목)/5(보관·파기) 3곳 정정 — Picks 데이터 수집 범위 + 열람·정정·삭제 요청 경로 명시.
+- 커밋: `8f0c9ab4` (직접 main, R4 범위). `tsc --noEmit`/`pnpm lint` clean, pre-push(lint+type-check+version-sync-guard+test) 전부 PASS.
+
+**부차 발견 (저가치, 미수정)**: about 페이지 스케줄 카피("매 정시"/"23:00 KST")가 실제 cron(`cloudflare-worker/wrangler.toml` `17 0-14 * * *` = 매시 17분)과 17분 오차 — cosmetic, 별도 액션 없음.
+
+**그 외 clean**: 가중치/FACTORS 배열은 `DEFAULT_WEIGHTS` 동적 참조라 drift-resistant 확인, park factor/AI 에이전트 설명/쿠키 고지/내부 링크 전부 정확. `settings`/`login`/`community` 는 의도된 stub(noindex) 확인.
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/{calendar,changelog,glossary,guide,leaderboard}` CHANGELOG mention 0건 잔여 클러스터) 또는 fix-incident(20/20, 실제 incident 부재 재확인)/lotto(24/30)/info-arch(28/30) gap 자연 대기. op-analysis 는 Supabase 복구 전까지 계속 블락.
+
 ## ⚪ RETRO-ONLY — expand-scope: 2-chain lock(review-code(heavy)+polish-ui) fallback, 신규 확장 기회 미발견 (cycle 3236, 2026-10-16)
 
 진단: open issue 0건. approved plan 0건(plan#30 completed_all_phases_shipped, 나머지 전부 completed/archived). 2nd 방어선(cycle 3235 retro `1d256dd6`) OK. 2-chain lock 발동 — 직전8(3228-3235) distinct=2(review-code(heavy)7+polish-ui1) — 둘 다 bug 아니라 rule4 예외 불성립, 둘 다 제외. gap trigger 4종 전부 미근접/블락: fix-incident 18/20·info-arch 25/30·lotto 21/30·op-analysis gap=49/25 충족이나 Supabase DNS ENOTFOUND 재확인(`node dns lookup`/REST `curl` http_status=000, 변화 없음) actionable 아님. explore-idea saturation 직전15(3221-3235) 2/15 — saturation 자체 미충족(review-code(heavy) 연속 성공 streak 이 saturation 계산 윈도우에서도 review-code 비중 낮게 샘플링된 구간이라 미충족, 과거와 다른 결과). lock fallback(폴리시-ui 강제)이 그 자체 locked chain이라 적용 불가 — 남은 pool 중 expand-scope 조건(1, 직전4(3232-3235) 전부 {review-code,polish-ui} 안) 유일 명시적 충족, cycle 3079/3227 precedent 동일 해법 재적용.
