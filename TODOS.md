@@ -1,5 +1,19 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): app/feed·app/contact 전수 감사, RSS 빗나감 배지 라벨 통일 (cycle 3282, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived). 2차 방어선: cycle 3281 retro commit(`1e0a11fa`) 존재 확인. 2-chain lock 미충족(직전8(3274-3281) distinct=3, review-code(heavy)/operational-analysis(heavy)/fix-incident(lite)). gap 전부 미근접(op-analysis 6/25·info-arch 12/30·lotto 29/30 근접하나 미도달, cron 산출물(lotto-picks/lotto-results) 둘 다 최신 정상 확인).
+
+**스코프 전환**: cycle 3281 추천 항목("margin vs probability 컨벤션 불일치", cycle 3279 PLAUSIBLE 보류)을 직접 추적 — `FactorWaterfallChart.tsx` 가 이미 `home_advantage` 를 별도 bar(weight=0)로 명시 처리하고 clamp 까지 반영해 marginPp 와 정확히 reconcile. `FactorBreakdown.tsx`(리스트 모드)는 합계(total) 자체를 표시하지 않아 reconciliation 불일치가 사용자에게 노출될 지점이 없음 — **실제 버그 아님, non-issue 결론** (추가 코드 변경 없음). 대신 review-code grep-history(최근 200 cycle-retro 커밋) 0-mention 신규 스코프로 전환: `app/feed`(route.ts 298줄 + 테스트 2개), `app/contact`(page/opengraph-image/twitter-image, 270줄) 전수 read.
+
+**수정(CONFIRMED 1건)**: `feed/route.ts` 2곳(KBO/MLB 결과 태그)이 '[실패]' 라벨 사용 — `statusBadge.ts` canonical('적중'/'빗나감', sweep 52) 및 cycle 3274/3280 이 UI 전역 통일한 '빗나감' 과 다른 제3 변형. RSS 피드 소비자도 동일 라벨 컨벤션 적용 필요 판단, '[빗나감]' 으로 통일. `contact/*` 는 전부 clean(`contact/page.tsx` 안 "팩터별 오답 분석"은 cycle 3280 이 이미 제외 확정한 복합명사 문맥 — 재확인만).
+
+**regression**: 라벨 리터럴 변경만(스타일/로직 변경 없음). 사전 확인 — feed 테스트는 `[적중]`만 assert, `[실패]` 비assert 확인 후 안전 변경. `tsc --noEmit` clean. `pnpm --filter moneyball lint` clean. `pnpm --filter moneyball test` 596 files·4676 tests 전부 통과. 직접 main 커밋+push(R4, `2984345b`), pre-push hook(lint+type-check+version-sync-guard+test) 전부 green.
+
+skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3282%50≠0, trigger5 직전20(3263-3282) review-code 다회 발화로 0회 chain 없음, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전10 success 다수, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 계속(미방문 소형 라우트 app/login·community·settings·debug 또는 packages/kbo-data/src/agents 세부 재확인) 또는 lotto gap(29/30, 거의 도달) 자연 대기.
+
 ## 🟢 SUCCESS — fix-incident(lite): 20-사이클 주기 점검, 실제 인시던트 0건 확인 (cycle 3281, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived). 2차 방어선: cycle 3280 retro commit(`ec8c7633`) 존재 확인. **2-chain lock 탐지**(직전8(3273-3280) distinct=2, review-code(heavy) 7/8 + operational-analysis(heavy) 1/8) → review-code/operational-analysis 양쪽 이번 사이클 후보 제외. 제외 후 남은 pool 중 fix-incident gap=20/20(마지막 발화 cycle 3261) 정확히 trigger 임계 도달 — lite 자동 권장 채택.
