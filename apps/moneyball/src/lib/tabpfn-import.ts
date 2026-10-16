@@ -13,7 +13,7 @@
 // 없어 이 flat reasoning.homeWinProb 형태를 못 읽는다. 비교 페이지 연결은
 // 별도 스코프.
 
-import { NEUTRAL_FACTOR } from '@moneyball/shared';
+import { NEUTRAL_FACTOR, TABPFN_SCORING_RULE } from '@moneyball/shared';
 
 const TABPFN_OUTPUT_HEADER = 'game_id,tabpfn_home_win_prob';
 
@@ -88,7 +88,7 @@ export function parseTabpfnOutputCsv(csv: string): TabpfnParseResult {
 /** predictions table upsert shape — subset required for tabpfn-shadow insert. */
 type TabpfnPredictionInsert = {
   game_id: number;
-  scoring_rule: 'tabpfn-shadow';
+  scoring_rule: typeof TABPFN_SCORING_RULE;
   prediction_type: 'pre_game';
   reasoning: { homeWinProb: number };
   predicted_winner: null;
@@ -100,7 +100,7 @@ export function buildTabpfnPredictionInsert(
 ): TabpfnPredictionInsert {
   return {
     game_id: row.game_id,
-    scoring_rule: 'tabpfn-shadow',
+    scoring_rule: TABPFN_SCORING_RULE,
     prediction_type: 'pre_game',
     reasoning: { homeWinProb: row.tabpfn_home_win_prob },
     predicted_winner: null,

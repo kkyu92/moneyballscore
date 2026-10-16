@@ -17,6 +17,7 @@
 import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import { parseTabpfnOutputCsv, buildTabpfnPredictionInsert } from '../apps/moneyball/src/lib/tabpfn-import';
+import { TABPFN_SCORING_RULE } from '../packages/shared/src/index';
 import { DB_CONSTRAINTS } from '../packages/kbo-data/src/pipeline/db-constraints';
 
 async function main(): Promise<void> {
@@ -100,7 +101,7 @@ async function main(): Promise<void> {
       ...base,
       predicted_winner: predictedWinner,
       is_correct: isCorrect,
-      model_version: 'tabpfn-shadow',
+      model_version: TABPFN_SCORING_RULE,
       predicted_at: now,
       verified_at: game.winner_team_id != null ? now : null,
     };
