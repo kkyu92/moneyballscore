@@ -50,7 +50,15 @@ export function LeaderboardTable({
   }
 
   const myEntry = myDeviceId ? entries.find((e) => e.device_id === myDeviceId) : null;
-  const myRank = myDeviceId ? entries.findIndex((e) => e.device_id === myDeviceId) + 1 : 0;
+  const myStreakRank = myDeviceId ? streakRankMap?.get(myDeviceId) : undefined;
+  const mySampleRank = myDeviceId ? sampleRankMap?.get(myDeviceId) : undefined;
+  const myRank = myDeviceId
+    ? effectiveSort === 'streak' && myStreakRank !== undefined
+      ? myStreakRank + 1
+      : effectiveSort === 'sample' && mySampleRank !== undefined
+      ? mySampleRank + 1
+      : entries.findIndex((e) => e.device_id === myDeviceId) + 1
+    : 0;
   const aiPct = aiBaseline?.pct ?? null;
   const myDelta = myEntry && aiPct !== null ? myEntry.accuracy_pct - aiPct : null;
 
