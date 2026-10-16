@@ -1,5 +1,15 @@
 
 
+## ⚪ PARTIAL — review-code(heavy): picks/mlb API cluster + mlb/waitlist + mlb/pipeline twin-audit clean (cycle 3249, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/spec_only_deferred). 2-chain lock 결정 시점 미충족(직전8(3241-3248) distinct=3: review-code(heavy)6+fix-incident1+lotto(lite)1 — 단 3242-3249 window 는 distinct=2 로 다음 cycle 3250 lock 예상). Supabase `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(2026-10-11~, 5일+, op-analysis 계속 블락). fix-incident gap=8/20·info-arch gap=9/30·lotto gap=3/30 전부 미근접. cycle 3248 retro carry-over("review-code(heavy) 계속 가능") 직접 이어감 — CHANGELOG mention 0건인 app/api 경로(`picks/mlb-poll`/`picks/mlb-submit`/`mlb/waitlist`) 신규 선정.
+
+**전수 감사**: `picks/mlb-poll` vs `picks/poll`, `picks/mlb-submit` vs `picks/submit` 1:1 대조, `picks/results`(KBO+MLB 통합 라우트) 재확인, `mlb/waitlist`(migration 028 UNIQUE(league,email) 대조), `mlb/pipeline` vs `pipeline`(KBO) 1:1 대조, `version`/`hub-dispatch` 추가 확인.
+
+**결과**: 버그 0건, 전부 clean parity. 확인된 의도된 구조적 차이: (1) MLB `predictions.is_correct` 는 항상 NULL(verify mode 자체가 MLB pipeline 에 없음 — `deriveMlbOutcome` 으로 클라이언트/API 레벨에서 즉시 파생하는 설계, KBO 처럼 DB 에 영구 저장 안 함) (2) `mlb/waitlist` 가 `.insert()` + 23505 에러코드 catch 로 중복 처리(코드 주석 "ON CONFLICT DO NOTHING" 표현과 메커니즘은 다르나 효과 동일 — email enumeration 방지 결과 동일) (3) MLB pipeline revalidate 가 `mlb_predict_final` 1개 mode 에만 걸리는 이유 = MLB 에 KBO 의 `verify` mode 대응 자체가 구조적으로 없음.
+
+cycle 3248 에 이어 2회 연속 review-code(heavy) clean 결과 — mlb/kbo twin-audit vein 거의 소진. 다음 사이클(3250) 2-chain lock 발동 예상(review-code(heavy)+lotto(lite) 제외) → fix-incident(8/20)/info-arch(9/30) gap 자연 대기 또는 polish-ui/explore-idea 다양성 redirect 권장. op-analysis 는 Supabase 복구(사용자 billing 조치) 전까지 계속 블락.
+
 ## ⚪ PARTIAL — review-code(heavy): mlb/predictions(KO+EN) twin-audit clean (cycle 3248, 2026-10-16)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/spec_only_deferred). 2-chain lock 미충족(직전8(3240-3247) distinct=4: review-code(heavy)5+info-arch1+fix-incident1+lotto(lite)1). Supabase `npx supabase projects list` 재확인 — `status: "INACTIVE"` 지속(2026-10-11~, op-analysis 계속 블락). fix-incident gap=7/20·info-arch gap=8/30 전부 미근접, lotto 직전 발화 cycle 3246(gap reset). cycle 3247 retro 가 명시적으로 남긴 carry-over(mlb/predictions 398줄 미감사) 직접 이어감.
