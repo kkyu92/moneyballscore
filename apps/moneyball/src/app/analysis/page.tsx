@@ -134,11 +134,12 @@ function renderConvergenceTeamBadgeRow(
       {stats.slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT).map(stat => {
         const total = stat.wins + stat.losses;
         const pct = computeWinRatePct(stat.wins, total);
+        const isSmallSample = total < SMALL_SAMPLE_N;
         return (
           <span
             key={stat.teamCode}
-            className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${opts.badgeBgClass}`}
-            title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — ${opts.titleSuffix} ${total}경기`}
+            className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${opts.badgeBgClass} ${isSmallSample ? 'opacity-60' : ''}`}
+            title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — ${opts.titleSuffix} ${total}경기${isSmallSample ? ` · 소표본(n<${SMALL_SAMPLE_N})` : ''}`}
           >
             <span className={`font-medium ${opts.nameClass}`}>{shortTeamName(stat.teamCode)}</span>
             <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>{pct}%</span>
