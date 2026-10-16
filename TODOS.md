@@ -1,5 +1,21 @@
 
 
+## 🟢 SUCCESS — review-code(heavy): accuracy/page.tsx scoring_rule 코호트 히트맵 죽은 render 게이트 수정 (cycle 3244, 2026-10-16)
+
+진단: open issue 0건. approved plan 0/22(전부 completed/archived/superseded, plan#29 이미 만료→`_archive` 이동 확인). 2-chain lock 미충족(직전8(3236-3243) distinct=4: expand-scope/review-code(heavy)/info-architecture-review/fix-incident). gap trigger: fix-incident 2/20·info-arch 3/30·lotto 29/30 전부 미근접(lotto cron 양쪽 신선: picks `2026-10-17.md`/results `2026-10-10.md` 확인, 트리거 미충족). op-analysis gap 129(직전 3114)지만 Supabase `npx supabase projects list` 실측 재확인 — `status: "INACTIVE"` 지속(2026-10-11 시작, 6일째) 계속 블락. explore-idea saturation 직전15 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 5.8일 신선) — 확립된 skip 패턴 재확인. cycle 3243 추천대로 `accuracy/page.tsx`(1271줄) 단독 스코프 선택 — cycle 3234 가 components/accuracy(컴포넌트 디렉토리, 3건 소형 수정)만 건드려서 이 라우트 파일 자체의 독립 전수 감사는 미실시였음.
+
+**전수 감사**: general-purpose agent 위임 — `accuracy/page.tsx`(1271줄) + `lib/accuracy/buildAccuracyData.ts`(767줄) + `buildFactorAccuracy.ts`(65줄) 전수 read, `packages/shared` 상수(DEFAULT_WEIGHTS/SMALL_SAMPLE_N/ACCURACY_BASELINE/STATS_RELIABLE_MIN_N 등 전부) + migrations 스키마 + MLB twin(`MlbAccuracyDashboard.tsx`) + 기존 `silent-drift-cycle-{2490,2528,2565,2670}.test.ts`/`wave-2300`/`wave-2463` 선행 확인(재보고 방지) 교차검증.
+
+**확정 버그 1건**: `{scoringRuleDayHeatmap.length > 0 && rows.length >= 10 && (...)}` (line 715) — `scoringRuleDayHeatmap`은 `SCORING_RULE_HEATMAP_ROWS`(6)×7요일=42 cell을 항상 미리 채워 반환해 `.length > 0`이 데이터 유무와 무관하게 항상 true인 죽은 체크. 실질 게이트는 `rows.length >= 10`뿐인데 `rows`는 `CURRENT_MODEL_FILTER`(scoring_rule='v1.8')로 걸러진 subset이고, 히트맵의 실제 데이터 소스는 unfiltered `versionHistoryRows`(cycle 2670이 builder 입력은 이미 이걸로 교체함, 이 render 게이트만 누락) — era 전환 시(v1.8→v1.9) `rows`가 신규 era 소표본으로 리셋되는데 `versionHistoryRows`는 수백 건 보유한 상태에서 코호트 히트맵이 조기에 숨겨지는 silent 회귀. `c.n > 0` 실제 cell 존재 체크 + `versionHistoryRows.length >= 10`으로 교체.
+
+**부가 수정 2건**: `recentForm.total >= 5`/`n >= 5` (line 565, 856) — 같은 파일 내 동일 의미로 4곳에서 이미 쓰이는 `SMALL_SAMPLE_N` 상수를 두 곳만 bare literal로 중복(현재 값 일치라 inert, 상수 재조정 시 분기 위험 사전 차단).
+
+**zero-finding**: DEFAULT_WEIGHTS/FACTOR_KEYS 순서·값 일치, ACCURACY_BASELINE/SMALL_SAMPLE_N/STATS_RELIABLE_MIN_N/MIN_TEAM_PREDICTIONS/MIN_POLL_TOTAL/WINNER_PROB_LEAN·CONFIDENT 등 전체 상수 stale 중복 0건, DB 스키마(predictions.home_win_prob DECIMAL/factors JSONB/is_correct BOOLEAN/scoring_rule VARCHAR 등) 전부 실제 쿼리·타입과 정합, `reasoning->homeWinProb`와 top-level `home_win_prob` 동일 insert payload 출처 확인(divergence 없음), KBO/MLB twin 과거 수정분(2528/2565/wave-2300/wave-2463/cycle3234 StatCard accent) 전부 재규역 없이 유지.
+
+커밋: `83d2e2e0` (직접 main + push, pre-push hook lint+type-check+version-sync-guard 전부 PASS). 신규 회귀 테스트 `silent-drift-cycle-3244.test.ts`(2 assertion) PASS, accuracy+lib/accuracy 전체 10 files/120 tests PASS, `tsc --noEmit`/eslint clean.
+
+다음 사이클 추천 = review-code(heavy) 계속(matchup/predictions/teams[code] 등 app/ 대형 route 잔여 — matchup 우선) 또는 fix-incident(2/20)/info-arch(3/30)/lotto(29/30→다음 사이클 30 도달) gap 자연 대기. op-analysis는 Supabase INACTIVE 복구(사용자 billing 조치 필요) 전까지 계속 블락 — 6일째 미해결.
+
 ## 🟢 SUCCESS — review-code(heavy): analysis/page.tsx 팀별 수렴 배지 SMALL_SAMPLE_N 가드 누락 수정 (cycle 3243, 2026-10-16)
 
 진단: open issue 0건, approved plan 0/21(전부 non-approved). 2-chain lock 미충족(직전8(3235-3242) distinct=4: expand-scope/review-code(heavy)/info-architecture-review/fix-incident). fix-incident gap=2(직전 3241)·info-arch gap=3(직전 3240) 전부 skip. lotto gap=29/30(근접 미도달). op-analysis gap=129(직전 발화 cycle 3114, 압도적 초과)이나 Supabase 프로젝트 상태 재확인 — `npx supabase projects list` 실측 `status: "INACTIVE"` 지속(2026-10-11 시작, 6일째), DNS NXDOMAIN 변화 없음, TODOS 과거 10+ 사이클 연속 "actionable 아님" 재확인과 동일 — 계속 블락. 사이트 자체는 200 응답(14.9s, cold)하나 "경기가 없습니다" 표시로 DB 의존 기능 전부 degraded 확인. cycle 3242 추천대로 review-code(heavy) 계속, `app/analysis/page.tsx`(2860줄, 전수 스윕 이력 0) 단독 스코프 선택.
