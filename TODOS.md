@@ -1,5 +1,17 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): lib/stats·observability·calendar 전수 감사, 신규 drift 0건 (cycle 3289, 2026-10-17)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3288 retro commit(`f3e6351e`) 존재 확인. 2-chain lock 미충족(직전8(3281-3288) distinct=3: fix-incident(lite)1+review-code(heavy)6+lotto(lite)1). gap 전부 미근접(fix-incident 8/20·op-analysis 13/25·info-arch 19/30·lotto 6/30). explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재) — 확립된 skip 패턴. cycle 3288(`lib/analysis` 완결) 이후 신규 축으로 `apps/moneyball/src/lib/` 서브디렉토리 git log mention-count 최하위군 선정 — `lib/stats`(1) / `lib/observability`(2) / `lib/calendar`(2).
+
+**결과**: 본 메인 직접 전수 read — `pearson.ts`(19줄, `pearsonCorrelation` — dashboard/factor-accuracy.ts + reviews/mlb-shared.ts 2곳에서 사용, 테스트 4건 통과) / `captureFallback.ts`(10줄, Sentry wrapper, 61개 파일에서 사용) / `monthGrid.ts`(101줄, KBO/MLB/EN calendar 3개 page 공유 골격 — 주석의 cycle 2123 타임존 버그 수정 이력과 실제 `toUtcDate` UTC-only 연산 일치) 전부 주석-코드 정합 확인. 추가로 호출부 3종(`app/calendar/page.tsx` KBO — `assertSelectOk`+`captureFallback` 패턴, `app/mlb/calendar/page.tsx` — `getMlbMonthHeatmap` 내부 fail-silent+degraded flag 패턴, `app/en/mlb/calendar/page.tsx` — EN mirror) 대조 — 두 fallback 전략(외부 captureFallback vs 내부 catch-and-log)이 각 주석에 설명된 대로 의도적 분기, drift 아님.
+
+**결론**: 신규 drift 0건, 코드 변경 없음. `pnpm vitest run src/lib/stats src/lib/calendar` 11 tests 전부 pass 확인.
+
+검증: 코드 변경 없음(감사만). skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3289%50≠0, trigger5 직전20(3270-3289) review-code(heavy) 다회 발화로 0회 chain 없음, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전10(3280-3289) success 5건, retro-only 1건, partial 4건, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 계속(`lib/leaderboard`/`lib/picks`/`lib/insights`/`lib/debug` 저-mention 축, 2-8 mention) 또는 fix-incident(9/20)/op-analysis(14/25)/info-arch(20/30)/lotto(7/30) gap 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): apps/moneyball/src/lib/analysis 전수 감사, 신규 drift 0건 (cycle 3288, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/22(전부 completed/archived/non-approved). 2차 방어선: cycle 3287 retro commit(`aed112c5`) 존재 확인. 2-chain lock 미충족(직전8(3280-3287) distinct=3: review-code(heavy)6+fix-incident(lite)1+lotto(lite)1). gap 전부 미근접(fix-incident 6/20·op-analysis 12/25·info-arch 18/30·lotto 25/30). explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 부재) — 확립된 skip 패턴. cycle 3287 추천대로 `packages/kbo-data/src/pipeline/` 저-mention 축 소진 확인 후 신규 축 `apps/moneyball/src/lib/analysis/`(6개 소스 파일, 테스트 제외) 채택.
