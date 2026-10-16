@@ -93,7 +93,7 @@ async function getMlbFeedItems(
     let resultTag = '';
     if (isFinal) {
       const actualWinner = schedule.home_score! > schedule.away_score! ? homeCode : awayCode;
-      resultTag = actualWinner === winnerCode ? ' [적중]' : ' [실패]';
+      resultTag = actualWinner === winnerCode ? ' [적중]' : ' [빗나감]';
     }
 
     const title = `[MLB] ${awayCode} vs ${homeCode} — ${winnerCode} ${pct}% 승 예측${resultTag}`;
@@ -253,7 +253,7 @@ export async function GET() {
 
     const isFinal = game.status === 'final';
     const resultTag = isFinal && pred.is_correct != null
-      ? (pred.is_correct ? ' [적중]' : ' [실패]')
+      ? (pred.is_correct ? ' [적중]' : ' [빗나감]')
       : '';
 
     const title = `${awayName} vs ${homeName} — ${winnerName} ${pct}% 승 예측${resultTag}`;
