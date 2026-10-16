@@ -47,3 +47,18 @@ export function insightsStatusBadge(
     cls: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-200",
   };
 }
+
+// en/mlb/insights + en/mlb/insights/[date] 가 badge.label(KO 전용)을 번역 없이 그대로
+// 렌더해 영문 페이지에 "적중"/"빗나감" 등 한글이 노출되던 drift 수정 (cycle 3284).
+const EN_LABELS: Record<string, string> = {
+  취소: "Postponed",
+  적중: "Hit",
+  빗나감: "Miss",
+  진행중: "Live",
+  "결과 대기": "Pending",
+  예정: "Scheduled",
+};
+
+export function insightsStatusBadgeLabelEn(label: string): string {
+  return EN_LABELS[label] ?? label;
+}

@@ -4,7 +4,10 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { mlbShortTeamName, INSIGHTS_ISR_HOURS, INSIGHTS_LIMIT, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { selectTopFactors } from "@/lib/insights/topFactors";
-import { insightsStatusBadge } from "@/lib/insights/statusBadge";
+import {
+  insightsStatusBadge,
+  insightsStatusBadgeLabelEn,
+} from "@/lib/insights/statusBadge";
 import { captureFallback } from "@/lib/observability/captureFallback";
 import { getRecentMlbInsights, type MlbInsightRow } from "@/app/mlb/insights/insights-data";
 
@@ -151,7 +154,7 @@ export default async function EnMlbInsightsHubPage() {
                     {awayName} vs {homeName}
                   </span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badge.cls}`}>
-                    {badge.label}
+                    {insightsStatusBadgeLabelEn(badge.label)}
                   </span>
                   {item.homeWinProb !== null && (
                     <span className="text-xs text-gray-500 dark:text-gray-400">

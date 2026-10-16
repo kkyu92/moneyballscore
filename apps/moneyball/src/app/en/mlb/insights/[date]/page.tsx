@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { mlbShortTeamName, INSIGHTS_ISR_HOURS, SITE_URL } from "@moneyball/shared";
 import { isValidInsightsDate } from "@/lib/insights/loader";
-import { insightsStatusBadge } from "@/lib/insights/statusBadge";
+import {
+  insightsStatusBadge,
+  insightsStatusBadgeLabelEn,
+} from "@/lib/insights/statusBadge";
 import { selectTopFactors } from "@/lib/insights/topFactors";
 import { getMlbInsightsForDate, listMlbInsightsDates } from "@/app/mlb/insights/insights-data";
 
@@ -154,7 +157,7 @@ export default async function EnMlbInsightsDatePage({ params }: Props) {
                   {awayName} vs {homeName}
                 </span>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badge.cls}`}>
-                  {badge.label}
+                  {insightsStatusBadgeLabelEn(badge.label)}
                 </span>
                 {item.homeWinProb !== null && (
                   <span className="text-xs text-gray-500 dark:text-gray-400">
