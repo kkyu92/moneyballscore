@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): scripts/ 저-mention 8파일 배치 감사(2차분), 2건 fix (cycle 3349, 2026-10-19)
+
+진단: 세션 시작 시 2차 방어선(직전 사이클 retro commit 결손 감지)에서 cycle 3348 이 세션-중단 사각지대(사례 15 family) 재발로 retro commit/JSON 누락 상태 발견 — retroactive backfill(`2efb55b4`) 선행 완료 후 본 사이클 진단 진행. open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3341-3348) distinct=3: review-code/operational-analysis/polish-ui). fix-incident gap=20/20 명목 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped, 최근 실패 0건) — actionable 없음, 과거 패턴과 동일 skip. lotto gap=15/30·op-analysis gap=6/25·info-arch gap=19/30 전부 미근접.
+
+**스코프**: cycle 3348 추천대로 scripts/ 저-mention 8파일 2차분(backfill-mlb-factor-breakdown/cohort-cleanup/op-analysis-mlb-elo-backtest/backfill-shadow-cohort/op-analysis-brier-drift/import-tabpfn-predictions/backfill-home-win-prob/export-predictions-tabpfn) 채택. general-purpose subagent 로 전수 read 위임 후 본 메인이 직접 migration+production 코드 교차검증.
+
+**발견+수정 2건**: `backfill-mlb-factor-breakdown.ts:61` 이 `scoring_rule` 쿼리에 하드코딩 리터럴 `'mlb_v0.1'` 사용 — plan #24 Phase 3c 가 이 패턴을 `MLB_SCORING_RULE` 상수로 통합했고(다른 모든 호출부·`silent-drift-wave-363` 가드 존재) 본 backfill 스크립트만 누락 상태였음(가드 스코프가 `src/lib/mlb`/`src/app/mlb`/`src/app/en/mlb` 뿐이라 `scripts/` 는 미탐지). 상수로 교체. `op-analysis-brier-drift.ts` 의 `tierOf()` 가 `TIER_BOUNDS` 마지막 구간을 `max: 1.0` exclusive(`conf < t.max`) 로 체크해 confidence 가 정확히 1.0 인 행이 fallback `"low"` 로 잘못 분류되는 경계 버그 — 마지막 tier 상한 포함 처리로 수정.
+
+**나머지 6개 CLEAN**: error swallowing / KBO-MLB scope 누출 / DB컬럼-TS필드 drift 0건(migrations + `mlb-pipeline.ts` 교차확인). `tsc --noEmit`/`pnpm lint`/`pnpm test` clean. 직접 main 커밋(R4 범위, `38628a0d`).
+
+**검증(skill-evolution 등)**: trigger3(3349%50=49≠0)/trigger2(5연속 fail 없음)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3330-3349) 표본 20(≥10 충족), 평가대상 review-code 16/20 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3340-3349) success 4건(3340/3343/3348/3349)으로 미충족. 2차 방어선: cycle 3348 retro 결손 발견+backfill 완료(본 사이클 내), 본 사이클(3349) 자체 retro 는 본 commit 으로 정상 박제.
+
+다음 사이클 추천 = review-code(heavy) 계속(scripts/ 잔여 5개 저-mention 파일: backtest.ts/op-analysis-cohort.ts/update-stale-data.ts/backtest-v2-candidate.ts/measure-context-layer-brier.ts) 또는 fix-incident(gap 명목 도달, 실 incident 재확인 필요)/lotto(gap 16/30)/info-arch(gap 20/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): scripts/ 저-mention 8파일 배치 감사, 2건 fix + 데이터 backfill (cycle 3348, 2026-10-19, retroactive backfill)
 
 cycle 3347 추천대로 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 복귀, scripts/ 잔여 저-mention 8파일(run-pipeline/backfill-kbo-confirmed-postponed/smoke-umpire-scraper/dev-backend-compare/llm-context-baseline/measure-n178-vs-n165/backfill-is-correct-shadow-fix/backfill-kbo-stuck-verify) 배치 감사.
