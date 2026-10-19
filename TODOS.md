@@ -1,4 +1,18 @@
 
+## ✅ SUCCESS — operational-analysis(lite): CE/비CE Brier 격차 31회 연속 재확인, gap 계산 버그 정정 (cycle 3323, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23. 2차 방어선: `cycle-retro 3322` 정상 확인(결손 없음). 직전8(3315-3322) distinct=3(review-code(heavy)6+operational-analysis(lite)1+fix-incident1) — 2-chain lock 미충족(≤2 조건 불충족). **진단 단계 계산 오류 발견**: op-analysis last-fire gap 측정 시 `chain_selected` 정확 일치(`== 'operational-analysis'`)로 검색해 `operational-analysis(lite)` 저장 포맷(괄호 접미사)을 매칭 못 해 cycle 3315 발화를 놓치고 gap=29/25 trigger 오판(실제 gap=8). cycle 3322 TODOS 에 이미 같은 클래스 버그("split()[0] prefix 매칭 교정")가 기록돼 있었음에도 본 사이클 초기 측정에서 재발 — 정확 일치가 아닌 `startswith`/substring 매칭 필요성 재확인.
+
+**조치**: harness(`scripts/op-analysis-ce-cohort.ts`) 는 이미 실행 완료된 상태(read-only, 결과 유효)라 폐기하지 않고 다양성 redirect(distinct=3 2-chain lock 미충족 상태의 자연 선택)로 재분류해 그대로 채택. CLAUDE.md 가중치 섹션에 cycle 3323 entry 추가.
+
+**결과**: 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3315 수치와 완전 동일(KBO 시즌 종료 지속, 신규 verified pre_game 0건). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 유지, LLM 부가가치 우세 결론 31회 연속 재확인. CREDIT_EXHAUSTED·비CE 동결(마지막 예측 2026-07-01, 110일+ 경과) 상태 변화 없음.
+
+**검증**: 코드 변경 없음(CLAUDE.md/TODOS 문서만, harness 자체는 기존 스크립트 재실행). skill-evolution trigger 전부 미충족 — trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3323%50=23≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3304-3323, 현재 포함) 표본 20, 평가대상 review-code(heavy) 다수 발화로 미충족). marker 미박제. ship-0 미충족(직전10(3314-3323) success 다수: 3315/3316/3318/3321/3323).
+
+**교훈**: `chain_selected` 필드 포맷 비일관(`operational-analysis` vs `operational-analysis(lite)` vs `review-code(heavy)` vs `review-code (heavy)` 공백 유무까지 혼재)이 반복적으로 gap 계산 오류를 유발 — cycle 3322 에서 이미 한 번 발견됐으나 재발. 단발 계산 실수 누적이지 아직 SKILL.md 룰 변경 trigger 는 아님(skill-evolution 미충족 상태 유지) — 다음 skill-evolution 발화 시 진단 단계 gap 측정 명령어를 `startswith` 패턴으로 통일하는 것을 갱신 후보로 기록.
+
+다음 사이클 추천 = review-code(heavy) 복귀(`components/` 재확인 또는 신규 디렉토리) 또는 info-arch(gap 23/30)/lotto(gap 19/30)/fix-incident(gap 7/20) 자연 대기.
+
 ## ⚪ PARTIAL — review-code(heavy): packages/kbo-data/src/scrapers/ 잔여 8개 파일 전수 감사 완결, 15/15 커버리지 (cycle 3322, 2026-10-19)
 
 진단: 2차 방어선 발견 — `cycle-retro 3321` 커밋 silent skip 확인(`git log --grep "cycle-retro 3321 " -F` 0건, docs TODOS 커밋+cycle_state JSON 은 정상 존재, 사례 15 family 재발). retroactive backfill 커밋(`cd69e215`) 즉시 작성 + push 후 본 사이클 진행. open issue 0건, approved plan 0/23(전부 non-approved). 직전8(3314-3321) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+fix-incident1) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 6/20, op-analysis 7/25 — `operational-analysis(lite)` 접두 매칭 버그로 초기 계산 27 오측정, split()[0] prefix 매칭 교정 후 7 확인, lotto 18/30, info-arch 22/30). explore-idea saturation 직전15(3307-3321) 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재, DESIGN.md mtime 8.7일 신선) — 확립된 skip 패턴 유지.
