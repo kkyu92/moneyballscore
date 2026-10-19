@@ -1,5 +1,21 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): packages/kbo-data/src/{features,notify} 전수 감사, 신규 drift 0건 (cycle 3299, 2026-10-19)
+
+진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3298 retro commit(`78f4fd06`) 존재 확인. 2-chain lock 미충족(직전8(3291-3298) distinct=5). info-arch gap 29/30 — cycle 3270 checkpoint 가 명시한 cycle 3300 근방 재도달 1사이클 전이라 조기발화 보류. fix-incident(7/20)·op-analysis(5/25)·lotto(4/30) 전부 미근접. `gh run list` 재확인 — CI/cron 전부 success/skipped, incident 신호 없음.
+
+**스코프 발견**: review-code(heavy) 과거 커밋 전수 grep 대조 — `packages/kbo-data/src/features`(0건, 신규 디렉토리, game-record-features.ts) + `packages/kbo-data/src/notify`(마지막 리뷰 cycle 463, 2800+ 사이클 전 — telegram.ts 는 이후 다수 fix 커밋 있었으나 review-code(heavy) 전수 감사 자체는 없었음) 미커버 확인.
+
+**실행**: 본 메인 직접 read — `game-record-features.ts`(136줄, 불펜피로도/득점/실점/홈런 4개 순수함수, look-ahead bias 방지 로직) + `telegram.ts`(256줄, notifyAnnounce/notifyPredictions/notifyResults/notifyError/notifyPipelineStatus 5개). `naver-record.ts` 교차검증(parseInnings 정규식, pitchers[0]=선발 가정 — Naver API 응답 순서 기반, 합리적 가정).
+
+**결과**: 신규 drift 0건. `game-record-features.ts` 는 `backtest-v3-run.ts`/`backtest/loader.ts` 에서만 사용 — 프로덕션 예측 엔진 미연결 확인(의도된 backtest-only 실험 단계, 버그 아님). `telegram.ts` 의 `notifyAnnounce` 이모지(⚾/🔔/🚫) 는 auto-memory `project_telegram_notification_structure.md` 의 "이모지·라벨 없음" 서술과 표면상 배치돼 보였으나, 해당 메모리는 winner-tier 분류 이모지 pool(🔥🎯/📈/🤔⚖️) 부재를 의미 — 구조적 이모지(섹션 마커)와는 별개 개념으로 재확인, 혼동 아님. `notifyPredictions` wave_177 게이트(throw → `markNotificationFlag` 순서) daily.ts:1291-1304 정상 작동 확인.
+
+**regression**: `npx vitest run src/__tests__/features-game-record.test.ts`(packages/kbo-data) 1 file / 9 tests 전부 통과. 코드 변경 없음(감사만).
+
+**검증**: skill-evolution trigger 5개 평가 — milestone 3299%50=49≠0(trigger3). trigger5: 직전20(3280-3299) 표본 충족, 영구opt-out 9개 제외 review-code 다회 발화 — 미충족. trigger1/2/4 해당 없음. marker 미박제. ship-0 emergency stop 미충족(직전9(3291-3298) success 다수, fail 0건).
+
+다음 사이클 추천 = info-architecture-review (gap 30/30 도달 예정, cycle 3270 checkpoint 명시한 정규 재도달 시점).
+
 ## 🟡 PARTIAL — review-code(heavy): components/{dashboard,layout,picks} 전수 감사, 신규 drift 0건 (cycle 3298, 2026-10-19)
 
 진단: open issue 0건. approved plan 0/23 (23개 전부 completed/archived/non-approved). 2차 방어선: cycle 3297 retro commit(`019b55a8`) 존재 확인. 2-chain lock 미충족(직전8(3290-3297) distinct=4: fix-incident/review-code/operational-analysis/lotto). gap 전부 미도달(fix-incident 5/20·op-analysis 3/25·lotto 2/30, info-arch 27/30 근접하나 cycle 3270 checkpoint 가 "다음 30-cycle 재도달 = cycle 3300 근방" 명시 — 2 사이클 이르게 발화 시 조기 no-op 중복 우려로 보류). cycle 3297 retro 추천 중 "review-code(heavy) 잔여(components 계열)" 채택 — git log 전수 대조로 components/ 하위 20개 디렉토리 중 dashboard/layout/picks 3개만 과거 review-code(heavy) 커밋에 전혀 언급 없음을 확인(accuracy/glossary/search/shared/standings/teams/leaderboard/seasons/ui/live/players/reviews/analysis/matchup/predictions/insights/share 는 cycle 3233-3279 에 이미 커버).
