@@ -20,7 +20,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { normalizeMlbTeamCode } from '@moneyball/shared';
+import { normalizeMlbTeamCode, MLB_SCORING_RULE } from '@moneyball/shared';
 
 const APPLY = process.argv.includes('--apply');
 
@@ -58,7 +58,7 @@ async function main() {
     .from('predictions')
     .select('id, external_game_id')
     .eq('league', 'mlb')
-    .eq('scoring_rule', 'mlb_v0.1')
+    .eq('scoring_rule', MLB_SCORING_RULE)
     .is('home_sp_fip', null)
     .not('external_game_id', 'is', null);
   if (predErr) { console.error('predictions query error:', predErr.message); process.exit(1); }

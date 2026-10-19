@@ -45,6 +45,7 @@ const TIER_BOUNDS = [
 
 function tierOf(conf: number): string {
   for (const t of TIER_BOUNDS) if (conf >= t.min && conf < t.max) return t.label;
+  if (conf >= TIER_BOUNDS[TIER_BOUNDS.length - 1].max) return TIER_BOUNDS[TIER_BOUNDS.length - 1].label;
   return "low";
 }
 
