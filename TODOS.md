@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/accuracy+teams+picks 저-mention 6파일 신규 스코프 감사, 신규 drift 0건 (cycle 3356, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23(plan #30 completed, expiry 만료). 2-chain lock 미충족(직전8(3348-3355) distinct=3: review-code/fix-incident(lite)/skill-evolution). gap 전부 미도달(fix-incident 6/20·op-analysis 13/25·info-arch 26/30·lotto 22/30). explore-idea saturation 13/15 근접하나 4-source negative 확립 skip 패턴 유지. cycle 3355 추천 lib/picks 잔여/lib/teams 잔여/lib/accuracy 잔여 채택 — CHANGELOG mention 최저 6파일 선정(buildFactorAccuracy 0회, shadow-pair-prob/buildShadowCalibration/buildTeamEloTrend 1회, buildTeamRecentForm/buildCommunityAccuracy 2회).
+
+**감사**: Agent 1개 — 6파일 전수 read + 테스트 파일 대조 + twin 함수 비교(buildMlbFactorAccuracy, buildAccuracyData, buildPicksStats, buildTeamFactorAverages/Profile/StrengthSnapshot/Upcoming).
+
+**결과**: 신규 drift 0건. 전부 과거 cycle 2288/2290/2399/2409/3175 수정 흔적 보유 상태로 clean 확인 — neutral-band 경계 일치, MLB twin 과의 차이는 의도된 설계 차이(주석 명시), bucket boundary 중복/누락 없음, Supabase `.error` 처리 정상, KBO/MLB 변수 키 차이 외 twin 로직 동일.
+
+**검증(skill-evolution 등)**: trigger3(3356%50=6) 미충족. trigger5 — 직전20(3337-3356) review-code 다수 발화(0회 아님) 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3346-3355) success 5건(3348/3349/3351/3352/3355)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`lib/analysis`/`lib/insights`/`lib/matchup`/`lib/stats`/`lib/v2-shadow-monitor` 등 저-mention 디렉토리 재확인) 또는 fix-incident(gap 6)/op-analysis(gap 13)/info-arch(gap 26)/lotto(gap 22) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): app/api 잔여 route 3차분 6파일, naver-schedule twin bug 1건 fix (cycle 3355, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3354 retro `fc581ecc`) OK. 2-chain lock 미충족(직전8(3347-3354) distinct=4: polish-ui/review-code/fix-incident(lite)/skill-evolution). gap 전부 미도달(fix-incident 4/20·op-analysis 11/25·lotto 20/30·info-arch 24/30). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 8.8일 신선) 확립 skip 패턴 유지. cycle 3354 추천 app/api 잔여 6개(leaderboard/mlb-sync, kbo-scores, live, revalidate, snapshot-pitchers, sync-batter-stats) 채택.
