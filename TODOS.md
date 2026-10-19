@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — polish-ui: 2-chain lock fallback, DESIGN.md 기 문서화 drift 3종 재점검, 신규 drift 0건 (cycle 3362, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. **2-chain lock 충족** — 직전8(3354-3361) distinct=2(review-code+operational-analysis) → 두 chain 모두 제외. fix-incident gap=12/20(`gh run list` 재확인 CI Failure Dispatch 전부 skipped, 실 incident 부재)·lotto gap=28/30(cron 산출물 2026-10-17.md picks+results 모두 신선)·info-arch gap=2(cycle 3360 직후)·design-system(DESIGN.md mtime 211h, 4주 미달) 전부 미도달. explore-idea saturation 11/14(review-code10+fix-incident1, cycle 3360 JSON 누락으로 표본 14) 근접하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up stale) 확립 skip 패턴 유지. lock fallback 룰("어떤 chain 도 trigger 없으면 polish-ui 강제") 적용.
+
+**감사**: 본 메인 직접 — DESIGN.md Decisions Log 기 문서화 drift 3종 재점검. (1) `rounded-md` 리터럴 전역 grep 0건(cycle 2605 완전 소진 유지). (2) `text-gray-400 dark:text-gray-400`/`text-gray-500 dark:text-gray-500` flat 변형 전역 grep 각 0건. (3) "AI" 원형 배지(`DebateTimeline`/`JudgeReasoningCard`/`predictions/[date]`) 3곳 전부 `w-6 h-6` 일관(cycle 2611 fix 유지).
+
+**결과**: 신규 drift 0건. 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger3(3362%50=12) 미충족. trigger5 — 직전20(3343-3362) review-code 13회 발화로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3352-3361, 3360 JSON 누락) success 2건(3352,3355)으로 미충족. 2차 방어선(cycle 3361 retro `322e2e7b`) OK.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 복귀(app/api 잔여 또는 lib/analysis+insights 잔여) 또는 lotto(gap 29/30, 다음 도달)/fix-incident(gap 13/20) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/matchup+stats/pearson+insights/statusBadge 7파일 신규 스코프 감사, 신규 drift 0건 (cycle 3357, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3349-3356) distinct=3: review-code/fix-incident(lite)/skill-evolution). gap 전부 미도달(fix-incident 7/20·op-analysis 14/25·info-arch 27/30·lotto 23/30). cycle 3356 추천 lib/analysis/lib/insights/lib/matchup/lib/stats/lib/v2-shadow-monitor 재확인 — v2-shadow-monitor 는 cycle 2990 기수정 확인되어 제외, 나머지 중 CHANGELOG mention 최저(buildSeasonHeadToHead 3회·pearson 3회·statusBadge 4회·buildMatchupEloTrend 4회·canonicalPair 4회) 포함한 `lib/matchup` 5파일 + `lib/stats/pearson.ts` + `lib/insights/statusBadge.ts` 7파일 채택.
