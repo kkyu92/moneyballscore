@@ -1,5 +1,19 @@
 
 
+## ✅ SUCCESS — review-code(heavy): lib/{calendar,stats,observability,debug,leaderboard} 전수 감사 + 세션중단분 2건 R7 머지 지연 정리 (cycle 3303, 2026-10-19)
+
+진단: `~/.develop-cycle/active-cycle` 가 dead pid(50355) 가리킴 확인 — 직전 세션이 review-code(heavy) 작업(lib/{calendar,stats,observability,debug,leaderboard} 전수 감사) 완료 후 PR #3167 생성까지 하고 회고 단계 전 중단. open issue 0건, approved plan 0/23(plan #30 만료 확인, 자동 archive 대상 아님 — status completed 라 archive 불필요). 2-chain lock 미충족(직전8(3295-3302) distinct=4: lotto/review-code/info-arch/skill-evolution).
+
+**발견 1**: PR #3167 (cycle 3303 산출, `/debug/pipeline` page.tsx 의 `SkippedEntry`/`parseSkippedDetail` 가 `lib/debug/pipelineStats.ts` export 와 byte-identical 중복 — dedupe) CI green 확인 후 merge (`a36e25b2`).
+
+**발견 2 (R7 silent skip, lesson 커밋 별도 박제)**: `gh pr list --state open` 전수 스캔 중 PR #3165 (cycle 3296 review-code(heavy) 산출, `lib/accuracy·teams` 실제 drift — `buildFactorAccuracy.ts` FACTOR_KEYS 중복 + `buildTeamStrengthSnapshot.ts` CURRENT_MODEL_FILTER 오사용, cycle 2288/2290 동일 버그 클래스 재발) 이 CI green 상태로 cycle 3296→3303 (7 cycle) 미merge 방치 발견. CI 재확인(check/GitGuardian/Vercel 전부 pass, mergeable=MERGEABLE) 후 merge (`6677814e`).
+
+**원인**: 기존 2-layer 방어선(1차 자기cycle retro 자기검증 / 2차 직전cycle retro 결손감지)은 "retro commit 누락"만 커버 — "PR 생성했지만 merge 커맨드 미실행 후 세션 종료"하는 3번째 실패모드는 미커버. lesson 커밋에 제안 박제: 진단 단계 첫 step에 `develop-cycle/*` open PR 전수 스캔 + CI green 즉시 merge 루틴 추가 후보.
+
+**검증**: 두 PR 모두 `tsc --noEmit`/`eslint`/vitest 전체 suite 통과 상태로 CI green. push 전 로컬 lint+type-check+version-sync-guard 통과.
+
+다음 사이클 추천 = review-code(heavy) twin-audit vein 소진 근접(phase 53 권고 유지) — fix-incident/lotto/op-analysis/info-arch gap 자연 대기 또는 스코프 전환 검토.
+
 ## ✅ SUCCESS — skill-evolution: phase 53 (87회) 완료 + PR #3166 머지 지연분 정리 (cycle 3301, 2026-10-19)
 
 진단: 세션 시작 시 `develop-cycle/skill-evolution-3301` 브랜치에 commit `d1143351`(feat(skill): cycle 3300 milestone — skill-evolution 87회 phase 53)만 존재하고 PR #3166 이 CI 대기 상태로 open 방치 확인 — 직전 세션이 skill-evolution chain 실행(trigger 3 milestone, cycle 3300 marker 발화)까지 마치고 회고 단계(cycle_state JSON / marker 삭제 / signal) 완료 전 종료된 것으로 판단.
