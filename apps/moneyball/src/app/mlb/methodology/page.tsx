@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_ELO_K, MLB_ELO_K_POSTSEASON } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_ELO_K } from "@moneyball/kbo-data";
 import {
   SITE_URL,
   MLB_SCORING_RULE,
@@ -135,8 +135,9 @@ export default function MlbMethodologyPage() {
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           KBO 10팩터 동등(FIP·xFIP·wOBA·불펜FIP·최근폼·WAR·상대전적·구장보정·Elo·수비SFR) + Statcast 전용 4팩터를
           더한 {TOTAL}팩터 가중 합산 모델입니다. 팀별 Elo 레이팅은 KBO Fancy Stats 처럼 외부에서 받아오지 않고
-          자체 구현한 K-factor 갱신 로직(<code>K={MLB_ELO_K}</code>, 포스트시즌 <code>K={MLB_ELO_K_POSTSEASON}</code>{" "}
-          — FiveThirtyEight MLB Elo 모델의 공개 문헌 값 인용)으로 경기 결과마다 갱신합니다. 홈팀 어드밴티지는 KBO
+          자체 구현한 K-factor 갱신 로직(<code>K={MLB_ELO_K}</code>{" "}
+          — FiveThirtyEight MLB Elo 모델의 공개 문헌 값 인용, 포스트시즌 구분 없이 전 경기 동일 적용)으로 경기 결과마다
+          갱신합니다. 홈팀 어드밴티지는 KBO
           처럼 단일 고정값이 아니라 두 항목의 합산입니다 — elo 팩터 안에 내장된 홈 Elo 보너스({HOME_ELO_BONUS} Elo)
           + 별도 home_elo_bonus 가중치의 flat 가산. 중립 매치업(모든 팩터 동률) 기준 두 항목 합은 약{" "}
           +{HOME_NEUTRAL_TOTAL_PCT}%p — KBO 의 단일 실측 상수(+1.5%p)보다 구조적으로 큽니다.

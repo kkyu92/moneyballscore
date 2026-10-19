@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_ELO_K, MLB_ELO_K_POSTSEASON } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_ELO_K } from "@moneyball/kbo-data";
 import {
   SITE_URL,
   MLB_SCORING_RULE,
@@ -142,7 +142,7 @@ export default function MlbMethodologyEnPage() {
           The {TOTAL}-factor model is the 10 KBO-equivalent factors (FIP, xFIP, wOBA, bullpen FIP, recent form,
           WAR, head-to-head, park factor, Elo, defensive SFR) plus 4 Statcast-only factors. Team Elo ratings
           aren&apos;t sourced externally like KBO&apos;s — we run our own K-factor update loop (<code>K={MLB_ELO_K}</code>,{" "}
-          <code>K={MLB_ELO_K_POSTSEASON}</code> in the postseason, values cited from FiveThirtyEight&apos;s published
+          same value for every game including postseason, cited from FiveThirtyEight&apos;s published
           MLB Elo model) after every game. Home-field advantage isn&apos;t a single fixed value like KBO&apos;s —
           it&apos;s the sum of a home Elo bonus ({HOME_ELO_BONUS} Elo) baked into the elo factor, plus a separate
           flat home_elo_bonus weight. At a fully neutral matchup (every factor tied) the two sum to about{" "}
