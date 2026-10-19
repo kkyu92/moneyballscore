@@ -97,14 +97,47 @@ jobs:
             exit 0
           }
           git push -u origin "$BRANCH"
-          PR_URL=$(gh pr create \
-            --title "data(stale-data): ${DATE} weekly snapshot (cron)" \
-            --body "plan #9 Step 4 X2 — stale-data 자동 측정. scoring_rule cohort + 요일별 누적 + v1.8 진행 markdown 박제. CLAUDE.md / TODOS.md 직접 mutation 차단 (snapshot 만 commit, 수동 갱신 source-of-truth)." \
-            --label "automated,stale-data")
-          PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-          if gh pr checks "$PR_NUM" --watch --fail-fast; then
-            gh pr merge "$PR_NUM" --squash --delete-branch
-            echo "::notice::PR $PR_URL merged after CI green"
-          else
-            echo "::warning::CI failed for PR $PR_NUM — skip merge, needs manual review"
+
+          # gh pr create/merge transient API 503 대응 — op-analysis-weekly 와 동일 패턴
+          # (cycle 2156 incident: PR create 실패로 branch stranded, 다음 cron 1주일 후까지 방치됨)
+          PR_URL=""
+          for attempt in 1 2 3 4 5; do
+            if PR_URL=$(gh pr create \
+              --title "data(stale-data): ${DATE} weekly snapshot (cron)" \
+              --body "plan #9 Step 4 X2 — stale-data 자동 측정. scoring_rule cohort + 요일별 누적 + v1.8 진행 markdown 박제. CLAUDE.md / TODOS.md 직접 mutation 차단 (snapshot 만 commit, 수동 갱신 source-of-truth)." \
+              --label "automated,stale-data" 2>&1); then
+              break
+            fi
+            echo "::warning::gh pr create attempt ${attempt} failed: ${PR_URL}"
+            PR_URL=""
+            sleep $((attempt * 10))
+          done
+
+          if [ -z "$PR_URL" ]; then
+            echo "::error::gh pr create failed after retries — branch $BRANCH pushed but no PR. Recover manually: gh pr create --head $BRANCH"
+            exit 1
           fi
+
+          PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+
+          if ! gh pr checks "$PR_NUM" --watch --fail-fast; then
+            echo "::warning::CI failed for PR $PR_NUM — skip merge, needs manual review"
+            exit 0
+          fi
+
+          MERGED=false
+          for attempt in 1 2 3 4 5; do
+            if gh pr merge "$PR_NUM" --squash --delete-branch; then
+              MERGED=true
+              break
+            fi
+            echo "::warning::gh pr merge attempt ${attempt} failed"
+            sleep $((attempt * 10))
+          done
+
+          if [ "$MERGED" != "true" ]; then
+            echo "::error::gh pr merge failed after retries — PR #$PR_NUM created, CI green, but merge failed. Recover manually: gh pr merge $PR_NUM --squash --delete-branch"
+            exit 1
+          fi
+
+          echo "::notice::PR $PR_URL merged after CI green"
