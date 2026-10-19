@@ -1,4 +1,18 @@
 
+## 🟡 PARTIAL — fix-incident: op-analysis-weekly/factor-backtest-weekly cron DNS flake 재발, retry 로직 추가 (cycle 3329, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23. 2차 방어선: `cycle-retro 3328`(`ddc2c6f6`) 정상 확인. 직전8(3322-3329 평가 시점 기준 3321-3328) distinct=4 — 2-chain lock 미충족. info-arch gap 29/30(미도달), lotto gap 25/30(미도달), fix-incident 자체 gap 2/20(미도달, 실측 대기 사유 1/20이었으나 trigger 1 버그/에러 직접 발견으로 즉시 자연 발화). `gh run list --workflow=` 로 6개 스케줄 워크플로(health-alert/deploy-drift-alert/heartbeat-stale/factor-backtest-weekly/op-analysis-weekly/data-refresh-weekly) 전수 점검 중 **op-analysis-weekly 최근 3회 중 2회 실패(10-05/10-12), factor-backtest-weekly 최근 3회 중 2회 실패(10-04/10-11)** 발견.
+
+**근본 원인**: 로그 확인 결과 둘 다 cycle 3327 이 data-refresh-weekly 에서 고친 것과 동일 — GH Actions runner → Supabase REST `TypeError: fetch failed` / `getaddrinfo ENOTFOUND <project>.supabase.co`(op-analysis-weekly) 및 `teams load: TypeError: fetch failed`(factor-backtest-weekly). cycle 3327 fix 는 data-refresh-weekly 1개 워크플로만 수정 — 같은 DNS flake 에 노출된 나머지 2개 워크플로는 범위 밖이었음(재시도 로직 부재 공통).
+
+**수정**: 두 워크플로 모두 동일 패턴(3회 재시도, 15초 간격) 적용(`d587c5bd`). `op-analysis-weekly.yml` 은 data-refresh-weekly 와 동일 구조(if-break loop). `factor-backtest-weekly.yml` 은 `set -eo pipefail` + `tee` 구조라 재시도 루프 안에 fetch failed/ENOTFOUND grep 가드 추가(출력은 비어있지 않아도 에러 메시지만 담긴 채 성공 종료될 수 있어 `-s` 체크만으론 불충분).
+
+**검증**: pre-push lint+type-check+vitest(3/3 PASS) 통과, YAML syntax 검증(`python3 -c "import yaml..."`) OK, 단일 논리 단위 직접 main commit+push(R4). **미검증 — 실측 fire 대기**: op-analysis-weekly 다음 fire = 월 17:45 UTC(화 KST 새벽), factor-backtest-weekly 다음 fire = 일 17:33 UTC — 둘 다 수일 후. chain stop 조건(실측 fire PASS) 미충족으로 SUCCESS 선언 보류(CLAUDE.md R5 / 사례 18 lesson 정합, cycle 3327 과 동일 패턴).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3329%50=29≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3310-3329, 현재 포함) 표본 20≥10, 평가대상 review-code(heavy) 다수 발화로 미충족). marker 미박제. ship-0 — 직전10(3320-3329) success 다수(3321/3324/3328 RETRO 포함 혼재, 3324 SUCCESS)로 미충족.
+
+다음 사이클 추천 = **op-analysis-weekly/factor-backtest-weekly 다음 실제 fire 결과 확인**(각각 월/일 UTC 스케줄, 수일 소요) 또는 info-arch(gap 30/30, 다음 사이클 정확 도달)/lotto(gap 26/30) 자연 대기 또는 review-code(heavy) 신규 스코프 탐색(기존 스코프 cycle 3328 기준 거의 소진 확인됨).
+
 ## ⚪ RETRO-ONLY — review-code(heavy): migrations 051-053 신규 교차검증, 신규 drift 0건 (cycle 3328, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23. 2차 방어선: `cycle-retro 3327`(`8fdfb7a7`) 정상 확인. 직전8(3321-3328) distinct=4(review-code(heavy)5+operational-analysis(lite)1+polish-ui1+fix-incident1) — 2-chain lock 미충족. gap 전부 미도달(fix-incident 1/20, 실측 검증은 2026-10-20 17:15 UTC 예정이라 재방문 불가·info-arch 28/30·lotto 24/30·op-analysis 5/25). explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9.7일 신선) — 확립된 skip 패턴 유지.
