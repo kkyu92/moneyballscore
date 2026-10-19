@@ -1,4 +1,12 @@
 
+## 🟡 PARTIAL — review-code(heavy): lib/{matchup,predictions,insights,dashboard,analysis} 전수 감사(4141줄), 신규 drift 0건 (cycle 3310, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23. 직전8(3302-3309) distinct=3(review-code(heavy)6+lotto1+fix-incident1) — 2-chain lock 미충족. fix-incident gap=5·lotto gap=6·op-analysis gap=16·info-arch gap=10 전부 미근접. 2차 방어선: `cycle-retro 3309` 1건 정상 확인(결손 없음). app/api 20/20 완료(cycle 3308) 후 TODOS 권고대로 lib/ 미감사 영역 채택.
+
+**감사 결과**: `matchup/`(buildMatchupProfile vs buildMatchupUpcoming 의 PRODUCTION_COHORT_RULES vs CURRENT_SCORING_RULE 구분 의도된 설계 확인) / `predictions/`(judgeReasoning FALLBACK_PREFIXES 가 debate.ts/postview.ts 실제 fallback 문자열과 정확 일치) / `insights/`(canonicalPair 45=10C2 KBO_TEAM_COUNT 일치) / `dashboard/`(buildModelTuningInsights CURRENT_MODEL_FILTER 가 config/model.ts 정의와 일치 — 과거 버그 클래스 재발 없음, buildHallucinationStats agent/passed 컬럼이 migration 022 스키마와 일치) / `analysis/`(computeCompositeDuel KBO 10팩터 vs computeMlbCompositeDuel MLB 6팩터 비대칭이 FACTOR_LABELS/DEFAULT_WEIGHTS 와 정확 일치하는 의도된 설계 — elo/recent_form/head_to_head MLB 미연동 + sfr MLB 미구현이 주석에 명시됨, FACTOR_TOTAL 정규화가 cycle 3279 fix 와 일치). 신규 drift 0건, 코드 변경 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속 (lib/ 잔여 11개: api/changelog/lotto/picks/players/reviews/seasons/seo/standings/supabase/v2-shadow-monitor) 또는 fix-incident/lotto/op-analysis/info-arch gap 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): app/api/{mlb/waitlist,picks/mlb-poll,picks/mlb-submit,picks/poll,picks/results,picks/submit,seo/indexnow/ping,sync-batter-stats} 전수 감사, 신규 drift 0건 — app/api/ 전체 20/20 route 누적 감사 완료 (cycle 3308, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23(전수 status 재확인 — approved 상태 0건 확정). 직전8(3300-3307) distinct=5(review-code(heavy)4+info-arch1+skill-evolution1+lotto(lite)1+fix-incident1) — 2-chain lock 미충족. fix-incident gap=3·lotto gap=4·op-analysis gap=14·info-arch gap=8 전부 미근접. 직전 cycle(3307) retro commit 결손 감지 — `git log --grep "cycle-retro 3307 " -F` 1건 정상 확인(2차 방어선 clean). review-code(heavy) 3연속 success(3303/3306/3307) 후 twin-audit vein 소진 임박 — 지난 retro 권고대로 `app/api/` 잔여 8개 route 채택.
