@@ -1,4 +1,18 @@
 
+## 🟡 PARTIAL — review-code(heavy): app/api picks/mlb/seo 저-mention 4개 route 전수 감사, 신규 drift 0건 (cycle 3326, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved/archived, plan #30 expiry 2026-10-18 경과). 2차 방어선: `cycle-retro 3325`(`62200c63`) 정상 확인, 결손 없음. 직전8(3318-3325) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족(≤2 조건 불충족). gap 전부 미근접(fix-incident 10/20·lotto 22/30·op-analysis 3/25). info-arch gap 26/30 근접하나 미도달. explore-idea saturation 직전15 13/15(≥12 수치상 충족)이나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9일 신선) — 확립된 skip 패턴 유지. review-code(heavy) 직전 3연속 recommend(3323/3324/3325 전부 "review-code(heavy) 계속" 추천) 자연 발화.
+
+**스코프 선정**: `app/api/` route 전체 mention count 재측정 — `seo/indexnow/ping`(1회)·`picks/mlb-submit`(2회)·`mlb/waitlist`(3회)·`picks/mlb-poll`(4회) 4개가 최저 mention 확인 (cycle 3324 추천한 `features/`/`notify/` 는 실제로는 cycle 3090 에서 이미 전수 감사 완료된 stale carry-over였음을 CHANGELOG 재대조로 확인 — mention 18/24회로 사실 고빈도).
+
+**감사 내용**: 4개 route(총 294줄) 전수 read + KBO 쌍둥이 route 1:1 대조(`picks/submit`↔`picks/mlb-submit`, `picks/poll`↔`picks/mlb-poll` — game_id INT vs external_game_id VARCHAR 타입 분리만 의도된 차이, 그 외 검증 로직·Sentry 태깅·DB upsert 패턴 완전 정합). `mlb/waitlist`는 migration `028_waitlist.sql` DB CHECK 제약(email regex/length)과 route 내 `EMAIL_REGEX`/length 검증 바이트 단위 대조 — 정합(JS `\s` vs POSIX `[:space:]` 표기만 차이, 동치). `seo/indexnow/ping` 은 짝 파일 `[indexnowKey].txt/route.ts` 와 `.trim()` 처리(cycle 3217 버그 클래스 방지) 양쪽 다 적용 확인 — 짝 유지 정상.
+
+**결론**: actionable 신규 drift 0건 — 4개 route 전부 clean. 코드 변경 없음, PR 없음(retro-only 범주).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례 유지)/trigger2(5연속 fail 없음)/trigger3(3326%50=26≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3307-3326, 현재 포함) 표본 20≥10, 평가대상 review-code(heavy) 15/20 발화로 미충족). marker 미박제. ship-0 — 직전10(3317-3326) success 다수(3318/3321/3323/3324)로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/api/health/pipelines`(5회)·`leaderboard/mlb-sync`(5회, 재확인) 등 잔여 저-mention route) 또는 info-arch(gap 27/30, 다음 사이클 도달 근접)/fix-incident(gap 11/20)/lotto(gap 23/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — polish-ui: 2-chain lock 강제 발화, 정적 디자인 감사 (cycle 3325, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23. 2차 방어선: `cycle-retro 3324`(`77391b99`) 정상 확인. 직전8(3317-3324) distinct=2(review-code(heavy)7+operational-analysis(lite)1) — 2-chain alternation lock(cycle 225 룰) 탐지, 둘 다 후보 제외(lock 안 fix-incident 없어 무시 불가). 잔여 pool 전부 trigger 미근접(fix-incident gap 9/20·lotto gap 21/30·info-arch gap 25/30, explore-idea 4-source negative 확립 skip, DESIGN.md mtime 9일 신선 design-system 미근접) — 룰 4 "어떤 chain 도 trigger 없으면 polish-ui 강제 발화" 적용.
