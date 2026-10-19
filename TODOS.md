@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/analytics/ 전수 감사, 요일별 집계 KST 변환 누락 버그 수정 (cycle 3324, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved). 2차 방어선: `cycle-retro 3323`(`39717d8d`) 정상 존재 확인, 결손 없음. 직전8(3316-3323) distinct=3(review-code(heavy)6+fix-incident1+operational-analysis(lite)1) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 8/20·op-analysis 1/25(직전 발화)·lotto 20/30·info-arch 24/30). explore-idea saturation 2/15 미충족. DESIGN.md mtime 9일(4주 미만) — design-system trigger 無. `gh run list` 스케줄 워크플로(health-alert/deploy-drift-alert/heartbeat-stale) 전부 success, CI 신규 실패 無.
+
+**스코프 선정**: `components/` 전 디렉토리(analysis/matchup/picks/layout/shared/accuracy/dashboard/predictions/live/share/glossary/leaderboard/reviews/seasons/players/teams/standings/search/insights/ui) 가 history 상 다회 전수 감사 완료 확인(grep 교차검증) — 신규 미감사 축 탐색 필요. `packages/kbo-data/src/` 하위 디렉토리별 mention count 측정 결과 `analytics/`(1파일, mention 0건) 완전 미감사 확인 → 선택.
+
+**발견**: `stale-data-snapshot.ts`(plan #9 Step 4, `data-refresh-weekly` cron 이 매주 실행해 CLAUDE.md/TODOS.md 요일별 성과 source-of-truth markdown 생성) 의 `buildStaleSnapshot()` 요일별 집계가 `verified_at`(DB UTC 저장)을 KST 변환 없이 `dt.getUTCDay()` 로 직접 버킷팅 — CLAUDE.md 명시 원칙("날짜는 KST 기준, DB 저장은 UTC") 위반. 동일 저장소 안 `apps/moneyball/src/lib/accuracy/buildAccuracyData.ts`(`buildDayOfWeek`) 는 이미 `KST_OFFSET_MS`(`@moneyball/shared`) 더한 후 `getUTCDay()` 하는 정확한 패턴 보유 — 같은 버그 클래스가 두 구현 사이 불일치로 존재(`scripts/op-analysis-cohort.ts` 도 동일 미변환 패턴이나 1회성 분석 스크립트라 영향 낮음, 이번 스코프는 cron 정기 산출물인 `stale-data-snapshot.ts` 만 수정). 실제 영향: UTC 15:00 이후(KST 자정 이후) 검증된 경기가 실제보다 하루 이른 요일로 집계됨 — KBO 연장전 등으로 자정 넘겨 끝나는 경기 비중 고려 시 비무시 가능한 수준.
+
+**수정**: `KST_OFFSET_MS` import + 요일 계산에 적용(`dd2e2b54`). 회귀 테스트 1건 추가(UTC 자정 경계 넘는 케이스가 KST 기준 올바른 요일로 버킷팅되는지 검증) — 기존 12개 테스트는 전부 UTC 10:00 데이터라 KST 변환해도 같은 날짜라 결과 불변 확인(regression-safe).
+
+**검증**: `pnpm --filter @moneyball/kbo-data exec vitest run src/__tests__/stale-data-snapshot.test.ts`(13/13 PASS, 신규 1건 포함) + 패키지 전체 vitest(96 files/1221 tests PASS) + `tsc --noEmit` clean + pre-push lint/type-check/version-sync-guard 전부 PASS. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3324%50=24≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3305-3324, 현재 포함) 표본 20(≥10 충족), 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3315-3324) success 다수(3315/3316/3318/3321/3323/3324)로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/features/`(1파일, mention 2건 낮음) 또는 `packages/kbo-data/src/notify/`(1파일, mention 2건) 잔여 저-mention 축) 또는 fix-incident(gap 9/20)/lotto(gap 21/30)/info-arch(gap 25/30)/op-analysis(gap 2/25) 자연 대기.
+
 ## ✅ SUCCESS — operational-analysis(lite): CE/비CE Brier 격차 31회 연속 재확인, gap 계산 버그 정정 (cycle 3323, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23. 2차 방어선: `cycle-retro 3322` 정상 확인(결손 없음). 직전8(3315-3322) distinct=3(review-code(heavy)6+operational-analysis(lite)1+fix-incident1) — 2-chain lock 미충족(≤2 조건 불충족). **진단 단계 계산 오류 발견**: op-analysis last-fire gap 측정 시 `chain_selected` 정확 일치(`== 'operational-analysis'`)로 검색해 `operational-analysis(lite)` 저장 포맷(괄호 접미사)을 매칭 못 해 cycle 3315 발화를 놓치고 gap=29/25 trigger 오판(실제 gap=8). cycle 3322 TODOS 에 이미 같은 클래스 버그("split()[0] prefix 매칭 교정")가 기록돼 있었음에도 본 사이클 초기 측정에서 재발 — 정확 일치가 아닌 `startswith`/substring 매칭 필요성 재확인.
