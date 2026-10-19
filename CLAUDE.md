@@ -69,11 +69,12 @@ agent-loop 자율 cron (`self-develop.yml` + cloudflare worker dispatch) **폐�
 
 ### 자동 머지 정책 — 묻지 말고 실행 (R7, R4 PR 차원 확장 — 2026-05-01)
 
-R4 (자동 commit) 의 PR 차원 확장. 본 메인이 만든 PR + CI green → **묻지 않고 즉시 `gh pr merge <#> --squash --auto --delete-branch`** 활성화. develop-cycle 사이클 운영을 사용자 머지 confirm 없이 closed loop 자동화.
+R4 (자동 commit) 의 PR 차원 확장. 본 메인이 만든 PR + CI green → **묻지 않고 즉시 `gh pr checks <#> --watch --fail-fast` 대기 후 `gh pr merge <#> --squash --delete-branch`** 활성화. develop-cycle 사이클 운영을 사용자 머지 confirm 없이 closed loop 자동화.
 
-- `--auto` → CI green 자동 대기 후 머지 (push 직후 활성화 안전)
+- `gh pr checks --watch --fail-fast` → CI green 명시적 대기 (아래 "cycle 3292 발견" 참조 — `--auto` 단독은 `main` 에 branch protection 부재 시 대기 없이 즉시 머지돼 CI 가 실질 무력화됨)
 - `--squash` default → submit-lesson workflow 의 PR /commits API fallback (#34 머지 후) 로 lesson 차원 PR squash 도 silent skip 차단됨
 - `--delete-branch` → 머지 후 head branch 자동 정리 (origin)
+- **cycle 3292 발견 (fix-incident, 사례 20)**: `main` branch protection 부재(`gh api .../branches/main/protection` → 404) 확인 → `--auto` 는 required status check 가 없으면 대기 없이 즉시 머지. 증거: PR #3160(factor-backtest) CI run 생성 19:34:51Z, PR 머지 19:34:52Z — 1초 차. CI 는 `pull_request` 트리거로 시작되지만 `--delete-branch` 가 그 직후 즉시 branch 삭제 → CI 가 "workflow file issue" 로 실패(checkout 대상 ref 소실). develop-cycle 자체 PR 도 동일 — 최근 CI run 이력에 `develop-cycle/*` 브랜치의 `pull_request` 트리거 run 자체가 기록되지 않고 머지 후 `main` push 트리거 run 만 존재(사후 검증, 머지 전 검증 아님). 5개 cron workflow(`data-refresh-weekly`/`factor-backtest-weekly`/`lotto-result-update`/`lotto-pick-update`/`op-analysis-weekly`) 전부 `gh pr checks --watch --fail-fast` 선행 후 머지로 수정 완료(cycle 3292). branch protection 추가(repo 설정 변경)는 전체 자동 머지 파이프라인 stall 위험 있어 보류 — 대신 호출부에서 명시적 대기로 해결.
 
 **자동 적용 대상**:
 - 본 메인이 직접 작성한 PR (4 prefix `lesson:`/`policy:`/`feedback:`/`memory:` + `feat:`/`fix:`/`data:`/`content:`/`refactor:`/`docs:`/`build:`/`ci:`/`perf:`/`test:`/`style:` + Conventional Commit scope 포함)
@@ -87,8 +88,8 @@ R4 (자동 commit) 의 PR 차원 확장. 본 메인이 만든 PR + CI green → 
 - secrets/credentials 포함 PR → 자동 진행 X
 
 **진행 흐름**:
-1. PR 생성 직후 즉시 `gh pr merge <#> --squash --auto --delete-branch` 활성화
-2. CI green 자동 대기 → 머지 → branch 자동 정리
+1. PR 생성 직후 즉시 `gh pr checks <#> --watch --fail-fast` 로 CI green 명시적 대기
+2. 대기 성공 시 `gh pr merge <#> --squash --delete-branch` → 머지 → branch 자동 정리. CI red 시 머지 skip + 사용자 보고
 3. 결과 보고 — PR # + 머지 commit hash + 다음 단계 한 줄
 
 **역사적 갭 (#34 이전)**: `lesson:` 차원 PR 을 squash 머지하면 head_commit + commits 배열 모두 squash 결과 (PR title) 만 남아 submit-lesson workflow silent skip. 회피 위해 PR #32 가 `--merge` 강제. 본 fix #34 가 `gh api repos/.../pulls/NN/commits` fallback 추가 → squash 도 안전. R7 시점부턴 squash default.

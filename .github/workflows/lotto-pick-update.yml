@@ -131,7 +131,11 @@ jobs:
             --label "automated,lotto" 2>/dev/null || echo "")
           if [ -n "$PR_URL" ]; then
             PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-            gh pr merge "$PR_NUM" --squash --auto --delete-branch
-            echo "::notice::PR $PR_URL queued for auto-merge"
+            if gh pr checks "$PR_NUM" --watch --fail-fast; then
+              gh pr merge "$PR_NUM" --squash --delete-branch
+              echo "::notice::PR $PR_URL merged after CI green"
+            else
+              echo "::warning::CI failed for PR $PR_NUM — skip merge, needs manual review"
+            fi
           fi
 
