@@ -1,4 +1,16 @@
 
+## 🟡 PARTIAL — review-code(heavy): lib/reviews 전수 감사(1804줄), 신규 drift 0건 — lib/ 대형 디렉토리 전수 커버리지 완료 (cycle 3313, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved). 직전8(3306-3313) distinct=2(fix-incident1+review-code(heavy)7) — 2-chain lock 탐지되나 lock 안에 fix-incident 포함 → 안전 우선 룰로 lock 무시, 정상 선택 진행. gap 전부 미근접(fix-incident 8/20·op-analysis 19/25·info-arch 13/30·lotto 9/30). 2차 방어선: `cycle-retro 3312` 1건 정상 확인(결손 없음). explore-idea saturation 직전15(3299-3313) 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9일 신선) — 확립된 skip 패턴 유지. cycle 3312 TODOS 권고대로 lib/ 마지막 대형 잔여 reviews 채택.
+
+**감사 결과**: 9개 파일(shared.ts/computeWeekRange.ts/computeMonthRange.ts/buildWeeklyReview.ts/buildMonthlyReview.ts/buildMissReport.ts/mlb-shared.ts/buildMlbWeeklyReview.ts/buildMlbMonthlyReview.ts) 전수 read. `mlb-shared.ts`의 `buildMlbMissReport`가 `mlbShortTeamName(raw s.home_team_code)`를 `normalizeMlbTeamCode` 없이 호출하는 점을 의심했으나, `mlbShortTeamName` 내부가 자체적으로 `normalizeMlbTeamCode`를 호출해 alias 팀도 안전 처리됨을 소스 확인 — 실제 버그 아님. `buildMlbTeamStats`의 `sortBy` 옵션 부재 시 "가장 정확했던 팀"이 실제론 "가장 많이 예측된 팀"으로 오라벨링되는 parity bug 주석(mlb-shared.ts 217-221행)은 git log 재확인 결과 cycle 3071(PR `62c3bab6`)에서 이미 수정 완료된 이력 — 신규 drift 아님. `computeWeekRange.ts`/`computeMonthRange.ts`의 KST_OFFSET_MS 경계 보정도 각각 기존 fix 이력(wave 145/cycle 2510)과 일치. 신규 drift 0건, 코드 변경 없음.
+
+**커버리지 완료**: `lib/` 대형 디렉토리(matchup/predictions/insights/dashboard/analysis → cycle 3310, api/changelog/lotto/seasons/seo/standings/supabase/v2-shadow-monitor → cycle 3311, picks/players → cycle 3312, reviews → 본 cycle) 전수 감사 완료. `app/api/` 20/20(cycle 3308) + `lib/` 대형 디렉토리 전수 완료 — twin-audit vein 이 `lib/` 범위에서도 소진 단계. 다음 review-code(heavy)는 `components/` 또는 `packages/kbo-data/src/` 로 스코프 전환 필요.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 기존 관례대로 평가 보류)/trigger2(5연속 fail 없음)/trigger3(3313%50=13≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3294-3313) chain pool 분포: review-code(heavy)11+review-code2+fix-incident1+info-arch1+lotto1+lotto(lite)1+op-analysis1+skill-evolution1, 0회 chain 없음) 전부 미충족. marker 미박제. ship-0 — 직전10(3304-3313) success 3건(3305/3306/3307/3309 중 일부 포함)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 스코프 전환(components/ 또는 packages/kbo-data/src/ 미감사 영역 탐색) 또는 fix-incident/lotto/op-analysis/info-arch gap 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): lib/{picks,players} 전수 감사(1106줄), 신규 drift 0건 (cycle 3312, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved). 직전8(3304-3311) distinct=3(lotto1+fix-incident1+review-code(heavy)6) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 7/20·op-analysis 18/25·info-arch 12/30·lotto 8/30). 2차 방어선: `cycle-retro 3311` 1건 정상 확인(결손 없음). explore-idea saturation 직전15(3297-3311) 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8.6일 신선) — 확립된 skip 패턴 유지. cycle 3311 TODOS 권고대로 lib/ 잔여 대형 3개 중 picks(1561줄 — 실제 non-test 소스는 532줄, 나머지 테스트) + players(904줄 — 소스 574줄) 2개 채택, reviews(2816줄)는 다음 사이클 이월.
