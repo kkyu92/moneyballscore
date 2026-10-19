@@ -47,13 +47,24 @@ jobs:
           mkdir -p apps/moneyball/data/backtest-results
           DATE=$(date -u +%Y-%m-%d)
           OUT="apps/moneyball/data/backtest-results/${DATE}-manual-weights.txt"
-          pnpm exec tsx packages/kbo-data/src/pipeline/backtest-manual-weights-run.ts 2>&1 | tee "$OUT"
+          # GH runner ↔ Supabase DNS 일시 실패(fetch failed/ENOTFOUND) 대응 — data-refresh-weekly 와 동일 원인 재발 확인(cycle 3329)
+          for attempt in 1 2 3; do
+            if pnpm exec tsx packages/kbo-data/src/pipeline/backtest-manual-weights-run.ts 2>&1 | tee "$OUT"; then
+              [ -s "$OUT" ] && ! grep -qE "fetch failed|ENOTFOUND" "$OUT" && break
+            fi
+            echo "::warning::backtest attempt $attempt failed, retrying..."
+            sleep 15
+          done
           if [ ! -s "$OUT" ]; then
-            echo "::error::backtest output empty"
+            echo "::error::backtest output empty after 3 attempts"
             exit 1
           fi
           if grep -qE "Command \"tsx\" not found|ERR_PNPM" "$OUT"; then
             echo "::error::tsx invocation failed (silent drift family)"
+            exit 1
+          fi
+          if grep -qE "fetch failed|ENOTFOUND" "$OUT"; then
+            echo "::error::backtest failed after 3 attempts (DNS flake persisted)"
             exit 1
           fi
           echo "::notice::backtest result saved to $OUT"

@@ -47,9 +47,16 @@ jobs:
           mkdir -p apps/moneyball/data/op-analysis
           DATE=$(date -u +%Y-%m-%d)
           OUT="apps/moneyball/data/op-analysis/${DATE}-cohort-split.md"
-          pnpm exec tsx scripts/op-analysis-cohort.ts "$OUT" 2>&1 | tail -50
+          # GH runner ↔ Supabase DNS 일시 실패(ENOTFOUND) 대응 — data-refresh-weekly 와 동일 원인 재발 확인(cycle 3329)
+          for attempt in 1 2 3; do
+            if pnpm exec tsx scripts/op-analysis-cohort.ts "$OUT" 2>&1 | tail -50; then
+              [ -f "$OUT" ] && break
+            fi
+            echo "::warning::cohort split attempt $attempt failed, retrying..."
+            sleep 15
+          done
           if [ ! -f "$OUT" ]; then
-            echo "::error::cohort split markdown not generated"
+            echo "::error::cohort split markdown not generated after 3 attempts"
             exit 1
           fi
           LINES=$(wc -l < "$OUT")
