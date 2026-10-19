@@ -316,9 +316,11 @@ describe("plan #7 Step E — lotto-pick-update cron workflow regression", () => 
     expect(yaml).toContain("scripts/lotto.ts pick-md");
   });
 
-  it("update workflow PR auto-merge 박제 (R7 정합)", () => {
+  it("update workflow PR auto-merge 박제 (R7 정합, CI green 명시 대기 후 머지)", () => {
     const yaml = readFileSync(UPDATE_YAML, "utf-8");
-    expect(yaml).toContain("--squash --auto --delete-branch");
+    expect(yaml).toContain("gh pr checks");
+    expect(yaml).toContain("--watch --fail-fast");
+    expect(yaml).toContain("--squash --delete-branch");
   });
 
   it("monitor workflow cron = '0 17 * * 5' (KST 토 02:00)", () => {
