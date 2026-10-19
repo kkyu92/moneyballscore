@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): scripts/ 저-mention 8파일 배치 감사, 2건 fix + 데이터 backfill (cycle 3348, 2026-10-19, retroactive backfill)
+
+cycle 3347 추천대로 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 복귀, scripts/ 잔여 저-mention 8파일(run-pipeline/backfill-kbo-confirmed-postponed/smoke-umpire-scraper/dev-backend-compare/llm-context-baseline/measure-n178-vs-n165/backfill-is-correct-shadow-fix/backfill-kbo-stuck-verify) 배치 감사.
+
+**발견+수정 2건**: `run-pipeline.ts` 의 `runDailyPipeline()` 호출 시 `triggeredBy` 인자 누락 — `daily.ts` 기본값 `'api'` 로 기록돼 수동 CLI 실행이 실제 API 트리거와 `pipeline_runs.triggered_by` 에서 구분 불가능했음, `'manual'` 명시로 수정. `dev-backend-compare.ts` 의 `parseResponse()` 가 team 을 `'LG'` 하드코딩 — 실제 호출측 인자로 교체(현재는 항상 LG 관점만 호출돼 무해하나 OB 쪽 확장 시 silent 오류 위험 선제 차단). 나머지 6개 CLEAN.
+
+**운영 이슈 1건**: 감사 중 `backfill-kbo-stuck-verify.ts` 진단 모드 실행으로 KBO 게임 5개 날짜(08-16/08-28/09-09/09-10/10-04)가 `status='scheduled'` 영구 고착(사례 33 family, 시즌 종료 후 재검증 기회 없이 방치) 발견 — `--apply` 로 재검증 실행(games upsert 23 / accuracy 갱신 3 / errors 0), 09-09·09-10·10-04 완전 해소 + 08-16 부분 해소(5중 3 final). 08-28 은 KBO API 자체가 여전히 'scheduled' 응답(미확정 우천취소 추정)으로 잔존, 다음 사이클 자연 재시도 대기.
+
+직접 main 커밋(R4 범위, PR 미경유, `09aefa35`+`69fa83f9`).
+
+**세션 중단 사각지대 재발 (사례 15 family)**: 두 fix/data 커밋은 정상 생성됐으나 세션이 retro 단계 도달 전 종료 — retro commit/JSON 양쪽 누락 상태로 방치. cycle 3349 진단 2차 방어선(직전 사이클 retro commit 결손 감지)에서 발견, 본 사이클에서 retroactive backfill.
+
+다음 사이클 추천 = review-code(heavy) 계속(scripts/ 잔여 15개 저-mention 파일) 또는 fix-incident(gap 20/20 도달)/lotto(gap 15/30)/info-arch(gap 19/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — polish-ui: DESIGN.md token/radius 정합성 재점검, 신규 drift 0건 (cycle 3347, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3346 retro `0d0c147b`) 확인 OK. **2-chain lock 탐지**(직전8(3339-3346): review-code(heavy/변형) 7 + operational-analysis(lite) 1, distinct=2) → review-code/operational-analysis 후보 제외. gap 전부 미도달(fix-incident 19/20·lotto 14/30·info-arch 18/30, op-analysis 는 lock 대상이라 평가 제외). explore-idea saturation 미충족(직전15(3332-3346) review-code/fix-incident/polish-ui/info-arch=13+1+0+1=15≥12 충족이나 review-code 자체가 lock 대상). 신규 7일 라우트 0건(git log 확인, find mtime 는 checkout 오탐). → lock fallback 규정대로 `polish-ui` 강제 선택.
