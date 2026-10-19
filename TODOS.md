@@ -15295,3 +15295,19 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **교훈**: "세션중단 인계" 패턴이 cycle 3303 → cycle 3306 으로 2건째 재발 — review-code(heavy) 가 heavy 작업(전수 감사 + 코드 수정 + PR)이라 소요 시간이 길어 세션 경계(watch.sh hard cap 또는 사용자 /develop-cycle 재호출 타이밍)에 걸릴 위험이 구조적으로 높음. 완화책 = 매 cycle 진단 단계 첫 step 에서 로컬 브랜치 상태 + 미병합 PR 유무를 git status 로 즉시 확인하는 기존 패턴(cycle 3303 에서 이미 "active-cycle stale 발견 시 대응 PR 유무 확인" 으로 기록됨)이 2번째도 정상 작동 — 추가 SKILL.md 변경 불필요, 기존 패턴 재확인만으로 충분.
 
 다음 사이클 추천 = review-code(heavy) `packages/kbo-data/src/{context,factors,engine,analytics}` 잔여 파일 감사 계속 또는 fix-incident/lotto/info-arch gap 자연 대기.
+
+## ✅ SUCCESS — review-code(heavy): apps/moneyball/src/lib/mlb 18파일 중 16개 전수 감사, buildMlbTeamAccuracy.ts alias 팀 silent drift 발견+수정 (cycle 3309, 2026-10-19)
+
+진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3308 retro commit(`a6d3fbd3`) 존재 확인. 2-chain lock 미충족(직전8(3301-3308) distinct=4). fix-incident(gap 4)·lotto(gap 5)·op-analysis(gap 15)·info-arch(gap 9) 전부 미도달. cycle 3308 TODOS carry-over 가 명시한 `apps/moneyball/src/lib/mlb` 전수 감사 계속 — 실제 파일 수를 `ls` 로 재확인하니 18개(cycle 3302 carry-over 메모의 "17개"는 stale count, 당시 수동 집계 오차로 추정).
+
+**실행**: 18개 파일 중 16개 전수 read(deriveMlbOutcome/mlbCanonicalPair/buildMlbSeasonHeadToHead/buildMlbMatchupEloTrend/buildMlbTeamEloTrend/buildMlbCommunityAccuracy/buildMlbCalendarHeatmap/buildMlbTeamStrengthSnapshot/fetchMlbHistoricalAnalogs/buildMlbTeamUpcoming/buildMlbMatchupUpcoming/buildMlbStandings/buildMlbTeamFactorAverages/buildMlbFactorAccuracy/buildMlbAccuracySummary/buildMlbTeamAccuracy). 나머지 2개(buildMlbTeamProfile.ts 398줄/buildMlbMatchupProfile.ts 532줄, 디렉토리 내 최대 파일 2개)는 시간 budget 내 미완독 — 다음 사이클 carry-over. 완독한 16개는 모두 `normalizeMlbTeamCode()` 패턴을 일관되게 적용해 StatsAPI alias 코드(TB/CWS/KC/SD/SF/AZ/WSH) → canonical(TBR/CHW/KCR/SDP/SFG/ARI/WSN) 변환 후 사용 — "사례 27 family" 로 여러 파일 주석에 명시적으로 가드돼있음.
+
+**발견**: `buildMlbTeamAccuracy.ts` 의 3개 함수(`buildAllMlbTeamAccuracy`/`buildMlbMatchupData`/`buildMlbTeamBiasAnalysis`)만 이 패턴에서 예외 — `mlb_schedule.home_team_code`/`away_team_code` raw 값을 `normalizeMlbTeamCode()` 없이 그대로 `as MlbTeamCode` cast. `/mlb/accuracy` 페이지의 `TeamMatchupCards`/`TeamBiasTable` 는 `Object.keys(MLB_TEAMS)`(canonical) 로 순회하며 `.find(t => t.teamCode === teamCode)` 로 정확 일치 매칭 — 7개 alias 팀(Rays/White Sox/Royals/Padres/Giants/Diamondbacks/Nationals)은 실제 예측 데이터가 있어도 카드에 "데이터 없음"으로 렌더되는 silent drift. 기존 테스트가 non-alias 팀(NYY/BOS/NYM)만 사용해 미발견 상태로 남아있었음.
+
+**조치**: 3개 함수의 home/away 코드 변환 지점에 `normalizeMlbTeamCode()` 적용(정규화 실패 시 skip). 회귀 테스트 3건 추가(TB→TBR/SD→SDP 양방향/AZ→ARI 케이스). `npx vitest run src/lib/mlb` 119/119 pass, `npx tsc --noEmit` clean, `npx eslint` clean.
+
+**ship**: PR #3169 생성 → `gh pr checks --watch --fail-fast` green(4m53s) → `gh pr merge --squash --delete-branch` → `gh pr view --json state,mergedAt` 로 `state=MERGED`(51704d66) 실측 확인.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3309%50=9≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3290-3309, 현재 cycle 포함) 표본 20(≥10 충족), opt-out 9개 제외 평가대상 review-code 12회 발화로 미충족. marker 미박제. ship-0 — 직전10(3300-3309) success 다수(3301/3303/3305/3306/3307/3309)로 미충족.
+
+다음 사이클 추천 = review-code(heavy) `apps/moneyball/src/lib/mlb` 잔여 2파일(buildMlbTeamProfile.ts/buildMlbMatchupProfile.ts, 시간 budget 내 미완독분) 확인 후 다른 미감사 디렉토리(lib/picks, lib/predictions, lib/teams, lib/accuracy) 로 확장 또는 fix-incident/lotto/op-analysis/info-arch gap 자연 대기.
