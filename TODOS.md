@@ -15075,3 +15075,17 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3277
 skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278%50=28≠0, trigger5 표본13≥10 충족하나 직전20 윈도우 review-code 13회 발화로 0회 chain 없음). marker 미박제. ship-0 emergency stop 미충족(직전9 outcome 중 success 다수, fail 0).
 
 다음 사이클 추천 = review-code(heavy) 계속(components/{analysis,dashboard,insights,layout,matchup,picks,predictions,share} 잔여 미방문) 또는 fix-incident(18/20)/info-arch(9/30)/lotto(16/30) gap 자연 대기.
+
+## 🟢 SUCCESS — fix-incident(lite): 중단된 PR #3164 R7 머지 흐름 재개 + stale 테스트 수정 (cycle 3292, 2026-10-19)
+
+진단: 세션 시작 시 `~/.develop-cycle/active-cycle` 이 stale(pid 36666 dead, cycle 3292 marker) 로 발견 — 직전 세션이 cron PR merge R7 fix(커밋 `c55d8d58`, PR #3164)까지 만들고 CI 대기 중 중단된 상태.
+
+**발견**: PR #3164 CI `check` job fail. 원인 = PR 자신이 `lotto-pick-update.yml` 의 머지 커맨드를 `gh pr merge --squash --auto --delete-branch` → `gh pr checks --watch --fail-fast` 선행 후 `--squash --delete-branch` 로 바꿨는데, `apps/moneyball/src/app/lotto/__tests__/lotto-routes.test.ts` 의 "update workflow PR auto-merge 박제 (R7 정합)" 테스트가 옛 문자열(`--squash --auto --delete-branch`)을 그대로 assert — self-inflicted stale test(동일 PR 의 다른 파일 변경이 자기 테스트를 깨뜨림).
+
+**수정**: assertion 을 `gh pr checks` + `--watch --fail-fast` + `--squash --delete-branch` 3-part 체크로 교체. 다른 4개 cron workflow 관련 테스트는 동일 패턴 재확인 결과 이상 없음(이 1건만 stale). `pnpm vitest run lotto-routes.test.ts` 49/49 pass, pre-push lint+type-check 통과.
+
+**결과**: commit `609dd5fd` push → `gh pr checks 3164 --watch --fail-fast` green(6m34s) → `gh pr merge 3164 --squash --delete-branch` → MERGED(`62ae02b5`). 5개 cron workflow 의 R7 CI-wait fix 가 main 에 실제 반영 완료.
+
+검증: skill-evolution trigger 5개 전부 미충족(milestone 3292%50=42≠0, trigger5 review-code 직전20 다수 발화로 0회 chain 없음, trigger1 chain-evolution 누적 10건 장기 지속 상태, trigger2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전10(3283-3292) success 4건 partial 5건 — success 존재). 2차 방어선: cycle 3291 retro commit(`bf462aac`) 존재 확인.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 재탐색 또는 op-analysis/info-arch/lotto gap 자연 대기. 본 cycle 은 세션 중단 사각지대 우연 발견(구조적 trigger 아님) — 향후 참고: active-cycle stale 발견 시 해당 marker 의 cycle_n 에 대응하는 PR 유무를 진단 단계에서 바로 확인하는 패턴 유효.
