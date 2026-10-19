@@ -2168,13 +2168,14 @@ export const PICKS_POLL_IDS_LIMIT = 50;
 
 /**
  * 파이프라인 staleness 기본 임계 (시간) — silent drift family wave 303 (cycle 1632).
- * 동일 숫자 28 hardcoded 3 surface:
- *   - app/api/health/pipelines/route.ts: { mode: 'announce', stale_hours: 28 }
- *   - app/api/health/pipelines/route.ts: { mode: 'predict_final', stale_hours: 28 }
- *   - app/api/health/pipelines/route.ts: { mode: 'verify', stale_hours: 28 }
+ * app/api/health/pipelines/route.ts 의 PIPELINE_MODES 9개 모드가 사용 (announce /
+ * predict_final / verify + MLB 일일 cadence 6종: mlb_statsapi_scrape /
+ * mlb_fancy_scrape / mlb_savant_scrape / mlb_shadow_train / mlb_elo_update /
+ * mlb_predict_final). 원래 KBO 3 surface 로 박제됐으나 cycle 2000년대 MLB 파이프라인
+ * 추가로 6개 모드 더 사용 — 모두 24h 주기 cron 이라 동일 임계 적용 (cycle 3307 주석 정정).
  *
- * Cron '17 0-14 * * *' (UTC) 기준 announce / predict_final / verify 모드의 최대
- * stale 허용 시간. 28h = 24h 주기 + 4h tolerance. 변경 시 본 상수 1곳만 갱신.
+ * Cron '17 0-14 * * *' (UTC) 기준 KBO 3모드 + MLB cron 기준 MLB 6모드 — 전부 하루 1회
+ * 고정 cadence. 28h = 24h 주기 + 4h tolerance. 변경 시 본 상수 1곳만 갱신.
  */
 export const PIPELINE_STALE_HOURS_DEFAULT = 28;
 
