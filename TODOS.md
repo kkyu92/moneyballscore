@@ -1,4 +1,20 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): scripts/ 8파일 저-mention 배치 전수 감사, 신규 drift 0건 (cycle 3346, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23(plan #30 completed_all_phases_shipped 이나 비-approved 유지). 2차 방어선(cycle 3345 retro `f52e9776`) 확인 OK. 2-chain lock 미충족(직전8(3338-3345) distinct=4). gap 전부 미도달(fix-incident 18/20·lotto 13/30·info-arch 17/30·op-analysis 4/25).
+
+**carry-over 재검증**: cycle 3345 가 추천한 `lib/picks`/`lib/teams`/`lib/accuracy` 신규 스코프 착수 전 TODOS 직접 cross-check — 셋 다 이미 완전 감사 완료 확인(picks=cycle 3178, teams=cycle 4973~5227 누적, accuracy=cycle 5135/6017/15737 누적). stale 추천이었음(`feedback_diagnose_existing_artifacts_first` 재발 방지). 추가로 `lib/`(cycle 3313 완결), `components/`(cycle 3344 완결), `packages/kbo-data/src/`(cycle 3164/3207 완결) 전부 명시적 완료 선언 재확인 — 3대 기존 vein 모두 소진 상태.
+
+**신규 스코프 발견**: `scripts/*.ts` 31개 파일 중 `lotto.ts`(53회)/`op-analysis-ce-cohort.ts`(64회) 등 핵심 하네스는 반복 감사되지만, 1~6회 mention 의 저-coverage 파일 다수 미감사 확인 — 8개 채택(829줄): `op-analysis-war-check.ts`/`op-analysis-postbreak-full.ts`/`op-analysis-postbreak.ts`/`backfill-mlb-elo.ts`/`backfill-tie-winner-null.ts`/`dev-postview.ts`/`backfill-mlb-schedule-status.ts`/`dev-debate.ts`.
+
+**감사 결과**: general-purpose subagent 전수 read + migrations/shared helper cross-reference + 2개 파일 실제 실행 검증(`op-analysis-postbreak-full.ts`/`op-analysis-postbreak.ts` 라이브 DB 구동, 정상 출력 확인). 8개 전부 CLEAN — comment-vs-code mismatch 0건, dead code 0건, error-swallowing 0건, KBO/MLB scope 누출 0건, DB컬럼-TS필드 불일치 0건. 비-버그 관찰 1건: `op-analysis-postbreak.ts` 의 `.order("games(game_date)", ...)` 가 canonical supabase-js 패턴은 아니나 PostgREST 가 허용 + 클라이언트 재정렬로 실질 영향 없음(수정 안 함).
+
+**결론**: 코드 변경 없음(retro-only). `scripts/` 잔여 23개 파일 중 유사 저-mention 파일 다수 — 다음 review-code(heavy) 계속 가능한 신규 축.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3346%50=46≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3327-3346) 표본 19(≥10 충족), 평가대상 review-code 14/19 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3336-3345) success 3건(3336/3340/3343)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) `scripts/` 잔여 저-mention 파일 계속 또는 fix-incident(gap 18/20)/lotto(gap 13/30)/info-arch(gap 17/30)/op-analysis(gap 4/25) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/{players,leaderboard,ui} 7파일 전수 감사 완료 — components/ 전체 vein 소진 (cycle 3344, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3336-3343) distinct=4: review-code(heavy)4+review-code(lite)1+review-code1+operational-analysis(lite)1+fix-incident1 — review-code 변형들 묶어도 lock 완화 적용 가능하나 cycle 3343 이미 redirect 처리). gap 측정: fix-incident 15/20·lotto 10/30·info-arch 14/30·op-analysis 1/25 전부 미도달. ship-0 미충족(직전10(3334-3343) success 3건: 3336/3340/3343). 2차 방어선(cycle 3343 retro `06e89532`) 확인 OK.
