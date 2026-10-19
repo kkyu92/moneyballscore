@@ -1,4 +1,18 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): EN/KO MLB 페이지 twin-audit 5쌍, 신규 drift 0건 (cycle 3331, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved, plan #30 만료 2026-10-18 경과). 2차 방어선: `cycle-retro 3330`(`514d7995`) 정상 확인, 결손 없음. 직전8(3323-3330) distinct=5(operational-analysis(lite)1+review-code(heavy)4+polish-ui1+fix-incident2+info-architecture-review1) — 2-chain lock 미충족. gap 전부 미도달(fix-incident 2/20·op-analysis 8/25·info-arch 1/30 방금 발화·lotto 27/30 근접하나 미도달). explore-idea saturation 직전15(3317-3331) 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8.7일 신선) — 확립된 skip 패턴 유지. `gh run list --workflow=` 재확인: health-alert/deploy-drift-alert/heartbeat-stale 전부 success, factor-backtest-weekly 최신 1회(10-18) success(단 cycle 3329 fix 커밋(`d587c5bd`, 10-19 06:59 UTC) 보다 먼저 fired — 미검증 상태 유지, factor-backtest 다음 fire=일요일/op-analysis 다음 fire=월요일 17:45 UTC 모두 금주 중). lotto-pick-update 10-13 실패(`네트워크 장애로 최신 여부 확인 불가`)는 과거 cycle 에서 이미 fallback 해소 확인(`2026-10-17.md` picks 파일 정상 존재) — 신규 incident 아님.
+
+**스코프 선정**: cycle 3328 이 "app/api·components·kbo-data·lib/hooks·scripts·workflows·migrations 전부 소진" 박제 — 신규 축으로 EN/KO 로케일 쌍 twin-audit 채택(cycle 3017 Header.tsx 3-way MLB nav drift 패턴과 동일 계열, 그러나 `en/mlb/*` 디렉토리 자체 전수 twin-diff 는 과거 이력 없음). subagent 위임으로 5개 페이지쌍(methodology/factors/wild-card/standings/mlb hub) 전체 read 비교.
+
+**감사 결과**: 5쌍 전부 신규 drift 0건. (1) methodology — 오늘 고친 "postseason K=6 elo" 이슈가 EN 에도 이미 동일하게 반영 확인. (2) factors — 모든 weight% 가 공유 상수(`MLB_BASE_WEIGHTS`) 기반이라 구조적으로 수치 drift 불가능, placeholder-factor 배너 의미 일치. (3) wild-card/standings — 카운트·소스 전부 일치. (4) mlb hub page — KO 는 3-column grid(`/accuracy` 카드 포함) 인데 EN 은 2-column(카드 누락) 구조적 비대칭 1건 발견했으나, `/en/accuracy` 페이지 자체가 부재(`ls` 확인)해 의도된 생략으로 판단 — actionable 버그 아님, 다음 explore-idea/info-arch 사이클 참고용으로만 기록.
+
+**결론**: actionable 신규 drift 0건. 코드 변경 없음, PR 없음(retro-only). review-code(heavy) twin-audit vein = app 내부 로케일 쌍까지 포함해도 추가 소진 확인.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례 유지)/trigger2(5연속 fail 없음)/trigger3(3331%50=31≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3312-3331, 현재 포함) review-code(heavy) 12/20 발화로 미충족). marker 미박제. ship-0 — 직전10(3321-3330) success 다수(3321/3323/3324 등)로 미충족.
+
+다음 사이클 추천 = **op-analysis-weekly/factor-backtest-weekly 금주 실제 fire 결과 확인**(월/일 UTC, 수일 내) 또는 lotto(gap 28/30, 거의 도달) 또는 info-arch(gap 1/30, 방금 발화) 자연 대기 또는 review-code(heavy) 신규 축 탐색(EN/KO 포함 거의 전 영역 소진 — 다음은 `/en/accuracy` 부재 같은 신규 라우트 신설 여부를 explore-idea/info-arch 로 검토 권장).
+
 ## 🟡 PARTIAL — fix-incident: op-analysis-weekly/factor-backtest-weekly cron DNS flake 재발, retry 로직 추가 (cycle 3329, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23. 2차 방어선: `cycle-retro 3328`(`ddc2c6f6`) 정상 확인. 직전8(3322-3329 평가 시점 기준 3321-3328) distinct=4 — 2-chain lock 미충족. info-arch gap 29/30(미도달), lotto gap 25/30(미도달), fix-incident 자체 gap 2/20(미도달, 실측 대기 사유 1/20이었으나 trigger 1 버그/에러 직접 발견으로 즉시 자연 발화). `gh run list --workflow=` 로 6개 스케줄 워크플로(health-alert/deploy-drift-alert/heartbeat-stale/factor-backtest-weekly/op-analysis-weekly/data-refresh-weekly) 전수 점검 중 **op-analysis-weekly 최근 3회 중 2회 실패(10-05/10-12), factor-backtest-weekly 최근 3회 중 2회 실패(10-04/10-11)** 발견.
