@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { SITE_URL, CALENDAR_ISR_HOURS, ACCURACY_GOOD_RATE, ACCURACY_BASELINE, WEEKDAY_LABELS_EN_MON_FIRST } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks';
 import { getKstMonthInfo, buildEmptyGrid, type MonthInfo, type DayCell } from '@/lib/calendar/monthGrid';
 import { getMlbMonthHeatmap } from '@/lib/mlb/buildMlbCalendarHeatmap';
 
@@ -108,6 +109,13 @@ export default async function MlbCalendarPageEn() {
 
   const weekHeaders = WEEKDAY_LABELS_EN_MON_FIRST;
 
+  const related: RelatedLink[] = [
+    { href: '/en/mlb/predictions', label: 'Predictions hub', hint: 'All prediction cards' },
+    { href: '/en/mlb/accuracy', label: 'Cumulative accuracy', hint: 'Calibration + trend' },
+    { href: '/en/mlb/reviews', label: 'Prediction reviews', hint: 'Weekly / monthly' },
+    { href: '/en/mlb/standings', label: 'Standings', hint: 'Season standings' },
+  ];
+
   return (
     <main className="max-w-4xl mx-auto space-y-6 py-4">
       <Breadcrumb items={[{ href: '/en/mlb', label: 'MLB Analysis' }, { label: 'Monthly Calendar' }]} locale="en" />
@@ -205,6 +213,8 @@ export default async function MlbCalendarPageEn() {
           description="Data will populate automatically once MLB games start this month."
         />
       )}
+
+      <RelatedLinks title="Related pages" items={related} />
     </main>
   );
 }

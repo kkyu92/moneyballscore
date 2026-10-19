@@ -44,7 +44,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: `${SITE_URL}/mlb/calendar` },
+    alternates: {
+      canonical: `${SITE_URL}/mlb/calendar`,
+      languages: { en: `${SITE_URL}/en/mlb/calendar`, ko: `${SITE_URL}/mlb/calendar` },
+    },
     openGraph: {
       title,
       description,
