@@ -82,5 +82,9 @@ jobs:
             --body "plan #8 Tier 1 M2 — weekly cron 자동 backtest. cycle 231 v2.0 후보 적용 시 추정 acc/Brier 박제." \
             --label "automated,backtest")
           PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-          gh pr merge "$PR_NUM" --squash --auto --delete-branch
-          echo "::notice::PR $PR_URL queued for auto-merge"
+          if gh pr checks "$PR_NUM" --watch --fail-fast; then
+            gh pr merge "$PR_NUM" --squash --delete-branch
+            echo "::notice::PR $PR_URL merged after CI green"
+          else
+            echo "::warning::CI failed for PR $PR_NUM — skip merge, needs manual review"
+          fi
