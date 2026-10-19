@@ -1,4 +1,4 @@
-// Sentry SDK v10 서버 사이드 진입점.
+// Sentry SDK v11 서버 사이드 진입점.
 // 드리프트 사례 6: Next.js 16 + src/app 구조에선 이 파일이 src/ 내부에 있어야 Next 가
 // 자동 감지·로드. 이전 패턴 (register → dynamic import) + 위치 루트 두 문제 동시 해결.
 import * as Sentry from '@sentry/nextjs';
