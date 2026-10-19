@@ -1,4 +1,18 @@
 
+## ✅ SUCCESS — review-code(heavy): cron PR-create/merge retry 격차 발견+수정, ship-0 10-cycle streak 종료 (cycle 3336, 2026-10-19)
+
+진단: 사용자가 cycle 3335 emergency-stop(meta-pattern dispatch) 직후 `/develop-cycle 27` 재호출 — 사용자 결정 신호로 해석, N=27 그대로 진행. periodic gap 전부 미도달(fix-incident 7/20·info-arch 6/30·op-analysis 13/25·lotto 2/30). 2-chain lock 미충족(직전8(3328-3335) distinct=4). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/23/TODOS Next-Up 부재/DESIGN.md 8.7일 신선) 확립 skip 패턴 유지.
+
+**review-code(heavy) 재탕 방지**: app/api 20/20, lib/ 전수, components/ 전수, packages/kbo-data 전 서브디렉토리(agents/backtest/engine/factors/scrapers 전부 기감사), scripts/ 전수 — 거의 전 영역 dry vein 재확인. 새 파일 read 대신 cycle 3327/3329 DNS-flake retry 핫픽스 자체를 교차검증하는 방법으로 전환.
+
+**발견**: `op-analysis-weekly.yml` 은 cycle 2156 실제 incident(2026-08-17, `gh pr create` transient 503 → branch push 됐지만 PR 미생성, 다음 cron 1주일 후까지 silent stranded) 이후 `gh pr create`/`gh pr merge` 양쪽에 5회 retry(backoff)를 갖고 있음. `data-refresh-weekly.yml`/`factor-backtest-weekly.yml` 는 cycle 3327/3329 에서 스크립트 레벨 DNS retry만 추가됐고 동일한 PR-level 보호는 누락 — 같은 실패 모드가 두 워크플로에 여전히 열려있었음.
+
+**수정**: op-analysis-weekly 의 검증된 retry 패턴을 data-refresh-weekly.yml + factor-backtest-weekly.yml 에 그대로 이식. YAML syntax 검증 + pre-push lint/type-check/test 통과 + PR #3170 CI(`check`) pass 확인(Vercel 실패는 build-rate-limit 쿼터 이슈로 무관, GitGuardian pass) 후 `--squash --delete-branch` 머지(`4ac36842`).
+
+**ship-0 streak 종료**: 직전10(3326-3335) 전부 partial/retro-only 였던 streak 이 본 cycle outcome=success 로 종료. 다음 cycle 의 emergency-stop 재평가는 success 1건 포함되어 미충족 예상.
+
+다음 사이클 추천 = review-code(heavy) 계속 또는 fix-incident(gap 8/20) 자연 대기. 3개 weekly cron(op-analysis 오늘 밤/data-refresh 화/factor-backtest 일) 의 DNS-retry + PR-retry 패치 전부 다음 fire 때 실검증 필요.
+
 ## 🛑 EMERGENCY-STOP — review-code(heavy): lib/ 15파일 전수 감사 신규 drift 0건, ship-0 10-cycle streak (cycle 3335, 2026-10-19)
 
 진단: open issue 0건. approved+unexpired plan 0/23. 2차 방어선(cycle 3334 retro `a924fe55`) OK. 2-chain lock 미충족(직전8(3327-3334) distinct=4: review-code(heavy)4+fix-incident2+lotto1+info-arch1). gap 전부 미도달(fix-incident 6/20·info-arch 5/30·op-analysis 12/25·lotto 1/30). explore-idea saturation 13/15 미충족.
