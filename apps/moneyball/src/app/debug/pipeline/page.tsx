@@ -2,8 +2,10 @@ import { createClient } from '@supabase/supabase-js';
 import { DAY_MS } from '@moneyball/shared';
 import {
   buildRejectReasonBreakdown,
+  parseSkippedDetail,
   REJECT_REASON_LABEL,
   type RejectReasonCell,
+  type SkippedEntry,
 } from '@/lib/debug/pipelineStats';
 
 // /debug/pipeline 대시보드
@@ -36,20 +38,6 @@ interface PipelineRun {
   skipped_detail: string | null;
   duration_ms: number;
   created_at: string;
-}
-
-interface SkippedEntry {
-  game: string;
-  reason: string;
-}
-
-function parseSkippedDetail(raw: string | null): SkippedEntry[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed as SkippedEntry[];
-  } catch {}
-  return [];
 }
 
 function summarizeReasons(entries: SkippedEntry[]): string {
