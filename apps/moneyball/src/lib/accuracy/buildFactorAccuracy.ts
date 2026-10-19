@@ -1,18 +1,5 @@
-import { NEUTRAL_FACTOR } from '@moneyball/shared';
+import { NEUTRAL_FACTOR, ACTIVE_FACTOR_KEYS as FACTOR_KEYS } from '@moneyball/shared';
 import { FACTOR_LABELS, NEUTRAL_LO, NEUTRAL_HI } from '@/lib/predictions/factorLabels';
-
-const FACTOR_KEYS = [
-  'sp_fip',
-  'sp_xfip',
-  'lineup_woba',
-  'bullpen_fip',
-  'recent_form',
-  'war',
-  'head_to_head',
-  'park_factor',
-  'elo',
-  'sfr',
-] as const;
 
 export interface FactorAccuracyRow {
   key: string;
