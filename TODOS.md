@@ -1,4 +1,18 @@
 
+## ⚪ SUCCESS (retro-only) — operational-analysis(lite): CE/비CE Brier 격차 30회 연속 재확인, 신규 데이터 0건 (cycle 3315, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved). 직전8(3307-3314) distinct=2(review-code(heavy)7+polish-ui1) — 2-chain lock 탐지, 둘 다 후보 제외(cooldown N=1). explore-idea saturation 직전15(3300-3314) 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8.6일 신선) — 확립된 skip 패턴 유지. fix-incident(gap 10/20)·lotto(gap 11/30)·info-arch(gap 15/30) 전부 미도달 중 op-analysis 자체 gap 21/25 로 가장 근접 — 자율 선택.
+
+**부수 조사**: `gh run list --workflow=lotto-pick-update.yml` 재확인 중 2026-10-13 1회 실패 발견 — 원인 확인 결과 cycle 3128 에서 이미 fix 커밋(`b7b8c2d5`, dhlottery 일시 unreachable 시 lottolyzer 단독 확인 결과를 무시하던 버그) + 수동 fallback 으로 해소된 과거 사건(`2026-10-17.md` picks 파일 정상 존재 확인). 신규 incident 아님, fix-incident 선택 근거 안 됨.
+
+**실행**: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행(동일 harness). 전체 n=448(CE n=401/비CE n=47) — cycle 3294 수치와 완전 동일. CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 그대로. LLM 부가가치 우세 결론 30회 연속 재확인. KBO 2026 정규시즌 종료(최종 경기일 2026-10-04) 지속으로 신규 verified pre_game 예측 0건, CREDIT_EXHAUSTED/비CE 동결 상태 변화 없음.
+
+**결과**: 코드 변경 없음(순수 재측정), CLAUDE.md 측정 히스토리에 cycle 3315 항목 append.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3315%50=15≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3296-3315, 현재 포함) 표본 20(≥10 충족), 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3306-3315) success 다수(3306/3307/3309)로 미충족.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 복귀(components/ 또는 packages/kbo-data/src/ 미감사 영역) 또는 info-arch(gap 16/30)/lotto(gap 12/30)/fix-incident(gap 11/20) gap 자연 대기.
+
 ## 🟡 PARTIAL — polish-ui: DESIGN.md 토큰/색상/spacing/모션/breadcrumb 전수 재검증, 신규 drift 0건 (cycle 3314, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved). 직전8(3306-3313) distinct=1(review-code(heavy) 8/8) — 2-chain lock 탐지, lock 안에 fix-incident 미포함(안전 우선 예외 미적용) → review-code(heavy) 후보 제외. gap 전부 미근접(fix-incident 9/20·op-analysis 20/25·info-arch 14/30·lotto 10/30). explore-idea saturation 직전15(3299-3313) 2/15 미충족. DESIGN.md mtime 8.6일(4주 미만, design-system 미근접). 잠긴 chain 제외 후 다른 chain 도 trigger 없음 → 룰 "어떤 chain 도 trigger 없으면 polish-ui 강제 발화" 적용. 2차 방어선: `cycle-retro 3313` 1건 정상 확인(결손 없음).
