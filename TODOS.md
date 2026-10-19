@@ -1,4 +1,22 @@
 
+## 🟢 SUCCESS — review-code(heavy): config/hooks/lib 루트파일+middleware+instrumentation 16파일 전수 감사, stale 주석 2건 수정 (cycle 3321, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved). 직전8(3313-3320) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+fix-incident1) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 5/20·op-analysis 6/25·lotto 17/30·info-arch 21/30). explore-idea saturation 직전15(3306-3320) 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재, DESIGN.md mtime 9일 신선) — 확립된 skip 패턴 유지. 2차 방어선: `cycle-retro 3320` 1건 정상 확인(결손 없음).
+
+**스코프**: app/api·lib·components·scripts 대형 디렉토리는 이미 전수 완료(cycle 3099/3313~3320) — 신규 미탐색 축으로 지금까지 서브디렉토리 스윕에서 누락된 **소형 루트파일 묶음** 16개 선정: `config/model.ts`+test, `hooks/{use-user-picks,use-kbo-scores}.ts`, `lib/{feature-flags,tabpfn-import,tabpfn-export,utils,design-tokens,weather,hub-dispatch}.ts`, `middleware.ts`, `next.config.ts`, `sentry-scrub.ts`, `instrumentation{,-client}.ts`.
+
+**발견+수정 2건 (comment-only, 로직 변경 없음)**:
+1. `lib/weather.ts:6` 헤더 "10분 ISR" 서술 vs 실제 `WEATHER_FETCH_REVALIDATE_SECONDS=1800`(30분, `packages/shared` wave-137 레지스트리 주석 + 테스트로 확정) — stale. `10분`→`30분` 정정.
+2. `instrumentation.ts:1` 헤더 "Sentry SDK v10" 서술 vs 실제 `package.json` `@sentry/nextjs: ^11.6.0`(cycle 2986 v11 마이그레이션, `next.config.ts` 동일 주석은 이미 정정됐으나 본 파일만 누락) — stale. `v10`→`v11` 정정.
+
+**clean 확인(수정 없음)**: tabpfn-import/export 필드 정합(asymmetric 하지만 matched pair), `hub-dispatch.ts` eventType 전부 `.github/workflows/*.yml` 사용과 일치, `design-tokens.ts` 33개 토큰 전부 DESIGN.md 정확 매칭 + dead export 0건, `feature-flags.ts` 5개 flag 전부 실사용 확인, `middleware.ts` matcher 현재 라우트 트리와 일치, `config/model.ts` JSDoc↔구현↔테스트 정합, hooks STORAGE_KEY 패턴 일관, `sentry-scrub.ts` 내부 일관. 미확인 flag 1건(`hub-dispatch.ts`의 "bash/TS 알고리즘 일치 필수" 주석 — 본 리포 안엔 대응 bash 구현 부재, playbook 허브 레포(별도) 참조 추정 — cross-repo 라 본 스코프 밖, drift 단정 보류).
+
+**검증**: `tsc --noEmit`/`pnpm lint` clean. pre-push hook(lint+type-check+version-sync-guard+vitest 3 tests) 전부 PASS. 직접 main 커밋+push(`42336074`, R4 범위).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3321%50=21≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3302-3321, 현재 포함) 표본 20(≥10 충족), 평가대상 review-code 13/20 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3312-3321) success 다건(3318/3321 등)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속 가능(16파일 묶음 완료, 다음은 `apps/moneyball/src/__tests__` 디렉토리 자체 메타 점검 또는 `packages/kbo-data/src/scrapers` 재확인) 또는 fix-incident(gap 6/20)/op-analysis(gap 7/25, Supabase/CE 상태 재확인)/lotto(gap 18/30)/info-arch(gap 22/30) 자연 대기.
+
 ## ⚪ PARTIAL — review-code(heavy): app/api/ 전체 20개 route 전수 감사 완결, 신규 drift 0건 (cycle 3319, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved). 직전8(3311-3318) distinct=4(review-code(heavy)6+polish-ui1+operational-analysis(lite)1+fix-incident1) — 2-chain lock 미충족. gap 재계산 결과 전부 미근접(fix-incident 2/20, lotto 14/30, info-arch 18/30) — **op-analysis gap 은 cycle 3318 TODOS 가 "24/25"로 서술했으나 실측(`chain_selected` 전수 grep) 재계산 결과 last-fire=3315, 실제 gap=3 — 24/25 서술은 cycle 3318 자체 계산 오류로 확인, 이번 cycle 은 재계산 수치 신뢰해 op-analysis 선택 안 함**. explore-idea saturation 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) — 확립된 skip 패턴 유지. DESIGN.md mtime 9일(4주 미만) design-system 미근접. 2차 방어선: `cycle-retro 3318` 1건 정상 확인(결손 없음).
