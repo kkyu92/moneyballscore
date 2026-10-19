@@ -1,5 +1,19 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): lib/accuracy·lib/teams 전수 감사, 신규 drift 0건 (cycle 3297, 2026-10-19)
+
+진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3296 retro commit(`1d6e23e4`) 존재 확인. 2-chain lock 미충족(직전8(3289-3296) distinct=5). gap 전부 미도달(info-arch 26/30 근접·fix-incident 4/20·op-analysis 2/25·lotto 1/30). cycle 3294/3295/3296 공통 carry-over 추천 소비 — 이전에 "상대적으로 높아 제외"했던 `lib/accuracy`(64회 mention)/`lib/teams`(47회 mention) 차례로 감사.
+
+**실행**: 본 메인 직접 read — `lib/accuracy/{buildAccuracyData,buildFactorAccuracy,buildShadowCalibration,shadow-pair-prob}.ts`(953줄) + `lib/teams/{buildTeamProfile,buildTeamFactorAverages,buildTeamUpcoming,buildTeamRecentForm,buildTeamStrengthSnapshot,buildTeamEloTrend}.ts`(1166줄), 총 2119줄.
+
+**결과**: VERSION_NOTES(accuracy) 8개 키 vs shared `ALL_SCORING_RULES` 8개 값 정확 일치. `PRODUCTION_COHORT_RULES`(v1.8+v1.8-credit-fail) 사용처(`buildTeamProfile`/`buildTeamFactorAverages`) 코멘트가 실제 상수 정의와 정합, `buildTeamUpcoming`의 `CURRENT_SCORING_RULE` 단일 필터는 미래 scheduled 경기 한정이라 legacy credit-fail row 가 생길 수 없는 구조 — 의도적 차이(버그 아님). `FACTOR_KEYS`(10종) vs `FACTOR_LABELS`/`FACTOR_LABELS_EN` 양쪽 완전 대응. `CURRENT_MODEL_FILTER`(config/model.ts) 코멘트의 wave-656 정정 서술이 현재 구현과 일치. 신규 drift 0건.
+
+**regression**: `pnpm vitest run src/lib/accuracy src/lib/teams`(apps/moneyball 디렉토리 기준 — repo root 에서 `--dir` 플래그로 실행 시 `@/` alias 미해석으로 11건 오탐 발생, 올바른 작업 디렉토리로 재실행) 8 test files / 126 tests 전부 통과. 코드 변경 없음(감사만).
+
+**검증**: skill-evolution trigger 5개 전부 미충족(milestone 3297%50=47≠0, trigger5 직전20(3278-3297) review-code 다회 발화로 0회 chain 없음). marker 미박제. ship-0 emergency stop 미충족(직전9(3289-3296) success 다수, fail 0건).
+
+다음 사이클 추천 = info-architecture-review(gap 27/30, 근접 — 다양성 redirect 권장) 또는 review-code(heavy) 잔여 영역(components 계열) 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): lib/api·lib/supabase·lib/seo 전수 감사, 신규 drift 0건 (cycle 3296, 2026-10-19)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3295 retro commit(`03273770`) 존재 확인. 2-chain lock 미충족(직전8(3288-3295) distinct=5). gap 전부 미근접(fix-incident 4/20·op-analysis 2/25·info-arch 26/30·lotto 1/30 방금 발화). explore-idea saturation 직전15(3282-3296) 12/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8일 신선) — 확립된 skip 패턴 유지. cycle 3294 추천 carry-over 직접 소비 — git log mention-count 최저 3개(`lib/api`=2회·`lib/supabase`=4회·`lib/seo`=9회, `lib/teams`=47회·`lib/accuracy`=64회는 상대적으로 높아 이번 사이클 제외) 선정.
