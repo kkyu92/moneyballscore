@@ -1,5 +1,19 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): lib/{changelog,v2-shadow-monitor,seasons,players,matchup} 전수 감사, 신규 drift 0건 (cycle 3293, 2026-10-19)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/spec_only_deferred). 2차 방어선: cycle 3292 retro commit(`f831eb9f`) 존재 확인. 2-chain lock 탐지(직전8(3285-3292) distinct=2: review-code(heavy)6+fix-incident(lite)2) 충족하나 lock 안에 fix-incident 포함 → 안전 우선 룰(4)로 lock 무시, 정상 선택 진행. gap 전부 미근접(fix-incident 1/20·op-analysis 17/25·info-arch 23/30·lotto 10/30). explore-idea saturation 직전15(3278-3292) 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8.4일 신선) — 확립된 skip 패턴 유지. cycle 3291 추천대로 lib 저-mention 축 지속 — git log mention-count 최하위군 5개 디렉토리(`lib/changelog` 3회·`lib/seasons` 4회·`lib/v2-shadow-monitor` 4회·`lib/players` 5회·`lib/matchup` 6회) 선정.
+
+**실행**: Agent(general-purpose) 1개 — 13개 production 파일(`changelog/parse.ts` / `v2-shadow-monitor/{parse,loader}.ts` / `seasons/buildSeasonSummary.ts` / `players/{buildPitcherFipTrend,buildPitcherProfile,buildBatterLeaderboard,buildPitcherLeaderboard}.ts` / `matchup/{canonicalPair,buildMatchupUpcoming,buildMatchupEloTrend,buildMatchupProfile,buildSeasonHeadToHead}.ts`) + 11개 test sibling 전수 read + 전체 repo cross-grep.
+
+**결과**: 의심 사례 4건 추적 조사 — 전부 drift 아님으로 확인. (1) `v2-shadow-monitor/loader.ts` 의 "op-analysis cron이 처음부터 해당 경로에 기록"/"op-analysis-cohort 는 cycle 1340부터 미사용" 주석을 `git show` + 실제 디렉토리 최신 파일로 교차검증 — 둘 다 정확. (2) `buildMatchupUpcoming.ts` 가 `PRODUCTION_COHORT_RULES`(레거시 포함) 대신 `CURRENT_SCORING_RULE` 단독 필터 사용 — `decideModelVersion` 추적 결과 신규 pre_game row 는 레거시 라벨로 기록되지 않아 upcoming(scheduled) 전용 쿼리엔 단독 필터가 정확, 다른 파일들의 `PRODUCTION_COHORT_RULES` 사용(과거 행 포함)과 모순 아님. (3) `buildMatchupProfile.ts`/MLB 대응 파일의 "shared 모듈로 통합" 주석 전부 실제 `packages/shared` 함수 호출 확인. (4) `computeMatchup*` export 전부 `wave-6xx` 테스트에서 실사용 확인(orphan 아님). 하드코딩 상수 전수(`RECENT_FORM_GAMES`/`PITCHER_TEAM_RECORD_MIN_GAMES`/`MATCHUP_UPCOMING_LIMIT`/`MARGIN_*`/`VENUE_SPLIT_*`/`WIN_LOSS_STREAK_MIN_LENGTH` 등) `packages/shared` 대조 일치. KBO/MLB scope 혼동 0건.
+
+**결론**: 신규 drift 0건, 코드 변경 없음(감사만).
+
+검증: skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3293%50=43≠0, trigger5 직전20(N-19..N=3274-3293) 영구opt-out 9개 제외 평가대상 review-code 다회 발화로 0회 아님, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전9(3284-3292) success 3건 포함).
+
+다음 사이클 추천 = review-code(heavy) 계속(남은 저-mention 후보 — `lib/accuracy`/`lib/api`/`lib/seo`/`lib/supabase`/`lib/teams` 재검증, 또는 components 계열 잔여) 또는 op-analysis(18/25)/info-arch(24/30)/lotto(11/30) gap 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): lib/{leaderboard,picks,insights,debug} 전수 감사, 신규 drift 0건 (cycle 3291, 2026-10-17)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3290 retro commit(`e42f1749`) 존재 확인. 2-chain lock 미충족(직전8(3283-3290) distinct=3: lotto(lite)1+review-code(heavy)6+fix-incident(lite)1). gap 전부 미근접(fix-incident 1/20·op-analysis 15/25·info-arch 21/30·lotto 8/30). explore-idea saturation 직전15(3276-3290) 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 6.1일 신선) — 확립된 skip 패턴 유지. cycle 3289 추천 carry-over(`lib/leaderboard`/`lib/picks`/`lib/insights`/`lib/debug` 저-mention 축) 직접 소비.
