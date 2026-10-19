@@ -76,6 +76,12 @@ function normalizeGameId(naverGameId: string): string {
  */
 function mapStatus(g: NaverGame): GameStatus {
   if (g.cancel || g.suspended) return 'postponed';
+  // statusInfo 한국어 '취소'/'연기' 텍스트 폴백 — Naver API 가 우천취소 시
+  // statusCode='BEFORE' + statusInfo='경기취소' 응답하는 케이스 존재 (cancel/suspended
+  // 필드가 false 로 남는 경우). kbo-scores/route.ts mapStatus() 와 동일 우선순위 유지.
+  if (g.statusInfo && (g.statusInfo.includes('취소') || g.statusInfo.includes('연기'))) {
+    return 'postponed';
+  }
   if (g.statusCode === 'RESULT') return 'final';
   if (g.statusCode === 'STARTED' || g.statusCode === 'LIVE') return 'live';
   return 'scheduled';
