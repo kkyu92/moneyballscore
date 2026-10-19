@@ -15433,3 +15433,19 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **교훈**: twin-audit vein 이 `lib/mlb` 완결 이후에도 즉시 소진되지 않음 — 저 CHANGELOG-mention 파일(1~2회) 이 실제로 "거의 미감사"에 가까워 작은 파일 다수를 빠르게 훑는 방식이 cycle budget 안에서 scope 확장에 유효했음(cycle 3001 grep-count≠depth 가드레일과 정합 — mention count 를 skip 근거로 안 쓰고 직접 read 로 전부 확인).
 
 다음 사이클 추천 = review-code(heavy) 계속(`lib/picks` 2파일 / `lib/predictions` 잔여 5파일 / `lib/teams` 잔여 5파일 / `lib/accuracy` 잔여 2파일) 또는 fix-incident/lotto/op-analysis/info-arch gap 자연 대기.
+
+## ⚪ PARTIAL — review-code(heavy): scripts/ 디렉토리 전수 감사 완결, 신규 drift 0건 (cycle 3320, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved). 직전8(3312-3319) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+fix-incident1) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 4/20·lotto 16/30·info-arch 20/30·op-analysis 5/25). explore-idea saturation 3/15 미충족. DESIGN.md mtime 8.6일(4주 미만) design-system 미근접. 2차 방어선: `cycle-retro 3319` 1건 정상 확인(결손 없음).
+
+**스코프**: cycle 3319 TODOS 권고(scripts/ — 이전 사이클 전수 스윕 이력 미확인) 직접 소비 — top-level `scripts/` 디렉토리 32개 파일 전수 read(`lotto.ts` 2637줄 제외, 별도 lotto chain 트랙). 28개 `.ts` + 4개 `.sh` = 32/32 전수 커버리지.
+
+**결과**: 신규 drift 0건. 의심 항목 4건 검증 후 기각 — (1) `op-analysis-postbreak.ts` 의 `.order("games(game_date)", {...})` 문법은 `!inner` 조인 시 유효한 postgrest-js 대안 문법 확인 (2) `backfill-mlb-factor-breakdown.ts` 의 bullpen FIP가 SP FIP 재사용은 `mlb-pipeline.ts` cycle 2402 주석에 명시된 의도(MLB 분리 불펜 FIP 소스 부재) 재확인 (3) `op-analysis-cohort.ts` 의 UTC `getUTCDay()` 사용은 verify cron 실행 시각(UTC 14시=KST 같은날)상 안전 확인 (4) 페이지네이션 루프 전부 `.range()` 종료 조건 정상(1000행 silent truncation 클래스, cycle 3131/3171 fix 이미 반영). 미수정 플래그 1건 — `backtest-v2-candidate.ts:223` 하드코딩 cycle 번호(1021) 라벨링, archived plan(#14/15/16, v1.8 유지 확정) 전용 one-off 도구라 수정 보류.
+
+**scripts/ 디렉토리 전수 감사 완료 박제**(lotto.ts 제외 32/32). review-code(heavy) 미감사 축 잔여 후보 = `components/` 재확인 또는 신규 영역 고갈 조짐 지속.
+
+**검증**: 코드 변경 없음(순수 read 감사, agent 가 `git status` clean 확인) — 커밋 없음(TODOS+cycle-retro 만).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3320%50=20≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3301-3320, 현재 포함) 표본 20(≥10 충족), 평가대상 review-code 13/20 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3311-3320) success 3건(3315/3316/3318)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/` 재확인) 또는 fix-incident(gap 4/20)/lotto(gap 16/30)/info-arch(gap 20/30)/op-analysis(gap 5/25) 자연 대기.
