@@ -1,4 +1,18 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/matchup/ 11개 + teams/ 잔여 2개 전수 감사, 신규 drift 0건 (cycle 3333, 2026-10-19)
+
+진단: open issue 0건. approved+unexpired plan 0/23. 2차 방어선(cycle 3332 retro `b9bdf02f`) OK. 2-chain lock 미충족(직전8(3325-3332) distinct=4: review-code(heavy)4+fix-incident2+polish-ui1+info-arch1). gap 전부 미도달(fix-incident 4/20·info-arch 3/30·op-analysis 10/25·lotto 29/30 — 다음 사이클 정확 트리거 예정). explore-idea saturation 4/15 미충족. DESIGN.md mtime 8.7일 신선. `gh run list` 최근 10건 전부 success/skipped.
+
+**스코프**: cycle 3332 retro 의 명시적 carry-over — `components/matchup/` 11파일(5쌍 KBO/MLB + 공용 GamesCloseFilter) + `components/teams/` 잔여 2파일(TeamEloChart/MlbTeamEloChart). subagent(`superpowers:code-reviewer`) 위임 전수 read 비교.
+
+**결과**: 신규 drift 0건. K-factor 상수는 이 presentational 컴포넌트들엔 없음(계산 레이어 소관, 과거 MLB postseason K=6 이슈와 무관 확인). 하드코딩 팀 수 리터럴 없음(KBO_TEAMS/MLB_TEAMS 객체 기반). dead import/unreachable branch 없음. `MatchupGamesCloseFilter` 는 의도적으로 locale prop 기반 KBO/MLB 공용 컴포넌트 확인(별도 Mlb 변형 불필요가 맞음). 코드 변경 없음, PR 없음.
+
+**의미**: cycle 3324(analytics)→3326(app/api)→3328(migrations)→3329(workflows)→3331(EN/KO twin)→3332(components 저-commit)→3333(matchup+teams 잔여) 흐름으로 components/ 디렉토리 전역(glossary/players/seasons/standings/ui/share/search/live/insights/matchup/teams) 감사 완료 확인.
+
+**검증(skill-evolution 등)**: trigger3(3333%50=33≠0)/trigger5(직전20(3314-3333, 현재 포함) review-code 12/20 다수 발화로 미충족)/trigger2(5연속 fail 없음)/trigger4(meta-pattern 없음) 전부 미충족, marker 미박제. ship-0 — 직전10(3324-3333) success 1건(3324)로 미충족.
+
+다음 사이클 추천 = **lotto**(gap 29/30 → 다음 사이클 정확 30 도달, 자연 트리거) 또는 fix-incident(gap 4/20)/info-arch(gap 3/30)/op-analysis(gap 10/25) 자연 대기. review-code(heavy) 는 components/ 전역 소진 확인 — 다음 스코프는 `apps/moneyball/src/lib/`, `scripts/` 재감사 권장.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 저-commit-count 하위 디렉토리 13개 파일 전수 감사, 신규 drift 0건 (cycle 3332, 2026-10-19)
 
 진단: open issue 0건. approved+unexpired plan 0/23. 2차 방어선(cycle 3331 retro `3a15ee9c`) OK. 2-chain lock 미충족(직전8(3324-3331) distinct=4: review-code(heavy)4+fix-incident2+polish-ui1+info-arch1). gap 전부 미도달(fix-incident 3/20·lotto 28/30·op-analysis 9/25(실제 last fire 3323)·info-arch 2/30). explore-idea saturation 4/15 미충족. DESIGN.md mtime 8일 신선. `gh run list` 최근 10건 전부 success 또는 skipped(CI Failure Dispatch 실incident 없음).
