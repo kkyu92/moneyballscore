@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/ 잔여 스코프 완결 + leaderboard ORDER BY 누락 버그 수정 (cycle 3318, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 non-approved). 직전8(3310-3317) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+fix-incident1) — 2-chain lock 미충족. gap: fix-incident 2/20·lotto 14/30·info-arch 18/30·op-analysis 24/25(근접하나 KBO 시즌종료 지속으로 신규데이터 0건 확실시). explore-idea saturation 3/15 미충족. 2차 방어선: `cycle-retro 3317` 1건 정상 확인(결손 없음).
+
+**스코프**: cycle 3317 retro carry-over인 `lib/{picks,predictions,teams,accuracy}` 잔여 19개 파일 전수 read 완료(신규 drift 0건) + 신규 발견 미감사 디렉토리 `lib/{calendar,debug,leaderboard,observability,stats}` 11개 파일 추가 전수 read.
+
+**발견+수정**: `lib/leaderboard/server.ts`의 `fetchLeaderboard()`가 `leaderboard_{weekly,monthly,season,all}` 4개 view를 조회할 때 `.limit(limit)`만 걸고 `.order()`를 호출하지 않음. 각 view는 migration 024/026/027/032에서 `ORDER BY accuracy_pct DESC, total DESC`로 정의돼 있지만, PostgreSQL은 view를 outer query 입장에서 inlined subquery로 취급 — outer query에 명시적 ORDER BY가 없으면 view 내부 정렬이 보존된다는 보장이 없음(SQL 표준 자체가 그렇고, 실무적으로도 통계/인덱스 변화로 planner가 다른 실행 계획을 선택하면 조용히 깨질 수 있는 패턴). 사용자 가시 리더보드 상위 N명이 실제 순위와 무관하게 표시될 수 있는 silent correctness risk — 확정 버그로 판단해 outer query에도 `.order('accuracy_pct', {ascending:false}).order('total', {ascending:false})` 명시 추가(단일 함수 수정으로 4개 view 전부 커버).
+
+**검증**: `tsc --noEmit`/`pnpm lint` clean. pre-push hook(lint+type-check+version-sync-guard+vitest 3 tests) 전부 PASS. 직접 main 커밋+push(`0dd26134`, R4 범위).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3318%50=18≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3299-3318) 표본 19(≥10 충족), 평가대상 review-code 12/19 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3309-3318) success 3건(3309/3316/3318)으로 미충족.
+
+다음 사이클 추천 = op-analysis(lite, gap 25/25 정확 도달) 자연 트리거 또는 review-code(heavy) 계속(app/api 잔여 route·components 재확인).
+
 ## 🟢 SUCCESS — fix-incident: lotto cron 2종 PR-create silent swallow 패턴 수정 (cycle 3316, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved, plan#30 2026-10-18 만료 확인 — status=completed 라 미처리 approved 아님, 액션 불필요). 직전8(3309-3315) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족(distinct=3). gap 전부 미근접(fix-incident 11/20·lotto 12/30·info-arch 16/30·op-analysis 22/25). explore-idea saturation 2/15 미충족. DESIGN.md mtime 205h(8.5일, 4주 미만) design-system 미근접. 2차 방어선: `cycle-retro 3315` 1건 정상 확인(결손 없음).
