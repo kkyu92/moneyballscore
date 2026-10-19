@@ -1,5 +1,19 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): components/{dashboard,layout,picks} 전수 감사, 신규 drift 0건 (cycle 3298, 2026-10-19)
+
+진단: open issue 0건. approved plan 0/23 (23개 전부 completed/archived/non-approved). 2차 방어선: cycle 3297 retro commit(`019b55a8`) 존재 확인. 2-chain lock 미충족(직전8(3290-3297) distinct=4: fix-incident/review-code/operational-analysis/lotto). gap 전부 미도달(fix-incident 5/20·op-analysis 3/25·lotto 2/30, info-arch 27/30 근접하나 cycle 3270 checkpoint 가 "다음 30-cycle 재도달 = cycle 3300 근방" 명시 — 2 사이클 이르게 발화 시 조기 no-op 중복 우려로 보류). cycle 3297 retro 추천 중 "review-code(heavy) 잔여(components 계열)" 채택 — git log 전수 대조로 components/ 하위 20개 디렉토리 중 dashboard/layout/picks 3개만 과거 review-code(heavy) 커밋에 전혀 언급 없음을 확인(accuracy/glossary/search/shared/standings/teams/leaderboard/seasons/ui/live/players/reviews/analysis/matchup/predictions/insights/share 는 cycle 3233-3279 에 이미 커버).
+
+**실행**: Agent(general-purpose) 위임 — dashboard/(14 tsx+1 test) + layout/(9 tsx+5 test) + picks/(12 tsx) 전수 read, packages/shared 상수 + 연관 lib/{accuracy,dashboard,picks,predictions,standings} 교차검증. 과거 형제 디렉토리에서 발견된 8가지 드리프트 패턴(하드코딩 팀수/sort-aware rank 버그/comment-code mismatch/dead export/i18n 리터럴 누출/factor 정규화 누락/stale scoring-rule 참조/twin-variant prop mismatch) 전부 점검.
+
+**결과**: 신규 drift 0건. `KBO/MLB_TEAM_COUNT` 등 상수 전부 import 사용(하드코딩 없음), `TeamPerformanceChart`/`BrierTrendChart`/`CohortComparisonHeatmap` sort-aware 정상, `ModelTuningInsights` 정규화 로직이 `lib/dashboard/factor-accuracy.ts` 와 정확 일치, `Header`/`Footer` isEn 분기 ko/en 양쪽 호출부 정상. 스타일적 특이사항 1건(`LeagueSelector.tsx:20` 로또 pill 이 `/lotto` 아닌 `/lotto/methodology` 링크 — 의도된 기존 동작, 테스트로 커버됨, 버그 아님) 발견했으나 non-actionable 판단.
+
+**regression**: `pnpm vitest run src/components/dashboard src/components/layout src/components/picks` 11 test files / 52 tests 전부 통과. 코드 변경 없음(감사만).
+
+**검증**: skill-evolution trigger 5개 평가 — milestone 3298%50=48≠0(trigger3). trigger5: 직전20(N-19..N=3279-3298) 표본 10+ 충족, 영구opt-out 9개 제외 평가대상 review-code 다회 발화(0회 아님) — 미충족. trigger1/2/4 해당 없음. marker 미박제. ship-0 emergency stop 미충족(직전9(3290-3297) success 다수, fail 0건).
+
+다음 사이클 추천 = info-architecture-review(gap 28/30, cycle 3300 근방 정규 재도달 예정) 또는 components/ 잔여 없음 확인 후 review-code(heavy) 는 packages/ 영역 재점검 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): lib/accuracy·lib/teams 전수 감사, 신규 drift 0건 (cycle 3297, 2026-10-19)
 
 진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3296 retro commit(`1d6e23e4`) 존재 확인. 2-chain lock 미충족(직전8(3289-3296) distinct=5). gap 전부 미도달(info-arch 26/30 근접·fix-incident 4/20·op-analysis 2/25·lotto 1/30). cycle 3294/3295/3296 공통 carry-over 추천 소비 — 이전에 "상대적으로 높아 제외"했던 `lib/accuracy`(64회 mention)/`lib/teams`(47회 mention) 차례로 감사.
