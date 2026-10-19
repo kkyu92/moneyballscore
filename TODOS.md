@@ -1,4 +1,18 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/{players,leaderboard,ui} 7파일 전수 감사 완료 — components/ 전체 vein 소진 (cycle 3344, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3336-3343) distinct=4: review-code(heavy)4+review-code(lite)1+review-code1+operational-analysis(lite)1+fix-incident1 — review-code 변형들 묶어도 lock 완화 적용 가능하나 cycle 3343 이미 redirect 처리). gap 측정: fix-incident 15/20·lotto 10/30·info-arch 14/30·op-analysis 1/25 전부 미도달. ship-0 미충족(직전10(3334-3343) success 3건: 3336/3340/3343). 2차 방어선(cycle 3343 retro `06e89532`) 확인 OK.
+
+**스코프**: 직전 다수 사이클(3320/3322/3329 등)이 "`components/` 재확인" 을 반복 추천했으나 실제로는 picks/layout(3219)·dashboard/insights(3228)·predictions(3229)·teams/reviews/search/live/share(3230)·analysis/matchup(3233)·accuracy/shared(3234)·standings/seasons/glossary(3278) 순으로 대부분 이미 감사 완료 상태 — 미방문 잔여 디렉토리를 직접 찾아 `components/players`(1파일, PitcherFipTrend.tsx 116줄) + `components/leaderboard`(5파일, 660줄: LeaderboardTable/LeaderboardClient/LeaderboardSortControl/HallOfFame/LeaderboardJoinModal) + `components/ui`(1파일, navigation-menu.tsx 109줄, shadcn 생성) 전수 read.
+
+**결과**: 7개 파일 전부 clean. PitcherFipTrend 는 recharts 기반 차트, neutral 토큰 사용 일관. LeaderboardTable 의 rank 계산(streak/sample/accuracy 3-way)이 myRank/per-entry rank 양쪽 동일 로직 사용 — 불일치 없음. HallOfFame 은 leaderboard/page.tsx 에서 정상 import+렌더 확인(dead code 아님), SVG 메달 CSS 변수 DESIGN.md 토큰 정합. navigation-menu.tsx 는 MegaMenu.tsx 가 소비 — 사용 중(dead code 아님), 관련 a11y/silent-drift 테스트 존재. **신규 drift 0건.**
+
+**결론**: `components/` 20개 서브디렉토리 전체(picks/layout/dashboard/insights/predictions/teams/reviews/search/live/share/analysis/matchup/accuracy/shared/standings/seasons/glossary/players/leaderboard/ui) 전수 감사 완결 박제 — review-code(heavy) 의 components/ vein 공식 소진. 코드 변경 없음(retro-only). 다음 review-code(heavy) 스코프 = `packages/kbo-data/src/{context,factors,engine,analytics}` 잔여(cycle 3306 carry-over 미완) 또는 전혀 새 축(`packages/shared`, `apps/moneyball/src/hooks` 등) 탐색 필요.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3344%50=44≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3325-3344, 현재 포함) 표본 20(≥10 충족), 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3335-3344) success 3건(3336/3340/3343)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) `packages/kbo-data` 신규 축 탐색 또는 fix-incident(gap 16/20)/lotto(gap 11/30)/op-analysis(gap 2/25)/info-arch(gap 15/30) 자연 대기.
+
 ## 🟢 SUCCESS — operational-analysis(lite): CE/비CE Brier 격차 32회 연속 재확인 (cycle 3343, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 탐지(직전8(3335-3342) distinct=1, 전부 review-code 변형) → review-code 후보 제외 후 redirect. gap 측정: fix-incident 14/20·lotto 9/30(미도달)·info-arch 13/30(미도달)·**operational-analysis 마지막 발화 cycle 3294, gap=49/25 (최대 미도달 폭, 최우선 선택)**.
