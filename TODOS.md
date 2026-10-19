@@ -15769,3 +15769,19 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3330%50=30≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3311-3330, 현재 cycle 포함) 표본 20(≥10 충족), opt-out 9개 제외 평가대상 review-code 12/20 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3321-3330) success 다수(3321/3323/3324)로 미충족.
 
 다음 사이클 추천 = review-code(heavy) 계속(`components/` 재확인) 또는 fix-incident(gap 1/20)/lotto(gap 27/30)/op-analysis(gap 8/25) 자연 대기.
+
+## ⚪ RETRO-ONLY — review-code(heavy): lib/mlb 잔여 2파일 + lib/predictions 7파일 전수 감사, 신규 drift 0건 (cycle 3345, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23(plan #30 completed_all_phases_shipped 이나 비-approved 상태 유지, 기존 정합 패턴). 2차 방어선(cycle 3344 retro `502a8b9a`) 확인 OK. 2-chain lock 미충족(직전8(3337-3344) distinct=4). gap 전부 미도달(fix-incident 16/20·lotto 11/30·info-arch 15/30·op-analysis 2/25). review-code(heavy) 직전20 중 13/20(65%) dominance 지속.
+
+**carry-over 재검증**: cycle 3344 가 추천한 두 후보(① `packages/kbo-data/src/{context,factors,engine,analytics}` 잔여, ② 신규 축 `packages/shared`+`hooks`) 모두 착수 전 실제 완료 여부 직접 확인 — ①은 cycle 3306 carry-over 수정(`mlb-elo.ts` MLB_ELO_K_POSTSEASON 사장 상수)이 PR #3168 로 오늘(2026-10-19 02:10 UTC) 이미 머지 완료, ②는 cycle 3271 에서 이미 10파일+hooks+config/model.ts 전수 감사 완료 — 둘 다 추천 당시 stale 정보였음(carry-over 문구 직접 재확인 없이 작성된 사례, `feedback_diagnose_existing_artifacts_first` 패턴 재발 방지 차 본 사이클에서 선행 검증). `apps/moneyball/src/lib/` TODOS 히스토리 재추적 결과 실제 미감사 잔존 = `lib/mlb` 18개 중 16개 완료(cycle 3309) 잔여 2개(`buildMlbTeamProfile.ts`/`buildMlbMatchupProfile.ts`) + `lib/predictions` 7개 파일(전체 미감사) 채택.
+
+**감사**: Agent 1개 — 9개 파일(930+334=1264줄) 전수 read + 전 export call-site cross-grep + comment-vs-code 대조 + `packages/shared` 상수 대조 + factorLabels.ts 10팩터 CLAUDE.md v1.8 리스트 1:1 매칭 + mlb 2파일 KBO/MLB 스코프 누출 확인 지시.
+
+**결과**: 9개 파일 전부 clean. `buildMlbTeamProfile.ts`/`buildMlbMatchupProfile.ts` — MLB 전용(`mlb_schedule`/`external_game_id`/`league='mlb'`) 패턴 확인, KBO 누출 없음, `assertSelectOk` 에러 핸들링 주석-코드 일치. `factorLabels.ts` — `FACTOR_LABELS` 10키가 `packages/shared` `ACTIVE_FACTOR_KEYS` 및 CLAUDE.md v1.8 10팩터 리스트와 순서까지 완전 일치, `NEUTRAL_LO/HI`·`RECENT_FORM_GAMES` 단일 source 확인. `judgeReasoning.ts` 의 `FALLBACK_PREFIXES` 리터럴이 `debate.ts:86`/`postview.ts:516` 실제 값과 여전히 일치. `v2Predictor.ts`/`yesterdayDate.ts`/`tierStats.ts`/`adjacentDates.ts`/`estimateTime.ts` 전부 shared 상수 재사용 확인, dead export 0건. **신규 drift 0건.**
+
+**결론**: `lib/mlb`(18/18) + `lib/predictions`(7/7) 전수 감사 완결. 코드 변경 없음(retro-only). `apps/moneyball/src/lib/` 잔여 미감사 = picks(532L)/teams(1166L)/accuracy(940L)/analysis/calendar/changelog/debug/insights/leaderboard/lotto/matchup/observability/players/reviews/seasons/seo/standings/stats/supabase/v2-shadow-monitor/api — 다수 서브디렉토리 잔존.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3345%50=45≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3326-3345, 현재 포함) 표본 충족, 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3336-3345) success 3건(3336/3340/3343)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`lib/picks` 또는 `lib/teams` 또는 `lib/accuracy` 신규 스코프 — 착수 전 실제 미감사 여부 재확인 필수) 또는 fix-incident(gap 17/20)/lotto(gap 12/30)/info-arch(gap 16/30)/op-analysis(gap 3/25) 자연 대기.
