@@ -82,13 +82,13 @@ ${isHome ? '홈' : '원정'} 경기입니다.
 ${myName}의 관점에서 분석하세요.`;
 }
 
-function parseResponse(text: string): TeamArgument | null {
+function parseResponse(text: string, team: 'LG' | 'OB'): TeamArgument | null {
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
     const parsed = JSON.parse(jsonMatch[0]);
     return {
-      team: 'LG',
+      team,
       strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 5) : [],
       opponentWeaknesses: Array.isArray(parsed.opponentWeaknesses) ? parsed.opponentWeaknesses.slice(0, 3) : [],
       keyFactor: String(parsed.keyFactor || ''),
@@ -155,10 +155,10 @@ function scoreOutput(text: string, parsed: TeamArgument | null, ctx: GameContext
 
   // 결과 비교
   if (deepseekResult.success && deepseekResult.data) {
-    scoreOutput(deepseekResult.data, parseResponse(deepseekResult.data), context, 'DeepSeek V3');
+    scoreOutput(deepseekResult.data, parseResponse(deepseekResult.data, 'LG'), context, 'DeepSeek V3');
   }
   if (claudeResult.success && claudeResult.data) {
-    scoreOutput(claudeResult.data, parseResponse(claudeResult.data), context, 'Claude Haiku 4.5');
+    scoreOutput(claudeResult.data, parseResponse(claudeResult.data, 'LG'), context, 'Claude Haiku 4.5');
   }
 
   console.log('\n=== 요약 ===');

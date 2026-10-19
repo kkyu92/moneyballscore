@@ -6,7 +6,7 @@ const mode = (process.argv[3] as PipelineMode) || 'predict';
 console.log(`Running pipeline: date=${date || 'today'} mode=${mode}`);
 console.log('---');
 
-runDailyPipeline(date, mode)
+runDailyPipeline(date, mode, 'manual')
   .then((result) => {
     console.log('---');
     console.log('Result:', JSON.stringify(result, null, 2));
