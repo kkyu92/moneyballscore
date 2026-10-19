@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/matchup+stats/pearson+insights/statusBadge 7파일 신규 스코프 감사, 신규 drift 0건 (cycle 3357, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3349-3356) distinct=3: review-code/fix-incident(lite)/skill-evolution). gap 전부 미도달(fix-incident 7/20·op-analysis 14/25·info-arch 27/30·lotto 23/30). cycle 3356 추천 lib/analysis/lib/insights/lib/matchup/lib/stats/lib/v2-shadow-monitor 재확인 — v2-shadow-monitor 는 cycle 2990 기수정 확인되어 제외, 나머지 중 CHANGELOG mention 최저(buildSeasonHeadToHead 3회·pearson 3회·statusBadge 4회·buildMatchupEloTrend 4회·canonicalPair 4회) 포함한 `lib/matchup` 5파일 + `lib/stats/pearson.ts` + `lib/insights/statusBadge.ts` 7파일 채택.
+
+**감사**: Agent 1개 — 7파일 전수 read + 모든 export call-site cross-grep + MLB twin 5개(buildMlbMatchupEloTrend/buildMlbMatchupProfile/buildMlbMatchupUpcoming/buildMlbSeasonHeadToHead/mlbCanonicalPair) 라인별 diff + 기존 테스트 36개 green 확인.
+
+**결과**: 신규 drift 0건. canonicalPair 전 caller(sitemap/analysis/matchup/players/teams 페이지) 모두 정상 사용, 수동 pair-ordering 우회 0건. pearson n<2/zero-variance 0 반환 테스트 커버. statusBadge EN/KO 분기 cycle 3284 fix 정합. buildMatchupUpcoming 의 `CURRENT_SCORING_RULE`(단수) vs buildMatchupProfile 의 `PRODUCTION_COHORT_RULES`(복수) 차이는 버그 아님 — `v1.8-credit-fail` 라벨은 과거 검증된 예측에만 retroactive 적용되므로 예정 경기 필터는 단수가 맞음(설계 의도 확인).
+
+**검증(skill-evolution 등)**: trigger3(3357%50=7) 미충족. trigger5 — 직전20(3338-3357) review-code 다수 발화(16/20)로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3348-3357) success 5건(3348/3349/3351/3352/3355)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`lib/insights` 잔여 3파일(loader/series/topFactors) + `lib/analysis` 4파일(computeCompositeDuel/computeMlbCompositeDuel/convergenceRecord/factor-explanations)) 또는 fix-incident(gap 8)/op-analysis(gap 15)/info-arch(gap 28)/lotto(gap 24) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/accuracy+teams+picks 저-mention 6파일 신규 스코프 감사, 신규 drift 0건 (cycle 3356, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23(plan #30 completed, expiry 만료). 2-chain lock 미충족(직전8(3348-3355) distinct=3: review-code/fix-incident(lite)/skill-evolution). gap 전부 미도달(fix-incident 6/20·op-analysis 13/25·info-arch 26/30·lotto 22/30). explore-idea saturation 13/15 근접하나 4-source negative 확립 skip 패턴 유지. cycle 3355 추천 lib/picks 잔여/lib/teams 잔여/lib/accuracy 잔여 채택 — CHANGELOG mention 최저 6파일 선정(buildFactorAccuracy 0회, shadow-pair-prob/buildShadowCalibration/buildTeamEloTrend 1회, buildTeamRecentForm/buildCommunityAccuracy 2회).
