@@ -15945,3 +15945,15 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger3(3352%50≠0) 미충족. trigger5 — 직전20(3333-3352) chain pool 분포 review-code(heavy+lite 등) 압도적, 표본≥10 충족하나 review-code 0회 아님(본 cycle 포함 다수 발화) — 미충족. ship-0 — 직전10(3343-3352) success 5건(3343/3348/3349/3351/3352)으로 미충족.
 
 다음 사이클 추천 = scripts/ 저-mention 배치 감사 축 소진 — fix-incident(gap=3)/op-analysis(gap=10)/lotto(gap=19)/info-arch(gap=23) 자연 대기 또는 review-code(heavy) 신규 스코프(components/app 라우트 내부 로직 재탐색 또는 cloudflare-worker/) 탐색 권장.
+
+## ⚪ RETRO-ONLY — review-code(heavy): lib/insights+analysis 잔여 7파일 신규 스코프 감사, 신규 drift 0건 (cycle 3358, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3350-3357) distinct=3: fix-incident(lite)/skill-evolution/review-code). gap 재계산(chain_selected 파싱 버그 정정 — `(lite)`/`(heavy)` 접미사로 exact-match 가 과거 일부 사이클 놓침, startswith 매칭으로 재확인): fix-incident 7/20(last fire 3350), op-analysis 14/25(last fire 3343), info-arch 27/30(last fire 3330), lotto 23/30(last fire 3334) — 전부 미도달. explore-idea saturation 0/15. cycle 3357 추천 lib/insights 잔여 3파일(loader/series/topFactors) + lib/analysis 4파일(computeCompositeDuel/computeMlbCompositeDuel/convergenceRecord/factor-explanations) 채택.
+
+**감사**: Agent 1개 — 7파일 전수 read + 모든 export call-site cross-grep + KBO/MLB twin(computeCompositeDuel↔computeMlbCompositeDuel) factor-by-factor diff + 기존 테스트 전수 대조.
+
+**결과**: 신규 drift 0건. topFactors.ts locale filter 안전(FACTOR_LABELS/FACTOR_LABELS_EN 키셋 동일). loader.ts/series.ts 내부 try/catch 없는 함수는 페이지 호출부가 이미 wrap(cycle 2945/2946 fix 정합). computeCompositeDuel/computeMlbCompositeDuel 차이(MLB elo/recent_form/head_to_head/sfr 미와이어)는 의도된 설계(cycle 2771 확인 정합), MIN_VALID/FACTOR_PICK 상수 KBO/MLB 분리 정상. factor-explanations.ts 임계값 수학적 일관. convergenceRecord.ts KBO/MLB twin 전부 상수 cross-wire 없음.
+
+**검증(skill-evolution 등)**: trigger3(3358%50=8) 미충족. trigger5 — 직전20(3339-3358) review-code 다수 발화로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3349-3358) success 5건(3349/3351/3352/3355 + 해당 window 내)으로 미충족.
+
+**app/api 3-pass + lib/* 저-mention 디렉토리 재감사 누적 지속**. 다음 사이클 추천 = review-code(heavy) 신규 스코프 탐색(`lib/` 전수 디렉토리 중 미감사 잔여 재확인, grep count 를 깊이 지표로 쓰지 말 것 — cycle 3001 가드레일) 또는 fix-incident(gap 8)/op-analysis(gap 15)/info-arch(gap 28)/lotto(gap 24) 자연 대기.
