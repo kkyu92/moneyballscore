@@ -15957,3 +15957,15 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger3(3358%50=8) 미충족. trigger5 — 직전20(3339-3358) review-code 다수 발화로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3349-3358) success 5건(3349/3351/3352/3355 + 해당 window 내)으로 미충족.
 
 **app/api 3-pass + lib/* 저-mention 디렉토리 재감사 누적 지속**. 다음 사이클 추천 = review-code(heavy) 신규 스코프 탐색(`lib/` 전수 디렉토리 중 미감사 잔여 재확인, grep count 를 깊이 지표로 쓰지 말 것 — cycle 3001 가드레일) 또는 fix-incident(gap 8)/op-analysis(gap 15)/info-arch(gap 28)/lotto(gap 24) 자연 대기.
+
+## ⚪ RETRO-ONLY — operational-analysis(lite): CE/비CE cohort 재측정, 수치 동결 65-cycle 지속 확인 (cycle 3359, 2026-10-19)
+
+진단: open issue 0건. 2-chain lock 충족 — 직전8(3351-3358) distinct=2(review-code+skill-evolution) → 둘 다 후보 제외. fix-incident gap=30/20(last fire 3329), op-analysis gap=65/25(last fire 3294, 역대 최대 미도달 폭) 양쪽 trigger 충족. `gh run list` 재확인 — CI Failure Dispatch 전부 skipped(실제 incident 부재), fix-incident 는 periodic 보정 trigger뿐이라 실체 없음 판단 → op-analysis 선택(더 오래 미발화 + 기존 harness 즉시 실행 가능).
+
+**실행**: `scripts/op-analysis-ce-cohort.ts` 재실행 (env `apps/moneyball/.env.local` source).
+
+**결과**: 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3294/3315/3323/3343 수치와 완전 동일. CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp, overlap(05/06/07) 통제 격차 10.8pp 그대로, LLM 부가가치 우세 결론 33회 연속 재확인. 원인 = KBO 2026 정규시즌 종료(2026-10-04 최종 경기) 지속 — `pipeline_runs` predict_final/verify 매일 no-op 정상. CREDIT_EXHAUSTED·비CE 동결(마지막 예측 2026-07-01, 110일+ 경과) 상태 변화 없음. 코드 변경 없음(harness 재실행만).
+
+**검증(skill-evolution 등)**: trigger3(3359%50=9) 미충족. trigger5 — 직전20(3340-3359) chain pool 분포: review-code 압도적 다수, 표본≥10 충족, review-code 0회 아님 → 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3350-3359) success 포함(3351/3352/3355) → 미충족.
+
+다음 사이클 추천 = 2-chain lock(review-code+skill-evolution) cooldown(N=1) 만료 후 review-code(heavy) 복귀 또는 info-arch(gap 29/30, 다음 사이클 도달)/lotto(gap 25/30)/fix-incident(gap 0, 미선택 상태 유지) 자연 대기. op-analysis 재측정 ROI 낮음(65-cycle 고정값) — 다음 재측정은 KBO 2027 개막 신호 또는 gap 25-cycle 주기 기준 권장.
