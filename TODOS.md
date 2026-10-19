@@ -15867,3 +15867,17 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3345%50=45≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3326-3345, 현재 포함) 표본 충족, 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3336-3345) success 3건(3336/3340/3343)으로 미충족.
 
 다음 사이클 추천 = review-code(heavy) 계속(`lib/picks` 또는 `lib/teams` 또는 `lib/accuracy` 신규 스코프 — 착수 전 실제 미감사 여부 재확인 필수) 또는 fix-incident(gap 17/20)/lotto(gap 12/30)/info-arch(gap 16/30)/op-analysis(gap 3/25) 자연 대기.
+
+## 🟢 SUCCESS — review-code(heavy): scripts/ 저-mention 5파일 3차분 재검증, tierOf 쌍둥이 버그 1건 fix (cycle 3352, 2026-10-19)
+
+진단: 2차 방어선 — cycle 3351 retro commit(`9fd7bdde`) 존재 확인, 결손 0건. open issue 0건, approved plan 0/23. 직전8(3344-3351) distinct=4(review-code 5+polish-ui1+fix-incident(lite)1+skill-evolution1) — 2-chain lock 미충족. fix-incident gap=2·op-analysis gap=9·lotto gap=18·info-arch gap=22 전부 미근접. cycle 3349 추천 carry-over(backtest.ts/op-analysis-cohort.ts/update-stale-data.ts/backtest-v2-candidate.ts/measure-context-layer-brier.ts) 채택.
+
+**diagnose-existing-artifacts-first 재확인**: 5개 중 4개(backtest.ts/update-stale-data.ts/backtest-v2-candidate.ts/measure-context-layer-brier.ts)는 CHANGELOG(1712-1713줄)·TODOS(2405줄)·cycle 3171 커밋 이력으로 이미 전수 감사 완료 확인 — cycle 3349 의 "저-mention" 분류 자체가 stale(실제로는 이미 손길 닿은 파일). 직접 read 로 재확인했으나 drift 0건(기존 결론 그대로).
+
+**확정 버그 1건**: `op-analysis-cohort.ts` 의 `tierOf()` — cycle 3349 가 쌍둥이 파일 `op-analysis-brier-drift.ts` 의 동일 TIER_BOUNDS/tierOf 패턴에 적용한 confidence=1.0 경계 fix 를 이 파일엔 놓침(배치 감사 시 쌍둥이 파일 존재 미인지). `conf < t.max` exclusive 라 confidence=1.0 인 행이 veryhigh tier 에 안 걸리고 fallback "low" 오분류 — 동일 fix(마지막 tier 상한 포함) 적용.
+
+검증: `pnpm lint:scripts` clean, `pnpm test` 596 files/4679 tests pass. 직접 main 커밋+push(R4, `365b5094`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger3(3352%50≠0) 미충족. trigger5 — 직전20(3333-3352) chain pool 분포 review-code(heavy+lite 등) 압도적, 표본≥10 충족하나 review-code 0회 아님(본 cycle 포함 다수 발화) — 미충족. ship-0 — 직전10(3343-3352) success 5건(3343/3348/3349/3351/3352)으로 미충족.
+
+다음 사이클 추천 = scripts/ 저-mention 배치 감사 축 소진 — fix-incident(gap=3)/op-analysis(gap=10)/lotto(gap=19)/info-arch(gap=23) 자연 대기 또는 review-code(heavy) 신규 스코프(components/app 라우트 내부 로직 재탐색 또는 cloudflare-worker/) 탐색 권장.
