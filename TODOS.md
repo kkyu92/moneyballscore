@@ -1,5 +1,17 @@
 
 
+## 🟢 SUCCESS — operational-analysis(lite): CE/비CE 격차 29회 연속 재측정, Supabase ENOTFOUND 오진단 정정 (cycle 3294, 2026-10-19)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3293 retro commit(`0698d06c`) 존재 확인. 2-chain lock 탐지(직전8(3286-3293) distinct=2: review-code(heavy)6+fix-incident(lite)2) 충족하나 lock 안에 fix-incident 포함 → 안전 우선 룰(4)로 lock 무시, 정상 선택 진행. gap 전부 미근접(fix-incident 2/20·op-analysis 18/25·info-arch 24/30·lotto 11/30). explore-idea saturation 직전15(3279-3293) 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8.4일 신선) — 확립된 skip 패턴 유지. review-code(heavy) 가 직전 9사이클 중 7회 "신규 drift 0건" PARTIAL 반복(3285/3286/3287/3288/3289/3291/3293) — 수확체감 신호 + Supabase 상태 재확인 겸 op-analysis(lite) 선택(gap 미도달이나 자율 선택).
+
+**실행**: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행 + Supabase DNS/REST 직접 확인 + `pipeline_runs` 최신 5건 조회.
+
+**결과**: (1) 전체 n=448(CE n=401/비CE n=47) — cycle 3276 수치와 완전 동일, KBO 시즌 종료(2026-10-04) 지속으로 신규 verified pre_game 0건. CE 55.9%(224/401)/비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 유지 — LLM 부가가치 우세 결론 29회 연속 재확인. (2) **오진단 정정**: 이전 node DNS 테스트가 잘못된 호스트명(`db.<project>.supabase.co`)으로 ENOTFOUND 를 반환해 "Supabase 블락 지속"처럼 보였으나, 실제 프로젝트 호스트(`utmimgpccbrciwuuacyw.supabase.co`)로 재확인하니 DNS 정상 resolve(104.18.38.10) + REST API 401(인증 필요 응답, 서비스 정상). `pipeline_runs` 최신 5건(2026-10-19, MLB 5개 모드) 전부 predictions=games_found 로 정상 매칭 확인 — 구조적 블락 완전 해소, cycle 3261/3276 RESOLVED 기록과 정합.
+
+**검증**: skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3294%50=44≠0, trigger5 직전20(N-19..N=3275-3294) review-code 다회 발화로 0회 chain 없음, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전9(3285-3293) success/PARTIAL 혼재, fail 0건). 코드 변경 없음(측정+CLAUDE.md 서술 정정만).
+
+다음 사이클 추천 = review-code(heavy) 신규 축(`lib/accuracy`/`lib/api`/`lib/seo`/`lib/supabase`/`lib/teams` 저-mention 또는 components 계열 잔여) 또는 info-arch(gap 25/30, 근접)/lotto(gap 12/30)/fix-incident(gap 3/20) 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): lib/{changelog,v2-shadow-monitor,seasons,players,matchup} 전수 감사, 신규 drift 0건 (cycle 3293, 2026-10-19)
 
 진단: open issue 0건. approved plan 0/23(전부 completed/archived/spec_only_deferred). 2차 방어선: cycle 3292 retro commit(`f831eb9f`) 존재 확인. 2-chain lock 탐지(직전8(3285-3292) distinct=2: review-code(heavy)6+fix-incident(lite)2) 충족하나 lock 안에 fix-incident 포함 → 안전 우선 룰(4)로 lock 무시, 정상 선택 진행. gap 전부 미근접(fix-incident 1/20·op-analysis 17/25·info-arch 23/30·lotto 10/30). explore-idea saturation 직전15(3278-3292) 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8.4일 신선) — 확립된 skip 패턴 유지. cycle 3291 추천대로 lib 저-mention 축 지속 — git log mention-count 최하위군 5개 디렉토리(`lib/changelog` 3회·`lib/seasons` 4회·`lib/v2-shadow-monitor` 4회·`lib/players` 5회·`lib/matchup` 6회) 선정.
