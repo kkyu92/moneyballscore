@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — polish-ui: DESIGN.md token/radius 정합성 재점검, 신규 drift 0건 (cycle 3347, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3346 retro `0d0c147b`) 확인 OK. **2-chain lock 탐지**(직전8(3339-3346): review-code(heavy/변형) 7 + operational-analysis(lite) 1, distinct=2) → review-code/operational-analysis 후보 제외. gap 전부 미도달(fix-incident 19/20·lotto 14/30·info-arch 18/30, op-analysis 는 lock 대상이라 평가 제외). explore-idea saturation 미충족(직전15(3332-3346) review-code/fix-incident/polish-ui/info-arch=13+1+0+1=15≥12 충족이나 review-code 자체가 lock 대상). 신규 7일 라우트 0건(git log 확인, find mtime 는 checkout 오탐). → lock fallback 규정대로 `polish-ui` 강제 선택.
+
+**실행**: 실브라우저 design-review 전체 플로우는 AskUserQuestion(더티트리 확인/DESIGN.md 저장 제안 등) 다수 포함해 자동 fire 세션에서 hang 위험 — 대신 DESIGN.md 토큰 vs 실제 컴포넌트 정적 grep 감사로 대체(polish-ui 진단 source 표의 "DESIGN.md token vs 컴포넌트 grep 균열" 항목 직접 수행). 점검 항목: (1) border-radius `rounded-md` 전역 재검색 — cycle 2604 가 "다음 사이클 후보"로 남긴 `MegaMenu.tsx`/`navigation-menu.tsx`/`SearchClient.tsx` 3곳 포함 전체 재확인: 0건(이미 완전 정렬, 미문서화 해소). (2) `green-*`/`emerald-*` 리터럴 Tailwind 클래스 전수: 전부 기존 문서화된 의도적 예외(lotto 공식 볼 색상, `/debug/*` 사용자 비가시, `AgentVoteCard` categorical 패턴). (3) 컴포넌트 내 리터럴 hex: `HallOfFame.tsx`(전부 `var(--color-*, #hex)` fallback 패턴, 정상) + `ShareButtons.tsx`(소셜 브랜드 컬러, 기존 예외) 뿐 — 신규 미문서 리터럴 0건.
+
+**결론**: 신규 drift 0건. cycle 2604 미해결 잔여 3곳도 이미 해소 확인(문서 갱신만 누락 상태였음, 코드 변경 불필요). 코드 변경 없음(retro-only).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3347%50=47≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3328-3347, 현재 포함) 표본 19(≥10 충족), 평가대상 review-code 15/19 다수 발화로 미충족. marker 미박제. ship-0 — 직전9(3338-3346) 중 success 2건(3340/3343)으로 미충족.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 복귀(`scripts/` 잔여 저-mention 파일 계속) 또는 fix-incident(gap 19/20, 임계 근접)/lotto(gap 14/30)/info-arch(gap 18/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): scripts/ 8파일 저-mention 배치 전수 감사, 신규 drift 0건 (cycle 3346, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23(plan #30 completed_all_phases_shipped 이나 비-approved 유지). 2차 방어선(cycle 3345 retro `f52e9776`) 확인 OK. 2-chain lock 미충족(직전8(3338-3345) distinct=4). gap 전부 미도달(fix-incident 18/20·lotto 13/30·info-arch 17/30·op-analysis 4/25).
