@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): validator-logger+mlb/calendar-heatmap+mlb/team-elo-trend 3파일 신규 스코프 감사, 신규 drift 0건 (cycle 3363, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23(plan #30 completed_shipped stale-unarchived). 2-chain lock 미충족(직전8(3355-3362) distinct=3: review-code/operational-analysis/polish-ui). gap 전부 미도달(fix-incident 13/20·op-analysis 4/25·info-arch 3/30·lotto 29/30·design-system mtime 211h). explore-idea saturation 12/15 수치 충족하나 4-source negative 확립 skip 패턴 유지. cycle 3361 이 lib/insights+lib/analysis 전수 완료 선언(수익 체감 구간) — CHANGELOG mention 최저(각 1회) `packages/kbo-data/src/agents/validator-logger.ts` + `lib/mlb/buildMlbCalendarHeatmap.ts` + `lib/mlb/buildMlbTeamEloTrend.ts` 3파일 채택.
+
+**감사**: 본 메인 직접 read, agent 위임 없음. (1) validator-logger.ts 의 `ValidatorAgent` union(`'team'|'judge'|'calibration'`) 과 전체 호출부(team-agent/judge-agent/calibration-agent/postview) 교차 grep — 완전 일치, mlb-retro.ts 는 이 path 미사용 확인. (2) buildMlbCalendarHeatmap.ts 의 predictions join — `MLB_PRODUCTION_COHORT_RULES` 가 단일원소 배열이라 external_game_id 당 row 1개 보장, Map overwrite dedup 오류 가능성 없음. (3) buildMlbTeamEloTrend.ts forward-fill league-average(cycle 3033 정정) 로직 재확인 — KBO buildTeamEloTrend.ts 설계와 일치.
+
+**결과**: 신규 drift 0건. 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger3(3363%50=13) 미충족. trigger5 — 직전20(3344-3363, 1개 JSON 누락) review-code 14회 발화로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3354-3362, 3360 JSON 누락) success 1건(3355)으로 미충족. 2차 방어선(cycle 3362 retro `3951cf8c`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`lib/debug` 4파일: agentFallbackStats/factorDeltaStats/pipelineStats/silentDriftStats) 또는 lotto(gap 30/30 다음 cycle 도달)/fix-incident(gap 14/20) 자연 대기.
+
 ## ⚪ RETRO-ONLY — polish-ui: 2-chain lock fallback, DESIGN.md 기 문서화 drift 3종 재점검, 신규 drift 0건 (cycle 3362, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23. **2-chain lock 충족** — 직전8(3354-3361) distinct=2(review-code+operational-analysis) → 두 chain 모두 제외. fix-incident gap=12/20(`gh run list` 재확인 CI Failure Dispatch 전부 skipped, 실 incident 부재)·lotto gap=28/30(cron 산출물 2026-10-17.md picks+results 모두 신선)·info-arch gap=2(cycle 3360 직후)·design-system(DESIGN.md mtime 211h, 4주 미달) 전부 미도달. explore-idea saturation 11/14(review-code10+fix-incident1, cycle 3360 JSON 누락으로 표본 14) 근접하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up stale) 확립 skip 패턴 유지. lock fallback 룰("어떤 chain 도 trigger 없으면 polish-ui 강제") 적용.
