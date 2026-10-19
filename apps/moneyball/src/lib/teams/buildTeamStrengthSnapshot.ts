@@ -5,9 +5,9 @@ import {
   shortTeamName,
   TEAM_STRENGTH_ELO_DELTA_WINDOW,
   TEAM_STRENGTH_SNAPSHOT_LIMIT,
+  PRODUCTION_COHORT_RULES,
   type TeamCode,
 } from '@moneyball/shared';
-import { CURRENT_MODEL_FILTER } from '@/config/model';
 
 export interface TeamStrengthRow {
   teamCode: TeamCode;
@@ -49,7 +49,7 @@ export async function buildTeamStrengthSnapshot(): Promise<TeamStrengthRow[]> {
       )
     `,
     )
-    .match(CURRENT_MODEL_FILTER)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .eq('prediction_type', 'pre_game')
     .not('home_elo', 'is', null)
     .order('created_at', { ascending: false })
