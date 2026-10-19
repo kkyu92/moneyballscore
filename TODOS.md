@@ -15249,3 +15249,15 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger 1(chain-evolution 5건, 평가 보류)/2(5연속 fail 없음)/3(3302%50≠0)/4(meta-pattern 없음) 미충족. trigger5 — 직전20(3283-3302) 표본 10+ 충족, review-code 다수 발화로 미충족. marker 미박제. ship-0 emergency stop — 직전10(3293-3302) success(3294,3295) 존재로 미충족.
 
 다음 사이클 추천 = review-code(heavy) lib/mlb 17파일 감사 계속 또는 fix-incident/lotto/op-analysis/info-arch gap 자연 대기.
+
+## ✅ SUCCESS — fix-incident: incident-followup reminder 3건(health-alert/heartbeat-stale/deploy-drift-alert) 기해소 사건 duplicate 정리 (cycle 3305, 2026-10-19)
+
+진단: open issue 스캔을 `hub-dispatch` 라벨 한정으로만 했을 때 0건이었으나, 라벨 미필터 전체 스캔에서 `lesson-pending` 라벨 reminder 3건(#3157/#3158/#3159, 2026-10-14 생성 hub incident #4632/#4626/#4617 의 3+일 무응답) 발견 — 진단 source 우선순위 절의 라벨 가정이 실제와 어긋났던 사례. approved plan 0/23. 2-chain lock 미충족(직전8 distinct=5). fix-incident 20-cycle gap 재확인 중 split()[0] 문자열 포맷 불일치(`fix-incident(lite)` 가 `fix-incident` 와 미매칭)로 최초 측정이 false negative 였음을 교정 — 실제 gap=13(마지막 발화 cycle 3292).
+
+**조사**: `gh run list --workflow=health-alert.yml/heartbeat-stale.yml/deploy-drift-alert.yml` 로 3개 workflow 전체 실패 구간 대조 + 실패 로그 직접 확인(run 38901215084) — 전부 Supabase 프로젝트 status=INACTIVE 로 인한 `TypeError: fetch failed`, 실패 구간 2026-10-11~10-17 로 cycle 3261 fix-incident 가 이미 해소한 사건(restore API 재시도 HTTP 200, billing 조치 불필요, lesson 6f790440)과 완전 일치. 3 workflow 모두 현재 1.5~2일 연속 success.
+
+**조치**: lesson commit(`9fb262fe`) 으로 기존 lesson 과 cross-reference 박제 + 교훈("fingerprint 자연어 불일치 시 허브 auto-match 실패로 해소된 사건도 reminder 재부상 가능") 기록. 신규 lesson 중복 작성 대신 issue 3건 전부 close(comment 로 근거 남김).
+
+**검증**: `gh issue list --state open` 0건 확인. 코드 변경 없음(순수 triage), CI 영향 없음.
+
+다음 사이클 추천 = review-code(heavy) twin-audit 계속 또는 op-analysis(gap 14/25)/info-arch(gap 5/30) 자연 대기.
