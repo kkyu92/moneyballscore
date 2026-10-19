@@ -1,4 +1,18 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): app/api/ 잔여 라우트 9개 전수 감사 (cycle 3342, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3341 retro `c24f5110`) 확인 OK. 2-chain lock 미충족(직전8(3335-3342) distinct=4: lotto/review-code(heavy)/review-code(lite)/review-code). gap 전부 미도달(fix-incident 13/20·lotto 8/30·op-analysis 19/25·info-arch 12/30). DESIGN.md mtime 8.7일 신선, approved plan 전부 completed/archived — design-system/expand-scope 미근접.
+
+**스코프**: cycle 3099 가 남긴 "mention 은 있으나 전수 감사 이력 불명확" 후보 — `app/api/{health,hub-dispatch,leaderboard/sync,mlb/waitlist,mlb/pipeline,picks/submit,picks/mlb-poll,picks/results,picks/mlb-submit,picks/poll,pipeline,seo/indexnow/ping,[indexnowKey].txt,sync-batter-stats,version}` 15개 route 파일 전수 read.
+
+**결과**: 전부 clean. CRON_SECRET/Bearer 인증 + `.trim()` defensive(cycle 3217 trailing-newline 버그 클래스) 패턴이 pipeline/mlb-pipeline/sync-batter-stats/seo-indexnow-ping 4곳 일관 적용 확인. `seo/indexnow/ping` 의 `.trim()` 짝(`[indexnowKey].txt` route) 교차 확인 — 양쪽 정합. mode validation(400 반환, silent fallback 금지) 패턴이 pipeline/mlb-pipeline 양쪽 동일. picks 계열 5개 route(submit/mlb-submit/poll/mlb-poll/results) 는 KBO(games.id INT)/MLB(external_game_id VARCHAR) 분리 컨벤션 일관 유지, Sentry tagging 전부 route 이름 명시. **신규 drift 0건.**
+
+**결론**: `app/api/` 전체 13개 route 디렉토리 전수 감사 완료(cycle 3099 5개 + 본 cycle 9개 추가 스코프, 기존 mention-보유 8개 전부 커버). 코드 변경 없음(retro-only). 다음 review-code(heavy) 스코프 = 신규 미탐색 영역 발굴 필요 — app/api/ vein 소진.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3342%50=42≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3323-3342, 현재 포함) 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3333-3342) success 2건(3336/3340)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 신규 영역 탐색 또는 fix-incident(gap 14/20)/lotto(gap 9/30)/op-analysis(gap 20/25)/info-arch(gap 13/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): EN/KO MLB page pair twin-audit 완결 (잔여 17쌍, cycle 3341, 2026-10-19)
 
 진단: cycle 3340 이 세션 중단 사각지대(사례 15 family)로 retro 미박제 상태였음을 본 사이클 시작 시 발견 — PR #3171(merge 미완료 상태로 방치) 즉시 머지 + retro commit 재박제(squash 로 원본 메시지 소실되어 main 직접 재커밋) 선행 후 신규 진단. open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3334-3341) distinct=4). gap 전부 미도달(fix-incident 12/20·lotto 7/30·op-analysis 18/25·info-arch 11/30). explore-idea saturation 14/15 충족하나 4-source negative(open issue 0/plan 0/TODOS Next-Up 부재/DESIGN.md 8일 신선) 확립 skip 패턴 유지.
