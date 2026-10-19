@@ -1,4 +1,20 @@
 
+## 🛑 EMERGENCY-STOP — review-code(heavy): lib/ 15파일 전수 감사 신규 drift 0건, ship-0 10-cycle streak (cycle 3335, 2026-10-19)
+
+진단: open issue 0건. approved+unexpired plan 0/23. 2차 방어선(cycle 3334 retro `a924fe55`) OK. 2-chain lock 미충족(직전8(3327-3334) distinct=4: review-code(heavy)4+fix-incident2+lotto1+info-arch1). gap 전부 미도달(fix-incident 6/20·info-arch 5/30·op-analysis 12/25·lotto 1/30). explore-idea saturation 13/15 미충족.
+
+**gh run list 재확인**: factor-backtest-weekly 10-18 success 는 cycle 3329 fix commit(`d587c5bd`, 10-19 06:59 UTC)보다 먼저 fired — 여전히 미검증. op-analysis-weekly 다음 fire=오늘 밤(월 17:45 UTC), data-refresh-weekly 다음 fire=내일(화) — 전부 수일 내 대기, 지금 확인 불가. lotto-pick-update/result-update 는 이미 multi-fire(3회/일) 설계라 weekly-only cron 과 다른 패턴 — 추가 retry 불필요 확인(fix-incident 후보 기각).
+
+**TODOS 3331 EN/KO 재검증**: EN `/en/mlb` 2-column vs KO `/mlb` 3-column accuracy grid — KO 3번째 타일은 "KBO 상세 대시보드"(`/accuracy`) 링크인데 EN 사이트엔 KBO 페이지 자체가 없음(en/accuracy 부재) — 의도된 생략 재확인, actionable 아님.
+
+**review-code(heavy) 실행**: `apps/moneyball/src/lib/` 저-commit-count(1~2건) 15파일 전수 read(subagent 위임) — api/is-origin-allowed, api/leaderboard-sync-validation, calendar/monthGrid, mlb/mlbCanonicalPair, players/buildPitcherFipTrend, predictions/adjacentDates, predictions/tierStats, stats/pearson, supabase/admin, utils, accuracy/buildShadowCalibration, accuracy/shadow-pair-prob, dashboard/buildDailyAccuracy, matchup/buildMatchupEloTrend, matchup/buildSeasonHeadToHead. 과거 버그 수정 코멘트(timezone offset, shadow-prob collision)까지 실제 코드와 교차검증 완료 — 코멘트 정확, 신규 drift 0건. "dry vein" 재확인, 코드 변경 없음.
+
+**검증(skill-evolution)**: trigger3(3335%50=35≠0)/trigger2(5연속 fail 없음)/trigger4(없음)/trigger5(직전20(3316-3335) review-code 13회 다수 발화, 미충족) 전부 미충족. marker 미박제.
+
+**ship-0 emergency stop 발동**: 직전10(3326-3335) outcome 전부 partial/retro-only, success 0건 — 10/10 streak. 사용자 N=27 무시하고 **next_n=0 강제 박제**, `memory: meta-pattern emergency-stop` dispatch. 자가 의심 차단 룰의 단일 객관 escape (CLAUDE.md "ship-0 emergency stop" 룰 정합). 다음 행동은 사용자 결정 대기.
+
+다음 사이클 추천 = 사용자 결정 대기. 유력 재개 시점 후보: op-analysis-weekly 오늘 밤 fire 검증, data-refresh-weekly 내일 fire 검증, factor-backtest-weekly 이번 주 fire 검증 — 전부 수일 내라 자동 재개 애매.
+
 ## ⚪ RETRO-ONLY — lotto(lite): 30-cycle gap trigger, cron 정상 재확인 (cycle 3334, 2026-10-19)
 
 진단: open issue 0건. approved+unexpired plan 0/23. 2차 방어선(cycle 3333 retro `8fa671d6`) OK. 2-chain lock 미충족(직전8(3326-3333) distinct=3: review-code(heavy)5+fix-incident2+info-arch1).
