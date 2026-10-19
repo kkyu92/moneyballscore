@@ -15391,3 +15391,15 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3309%50=9≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3290-3309, 현재 cycle 포함) 표본 20(≥10 충족), opt-out 9개 제외 평가대상 review-code 12회 발화로 미충족. marker 미박제. ship-0 — 직전10(3300-3309) success 다수(3301/3303/3305/3306/3307/3309)로 미충족.
 
 다음 사이클 추천 = review-code(heavy) `apps/moneyball/src/lib/mlb` 잔여 2파일(buildMlbTeamProfile.ts/buildMlbMatchupProfile.ts, 시간 budget 내 미완독분) 확인 후 다른 미감사 디렉토리(lib/picks, lib/predictions, lib/teams, lib/accuracy) 로 확장 또는 fix-incident/lotto/op-analysis/info-arch gap 자연 대기.
+
+## 🟡 PARTIAL — review-code(heavy): lib/mlb 18/18 완료 + lib/{accuracy,teams,predictions} 저-mention 5파일 추가 감사, 신규 drift 0건 (cycle 3317, 2026-10-19)
+
+진단: open issue 0건. approved+unexpired plan 0/23. 2차 방어선(cycle 3316 retro `2c47b297`) OK. 2-chain lock 미충족(직전8(3309-3316) distinct=4: review-code(heavy)5+polish-ui1+op-analysis(lite)1+fix-incident1). gap trigger 전부 미도달(fix-incident 0/20, lotto 12/30, info-arch 16/30, op-analysis 1/25). explore-idea saturation 3/15 미충족. DESIGN.md mtime 9일(신선). 직전 3 cycle(3314/3315/3316) 전부 review-code(heavy) 계속 추천 — cycle 3309 carry-over scope(`lib/mlb` 잔여 2파일) 채택.
+
+**실행**: `buildMlbTeamProfile.ts`(398줄)/`buildMlbMatchupProfile.ts`(532줄) 전수 read — `normalizeMlbTeamCode`/`toMlbStatsApiCode` alias 변환, `assertSelectOk` degrade wrap, 독립 문장 명시 정렬(`.sort()`) 전부 과거 cycle(2066/2081/2399) fix 가 정상 유지 중임을 확인, drift 0건. `lib/mlb` 18/18 전수 감사 완료(cycle 3309 에서 16/18, 금번 2개 추가로 완결). 시간 budget 여유로 CHANGELOG mention 최소(1~2회) 파일 5개 추가 감사: `lib/accuracy/shadow-pair-prob.ts`(66줄, shadow vs v1.8 prob 추출 — scoring_rule 분기로 shadow row silent self-compare 버그(과거 cycle) 이미 fix 유지 확인) / `buildShadowCalibration.ts`(55줄, calibration bucket 로직 clean) / `lib/teams/buildTeamEloTrend.ts`(37줄, clean) / `lib/predictions/adjacentDates.ts`(19줄, cycle 2513 KST Date.UTC fix 유지 확인) / `yesterdayDate.ts`(18줄, clean). 전부 신규 drift 0건.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 기존 관례대로 평가 보류)/trigger2(5연속 fail 없음)/trigger3(3317%50=17≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3298-3317, 현재 cycle 포함) 표본 20(≥10 충족), opt-out 9개 제외 평가대상 review-code(heavy) 12회 발화로 미충족. marker 미박제. ship-0 — 직전10(3307-3316) success 4건(3307/3309/3315/3316)로 미충족. 코드 변경 없음(순수 read-only 감사), CI 영향 없음.
+
+**교훈**: twin-audit vein 이 `lib/mlb` 완결 이후에도 즉시 소진되지 않음 — 저 CHANGELOG-mention 파일(1~2회) 이 실제로 "거의 미감사"에 가까워 작은 파일 다수를 빠르게 훑는 방식이 cycle budget 안에서 scope 확장에 유효했음(cycle 3001 grep-count≠depth 가드레일과 정합 — mention count 를 skip 근거로 안 쓰고 직접 read 로 전부 확인).
+
+다음 사이클 추천 = review-code(heavy) 계속(`lib/picks` 2파일 / `lib/predictions` 잔여 5파일 / `lib/teams` 잔여 5파일 / `lib/accuracy` 잔여 2파일) 또는 fix-incident/lotto/op-analysis/info-arch gap 자연 대기.
