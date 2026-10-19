@@ -115,13 +115,11 @@ jobs:
           PR_URL=$(gh pr create \
             --title "data(lotto): ${{ steps.draw.outputs.draw_no }}회 추첨 결과 박제 (cron)" \
             --body "추첨 토 21:00 KST 직후 새벽 자동 fire. 1등 미포함 시 차원별 비교 + 256 룰 PASS 자동 생성." \
-            --label "automated,lotto" 2>/dev/null || echo "")
-          if [ -n "$PR_URL" ]; then
-            PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-            if gh pr checks "$PR_NUM" --watch --fail-fast; then
-              gh pr merge "$PR_NUM" --squash --delete-branch
-              echo "::notice::PR $PR_URL merged after CI green"
-            else
-              echo "::warning::CI failed for PR $PR_NUM — skip merge, needs manual review"
-            fi
+            --label "automated,lotto")
+          PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+          if gh pr checks "$PR_NUM" --watch --fail-fast; then
+            gh pr merge "$PR_NUM" --squash --delete-branch
+            echo "::notice::PR $PR_URL merged after CI green"
+          else
+            echo "::warning::CI failed for PR $PR_NUM — skip merge, needs manual review"
           fi
