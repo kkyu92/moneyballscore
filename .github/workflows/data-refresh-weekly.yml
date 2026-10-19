@@ -52,9 +52,16 @@ jobs:
           mkdir -p apps/moneyball/data/stale-data
           DATE=$(date -u +%Y-%m-%d)
           OUT="apps/moneyball/data/stale-data/${DATE}.md"
-          pnpm exec tsx scripts/update-stale-data.ts "$OUT" 2>&1 | tail -20
+          # GH runner ↔ Supabase DNS 일시 실패(ENOTFOUND) 대응 — 최근 6주 중 4주 실패 확인(cycle 3327)
+          for attempt in 1 2 3; do
+            if pnpm exec tsx scripts/update-stale-data.ts "$OUT" 2>&1 | tail -20; then
+              [ -f "$OUT" ] && break
+            fi
+            echo "::warning::stale-data snapshot attempt $attempt failed, retrying..."
+            sleep 15
+          done
           if [ ! -f "$OUT" ]; then
-            echo "::error::stale-data snapshot not generated"
+            echo "::error::stale-data snapshot not generated after 3 attempts"
             exit 1
           fi
           LINES=$(wc -l < "$OUT")
