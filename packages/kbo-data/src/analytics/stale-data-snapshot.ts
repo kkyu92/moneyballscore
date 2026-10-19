@@ -8,7 +8,7 @@
  * 사용자 / 본 메인이 사이클 retro 시 snapshot 보고 수동 갱신.
  */
 
-import { CURRENT_SCORING_RULE } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, KST_OFFSET_MS } from '@moneyball/shared';
 
 export interface PredRowMin {
   is_correct: boolean | null;
@@ -107,7 +107,9 @@ export function buildStaleSnapshot(input: StaleSnapshotInput): StaleSnapshot {
     if (!r.verified_at) continue;
     const dt = new Date(r.verified_at);
     if (Number.isNaN(dt.getTime())) continue;
-    const day = DAYS_EN[dt.getUTCDay()];
+    // verified_at은 UTC. KST = UTC+9 (buildAccuracyData.ts 패턴 정합).
+    const kstMs = dt.getTime() + KST_OFFSET_MS;
+    const day = DAYS_EN[new Date(kstMs).getUTCDay()];
     const arr = dayMap.get(day) ?? [];
     arr.push(r);
     dayMap.set(day, arr);

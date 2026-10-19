@@ -82,6 +82,14 @@ describe("buildStaleSnapshot", () => {
     expect(snap.weekdays[2].acc).toBe(100);
   });
 
+  it("buckets weekday by KST, not raw UTC (post-midnight-KST verification)", () => {
+    // 2026-05-24T16:00:00Z = Sunday 16:00 UTC, but KST(+9h) = Monday 01:00 — must bucket as Monday.
+    const rows = [row(true, "v1.8", 0.6, "2026-05-24T16:00:00Z")];
+    const snap = buildStaleSnapshot({ rows, generatedAt: FIXED_DATE });
+    expect(snap.weekdays.length).toBe(1);
+    expect(snap.weekdays[0].weekday).toBe("Mon");
+  });
+
   it("skips rows with null verified_at for weekday split but keeps in scoring_rule split", () => {
     const rows = [
       row(true, "v1.8", 0.6, null),
