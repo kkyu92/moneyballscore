@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — fix-incident: lotto cron 2종 PR-create silent swallow 패턴 수정 (cycle 3316, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved, plan#30 2026-10-18 만료 확인 — status=completed 라 미처리 approved 아님, 액션 불필요). 직전8(3309-3315) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족(distinct=3). gap 전부 미근접(fix-incident 11/20·lotto 12/30·info-arch 16/30·op-analysis 22/25). explore-idea saturation 2/15 미충족. DESIGN.md mtime 205h(8.5일, 4주 미만) design-system 미근접. 2차 방어선: `cycle-retro 3315` 1건 정상 확인(결손 없음).
+
+**진단 축 전환**: lib/+components/+packages/kbo-data 전부 review-code(heavy) 로 전수 스윕 완료된 상태(migration path phase53 trend 확인) — 신규 review-code(heavy) 스코프 고갈 조짐. 대신 `.github/workflows/*.yml` 전수 grep(`2>/dev/null || echo` 패턴)으로 cron silent-failure 클래스 재점검.
+
+**발견**: `lotto-pick-update.yml`/`lotto-result-update.yml` 의 `gh pr create ... --label "automated,lotto" 2>/dev/null || echo ""` 가 PR 생성 실패 시 `PR_URL` 빈 문자열로 삼켜 `if [ -n "$PR_URL" ]` 가드만 통과 못 하고 조용히 no-op — `data-refresh-weekly.yml`/`factor-backtest-weekly.yml` 에서 cycle 2061/3090 에 이미 고친 동일 버그 클래스(라벨 삭제/권한 변경 시 수개월 silent skip 재발 가능, 실측 사례 = data-refresh-weekly 4개월·factor-backtest-weekly 16주 무PR 방치). 현재는 `automated`/`lotto` 라벨이 실존해 정상 동작하지만, cycle 2949/3294/3315 TODOS 가 "라벨 존재 여부가 유일한 분기점" 이라 3회 반복 flag 했음에도 fail-fast 전환이 누락돼 있었음(동일 bug class 진단 3회 후 미적용 상태가 본 사이클까지 지속).
+
+**수정**: 두 워크플로 모두 `2>/dev/null || echo ""` swallow 제거 → `set -e` 하 `gh pr create` 직접 실행, 실패 시 워크플로 자체 fail (Actions 탭 즉시 가시). `health-alert.yml`/`heartbeat-stale.yml` 의 유사 패턴은 optional JSON 필드 파싱 fallback 용도로 이후 명시적 분기(`case $OVERALL`/`if [ -z "$LAST_RUN" ]`)가 있어 동일 버그 클래스 아님 확인 — 수정 대상 제외.
+
+**검증**: `python3 -c "import yaml; yaml.safe_load(...)"` 양쪽 유효성 확인. 직접 main 커밋+push(`dd012fc6`, pre-push lint+type-check+version-sync-guard 전부 PASS). 실제 cron fire 검증은 다음 화/금/토 스케줄(`lotto-pick-update` 화/금, `lotto-result-update` 토) 대기 필요 — 라벨 존재 하에선 동작 동일(회귀 없음), 라벨 부재 시나리오만 fail-fast 차이 발생이라 즉시 실측 불가.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3316%50=16≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3297-3316, 현재 포함) 표본 20(≥10 충족), 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3307-3316) success 다수(3307/3309/3316)로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 복귀 시 scripts/.github 축 계속(다른 workflow의 cron 스케줄/권한 설정 재검토) 또는 info-arch(gap 17/30)/lotto(gap 13/30)/op-analysis(gap 23/25) gap 자연 대기.
+
 ## ⚪ SUCCESS (retro-only) — operational-analysis(lite): CE/비CE Brier 격차 30회 연속 재확인, 신규 데이터 0건 (cycle 3315, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved). 직전8(3307-3314) distinct=2(review-code(heavy)7+polish-ui1) — 2-chain lock 탐지, 둘 다 후보 제외(cooldown N=1). explore-idea saturation 직전15(3300-3314) 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8.6일 신선) — 확립된 skip 패턴 유지. fix-incident(gap 10/20)·lotto(gap 11/30)·info-arch(gap 15/30) 전부 미도달 중 op-analysis 자체 gap 21/25 로 가장 근접 — 자율 선택.
