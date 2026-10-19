@@ -15981,3 +15981,15 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3360%50=10≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3341-3360, 현재 cycle 포함) 표본≥10 충족, opt-out 9개 제외 평가대상 review-code 다수 발화(9+)로 미충족. marker 미박제. ship-0 — 직전10(3351-3360) success 다수(3351/3352/3355)로 미충족.
 
 다음 사이클 추천 = 2-chain lock(review-code+operational-analysis) cooldown(N=1) 만료 후 review-code(heavy) 복귀(`lib/picks`/`lib/teams`/`lib/accuracy` 신규 스코프) 또는 fix-incident(gap 11/20)/lotto(gap 27/30) 자연 대기.
+
+## ⚪ RETRO-ONLY — review-code(heavy): lib/insights+analysis 7파일 재확인, 신규 drift 0건 (cycle 3361, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 체크(직전8 3353-3360, 3360.json 누락분은 커밋 로그로 보강) distinct=3(review-code/operational-analysis/info-architecture-review) — 미충족. fix-incident gap=32/20 도달하나 `gh run list` 재확인(전부 success/skipped) 실제 incident 부재 skip. lotto gap=27/30 미도달(picks/results 파일 모두 최신, cron 정상). op-analysis·info-arch 둘 다 직전 2사이클 안 발화. cycle 3357/3358 추천 lib/insights(loader/series/topFactors)+lib/analysis(computeCompositeDuel/computeMlbCompositeDuel/convergenceRecord/factor-explanations) 7파일 채택.
+
+**감사**: Agent 1개 — 7파일 전수 read + 모든 export call-site cross-grep + KBO/MLB twin 2쌍(computeCompositeDuel↔computeMlbCompositeDuel, convergenceRecord 내부 KBO/MLB fetcher) 라인별 diff + 기존 테스트 119개 전수 실행 + tsc --noEmit.
+
+**결과**: 신규 drift 0건. twin 쌍 전부 의도된 차이 확인(MLB 6팩터 vs KBO 10팩터는 pipeline 저장 실태 대조로 실제 미배선 상태 확인, 주석 정확). factor-explanations.ts FACTOR_TOTAL=0.85 (v1.8 10팩터 합) 정합. 과거 drift fix(cycle 2291/2303/2304/2771/3232/3279)들 전부 현재 코드에 남아있고 회귀 테스트로 커버됨 — 이 디렉토리 쌍은 이제 "쉬운 drift" 소진 상태로 수익 체감 구간 진입.
+
+**검증(skill-evolution 등)**: trigger3(3361%50=11) 미충족. trigger5 — 직전20 review-code 다수 발화로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3352-3361) success 2건(3352/3355)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프(app/api 잔여 mention-only route 재확인 또는 components/hooks) 또는 lotto(gap 28/30 근접)/fix-incident(gap 33, 재확인 필요) 자연 대기.
