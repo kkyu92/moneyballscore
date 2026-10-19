@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api 잔여 route 3차분 6파일, naver-schedule twin bug 1건 fix (cycle 3355, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3354 retro `fc581ecc`) OK. 2-chain lock 미충족(직전8(3347-3354) distinct=4: polish-ui/review-code/fix-incident(lite)/skill-evolution). gap 전부 미도달(fix-incident 4/20·op-analysis 11/25·lotto 20/30·info-arch 24/30). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 8.8일 신선) 확립 skip 패턴 유지. cycle 3354 추천 app/api 잔여 6개(leaderboard/mlb-sync, kbo-scores, live, revalidate, snapshot-pitchers, sync-batter-stats) 채택.
+
+**감사**: Agent 1개 — 6파일 전수 read + CRON_SECRET 가드 확인 + twin-route 대조 + Supabase `.error` 처리 확인 + KST/UTC 처리 확인 + 호출부 cross-grep 지시.
+
+**결과**: `kbo-scores/route.ts` mapStatus() 가 statusCode='BEFORE' + statusInfo='경기취소' (cancel/suspended 필드 false) 우천취소 케이스를 statusInfo 한국어 텍스트 매칭으로 잡는 폴백(#1158, cycle 미상)을 보유하는데, 구조적 쌍둥이 함수 `packages/kbo-data/src/scrapers/naver-schedule.ts` mapStatus() 엔 cancel/suspended 불리언 필드 체크만 있고 동일 텍스트 폴백이 누락돼 있던 twin bug 확인 — 14일치 Naver prefetch 경로에서 우천취소 경기가 `scheduled` 로 오분류될 수 있던 상태(impact bounded: KBO 공식이 primary source 라 실데이터 덮어씀). 나머지 5파일(leaderboard/mlb-sync/live/revalidate/snapshot-pitchers/sync-batter-stats) 전부 clean — CRON_SECRET 가드/Supabase 에러 처리/twin 패턴 정합 확인.
+
+**수정**: `naver-schedule.ts` mapStatus() 에 `g.statusInfo` 포함 '취소'/'연기' 텍스트 폴백 추가(kbo-scores/route.ts 와 동일 우선순위).
+
+검증: `pnpm test` 596 files/4679 tests pass, `pnpm lint`/`type-check` clean. 직접 main 커밋+push(R4, `778f46e2`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger3(3355%50=5≠0) 미충족. trigger5 — 직전20(3336-3355) 표본 20(≥10 충족), 평가대상 review-code 16/20 다수 발화로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3346-3355) success 5건(3348/3349/3351/3352/3355)으로 미충족.
+
+**app/api 영역 3-pass 재감사 완료**(cycle 3099 최초 전수 + cycle 3353/3354 2차분 + 본 cycle 3차분 — 이번 pass 가 유일하게 신규 drift 발견). 다음 사이클 추천 = review-code(heavy) `lib/picks`(2파일)/`lib/teams` 잔여/`lib/accuracy` 잔여 스코프 또는 fix-incident(gap 5)/op-analysis(gap 12)/lotto(gap 21)/info-arch(gap 25) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): app/api 잔여 route 2차분 14파일 전수 감사, 신규 drift 0건 (cycle 3354, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3353 retro `f1b0dc48`) OK. 2-chain lock 미충족(직전8(3346-3353) distinct=4: review-code/polish-ui/fix-incident/skill-evolution). gap 전부 미도달(fix-incident 4/20·op-analysis 11/25·info-arch 24/30·lotto 20/30). cycle 3353 retro 추천 app/api 잔여 route 스코프 승계 — health/route.ts, health/pipelines/route.ts, hub-dispatch/route.ts, pipeline/route.ts, mlb/pipeline/route.ts, seo/indexnow/ping/route.ts, [indexnowKey].txt/route.ts, version/route.ts, mlb/waitlist/route.ts, picks/submit+mlb-submit+poll+mlb-poll+results route.ts 14개 선정(전수 감사 이력 없음).
