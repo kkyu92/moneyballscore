@@ -1,4 +1,18 @@
 
+## 🟡 PARTIAL — fix-incident: data-refresh-weekly cron DNS flake 4/6주 재발, retry 로직 추가 (cycle 3327, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23. 2차 방어선: `cycle-retro 3326`(`20e4f464`) 정상 확인. 직전8(3319-3326) distinct=3(review-code(heavy)6+op-analysis(lite)1+polish-ui1) — 2-chain lock 미충족. gap 전부 미도달(fix-incident 11/20·lotto 23/30·info-arch 27/30). `gh run list --workflow=` 로 4개 스케줄 워크플로(health-alert/deploy-drift-alert/heartbeat-stale/data-refresh-weekly) 점검 중 **data-refresh-weekly 최근 6주 중 4주(09-08/09-15/10-06/10-13) FAILURE** 발견 — 나머지 2주(09-22/09-29)만 success.
+
+**근본 원인**: 로그 전수 확인 결과 4건 전부 동일 — GH Actions runner → Supabase REST endpoint `TypeError: fetch failed` / `getaddrinfo ENOTFOUND <project>.supabase.co`. 본 머신에서 직접 `dig`/`curl` 로 재확인 시 DNS 정상 resolve + HTTP 401(인증 없음, 정상) 응답 — Supabase 자체 장애 아니라 **GH Actions runner 측 일시적 DNS 해석 실패(flake)**. 워크플로 자체에 retry 로직이 전혀 없어 단건 fetch 실패가 즉시 cron 전체 실패로 직결.
+
+**수정**: `.github/workflows/data-refresh-weekly.yml` 'Run stale-data snapshot' step 에 3회 재시도(15초 간격) 루프 추가(`72b7d411`). 다른 cron workflow 전수 grep 결과 retry 패턴 전무 확인 — 본 수정이 최초 선례.
+
+**검증**: pre-push lint+type-check+vitest(3/3 PASS) 통과, YAML syntax 검증(`python3 -c "import yaml..."`) OK, 단일 논리 단위 직접 main commit+push(R4). **미검증 — 실측 fire 대기**: 다음 cron 실제 발화 시점은 2026-10-20(화) 17:15 UTC — 그 결과 확인 전까진 재시도 로직 실효성 미확정. chain stop 조건(PR+CI green+실측 fire PASS) 중 실측 fire 부재로 SUCCESS 선언 보류, isolated smoke 단독 성급한 success 박제 회피(CLAUDE.md R5 / 사례 18 lesson 정합).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3327%50=27≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3308-3327, 현재 포함) 표본 20≥10, 평가대상 review-code(heavy) 14/20 발화로 미충족). marker 미박제. ship-0 — 직전10(3318-3327) success 다수(3318/3321/3324)로 미충족.
+
+다음 사이클 추천 = **data-refresh-weekly 다음 화(10/20) 실제 fire 결과 확인 우선** (fix-incident 재방문 또는 자연 재검증) — 성공 시 PARTIAL→SUCCESS 전환 박제. 그 외엔 info-arch(gap 28/30, 다음 사이클 도달)/review-code(heavy) 잔여 스코프/lotto(gap 24/30) 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): app/api picks/mlb/seo 저-mention 4개 route 전수 감사, 신규 drift 0건 (cycle 3326, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23(전부 non-approved/archived, plan #30 expiry 2026-10-18 경과). 2차 방어선: `cycle-retro 3325`(`62200c63`) 정상 확인, 결손 없음. 직전8(3318-3325) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족(≤2 조건 불충족). gap 전부 미근접(fix-incident 10/20·lotto 22/30·op-analysis 3/25). info-arch gap 26/30 근접하나 미도달. explore-idea saturation 직전15 13/15(≥12 수치상 충족)이나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9일 신선) — 확립된 skip 패턴 유지. review-code(heavy) 직전 3연속 recommend(3323/3324/3325 전부 "review-code(heavy) 계속" 추천) 자연 발화.
