@@ -1,4 +1,14 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): packages/kbo-data/src/agents/ 저-mention 6파일 전수 감사, 신규 drift 0건 (cycle 3337, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3336 retro `cb1ab500`) OK. 직전8(3330-3336) distinct=3(info-architecture-review1+review-code(heavy)4+lotto1) — 2-chain lock 미충족. gap 전부 미도달(fix-incident 8/20·op-analysis 14/25·lotto 3/30·info-arch 7/30). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 8.8일 신선) 확립 skip 패턴 유지. `gh run list` 전부 success/skipped — 실 incident 부재.
+
+**review-code(heavy) 스코프**: `packages/kbo-data/src/agents/` CHANGELOG mention 최저 6개 파일(validator-logger.ts 1·types.ts 7·personas.ts 7·llm-ollama.ts 6·llm-deepseek.ts 6·rivalry-memory.ts 8, 총 847줄) 전수 read. validator_logs fire-and-forget insert 로직, AgentResult/DebateResult 타입 정의, 환각방지 persona 프롬프트(cycle 986 강화 버전과 코드 정합), Ollama/DeepSeek 백엔드 wrapper(재시도/타임아웃/에러 핸들링), rivalry memory fallback(h2h+agent_memories 쿼리, truncate 로직) 전부 주석-코드 교차검증 완료 — 신규 drift 0건. dry vein 재확인.
+
+**검증(skill-evolution)**: trigger3(3337%50=37≠0)/trigger2(5연속 fail 없음)/trigger4(없음)/trigger5(직전20(3318-3336)+본 cycle 평가 대상 review-code 20/20 샘플 중 다수 발화, 미충족) 전부 미충족. marker 미박제. ship-0 emergency stop: 직전10(3327-3336) success 1건(3336) 포함 — 미충족, 정상 진행.
+
+코드 변경 없음(retro-only). 다음 사이클 추천 = review-code(heavy) 계속(직전8 6/8 비중, dominance 지속 — 다음 재평가 시 다양성 고려) 또는 fix-incident(gap 9/20) 자연 대기.
+
 ## ✅ SUCCESS — review-code(heavy): cron PR-create/merge retry 격차 발견+수정, ship-0 10-cycle streak 종료 (cycle 3336, 2026-10-19)
 
 진단: 사용자가 cycle 3335 emergency-stop(meta-pattern dispatch) 직후 `/develop-cycle 27` 재호출 — 사용자 결정 신호로 해석, N=27 그대로 진행. periodic gap 전부 미도달(fix-incident 7/20·info-arch 6/30·op-analysis 13/25·lotto 2/30). 2-chain lock 미충족(직전8(3328-3335) distinct=4). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/23/TODOS Next-Up 부재/DESIGN.md 8.7일 신선) 확립 skip 패턴 유지.
