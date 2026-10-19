@@ -1,4 +1,20 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): migrations 051-053 신규 교차검증, 신규 drift 0건 (cycle 3328, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23. 2차 방어선: `cycle-retro 3327`(`8fdfb7a7`) 정상 확인. 직전8(3321-3328) distinct=4(review-code(heavy)5+operational-analysis(lite)1+polish-ui1+fix-incident1) — 2-chain lock 미충족. gap 전부 미도달(fix-incident 1/20, 실측 검증은 2026-10-20 17:15 UTC 예정이라 재방문 불가·info-arch 28/30·lotto 24/30·op-analysis 5/25). explore-idea saturation 직전15 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9.7일 신선) — 확립된 skip 패턴 유지.
+
+**스코프 선정**: app/api(20/20)·components(전체)·packages/kbo-data(전체)·lib/hooks/config/middleware(cycle 3321)·scripts(32/32)·.github/workflows(23/23) 전부 2~4회씩 복수 재감사 완료 확인(grep 재검증) — review-code(heavy) 기존 twin-audit vein 거의 완전 소진. `db-constraints.ts` 교차검증이 migrations 001~050 범위만 수행된 기이력 확인 → 최신 3개 미교차검증 migration(`051_mlb_probable_pitchers`/`052_daily_notifications_credit_exhausted_flag`/`053_widen_pipeline_runs_mode_mlb`)으로 신규 스코프 전환.
+
+**감사 내용**: (1) `home_starter_name`/`away_starter_name`(051) — 소비처 4곳(`app/mlb/games/[date]/[slug]`+EN twin, `mlb-pipeline.ts`, `naver-schedule.ts`) 전부 확인, 정합. (2) `credit_exhausted_sent`(052) — `daily.ts`(KBO) 단독 소비 확인. MLB pipeline 은 debate/LLM 미사용(quant-only)이라 CREDIT_EXHAUSTED 알림 자체 대상 아님 — 비대칭이 아니라 의도된 설계. (3) `pipeline_runs.mode VARCHAR(30)`(053) — `db-constraints.ts` 는 UNIQUE 제약 전용 파일(length 추적 대상 아님)이라 범위 밖, drift 아님.
+
+**결론**: actionable 신규 drift 0건. 코드 변경 없음, PR 없음(retro-only).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례 유지)/trigger2(5연속 fail 없음)/trigger3(3328%50=28≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3309-3328, 현재 포함) 표본 20≥10, 평가대상 review-code(heavy) 14/20 발화로 미충족). marker 미박제. ship-0 — 직전10(3319-3328) success 다수로 미충족.
+
+**전역 소진 재확인**: app/api·components·kbo-data·lib/hooks·scripts·workflows·migrations(001-053 전체) 전부 교차검증 완료 — review-code(heavy) 신규 unswept scope 사실상 소멸. 다음 사이클은 review-code(heavy) 추가 재감사보다 info-arch(gap 29/30, 다음 사이클 도달) 또는 fix-incident 실측(10/20 17:15 UTC) 또는 lotto(gap 25/30) 자연 대기를 우선 고려 권장.
+
+다음 사이클 추천 = info-architecture-review(gap 29/30, 다음 사이클 도달 임박) 또는 fix-incident(실측 대기, 2026-10-20 cron 결과 확인) 또는 lotto(gap 25/30) 자연 대기.
+
 ## 🟡 PARTIAL — fix-incident: data-refresh-weekly cron DNS flake 4/6주 재발, retry 로직 추가 (cycle 3327, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23. 2차 방어선: `cycle-retro 3326`(`20e4f464`) 정상 확인. 직전8(3319-3326) distinct=3(review-code(heavy)6+op-analysis(lite)1+polish-ui1) — 2-chain lock 미충족. gap 전부 미도달(fix-incident 11/20·lotto 23/30·info-arch 27/30). `gh run list --workflow=` 로 4개 스케줄 워크플로(health-alert/deploy-drift-alert/heartbeat-stale/data-refresh-weekly) 점검 중 **data-refresh-weekly 최근 6주 중 4주(09-08/09-15/10-06/10-13) FAILURE** 발견 — 나머지 2주(09-22/09-29)만 success.
