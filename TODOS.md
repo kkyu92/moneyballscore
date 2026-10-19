@@ -1,4 +1,18 @@
 
+## ⚪ PARTIAL — review-code(heavy): packages/kbo-data/src/scrapers/ 잔여 8개 파일 전수 감사 완결, 15/15 커버리지 (cycle 3322, 2026-10-19)
+
+진단: 2차 방어선 발견 — `cycle-retro 3321` 커밋 silent skip 확인(`git log --grep "cycle-retro 3321 " -F` 0건, docs TODOS 커밋+cycle_state JSON 은 정상 존재, 사례 15 family 재발). retroactive backfill 커밋(`cd69e215`) 즉시 작성 + push 후 본 사이클 진행. open issue 0건, approved plan 0/23(전부 non-approved). 직전8(3314-3321) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+fix-incident1) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 6/20, op-analysis 7/25 — `operational-analysis(lite)` 접두 매칭 버그로 초기 계산 27 오측정, split()[0] prefix 매칭 교정 후 7 확인, lotto 18/30, info-arch 22/30). explore-idea saturation 직전15(3307-3321) 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재, DESIGN.md mtime 8.7일 신선) — 확립된 skip 패턴 유지.
+
+**스코프**: cycle 3321 TODOS 가 후보로 남긴 `packages/kbo-data/src/scrapers/` — CHANGELOG mention 0회인 8개 파일(`baseball-savant.ts`/`fangraphs-mlb.ts`/`fangraphs.ts`/`fetch-with-retry.ts`/`kbo-official.ts`/`kbo-scraper-alert.ts`/`statsapi-mlb.ts`/`weather.ts`) 전수 read. 기존 7개(fancy-stats/kbo-live/kbo-pitcher/mlb-historical-bootstrap/naver-record/naver-schedule/umpire) 와 합쳐 scrapers/ 디렉토리 15/15 파일 전수 커버리지 완료 박제.
+
+**결과**: 신규 drift 0건. `baseball-savant.ts`/`fangraphs-mlb.ts` 의 TOCTOU race 방지 순차 호출 주석 정확, `fangraphs.ts` resolveTeamCode 단일 소스 derive 주석 정확, `fetch-with-retry.ts` 공유 재시도 wrapper 3개 호출부(statsapi-mlb/kbo-official/fancy-stats/naver-schedule) 확인(단 `statsapi-mlb.ts` 는 이름이 같은 **별도 로컬** `fetchWithRetry` 함수를 자체 정의 — 401/403 ToS cooldown 전용 분기가 달라 의도된 설계 분리로 판단, drift 아님). `kbo-official.ts` 의 `fetchStandings` 컬럼 인덱스 주석(cycle 3250 재확인) 실제 파싱 코드와 일치, `fetchRecentForm`/`fetchHeadToHead` fallback-only 제약사항(`_season` 무시/`losses` 항상 0) 문서화 정확. `DEFAULT_PARK_FACTORS` 사용처(daily.ts/postview-daily.ts) 확인, dead export 아님. `kbo-scraper-alert.ts`/`weather.ts` 내부 일관.
+
+**검증**: 코드 변경 없음(순수 read 감사) — `tsc`/`lint` 실행 불필요, 커밋 없음(TODOS+cycle-retro 만, 단 2차 방어선 backfill 커밋 1건 별도 push 완료).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3322%50=22≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3303-3322, 현재 포함) 표본 20(≥10 충족), 평가대상 review-code 14/20 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3313-3322) success 3건(3315/3316/3318)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/{context,factors,engine,analytics}` 잔여 파일 또는 `components/` 재확인) 또는 fix-incident(gap 7/20)/lotto(gap 19/30)/info-arch(gap 23/30)/op-analysis(gap 8/25) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): config/hooks/lib 루트파일+middleware+instrumentation 16파일 전수 감사, stale 주석 2건 수정 (cycle 3321, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved). 직전8(3313-3320) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+fix-incident1) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 5/20·op-analysis 6/25·lotto 17/30·info-arch 21/30). explore-idea saturation 직전15(3306-3320) 14/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재, DESIGN.md mtime 9일 신선) — 확립된 skip 패턴 유지. 2차 방어선: `cycle-retro 3320` 1건 정상 확인(결손 없음).
