@@ -1,4 +1,14 @@
 
+## 🟡 PARTIAL — review-code(heavy): app/api/{mlb/waitlist,picks/mlb-poll,picks/mlb-submit,picks/poll,picks/results,picks/submit,seo/indexnow/ping,sync-batter-stats} 전수 감사, 신규 drift 0건 — app/api/ 전체 20/20 route 누적 감사 완료 (cycle 3308, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전수 status 재확인 — approved 상태 0건 확정). 직전8(3300-3307) distinct=5(review-code(heavy)4+info-arch1+skill-evolution1+lotto(lite)1+fix-incident1) — 2-chain lock 미충족. fix-incident gap=3·lotto gap=4·op-analysis gap=14·info-arch gap=8 전부 미근접. 직전 cycle(3307) retro commit 결손 감지 — `git log --grep "cycle-retro 3307 " -F` 1건 정상 확인(2차 방어선 clean). review-code(heavy) 3연속 success(3303/3306/3307) 후 twin-audit vein 소진 임박 — 지난 retro 권고대로 `app/api/` 잔여 8개 route 채택.
+
+**감사 결과**: 8개 route 전부 정확 — `mlb/waitlist`(CSRF/Origin+honeypot+email validate+service-role insert+23505 enumeration 방어 전부 일치) / `picks/{mlb-poll,poll}`(PICKS_POLL_IDS_LIMIT=50 shared 정의 일치, KBO/MLB 양쪽 parity) / `picks/{mlb-submit,submit}`(DB_CONSTRAINTS.{mlbPickPollEvents,pickPollEvents} 가 migration 048/025 UNIQUE 제약과 바이트 단위 일치, DEVICE_ID_MAX_LENGTH=64 일치) / `picks/results`(PICKS_RESULTS_IDS_LIMIT=200, `mlb-` prefix 네임스페이스가 PickButton.tsx storageKey 컨벤션과 일치, CURRENT_SCORING_RULE 우선 + legacy null fallback 정확) / `seo/indexnow/ping`(CRON_SECRET/INDEXNOW_KEY 양쪽 `.trim()` 방어 — 짝인 `[indexnowKey].txt/route.ts` 의 trim 과 정합 확인, outer HTTP status 로 IndexNow API 실패 반영하는 silent-swallow 방지 로직 정확) / `sync-batter-stats`(MIN_EXPECTED_BATTERS=8 packages/kbo-data 정의와 일치, CRON_SECRET trim 방어 동일 패턴). 신규 drift 0건, 코드 변경 없음.
+
+**커버리지 완료**: `app/api/` 전체 20개 route 중 cycle 3099(5개) + cycle 3307(6개) + 본 cycle(8개) = 19개 + `leaderboard/sync`(cycle 2991/2992 계열 별도 fix 이력으로 이미 감사 완료 확인, git log 3건 fix 커밋 존재) = 20/20 전수 완료. twin-audit vein 이 `app/api/` 범위에서는 완전 소진 — 다음 review-code(heavy) 는 `lib/`, `components/`, `packages/kbo-data/src/` 중 미감사 디렉토리로 스코프 전환 필요.
+
+다음 사이클 추천 = review-code(heavy) 스코프 전환(lib/components/packages 미감사 영역 탐색) 또는 fix-incident/lotto/op-analysis/info-arch gap 자연 대기.
+
 ## ✅ SUCCESS — review-code(heavy): app/api/{hub-dispatch,health,health/pipelines,version,pipeline,mlb/pipeline} 전수 감사 (cycle 3307, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23. 직전8(3299-3306) distinct=5(review-code(heavy)4+info-arch1+skill-evolution1+lotto(lite)1+fix-incident1) — 2-chain lock 미충족. fix-incident gap=2·lotto gap=3·info-arch gap=7·op-analysis gap=13 전부 미근접. review-code(heavy) twin-audit vein 소진 근접(phase 53 권고)이나 `app/api/` 13개 route 중 cycle 3099 가 감사한 5개(kbo-scores/leaderboard-mlb-sync/live/revalidate/snapshot-pitchers) 외 잔여 8개가 여전히 신규 스코프 — hub-dispatch(Sentry→허브 relay, HMAC 검증)/health/health-pipelines(알림 파이프라인 핵심)/version/pipeline(KBO)/mlb-pipeline(MLB) 6개 채택.
