@@ -15969,3 +15969,15 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger3(3359%50=9) 미충족. trigger5 — 직전20(3340-3359) chain pool 분포: review-code 압도적 다수, 표본≥10 충족, review-code 0회 아님 → 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3350-3359) success 포함(3351/3352/3355) → 미충족.
 
 다음 사이클 추천 = 2-chain lock(review-code+skill-evolution) cooldown(N=1) 만료 후 review-code(heavy) 복귀 또는 info-arch(gap 29/30, 다음 사이클 도달)/lotto(gap 25/30)/fix-incident(gap 0, 미선택 상태 유지) 자연 대기. op-analysis 재측정 ROI 낮음(65-cycle 고정값) — 다음 재측정은 KBO 2027 개막 신호 또는 gap 25-cycle 주기 기준 권장.
+
+## ⚪ RETRO-ONLY — info-architecture-review: 30-cycle gap 재도달, 23연속 "현 IA 충분" 재확인 (cycle 3360, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 충족 — 직전8(3352-3359) distinct=2(review-code 7+operational-analysis 1) → 둘 다 후보 제외. info-arch gap=30/30(last fire 3330, cycle 3359 시점 29/30 → 본 cycle 도달) 자연 trigger. lotto gap=26/30·fix-incident gap=10/20·polish-ui 자연 source 無 — info-arch 가 유일 확정 trigger.
+
+**감사**: 라우트 신규 추가 7일 내(`find -mtime -7`) 다수 표시되나 전체 저장소 touch 패턴 반영(실제 신규 생성 아님, git log 확인) — 노이즈 판단. breadcrumb 누락 18개 중 전부 debug/*(8개, 내부 전용) + reviews/mlb/reviews 월간·주간 index(4개, 상위 허브라 breadcrumb 불필요 구조) + login/settings/community(cycle 2987 이전 기존 페이지, 이미 과거 cycle 감사 대상) + 홈(`/`, 루트라 breadcrumb 구조상 불필요) — 전부 기존에 이미 검토된 의도적 제외 패턴, 신규 아님. 헤더 MegaMenu.tsx/Footer.tsx/Header.tsx 전부 존재 + 테스트 커버(a11y 포함) 확인, 구조 회귀 없음. sitemap.ts 는 동적 생성(DB 조회 기반 game/review/insights 경로 다수) — grep 정적 비교는 신뢰 불가, 구조 자체(revalidate 6h ISR + warmup cron) 유지 확인.
+
+**결론**: "현 IA 충분" 23연속 재확정(…→3270→3300→3330→3360). 코드 변경 0. 다음 30-cycle 재도달 = cycle 3390 근방.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3360%50=10≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3341-3360, 현재 cycle 포함) 표본≥10 충족, opt-out 9개 제외 평가대상 review-code 다수 발화(9+)로 미충족. marker 미박제. ship-0 — 직전10(3351-3360) success 다수(3351/3352/3355)로 미충족.
+
+다음 사이클 추천 = 2-chain lock(review-code+operational-analysis) cooldown(N=1) 만료 후 review-code(heavy) 복귀(`lib/picks`/`lib/teams`/`lib/accuracy` 신규 스코프) 또는 fix-incident(gap 11/20)/lotto(gap 27/30) 자연 대기.
