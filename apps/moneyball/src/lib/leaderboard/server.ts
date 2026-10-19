@@ -22,9 +22,16 @@ export async function fetchLeaderboard(
   const supabase = await createClient();
   const view = VIEW_BY_MODE[mode];
 
+  // view 자체가 `ORDER BY accuracy_pct DESC, total DESC` 로 정의돼 있지만(migrations
+  // 024/026/027/032), outer query 가 명시적 ORDER BY 없이 LIMIT 만 걸면 그 순서가
+  // 유지된다는 보장이 없다 — view 는 planner 입장에서 inlined subquery 일 뿐이라
+  // 통계/인덱스 변화로 plan 이 바뀌면 상위 N행이 실제 순위와 무관하게 잘릴 수 있음
+  // (review-code heavy 감사, cycle 3318). outer query 에도 동일 정렬 명시.
   const result = await supabase
     .from(view)
     .select('nickname, device_id, total, correct, accuracy_pct, current_streak')
+    .order('accuracy_pct', { ascending: false })
+    .order('total', { ascending: false })
     .limit(limit);
 
   const { data } = assertSelectOk(result, `leaderboard.fetchLeaderboard(${mode})`);
