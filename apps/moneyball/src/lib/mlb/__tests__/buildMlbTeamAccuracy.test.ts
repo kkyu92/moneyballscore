@@ -114,6 +114,22 @@ describe('buildAllMlbTeamAccuracy', () => {
     const { rows } = await buildAllMlbTeamAccuracy();
     expect(rows).toEqual([]);
   });
+
+  // cycle 3309 — mlb_schedule 은 StatsAPI 컨벤션 코드(TB/CWS/KC/SD/SF/AZ/WSH) 저장, teamCode
+  // 는 canonical(TBR/CHW/KCR/SDP/SFG/ARI/WSN) 이어야 함(mlb-teams.ts). normalizeMlbTeamCode
+  // 누락 시 /mlb/accuracy 의 TeamMatchupCards 가 canonical 코드로 .find() 해 이 7팀만 "데이터 없음"
+  // 으로 보임 (사례 27 family 재발).
+  it('mlb_schedule StatsAPI alias 코드(TB)가 canonical(TBR)로 정규화됨', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [{ external_game_id: 'g1', home_team_code: 'TB', away_team_code: 'NYY', home_score: 5, away_score: 2 }],
+      preds: [{ external_game_id: 'g1', home_win_prob: 0.7 }],
+    });
+    const { buildAllMlbTeamAccuracy } = await import('../buildMlbTeamAccuracy');
+    const { rows } = await buildAllMlbTeamAccuracy();
+    const byCode = new Map(rows.map((r) => [r.teamCode as string, r]));
+    expect(byCode.has('TB')).toBe(false);
+    expect(byCode.get('TBR')).toEqual({ teamCode: 'TBR', verifiedN: 1, correctN: 1, accuracyRate: 1 });
+  });
 });
 
 describe('buildMlbMatchupData', () => {
@@ -172,6 +188,20 @@ describe('buildMlbMatchupData', () => {
     const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
     const result = await buildMlbMatchupData();
     expect(result).toEqual({ matchups: [], homeAway: [], degraded: false });
+  });
+
+  // cycle 3309 — alias 팀(SD)이 양쪽(teamCode/opponentCode) 모두 canonical(SDP)로 정규화돼야
+  // TeamMatchupCards 의 canonical 코드 .find() 가 매칭됨.
+  it('mlb_schedule StatsAPI alias 코드가 matchups/homeAway 양쪽에서 canonical 로 정규화됨', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [{ external_game_id: 'g1', home_team_code: 'SD', away_team_code: 'NYY', home_score: 5, away_score: 2 }],
+      preds: [{ external_game_id: 'g1', home_win_prob: 0.7 }],
+    });
+    const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
+    const { matchups, homeAway } = await buildMlbMatchupData();
+    expect(matchups.find((m) => m.teamCode === 'SDP' && m.opponentCode === 'NYY')).toBeDefined();
+    expect(matchups.some((m) => (m.teamCode as string) === 'SD' || (m.opponentCode as string) === 'SD')).toBe(false);
+    expect(homeAway.find((h) => h.teamCode === 'SDP')).toBeDefined();
   });
 });
 
@@ -247,5 +277,28 @@ describe('buildMlbTeamBiasAnalysis', () => {
     const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
     const { rows } = await buildMlbTeamBiasAnalysis();
     expect(rows).toEqual([]);
+  });
+
+  it('mlb_schedule StatsAPI alias 코드(AZ)가 canonical(ARI)로 정규화됨', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', home_team_code: 'AZ', away_team_code: 'NYY', home_score: 5, away_score: 2 },
+        { external_game_id: 'g2', home_team_code: 'AZ', away_team_code: 'NYY', home_score: 5, away_score: 2 },
+        { external_game_id: 'g3', home_team_code: 'AZ', away_team_code: 'NYY', home_score: 5, away_score: 2 },
+        { external_game_id: 'g4', home_team_code: 'AZ', away_team_code: 'NYY', home_score: 5, away_score: 2 },
+        { external_game_id: 'g5', home_team_code: 'AZ', away_team_code: 'NYY', home_score: 5, away_score: 2 },
+      ],
+      preds: [
+        { external_game_id: 'g1', home_win_prob: 0.7 },
+        { external_game_id: 'g2', home_win_prob: 0.7 },
+        { external_game_id: 'g3', home_win_prob: 0.7 },
+        { external_game_id: 'g4', home_win_prob: 0.7 },
+        { external_game_id: 'g5', home_win_prob: 0.7 },
+      ],
+    });
+    const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
+    const { rows } = await buildMlbTeamBiasAnalysis();
+    expect(rows.some((r) => (r.teamCode as string) === 'AZ')).toBe(false);
+    expect(rows.find((r) => r.teamCode === 'ARI')).toBeDefined();
   });
 });

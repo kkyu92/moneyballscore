@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES, SMALL_SAMPLE_N, type MlbTeamCode } from '@moneyball/shared';
+import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES, SMALL_SAMPLE_N, normalizeMlbTeamCode, type MlbTeamCode } from '@moneyball/shared';
 import { captureFallback } from '@/lib/observability/captureFallback';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
@@ -88,8 +88,10 @@ export async function buildAllMlbTeamAccuracy(): Promise<{ rows: MlbTeamAccuracy
     });
     if (isCorrect == null) continue;
 
-    bump(s.home_team_code, isCorrect);
-    bump(s.away_team_code, isCorrect);
+    const homeCode = normalizeMlbTeamCode(s.home_team_code);
+    const awayCode = normalizeMlbTeamCode(s.away_team_code);
+    if (homeCode) bump(homeCode, isCorrect);
+    if (awayCode) bump(awayCode, isCorrect);
   }
 
   const rows = Array.from(acc.entries())
@@ -182,8 +184,9 @@ export async function buildMlbMatchupData(): Promise<{
     });
     if (isCorrect == null) continue;
 
-    const homeCode = s.home_team_code;
-    const awayCode = s.away_team_code;
+    const homeCode = normalizeMlbTeamCode(s.home_team_code);
+    const awayCode = normalizeMlbTeamCode(s.away_team_code);
+    if (!homeCode || !awayCode) continue;
 
     for (const [code, isHome] of [[homeCode, true], [awayCode, false]] as [string, boolean][]) {
       if (!haMap.has(code)) haMap.set(code, { homeN: 0, homeCorrect: 0, awayN: 0, awayCorrect: 0 });
@@ -313,8 +316,10 @@ export async function buildMlbTeamBiasAnalysis(): Promise<{ rows: MlbTeamBiasRow
     });
     if (predictedHomeWin == null || actualHomeWin == null || isCorrect == null) continue;
 
-    bump(s.home_team_code, predictedHomeWin, actualHomeWin, isCorrect);
-    bump(s.away_team_code, !predictedHomeWin, !actualHomeWin, isCorrect);
+    const homeCode = normalizeMlbTeamCode(s.home_team_code);
+    const awayCode = normalizeMlbTeamCode(s.away_team_code);
+    if (homeCode) bump(homeCode, predictedHomeWin, actualHomeWin, isCorrect);
+    if (awayCode) bump(awayCode, !predictedHomeWin, !actualHomeWin, isCorrect);
   }
 
   const rows = Array.from(acc.entries())
