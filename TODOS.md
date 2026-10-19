@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): app/api 잔여 route 2차분 14파일 전수 감사, 신규 drift 0건 (cycle 3354, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3353 retro `f1b0dc48`) OK. 2-chain lock 미충족(직전8(3346-3353) distinct=4: review-code/polish-ui/fix-incident/skill-evolution). gap 전부 미도달(fix-incident 4/20·op-analysis 11/25·info-arch 24/30·lotto 20/30). cycle 3353 retro 추천 app/api 잔여 route 스코프 승계 — health/route.ts, health/pipelines/route.ts, hub-dispatch/route.ts, pipeline/route.ts, mlb/pipeline/route.ts, seo/indexnow/ping/route.ts, [indexnowKey].txt/route.ts, version/route.ts, mlb/waitlist/route.ts, picks/submit+mlb-submit+poll+mlb-poll+results route.ts 14개 선정(전수 감사 이력 없음).
+
+본 메인 직접 전수 read(14파일 전부). health 계열 2파일 — Supabase 402 billing quota downgrade 로직 정합(checkSupabase/checkPipeline/health.pipelines 3곳 동일 패턴). hub-dispatch — HMAC 검증+no-relay 재귀방지+PII 재스크럽 문서화 양호. pipeline/mlb-pipeline — mode validation 400 반환 쌍둥이 패턴 일치, VARCHAR(20) clamp 동일 적용. indexnow ping route 와 `[indexnowKey].txt` route 의 `.trim()` 짝 유지 확인(cycle 3217/3241 교훈 반영). picks 4쌍(submit/mlb-submit, poll/mlb-poll) KBO int FK vs MLB string external_id 타입 차이 외 로직 동일 — twin 버그 없음. picks/results.ts 는 MLB predByExternalId Map 이 scoring_rule cohort 다중 매칭 시 비결정적 선택 가능한 latent 구조이나 `MLB_PRODUCTION_COHORT_RULES` 가 현재 `[MLB_SCORING_RULE]` 단일원소라 미발현 — 즉시 버그 아님, 향후 cohort 확장 시 재검토 필요 사항으로만 기록.
+
+**결론**: 14파일 전수 감사 완료, 신규 drift 0건. 코드 변경 없음, retro-only.
+
+**검증(skill-evolution 등)**: trigger3(3354%50=4) 미충족. trigger5 — 직전20(3335-3354) review-code 다수 발화(0회 아님) 미충족. trigger2/4 미충족. ship-0 — 직전10(3345-3354) success 4건(3348/3349/3351/3352)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) app/api 잔여 6개(leaderboard/mlb-sync, kbo-scores, live, revalidate, snapshot-pitchers, sync-batter-stats) 3차분 또는 fix-incident(gap 5)/info-arch(gap 25)/lotto(gap 21)/op-analysis(gap 12) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/standings+leaderboard+changelog 9파일 신규 스코프 전수 감사, 신규 drift 0건 (cycle 3353, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived/non-approved). 2차 방어선(cycle 3352 retro `fdddc9d4`) OK. 2-chain lock 미충족(직전8(3345-3352) distinct=4: review-code/polish-ui/fix-incident/skill-evolution). gap 전부 미도달(fix-incident 3/20·op-analysis 10/25·info-arch 23/30·lotto 19/30). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 8.8일 신선) 확립 skip 패턴 유지. cycle 3352 retro "scripts/ 저-mention 축 사실상 소진" 확인 후 review-code(heavy) 신규 저-mention 스코프로 `lib/standings`(4파일: buildEloTrend/buildStandings/buildTeamAccuracy/computeMagicNumber) + `lib/leaderboard`(3파일: server/types/use-leaderboard) + `lib/changelog`(2파일: parse/renderMarkdown) 9개 파일(CHANGELOG grep 2~3회, 전수 감사 이력 없음) 선정.
