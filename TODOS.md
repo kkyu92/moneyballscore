@@ -1,5 +1,19 @@
 
 
+## 🟡 PARTIAL — review-code(heavy): lib/api·lib/supabase·lib/seo 전수 감사, 신규 drift 0건 (cycle 3296, 2026-10-19)
+
+진단: open issue 0건. approved plan 0/23(전부 completed/archived/non-approved). 2차 방어선: cycle 3295 retro commit(`03273770`) 존재 확인. 2-chain lock 미충족(직전8(3288-3295) distinct=5). gap 전부 미근접(fix-incident 4/20·op-analysis 2/25·info-arch 26/30·lotto 1/30 방금 발화). explore-idea saturation 직전15(3282-3296) 12/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8일 신선) — 확립된 skip 패턴 유지. cycle 3294 추천 carry-over 직접 소비 — git log mention-count 최저 3개(`lib/api`=2회·`lib/supabase`=4회·`lib/seo`=9회, `lib/teams`=47회·`lib/accuracy`=64회는 상대적으로 높아 이번 사이클 제외) 선정.
+
+**실행**: 본 메인 직접 read(scope 작아 Agent 위임 없이 5개 production 파일 142줄 + 연관 route 2개 + migration + DB_CONSTRAINTS + shared 상수 교차검증).
+
+**결과**: `is-origin-allowed.ts`/`leaderboard-sync-validation.ts`(사용처 `leaderboard/sync`·`leaderboard/mlb-sync` route 양쪽 확인) / `supabase/admin.ts`/`server.ts` / `seo/json-ld.ts`(사용처 ko/en/mlb `insights/series/[topic]` 3개 확인, `predictions/[date]/page.tsx` 로컬 포크 존재 확인, `insights`/`analysis/game`/`guide` inline 유지 확인) 전부 comment-code 정합. migration 050(`mlb_user_picks`) CHECK 제약(nickname 2~12자) vs `NICKNAME_MIN/MAX_CHARS` 상수 일치, `external_game_id VARCHAR(20)` vs route 길이 체크(`<=20`) 일치, `DB_CONSTRAINTS.userPicks`/`mlbUserPicks` upsert key 일치. 신규 drift 0건. **보류 1건(비actionable)**: `server.ts` 주석의 "44개 호출부" 수치가 현재 실측 102개로 stale — 그러나 cycle 3138 당시 fix 적용 범위를 설명하는 historical narration 성격(cycle 3291 PLAUSIBLE-비actionable 전례와 동일 판단), 호출부 수가 자연 증가한 것뿐이라 미수정.
+
+**regression**: `pnpm vitest run src/lib/supabase src/lib/api src/lib/seo` 3 tests 전부 통과. 코드 변경 없음(감사만).
+
+**검증**: skill-evolution trigger 5개 평가 — 전부 미충족(milestone 3296%50=46≠0, trigger5 직전20(N-19..N=3277-3296) 영구opt-out 9개 제외 평가대상 review-code 다회 발화로 0회 아님, trigger1/2/4 해당無). marker 미박제. ship-0 emergency stop 미충족(직전9(3287-3295) success 다수, fail 0건).
+
+다음 사이클 추천 = review-code(heavy) 잔여(`lib/accuracy`/`lib/teams`) 또는 info-arch(gap 27/30, 근접) 자연 대기.
+
 ## 🟢 SUCCESS — lotto(lite): gap=32/30 trigger 도달, cron 2종 건강 확인 (cycle 3295, 2026-10-19)
 
 진단: open issue 0건. approved plan 0/23. 2차 방어선: cycle 3294 retro commit(`b73719e2`) 존재 확인. 2-chain lock 미충족(직전8(3287-3294) distinct=3). gap 측정 — lotto 마지막 발화 cycle 3263 → gap=32/30 trigger 6 충족(장기 미발화 주기 보정). fix-incident 3/20·op-analysis 1/25·info-arch 25/30 전부 미근접. review-code(heavy) 직전 9사이클 중 7회 PARTIAL 반복 — cycle 3294 수확체감 지적 지속, lotto 다양성 선택.
