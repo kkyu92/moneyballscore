@@ -1,4 +1,14 @@
 
+## 🟡 PARTIAL — review-code(heavy): lib/{api,changelog,lotto,seasons,seo,standings,supabase,v2-shadow-monitor} 전수 감사(2934줄), 신규 drift 0건 (cycle 3311, 2026-10-19)
+
+진단: open issue 0건, approved plan 0/23(전부 completed/archived/non-approved). 직전8(3303-3310) distinct=3(review-code(heavy)6+lotto1+fix-incident1) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 6/20·op-analysis 17/25·info-arch 11/30·lotto 7/30). 2차 방어선: `cycle-retro 3310` 1건 정상 확인(결손 없음). explore-idea saturation 직전15(3297-3311) 13/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 8.3일 신선) — 확립된 skip 패턴 유지. cycle 3310 TODOS 권고대로 lib/ 잔여 11개 중 소형 8개(api/changelog/lotto/seasons/seo/standings/supabase/v2-shadow-monitor) 채택, 대형 3개(picks 1561줄/players 904줄/reviews 2816줄)는 다음 사이클 이월.
+
+**감사 결과**: 31개 파일(api 2 / changelog 4 / lotto 7 / seasons 3 / seo 1 / standings 7 / supabase 3 / v2-shadow-monitor 4) 전수 read. KBO team-code alias 리스크(cycle 3309 MLB 패턴과 동일 클래스) 재확인 — `buildSeasonSummary.ts`는 migration 005 가 이미 레거시 코드(SSG/KIA/DSB/SSA/LOT/HHE/KIW)를 `KBO_TEAMS` 키와 정확히 정규화해둬서 MLB와 달리 alias drop 리스크 없음(KBO 10팀 고정 로스터). lotto 상금 등급 주석(`tier_3`=5등 등) KBO 로또 실제 규정과 일치. `computeMagicNumber`/`buildEloTrend`/`buildTeamAccuracy` 의 CURRENT_MODEL_FILTER/PRODUCTION_COHORT_RULES 사용 — 과거 cycle 2453/2514/3176/3216 fix 와 일치, 전용 `silent-drift.test.ts` 리그레션 통과 재확인. 경미한 비-버그 관찰 2건(수정 안 함, 실제 실패 사례 없음): (1) `lotto/picks-loader.ts` 파일명 정규식이 `archive.ts` 보다 느슨하나 실제 파일명 범위에선 무해, (2) `buildEloTrend.ts` 60점 다운샘플링이 극단 케이스(120 raw points)에서 61점 emit 가능 — 차트 밀도만 영향, 데이터 손상 없음. 신규 drift 0건, 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 기존 관례대로 평가 보류)/trigger2(5연속 fail 없음)/trigger3(3311%50=11≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3292-3311) review-code 12회 발화로 0회 chain 없음) 전부 미충족. marker 미박제. ship-0 — 직전10(3302-3311) success 5건(3303/3305/3306/3307/3309)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) lib/ 잔여 대형 3개(picks 1561줄/players 904줄/reviews 2816줄) 전수 감사 또는 fix-incident/lotto/op-analysis/info-arch gap 자연 대기.
+
 ## 🟡 PARTIAL — review-code(heavy): lib/{matchup,predictions,insights,dashboard,analysis} 전수 감사(4141줄), 신규 drift 0건 (cycle 3310, 2026-10-19)
 
 진단: open issue 0건, approved plan 0/23. 직전8(3302-3309) distinct=3(review-code(heavy)6+lotto1+fix-incident1) — 2-chain lock 미충족. fix-incident gap=5·lotto gap=6·op-analysis gap=16·info-arch gap=10 전부 미근접. 2차 방어선: `cycle-retro 3309` 1건 정상 확인(결손 없음). app/api 20/20 완료(cycle 3308) 후 TODOS 권고대로 lib/ 미감사 영역 채택.
