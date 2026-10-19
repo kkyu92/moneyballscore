@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/standings+leaderboard+changelog 9파일 신규 스코프 전수 감사, 신규 drift 0건 (cycle 3353, 2026-10-19)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived/non-approved). 2차 방어선(cycle 3352 retro `fdddc9d4`) OK. 2-chain lock 미충족(직전8(3345-3352) distinct=4: review-code/polish-ui/fix-incident/skill-evolution). gap 전부 미도달(fix-incident 3/20·op-analysis 10/25·info-arch 23/30·lotto 19/30). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 8.8일 신선) 확립 skip 패턴 유지. cycle 3352 retro "scripts/ 저-mention 축 사실상 소진" 확인 후 review-code(heavy) 신규 저-mention 스코프로 `lib/standings`(4파일: buildEloTrend/buildStandings/buildTeamAccuracy/computeMagicNumber) + `lib/leaderboard`(3파일: server/types/use-leaderboard) + `lib/changelog`(2파일: parse/renderMarkdown) 9개 파일(CHANGELOG grep 2~3회, 전수 감사 이력 없음) 선정.
+
+본 메인 직접 전수 read(9파일 전부). `buildTeamAccuracy.ts` 의 cohort 분리(cycle 3176 fix) 정합성 — `buildAllTeamAccuracy`(cohort 옵션 보유, home/standings 는 PRODUCTION_COHORT_RULES 명시 전달 vs accuracy 는 default CURRENT_MODEL_FILTER) vs `buildMatchupData`/`buildTeamBiasAnalysis`(cohort 옵션 없이 CURRENT_MODEL_FILTER 고정) 교차 확인 — 후자 2개는 호출처가 `/accuracy` 단일이라 cohort mismatch 아님(의도된 설계). `leaderboard/types.ts` 의 "'weekly' backward-compat 유지" 주석을 실사용처(`leaderboard/page.tsx` PeriodTab 은 weekly 제외)와 대조 — `silent-drift.test.ts` 가 4개 mode 전부 테스트해 dead code 아님 확인(DB view `leaderboard_weekly` 도 migrations 024/026/027 에 유지). `use-leaderboard.ts` 의 KBO picks 는 길이 무관 항상 POST, MLB picks 는 length>0 조건부 전송 비대칭을 `/api/leaderboard/sync` route 코드와 대조 — 서버가 빈 배열 `{synced:0}` 로 정상 처리함을 확인(버그 아님). `computeMagicNumber.ts`/`buildStandings.ts`/`changelog/parse.ts`/`renderMarkdown.tsx` 전부 clean.
+
+**결론**: 9파일 전수 감사 완료, 신규 drift 0건. 코드 변경 없음, retro-only.
+
+**검증(skill-evolution 등)**: trigger3(3353%50=3) 미충족. trigger5 — 직전20(3334-3352) 표본 19개, review-code 14회 발화(0회 아님) 미충족. trigger2(5연속 fail 없음)/trigger4(meta-pattern 없음) 미충족. ship-0 — 직전10(3343-3352) retro-only/partial 5건(10/10 아님)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 신규 축(app/api 잔여 8개 mention-1건 이상이나 전수감사 미실시 route: health/hub-dispatch/leaderboard-sync/mlb/picks/pipeline/seo/version) 또는 fix-incident/info-arch(gap 24)/lotto(gap 20)/op-analysis(gap 11) 자연 대기.
+
 ## 🟢 SUCCESS — skill-evolution: phase 54 (88th 자가 진화), milestone cycle 3350 (cycle 3351, 2026-10-19)
 
 진단: `skill-evolution-pending` marker 발견(3350: 1a6b3282, trigger3 milestone cycle_n%50==0). 2차 방어선: cycle 3350 retro commit 존재 확인(결손 0건). forced 소비(메인 자율 X).
