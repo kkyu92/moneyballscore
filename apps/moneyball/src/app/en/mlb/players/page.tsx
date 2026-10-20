@@ -227,7 +227,7 @@ export default function MlbPlayersHubEn() {
                             href={`/en/mlb/players/${code}`}
                             className="flex items-center gap-2 bg-white dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-2 hover:shadow-md hover:border-brand-500/50 transition-all"
                           >
-                            <MlbTeamLogo team={code} size={16} className="rounded-full shrink-0" />
+                            <MlbTeamLogo team={code} size={16} className="rounded-full shrink-0" locale="en" />
                             <div className="min-w-0 flex-1">
                               <p className="text-xs font-semibold truncate">{team.shortName}</p>
                               <p className="text-2xs text-gray-400 dark:text-gray-500 truncate">

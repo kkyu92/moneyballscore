@@ -161,7 +161,7 @@ export default async function MlbStandingsHubEn() {
                           >
                             {idx + 1}
                           </span>
-                          <MlbTeamLogo team={code} size={24} className="rounded-full shrink-0" />
+                          <MlbTeamLogo team={code} size={24} className="rounded-full shrink-0" locale="en" />
                           <div className="min-w-0 flex-1">
                             <p className="font-semibold truncate">{team.shortName}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate font-mono tabular-nums">

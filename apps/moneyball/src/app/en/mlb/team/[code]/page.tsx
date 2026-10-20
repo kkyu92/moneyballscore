@@ -200,7 +200,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
         <div className="flex items-center gap-3 flex-wrap">
-          <MlbTeamLogo team={code} size={40} className="rounded-full shrink-0" />
+          <MlbTeamLogo team={code} size={40} className="rounded-full shrink-0" locale="en" />
           <h1 className="text-3xl md:text-4xl font-bold">{profile.name}</h1>
           <span className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-600 dark:text-gray-300 font-mono">
             {profile.league} {profile.division}

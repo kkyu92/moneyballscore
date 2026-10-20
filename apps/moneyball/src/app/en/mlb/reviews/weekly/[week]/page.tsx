@@ -111,7 +111,7 @@ function GameResultRowEn({ g, style }: { g: MlbWeeklyGameResult; style?: CSSProp
       <span className="w-14 shrink-0 text-xs text-gray-400 dark:text-gray-500 tabular-nums">
         {g.gameDate.slice(5).replace('-', '/')}
       </span>
-      <MlbTeamLogo team={g.awayCode} size={16} className="shrink-0" />
+      <MlbTeamLogo team={g.awayCode} size={16} className="shrink-0" locale="en" />
       <span className="text-gray-600 dark:text-gray-300 w-10 truncate text-xs">
         {mlbShortTeamName(g.awayCode)}
       </span>
@@ -121,7 +121,7 @@ function GameResultRowEn({ g, style }: { g: MlbWeeklyGameResult; style?: CSSProp
       <span className="font-medium text-gray-800 dark:text-gray-100 w-10 truncate text-xs">
         {mlbShortTeamName(g.homeCode)}
       </span>
-      <MlbTeamLogo team={g.homeCode} size={16} className="shrink-0" />
+      <MlbTeamLogo team={g.homeCode} size={16} className="shrink-0" locale="en" />
       <div className="flex-1" />
       {predictedWinnerCode && (
         <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:inline truncate max-w-[5rem]">
@@ -396,7 +396,7 @@ export default async function MlbWeeklyReviewPageEn({ params }: PageProps) {
                       : undefined
                   }
                 >
-                  <MlbTeamLogo team={t.teamCode} size={20} className="shrink-0" />
+                  <MlbTeamLogo team={t.teamCode} size={20} className="shrink-0" locale="en" />
                   <span className="w-24 shrink-0 font-medium">
                     {t.teamName}
                   </span>

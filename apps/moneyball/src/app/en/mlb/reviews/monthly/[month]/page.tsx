@@ -390,7 +390,7 @@ export default async function MlbMonthlyReviewPageEn({ params }: PageProps) {
                             : undefined
                         }
                       >
-                        <MlbTeamLogo team={t.teamCode} size={20} className="shrink-0" />
+                        <MlbTeamLogo team={t.teamCode} size={20} className="shrink-0" locale="en" />
                         <span className="w-24 shrink-0 font-medium">
                           {t.teamName}
                         </span>

@@ -289,7 +289,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 w-20 justify-end">
-                      <MlbTeamLogo team={u.awayCode} size={16} className="rounded-full shrink-0" />
+                      <MlbTeamLogo team={u.awayCode} size={16} className="rounded-full shrink-0" locale="en" />
                       <span className="text-xs font-medium text-gray-700 dark:text-gray-200 truncate">
                         {mlbShortTeamName(u.awayCode)}
                       </span>
@@ -301,7 +301,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
                       />
                     </div>
                     <div className="flex items-center gap-1 w-20">
-                      <MlbTeamLogo team={u.homeCode} size={16} className="rounded-full shrink-0" />
+                      <MlbTeamLogo team={u.homeCode} size={16} className="rounded-full shrink-0" locale="en" />
                       <span className="text-xs font-medium text-gray-700 dark:text-gray-200 truncate">
                         {mlbShortTeamName(u.homeCode)}
                       </span>
@@ -342,7 +342,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
                 className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl p-5 border border-gray-200 dark:border-[var(--color-border)]"
               >
                 <div className="flex items-center gap-2">
-                  <MlbTeamLogo team={s.teamCode} size={24} className="rounded-full shrink-0" />
+                  <MlbTeamLogo team={s.teamCode} size={24} className="rounded-full shrink-0" locale="en" />
                   <p className="text-sm text-gray-500 dark:text-gray-400">{s.teamName}</p>
                 </div>
                 <p className="text-3xl font-bold mt-1">

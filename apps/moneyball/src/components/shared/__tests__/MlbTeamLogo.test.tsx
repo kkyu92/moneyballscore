@@ -23,4 +23,15 @@ describe("MlbTeamLogo", () => {
       render(<MlbTeamLogo team={"XX" as MlbTeamCode} />),
     ).not.toThrow();
   });
+
+  it("locale='en' 시 alt 접미사가 'logo' (영문), '로고' 미노출 — /en/mlb/* 쌍둥이 페이지 i18n 누락 fix (cycle 3413 review-code heavy)", () => {
+    render(<MlbTeamLogo team={"LAD" as MlbTeamCode} locale="en" />);
+    expect(screen.getByAltText(/logo/)).toBeInTheDocument();
+    expect(screen.queryByAltText(/로고/)).toBeNull();
+  });
+
+  it("locale 생략 시(default 'ko') 기존과 동일하게 '로고' alt 유지", () => {
+    render(<MlbTeamLogo team={"NYY" as MlbTeamCode} />);
+    expect(screen.getByAltText(/로고/)).toBeInTheDocument();
+  });
 });

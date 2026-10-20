@@ -79,7 +79,7 @@ export function MlbTeamStrengthGrid({ rows, locale = 'ko' }: Props) {
             <span className="shrink-0 text-xs text-gray-400 dark:text-gray-500 tabular-nums w-4 text-right">
               {idx + 1}
             </span>
-            <MlbTeamLogo team={row.teamCode} size={24} />
+            <MlbTeamLogo team={row.teamCode} size={24} locale={locale} />
             <span className="text-sm font-semibold truncate group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
               {row.teamName}
             </span>

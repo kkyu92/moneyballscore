@@ -27,7 +27,7 @@ export function AnalysisLink({
       ? 'text-white bg-brand-600 hover:bg-brand-700 px-4 py-2'
       : variant === 'subtle'
       ? 'text-gray-500 dark:text-gray-400 hover:text-brand-600'
-      : 'text-brand-600 hover:text-brand-800 hover:underline';
+      : 'text-brand-600 dark:text-brand-400 hover:text-brand-800 dark:hover:text-brand-300 hover:underline';
 
   return (
     <Link
