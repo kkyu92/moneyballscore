@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): components/insights+search+share+ui 전수감사, drift 0건 (cycle 3466, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3465 retro `1ccc7521`) OK. 2-chain lock 미충족(직전8(3458-3465) distinct=3: review-code/polish-ui/fix-incident) — 자유 선택. fix-incident gap=3/20·lotto gap=17/30·info-arch gap=26/30·op-analysis gap=12/25 전부 미도달. components/reviews/ 전수감사 완료(cycle 3465) 후속 — TODOS 전수 grep 결과 0 mention 인 `insights/`(2파일)+`search/`(1파일)+`share/`(1파일)+`ui/`(1파일) 미감사 스코프 선정.
+
+**감사 결과**: `AgentVoteCard.tsx`/`DebateTimeline.tsx` — 기존 silent-drift 회귀 테스트(cycle 2609 awayColor var(--color-away)/cycle 2616 w-6 h-6 badge)와 현재 코드 일치 확인(이미 수정 반영 상태). `SearchClient.tsx` — 기존 회귀 테스트(cycle 2620 tracking-wide/cycle 2622 hover:bg-gray-800)와 현재 코드 일치. `DebateTimelineData` loader 타입(`lib/insights/loader.ts`) vs `DebateTimeline.tsx` 소비 필드(keyFactor/strengths/reasoning/recentBias/teamSpecific/modelWeakness/adjustmentSuggestion) 전부 shape 일치. `ShareButtons.tsx` `isEn` prop — `/en/*` 5개 라우트(mlb/matchup, mlb/games, mlb/reviews/misses·monthly·weekly) 전수 확인, 전부 `isEn` 전달 — 누락 0건. `ui/navigation-menu.tsx` — `MegaMenu.tsx` 사용 확인, dead code 아님.
+
+**코드 변경 없음** — actionable fix 없음, drift 0건 확인.
+
+**검증(skill-evolution 등)**: trigger3(3466%50=16≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3447-3466, 현재 포함) review-code 15회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3457-3466) outcome 중 success 다수(3458/3461/3462/3464) 포함 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(components/ 잔여 서브디렉토리 또는 packages/kbo-data 2순회) 또는 info-arch(gap27/30, 거의 도달)/lotto(gap18/30)/op-analysis(gap13/25) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): components/reviews/ 전수감사, drift 0건 (cycle 3465, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3464 retro `73ece596`) OK. 2-chain lock 미충족(직전8(3457-3464) distinct=3: review-code/polish-ui/fix-incident) — 자유 선택. fix-incident gap=2/20·lotto gap=16/30·info-arch gap=25/30·op-analysis gap=11/25 전부 미도달. lib/ 전수감사 완료(cycle 3464) 후속 — `components/` 20개 서브디렉토리 중 grep-count depth proxy 금지 룰(cycle 2991) 따라 직접 read 로 미감사 스코프 선정: `reviews/` (10 파일, 855줄).
