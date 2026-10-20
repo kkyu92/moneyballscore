@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): lib/{insights,picks,v2-shadow-monitor,supabase}/ 전수감사, drift 0건 (cycle 3448, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3447 retro `5261e9a2`) OK. 2-chain lock 미충족(직전8(3440-3447) distinct=3: review-code6+info-architecture-review1+polish-ui(lock-fallback)1). gap 체크: fix-incident=12/20·op-analysis=15/25·lotto=26/30·info-arch=8/30 전부 미도달. cycle 3447 추천대로 lib/ 잔여 9개 중 작은 4개(insights 8파일/picks 6파일/v2-shadow-monitor 4파일/supabase 3파일, 합 21파일) 배치 채택.
+
+**감사**: Agent 위임 전수 read — 21파일(소스+테스트) 전부. `topFactors.ts` 팩터 키(`sp_fip/sp_xfip/lineup_woba/bullpen_fip/recent_form/war/head_to_head/park_factor/elo/sfr`) v1.8 10팩터 세트와 정확 일치, 하드코딩 가중치 없음. `PRODUCTION_COHORT_RULES`(`['v1.8','v1.8-credit-fail']`) CE 코호트 포함 정확. `statusBadge.ts` dark-mode 6/6 페어링 완전 + EN 라벨 미러 정확 wiring. `picks/` KBO/MLB tie 처리 대칭, id 네임스페이싱(`mlb-{id}`) 정확, 상수(`RECENT_FORM_GAMES`/`PICKS_TREND_HALF`/`THRESHOLD`/`KST_OFFSET_MS`) `packages/shared` 와 일치. `v2-shadow-monitor/loader.ts` cron 실제 작성 경로 주석 정확, `parse.ts` 파서 dead branch 0. `supabase/server.ts` 쿠키 미사용 회귀 테스트(`server-cookie-free.test.ts`) 보유 — ISR 깨짐 재발 방지 가드 확인. `assertSelectOk` 전 쿼리 적용 + `.limit()` 바운드 확인, VARCHAR overflow silent-fail 패턴(사례 3) 재발 없음. dev 용어(백필/극값/표본/실측/cron/upsert) user-facing 노출 0건.
+
+**결과**: drift 0건. lib/ 시리즈 19개 서브디렉토리 완료(accuracy/analysis/calendar/changelog/leaderboard/seasons/seo/stats/observability/api/mlb/predictions/teams/dashboard/debug/insights/picks/v2-shadow-monitor/supabase). 코드 변경 없음(retro-only). 잔여 5개: matchup/players/standings/lotto/reviews.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3448%50=48≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3429-3448, 현재 포함, 표본 19) review-code 12회 발화로 미충족. marker 미박제. ship-0 — 직전10(3438-3447) retro-only 다수(success 2건: 3439/3444) 미충족(PARTIAL_STREAK≠10). exhaustive-sweep 서브구분 불필요. **2-chain lock(다음 사이클용) 충족** — 직전8(3441-3448, 현재 포함) distinct=2(review-code 7+polish-ui(lock-fallback)1) → 다음 사이클은 review-code/polish-ui 제외 후 선택 필요(fix-incident 버그 발견 시 예외). 2차 방어선(cycle 3447 retro `5261e9a2`) OK.
+
+다음 사이클 추천 = **2-chain lock 발동** — review-code(heavy)/polish-ui 제외, fix-incident(gap13/20)/op-analysis(gap16/25)/lotto(gap27/30)/info-arch(gap9/30)/expand-scope/design-system/explore-idea/dimension-cycle 중 선택. 어떤 chain 도 trigger 없으면 lock 룰 상 polish-ui 강제지만 본 사이클 polish-ui 자체가 잠긴 chain 중 하나 — 이 경우 trigger 가장 강한 chain(또는 dimension-cycle) 수동 선택 필요.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): lib/debug/ 전수감사, drift 0건 (cycle 3447, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3446 retro `0dfcf8a0`) OK. 2-chain lock 미충족(직전8(3439-3446) distinct=3: review-code(heavy)6+info-architecture-review1+polish-ui(lock-fallback)1). gap 체크: fix-incident=10/20·op-analysis=13/25·lotto=24/30·info-arch=6/30·expand-scope=27 전부 미도달. lotto cron 산출물 신선 확인(picks 2026-10-24.md/results 2026-10-17.md 둘 다 최신, 수동 개입 불필요). cycle 3446 추천대로 lib/ 잔여 10개 중 `lib/debug/`(8파일) 채택.
