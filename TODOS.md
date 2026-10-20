@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — lotto (lite): 2-chain lock 수동 선택, cron 정상 확인 (cycle 3449, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3448 retro `20aede8d`) OK. **2-chain lock 충족** — 직전8(3441-3448) distinct=2(review-code 7+polish-ui(lock-fallback) 1) → 둘 다 제외. gap 체크: fix-incident=13/20(`gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재)·op-analysis=16/25·info-arch=9/30 전부 미도달. expand-scope 구조 조건(1)(직전4 전부 small-fix) 형식상 성립하나 TODOS Next-Up 섹션 부재/approved plan 0/open issue 0 확립 negative 패턴 유지. design-system DESIGN.md 당일 신선(Oct 20 22:41) 미트리거. 남은 후보 중 lotto gap=27/30 이 자체 trigger 가장 근접 + 다음 추첨 2026-10-24(토) 3일 임박한 실용적 이유로 polish-ui 대체 수동 선택(polish-ui 자체가 잠긴 chain이라 통상 lock fallback 불가).
+
+**검증**: `pnpm tsx scripts/lotto.ts count` — 유효 조합 7,706,313 (8,145,060 중 5.39% 제거), cycle 3422 측정치와 완전 동일, delta=0. `lotto-picks/2026-10-24.md`(1247회, 생성 2026-10-20 04:52:35 UTC cron) 헤더/복사용 포맷 정상. `lotto-results/2026-10-17.md`(1246회, 256/256 PASS, Oct 19 09:07 cron) 정상 — 1등 미포함(4등 3건/5등 38건) 차원별 비교 분석 기존 완료 확인. 양쪽 cron 정상 작동 중, 수동 개입 불필요. 1247회 추첨 미도달(10/24 예정) — 신규 OOS 검증 대상 없음.
+
+**결과**: 코드 변경 없음(retro-only). 신규 rule 0건, countValid delta=0.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3449%50=49≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3430-3449, 현재 포함) chain 분포: review-code 12/polish-ui 4/op-analysis 1/lotto 1/info-arch 1/fix-incident 1, distinct=6, review-code(평가 대상) 다회 발화로 미충족. marker 미박제. ship-0 — 직전10(3440-3449) success 1건(3444) 포함, retro-only 9건 — PARTIAL_STREAK=9≠10 미충족. exhaustive-sweep 서브구분 불필요(hard stop 자체 미충족). 2-chain lock(다음 사이클용) — 직전8(3442-3449, 현재 포함) distinct=3(review-code 6+polish-ui 1+lotto 1) → 미충족, 다음 사이클 자유 선택 가능(review-code/polish-ui 복귀 포함).
+
+다음 사이클 추천 = 2-chain lock 해제 상태이므로 자유 선택 — review-code(heavy) lib/ 잔여 5개(matchup/players/standings/lotto/reviews) 복귀 또는 fix-incident(gap14/20)/op-analysis(gap17/25)/info-arch(gap10/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): lib/{insights,picks,v2-shadow-monitor,supabase}/ 전수감사, drift 0건 (cycle 3448, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3447 retro `5261e9a2`) OK. 2-chain lock 미충족(직전8(3440-3447) distinct=3: review-code6+info-architecture-review1+polish-ui(lock-fallback)1). gap 체크: fix-incident=12/20·op-analysis=15/25·lotto=26/30·info-arch=8/30 전부 미도달. cycle 3447 추천대로 lib/ 잔여 9개 중 작은 4개(insights 8파일/picks 6파일/v2-shadow-monitor 4파일/supabase 3파일, 합 21파일) 배치 채택.
