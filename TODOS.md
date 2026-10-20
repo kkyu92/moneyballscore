@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/analysis/ 전수 감사, PostviewPanel.tsx dark mode token 누락 수정 (cycle 3412, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3411 retro `d22782de`) OK. 2-chain lock 미충족(직전8(3404-3411) distinct=3: review-code(heavy)6+operational-analysis(lite)1+info-architecture-review1). fix-incident gap≥20 나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=4/25·lotto gap=20/30 전부 미도달. cycle 3378 next_rec 계승 — components/ 잔여 5개 subdir(dashboard/layout/analysis/shared/predictions) 중 소형 우선(analysis, 15파일) 채택.
+
+**감사**: Agent 1개 위임 — 12 소스 + 기존 테스트 3개 전수 read + 전체 call-site cross-grep(app/ 전역) + TeamStrengthGrid/MlbTeamStrengthGrid KBO-MLB twin 비교 + ThisWeekStatusFilter/YesterdayStatusFilter twin 비교 + division-by-zero 가드 확인 + 매직넘버 packages/shared 교차검증 + CREDIT_EXHAUSTED(`isQuantOnlyFallback`) threading 확인(JudgeVerdictPanel/AgentArgumentBox/BigMatchDebateCard) + `vitest run src/components/analysis`/`tsc --noEmit`/`pnpm lint`.
+
+**발견 + 수정**: `PostviewPanel.tsx` — cycle 616 dark mode 정렬 패스(#817)가 같은 디렉토리의 `GameOverview.tsx`/`FactorErrorsBars.tsx` 만 손대고 `PostviewPanel.tsx` 는 빠뜨림. 외곽 섹션(`bg-gradient-to-br from-brand-50 to-white`)/제목(`text-brand-800`)/안쪽 두 박스(`border-brand-200`) 전부 `dark:` variant 누락 — 동일 gradient 패턴 쓰는 `leaderboard/HallOfFame.tsx` 는 이미 dark 토큰 포함(쌍둥이 컴포넌트 drift). 다크 모드에서 "어제 경기 사후분석" 섹션만 밝은 배경으로 렌더되는 가시성 버그. HallOfFame.tsx 패턴과 동일하게 `dark:from-brand-900/30`/`dark:border-brand-800`/`dark:text-brand-200,300` 추가.
+
+**확인(clean)**: TeamStrengthGrid vs MlbTeamStrengthGrid divergence(Elo 태그 KBO 전용)는 의도적(plan #28 Phase 2 주석 확인) drift 아님. ThisWeekStatusFilter vs YesterdayStatusFilter CSS 숨김 로직 차이는 그룹형/플랫형 렌더링 차이로 정상. division-by-zero 전부 가드 확인(`RECENT_RECORD_MIN_GAMES` 필터, `FactorErrorsBars` maxAbs floor). 매직넘버 전부 `@moneyball/shared` 상수 소스 확인, 중복 없음. CREDIT_EXHAUSTED threading 전체 call site 일치 확인. prop 불일치 0건.
+
+**검증**: `vitest run src/components/analysis`(3 files/3 tests) + `tsc --noEmit` + `pnpm lint` 전부 clean. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `17144e3e`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비된 관례) 미적용. trigger2(5연속 fail 없음) 미충족. trigger3(3412%50=12≠0) 미충족. trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3393-3412, 현재 포함, 표본 20≥10) review-code 16회 발화로 미충족. marker 미박제. ship-0 — 직전10(3403-3412) success 8건(3403-3407/3409/3411/본cycle) 포함 미충족. 2-chain lock — 직전8(3405-3412, 본cycle 포함) distinct=3(review-code/operational-analysis/info-architecture-review), 미충족. 2차 방어선(cycle 3411 retro `d22782de`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 4개 subdir 계속(dashboard 17/layout 19/shared 23/predictions 31, 소형 우선 dashboard) 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap5/25)/lotto(gap21/30)/info-arch(gap2/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): fancy-stats.ts TOCTOU 중복 fetch dedup + kbo-live.ts/kbo-pitcher.ts 재시도 로직 일관화 (cycle 3411, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3410 retro `3df6586a`) OK. 2-chain lock 미충족(직전8(3403-3410) distinct=3: review-code(heavy)6+operational-analysis(lite)1+info-architecture-review1). cycle 3409 next_rec carry-over 채택 — `fancy-stats.ts` TOCTOU dedup 또는 `kbo-pitcher.ts`/`kbo-live.ts` 재시도 로직 보강.
