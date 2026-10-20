@@ -1,4 +1,18 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): debug/agent-fallback + v2-preview + v2-shadow-monitor 전수 재검증, drift 0건 (cycle 3424, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3423 retro `cb17eaad`) OK. 2-chain lock 미충족(직전8(3416-3423) distinct=5: review-code/polish-ui/expand-scope/fix-incident/lotto). fix-incident gap=3/20·op-analysis gap=16/25·info-arch gap=14/30·lotto gap=2/30 전부 미도달. DESIGN.md 당일 신선, 신규 라우트 7일 내 다수지만 기존 페이지(신규 아님). cycle 3423 추천 "agent-fallback 커버리지 gap 실데이터 확인 또는 잔여 top-level page" 채택.
+
+**검증 1 — debug/agent-fallback 커버리지 gap (cycle 3423 보류 건)**: 코드 로직상 `hasJudge && !hasHome/!hasAway` 조합이면 fullDebate/agentsFailed/quantOnly 어디에도 안 잡히는 이론적 uncategorized 분기 존재 — 실데이터(v1.8/v1.8-credit-fail cohort, reasoning not null, n=498) 로 직접 재현 시도. **결과: uncategorized=0건** — 이론적 gap 실데이터 미재현, false alarm 확정(fullDebate 45 + agentsFailed 32 + quantOnly 421 = 498 total 정확히 합산). 참고로 최근 14일 window 는 KBO 2026 시즌 종료(10/4)로 cohort 자체가 0건(의도된 정상 — MLB(`mlb_v0.1`)는 `reasoning` 컬럼 자체가 null 이라 debate 구조 없음, 대시보드가 KBO 전용인 게 맞음).
+
+**검증 2 — v2-preview / v2-shadow-monitor**: Agent 위임 전수 read(두 페이지 + import된 lib 전체: `v2Predictor.ts`/`v2-shadow-monitor/loader.ts`+`parse.ts`/`config/model.ts`) + migration/write-path 교차검증. 두 파일 모두 clean — interface 필드 전부 실제 DB 컬럼/최신 cohort md 파일과 1:1 일치, JSON.parse 오용 없음, catch 블록 silent swallow 없음(Promise.allSettled + captureFallback Sentry 사용), 과거 silent-drift-wave 수정 흔적(인라인 주석)이 이미 반영됨 확인.
+
+코드 변경 없음(retro-only, 전수 감사 완료 + drift 0건 확정).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3424%50=24≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3405-3424, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3415-3424) success 다수 포함 미충족. 2-chain lock — 직전8(3417-3424) distinct 재계산 필요(다음 사이클 진단 시). 2차 방어선(cycle 3423 retro `cb17eaad`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`about`/`community`/`glossary`/`guide`/`login`/`privacy`/`terms` 등 잔여 저-mention page.tsx, 단 clean 비율 상승 중이라 수확체감 고려) 또는 fix-incident(gap4/20)/op-analysis(gap17/25)/lotto(gap3/30)/info-arch(gap15/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): debug/pipeline GAP/SP_UNCONFIRMED 카드 silent zero 버그 수정 (cycle 3423, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3422 retro `19a41e60`) OK. 2-chain lock 미충족(직전8(3415-3422) distinct=5: review-code/polish-ui/expand-scope/fix-incident/lotto). fix-incident gap=2/20·op-analysis gap=15/25·info-arch gap=13/30·lotto gap=1/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 1h 신선) 확립 skip 패턴 유지. cycle 3420 추천 "debug/{agent-fallback,hallucination,reliability,silent-drift} 등 잔여 debug 페이지" 채택 — deploy-drift(cycle 3420 기 감사) 제외한 7개 잔여 debug/* 페이지(agent-fallback/factor-correlation/hallucination/model-comparison/pipeline/reliability/silent-drift, 총 2471줄) 전수 감사.
