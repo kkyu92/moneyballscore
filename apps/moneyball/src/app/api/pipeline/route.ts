@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
               '/',
               '/analysis',
               '/feed',
+              '/accuracy',
             ],
           }),
         });
