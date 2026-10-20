@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/backtest/ 전수 감사, models.ts stale doc ref 정정 + loader.ts 테스트 공백 보강 (cycle 3407, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3406 retro `222f4d44`) OK. 2-chain lock 미충족(직전8(3399-3406) distinct=3: review-code(heavy)6+polish-ui1+skill-evolution1). gap: fix-incident last fire 3382(gap=25/20 도달, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable)·op-analysis last fire 3383(gap=24/25 미도달)·info-arch last fire 3373(gap=34/30 도달하나 23연속 "IA 충분" 재확정 패턴 지속, mtime -7 매칭 다수는 route 신규 추가 아닌 일반 파일 touch 노이즈)·lotto last fire 3392(gap=15/30 미도달). explore-idea saturation 직전15(3393-3406) review-code 12+polish-ui 1=13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9.8일 신선) 확립 skip 패턴 유지. ship-0 미충족(직전10(3397-3406) success 9건). cycle 3406 next_rec 계승 — `packages/kbo-data/src/backtest/` (12파일, 1799줄) 채택.
+
+**감사**: agent 위임, 12개 파일 전수 read + 호출부(`scripts/backtest-v2-candidate.ts`, `pipeline/backtest-*-run.ts` 8종) 교차검증 + 테스트 커버리지 대조. `loader.ts`의 두 Supabase 쿼리(`loadDecidedGames`/`loadGameRecords`)는 이미 cycle 1361(wave 139)에서 `.range()` 페이지네이션 적용 완료 상태로 unbounded-query drift family 재발 없음 확인(`teams` 테이블 단일 unpaged select 는 10팀 고정이라 안전). `backtest-v2-helpers.ts`/`walk-forward-helpers.ts`/`logistic-regression.ts` 등 10개 파일 전부 clean(dead code 0건, export 전수 사용처 확인, `index.ts` 선택적 barrel 은 의도된 설계).
+
+**발견(수정)**: `models.ts:99` JSDoc 이 `computeTeamHomeAdvantages()` 라는 — 리포 전체에 존재한 적 없는 — 함수명을 참조. 실제 호출자(`pipeline/backtest-run.ts`)는 `loader.ts`의 `computeHomeWinRates()` 결과를 전달. `loader.ts`의 `buildFeatures()` 가 받는 선택적 `seasonStats`/`priorRecords` 두 분기(Wayback wOBA/FIP/SFR + game_records 기반 L3/L5 불펜·득실점·홈런)는 4개 실 프로덕션 백테스트 스크립트(`backtest-wayback-run.ts`/`backtest-manual-weights-run.ts`/`backtest-bootstrap-ci-run.ts`/`backtest-v3-run.ts`)가 실사용 중인데도 테스트 0건 — `logistic.ts` 자체 주석이 명시한 "optional data, asymmetric null handling" drift family(cycle 2977/2978)와 동일 형태의 공백.
+
+**수정**: `models.ts:99` 주석 함수명 정정(`computeHomeWinRates()`). 신규 `backtest-loader.test.ts` 추가 — seasonStats 분기(미지정/양쪽 채움/한쪽만 채움 3케이스) + priorRecords 분기(미지정/빈 배열/target.date 경계 look-ahead 제외 포함 L5 계산 3케이스) + `computeHomeWinRates` 1케이스, 총 7개 신규 테스트.
+
+**검증**: `packages/kbo-data` `tsc --noEmit` clean, `pnpm lint` clean, 전체 `pnpm test`(turbo, kbo-data 97 files/1232 tests +7, moneyball 603 files/4731 tests 변동없음) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `53b6d61b`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참)/trigger2(5연속 fail 없음)/trigger3(3407%50=7≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3388-3407, 현재 포함) review-code 다수 발화로 미충족(표본≥10 충족, distinct 2 이상). marker 미박제. ship-0 — 직전10(3398-3407) success 9건 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3400-3407) distinct=3(review-code+polish-ui+skill-evolution) 유지, 미충족. 2차 방어선(cycle 3406 retro `222f4d44`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/scrapers/`(15파일, 2693줄) 또는 `pipeline/` 잔여 ~19파일 — scrapers/ 가 더 작아 우선) 또는 op-analysis(gap24/25, 거의 도달)/lotto(gap15/30)/info-arch(24연속 "충분" 재확정 가능성) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/agents/ 전수 감사, calibration/agent_memories unbounded query 수정 (cycle 3406, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3405 retro `70e70e39`) OK. 2-chain lock 미충족(직전8(3398-3405) distinct=3: review-code+polish-ui+skill-evolution). gap: fix-incident last fire 3382(gap=24/20, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable)·op-analysis last fire 3383(gap=23/25 미도달)·info-arch last fire 3373(gap=33/30 충족하나 23연속 "IA 충분" 재확정 패턴, 신규 route mtime 노이즈뿐 실제 변경 0건)·lotto last fire 3392(gap=14/30 미도달). explore-idea saturation 직전15(3392-3405) 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9.8일 신선) 확립 skip 패턴 유지. ship-0 미충족(직전10(3396-3405) success 9건). cycle 3405 next_rec 계승 — `packages/kbo-data/src/agents/` (15파일, 4397줄) 채택.
