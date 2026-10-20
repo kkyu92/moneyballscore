@@ -7,6 +7,9 @@ import { isOriginAllowed } from '@/lib/api/is-origin-allowed';
 import { isValidNickname, isValidDeviceId } from '@/lib/api/leaderboard-sync-validation';
 import type { LeaderboardSyncPayload } from '@/lib/leaderboard/types';
 
+// KBO 정규시즌 팀당 144경기 × 10팀 / 2 = 720경기 — 한 기기가 보낼 수 있는 현실적 최대치의 여유 배수
+const MAX_PICKS_PER_SYNC = 1000;
+
 export async function POST(req: NextRequest) {
   if (!isOriginAllowed(req.headers.get('origin'))) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
@@ -32,6 +35,7 @@ export async function POST(req: NextRequest) {
   }
 
   const rows = picks
+    .slice(0, MAX_PICKS_PER_SYNC)
     .filter(
       (p) =>
         typeof p.game_id === 'number' &&

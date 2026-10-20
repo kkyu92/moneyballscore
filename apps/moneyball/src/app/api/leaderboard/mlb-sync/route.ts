@@ -11,6 +11,9 @@ import type { MlbLeaderboardSyncPayload } from '@/lib/leaderboard/types';
 // game_id INT REFERENCES games(id) 대신 external_game_id VARCHAR(20) REFERENCES
 // mlb_schedule(external_game_id) 라 별도 route 필요 (048 과 동일 분리 사유).
 
+// MLB 정규시즌 30팀 × 162경기 / 2 = 2430경기 — 한 기기가 보낼 수 있는 현실적 최대치의 여유 배수
+const MAX_PICKS_PER_SYNC = 3000;
+
 export async function POST(req: NextRequest) {
   if (!isOriginAllowed(req.headers.get('origin'))) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
@@ -36,6 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   const rows = picks
+    .slice(0, MAX_PICKS_PER_SYNC)
     .filter(
       (p) =>
         typeof p.external_game_id === 'string' &&

@@ -90,6 +90,20 @@ describe('POST /api/leaderboard/mlb-sync', () => {
     expect(json).toEqual({ synced: 0 });
   });
 
+  it('picks 3000건 초과 시 MAX_PICKS_PER_SYNC 로 자름', async () => {
+    const picks = Array.from({ length: 3500 }, (_, i) => ({
+      external_game_id: String(i),
+      pick: 'home' as const,
+      picked_at: new Date().toISOString(),
+    }));
+    const res = await callPost({ device_id: VALID_DEVICE_ID, nickname: 'Tester', picks });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json).toEqual({ synced: 3000 });
+    const upsertedRows = upsertSpy.mock.calls[0][0];
+    expect(upsertedRows).toHaveLength(3000);
+  });
+
   it('DB error → 500', async () => {
     upsertResult = { error: { message: 'connection timeout' } };
     const res = await callPost({

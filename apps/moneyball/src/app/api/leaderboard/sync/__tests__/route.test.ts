@@ -90,6 +90,24 @@ describe('POST /api/leaderboard/sync', () => {
     expect(json).toEqual({ synced: 0 });
   });
 
+  it('picks 1000건 초과 시 MAX_PICKS_PER_SYNC 로 자름', async () => {
+    const picks = Array.from({ length: 1500 }, (_, i) => ({
+      game_id: i,
+      pick: 'home' as const,
+      picked_at: new Date().toISOString(),
+    }));
+    const res = await callPost({ device_id: VALID_DEVICE_ID, nickname: 'Tester', picks });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json).toEqual({ synced: 1000 });
+    expect(upsertSpy).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ game_id: 0 })]),
+      expect.anything(),
+    );
+    const upsertedRows = upsertSpy.mock.calls[0][0];
+    expect(upsertedRows).toHaveLength(1000);
+  });
+
   it('DB error → 500', async () => {
     upsertResult = { error: { message: 'connection timeout' } };
     const res = await callPost({
