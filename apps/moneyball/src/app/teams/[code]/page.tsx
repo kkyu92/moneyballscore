@@ -100,7 +100,8 @@ export default async function TeamPage({ params }: PageProps) {
 
   // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
   // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
-  // buildTeamProfile 은 captureFallback 비가드(fail-loud) — 동시성 유지 위해 별도 promise 로 분리.
+  // buildTeamProfile 은 내부적으로 DB 오류를 catch 해 degraded 플래그로 반환 (fail-loud 아님) —
+  // 동시성 유지 위해 별도 promise 로 분리, profile.degraded 를 아래 dbDegraded 에 합류.
   const profilePromise = buildTeamProfile(code);
   const [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR] = await Promise.allSettled([
     buildTeamEloTrend(code),
@@ -117,7 +118,7 @@ export default async function TeamPage({ params }: PageProps) {
   const strongTeamStats = strongTeamStatsR.status === "fulfilled" ? strongTeamStatsR.value : captureFallback(strongTeamStatsR.reason, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(strong)" });
   const completeTeamStats = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(complete)" });
 
-  const dbDegraded = [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR].some((r) => r.status === "rejected");
+  const dbDegraded = profile.degraded || [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR].some((r) => r.status === "rejected");
 
   const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);

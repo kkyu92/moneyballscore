@@ -133,6 +133,7 @@ describe("buildTeamProfile — cycle 151 silent drift family `.error` 미체크 
     expect(profile?.predictedGames).toBe(0);
     expect(profile?.recentGames).toEqual([]);
     expect(profile?.topPitchers).toEqual([]);
+    expect(profile?.degraded).toBe(true);
   });
 
   it("games select error → throw 대신 빈 집계 degrade (captureFallback)", async () => {
@@ -150,6 +151,7 @@ describe("buildTeamProfile — cycle 151 silent drift family `.error` 미체크 
     expect(profile?.verifiedN).toBe(0);
     expect(profile?.recentGames).toEqual([]);
     expect(profile?.topPitchers).toEqual([]);
+    expect(profile?.degraded).toBe(true);
   });
 
   it("teams .maybeSingle() 빈 row (data=null, error=null) → 정상 fallback 빈 프로필 반환", async () => {
@@ -163,6 +165,7 @@ describe("buildTeamProfile — cycle 151 silent drift family `.error` 미체크 
     expect(profile?.predictedGames).toBe(0);
     expect(profile?.recentGames).toEqual([]);
     expect(profile?.topPitchers).toEqual([]);
+    expect(profile?.degraded).toBe(false);
   });
 
   it("정상 case (teams + games 모두 success, data=[]) → 빈 통계 프로필 정상 반환", async () => {
@@ -180,6 +183,7 @@ describe("buildTeamProfile — cycle 151 silent drift family `.error` 미체크 
     expect(profile?.verifiedN).toBe(0);
     expect(profile?.factorAverages.spFip).toBeNull();
     expect(profile?.recentGames).toEqual([]);
+    expect(profile?.degraded).toBe(false);
   });
 
   it("KBO_TEAMS 미등록 코드 → null 반환 (DB 콜 X)", async () => {

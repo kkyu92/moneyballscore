@@ -45,6 +45,7 @@ interface TeamProfile {
   closeGame: TeamCloseGameStats | null;
   homeAwayEdge: TeamHomeAwaySplit | null;
   recentRecord: TeamRecentRecord | null;
+  degraded: boolean;
 }
 
 export interface TeamAvgMargin {
@@ -299,8 +300,10 @@ export async function buildTeamProfile(
 
   // teams select .error 미체크 시 DB 오류에도 teamRow=null silent fallback →
   // 빈 프로필 반환되어 사용자에게 "팀 데이터 없음" 표시 (실제로는 DB 오류).
-  // assertSelectOk fail-loud 전환 — error 시 page boundary 가 처리.
-  // .maybeSingle() 빈 row 정상 케이스는 data=null 그대로.
+  // assertSelectOk fail-loud 전환 후 catch 에서 degraded 플래그로 page boundary 에 전파
+  // (buildMlbTeamProfile.ts 와 동일 패턴, cycle 3396 — KBO 쪽 degraded 누락 backport).
+  // .maybeSingle() 빈 row 정상 케이스는 data=null 그대로 (degraded=false).
+  let degraded = false;
   const teamResult = await supabase
     .from("teams")
     .select("id")
@@ -311,6 +314,7 @@ export async function buildTeamProfile(
   try {
     ({ data: teamRow } = assertSelectOk(teamResult, "buildTeamProfile teams"));
   } catch (err) {
+    degraded = true;
     teamRow = captureFallback(err, null, { route: "/teams/[code]", source: "buildTeamProfile teams" });
   }
 
@@ -339,6 +343,7 @@ export async function buildTeamProfile(
       closeGame: null,
       homeAwayEdge: null,
       recentRecord: null,
+      degraded,
     };
   }
 
@@ -391,6 +396,7 @@ export async function buildTeamProfile(
   try {
     ({ data } = assertSelectOk(gamesResult, "buildTeamProfile games"));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: "/teams/[code]", source: "buildTeamProfile games" });
   }
 
@@ -598,5 +604,6 @@ export async function buildTeamProfile(
     closeGame,
     homeAwayEdge,
     recentRecord,
+    degraded,
   };
 }
