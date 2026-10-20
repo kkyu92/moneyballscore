@@ -3,6 +3,7 @@ import { errMsg } from '@moneyball/shared';
 import { KBO_BASE_URL as BASE_URL, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { fetchNaverSchedule } from './naver-schedule';
 import { captureKboScraperHtmlAlert } from './kbo-scraper-alert';
+import { fetchWithRetry } from './fetch-with-retry';
 
 export interface LiveGameState {
   externalGameId: string;
@@ -43,7 +44,7 @@ interface KboLiveResponse {
 export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
   const yyyymmdd = date.replace(/-/g, '');
 
-  const res = await fetch(`${BASE_URL}/ws/Main.asmx/GetKboGameList`, {
+  const res = await fetchWithRetry(`${BASE_URL}/ws/Main.asmx/GetKboGameList`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json; charset=utf-8',

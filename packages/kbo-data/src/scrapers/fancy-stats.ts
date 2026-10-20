@@ -8,6 +8,32 @@ import { fetchWithRetry } from './fetch-with-retry';
 
 const BASE_URL = 'https://www.kbofancystats.com';
 
+// TOCTOU dedup — daily.ts 최상위 Promise.all([fetchPitcherStats, fetchTeamStats,
+// fetchEloRatings]) 가 fetchTeamStats 내부 Promise.all([fetchEloRatings, fetchBatterStats])
+// 와 겹쳐 /leaders/ 2회 + /elo/ 2회, 총 4건 동시 요청을 같은 URL 에 중복 발사 (cycle 3409
+// carry-over). in-flight 요청을 URL 키로 캐싱해 동시 호출 시 실제 HTTP 호출은 1회만 —
+// baseball-savant.ts 의 순차 await 직렬화(다른 URL 간 rate-limit race)와는 다른 성격의
+// TOCTOU(같은 URL 중복 fetch)라 dedup 패턴으로 해결.
+const inFlightFetches = new Map<string, Promise<string>>();
+
+async function fetchHtmlDeduped(url: string): Promise<string> {
+  const cached = inFlightFetches.get(url);
+  if (cached) return cached;
+
+  const promise = (async () => {
+    try {
+      const res = await fetchWithRetry(url, { headers: { 'User-Agent': KBO_USER_AGENT } });
+      assertResponseOk(res, 'Fancy Stats fetch error');
+      return await res.text();
+    } finally {
+      inFlightFetches.delete(url);
+    }
+  })();
+
+  inFlightFetches.set(url, promise);
+  return promise;
+}
+
 // scrapers utility export — kbo-official.ts·fangraphs.ts 와 동일 위치에서
 // sleep + parseNum 통일. backfill-records.ts·llm.ts·llm-deepseek.ts 의 sleep 은
 // scope 분리 (scrapers utility ≠ pipeline/agents utility).
@@ -182,14 +208,7 @@ export function parsePitchersFromHtml(html: string): PitcherStats[] {
  * /leaders/ 페이지 fetch → 순수 파서 호출. 내부 전용.
  */
 async function fetchFancyStatsPitchers(): Promise<PitcherStats[]> {
-  const url = `${BASE_URL}/leaders/`;
-  const res = await fetchWithRetry(url, {
-    headers: { 'User-Agent': KBO_USER_AGENT },
-  });
-
-  assertResponseOk(res, 'Fancy Stats leaders error');
-
-  const html = await res.text();
+  const html = await fetchHtmlDeduped(`${BASE_URL}/leaders/`);
   const pitchers = parsePitchersFromHtml(html);
 
   await sleep(SCRAPER_RATE_LIMIT_DEFAULT_MS);
@@ -364,14 +383,7 @@ export function parseBattersFromHtml(html: string): BatterStats[] {
  * `/leaders/` 는 시즌 query 미지원, 호출 시점의 현재 시즌 데이터만 반환.
  */
 export async function fetchBatterStats(_season: number): Promise<BatterStats[]> {
-  const url = `${BASE_URL}/leaders/`;
-  const res = await fetchWithRetry(url, {
-    headers: { 'User-Agent': KBO_USER_AGENT },
-  });
-
-  assertResponseOk(res, 'Fancy Stats leaders (batter) error');
-
-  const html = await res.text();
+  const html = await fetchHtmlDeduped(`${BASE_URL}/leaders/`);
   const batters = parseBattersFromHtml(html);
   await sleep(SCRAPER_RATE_LIMIT_DEFAULT_MS);
   return batters;
@@ -451,14 +463,7 @@ export function hasAnyFallback(flags: FancyStatsFallbacks): boolean {
  * fetchTeamStats 와 underscore prefix 정렬.
  */
 export async function fetchEloRatings(_season: number): Promise<(EloRating & { woba: number; fip: number; sfr: number })[]> {
-  const url = `${BASE_URL}/elo/`;
-  const res = await fetchWithRetry(url, {
-    headers: { 'User-Agent': KBO_USER_AGENT },
-  });
-
-  assertResponseOk(res, 'Fancy Stats Elo error');
-
-  const html = await res.text();
+  const html = await fetchHtmlDeduped(`${BASE_URL}/elo/`);
   const $ = cheerio.load(html);
   const ratings: (EloRating & { woba: number; fip: number; sfr: number })[] = [];
 
