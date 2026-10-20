@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — review-code (heavy): lib/mlb/ 전수감사, lib/ 시리즈 11번째 완료, drift 0건 (cycle 3442, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3441 retro `f4b1ab88`) OK. 2-chain lock 미충족(직전8(3434-3441) distinct=3: review-code(heavy)+fix-incident(lite)+info-architecture-review). gap 체크: fix-incident=5/20·op-analysis=8/25·lotto=19/30 전부 미도달, info-arch 직전(3440) 발화로 gap=1(재선택 부적절). cycle 3441 추천대로 lib/ 잔여 14개 서브디렉토리 중 최대 규모(35파일) `lib/mlb/` 채택.
+
+**감사**: 서브에이전트 위임 read-only 전수 조사 — `lib/mlb/` 17 source 파일 + `__tests__/` 17 파일 (2933줄). DB 컬럼(home_sp_fip/home_lineup_woba/home_bullpen_fip/home_war_total/head_to_head_rate/home_elo/home_recent_form/mlb_team_elo_history.*/mlb_team_stats.*/mlb_schedule.* 등) 전부 마이그레이션(001/003/034/038/044/047) 대조 확인. KBO twin `buildTeamAccuracy.ts` 와 `buildMlbTeamAccuracy.ts` line-by-line 대조 — bias-analysis `actualWinPct` 방법론 차이(MLB in-sample win-rate vs KBO 외부 standings scrape)는 comment 로 명시된 의도적 설계 차이, drift 아님. StatsAPI 코드 alias 처리(Elo trend 함수들, "사례 27" 7팀 alias bug class) 전부 정합. Factor sign convention(`LOWER_IS_BETTER`) 을 `packages/kbo-data/src/factors/mlb-base.ts` 의 `computeMlbFactorContributions` 와 대조 — 부호 일치. `defense_sfr` dead placeholder 주석을 `mlb-pipeline.ts` 실제 코드와 대조 — 정확. dead code 0 (모든 export 사용처 확인), TODO/FIXME/XXX/@ts-ignore 0건.
+
+**결과**: drift 0건. lib/ 시리즈 11개 서브디렉토리 전부 완료(accuracy/analysis/calendar/changelog/leaderboard/seasons/seo/stats/observability/api/mlb). 코드 변경 없음(retro-only).
+
+**검증**: `npx vitest run src/lib/mlb/__tests__` 17/17 파일 121/121 테스트 pass. `npx tsc --noEmit` 해당 디렉토리 기인 에러 0건.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3442%50=42≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3423-3442, 현재 포함, 표본 19→20 확보) review-code 14회 발화로 미충족(평가대상 review-code 단독, 0회 아님). marker 미박제. ship-0 — 직전10(3433-3442) retro-only 9건(3439 success 1건 제외) — PARTIAL_STREAK=9≠10, 미충족(emergency stop 미발동). exhaustive-sweep 서브구분 — RC_HEAVY_COUNT=7/10(<8) 미충족, 평가 불필요. 2-chain lock(다음 사이클용) — 직전8(3435-3442) distinct=3(review-code(heavy)+fix-incident(lite)+info-architecture-review), 미충족 — 다음 사이클 자유 선택. 2차 방어선(cycle 3441 retro `f4b1ab88`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(lib/ 잔여 13개: predictions/12 teams/12 reviews/17 dashboard/11 matchup/9 insights/8 debug/8 standings/7 lotto/7 players/7 picks/6 등) 또는 fix-incident(gap6/20)/op-analysis(gap9/25)/lotto(gap20/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): lib/ 10개 서브디렉토리 전수감사, drift 0건 (cycle 3441, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3440 retro `0a9cd510`) OK. 2-chain lock 미충족(직전8(3433-3440) distinct=4: review-code5+operational-analysis1+info-architecture-review1+fix-incident1) — 자유 선택. gap 체크: fix-incident=5/20·op-analysis=8/25·lotto=19/30 전부 미도달, info-arch 직전(3440) 발화로 gap=0(재선택 부적절). explore-idea saturation 14/15 충족하나 4-source negative 확립 skip 패턴 유지. components/(3438)+app/api(3439) 시리즈 완결 후 자연 다음 스코프 = lib/ 미감사 서브디렉토리.
