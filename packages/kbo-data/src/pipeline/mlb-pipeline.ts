@@ -26,7 +26,7 @@ import {
 import { computeMlbEloRatings, computeMlbEloHistory } from '../factors/mlb-elo';
 import { calculateMlbRecentForm, calculateMlbHeadToHead, type MlbFinishedGameForForm } from '../factors/mlb-form';
 import { captureSilentDriftAlert } from './silent-drift-alert';
-import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE, normalizeMlbTeamCode, errMsg, assertSelectOk } from '@moneyball/shared';
+import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE, normalizeMlbTeamCode, errMsg, assertSelectOk, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
 import { DB_CONSTRAINTS } from './db-constraints';
 import {
   generateMlbAgentMemories,
@@ -347,16 +347,32 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
   let finishedGames: MlbFinishedGameForForm[] = [];
   try {
     const seasonStart = `${season}-01-01`;
-    const finishedResult = await db
-      .from('mlb_schedule')
-      .select('home_team_code, away_team_code, home_score, away_score, game_date')
-      .eq('status', 'final')
-      .gte('game_date', seasonStart)
-      .lt('game_date', date);
-    const { data } = assertSelectOk<
-      Array<MlbFinishedGameForForm & { game_date: string }>
-    >(finishedResult, 'mlb-pipeline.mlb_schedule.finished.select');
-    finishedGames = (data ?? []).slice().sort((a, b) => (a.game_date < b.game_date ? 1 : -1));
+    // review-code(heavy) 발견 — supabase/config.toml max_rows=1000(SUPABASE_PAGE_SIZE 와 동일
+    // 값) 인데 이 select 는 .range() 없이 단일 호출이라 시즌 누적 final 경기 수가 1000건을
+    // 넘는 시점(MLB 30팀 × 162경기/2 ≈ 2430경기/시즌 — 시즌 중반이면 이미 초과)부터 나머지
+    // 경기가 PostgREST 에 의해 silent truncate 됨. recent_form/head_to_head 가 최근 10경기
+    // 승률을 계산하는데 쓰이는 입력이라, truncate 된 응답이 어느 날짜대 subset 인지 보장이
+    // 없어(order() 미지정) 최악의 경우 최근 경기가 통째로 누락될 수 있었음 — backfill-records.ts
+    // loadDecidedGames 와 동일한 .range() 페이지네이션 패턴으로 전체 조회 보장.
+    const allFinished: Array<MlbFinishedGameForForm & { game_date: string }> = [];
+    let from = 0;
+    for (;;) {
+      const finishedResult = await db
+        .from('mlb_schedule')
+        .select('home_team_code, away_team_code, home_score, away_score, game_date')
+        .eq('status', 'final')
+        .gte('game_date', seasonStart)
+        .lt('game_date', date)
+        .range(from, from + SUPABASE_PAGE_SIZE - 1);
+      const { data } = assertSelectOk<
+        Array<MlbFinishedGameForForm & { game_date: string }>
+      >(finishedResult, 'mlb-pipeline.mlb_schedule.finished.select');
+      const page = data ?? [];
+      allFinished.push(...page);
+      if (page.length < SUPABASE_PAGE_SIZE) break;
+      from += SUPABASE_PAGE_SIZE;
+    }
+    finishedGames = allFinished.slice().sort((a, b) => (a.game_date < b.game_date ? 1 : -1));
   } catch (e) {
     errors.push(`mlb_schedule finished select: ${errMsg(e)}`);
     // 동일 blind spot — recent_form/head_to_head 가 중립값(0.5)으로 계속 insert 되어
@@ -699,24 +715,40 @@ async function runEloUpdate(db: DB, _date: string): Promise<{ gamesFound: number
   // "이 경기 이미 반영" 을 나타내는 처리 로그가 없어 증분 방식은 재실행 시 이중
   // 반영 위험. computeMlbEloRatings 가 backfill 스크립트와 동일 로직 재사용
   // (scripts/backfill-mlb-elo.ts, cycle 2080/2082).
-  const { data: games, error: gErr } = await db
-    .from('mlb_schedule')
-    .select('game_date, home_team_code, away_team_code, home_score, away_score')
-    .eq('status', 'final')
-    .order('game_datetime_utc', { ascending: true });
-
-  if (gErr) {
-    errors.push(`mlb_schedule select: ${gErr.message}`);
-    return { gamesFound: 0, rowsInserted: 0, errors };
-  }
-
-  const gameList = (games ?? []) as Array<{
+  // review-code(heavy) 발견 — 이 쿼리는 날짜 필터가 전혀 없는 전체 history select 라
+  // supabase/config.toml max_rows=1000 캡에 매일 더 빨리 부딪힘(시즌 누적 + 과거 시즌 합산).
+  // .range() 없이는 PostgREST 가 1000건 초과분을 silent truncate — replayMlbGames 가
+  // "처음부터 전체 재생" 을 전제하는데(이 파일 상단 주석) 일부 경기가 누락된 채 재생되면
+  // 모든 팀 Elo rating 이 조용히 틀어짐. backfill-records.ts loadDecidedGames 와 동일
+  // .range() 페이지네이션 패턴 적용.
+  type EloScheduleRow = {
     game_date: string;
     home_team_code: string;
     away_team_code: string;
     home_score: number | null;
     away_score: number | null;
-  }>;
+  };
+  const gameList: EloScheduleRow[] = [];
+  {
+    let from = 0;
+    for (;;) {
+      const { data: page, error: gErr } = await db
+        .from('mlb_schedule')
+        .select('game_date, home_team_code, away_team_code, home_score, away_score')
+        .eq('status', 'final')
+        .order('game_datetime_utc', { ascending: true })
+        .range(from, from + SUPABASE_PAGE_SIZE - 1);
+
+      if (gErr) {
+        errors.push(`mlb_schedule select: ${gErr.message}`);
+        return { gamesFound: 0, rowsInserted: 0, errors };
+      }
+      const rows = (page ?? []) as EloScheduleRow[];
+      gameList.push(...rows);
+      if (rows.length < SUPABASE_PAGE_SIZE) break;
+      from += SUPABASE_PAGE_SIZE;
+    }
+  }
 
   if (gameList.length === 0) {
     return { gamesFound: 0, rowsInserted: 0, errors };

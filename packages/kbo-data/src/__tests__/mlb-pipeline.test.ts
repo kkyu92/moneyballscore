@@ -17,6 +17,7 @@ vi.mock('@supabase/supabase-js', () => ({
       order: vi.fn().mockReturnThis(),
       gte: vi.fn().mockReturnThis(),
       lt: vi.fn().mockReturnThis(),
+      range: vi.fn().mockReturnThis(),
     })),
   })),
 }));
@@ -203,7 +204,9 @@ describe('runMlbPipeline', () => {
                 // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
                 // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
                 gte: vi.fn(() => ({
-                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  lt: vi.fn(() => ({
+                    range: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  })),
                 })),
               })),
             })),
@@ -269,7 +272,9 @@ describe('runMlbPipeline', () => {
               eq: vi.fn(() => ({
                 eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
                 gte: vi.fn(() => ({
-                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  lt: vi.fn(() => ({
+                    range: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  })),
                 })),
               })),
             })),
@@ -391,13 +396,17 @@ describe('runMlbPipeline', () => {
       select: ReturnType<typeof vi.fn>;
       eq: ReturnType<typeof vi.fn>;
       order: ReturnType<typeof vi.fn>;
+      range: ReturnType<typeof vi.fn>;
       upsert: ReturnType<typeof vi.fn>;
       insert: ReturnType<typeof vi.fn>;
     };
     const builder: QueryBuilder = {
       select: vi.fn(() => builder),
       eq: vi.fn(() => builder),
-      order: vi.fn().mockResolvedValue({
+      order: vi.fn(() => builder),
+      // review-code(heavy) .range() 페이지네이션 fix 후속 — 단일 페이지(1000건 미만)
+      // 응답이라 루프가 1회만 돌고 종료되는 케이스를 재현.
+      range: vi.fn().mockResolvedValue({
         data: [
           { game_date: '2026-04-01', home_team_code: 'LAD', away_team_code: 'SF', home_score: 5, away_score: 2 },
         ],
@@ -427,6 +436,51 @@ describe('runMlbPipeline', () => {
     const rows = call?.rows as Array<{ team_code: string; season: number; games_played: number }>;
     expect(rows.find((r) => r.team_code === 'LAD')?.season).toBe(2026);
     expect(rows.find((r) => r.team_code === 'LAD')?.games_played).toBe(1);
+  });
+
+  it('mlb_elo_update — mlb_schedule final 건수가 SUPABASE_PAGE_SIZE(1000) 초과 시 .range() 로 전체 페이지 조회 (review-code(heavy) 발견 — supabase/config.toml max_rows=1000 인데 기존엔 단일 호출이라 1000건 초과분이 PostgREST 에 의해 silent truncate 돼 Elo 재생이 일부 경기 누락 상태로 돌아가고 있었음)', async () => {
+    const { createClient } = await import('@supabase/supabase-js');
+    const { SUPABASE_PAGE_SIZE } = await import('@moneyball/shared');
+
+    // page 1 = LAD/SF 1000경기 (시즌 중반까지 누적 가정), page 2 = NYY/BOS 1경기(가장 최근)
+    // — page 2 가 반영되지 않으면 NYY/BOS 는 states 에 아예 안 잡힘.
+    const page1 = Array.from({ length: SUPABASE_PAGE_SIZE }, (_, i) => ({
+      game_date: `2026-04-${String((i % 28) + 1).padStart(2, '0')}`,
+      home_team_code: 'LAD',
+      away_team_code: 'SF',
+      home_score: 5,
+      away_score: 2,
+    }));
+    const page2 = [
+      { game_date: '2026-09-30', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 3, away_score: 1 },
+    ];
+    const rangeMock = vi
+      .fn()
+      .mockResolvedValueOnce({ data: page1, error: null })
+      .mockResolvedValueOnce({ data: page2, error: null });
+
+    const builder = {
+      select: vi.fn(() => builder),
+      eq: vi.fn(() => builder),
+      order: vi.fn(() => builder),
+      range: rangeMock,
+      upsert: vi.fn().mockResolvedValue({ error: null }),
+      insert: vi.fn().mockResolvedValue({ error: null }),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn(() => builder),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    const result = await runMlbPipeline('mlb_elo_update', DATE, TRIGGERED_BY);
+
+    expect(rangeMock).toHaveBeenCalledTimes(2);
+    expect(rangeMock).toHaveBeenNthCalledWith(1, 0, SUPABASE_PAGE_SIZE - 1);
+    expect(rangeMock).toHaveBeenNthCalledWith(2, SUPABASE_PAGE_SIZE, SUPABASE_PAGE_SIZE * 2 - 1);
+    expect(result.games_found).toBe(SUPABASE_PAGE_SIZE + 1);
+    expect(result.rows_inserted).toBe(4); // LAD/SF/NYY/BOS 4팀
+    expect(result.errors).toHaveLength(0);
   });
 
   it('mlb_predict_final — predictions insert 모든 row predicted_winner=null (regression: cycle 1180 PHI integer cast fix)', async () => {
@@ -525,7 +579,9 @@ describe('runMlbPipeline', () => {
                 // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
                 // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
                 gte: vi.fn(() => ({
-                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  lt: vi.fn(() => ({
+                    range: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  })),
                 })),
               })),
             })),
@@ -588,7 +644,9 @@ describe('runMlbPipeline', () => {
                 // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
                 // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
                 gte: vi.fn(() => ({
-                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  lt: vi.fn(() => ({
+                    range: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  })),
                 })),
               })),
             })),
@@ -657,7 +715,9 @@ describe('runMlbPipeline', () => {
               eq: vi.fn(() => ({
                 eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
                 gte: vi.fn(() => ({
-                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  lt: vi.fn(() => ({
+                    range: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  })),
                 })),
               })),
             })),
@@ -721,7 +781,9 @@ describe('runMlbPipeline', () => {
                 // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
                 // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
                 gte: vi.fn(() => ({
-                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  lt: vi.fn(() => ({
+                    range: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  })),
                 })),
               })),
             })),
@@ -783,7 +845,9 @@ describe('runMlbPipeline', () => {
                 // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
                 // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
                 gte: vi.fn(() => ({
-                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  lt: vi.fn(() => ({
+                    range: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  })),
                 })),
               })),
             })),
@@ -862,7 +926,9 @@ describe('runMlbPipeline', () => {
               eq: vi.fn(() => ({
                 eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
                 gte: vi.fn(() => ({
-                  lt: vi.fn(() => Promise.resolve({ data: finishedGames, error: null })),
+                  lt: vi.fn(() => ({
+                    range: vi.fn(() => Promise.resolve({ data: finishedGames, error: null })),
+                  })),
                 })),
               })),
             })),
@@ -910,6 +976,89 @@ describe('runMlbPipeline', () => {
     expect(row.head_to_head_rate).toBeCloseTo(0.5, 5);
   });
 
+  it('mlb_predict_final — mlb_schedule finished games 건수가 SUPABASE_PAGE_SIZE(1000) 초과 시 .range() 로 전체 페이지 조회 (review-code(heavy) 발견 — 기존엔 단일 호출이라 1000건 초과분이 silent truncate 돼 시즌 후반 recent_form/head_to_head 가 최근 경기를 누락할 수 있었음)', async () => {
+    const insertedRows: Array<Record<string, unknown>> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+    const { SUPABASE_PAGE_SIZE } = await import('@moneyball/shared');
+
+    const scheduleGames = [
+      { external_game_id: '7002', home_team_code: 'NYY', away_team_code: 'BOS' },
+    ];
+    // page 1 = NYY/BOS 와 무관한 1000경기(TB vs OAK). page 2 에만 NYY-BOS 실제 매치업이
+    // 있어, page 2 가 누락되면 recent_form/head_to_head 가 중립값(50/50, 0.5)으로 빠짐.
+    const finishedPage1 = Array.from({ length: SUPABASE_PAGE_SIZE }, (_, i) => ({
+      home_team_code: 'TB',
+      away_team_code: 'OAK',
+      home_score: 3,
+      away_score: 1,
+      game_date: `2026-05-${String((i % 28) + 1).padStart(2, '0')}`,
+    }));
+    const finishedPage2 = [
+      { home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2, game_date: '2026-06-11' },
+    ];
+    const rangeMock = vi
+      .fn()
+      .mockResolvedValueOnce({ data: finishedPage1, error: null })
+      .mockResolvedValueOnce({ data: finishedPage2, error: null });
+
+    const predictionsBuilder = {
+      select: vi.fn(() => predictionsBuilder),
+      delete: vi.fn(() => predictionsBuilder),
+      eq: vi.fn(() => predictionsBuilder),
+      insert: vi.fn((rows: unknown) => {
+        if (Array.isArray(rows)) insertedRows.push(...(rows as Array<Record<string, unknown>>));
+        return Promise.resolve({ error: null });
+      }),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => ({
+                    range: rangeMock,
+                  })),
+                })),
+              })),
+            })),
+          };
+        }
+        if (table === 'mlb_team_stats' || table === 'mlb_team_elo') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+            })),
+          };
+        }
+        return predictionsBuilder;
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { computeMlbProbability } = await import('../factors/mlb-base');
+    (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mockClear();
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_predict_final', DATE, TRIGGERED_BY);
+
+    expect(rangeMock).toHaveBeenCalledTimes(2);
+    expect(rangeMock).toHaveBeenNthCalledWith(1, 0, SUPABASE_PAGE_SIZE - 1);
+    expect(rangeMock).toHaveBeenNthCalledWith(2, SUPABASE_PAGE_SIZE, SUPABASE_PAGE_SIZE * 2 - 1);
+
+    const callArgs = (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
+      recent_form: { home: number; away: number };
+      head_to_head: { homeWinRate: number };
+    };
+    // page 2 가 실제로 병합됐다면 NYY(1승)=100, BOS(1패)=0, h2h homeWinRate(NYY 관점)=1.
+    // 병합이 안 됐다면(구버전 버그) NYY/BOS 가 finishedGames 에 전혀 안 잡혀 중립값(50, 0.5)으로 떨어짐.
+    expect(callArgs.recent_form.home).toBeCloseTo(100, 5);
+    expect(callArgs.recent_form.away).toBeCloseTo(0, 5);
+    expect(callArgs.head_to_head.homeWinRate).toBeCloseTo(1, 5);
+  });
+
   it('mlb_predict_final — 시즌 초반(유효 경기 0건) 시 recent_form/head_to_head 중립값 + null 영속화 (regression guard)', async () => {
     const insertedRows: Array<Record<string, unknown>> = [];
     const { createClient } = await import('@supabase/supabase-js');
@@ -936,7 +1085,9 @@ describe('runMlbPipeline', () => {
               eq: vi.fn(() => ({
                 eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
                 gte: vi.fn(() => ({
-                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  lt: vi.fn(() => ({
+                    range: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                  })),
                 })),
               })),
             })),
