@@ -17024,3 +17024,17 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3426%50=26≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3407-3426, 현재 포함) review-code 14회 발화로 미충족(표본≥10 충족). marker 미박제. ship-0 — 직전10(3417-3426) success 다수(7/10) 미충족. 2-chain lock — 직전8(3419-3426) distinct=4(expand-scope/review-code/fix-incident/lotto) 미충족. 2차 방어선(cycle 3425 retro `13015d59`) OK.
 
 다음 사이클 추천 = review-code(heavy) 계속(`community`는 이미 clean 확인 — 잔여는 `reviews`/`standings`/`teams` 재감사 또는 `components/predictions`(31 files, components/ 전수 감사 시리즈 마지막 subdir) 신규 스코프) 또는 fix-incident(gap6/20)/op-analysis(gap19/25)/lotto(gap5/30)/info-arch(gap17/30) 자연 대기.
+
+## 🟡 RETRO-ONLY — review-code(heavy): components/predictions 31 files 전수감사, drift 0건 — components/ 시리즈 완결 (cycle 3438, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3437 retro `d34f717a`) OK. 2-chain lock 미충족(직전8(3430-3437) distinct=4: polish-ui/operational-analysis/review-code/fix-incident). fix-incident gap=2/20·op-analysis gap=5/25·info-arch gap=28/30(거의 도달)·lotto gap=16/30 전부 미도달. cycle 3426/3429/3437 추천대로 `components/predictions`(31 files) = components/ 전수감사 시리즈 마지막 미감사 subdir 채택.
+
+**감사**: Agent 위임 전수 read — predictions/ 디렉토리 전체 31 파일(컴포넌트 25 + `__tests__` 6) 전부. v1.8 10팩터 가중치(`FactorBreakdown`/`FactorWaterfallChart` 둘 다 `DEFAULT_WEIGHTS` 동적 참조, 하드코딩 없음, 15+5+15+10+10+8+3+4+10+5=85 검산), CREDIT_EXHAUSTED/debate fallback 카피(`JudgeReasoningCard`의 `QuantOnlyBadge` = `detectSimplifiedMode()` 배너와 동일 "일시 중단" 톤, "드문 일" 류 오도 서술 없음), dev 용어(없음, `PlaceholderCard`가 명시적으로 옵저버빌리티 어휘 회피 주석까지 보유), dark-mode 클래스 페어링(KBO/MLB 쌍둥이 파일 대조 + 사이트 전역 grep — `bg-error`/`text-error` dark 변형 부재는 `globals.css`에 `--color-error` dark shade 자체가 없어 10+ 파일과 동일한 의도된 전역 관례로 확인, 드리프트 아님), 하드코딩 상수(cron 스케줄 주석 `wrangler.toml` 대조, judge reasoning 길이 docstring `judge-agent.ts`/`postview.ts` 대조, `CANCEL_SC_ID` 주석 `kbo-live.ts` 대조 — 전부 일치), dead code(`FactorBreakdown` dedup 필터·`PredictionCardLive` 라이브 스코어 오버라이드 로직 — 항상-빈 필터 없음), a11y(`focus-visible`/`aria-label`/`aria-pressed`/`role` 전부 적절), i18n(MLB 쌍둥이 컴포넌트 `locale` prop 완전 EN 미러, KBO 전용은 의도된 무-locale) 전부 clean.
+
+**코드 변경 없음** — drift 0건, retro-only.
+
+**시리즈 완결**: 이로써 `components/` 하위 19개 subdir(accuracy/analysis/dashboard/glossary/insights/layout/leaderboard/live/matchup/picks/players/predictions/reviews/search/seasons/share/shared/standings/teams/ui) 전수감사 시리즈 완결. 다음 review-code(heavy) 발화 시 `app/` 잔여 라우트 재확인 또는 `lib/`/`hooks/` 등 비-component 디렉토리로 스코프 전환 필요.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3438%50=38≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3419-3438, 현재 포함) review-code 12회 발화로 미충족(표본=19≥10 충족). marker 미박제. ship-0 — 직전10(3429-3438) success 4건 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3431-3438) distinct=4(polish-ui/operational-analysis/review-code/fix-incident) 미충족. 2차 방어선(cycle 3437 retro `d34f717a`) OK.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프(`app/` 잔여 또는 `lib/`/`hooks/`) 또는 info-arch(gap29/30, 거의 도달 — 자연 trigger 유력)/fix-incident(gap3/20)/op-analysis(gap6/25)/lotto(gap17/30) 자연 대기.
