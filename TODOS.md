@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/ 5차분(mlb/ 18파일) 전수 감사, buildMlbTeamProfile.ts degraded 플래그 누락 수정 (cycle 3393, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3385-3392) distinct=3: review-code(heavy)6+polish-ui1+lotto1). fix-incident gap=11/20·op-analysis gap=10/25·info-arch gap=20/30 전부 미도달. ship-0 미충족(직전10 success 2건: 3388,3390). cycle 3392 next_rec 계승 — lib/ 잔여 subdir 중 mlb/(18파일, 미감사) 5차분 선택.
+
+**감사**: agent 위임, mlb/ 18파일 전수 read. 대부분 clean(assertSelectOk+try/catch+captureFallback 하우스 패턴 일관, 주석-코드 mismatch 없음, 하드코딩 상수 없음). `buildMlbTeamProfile.ts`가 mlb_team_stats/mlb_schedule/predictions 3개 Supabase query 실패를 captureFallback 으로 흡수하면서도 유일하게 `degraded` 플래그 미노출 — 형제 builder(buildMlbMatchupProfile 등)는 전부 degraded 스레딩하고 matchup 페이지는 cycle 3247부터 profile.degraded 합류했는데 team 페이지만 누락(DB 장애가 "데이터 없음"과 구분 안 되는 silent drift).
+
+**결과**: `buildMlbTeamProfile.ts`에 degraded 필드 추가(3개 catch 블록 전부 set) + `app/mlb/team/[code]/page.tsx`·`app/en/mlb/team/[code]/page.tsx` 양쪽 dbDegraded 에 profile.degraded OR 합류. tsc --noEmit clean + vitest 4680/4680 pass 확인 후 main 직접 push(`e04bdf15`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참 기존 판단 유지)/trigger2(5연속 fail 없음)/trigger3(3393%50=43≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3374-3393, 현재 포함) 표본=13(≥10), review-code 14회 발화로 미충족(0회 chain 없음). marker 미박제. ship-0 — 직전10(3384-3393) success 3건(3388,3390,3393) 포함 미충족. 2-chain lock 미충족(직전8 distinct=3 유지, 본 cycle 포함 시 다양성 추가 확대). 2차 방어선(cycle 3392 retro `ff9e5966`) OK.
+
+다음 사이클 추천 = review-code(heavy) lib/ 잔여 subdir(dashboard7/predictions8/teams7/reviews10, 합 32파일) 재개 또는 fix-incident(gap12/20)/op-analysis(gap11/25)/info-arch(gap21/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — lotto(lite): 2-chain lock 재발동 자연 redirect, cron 건강성 확인 (cycle 3392, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전수 재확인). 2-chain lock 재충족(직전8(3384-3391) distinct=2: review-code(heavy)7+polish-ui1) — review-code/polish-ui 제외. fix-incident gap=10/20·op-analysis gap=9/25·info-arch gap=19/30 전부 미도달, explore-idea saturation 11/15 미충족, design-system(DESIGN.md mtime 9.7일, 4주 미만) 미충족. lotto gap=28/30 으로 남은 후보 중 가장 근접 + 잠긴 2개 제외 후 유일한 실질 다양성 옵션으로 자율 선택.
