@@ -9,13 +9,14 @@ export interface TeamEloPoint {
 
 interface TeamEloTrendData {
   points: TeamEloPoint[];
+  degraded: boolean;
 }
 
 export async function buildTeamEloTrend(
   code: TeamCode,
 ): Promise<TeamEloTrendData> {
-  const { points, teams } = await buildEloTrend();
-  if (points.length === 0) return { points: [] };
+  const { points, teams, degraded } = await buildEloTrend();
+  if (points.length === 0) return { points: [], degraded };
 
   const result: TeamEloPoint[] = [];
   for (const pt of points) {
@@ -33,5 +34,5 @@ export async function buildTeamEloTrend(
     result.push({ date: pt.date, elo, avg });
   }
 
-  return { points: result };
+  return { points: result, degraded };
 }
