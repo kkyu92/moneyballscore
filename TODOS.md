@@ -16850,3 +16850,23 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3425%50=25≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3406-3425, 현재 포함) review-code 14회 발화로 미충족(표본≥10 충족, opt-out 아님에도 0회 아님). marker 미박제. ship-0 — 직전10(3416-3425) success 다수 포함 미충족. 2-chain lock — 직전8(3418-3425) distinct 재계산 필요(다음 사이클 진단 시). 2차 방어선(cycle 3424 retro `ad770244`) OK.
 
 다음 사이클 추천 = review-code(heavy) 계속(`about`/`community`/`reviews`/`standings`/`teams` 등 잔여, 단 clean 비율 상승 중이라 수확체감 고려) 또는 fix-incident(gap5/20)/op-analysis(gap18/25)/lotto(gap4/30)/info-arch(gap16/30) 자연 대기.
+
+## 🟢 SUCCESS — review-code(heavy): about 페이지 dark-mode 2건 + 영구 unreachable dead code 제거 (cycle 3426, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3425 retro `13015d59`) OK. 2-chain lock 미충족(직전8(3418-3425) distinct=4: review-code/expand-scope/fix-incident/lotto). fix-incident gap=5/20·op-analysis gap=18/25·info-arch gap=16/30·lotto gap=4/30 전부 미도달. cycle 3425 추천 목록(about/community/reviews/standings/teams) 중 reviews/standings/teams 는 기존 silent-drift 전용 테스트 다수(이미 중점 감사됨) 대비 about/community 는 0건 — 미감사 추정 아닌 실제 테스트 파일 부재로 확인 후 채택(grep-count-depth 가드레일 준수, 디렉토리 직접 read).
+
+**감사**: Agent 위임 전수 read — about(page.tsx+opengraph/twitter-image) + community(page.tsx), CLAUDE.md 가중치 섹션/packages/shared/index.ts/kbo-data MetricRegistry/debate 에이전트 모델 구성 교차검증 + 사이트 전역 dark-mode 클래스 관례 grep 대조.
+
+**발견 + 수정 1 (dark-mode)**: `about/page.tsx:304` 팩터 뱃지(`bg-brand-100 text-brand-700`)가 sitewide 관례(`dark:bg-brand-900/40 dark:text-brand-300`, standings/accuracy/PickButton 등)와 달리 dark 변형 전무 — 다크 배경에서 밝은 녹색 알약이 테마 무관 렌더. 추가.
+
+**발견 + 수정 2 (dark-mode)**: 같은 파일 line 324 팩터 가중치 % 텍스트(`text-xl font-bold font-mono text-brand-600`)도 dark 변형 누락 — 같은 파일 내 다른 동일 색상 사용처(line 285/300/442)는 전부 `dark:text-brand-300` 페어링, 홈페이지 동등 요소는 `dark:text-brand-400`. `dark:text-brand-300` 추가(파일 내부 일관성 우선).
+
+**발견 + 수정 3 (영구 unreachable dead code)**: `deprecatedFactors = FACTORS.filter(f => DEFAULT_WEIGHTS[f.key] === 0)` — `FACTORS` 배열이 v1.8 10개 active key(합 85%)만 담고 있어 weight===0 매칭 결과가 항상 빈 배열. 가드된 "현재 제외된 팩터" 카드 블록(37줄) 전체가 영구 렌더 불가 + "2023-2024 실측 데이터 logistic 학습 결과..." 카피가 v1.6 era(park_factor/head_to_head/sfr weight=0 시절) stale 잔재. 변수 선언 + JSX 블록 전체 제거.
+
+**확인(clean)**: v1.8 10팩터 가중치/이름, `CURRENT_SCORING_RULE`/`V2_PROMOTION_COHORT_N`=150/`HOME_ADVANTAGE_PCT`=1.5/`HOME_WIN_RATE_PCT`=51.93 등 상수, 4-agent debate 모델 구성(haiku×3+sonnet judge), 구장보정 예시(잠실/광주/사직), 데이터 소스 URL, 스케줄(09:00/23:00 KST) 전부 CLAUDE.md/실제 코드와 일치. OG/twitter 이미지는 `KBO_FACTOR_COUNT` 참조라 하드코딩 중복 없음. community 페이지는 noindex+sitemap 제외+nav 미링크 확인된 의도된 placeholder, i18n 갭 아님(KBO 전용 페이지 = en 미러 없음이 사이트 전역 관례).
+
+**검증**: `tsc --noEmit` clean, `pnpm test`(605 files/4744 tests) 전부 PASS. 직접 main 커밋+push(R4 범위, `f288cb3a`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3426%50=26≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3407-3426, 현재 포함) review-code 14회 발화로 미충족(표본≥10 충족). marker 미박제. ship-0 — 직전10(3417-3426) success 다수(7/10) 미충족. 2-chain lock — 직전8(3419-3426) distinct=4(expand-scope/review-code/fix-incident/lotto) 미충족. 2차 방어선(cycle 3425 retro `13015d59`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`community`는 이미 clean 확인 — 잔여는 `reviews`/`standings`/`teams` 재감사 또는 `components/predictions`(31 files, components/ 전수 감사 시리즈 마지막 subdir) 신규 스코프) 또는 fix-incident(gap6/20)/op-analysis(gap19/25)/lotto(gap5/30)/info-arch(gap17/30) 자연 대기.
