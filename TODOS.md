@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/ 7차분(predictions/ 7파일) 전수 감사, 신규 drift 0건 (cycle 3395, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3387-3394) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=13/20·op-analysis gap=12/25·info-arch gap=22/30·lotto gap=3/30 전부 미도달. ship-0 미충족(직전10 success 3건: 3388,3390,3393). cycle 3394 next_rec 계승 — lib/ 잔여 subdir(predictions 7/teams 12/reviews 17) 중 predictions/ 7차분 선택.
+
+**감사**: agent 위임, predictions/ 7 impl + 5 test 전수 read. 전부 clean — 7개 파일 모두 pure function (Supabase/외부 API 미접근) 이라 degraded-flag 패턴 적용 대상 자체가 아님(buildMlbTeamProfile.ts 참조 패턴과 비교 확인). adjacentDates/yesterdayDate 의 KST/UTC 날짜 경계 로직, factorLabels 10-key 정합, judgeReasoning 의 v1.8 하드코딩 회피(cycle 483 기 수정 확인), v2Predictor 의 weight-gating 로직 전부 재검증 — 신규 drift 0건. 유일 gap = `estimateTime.ts` 테스트 파일 부재(단일 호출자 PlaceholderCard.tsx, 저위험 — 버그 아니라 커버리지 공백, 범위 밖이라 코드 변경 안 함).
+
+**결과**: 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참 기존 판단 유지)/trigger2(5연속 fail 없음)/trigger3(3395%50=45≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3376-3395, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3386-3395) success 3건(3388/3390/3393) 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3388-3395) distinct=3(review-code7+polish-ui1+lotto1... 재계산 시 review-code 비중 확대) 유지, 미충족. 2차 방어선(cycle 3394 retro `6a58a6e7`) OK.
+
+다음 사이클 추천 = review-code(heavy) lib/ 잔여 subdir(teams 12/reviews 17, 합 29파일) 재개 또는 fix-incident(gap14/20)/op-analysis(gap13/25)/info-arch(gap23/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/ 6차분(dashboard/ 11파일) 전수 감사, 신규 drift 0건 (cycle 3394, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3386-3393) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=12/20·op-analysis gap=11/25·info-arch gap=21/30·lotto gap=2/30 전부 미도달. ship-0 미충족(직전10 success 3건: 3388,3390,3393). cycle 3393 next_rec 계승 — lib/ 잔여 subdir(dashboard 11/predictions 12/teams 12/reviews 17) 중 dashboard/ 6차분 선택.
