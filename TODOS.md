@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): debug/deploy-drift page.tsx vercel_url/deploy_url 필드명 drift 수정 (cycle 3420, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3419 retro `ab1acd10`) OK. 2-chain lock 미충족(직전8(3412-3419) distinct=3: review-code(heavy)/polish-ui/expand-scope). fix-incident last fire 3382(gap=38/20 도달하나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable). op-analysis gap=12/25·info-arch gap=10/30 전부 미도달. lotto gap=28/30 — cron 산출물(picks `2026-10-24.md`/results `2026-10-17.md`) 전부 최신 정상이라 (1)(2)(3) 미트리거, gap trigger(6)도 28<30 미도달. explore-idea saturation 직전15(3405-3419) 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 당일 신선) 확립 skip 패턴 유지. **cycle 3419 추천 "components/predictions/ 계속"은 stale carry-over 확인** — components/predictions/ 는 이미 cycle 3416 에서 31개 파일 전수 감사 완료(contributionPp 버그 수정) — review-code(heavy) dominance 지속(직전20 중 14회) 속 신규 스코프 탐색 필요 판단.
+
+**감사**: Agent 위임 — `packages/shared/src/`(9파일)와 `hooks/`(2파일)는 CHANGELOG 교차검증 결과 이미 과거(2958/2997/3000/3273, 2897/3089) 전수 스윕 완료 확인되어 skip. `scripts/`도 cycle 2762 이후 재확인 반복됨 확인. 피벗 — `app/*/page.tsx` 중 CHANGELOG mention 최저 tier(about/community/contact/glossary/guide/login/settings/privacy/terms/changelog/v2-preview/v2-shadow-monitor/debug/* 등) grep 전수 대조 후 `debug/deploy-drift/page.tsx`(114줄, 전체 로직 감사 이력 0건 — 주석/컨텍스트 참조성 drive-by 편집만 존재)를 신규 스코프로 채택. `settings`/`contact`/`changelog`도 동일 tier 확인 겸 함께 read — 전부 clean.
+
+**발견 + 수정**: `debug/deploy-drift/page.tsx`의 `VersionPayload` 인터페이스가 `vercel_url: string | null` 필드를 선언하고 있었으나, `/api/version/route.ts`는 생성 시점(cycle 838, commit `c8210880`)부터 줄곧 `deploy_url`로 응답 — M15 Deploy Drift Dashboard(cycle 947, commit `73e6e3eb`)가 출시 때부터 잘못된 필드명을 참조해 "production alias" URL 셀이 항상 `?`로 표시됨. 사례 9/10 류 deploy-drift 인시던트 진단 시 가장 유용해야 할 필드가 대시보드 출시 이후 쭉 silent 비작동 상태였음(디버그 전용·BASIC-auth 게이트 페이지라 심각도는 낮음). 인터페이스 필드명 + JSX 참조 2곳 `vercel_url` → `deploy_url` 정정.
+
+**검증**: `tsc --noEmit`/`pnpm lint` clean, `pnpm test` 605 files/4741 tests 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `1d363f15`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3420%50=20≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3401-3420, 현재 포함) review-code 14회 발화로 미충족(표본≥10 충족, distinct chain 수 다수). marker 미박제. ship-0 — 직전10(3411-3420) success 10건 전부(3411-3420) 포함 미충족. 2-chain lock — 직전8(3413-3420) distinct=3(review-code/polish-ui/expand-scope), 미충족. 2차 방어선(cycle 3419 retro `ab1acd10`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`about`/`community`/`glossary`/`guide`/`login`/`privacy`/`terms`/`v2-preview`/`v2-shadow-monitor`/`debug/{agent-fallback,hallucination,reliability,silent-drift}` 등 저-mention page.tsx 잔여) 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap13/25)/lotto(gap29/30, 거의 도달)/info-arch(gap11/30) 자연 대기.
+
 ## 🟢 SUCCESS — expand-scope: degraded-flag 구조적 가드 + 잔여 11개 builder sweep (cycle 3419, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3418 retro `83386fae`) OK. cycle 3401 retro가 3회 반복 버그 클래스(teams/buildTeamProfile cycle 3396, mlb/buildMlbTeamProfile cycle 3393, 5개 builder cycle 3397 — catch+Supabase-call 모양인데 degraded 신호 없이 silent fallback)를 ad-hoc file-by-file fix 대신 구조적 가드 필요로 flag한 carry-over 채택 — expand-scope(meta-pattern 누적 = 이 영역 재검토) 매핑.
