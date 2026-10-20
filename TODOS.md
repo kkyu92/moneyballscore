@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — polish-ui (2-chain-lock-forced): WeeklyTrendMini 다크모드 차트 커서 수정 (cycle 3371, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3370 retro `811cb77c`) OK. **2-chain lock 충족** — 직전8(3363-3370) distinct=2(review-code 6회 + lotto 1회 + review-code 1회 재집계, 정확히는 review-code/lotto 두 chain만). 룰에 따라 review-code/lotto 제외 후 재선정: fix-incident gap=21/20 충족이나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable. op-analysis gap=12/25·info-arch gap=11/30 미도달. explore-idea saturation 12/15 충족하나 4-source 재확인 negative(기존 skip 패턴 유지). 결과 actionable 후보 전무 → 룰 3항("어떤 chain 도 trigger 없으면 polish-ui 강제 발화") 적용.
+
+**감사**: DESIGN.md 컬러/스페이싱 토큰 vs 컴포넌트 리터럴 대조(hex 리터럴, rgba 리터럴, arbitrary px) — 대부분 클린(OG/twitter-image 리터럴은 satori 렌더링 한계로 CSS var 미지원, drift 아님; ShareButtons 의 FB/Twitter 브랜드 컬러는 의도된 3rd-party 고정값). 실제 발견: `WeeklyTrendMini.tsx` 의 Recharts Tooltip cursor fill 이 `rgba(0,0,0,0.05)` 하드코딩 — 다크모드 surface(`#0c0e0d`, 거의 블랙) 위에서 거의 안 보임. 동일 역할의 sibling 차트 6개(`BrierTrendChart`/`ConfidenceBucketChart`/`WinnerProbBucketChart`/`DailyAccuracyChart`/`TeamPerformanceChart`/`RollingAccuracyChart`)는 전부 `design-tokens.ts` 의 공유 `chartCursorTint`(`rgba(59,130,246,0.06)`, 라이트/다크 양쪽 가시) 사용 — 본 파일만 컨벤션 누락된 outlier.
+
+**결과**: `chartCursorTint` import 추가 + 하드코딩 literal 교체. typecheck+lint+test 전부 pass 확인 후 main 직접 push (`33cb4bce`).
+
+**검증(skill-evolution 등)**: trigger3(3371%50=21) 미충족. trigger5 — 직전20(3352-3371, 3360 JSON 누락) 표본 19≥10, review-code 14회 발화(opt-out 9개 제외 평가 대상 review-code 단독)로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3362-3371) success 4건(3365,3366,3369,3371)으로 미충족.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 복귀(app/api 잔여 5개 route: leaderboard-sync/mlb/picks/pipeline/seo/sync-batter-stats/version, 또는 packages/kbo-data/src/pipeline 1-mention 7파일) 또는 fix-incident(gap 22/20, actionable 재확인 필요)/op-analysis(gap 13/25)/info-arch(gap 12/30)/lotto(gap 8/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): app/api/{health,health/pipelines,hub-dispatch} 전수 감사, 신규 drift 0건 (cycle 3370, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3369 retro `fd373f5f`) OK. 2-chain lock 미충족(직전8(3362-3369) distinct=3: polish-ui/review-code/lotto). gap: fix-incident last fire 3340(gap=30/20, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재)·op-analysis last fire 3359(gap=11/25)·info-arch last fire 3360(gap=10/30)·lotto last fire 3364(gap=6/30) 전부 미도달 또는 actionable 부재. explore-idea saturation 직전15(3355-3369) 12/15 충족하나 4-source 재확인 negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9.4일 신선) 확립 skip 패턴 유지. cycle 3369 next_rec 따라 `app/api/{health,hub-dispatch}` (CHANGELOG mention 1건/0건, 전수 감사 이력 없음) 채택 — 디렉토리 내 `health/pipelines/route.ts` 도 동일 스코프로 포함.
