@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — info-architecture-review: 30-cycle gap checkpoint, drift 0건 (cycle 3440, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3439 retro `66ee29a3`) OK. 2-chain lock 미충족(직전8(3432-3439) distinct=4: polish-ui1+operational-analysis1+review-code4+fix-incident1+review-code 변형). gap 체크: fix-incident=4/20·op-analysis=7/25·lotto=18/30 전부 미도달, info-arch gap=30/30(마지막 발화 cycle 3410) 정확 도달. cycle 3439 추천("info-arch gap30/30, 정확 도달 — 단 24연속 '현 IA 충분' 재확인 패턴") 채택.
+
+**검증**: `find apps/moneyball/src/app -name page.tsx -mtime -7` 다수 매칭은 기존 파일 편집 노이즈(review-code heavy 사이클 편집 흔적) — 신규 page.tsx 생성 0건. `MegaMenu.tsx`/`NavLinks.tsx`/`Footer.tsx` nav 구조 불변. Breadcrumb 미보유 18건 전수 재확인 — debug/* 8종(내부 디버그), reviews/weekly·monthly KBO+MLB+EN twin 6종(redirect-only 허브 인덱스, ia-2026-05-08 spec 정합 확인 — `community`/`mlb/reviews/monthly`/`en/mlb/reviews/monthly` 코드 직접 read로 재확인), community/login/settings 3종(noindex/utility), root page 1종 — cycle 3373/3410 체크포인트와 100% 동일 목록, 신규 미분류 항목 0건. sitemap.ts(507줄) 동적 생성 구조 cycle 3036 확인 이후 불변.
+
+**결과**: "현 IA 충분" 25연속 재확정. 코드 변경 0 (checkpoint 문서 `docs/design/ia-2026-10-20-cycle-3440-30-cycle-gap-checkpoint.md` 작성만).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3440%50=40≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3421-3440, 현재 포함, 표본 20≥10) review-code 12회 발화로 미충족(평가대상 review-code 단독). marker 미박제. ship-0 — 직전10(3431-3440) success 3건(3431/3432/3439) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3433-3440) distinct=4(operational-analysis1+review-code5+fix-incident1+info-architecture-review1), 미충족 — 다음 사이클 자유 선택. 2차 방어선(cycle 3439 retro `66ee29a3`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(packages/kbo-data/src 잔여 또는 app/ 라우트 서버 컴포넌트 로직 미감사 영역) 또는 fix-incident(gap5/20)/op-analysis(gap8/25)/lotto(gap19/30) 자연 대기. 다음 info-arch 30-cycle 재도달 = cycle 3470 근방.
+
 ## 🟢 SUCCESS — review-code (heavy): app/api 잔여 8-route 전수감사, mlb-pipeline.yml dispatch 옵션 누락 수정 (cycle 3439, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3438 retro `4eb4acfb`) OK. 2-chain lock 미충족(직전8(3431-3438) distinct=4: polish-ui2+operational-analysis1+review-code4+fix-incident1). gap 체크: fix-incident=3/20·op-analysis=6/25·info-arch=29/30(근접, 미도달)·lotto=17/30 전부 미도달. **cycle 3438 추천("packages/kbo-data/src scrapers/pipeline/engine/agents/factors/analytics/backtest/context/features 미감사") 검증 결과 기각** — CHANGELOG grep 재확인 결과 cycle 3090이 이미 "packages/kbo-data 전체 서브디렉토리 모두 최소 1회 이상 감사 완료"로 명시적 결론 낸 바 있어, 3438 추천은 stale carry-over였음(carry-over 신뢰 전 검증 룰 적용). 대신 cycle 3099 retro가 남긴 정확한 잔여 스코프("나머지 8개 api route는 mention만 있고 전수 감사 미실시") 채택 — `health`/`hub-dispatch`/`mlb/{pipeline,waitlist}`/`picks/{mlb-poll,mlb-submit,poll,results,submit}`/`pipeline`/`seo/indexnow/ping`/`sync-batter-stats`/`version` 총 14파일.
