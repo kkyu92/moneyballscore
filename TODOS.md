@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): lib/ 10개 서브디렉토리 전수감사, drift 0건 (cycle 3441, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3440 retro `0a9cd510`) OK. 2-chain lock 미충족(직전8(3433-3440) distinct=4: review-code5+operational-analysis1+info-architecture-review1+fix-incident1) — 자유 선택. gap 체크: fix-incident=5/20·op-analysis=8/25·lotto=19/30 전부 미도달, info-arch 직전(3440) 발화로 gap=0(재선택 부적절). explore-idea saturation 14/15 충족하나 4-source negative 확립 skip 패턴 유지. components/(3438)+app/api(3439) 시리즈 완결 후 자연 다음 스코프 = lib/ 미감사 서브디렉토리.
+
+**감사**: 서브에이전트 위임 read-only 전수 조사 — `lib/{accuracy,analysis,calendar,changelog,leaderboard,seasons,seo,stats,observability,api}/` 10개 서브디렉토리 37파일. 기존 주석이 과거 사이클(2195/2304/2514/2771/3183/3216/3279/3318) 수정 이력을 명시적으로 인용하는 패턴 다수 — spot-check 결과 전부 실제 코드 반영 확인: `computeMlbCompositeDuel.ts` MLB factor parity gap(elo/recent_form/h2h/sfr 미연동)은 의도적으로 문서화된 상태(별도 `MLB_COMPOSITE_DUEL_MIN_VALID` threshold 적용, KBO 상수 혼용 없음), `buildSeasonSummary.ts` tie-guard(`winsA === winsB → null`) 정상 존재, `leaderboard/server.ts` `.order()` 가 view 정의와 일치, `convergenceRecord.ts` DB 컬럼(home_sfr/away_sfr/home_war_total 등) 전부 마이그레이션(001/003/046/047) 확인, `pearson.ts` dead code 아님(dashboard/reviews 소비 확인), `seo/json-ld.ts` 이미 cycle 3183 cleanup 완료 확인.
+
+**결과**: drift 0건. 코드 변경 없음(retro-only).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3441%50=41≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3422-3441, 현재 포함, 표본 20≥10) review-code 13회(review-code 12 + review-code(heavy) 1) 발화로 미충족(평가대상 review-code 단독). marker 미박제. ship-0 — 직전10(3432-3441) success 2건(3432/3439) 포함 미충족(PARTIAL_STREAK=8≠10). exhaustive-sweep 서브구분 평가 — RC_HEAVY_COUNT=6/10(<8) 미충족, 서브구분 불필요(hard stop 자체 미발동). 2-chain lock(다음 사이클용) — 직전8(3434-3441) 재계산 필요하나 현재 분포상 review-code 비중 높음(다음 사이클 진단 시 재확인). 2차 방어선(cycle 3440 retro `0a9cd510`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(lib/ 잔여 14개 서브디렉토리: mlb/35 predictions/12 teams/12 reviews/17 dashboard/11 matchup/9 insights/8 debug/8 standings/7 lotto/7 players/7 picks/6 등) 또는 fix-incident(gap6/20)/op-analysis(gap9/25)/lotto(gap20/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — info-architecture-review: 30-cycle gap checkpoint, drift 0건 (cycle 3440, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3439 retro `66ee29a3`) OK. 2-chain lock 미충족(직전8(3432-3439) distinct=4: polish-ui1+operational-analysis1+review-code4+fix-incident1+review-code 변형). gap 체크: fix-incident=4/20·op-analysis=7/25·lotto=18/30 전부 미도달, info-arch gap=30/30(마지막 발화 cycle 3410) 정확 도달. cycle 3439 추천("info-arch gap30/30, 정확 도달 — 단 24연속 '현 IA 충분' 재확인 패턴") 채택.
