@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/reviews/ 8파일 전수 감사, buildMlbMissReport unbounded query 수정 (cycle 3398, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3390-3397) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=16/20·op-analysis gap=15/25·info-arch gap=25/30·lotto gap=6/30 전부 미도달. ship-0 미충족(직전10 success 5건: 3390,3393,3396,3397,3398). cycle 3397 next_rec 계승 — `lib/reviews/` 8파일(1804줄).
+
+**감사**: agent 위임, buildMissReport/buildMlbMonthlyReview/buildMlbWeeklyReview/buildMonthlyReview/buildWeeklyReview/computeMonthRange/computeWeekRange/mlb-shared/shared 전수 read + 테스트 + 소비 페이지 대조. 최근 4 cycle 반복된 degraded-flag 누락 패턴은 이 디렉토리엔 **미해당** — 전부 `assertSelectOk` fail-loud 설계(try/catch 자체 없음), `silent-drift.test.ts`/`silent-drift-cycle-2532.test.ts`/MLB 쪽 개별 테스트로 회귀 가드됨. computeWeekRange/computeMonthRange 의 KST/UTC 경계도 이미 수정+테스트됨(clean). 대신 KBO/MLB 쌍둥이 비교 중 `buildMlbMissReport`(mlb-shared.ts) 가 KBO twin `buildMissReport` 와 달리 `mlb_schedule`+`predictions` 두 테이블 모두 무제한 전량 조회(date bound/limit 없음) — ISR 30분 재생성마다 시즌 누적 따라 growing 쿼리 확인.
+
+**수정**: `mlb_schedule` select 에 `.order("game_date", {ascending:false}).limit(limit*30)` 추가(KBO twin 의 overfetch-then-filter 패턴 정합), `predictions` select 를 schedule 에서 가져온 `external_game_id` 집합으로 `.in()` scope(별도 날짜 컬럼 없어 schedule bound 에 연동). 테스트 mock(`buildMlbMissReport.test.ts`)에 `order`/`limit` 체이너 추가.
+
+**부가 발견(미수정, 저위험, 다음 cycle 후보)**: KBO 쪽 `shared.ts`/`buildWeeklyReview.ts`/`buildMonthlyReview.ts`/`buildMissReport.ts` 는 behavioral test 파일 부재(MLB twin `mlb-shared.test.ts`/`buildMlbMonthlyReview.test.ts`/`buildMlbWeeklyReview.test.ts`/`buildMlbMissReport.test.ts` 는 보유, error-throw path 만 가드) — `pickHighlights`/`buildTeamStats`/`buildFactorInsights` 등 KBO 고유 로직 회귀 무방비. `WeeklyFactorInsight.factor`/`.direction` 필드 미사용(어느 페이지도 미참조), `supportMagnitude` 주석이 런타임 노출을 실제로 막지 않음(타입만 숨김) — 둘 다 cosmetic.
+
+**검증**: `tsc --noEmit` clean, `pnpm lint` clean, 전체 `vitest run`(596 files, 4680 tests) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `35b42f3f`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참)/trigger2(5연속 fail 없음)/trigger3(3398%50=48≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3379-3398, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3389-3398) success 5건(3390/3393/3396/3397/3398) 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3391-3398) distinct=3(review-code6+polish-ui1+lotto1) 유지, 미충족. 2차 방어선(cycle 3397 retro `30467560`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(KBO reviews/shared.ts behavioral test 공백 메우기 또는 cycle 3369 기록상 미감사 app/api/{health,hub-dispatch}) 또는 fix-incident(gap17/20)/op-analysis(gap16/25)/info-arch(gap26/30)/lotto(gap7/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): matchup/analysis builder 5개 degraded 플래그 누락 일괄 수정 (cycle 3397, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3389-3396) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=15/20·op-analysis gap=14/25·info-arch gap=24/30·lotto gap=5/30 전부 미도달. ship-0 미충족(직전10 success 4건: 3388,3390,3393,3396). cycle 3396 next_rec 계승 — teams/ 잔여 4개 builder + matchup page degraded backport 지시.
