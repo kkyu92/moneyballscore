@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/ 10차분(predictions, 31파일) 전수 감사, 신규 drift 0건 — components/ 전체 전수 감사 완결 (cycle 3386, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3378-3385) distinct=5: review-code3+review-code(heavy)2+polish-ui1+operational-analysis1+fix-incident1). fix-incident gap=3(3382 발화)/op-analysis gap=2(3383 발화)/info-arch gap=12/30/lotto gap=21/30 전부 미도달. cycle 3385 next_rec 계승 — review-code(heavy) components/ 잔여 1 subdir(predictions, 31파일) 채택.
+
+**감사**: agent 위임, `apps/moneyball/src/components/predictions/` 25 소스 + 6 테스트 전수 read + 전체 call-site cross-grep. KBO `FactorWaterfallChart`(probability-space) vs `MlbFactorWaterfallChart`(pp-space ×`FACTOR_CONTRIBUTION_SCALE`=200) 불일치 후보 → `Σ contributionPp == marginPp` 대수적 검증으로 의도된 서로 다른 지표 확인(drift 아님). `HistoricalAnalogMatchup`/`RivalryMemorySurface`/`PredictionsSearchBox` KBO-MLB 비대칭(locale/fetch 방식) 전부 call-site grep으로 의도 확인(KBO 버전은 ko-only 라우트 전용). 25개 export 전부 call site 존재(dead code 0건). `vitest run src/components/predictions` 6 files/11 tests pass, `tsc --noEmit` clean. **신규 drift 0건** — 변경 없음.
+
+**결과**: 코드 변경 없음. components/ 전체(20 subdir) 중 이번 10차분 라운드(dashboard/layout/analysis/picks/shared/predictions, cycle 3378-3386) 완결 — 나머지 subdir(matchup/accuracy/reviews/teams/leaderboard/insights/search/ui/players/seasons/standings/glossary)는 이전 라운드(cycle 2913~3278)에서 이미 감사/수정 완료. review-code(heavy) 가 components/ 전체를 커버한 상태 — 다음 scope 전환 권장(lib/ 또는 app/ 라우트 또는 packages/).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3386%50=36≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3367-3386, 현재 포함) 표본=10≥10 충족, 평가대상 review-code 다수 발화(미충족, 0회 아님). marker 미박제. ship-0 — 직전10(3377-3386) success 1건(3382) 포함으로 미충족(9/10 retro-only, hard stop 아님). exhaustive-sweep 서브체크 — RC_COUNT=7/9(<8), EXHAUSTIVE_SWEEP 미충족(정상 진행 분류 불필요, hard stop 자체가 미충족이라 무관). 2-chain lock 미충족(위 참조). 2차 방어선(cycle 3385 retro `8198d3f4`) OK.
+
+다음 사이클 추천 = components/ 전체 완결로 review-code(heavy) scope 전환 — `apps/moneyball/src/lib/` 또는 `apps/moneyball/src/app/` 라우트 전수 재감사, 또는 info-arch(gap 13/30)/lotto(gap 22/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 9차분(shared, 23파일) 전수 감사, 신규 drift 0건 (cycle 3385, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3377-3384) distinct=4: review-code(heavy)5+polish-ui1+fix-incident1+operational-analysis1). fix-incident gap=3(3382 발화), op-analysis gap=2(3383 발화), info-arch gap=12/30·lotto gap=21/30 전부 미도달. cycle 3384 next_rec 계승 — review-code(heavy) components/ 잔여 2 subdir(shared/predictions) 중 소규모(shared, 23파일) 채택.
