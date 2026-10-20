@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/ 9차분(shared, 23파일) 전수 감사, 신규 drift 0건 (cycle 3385, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3377-3384) distinct=4: review-code(heavy)5+polish-ui1+fix-incident1+operational-analysis1). fix-incident gap=3(3382 발화), op-analysis gap=2(3383 발화), info-arch gap=12/30·lotto gap=21/30 전부 미도달. cycle 3384 next_rec 계승 — review-code(heavy) components/ 잔여 2 subdir(shared/predictions) 중 소규모(shared, 23파일) 채택.
+
+**감사**: agent 위임, `apps/moneyball/src/components/shared/` 23파일(AnalysisLink/Breadcrumb/EmptyState/FavoriteTeamFilter/KofiWidget/LanguageSwitch/MiniGameCard/MlbTeamLogo/PWAInstallButton/QuantOnlyBadge/RelatedLinks/SearchForm/ServiceWorkerRegister/TableOfContents/TeamLogo/WebVitalsReporter + 7 test) 전수 read. TeamLogo/MlbTeamLogo twin pair 라인별 대조 — 동일 Sentry 인시던트(MONEYBALLSCORE-1B) 방어 가드 양쪽 동일, 유일한 차이(`unoptimized` prop)는 PNG(KBO)/SVG(MLB) 포맷 차이로 정당화된 의도적 차이(주석 확인). FavoriteTeamFilter 는 `KBO_TEAMS` 에서 동적 파생(하드코딩 리스트 없음). dark mode raw hex/rgb 0건(주석 내 1건 제외, 실제 스타일 전부 토큰/CSS var). dead code 0건, stale comment 0건, null guard 정상. **신규 drift 0건** — 변경 없음.
+
+**결과**: 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3385%50≠0). trigger5 — 직전20(3366-3385, 현재 포함) 표본≥10, 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3376-3385) success 1건(3382) 포함으로 미충족. 2차 방어선(cycle 3384 retro `8e04394e`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 1 subdir(predictions, 31파일) 복귀로 components/ 전체 전수 감사 완결, 또는 info-arch(gap 13/30)/lotto(gap 22/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 8차분(layout, 19파일) 전수 감사, 신규 drift 0건 (cycle 3384, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3376-3383) distinct=4: review-code(heavy)5+polish-ui1+fix-incident1+operational-analysis1). fix-incident gap=2(3382 발화), op-analysis gap=1(3383 발화), info-arch gap=11/30·lotto gap=20/30 전부 미도달. cycle 3383 next_rec 계승 — review-code(heavy) components/ 잔여 3 subdir(layout/shared/predictions) 중 최소 규모(layout, 19파일) 채택.
