@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api/{mlb/waitlist,picks/{mlb-poll,mlb-submit,poll,results,submit}} 전수 감사, poll 라우트 테스트 공백 보강 (cycle 3404, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3403 retro `7f98e6ef`) OK. 2-chain lock 미충족(직전8(3396-3403) distinct=3: review-code6+polish-ui1+skill-evolution1). gap: fix-incident last fire 3382(gap=22/20, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable 재확인)·op-analysis last fire 3383(gap=21/25 미도달)·info-arch last fire 3373(gap=31/30 충족하나 24연속 "IA 충분" 재확정 패턴 — 신규 라우트 mtime 노이즈/breadcrumb 누락 전부 기존 의도적 제외 확인된 영역, actionable 부재)·lotto last fire 3392(gap=12/30 미도달). ship-0 미충족(직전10(3394-3403) success 7건). cycle 3403 next_rec 계승 — `app/api/mlb/waitlist` + `app/api/picks/*` (mlb-poll/mlb-submit/poll/results/submit) 미감사 잔여 스코프 채택.
+
+**감사**: agent 위임, 6개 디렉토리 전수 read (route.ts + lib 의존성: `is-origin-allowed.ts`/`deriveMlbOutcome.ts`/`db-error.ts`/`shared` 상수/migrations 025·048·050). Supabase 에러 전부 fail-loud(`assertSelectOk`/`.error` 체크 → Sentry+500), unbounded query/upsert 0건(poll ids `PICKS_POLL_IDS_LIMIT`=50, results `PICKS_RESULTS_IDS_LIMIT`=200 로 사전 cap 확인), auth guard twin-consistent(쓰기 라우트만 `isOriginAllowed` 게이트, 읽기 라우트는 공개 집계라 의도적 미적용), KBO/MLB twin 구조 대칭(submit↔mlb-submit, poll↔mlb-poll 검증/에러처리 동일, id 타입/테이블만 차이), 주석-코드 불일치 0건.
+
+**발견(수정)**: `picks/poll`/`picks/mlb-poll` 양쪽 전부 테스트 0건 — 쓰기측 twin(submit/mlb-submit/waitlist)은 전부 테스트 보유하는데 집계 로직(home/away/total count loop)만 무검증.
+
+**수정**: `picks/poll/__tests__/route.test.ts` 신규(7 tests: 빈 ids/정상 집계/투표없는 id/invalid pick 값/non-numeric id 필터/전체무효/select error) + `picks/mlb-poll/__tests__/route.test.ts` 신규(7 tests, 동일 구조 + 20자 초과 id 필터 케이스).
+
+**검증**: `tsc --noEmit`(apps/moneyball) clean, `pnpm lint` clean, `pnpm test`(turbo, 603 files, 4731 tests, +14) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `29c88e01`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참)/trigger2(5연속 fail 없음)/trigger3(3404%50=4≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3385-3404, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3395-3404) success 8건(3396/3397/3398/3399/3401/3402/3403/3404) 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3397-3404) distinct=3(review-code+polish-ui+skill-evolution) 유지, 미충족. 2차 방어선(cycle 3403 retro `7f98e6ef`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(app/api 거의 소진 — `components/` 또는 `packages/kbo-data` 잔여 스코프 탐색 권장, cycle 3373 next_rec 과 동일 방향) 또는 op-analysis(gap22/25)/lotto(gap13/30)/info-arch(gap32/30, 재평가 시 25번째 "충분" 재확정 가능성) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): app/api/{kbo-scores,live,revalidate,snapshot-pitchers,leaderboard/{sync,mlb-sync}} 전수 감사, picks upsert unbounded 수정 + 테스트 공백 보강 (cycle 3403, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3402 retro `22693ea4`) OK. 2-chain lock 미충족(직전8(3395-3402) distinct=3: review-code+polish-ui+skill-evolution). gap: fix-incident last fire 3382(gap=21/20, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable)·op-analysis last fire 3383(gap=20/25)·info-arch last fire 3373(gap=30/30, 경계값이나 window inclusive 로 미충족)·lotto last fire 3392(gap=11/30) 전부 미도달 또는 actionable 부재. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 10일 신선) 확립 skip 패턴 유지. ship-0 미충족(직전10(3393-3402) success 6건). cycle 3402 next_rec 계승 — grep count 낮지만 `{}` 표기 감사 이력에 없던 6개 route(cycle 2991 lesson: grep count ≠ audit depth 재적용) 채택.
