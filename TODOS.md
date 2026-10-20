@@ -1,4 +1,22 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/agents/ 전수 감사, calibration/agent_memories unbounded query 수정 (cycle 3406, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3405 retro `70e70e39`) OK. 2-chain lock 미충족(직전8(3398-3405) distinct=3: review-code+polish-ui+skill-evolution). gap: fix-incident last fire 3382(gap=24/20, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable)·op-analysis last fire 3383(gap=23/25 미도달)·info-arch last fire 3373(gap=33/30 충족하나 23연속 "IA 충분" 재확정 패턴, 신규 route mtime 노이즈뿐 실제 변경 0건)·lotto last fire 3392(gap=14/30 미도달). explore-idea saturation 직전15(3392-3405) 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9.8일 신선) 확립 skip 패턴 유지. ship-0 미충족(직전10(3396-3405) success 9건). cycle 3405 next_rec 계승 — `packages/kbo-data/src/agents/` (15파일, 4397줄) 채택.
+
+**감사**: agent 위임, 15개 파일 전수 read + 테스트 커버리지 대조(`__tests__/agents-*.test.ts` 13개 파일 매칭) + 호출부(`daily.ts`/`mlb-pipeline.ts`/`prediction-history.ts`) 교차검증. `rivalry-memory.ts` 쿼리 전부 `.limit()` 정상 bounded, `postview.ts` DB 접근 없음 + dead code 0건, 3개 LLM 백엔드 어댑터(`llm.ts`/`llm-ollama.ts`/`llm-deepseek.ts`) parseResponse 콜백 내부 try/catch 로 double-retry 위험 없음, `team-agent.ts`의 "중복 getRivalryBlock 호출"은 주석에 정확히 문서화된 의도(stale 아님) 확인.
+
+**발견(수정)**: `retro.ts`의 `updateCalibration`/`generateAgentMemories` 양쪽 predictions select 가 `.range()` 없는 단일 호출 — cycle 3405 `mlb-pipeline.ts` Elo/recent-form 수정과 동일 unbounded-query drift family, 이번엔 calibration bucket accuracy 계산 + `agent_memories` 학습 루프(Phase D compound) 입력. 검증 predictions 누적이 SUPABASE_PAGE_SIZE(1000) 넘으면 PostgREST silent truncate 로 calibration 정확도가 표본 일부만 반영되거나 오답 학습이 일부 날짜 누락될 위험(현재 n≈448 로 미발현, 성장 시 발현).
+
+**발견(미수정, minor)**: `llm-deepseek.ts` retry/backoff 로직 직접 테스트 0건(sibling `llm-ollama.ts`는 전용 테스트 보유) — CREDIT_EXHAUSTED 기간 중 deepseek 이 사실상 primary backend 라 주목할 만하나 이번 사이클 범위 밖(별도 발화 시 처리). `retro.ts`의 `updateCalibration(season=...)` 파라미터가 쿼리 필터에 미반영(출력 태깅만) — 현재 non-default 호출자 없어 실질 영향 0, 기록만. `validator.ts`(1249줄) 는 split 후보이나 dead code 없음 확인.
+
+**수정**: `updateCalibration`/`generateAgentMemories` 양쪽에 `mlb-pipeline.ts`/`backfill-records.ts` 와 동일 `.range()` 페이지네이션 루프 적용(`SUPABASE_PAGE_SIZE` 상수 재사용). `agents-retro-silent-drift.test.ts` 에 1000건 초과 시 전체 페이지 조회 검증 회귀 테스트 2건 추가(updateCalibration + generateAgentMemories 각 1건, mock chain에 `range` 메서드 추가).
+
+**검증**: `packages/kbo-data` `tsc --noEmit` clean, `pnpm lint` clean, 전체 `pnpm test`(turbo, kbo-data 96 files/1225 tests +2, moneyball 603 files/4731 tests 변동없음) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `02e1ef43`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참)/trigger2(5연속 fail 없음)/trigger3(3406%50=6≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3387-3406, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3397-3406) success 9건(3397/3398/3399/3401/3402/3403/3404/3405/3406) 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3399-3406) distinct=3(review-code+polish-ui+skill-evolution) 유지, 미충족. 2차 방어선(cycle 3405 retro `70e70e39`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data` 잔여 vein — `backtest/`(12파일)/`scrapers/`(15파일)/`pipeline/` 나머지 ~19파일. agents/ 에서 2번째 연속 core engine 드리프트 발견이라 인접 영역 우선순위 유지) 또는 op-analysis(gap23/25)/lotto(gap14/30)/info-arch(23연속 "충분" 재확정 가능성) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/factors/ 전수 감사, MLB Elo/recent-form unbounded query 수정 (cycle 3405, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3404 retro `cf82e6a2`) OK. 2-chain lock 미충족(직전8(3397-3404) distinct=3: review-code6+polish-ui1+skill-evolution1). gap: fix-incident last fire 3382(gap=22/20, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — non-actionable)·op-analysis last fire 3383(gap=21/25 미도달)·info-arch last fire 3373(gap=31/30 충족하나 22연속 "IA 충분" 재확정 패턴, 신규 route/nav 변경 0건 지속)·lotto last fire 3392(gap=13/30 미도달). ship-0 미충족(직전10(3395-3404) success 8건). cycle 3404 next_rec 계승 — app/api/lib/components 전부 소진 확인 후 `packages/kbo-data` 신규 vein 탐색, factors/(9파일, 991줄, MLB 예측 팩터 핵심 로직, 전수 미감사) 채택.
