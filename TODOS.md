@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — 2-chain-lock-forced polish-ui: LeaderboardJoinModal focus 스타일 legacy ring → 표준 outline 정렬 (cycle 3417, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. **2-chain lock 충족** — 직전8(3409-3416) distinct=2(review-code(heavy)7+info-architecture-review1) → 둘 다 제외. fix-incident `gh run list` 재확인 결과 CI Failure Dispatch + Vercel Deploy Failure Dispatch 전부 skipped — 실제 incident 부재, 확립된 non-actionable 패턴. op-analysis gap=9/25·lotto gap=25/30(cron 산출물 picks `2026-10-24.md`/results `2026-10-17.md` 전부 최신, 정상) 전부 미도달. explore-idea saturation 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 10일 신선) 확립 skip 패턴 유지. design-system DESIGN.md 10일(4주 미달) 미트리거. 남은 trigger 전무 → lock fallback 룰(polish-ui 강제) 적용.
+
+**감사**: components/ 는 review-code(heavy) 가 전체 subdir 완료한 상태라, polish-ui 는 다른 각도로 사이트 전역 `focus-visible`/`focus:ring` 패턴 grep 전수 조사. 95곳이 `focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500` 관례 사용 확인.
+
+**발견 + 수정**: `LeaderboardJoinModal.tsx` 닉네임 `<input>` 만 레거시 Tailwind ring 패턴(`focus:outline-none focus:ring-2 focus:ring-brand-500`) 사용 — twin(`PredictionsSearchBox`/`MlbPredictionsSearchBox`/`FavoriteTeamFilter`)과 비교해 유일한 이탈. 모달의 취소/참가하기 버튼 2곳은 focus-visible 스타일 자체가 전무(키보드 포커스 표시 부재, a11y gap). 입력 1곳 + 버튼 2곳 전부 표준 outline 패턴으로 정렬. DESIGN.md Decisions Log 박제.
+
+**검증**: `tsc --noEmit`/`eslint` clean, `vitest run src/components/leaderboard`(1 file/3 tests, 신규 `silent-drift-cycle-3417.test.ts`) + 전체 `pnpm --filter moneyball test`(604 files/4736 tests) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `612b0ea7`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3417%50=17≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20 review-code(heavy) 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3408-3417) success 8건(3409/3411/3412/3413/3414/3415/3416/본cycle) 포함 미충족. 2차 방어선(cycle 3416 retro `c0ea2da2`) OK.
+
+다음 사이클 = lock cooldown(N=1) 만료 — 직전8(3410-3417) distinct=3(info-arch/review-code/polish-ui)로 review-code(heavy) 재선택 가능. components/ series 완료 후 `packages/kbo-data/` 잔여 스코프 계속 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap10/25)/lotto(gap26/30)/info-arch(gap7/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): components/predictions/ 전수 감사, contributionPp 2x overstatement 버그 수정 (cycle 3416, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3415 retro `2466a786`) OK. 2-chain lock 미충족(직전8(3408-3415) distinct=3: review-code(heavy)6+operational-analysis(lite)1+info-architecture-review1). fix-incident gap=34/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=8/25·lotto gap=24/30·info-arch gap=6/30 전부 미도달. cycle 3415 next_rec 계승 — components/predictions(31파일, components/ 전수 감사 시리즈 마지막 subdir) 채택.
