@@ -57,6 +57,42 @@ export function buildRejectReasonBreakdown(runs: PipelineRunForStats[]): RejectR
     .sort((a, b) => b.count - a.count);
 }
 
+interface PipelineRunForMarkerEvents {
+  run_date: string;
+  mode: string;
+  created_at: string;
+  errors: string[];
+}
+
+export interface MarkerEvent {
+  run_date: string;
+  mode: string;
+  msg: string;
+  created_at: string;
+}
+
+// pipeline_runs.errors 는 JSONB 컬럼 — insert 시 string[] 그대로 저장(stringify 안 함, daily.ts).
+// supabase-js 는 이를 이미 파싱된 JS 배열로 반환하므로 여기서 JSON.parse 하면 안 됨
+// (cycle 3423 발견 — 과거 JSON.parse(run.errors) 가 매번 throw 돼 GAP/SP_UNCONFIRMED 카드가
+// silent 하게 항상 0 으로 표시됨. skipped_detail 과 달리 errors 는 이중 인코딩 안 함).
+export function extractWeeklyMarkerEvents(
+  runs: PipelineRunForMarkerEvents[],
+  sinceIso: string,
+  marker: string
+): MarkerEvent[] {
+  const out: MarkerEvent[] = [];
+  for (const run of runs) {
+    if (run.created_at < sinceIso) continue;
+    const errs = run.errors ?? [];
+    for (const e of errs) {
+      if (typeof e === 'string' && e.includes(marker)) {
+        out.push({ run_date: run.run_date, mode: run.mode, msg: e, created_at: run.created_at });
+      }
+    }
+  }
+  return out;
+}
+
 // Korean label 매핑 — reason enum 안 한국어 자연어.
 export const REJECT_REASON_LABEL: Record<string, string> = {
   window_too_early: 'window_too_early (window 미진입)',

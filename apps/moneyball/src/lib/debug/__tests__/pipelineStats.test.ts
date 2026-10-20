@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildRejectReasonBreakdown, parseSkippedDetail } from '../pipelineStats';
+import { buildRejectReasonBreakdown, extractWeeklyMarkerEvents, parseSkippedDetail } from '../pipelineStats';
 
 describe('parseSkippedDetail', () => {
   it('null/empty → []', () => {
@@ -56,5 +56,44 @@ describe('buildRejectReasonBreakdown', () => {
     expect(result[0].reason).toBe('unknown');
     expect(result[0].count).toBe(1);
     expect(result[0].pct).toBe(1.0);
+  });
+});
+
+describe('extractWeeklyMarkerEvents', () => {
+  // cycle 3423 regression — pipeline_runs.errors 는 JSONB 컬럼에 string[] 그대로 insert 됨
+  // (skipped_detail 과 달리 stringify 안 함). supabase-js 는 이미 파싱된 네이티브 배열을
+  // 반환하므로, errors 가 string 이 아닌 string[] 로 와도 마커 탐지가 정상 작동해야 함.
+  it('native string[] (실제 supabase-js 반환 형태) 에서 마커 탐지', () => {
+    const runs = [
+      {
+        run_date: '2026-10-19', mode: 'predict_pre_game', created_at: '2026-10-19T10:00:00Z',
+        errors: ['[GAP] KTvOB missing probable pitcher'],
+      },
+      {
+        run_date: '2026-10-18', mode: 'verify', created_at: '2026-10-18T10:00:00Z',
+        errors: ['[SP_UNCONFIRMED] LGvSS'],
+      },
+    ];
+    expect(extractWeeklyMarkerEvents(runs, '2026-10-01T00:00:00Z', '[GAP]')).toEqual([
+      { run_date: '2026-10-19', mode: 'predict_pre_game', msg: '[GAP] KTvOB missing probable pitcher', created_at: '2026-10-19T10:00:00Z' },
+    ]);
+    expect(extractWeeklyMarkerEvents(runs, '2026-10-01T00:00:00Z', '[SP_UNCONFIRMED]')).toEqual([
+      { run_date: '2026-10-18', mode: 'verify', msg: '[SP_UNCONFIRMED] LGvSS', created_at: '2026-10-18T10:00:00Z' },
+    ]);
+  });
+
+  it('created_at < sinceIso → 제외', () => {
+    const runs = [
+      { run_date: '2026-09-01', mode: 'predict_pre_game', created_at: '2026-09-01T00:00:00Z', errors: ['[GAP] old'] },
+    ];
+    expect(extractWeeklyMarkerEvents(runs, '2026-10-01T00:00:00Z', '[GAP]')).toEqual([]);
+  });
+
+  it('errors=[] 또는 매칭 없음 → []', () => {
+    const runs = [
+      { run_date: '2026-10-19', mode: 'predict_pre_game', created_at: '2026-10-19T10:00:00Z', errors: [] },
+      { run_date: '2026-10-19', mode: 'predict_pre_game', created_at: '2026-10-19T10:00:00Z', errors: ['unrelated error'] },
+    ];
+    expect(extractWeeklyMarkerEvents(runs, '2026-10-01T00:00:00Z', '[GAP]')).toEqual([]);
   });
 });

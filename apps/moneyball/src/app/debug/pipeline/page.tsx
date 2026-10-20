@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { DAY_MS } from '@moneyball/shared';
 import {
   buildRejectReasonBreakdown,
+  extractWeeklyMarkerEvents,
   parseSkippedDetail,
   REJECT_REASON_LABEL,
   type RejectReasonCell,
@@ -34,7 +35,7 @@ interface PipelineRun {
   games_found: number;
   predictions: number;
   games_skipped: number;
-  errors: string;
+  errors: string[];
   skipped_detail: string | null;
   duration_ms: number;
   created_at: string;
@@ -101,31 +102,12 @@ async function getPipelineStats() {
   }
 
   // 이번 주 GAP / SP_UNCONFIRMED 이벤트 추출 — errors JSONB 마커 기반
-  const gapEventsWeek: Array<{ run_date: string; mode: string; gap_msg: string; created_at: string }> = [];
-  const spEventsWeek: Array<{ run_date: string; mode: string; sp_msg: string; created_at: string }> = [];
-  for (const run of runs) {
-    if (run.created_at < sevenDaysAgo) continue;
-    let errs: string[] = [];
-    try {
-      errs = JSON.parse(run.errors || '[]');
-    } catch {
-      continue;
-    }
-    for (const e of errs) {
-      if (typeof e !== 'string') continue;
-      if (e.includes('[GAP]')) {
-        gapEventsWeek.push({
-          run_date: run.run_date, mode: run.mode,
-          gap_msg: e, created_at: run.created_at,
-        });
-      } else if (e.includes('[SP_UNCONFIRMED]')) {
-        spEventsWeek.push({
-          run_date: run.run_date, mode: run.mode,
-          sp_msg: e, created_at: run.created_at,
-        });
-      }
-    }
-  }
+  const gapEventsWeek = extractWeeklyMarkerEvents(runs, sevenDaysAgo, '[GAP]').map((e) => ({
+    run_date: e.run_date, mode: e.mode, gap_msg: e.msg, created_at: e.created_at,
+  }));
+  const spEventsWeek = extractWeeklyMarkerEvents(runs, sevenDaysAgo, '[SP_UNCONFIRMED]').map((e) => ({
+    run_date: e.run_date, mode: e.mode, sp_msg: e.msg, created_at: e.created_at,
+  }));
 
   // M16 — reject reason cohort breakdown (전체 30일 runs).
   const rejectReasons: RejectReasonCell[] = buildRejectReasonBreakdown(runs);
@@ -401,10 +383,7 @@ export default async function PipelineDashboard() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {stats.runs.map((run) => {
-                      let errs: string[] = [];
-                      try {
-                        errs = JSON.parse(run.errors || '[]');
-                      } catch {}
+                      const errs = run.errors ?? [];
                       const hasGap = errs.some((e) => typeof e === 'string' && e.includes('[GAP]'));
                       return (
                         <tr
