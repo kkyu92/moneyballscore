@@ -343,10 +343,14 @@ export default async function AccuracyPage() {
     (r) => r !== null && r.status === 'rejected',
   );
 
+  const { data: pollData } = assertSelectOk(pollResult, 'AccuracyPage pickPoll');
+  const { data: completedGamesData } = assertSelectOk(completedGamesResult, 'AccuracyPage completedGames');
+  const { data: predForPollData } = assertSelectOk(predForPoll, 'AccuracyPage predForPoll');
+
   const communityStats = computeCommunityVsAI(
-    (pollResult.data ?? []) as Array<{ game_id: number; pick: string }>,
-    (completedGamesResult.data ?? []) as Array<{ id: number; home_score: number | null; away_score: number | null }>,
-    (predForPoll.data ?? []) as Array<{ game_id: number; is_correct: boolean | null }>,
+    (pollData ?? []) as Array<{ game_id: number; pick: string }>,
+    (completedGamesData ?? []) as Array<{ id: number; home_score: number | null; away_score: number | null }>,
+    (predForPollData ?? []) as Array<{ game_id: number; is_correct: boolean | null }>,
   );
 
   const { data } = assertSelectOk(result, 'AccuracyPage');
@@ -387,8 +391,9 @@ export default async function AccuracyPage() {
   const lastUpdated = rows.length > 0 ? rows[rows.length - 1].verified_at : null;
   const standingsAvailable = biasRows.some((r) => r.actualWinPct != null);
 
+  const { data: factorData } = assertSelectOk(factorResult, 'AccuracyPage factor');
   const factorAccuracyRows = buildFactorAccuracy(
-    ((factorResult.data ?? []) as FactorPredRow[])
+    ((factorData ?? []) as FactorPredRow[])
   );
 
   return (
