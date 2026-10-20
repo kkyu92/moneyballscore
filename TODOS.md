@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/ 3차분(accuracy+reviews, 18파일) 전수 감사, 신규 drift 0건 (cycle 3376, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전수 재확인, plan #30 포함 status 전부 non-approved). 2-chain lock 미충족(직전8(3368-3375) distinct=3: review-code/polish-ui/info-arch). fix-incident gap=26/20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=17/25·lotto gap=12/30 전부 미도달. explore-idea saturation 9/15 미충족. DESIGN.md mtime 10일 신선. cycle 3375 next_rec 따라 review-code(heavy) components/ 잔여 subdir 중 소형 우선(accuracy 8파일 + reviews 10파일 = 18파일) 채택.
+
+**감사**: Agent 1개 위임 — 18파일 전수 read + 모든 export call-site cross-grep(KBO/MLB/EN accuracy·reviews 페이지 전역) + twin쌍(`HighlightCard`↔`MlbHighlightCard`) 라인별 diff + localStorage/`useSyncExternalStore` try/catch 패턴 확인 + 매직넘버 shared 상수 참조 확인 + 전체 테스트 스위트(4680건) + `tsc --noEmit` + eslint.
+
+**결과**: 신규 drift 0건. 코드 변경 없음. twin쌍(`HighlightCard`/`MlbHighlightCard`) 차이(gameId vs externalGameId, route 패턴, MLB전용 locale prop) 전부 의도된 차이 확인(`/en/reviews` KBO 라우트 부재로 비대칭 정합). `app/analysis/page.tsx` 가 `ConvergenceTeamStatsBadges` 대신 로컬 헬퍼 쓰는 것도 주석에 이유 명시, drift 아님. `CalibrationPlot.tsx` 의 로컬 상수 `CALIBRATION_FULL_N=100` 은 해당 파일 단독 사용(중복 없음) 확인. 전체 테스트 4680/4680 pass + tsc clean + eslint clean. components/ 전체(20 subdir, 179파일) 중 3차분(18파일) 완료 — 잔여 7개 subdir(analysis 15/dashboard 17/layout 19/matchup 11/picks 13/predictions 31/shared 23, 총 129파일) 다음 사이클 후보.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3376%50=26≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3357-3376, 현재 cycle 포함) 표본≥10 충족, opt-out 9개 제외 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3367-3376) success 3건(3369/3371 + 과거분) 포함으로 미충족. 2-chain lock 미충족(위 참조). 2차 방어선(cycle 3375 retro `69743349`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 7개 subdir 계속 감사(matchup 11파일 또는 picks 13파일 우선 소형), 또는 fix-incident(gap 27/20, 재확인 필요)/op-analysis(gap 18/25)/lotto(gap 13/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 신규 스코프 2차분(leaderboard+teams+ui, 11파일) 전수 감사, 신규 drift 0건 (cycle 3375, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23 (plan #30 포함). 2-chain lock 미충족(직전8(3367-3374) distinct=4: review-code/polish-ui/info-arch/operational-analysis 혼재 — 실측 분포는 review-code 우세지만 lock 임계 ≤2 미도달). fix-incident gap=25/20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=16/25·lotto gap=11/30·info-arch gap=2/30 전부 미도달. 2차 방어선(`scripts/retro-drift-check.sh 3325 3374`) 실행 — 50-cycle 구간 전수 대조 결과 기존에 알려진 cycle 3360(commit-only, JSON 누락) 1건 외 신규 silent drift 0건. cycle 3374 next_rec 따라 review-code(heavy) components/ 잔여 12 subdir 중 중소형 우선(leaderboard 5파일/teams 5파일/ui 1파일 = 11파일) 채택.
