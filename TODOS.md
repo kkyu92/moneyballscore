@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/ 3차분(picks/lotto/players, 20파일) 전수 감사, 신규 drift 0건 (cycle 3389, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3381-3388) distinct=3: review-code(heavy)6+fix-incident1+operational-analysis1). fix-incident gap=7/20·op-analysis gap=6/25·info-arch gap=16/30·lotto gap=25/30 전부 미도달(lotto cron 산출물도 신선 — picks 2026-10-24.md/results 2026-10-17.md 둘 다 최신). ship-0 미충족(직전10(3379-3388) success 2건=3382,3388). exhaustive-sweep 서브체크 RC_HEAVY_COUNT=6/10(<8) 미충족. cycle 3388 next_rec 계승 — lib/ 잔여 subdir 중 소규모 3개(picks 6/lotto 7/players 7, 합 20파일) 3차분 선택.
+
+**감사**: agent 위임, picks/lotto/players 20파일 전수 read + 전체 call-site cross-grep. picks/lotto 는 Supabase 직접 호출 0건(순수 함수/파일시스템 기반) — 실제 쿼리는 호출부(accuracy/page.tsx, buildMlbCommunityAccuracy.ts)에 있고 이미 assertSelectOk 가드됨(cycle 3388 fix 대상). players/ 의 Supabase 쿼리 3건(buildBatterLeaderboard/buildPitcherLeaderboard/buildPitcherProfile) 전부 assertSelectOk 가드 + 전용 회귀 테스트(`__tests__/silent-drift.test.ts`, cycle 173 silent drift family 대비용) 기존 존재 확인 — 이미 선행 사이클에서 remediated. KBO/MLB 분기(computeCommunityVsAI vs computeMlbCommunityVsAI, key 타입 차이) 는 의도된 분리로 확인. dead code 0건(모든 export call site 존재). 상수/주석 전부 코드와 일치. `buildPitcherProfile.ts` 의 전체 predictions 테이블 fetch 후 client-side playerId 필터는 성능 비효율이나 correctness/drift 이슈 아님(PostgREST OR-조건 한계로 인한 의도적 설계로 추정, 이번 스코프 밖). `vitest run src/lib/picks src/lib/lotto src/lib/players` 10 files/116 tests pass, `tsc --noEmit` clean. **신규 drift 0건** — 변경 없음.
+
+**결과**: 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3389%50≠0, meta-pattern 없음). trigger5 — 직전20(3370-3389, 현재 포함) 표본≥10, 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3380-3389) success 2건(3382/3388) 포함 미충족. 2-chain lock 미충족(위 참조). 2차 방어선(cycle 3388 retro `9572a87c`) OK.
+
+다음 사이클 추천 = review-code(heavy) lib/ 잔여 subdir(standings/debug/insights/matchup/analysis/dashboard/predictions/teams/reviews/mlb) 순차 감사 계속 — RC_HEAVY_COUNT 6/10 로 exhaustive-sweep 여유 있음. 또는 info-arch(gap 17/30)/lotto(gap 26/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): lib/ 2차분(changelog/leaderboard/v2-shadow-monitor/accuracy, 18파일) 전수 감사, accuracy 페이지 silent error-swallow 수정 — PR #3178 머지 (cycle 3388, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3380-3387) distinct=4: polish-ui1+review-code(heavy)5+fix-incident1+operational-analysis1). fix-incident gap=6(3382 발화)/op-analysis gap=5(3383 발화)/info-arch gap=15/30/lotto gap=24/30 전부 미도달. ship-0 미충족(직전10(3378-3387) success 1건=3382). exhaustive-sweep 서브체크 RC_HEAVY_COUNT=7/10(<8) 미충족. 세션 재개 사례 — active-cycle 파일이 dead pid(36637)로 stale 상태 발견, 직전 세션이 본 작업(lib/ 2차분 audit + 수정 + PR 생성)을 이미 완료한 채 crash — 본 세션은 CI 확인 + 머지 + 회고만 수행.
