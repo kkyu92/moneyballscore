@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/ 6차분(dashboard/ 11파일) 전수 감사, 신규 drift 0건 (cycle 3394, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3386-3393) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=12/20·op-analysis gap=11/25·info-arch gap=21/30·lotto gap=2/30 전부 미도달. ship-0 미충족(직전10 success 3건: 3388,3390,3393). cycle 3393 next_rec 계승 — lib/ 잔여 subdir(dashboard 11/predictions 12/teams 12/reviews 17) 중 dashboard/ 6차분 선택.
+
+**감사**: agent 위임, dashboard/ 11파일(impl 6 + test 5) 전수 read. 전부 clean — buildConfidenceBuckets/buildDailyAccuracy/buildHallucinationStats/compareModels/factor-accuracy 는 순수 함수(Supabase 미접근), 테스트와 로직 완전 일치. 유일하게 Supabase 접근하는 `buildModelTuningInsights.ts`는 이미 cycle 152에 assertSelectOk(fail-loud) + regression test 로 degraded-flag 누락 패턴 선제 fix 완료 확인. `factor-accuracy.ts`의 shadow-only factor(park_weather/umpire_sz, currentWeight=0) 가 proposeWeights 재배분을 못 받는 특성은 설계 의도(기존 eligible weight 재분배 공식, 신규 발명 아님) — 버그 아님.
+
+**결과**: 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참 기존 판단 유지)/trigger2(5연속 fail 없음)/trigger3(3394%50=44≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3375-3394, 현재 포함) review-code 다수 발화(9+5=14건, 표기 분화 이슈 있으나 0회 아님)로 미충족. marker 미박제. ship-0 — 직전10(3385-3394) success 3건(3388/3390/3393) 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3387-3394) distinct=3(review-code6+polish-ui1+lotto1) 유지, 미충족. 2차 방어선(cycle 3393 retro `b9a7a7dc`) OK.
+
+다음 사이클 추천 = review-code(heavy) lib/ 잔여 subdir(predictions 12/teams 12/reviews 17, 합 41파일) 재개 또는 fix-incident(gap13/20)/op-analysis(gap12/25)/info-arch(gap22/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): lib/ 5차분(mlb/ 18파일) 전수 감사, buildMlbTeamProfile.ts degraded 플래그 누락 수정 (cycle 3393, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3385-3392) distinct=3: review-code(heavy)6+polish-ui1+lotto1). fix-incident gap=11/20·op-analysis gap=10/25·info-arch gap=20/30 전부 미도달. ship-0 미충족(직전10 success 2건: 3388,3390). cycle 3392 next_rec 계승 — lib/ 잔여 subdir 중 mlb/(18파일, 미감사) 5차분 선택.
