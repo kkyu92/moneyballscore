@@ -1,3 +1,16 @@
+## ⚪ RETRO-ONLY — operational-analysis (lite): CE/비CE 격차 재측정, n=448 동일값 36회 연속 (cycle 3433, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3432 retro `aa4aa7aa`) OK. 2-chain lock 충족(직전8(3425-3432) distinct=2: review-code5+polish-ui3)이나 **op-analysis 자체 gap=25/25 정확 도달(last fire 3408)** — lock 무관 자체 trigger 충족으로 우선 선택. fix-incident gap=12/20·info-arch gap=23/30·lotto gap=11/30 전부 미도달.
+
+**재측정**: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행. 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3408 수치와 완전 동일. DB 직접 조회 재확인: 최신 verified_at 2026-10-19 레코드 3건 존재하나 전부 cycle 3408 이전 이미 반영된 기존 건(신규 유입 아님) — 파이프라인 정상, drift 아님(KBO 2026 정규시즌 2026-10-04 종료 지속, 신규 pre_game 검증 배치 없음). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp, overlap 월(05/06/07) 통제 격차 10.8pp 그대로. LLM 부가가치 우세 결론 36회 연속 재확인.
+
+**결과**: 코드 변경 없음. CLAUDE.md 운영 섹션에 cycle 3433 측정값 append.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3433%50=33≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3414-3433, 현재 포함) review-code 12회 발화로 미충족(평가대상 review-code 단독). marker 미박제. ship-0 — 직전10(3424-3433) success 다수 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3426-3433) distinct=3(review-code4+polish-ui3+operational-analysis1), 미충족 — 다음 사이클 자유 선택. 2차 방어선(cycle 3432 retro `aa4aa7aa`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속 또는 fix-incident(gap13/20)/info-arch(gap24/30)/lotto(gap12/30) 자연 대기.
+
+
 ## 🟢 SUCCESS — 2-chain-lock-forced polish-ui: components/ focus-visible 패턴 8파일 누락 수정 (cycle 3432, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3431 retro `7ac63e29`) OK. **2-chain lock 충족** — 직전8(3424-3431) distinct=2(review-code 6+polish-ui 2) → 둘 다 제외. fix-incident gap=11/20·op-analysis gap=24/25(거의 도달)·info-arch gap=22/30·lotto gap=10/30 전부 미도달. design-system DESIGN.md 당일 신선 미트리거. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재) 확립 skip 패턴 유지. 남은 trigger 전무 → lock fallback 룰(polish-ui 강제) 적용 — app/ 은 cycle 3431 이 이미 100% 정합 확인했으므로 스윕 범위를 components/ 로 확장.
