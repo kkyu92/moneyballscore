@@ -114,11 +114,12 @@ export default async function TeamPage({ params }: PageProps) {
   if (!profile) notFound();
 
   const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/teams/[code]", source: "buildTeamEloTrend" });
-  const upcoming = upcomingR.status === "fulfilled" ? upcomingR.value : captureFallback(upcomingR.reason, [], { route: "/teams/[code]", source: "buildTeamUpcoming" });
+  const upcomingResult = upcomingR.status === "fulfilled" ? upcomingR.value : captureFallback(upcomingR.reason, { items: [], degraded: true }, { route: "/teams/[code]", source: "buildTeamUpcoming" });
+  const upcoming = upcomingResult.items;
   const strongTeamStats = strongTeamStatsR.status === "fulfilled" ? strongTeamStatsR.value : captureFallback(strongTeamStatsR.reason, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(strong)" });
   const completeTeamStats = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(complete)" });
 
-  const dbDegraded = profile.degraded || [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR].some((r) => r.status === "rejected");
+  const dbDegraded = profile.degraded || upcomingResult.degraded || [eloTrendR, strongTeamStatsR, completeTeamStatsR].some((r) => r.status === "rejected");
 
   const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);

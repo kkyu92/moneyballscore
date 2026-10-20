@@ -18,6 +18,7 @@ export interface TeamFactorAverages {
   sfr: number | null;
   warTotal: number | null;
   sampleN: number;
+  degraded: boolean;
 }
 
 interface PredRow {
@@ -53,6 +54,7 @@ export const EMPTY_FACTOR_AVERAGES: TeamFactorAverages = {
   sfr: null,
   warTotal: null,
   sampleN: 0,
+  degraded: false,
 };
 
 /**
@@ -73,6 +75,7 @@ export async function buildTeamFactorAverages(
   teamCode: TeamCode,
 ): Promise<TeamFactorAverages> {
   const supabase = await createClient();
+  let degraded = false;
 
   const teamResult = await supabase
     .from("teams")
@@ -86,13 +89,14 @@ export async function buildTeamFactorAverages(
       `buildTeamFactorAverages teams ${teamCode}`,
     ));
   } catch (err) {
+    degraded = true;
     teamRow = captureFallback(err, null, {
       route: "/matchup/[teamA]/[teamB]",
       source: `buildTeamFactorAverages teams ${teamCode}`,
     });
   }
   const teamId = (teamRow as { id: number } | null)?.id ?? null;
-  if (teamId == null) return EMPTY_FACTOR_AVERAGES;
+  if (teamId == null) return { ...EMPTY_FACTOR_AVERAGES, degraded };
 
   const predResult = await supabase
     .from("predictions")
@@ -122,6 +126,7 @@ export async function buildTeamFactorAverages(
       `buildTeamFactorAverages predictions ${teamCode}`,
     ));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], {
       route: "/matchup/[teamA]/[teamB]",
       source: `buildTeamFactorAverages predictions ${teamCode}`,
@@ -151,5 +156,5 @@ export async function buildTeamFactorAverages(
     });
   }
 
-  return computeFactorAveragesFromPerspectives(perspectives);
+  return { ...computeFactorAveragesFromPerspectives(perspectives), degraded };
 }

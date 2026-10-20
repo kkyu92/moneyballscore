@@ -31,8 +31,14 @@ interface SnapshotPredRow {
   } | null;
 }
 
-export async function buildTeamStrengthSnapshot(): Promise<TeamStrengthRow[]> {
+export interface TeamStrengthSnapshotResult {
+  rows: TeamStrengthRow[];
+  degraded: boolean;
+}
+
+export async function buildTeamStrengthSnapshot(): Promise<TeamStrengthSnapshotResult> {
   const supabase = await createClient();
+  let degraded = false;
 
   const result = await supabase
     .from('predictions')
@@ -59,16 +65,17 @@ export async function buildTeamStrengthSnapshot(): Promise<TeamStrengthRow[]> {
   try {
     ({ data } = assertSelectOk(result, 'buildTeamStrengthSnapshot'));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, null, { route: '/analysis', source: 'buildTeamStrengthSnapshot' });
   }
-  if (!data || data.length === 0) return [];
+  if (!data || data.length === 0) return { rows: [], degraded };
 
-  const rows = data as unknown as SnapshotPredRow[];
+  const predRows = data as unknown as SnapshotPredRow[];
   const seenCurrent = new Map<string, TeamStrengthRow>();
   const teamCount = new Map<string, number>(); // per-team prediction count (desc order)
   const eloOld = new Map<string, number>(); // Elo at TEAM_STRENGTH_ELO_DELTA_WINDOW games ago
 
-  for (const row of rows) {
+  for (const row of predRows) {
     const homeCode = row.game?.home_team?.code;
     const awayCode = row.game?.away_team?.code;
     const gameDate = row.game?.game_date ?? '';
@@ -108,10 +115,11 @@ export async function buildTeamStrengthSnapshot(): Promise<TeamStrengthRow[]> {
     }
   }
 
-  return Array.from(seenCurrent.values())
+  const rows = Array.from(seenCurrent.values())
     .sort((a, b) => b.elo - a.elo)
     .map((row) => ({
       ...row,
       eloChange: eloOld.has(row.teamCode) ? row.elo - eloOld.get(row.teamCode)! : undefined,
     }));
+  return { rows, degraded };
 }

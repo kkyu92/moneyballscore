@@ -334,7 +334,7 @@ export async function buildTeamProfile(
       verifiedN: 0,
       correctN: 0,
       accuracyRate: null,
-      factorAverages: EMPTY_FACTOR_AVERAGES,
+      factorAverages: { ...EMPTY_FACTOR_AVERAGES, degraded },
       topPitchers: [],
       recentGames: [],
       streak: null,
@@ -573,7 +573,7 @@ export async function buildTeamProfile(
   // 암묵적 의존이었음 (review-code heavy 감사, cycle 2399). 정렬을 독립 문장으로 분리.
   teamGames.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
   const recentGames = teamGames.slice(0, 8);
-  const factorAverages = computeFactorAveragesFromPerspectives(factorPerspectives);
+  const factorAverages = { ...computeFactorAveragesFromPerspectives(factorPerspectives), degraded };
   const streak = computeTeamStreak(teamGames);
   const avgMargin = computeTeamAvgMargin(teamGames);
   const blowout = computeTeamBlowoutCount(teamGames);

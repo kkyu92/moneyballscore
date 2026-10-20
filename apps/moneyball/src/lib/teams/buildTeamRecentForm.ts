@@ -16,6 +16,7 @@ export interface TeamRecentForm {
   ties: number;
   totalGames: number;
   winRate: number | null;
+  degraded: boolean;
 }
 
 export const EMPTY_RECENT_FORM: TeamRecentForm = {
@@ -25,6 +26,7 @@ export const EMPTY_RECENT_FORM: TeamRecentForm = {
   ties: 0,
   totalGames: 0,
   winRate: null,
+  degraded: false,
 };
 
 interface GameRow {
@@ -47,6 +49,7 @@ export async function buildTeamRecentForm(
   limit = MATCHUP_RECENT_FORM_GAMES,
 ): Promise<TeamRecentForm> {
   const supabase = await createClient();
+  let degraded = false;
 
   const teamResult = await supabase
     .from("teams")
@@ -60,13 +63,14 @@ export async function buildTeamRecentForm(
       `buildTeamRecentForm teams ${teamCode}`,
     ));
   } catch (err) {
+    degraded = true;
     teamRow = captureFallback(err, null, {
       route: "/matchup/[teamA]/[teamB]",
       source: `buildTeamRecentForm teams ${teamCode}`,
     });
   }
   const teamId = (teamRow as { id: number } | null)?.id ?? null;
-  if (teamId == null) return EMPTY_RECENT_FORM;
+  if (teamId == null) return { ...EMPTY_RECENT_FORM, degraded };
 
   const gamesResult = await supabase
     .from("games")
@@ -85,6 +89,7 @@ export async function buildTeamRecentForm(
       `buildTeamRecentForm games ${teamCode}`,
     ));
   } catch (err) {
+    degraded = true;
     gamesData = captureFallback(err, [], {
       route: "/matchup/[teamA]/[teamB]",
       source: `buildTeamRecentForm games ${teamCode}`,
@@ -128,5 +133,6 @@ export async function buildTeamRecentForm(
     ties,
     totalGames: results.length,
     winRate: decided > 0 ? wins / decided : null,
+    degraded,
   };
 }

@@ -195,7 +195,7 @@ export default async function AnalysisIndexPage() {
     (value) => ({ status: "fulfilled" as const, value }),
     (reason) => ({ status: "rejected" as const, reason }),
   );
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord, completeTeamStats, completeHomeAwaySplit, recentCompleteConvergenceRecord, simplifiedMode] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthSnapshot, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord, completeTeamStats, completeHomeAwaySplit, recentCompleteConvergenceRecord, simplifiedMode] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -245,7 +245,9 @@ export default async function AnalysisIndexPage() {
       ? standingsR.value
       : captureFallback(standingsR.reason, [] as StandingRow[], { route: 'AnalysisIndexPage', source: 'fetchStandings' });
 
-  const dbDegraded = [standingsR].some((r) => r !== null && r.status === "rejected");
+  const teamStrengthRows = teamStrengthSnapshot.rows;
+
+  const dbDegraded = teamStrengthSnapshot.degraded || [standingsR].some((r) => r !== null && r.status === "rejected");
 
   // wave-325: 현재 KBO 순위 맵
   const rankMap = new Map<TeamCode, number>(

@@ -56,6 +56,7 @@ describe("buildTeamFactorAverages", () => {
     const avg = await buildTeamFactorAverages("HT");
     expect(avg.spFip).toBeNull();
     expect(avg.sampleN).toBe(0);
+    expect(avg.degraded).toBe(true);
   });
 
   it("predictions select error → throw 대신 빈 집계 degrade (captureFallback)", async () => {
@@ -68,6 +69,7 @@ describe("buildTeamFactorAverages", () => {
     const avg = await buildTeamFactorAverages("HT");
     expect(avg.spFip).toBeNull();
     expect(avg.sampleN).toBe(0);
+    expect(avg.degraded).toBe(true);
   });
 
   it("teams 빈 row → EMPTY_FACTOR_AVERAGES", async () => {
@@ -77,6 +79,7 @@ describe("buildTeamFactorAverages", () => {
     const avg = await buildTeamFactorAverages("HT");
     expect(avg.spFip).toBeNull();
     expect(avg.sampleN).toBe(0);
+    expect(avg.degraded).toBe(false);
   });
 
   it("정상 — 홈/원정 팀별 팩터 평균 (홈 1경기 + 원정 1경기)", async () => {
@@ -143,6 +146,7 @@ describe("buildTeamFactorAverages", () => {
     expect(avg.elo).toBeCloseTo(1540, 5); // 1550+1530 / 2
     expect(avg.sfr).toBeCloseTo(4.0, 5); // home:5.0, away:3.0 → avg 4.0
     expect(avg.warTotal).toBeCloseTo(13.0, 5); // home:12.0, away:14.0 → avg 13.0
+    expect(avg.degraded).toBe(false);
   });
 
   it("null 팩터 값 — sampleN 은 카운트하되 평균 계산엔 제외", async () => {

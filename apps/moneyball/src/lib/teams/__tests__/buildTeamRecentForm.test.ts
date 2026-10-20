@@ -67,6 +67,7 @@ describe("buildTeamRecentForm", () => {
     expect(form.results).toEqual([]);
     expect(form.totalGames).toBe(0);
     expect(form.winRate).toBeNull();
+    expect(form.degraded).toBe(true);
   });
 
   it("games select error → throw 대신 빈 시퀀스 degrade (captureFallback)", async () => {
@@ -78,6 +79,7 @@ describe("buildTeamRecentForm", () => {
     expect(form.results).toEqual([]);
     expect(form.totalGames).toBe(0);
     expect(form.winRate).toBeNull();
+    expect(form.degraded).toBe(true);
   });
 
   it("teams 빈 row → EMPTY_RECENT_FORM", async () => {
@@ -87,6 +89,7 @@ describe("buildTeamRecentForm", () => {
     expect(form.results).toEqual([]);
     expect(form.totalGames).toBe(0);
     expect(form.winRate).toBeNull();
+    expect(form.degraded).toBe(false);
   });
 
   it("정상 — 홈 승 + 원정 승 + 홈 패 → W/W/L 시퀀스 + 승률 0.667", async () => {
@@ -106,6 +109,7 @@ describe("buildTeamRecentForm", () => {
     expect(form.ties).toBe(0);
     expect(form.totalGames).toBe(3);
     expect(form.winRate).toBeCloseTo(2 / 3, 3);
+    expect(form.degraded).toBe(false);
   });
 
   it("무승부 — winner_team_id null + 동점 스코어 → T", async () => {

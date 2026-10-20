@@ -23,6 +23,11 @@ interface TeamUpcomingGame {
   confidence: number | null;
 }
 
+export interface TeamUpcomingResult {
+  items: TeamUpcomingGame[];
+  degraded: boolean;
+}
+
 interface UpcomingGameRow {
   id: number;
   game_date: string;
@@ -41,8 +46,9 @@ interface UpcomingGameRow {
 
 export async function buildTeamUpcoming(
   teamCode: TeamCode,
-): Promise<TeamUpcomingGame[]> {
+): Promise<TeamUpcomingResult> {
   const supabase = await createClient();
+  let degraded = false;
 
   const teamResult = await supabase
     .from("teams")
@@ -53,10 +59,11 @@ export async function buildTeamUpcoming(
   try {
     ({ data: teamRow } = assertSelectOk(teamResult, "buildTeamUpcoming teams"));
   } catch (err) {
+    degraded = true;
     teamRow = captureFallback(err, null, { route: "/teams/[code]", source: "buildTeamUpcoming teams" });
   }
   const teamId = (teamRow as { id: number } | null)?.id ?? null;
-  if (teamId == null) return [];
+  if (teamId == null) return { items: [], degraded };
 
   const todayKST = toKSTDateString();
 
@@ -86,6 +93,7 @@ export async function buildTeamUpcoming(
   try {
     ({ data } = assertSelectOk(gamesResult, "buildTeamUpcoming games"));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: "/teams/[code]", source: "buildTeamUpcoming games" });
   }
   const rows = (data ?? []) as unknown as UpcomingGameRow[];
@@ -119,5 +127,5 @@ export async function buildTeamUpcoming(
     });
   }
 
-  return result;
+  return { items: result, degraded };
 }

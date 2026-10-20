@@ -22,6 +22,11 @@ interface MatchupUpcomingGame {
   predictedWinnerCode: TeamCode | null;
 }
 
+export interface MatchupUpcomingResult {
+  items: MatchupUpcomingGame[];
+  degraded: boolean;
+}
+
 interface UpcomingRow {
   id: number;
   game_date: string;
@@ -40,8 +45,9 @@ interface UpcomingRow {
 
 export async function buildMatchupUpcoming(
   pair: MatchupPair,
-): Promise<MatchupUpcomingGame[]> {
+): Promise<MatchupUpcomingResult> {
   const supabase = await createClient();
+  let degraded = false;
 
   const [teamAResult, teamBResult] = await Promise.all([
     supabase.from("teams").select("id").eq("code", pair.codeA).maybeSingle(),
@@ -51,17 +57,19 @@ export async function buildMatchupUpcoming(
   try {
     ({ data: tARow } = assertSelectOk(teamAResult, "buildMatchupUpcoming teamA") as { data: { id: number } | null });
   } catch (err) {
+    degraded = true;
     tARow = captureFallback(err, null, { route: "/matchup", source: "buildMatchupUpcoming teamA" });
   }
   let tBRow: { id: number } | null = null;
   try {
     ({ data: tBRow } = assertSelectOk(teamBResult, "buildMatchupUpcoming teamB") as { data: { id: number } | null });
   } catch (err) {
+    degraded = true;
     tBRow = captureFallback(err, null, { route: "/matchup", source: "buildMatchupUpcoming teamB" });
   }
   const teamAId = (tARow as { id: number } | null)?.id ?? null;
   const teamBId = (tBRow as { id: number } | null)?.id ?? null;
-  if (teamAId == null || teamBId == null) return [];
+  if (teamAId == null || teamBId == null) return { items: [], degraded };
 
   const todayKST = toKSTDateString();
 
@@ -94,6 +102,7 @@ export async function buildMatchupUpcoming(
   try {
     ({ data } = assertSelectOk(gamesResult, "buildMatchupUpcoming games"));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: "/matchup", source: "buildMatchupUpcoming games" });
   }
   const rows = (data ?? []) as unknown as UpcomingRow[];
@@ -132,5 +141,5 @@ export async function buildMatchupUpcoming(
     });
   }
 
-  return result;
+  return { items: result, degraded };
 }
