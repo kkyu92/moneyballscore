@@ -1,3 +1,18 @@
+## ⚪ RETRO-ONLY — review-code (heavy): components/{leaderboard,picks,search,share} 전수감사, drift 0건 (cycle 3437, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3436 retro `0bb79e23`) OK. 2-chain lock 미충족(직전8(3429-3436) distinct=4: review-code2+polish-ui3+operational-analysis1+fix-incident1) — 자유 선택. fix-incident gap=1/20·op-analysis gap=4/25·info-arch gap=27/30·lotto gap=15/30 전부 미도달. cycle 3436 추천 "review-code(heavy) 계속(components/leaderboard 등 재확인)" 채택.
+
+**감사**: `leaderboard/`(5파일: LeaderboardClient/Table/JoinModal/SortControl/HallOfFame) — cycle 3417 fix(focus-visible) 유지 확인, HallOfFame SVG 메달 토큰(accent/brand-*) DESIGN.md 정합. `picks/`(12파일: MyPicksClient/WeeklyHistorySection/PickButton/PicksSortControl/PicksStatusFilter/PicksTrendChart/SharePicksButton/DivergenceChip/FactorAgreementCard/UserVsAIScorecard/WeeklyHistorySortControl/WeeklyPicksSummary) — KBO/MLB league 분기, localStorage 네임스페이스 충돌 방지(`mlb-${gameId}`), Sentry silent_drift_family 태그 일관 확인. `search/SearchClient.tsx` — cycle 2620/2622 fix(tracking-wide, hover:bg-gray-800/40) 유지 확인. `share/ShareButtons.tsx` — Web Share API + Twitter/Facebook intent + 클립보드 fallback 정상.
+
+**부가 점검**: `text-red-600 dark:text-red-400` 패턴이 `text-error` 와 공존(60+ vs 9 인스턴스) — 광범위 기존 공존 패턴이라 단일 outlier 아님, drift 미분류. `HallOfFame`/`DivergenceChip`/`UserVsAIScorecard` 전부 실제 호출부(`leaderboard/page.tsx`, `page.tsx`) 존재 확인 — dead code 아님.
+
+**결과**: drift 0건. 코드 변경 없음. components/ 전체 서브디렉토리(20개) 금번 기준 최소 1회 이상 감사 이력 확보 완료.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3437%50=37≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3418-3437, 현재 포함, 표본 20≥10) review-code 12회 발화로 미충족(평가대상 review-code 단독). marker 미박제. ship-0 — 직전10(3427-3436) success 다수 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3430-3437) distinct=4(polish-ui3+operational-analysis1+review-code3+fix-incident1), 미충족 — 다음 사이클 자유 선택. 2차 방어선(cycle 3436 retro `0bb79e23`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(packages/kbo-data/src 스코프 — scrapers/pipeline/engine/agents/factors/analytics/backtest/context/features 미감사) 또는 info-arch(gap28/30, 근접)/lotto(gap16/30)/op-analysis(gap5/25) 자연 대기.
+
+
 ## ⚪ RETRO-ONLY — fix-incident (lite): pipeline_runs 7일 무결점 확인, 실제 incident 부재 (cycle 3436, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3435 retro `52ee9aef`) OK. 2-chain lock 미충족(직전8(3428-3435) distinct=3: review-code4+polish-ui3+operational-analysis1) — 자유 선택. op-analysis gap=3/25·info-arch gap=26/30·lotto gap=14/30 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. fix-incident gap=15/20 자체 trigger 미도달이나, 직전 2 사이클(3434/3435) 연속 review-code(heavy) 후 3회 연속 회피 룰(실패 모드 표 "동일 chain 3회 연속" 소프트 가드) 적용 — 다양성 확보 겸 fix-incident(lite) 선택.
