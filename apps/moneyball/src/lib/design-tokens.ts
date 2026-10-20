@@ -79,6 +79,18 @@ export const MLB_GRADIENT_ANALYSIS_135 = "linear-gradient(135deg, #2b1207 0%, #7
 export const MLB_GRADIENT_INSIGHTS_135 = "linear-gradient(135deg, #1f1606 0%, #5c4512 50%, #d4a017 100%)";
 export const MLB_GRADIENT_INSIGHTS_DATE_135 = "linear-gradient(135deg, #1f1a06 0%, #6b5214 50%, #eab308 100%)";
 
+// MLB accuracy/calendar/methodology/predictions/reviews OG/twitter gradients (review-code
+// heavy cycle 3458) — mlb/* + en/mlb/* 5개 라우트가 opengraph-image.tsx/twitter-image.tsx
+// 없이 발행돼 KBO twin 대비 소셜 카드가 누락되던 갭 해소 (insights wave 144 와 동일 family,
+// 5번째 재발). 각 hue 는 registry 내 기존 10개와 미충돌 — violet(≈271, accuracy),
+// lime(≈74, calendar), teal-green(≈155, methodology), crimson-pink(≈346, predictions),
+// orange-red(≈13, reviews).
+export const MLB_GRADIENT_ACCURACY_135 = "linear-gradient(135deg, #1f0a2e 0%, #4c1a7a 50%, #8b3fd4 100%)";
+export const MLB_GRADIENT_CALENDAR_135 = "linear-gradient(135deg, #1a2606 0%, #4d6b14 50%, #a3c020 100%)";
+export const MLB_GRADIENT_METHODOLOGY_135 = "linear-gradient(135deg, #06231a 0%, #0f5c42 50%, #15a872 100%)";
+export const MLB_GRADIENT_PREDICTIONS_135 = "linear-gradient(135deg, #2e0a1f 0%, #7a1a4a 50%, #e21d5c 100%)";
+export const MLB_GRADIENT_REVIEWS_135 = "linear-gradient(135deg, #2b0e07 0%, #7a2410 50%, #e0481f 100%)";
+
 // KBO 전용 라우트 OG/twitter gradient — 21개 라우트가 design-tokens.ts 밖에서 인라인 hex 로
 // 중복/분산돼있던 걸 단일 source 로 흡수 (silent drift family, cycle 2943 design-system 스윕).
 // factors(ko/en mirror)는 완전 동일 hex라 토큰 1개 공유.
