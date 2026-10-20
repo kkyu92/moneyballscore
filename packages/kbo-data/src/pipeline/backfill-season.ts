@@ -32,7 +32,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchNaverSchedule } from '../scrapers/naver-schedule';
 import { BACKFILL_POLITE_DELAY_MS, assertSelectOk, errMsg } from '@moneyball/shared';
-import type { TeamCode } from '@moneyball/shared';
 import { DB_CONSTRAINTS } from './db-constraints';
 import { computeWinnerTeamId } from './winner-id';
 
