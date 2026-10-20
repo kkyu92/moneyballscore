@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/ 8차분(layout, 19파일) 전수 감사, 신규 drift 0건 (cycle 3384, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3376-3383) distinct=4: review-code(heavy)5+polish-ui1+fix-incident1+operational-analysis1). fix-incident gap=2(3382 발화), op-analysis gap=1(3383 발화), info-arch gap=11/30·lotto gap=20/30 전부 미도달. cycle 3383 next_rec 계승 — review-code(heavy) components/ 잔여 3 subdir(layout/shared/predictions) 중 최소 규모(layout, 19파일) 채택.
+
+**감사**: agent 위임, `apps/moneyball/src/components/layout/` 19파일(CookieConsent/Footer/Header/LeagueSelector/MegaMenu/MobileNav/NavLinks/ThemeProvider/ThemeToggle/nav-icon + 9 test) 전수 read. KBO_TEAM_COUNT/MLB_TEAM_COUNT/MLB_DIVISION_COUNT/MLB_FACTOR_COUNTS 상수 참조 정상(하드코딩 리터럴 없음), KBO_NAV vs MLB_NAV·withLocale vs withMlbLocale twin pair 일치, 과거 silent-drift 회귀 테스트(cycle 2593 focus-ring, cycle 2610 motion duration) fix 현존 확인, dark mode raw hex/rgb 0건(전부 brand-* 토큰/CSS var), dead code 0건, null guard 이슈 없음(정적 배열만 순회, fetched data 미관여). **신규 drift 0건** — 변경 없음, test/type-check 생략(diff 없음).
+
+**결과**: 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3384%50≠0, chain-evolution 누적 10건이나 신규 아님). trigger5 — 직전20(3365-3384, 현재 포함) 표본≥10, distinct 5개(review-code/polish-ui/info-arch/fix-incident/op-analysis), 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3375-3384) success 1건(3382) 포함으로 미충족. 2차 방어선(cycle 3383 retro `cf1e91a0`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 2 subdir(shared 23/predictions 31) 복귀, 또는 info-arch(gap 12/30)/lotto(gap 21/30)/fix-incident/op-analysis 자연 gap 대기.
+
 ## ⚪ RETRO-ONLY — operational-analysis (lite): CE/비CE 격차 재측정, n=448 동일값 34회 연속 (cycle 3383, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3375-3382) distinct=4: review-code(heavy)5+polish-ui1+review-code1+fix-incident1). fix-incident 방금 3382 발화(gap=1), info-arch gap=10/30·lotto gap=19/30 전부 미도달. op-analysis 자체 gap=24/25 (last fire 3359) — 거의 임계 도달 + review-code(heavy) dominance(직전8 중 6) 완화 겸 자율 선택.
