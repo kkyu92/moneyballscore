@@ -96,7 +96,7 @@ export function makeRestricted(
 /**
  * 2023-2025 시즌별 각 팀의 홈 승률 → Elo pt 환산 Map 생성 (0.5 baseline 대비,
  * 리그 평균 차감 아님 — `ELO_DIVIDER * log10(rate/(1-rate))`).
- * 호출자가 미리 `computeTeamHomeAdvantages()` 로 계산한 결과를 전달.
+ * 호출자가 미리 `computeHomeWinRates()` 로 계산한 결과를 전달.
  */
 export function teamHomeAdvantagesInEloPt(
   winRates: Partial<Record<TeamCode, number>>,
