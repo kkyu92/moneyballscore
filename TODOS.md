@@ -1,3 +1,16 @@
+## ⚪ RETRO-ONLY — review-code (heavy): components/matchup/ 전수감사, drift 0건 (cycle 3434, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3433 retro `4be65450`) OK. 2-chain lock 미충족(직전8(3426-3433) distinct=3: review-code4+polish-ui3+operational-analysis1) — 자유 선택. 최근 review-code(heavy) 스윕 시리즈가 app/api 전체 + components/{predictions,reviews,standings,teams,shared,layout,dashboard,analysis} 커버했으나 components/matchup/ (11파일, 1417줄) 미감사 상태로 확인 — 스윕 대상 선정.
+
+**감사**: KBO/MLB twin 쌍 전부 대조 — `MatchupEloChart`/`MlbMatchupEloChart`(이미 공용 컴포넌트로 통합됨), `MatchupSeasonHeadToHead`/`MlbMatchupSeasonHeadToHead`, `MatchupConvergencePickRecord`/`MlbMatchupConvergencePickRecord`, `MatchupRecentForm`/`MlbMatchupRecentForm`, `MatchupFactorCompare`/`MlbMatchupFactorCompare`(KBO 는 MetricRegistry 단일 source, MLB 는 registry 미등록 slug(xwOBA/Barrel%) 때문에 로컬 라벨 — 문서화된 의도적 차이) 모두 로직 일치 확인. `MatchupGamesCloseFilter`(3개 라우트 페이지 공용) 의 `CLOSE_GAME_MARGIN` 임계값이 KBO/MLB-KO/MLB-EN 세 페이지 전부 동일 import 사용 확인. `buildMatchupEloTrend`/`buildMlbMatchupEloTrend` lib pair 와 MLB matchup KO/EN page.tsx 전체 diff 도 대조 — `degraded` 플래그 양쪽 페이지 모두 `dbDegraded` 파생에 정상 포함, i18n parity(제목/라벨/링크) 구조적으로 1:1 대응 확인.
+
+**결과**: drift 0건. 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3434%50=34≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3415-3434, 현재 포함, 표본 20≥10) review-code 12회 발화로 미충족(평가대상 review-code 단독). marker 미박제. ship-0 — 직전10(3425-3434) success 다수 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3427-3434) distinct=3(review-code4+polish-ui3+operational-analysis1), 미충족 — 다음 사이클 자유 선택. 2차 방어선(cycle 3433 retro `4be65450`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(남은 미감사 components/ 하위: accuracy/glossary/insights/live/players/seasons/ui) 또는 fix-incident(gap14/20)/info-arch(gap24/30)/lotto(gap13/30) 자연 대기.
+
+
 ## ⚪ RETRO-ONLY — operational-analysis (lite): CE/비CE 격차 재측정, n=448 동일값 36회 연속 (cycle 3433, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3432 retro `aa4aa7aa`) OK. 2-chain lock 충족(직전8(3425-3432) distinct=2: review-code5+polish-ui3)이나 **op-analysis 자체 gap=25/25 정확 도달(last fire 3408)** — lock 무관 자체 trigger 충족으로 우선 선택. fix-incident gap=12/20·info-arch gap=23/30·lotto gap=11/30 전부 미도달.
