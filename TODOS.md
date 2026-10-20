@@ -16834,3 +16834,19 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **코드 변경 없음** — cron 완전 자동화 유지 확인, 신규 rule 후보 0건.
 
 다음 사이클 추천 = review-code(heavy) components/predictions(31 files) 계속 또는 info-arch(gap13/30)/op-analysis(gap15/25)/fix-incident(gap2/20) 자연 대기.
+
+## 🟢 SUCCESS — review-code(heavy): guide 에이전트 fallback 오도 서술 + privacy Sentry 고지 누락 수정 (cycle 3425, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3424 retro `ad770244`) OK. 2-chain lock 미충족(직전8(3417-3424) distinct=5: polish-ui/review-code/expand-scope/fix-incident/lotto). fix-incident gap=4/20·op-analysis gap=17/25·info-arch gap=15/30·lotto gap=3/30 전부 미도달. fix-incident `gh run list` 재확인 CI Failure Dispatch 전부 skipped — non-actionable. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. 남은 actionable candidate 없어 review-code(heavy) 계속 — 저-mention top-level page(`privacy`/`terms`/`contact`/`login`/`guide`) 신규 스코프 선정.
+
+**감사**: Agent 위임 전수 read(5개 page.tsx + 3개 opengraph-image.tsx + 기존 silent-drift 테스트 2건) — `terms`/`contact`/`login`은 clean(contact 이메일 `@moneyball/shared` 상수 정합, login은 의도된 스텁+robots disallow 정합). OG 이미지 3종 cross-contamination 없음.
+
+**발견 + 수정 1**: `guide/page.tsx` "AI 분석 요약" 섹션이 "에이전트 토론 불가" 표시를 "드물지만 데이터 일시 장애 시" 로 서술 — 실제로는 CREDIT_EXHAUSTED 2026-06-06부터 35+ 연속 op-analysis 재측정이 near-permanent 상태임을 확인한 상태(CLAUDE.md 가중치 섹션 참조)와 정면 모순. `about.tsx`(및 analysis/predictions)는 이미 `detectSimplifiedMode()` 배너로 "AI 에이전트 심층 분석이 일시 중단됩니다. 통계 기반 승부예측은 계속 제공됩니다." 톤으로 정확히 고지 중인데 guide 만 반대로 "드문 일" 이라 사용자 오도. 배너와 동일 톤으로 정정 + "fallback" dev 용어 제거(UI 문구 사용자 언어 규칙 정합).
+
+**발견 + 수정 2**: `privacy/page.tsx` "4. 제3자 서비스 및 데이터 출처" 목록(Vercel/Google/Supabase/Anthropic)에 Sentry 누락 — `instrumentation-client.ts` 확인 결과 `replaysOnErrorSampleRate: 0.1` 로 오류 발생 시 방문자 화면 세션 일부를 실제로 녹화하는 서비스인데도 고지 안 됨(`sentry-scrub.ts` PII 제거 로직이 이미 존재해 팀이 민감 데이터 인지하고 있었음에도 정책 문서에는 반영 안 된 gap). 기존 bullet 스타일 그대로 Sentry 항목 추가.
+
+**검증**: `tsc --noEmit`/`pnpm lint`(privacy+guide 대상) clean, `vitest run src/app/guide src/app/privacy src/app/contact` 5 tests PASS. 직접 main 커밋+push(R4 범위, `11b52978`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3425%50=25≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3406-3425, 현재 포함) review-code 14회 발화로 미충족(표본≥10 충족, opt-out 아님에도 0회 아님). marker 미박제. ship-0 — 직전10(3416-3425) success 다수 포함 미충족. 2-chain lock — 직전8(3418-3425) distinct 재계산 필요(다음 사이클 진단 시). 2차 방어선(cycle 3424 retro `ad770244`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`about`/`community`/`reviews`/`standings`/`teams` 등 잔여, 단 clean 비율 상승 중이라 수확체감 고려) 또는 fix-incident(gap5/20)/op-analysis(gap18/25)/lotto(gap4/30)/info-arch(gap16/30) 자연 대기.
