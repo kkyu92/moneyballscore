@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api/{kbo-scores,live,revalidate,snapshot-pitchers,leaderboard/{sync,mlb-sync}} 전수 감사, picks upsert unbounded 수정 + 테스트 공백 보강 (cycle 3403, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3402 retro `22693ea4`) OK. 2-chain lock 미충족(직전8(3395-3402) distinct=3: review-code+polish-ui+skill-evolution). gap: fix-incident last fire 3382(gap=21/20, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable)·op-analysis last fire 3383(gap=20/25)·info-arch last fire 3373(gap=30/30, 경계값이나 window inclusive 로 미충족)·lotto last fire 3392(gap=11/30) 전부 미도달 또는 actionable 부재. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 10일 신선) 확립 skip 패턴 유지. ship-0 미충족(직전10(3393-3402) success 6건). cycle 3402 next_rec 계승 — grep count 낮지만 `{}` 표기 감사 이력에 없던 6개 route(cycle 2991 lesson: grep count ≠ audit depth 재적용) 채택.
+
+**감사**: agent 위임, `kbo-scores`/`live`/`revalidate`/`snapshot-pitchers`/`leaderboard/sync`/`leaderboard/mlb-sync` 전수 read. auth guard 전부 정상(`.trim()` 방어 패턴 일관), Supabase 에러 silent swallow 0건(`assertSelectOk`/`assertWriteOk` fail-loud 또는 Sentry capture+500/207 전부 정상), KBO/MLB twin(leaderboard sync/mlb-sync) 구조 대칭 확인, 주석-코드 불일치 0건(cloudflare worker cron 주석·네이버 팀코드 매핑 전부 정확). `kbo-scores` 는 auth guard 부재가 의도된 설계(읽기전용 Naver 프록시, health/version 과 동일 패턴) 확인 — drift 아님.
+
+**발견 1 (수정)**: `leaderboard/sync`/`mlb-sync` 가 client localStorage 의 전체 season picks 배열을 upsert 전 크기 제한 없이 그대로 처리 — `revalidate/route.ts` 의 기존 `.slice(0,10)` 패턴과 비일관한 쓰기측 unbounded 입력(과거 cycle 들의 읽기측 unbounded query 버그의 쓰기측 대응 패턴). **발견 2 (수정)**: kbo-scores/live/revalidate/snapshot-pitchers 4개 route 모두 route-level 테스트 0건(leaderboard twin 은 보유) — auth guard/부분실패(207)/throw(500)/revalidate 실패가 live update 성공을 가리지 않는 경로 등 무방비.
+
+**수정**: `MAX_PICKS_PER_SYNC` 상수 추가(KBO 1000 = 144경기×10팀/2 여유배수, MLB 3000 = 162경기×30팀/2 여유배수) + `picks.slice(0, MAX)` 를 filter 이전에 적용(양쪽 route). 4개 미감사 route 에 각각 `__tests__/route.test.ts` 신규 작성(revalidate 7 tests / live 6 tests / snapshot-pitchers 6 tests / kbo-scores 4 tests) + leaderboard sync/mlb-sync 기존 테스트에 cap 회귀 테스트 2건 추가.
+
+**검증**: `tsc --noEmit` clean, `pnpm lint` clean, 전체 `vitest run`(601 files, 4717 tests, +22) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `6b3b2a3d`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참)/trigger2(5연속 fail 없음)/trigger3(3403%50=3≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3384-3403, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3394-3403) success 7건(3396/3397/3398/3399/3401/3402/3403) 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3396-3403) distinct=3(review-code+polish-ui+skill-evolution) 유지, 미충족. 2차 방어선(cycle 3402 retro `22693ea4`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(app/api 잔여: `mlb/`, `picks/` 하위 서브라우트 전수 재확인 또는 KBO `lib/reviews/{shared,buildWeeklyReview,buildMonthlyReview,buildMissReport}.ts` behavioral test 공백 — cycle 3398 carry-over 잔존) 또는 op-analysis(gap21/25)/lotto(gap12/30)/info-arch(gap31/30, 다음 사이클 재평가 시 트리거 가능성) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): app/api/{health,hub-dispatch} 전수 감사, hub-dispatch route 테스트 공백 보강 (cycle 3399, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3391-3398) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=17/20·op-analysis gap=16/25·info-arch gap=26/30·lotto gap=7/30 전부 미도달. ship-0 미충족(직전10(3390-3398) success 5건: 3390,3393,3396,3397,3398). 2차 방어선(cycle 3398 retro `c637dac7`) OK. cycle 3398 next_rec "app/api/{health,hub-dispatch}" 계승.
