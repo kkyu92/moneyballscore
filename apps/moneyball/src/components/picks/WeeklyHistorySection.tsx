@@ -76,7 +76,7 @@ export function WeeklyHistorySection({ groups }: Props) {
           >
             <button
               onClick={() => setOpenIdx(isOpen ? null : idx)}
-              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-white/5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
               aria-expanded={isOpen}
             >
               <div className="flex items-center gap-2 min-w-0">

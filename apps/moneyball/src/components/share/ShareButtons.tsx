@@ -130,7 +130,7 @@ export function ShareButtons({ url, title, text, isEn = false }: ShareButtonsPro
         <button
           type="button"
           onClick={handleNativeShare}
-          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
           aria-label={isEn ? "Share" : "공유하기"}
         >
           <IconShare />
@@ -142,7 +142,7 @@ export function ShareButtons({ url, title, text, isEn = false }: ShareButtonsPro
         href={twitterUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-[#1DA1F2] hover:text-[#1DA1F2] transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-[#1DA1F2] hover:text-[#1DA1F2] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         aria-label={isEn ? "Share on Twitter" : "Twitter에 공유"}
       >
         <IconTwitter />
@@ -153,7 +153,7 @@ export function ShareButtons({ url, title, text, isEn = false }: ShareButtonsPro
         href={facebookUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-[#1877F2] hover:text-[#1877F2] transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-[#1877F2] hover:text-[#1877F2] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         aria-label={isEn ? "Share on Facebook" : "Facebook에 공유"}
       >
         <IconFacebook />
@@ -163,7 +163,7 @@ export function ShareButtons({ url, title, text, isEn = false }: ShareButtonsPro
       <button
         type="button"
         onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         aria-label={isEn ? "Copy link" : "링크 복사"}
       >
         <IconLink />

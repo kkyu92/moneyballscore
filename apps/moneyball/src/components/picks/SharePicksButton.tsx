@@ -84,7 +84,7 @@ export function SharePicksButton({ stats, weekly }: Props) {
   return (
     <button
       onClick={handleShare}
-      className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-surface-card)] px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)] transition-colors"
+      className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-surface-card)] px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
     >
       {copied ? (
         <>

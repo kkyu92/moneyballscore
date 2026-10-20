@@ -227,7 +227,7 @@ export function SearchClient({ entries, initialQuery = '' }: Props) {
           aria-autocomplete="list"
           aria-controls={listboxId}
           aria-activedescendant={activeId}
-          className="w-full px-4 py-3 bg-transparent focus:outline-none text-base"
+          className="w-full px-4 py-3 bg-transparent focus:outline-none text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         />
       </div>
 

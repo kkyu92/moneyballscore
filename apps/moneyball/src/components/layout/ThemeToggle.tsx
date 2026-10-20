@@ -28,7 +28,7 @@ export function ThemeToggle({ isEn = false }: { isEn?: boolean }) {
   return (
     <button
       onClick={next}
-      className="p-2 text-brand-200 hover:text-white transition-colors text-sm"
+      className="p-2 text-brand-200 hover:text-white transition-colors text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
       aria-label={ariaLabel}
       title={ariaLabel}
     >

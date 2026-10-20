@@ -127,14 +127,14 @@ export function PWAInstallButton() {
             <button
               type="button"
               onClick={handleInstall}
-              className="text-xs font-medium px-3 py-1.5 rounded bg-brand-500 hover:bg-brand-400 text-white transition-colors"
+              className="text-xs font-medium px-3 py-1.5 rounded bg-brand-500 hover:bg-brand-400 text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               {copy.install}
             </button>
             <button
               type="button"
               onClick={handleDismiss}
-              className="text-xs px-3 py-1.5 rounded text-brand-200 hover:text-white transition-colors"
+              className="text-xs px-3 py-1.5 rounded text-brand-200 hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               {copy.later}
             </button>
@@ -144,7 +144,7 @@ export function PWAInstallButton() {
           type="button"
           onClick={handleDismiss}
           aria-label={copy.closeAria}
-          className="text-brand-300 hover:text-white text-sm leading-none"
+          className="text-brand-300 hover:text-white text-sm leading-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
           ✕
         </button>

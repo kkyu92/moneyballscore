@@ -61,7 +61,7 @@ export function LeaderboardClient({ entries, aiBaseline }: Props) {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
           >
             참가하기
           </button>
@@ -76,7 +76,7 @@ export function LeaderboardClient({ entries, aiBaseline }: Props) {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-200"
+            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
           >
             닉네임 변경
           </button>
