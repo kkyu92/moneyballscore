@@ -8025,3 +8025,17 @@ Google AdSense 심사 거부 사유 중 "개인정보처리방침·연락처 누
 - Next.js 16 App Router UI 셸
 - Supabase 스키마 + RLS
 - 예측 카드 컴포넌트, 적중률 요약, 방법론 페이지
+
+## ⚪ SUCCESS — review-code(heavy): packages/kbo-data/src/pipeline 1-mention 7파일 전수 감사, dead import 제거 (cycle 3369, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3361-3368) distinct=3: review-code/polish-ui/lotto). gap 전부 미도달(fix-incident 29/20 actionable 부재·op-analysis 10/25·info-arch 29/30·lotto 5/30). 2차 방어선(cycle 3368 retro `712a4943`) OK. cycle 3368 next_rec 따라 pipeline/ 1-mention 7파일(backfill-season.ts, backfill-weather.ts, backtest-wayback-run.ts, factor-bias-bootstrap-ci.ts, notify-status-predicate.ts, snapshot-pitchers.ts, sync-batter-stats.ts) 채택.
+
+**감사**: 본 메인 직접 read. `backtest-wayback-run.ts`/`factor-bias-bootstrap-ci.ts` 는 cycle 23/59 일회성 CLI 분석 스크립트(production 호출 없음) 확인만. `notify-status-predicate.ts` predicate 를 daily.ts 호출부(L215) + 전용 테스트 파일 대조 — 정확 일치. `snapshot-pitchers.ts` cron 주석(cloudflare-worker `37 * * * *` UTC 토 15시)을 worker.ts L445 + wrangler.toml 대조 — 정확. `sync-batter-stats.ts` `MIN_EXPECTED_BATTERS=8` "4 테이블 union" 주석을 fancy-stats.ts 실제 파서(0 WAR/1 wRC+/2 OPS/3 ISO) 대조 — 정확.
+
+**확정 버그 1건**: `backfill-season.ts` 가 `import type { TeamCode } from '@moneyball/shared'` 했으나 파일 전체 미사용 — 쌍둥이 파일 `backfill-weather.ts` 는 L99 `as TeamCode` 로 실제 사용 중이라 복붙 잔재로 추정. tsc/eslint 둘 다 미탐지(unused type import 룰 미설정) — 코드 read 로만 발견. Edit 로 제거, `tsc --noEmit` clean.
+
+**결과**: 직접 main 커밋+push(R4 범위, `4b073ea1`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger3(3369%50=19) 미충족. trigger5 — 직전20(3350-3369) review-code 다수 발화로 미충족(sample≥10). trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3360-3369) success 3건(3365,3366,3369)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(pipeline/ 완료 — app/api/{health,hub-dispatch} 미감사) 또는 info-arch(gap 30/30 다음 사이클 정확 도달)/fix-incident(gap 30/20)/op-analysis(gap 11/25)/lotto(gap 6/30) 자연 대기.
