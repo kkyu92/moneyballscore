@@ -16687,3 +16687,21 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **확인(clean)**: i18n/dark-mode/매직넘버 drift 없음 — layout/ 자체 isEn 관례 + 의도적 non-theme-reactive brand-* 색상 확인.
 
 다음 사이클 추천 = review-code(heavy) components/shared(23)/predictions(31) 계속 (소형 우선 shared) 또는 fix-incident/op-analysis/lotto/info-arch gap 자연 대기.
+
+## 🟢 SUCCESS — review-code(heavy): components/shared/ 전수 감사, MlbTeamLogo i18n 누락 + AnalysisLink dark-mode contrast 수정 (cycle 3415, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3414 retro `4b3bf971`) OK. 2-chain lock 미충족(직전8(3407-3414) distinct=3: review-code/operational-analysis/info-architecture-review). fix-incident gap 20+ 나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 비액션 패턴 재확인. op-analysis gap=7/25·lotto gap=23/30·info-arch gap=5/30 전부 미도달. cycle 3414 next_rec 계승 — components/shared/ 채택.
+
+**부가 발견**: 세션 시작 시 stale `active-cycle`(pid 14710, dead) 발견 — cycle 3414 세션이 작업 완료(커밋 `fc84b3c8`, PR #3180 생성) 후 회고 도달 전 중단. CI green 재확인 후 R7 머지(`219cde12`) + retroactive TODOS/retro backfill(`3fd9f2e9`/`4b3bf971`) 선행 수행 후 본 사이클 진행.
+
+**감사**: Agent 1개 위임 — 16 소스 + 7 테스트 전수 read + 전체 call-site cross-grep(en/mlb 페이지, MlbTeamStrengthGrid) + KBO/MLB twin(TeamLogo vs MlbTeamLogo) 비교 + dark-mode 토큰 교차검증 + division-by-zero/dead-code/stale-comment 점검.
+
+**발견 + 수정 (i18n 누락)**: `MlbTeamLogo.tsx` alt text 가 `/en/mlb/*` 페이지에서도 "로고" suffix 고정 렌더 — `locale` prop 추가(`Breadcrumb.tsx` 기존 관례 일치), en/mlb 10개 page 파일 call site + `MlbTeamStrengthGrid.tsx`(이미 `locale` 을 형제 헬퍼엔 전달하면서 `MlbTeamLogo` 엔 누락 — cycle 3413 `5d7abe1a` 와 동일한 "부분 locale plumbing" drift 패턴) 수정. 회귀 테스트 추가.
+
+**발견 + 수정 (dark-mode)**: `AnalysisLink.tsx` default variant 의 `text-brand-600` 가 `dark:` pairing 없이 사용 — 다크 배경(`#151d18`)에서 거의 안 보이는 대비. 같은 색을 쓰는 다른 모든 사용처(`dark:text-brand-300/400`)와 정렬.
+
+**확인(clean)**: `TeamLogo.tsx`(KBO)는 KBO 전용 라우트에서만 사용 확인(locale 불필요). `MiniGameCard`/`FavoriteTeamFilter`/`QuantOnlyBadge` 등 KBO 전용 하드코딩 한글 = 의도적 scope. brand CTA 버튼류 dark: 변형 부재는 사이트 전역 일관 관례. division-by-zero·dead code·stale comment 0건.
+
+**검증**: `tsc --noEmit`/`eslint src/components/shared`/`vitest run src/components/shared`(7 files/29 tests) + 전체 `pnpm test`(603 files/4733 tests) 전부 PASS. 직접 main 커밋+push(R4, pre-push lint+type-check+version-sync-guard PASS, `2846522f`).
+
+다음 사이클 추천 = review-code(heavy) components/predictions(31 files, components/ 전수 감사 시리즈 마지막 subdir) 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap8/25)/lotto(gap24/30)/info-arch(gap6/30) 자연 대기.
