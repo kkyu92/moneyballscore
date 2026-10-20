@@ -20,7 +20,7 @@ export function NavLinks() {
   const isEn = pathname === "/en" || pathname.startsWith("/en/");
 
   return (
-    <div data-league={league} className="hidden md:flex items-center gap-5">
+    <div className="hidden md:flex items-center gap-5">
       <MegaMenu items={navItems} pathname={pathname} />
       <SearchForm compact />
       <ThemeToggle isEn={isEn} />

@@ -19,12 +19,10 @@ describe("LeagueSelector", () => {
     mockedUsePathname.mockReturnValue("/");
     render(<LeagueSelector />);
 
-    const kboTab = screen.getByRole("tab", { name: /KBO/ });
-    expect(kboTab).toHaveAttribute("aria-selected", "true");
+    const kboTab = screen.getByRole("link", { name: /KBO/ });
     expect(kboTab).toHaveAttribute("aria-current", "page");
 
-    const mlbTab = screen.getByRole("tab", { name: /MLB/ });
-    expect(mlbTab).toHaveAttribute("aria-selected", "false");
+    const mlbTab = screen.getByRole("link", { name: /MLB/ });
     expect(mlbTab).not.toHaveAttribute("aria-current");
   });
 
@@ -33,8 +31,8 @@ describe("LeagueSelector", () => {
 
     // pill active state
     const { unmount } = render(<LeagueSelector />);
-    const mlbTab = screen.getByRole("tab", { name: /MLB/ });
-    expect(mlbTab).toHaveAttribute("aria-selected", "true");
+    const mlbTab = screen.getByRole("link", { name: /MLB/ });
+    expect(mlbTab).toHaveAttribute("aria-current", "page");
     expect(mlbTab).toHaveAttribute("href", "/mlb");
     unmount();
 
@@ -57,31 +55,30 @@ describe("LeagueSelector", () => {
       <LeagueSelector variant="mobile" onSelect={onSelect} />,
     );
 
-    const tablist = container.querySelector('[role="tablist"]');
-    expect(tablist).toBeTruthy();
+    const group = container.querySelector('[role="group"]');
+    expect(group).toBeTruthy();
     // mobile variant 는 border-b 클래스로 mobile 식별
-    expect(tablist?.className).toContain("border-b");
+    expect(group?.className).toContain("border-b");
 
     // 모든 pill click 가능 + onSelect 호출
-    const tabs = within(tablist as HTMLElement).getAllByRole("tab");
+    const tabs = within(group as HTMLElement).getAllByRole("link");
     expect(tabs).toHaveLength(3);
     tabs[1].click(); // MLB
     expect(onSelect).toHaveBeenCalledWith("mlb");
   });
 
-  it("a11y — role=tablist + 각 pill role=tab + aria-label", () => {
+  it("a11y — role=group + 각 pill link + aria-label", () => {
     mockedUsePathname.mockReturnValue("/lotto/methodology");
     render(<LeagueSelector />);
 
-    const tablist = screen.getByRole("tablist");
-    expect(tablist).toHaveAttribute("aria-label", "리그 선택");
+    const group = screen.getByRole("group");
+    expect(group).toHaveAttribute("aria-label", "리그 선택");
 
-    const tabs = screen.getAllByRole("tab");
+    const tabs = within(group).getAllByRole("link");
     expect(tabs).toHaveLength(3);
 
     // 로또 active when pathname=/lotto/methodology
-    const lottoTab = screen.getByRole("tab", { name: /로또/ });
-    expect(lottoTab).toHaveAttribute("aria-selected", "true");
+    const lottoTab = screen.getByRole("link", { name: /로또/ });
     expect(lottoTab).toHaveAttribute("aria-current", "page");
   });
 
@@ -134,19 +131,19 @@ describe("LeagueSelector", () => {
     mockedUsePathname.mockReturnValue("/en/mlb/team/NYY");
     render(<LeagueSelector />);
 
-    const mlbTab = screen.getByRole("tab", { name: /MLB/ });
-    expect(mlbTab).toHaveAttribute("aria-selected", "true");
+    const mlbTab = screen.getByRole("link", { name: /MLB/ });
+    expect(mlbTab).toHaveAttribute("aria-current", "page");
 
-    const kboTab = screen.getByRole("tab", { name: /KBO/ });
-    expect(kboTab).toHaveAttribute("aria-selected", "false");
+    const kboTab = screen.getByRole("link", { name: /KBO/ });
+    expect(kboTab).not.toHaveAttribute("aria-current");
   });
 
   it("EN pathname(/en/mlb/*) — aria-label 'League' + 로또 pill 'Lotto' + MLB 'Beta' badge (cycle 2141 nav label i18n)", () => {
     mockedUsePathname.mockReturnValue("/en/mlb/team/NYY");
     render(<LeagueSelector />);
 
-    expect(screen.getByRole("tablist")).toHaveAttribute("aria-label", "League");
-    expect(screen.getByRole("tab", { name: /Lotto/ })).toBeTruthy();
+    expect(screen.getByRole("group")).toHaveAttribute("aria-label", "League");
+    expect(screen.getByRole("link", { name: /Lotto/ })).toBeTruthy();
     expect(screen.getByText("Beta")).toBeTruthy();
     expect(screen.queryByText("베타")).toBeNull();
   });
@@ -155,7 +152,7 @@ describe("LeagueSelector", () => {
     mockedUsePathname.mockReturnValue("/lotto/methodology");
     render(<LeagueSelector />);
 
-    expect(screen.getByRole("tablist")).toHaveAttribute("aria-label", "리그 선택");
-    expect(screen.getByRole("tab", { name: /로또/ })).toBeTruthy();
+    expect(screen.getByRole("group")).toHaveAttribute("aria-label", "리그 선택");
+    expect(screen.getByRole("link", { name: /로또/ })).toBeTruthy();
   });
 });
