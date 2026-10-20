@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — expand-scope: degraded-flag 구조적 가드 + 잔여 11개 builder sweep (cycle 3419, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3418 retro `83386fae`) OK. cycle 3401 retro가 3회 반복 버그 클래스(teams/buildTeamProfile cycle 3396, mlb/buildMlbTeamProfile cycle 3393, 5개 builder cycle 3397 — catch+Supabase-call 모양인데 degraded 신호 없이 silent fallback)를 ad-hoc file-by-file fix 대신 구조적 가드 필요로 flag한 carry-over 채택 — expand-scope(meta-pattern 누적 = 이 영역 재검토) 매핑.
+
+**감사**: catch+Supabase-call 모양 가진 lib/ builder 14개 전수 read(buildMlbMatchupEloTrend/buildMlbMatchupUpcoming/buildMlbStandings/buildMlbTeamEloTrend/buildMlbTeamFactorAverages/buildMlbTeamUpcoming/standings·buildEloTrend/buildTeamAccuracy/analysis·convergenceRecord 14개 export 함수 + pipelineStats/insights·loader/buildMlbTeamStrengthSnapshot/fetchMlbHistoricalAnalogs).
+
+**발견 + 수정**: 10개가 동일 버그 클래스 — `degraded: boolean` 필드를 모든 catch/early-return 경로에 추가 + 각 소비 페이지의 dbDegraded 표현식에 threading(기존 관례 일치). 4개는 clean — `pipelineStats`(JSON.parse catch, Supabase 무관) / `insights/loader`(의도적 notFound() degrade) / `buildMlbTeamStrengthSnapshot`·`fetchMlbHistoricalAnalogs`(dbDegraded 소비 페이지 부재) — `// degraded-flag-exempt:` 주석으로 명시해 향후 감사 시 재질문 차단.
+
+**회귀 방지**: `src/__tests__/degraded-flag-convention.test.ts` 신규 — lib/**/*.ts 안 catch+.from() 모양 스캔해 degraded 신호 또는 exempt 주석 없으면 CI fail. 가상 regression 파일 심어 가드 동작 검증 후 제거.
+
+**검증**: `tsc --noEmit`/lint clean, `pnpm test` 605 files/4741 tests 전부 PASS. PR #3181 → CI green 확인 후 R7 머지(`ee5092e8`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비된 관례) 미적용. trigger2(5연속 fail 없음)/trigger3(3419%50=19≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3400-3419, 현재 포함) review-code 14회 발화로 미충족. marker 미박제. ship-0 — 직전10(3410-3419) success 9건(3411-3416/3417/3418/본cycle) 포함 미충족. 2-chain lock — 직전8(3412-3419) distinct=3(review-code/polish-ui/expand-scope), 미충족. 2차 방어선(cycle 3418 retro `83386fae`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/predictions/ 계속 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap11/25)/lotto(gap27/30)/info-arch(gap9/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): app/api/ 잔여 12 route 전수 감사, EXTERNAL_GAME_ID_MAX_LENGTH 추출 + PIPELINE_MODES 주석 정정 (cycle 3418, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3417 retro `1cef7b4e`) OK. 2-chain lock 미충족(직전8(3410-3417) distinct=3: review-code(heavy)6+info-architecture-review1+polish-ui1). fix-incident `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable. op-analysis gap=10/25·lotto gap=26/30·info-arch gap=8/30 전부 미도달. explore-idea saturation 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 0h 신선) 확립 skip 패턴 유지. cycle 3416 next_rec 계승 — components/ 전수 감사 시리즈 완료 후 `app/api/` 잔여 12 route(health×2/hub-dispatch/mlb×2/picks×4/pipeline/seo/sync-batter-stats/version) 채택.
