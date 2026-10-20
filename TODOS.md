@@ -1,4 +1,22 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/scrapers/ 전수 감사, kbo-official.ts/kbo-live.ts cancel-status 순서 silent drift 수정 (cycle 3409, 2026-10-20)
+
+진단: open issue 0건, approved plan 0/23. 2차 방어선(cycle 3408 retro `15a8fba9`) OK. 2-chain lock 미충족(직전8(3401-3408) distinct=3: review-code(heavy)6+skill-evolution1+operational-analysis1). fix-incident gap=27/20 도달하나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable. info-arch gap=36/30 도달하나 23+연속 "IA 충분" 재확정 패턴. lotto gap=17/30·op-analysis gap=1 전부 미근접. cycle 3407 next_rec 계승 — `packages/kbo-data/src/scrapers/` (14파일, 2693줄) 채택.
+
+**감사**: agent 위임, 14개 파일 전수 read + 호출부 교차검증 + 테스트 커버리지 대조.
+
+**발견(수정)**: `kbo-official.ts:74-80`의 경기 상태 판정이 `CANCEL_SC_ID`를 state_sc(live/final) 체크 **뒤**에 확인 — `kbo-live.ts:121`는 반대로 cancel을 **먼저** 체크하며 주석에 "kbo-official.ts:65-72 패턴 정합"이라 명시하지만 실제로는 순서가 역전된 상태(silent drift). kbo-live.ts의 cancel-first 설계는 의도적(서스펜드/우천취소가 state_sc=2/3로 이미 넘어간 뒤에도 감지되어야 함 — 안 그러면 영구히 live/final로 고착) + 전용 regression test 보유. kbo-official.ts는 이 순서 없이 반대로 구현돼 있었고 해당 edge case 테스트도 부재.
+
+**발견(carry-over, 미수정)**: `fancy-stats.ts`의 `fetchTeamStats`가 `Promise.all([fetchEloRatings, fetchBatterStats])`로 elo/leaders URL을 동시 요청 + 파이프라인 최상위 `Promise.all([fetchPitcherStats, fetchTeamStats, fetchEloRatings])`와 겹쳐 같은 URL을 사실상 중복 fetch — `baseball-savant.ts`/`fangraphs-mlb.ts`에 이미 적용된 TOCTOU 직렬화 fix가 Fancy Stats(핵심 KBO 데이터 소스)에는 미적용. `kbo-pitcher.ts`/`kbo-live.ts` 메인 fetch 경로도 재시도 로직 부재(형제 스크레이퍼 대비 비일관). 다음 review-code(heavy) 사이클 추천 스코프.
+
+**수정**: `kbo-official.ts` cancel 체크를 state_sc 체크보다 먼저로 재배치(kbo-live.ts와 정합) + conflict 시나리오(state_sc=2/3 + cancel) regression test 2건 추가.
+
+**검증**: `tsc --noEmit`/`pnpm lint` clean, 전체 `pnpm test`(kbo-data 1234 tests +2, moneyball 4731 tests) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `92ba3535`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참)/trigger2(5연속 fail 없음)/trigger3(3409%50=9≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3390-3409, 현재 포함) review-code 14회 발화(평가대상 비0)로 미충족. marker 미박제. ship-0 — 직전10(3400-3409) success 7건 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3402-3409) distinct=2(review-code+skill-evolution/operational-analysis 등 확인 필요하나 review-code 다수) 재확인 권장.
+
+다음 사이클 추천 = review-code(heavy) 계속(`fancy-stats.ts` TOCTOU 직렬화 fix 또는 `kbo-pitcher.ts`/`kbo-live.ts` 재시도 로직 보강) 또는 info-arch(비액션 패턴)/lotto(gap18/30)/fix-incident(비액션) 자연 대기.
+
 ## ⚪ RETRO-ONLY — operational-analysis (lite): CE/비CE 격차 재측정, n=448 동일값 35회 연속 (cycle 3408, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3400-3407) distinct=3: polish-ui1+skill-evolution1+review-code(heavy)6). fix-incident gap=26/20 도달하나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable. lotto gap=16/30·info-arch gap=35/30(23+연속 "IA 충분" 재확정 패턴) 전부 미근접/비액션. op-analysis 자체 gap=25/25 정확 도달(last fire 3383) + review-code(heavy) 직전8 중 6 dominance 완화 겸 선택. 2차 방어선(cycle 3407 retro `5f4afdcd`) OK.
