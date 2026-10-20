@@ -90,6 +90,7 @@ export const MLB_GRADIENT_CALENDAR_135 = "linear-gradient(135deg, #1a2606 0%, #4
 export const MLB_GRADIENT_METHODOLOGY_135 = "linear-gradient(135deg, #06231a 0%, #0f5c42 50%, #15a872 100%)";
 export const MLB_GRADIENT_PREDICTIONS_135 = "linear-gradient(135deg, #2e0a1f 0%, #7a1a4a 50%, #e21d5c 100%)";
 export const MLB_GRADIENT_REVIEWS_135 = "linear-gradient(135deg, #2b0e07 0%, #7a2410 50%, #e0481f 100%)";
+export const MLB_GRADIENT_REVIEWS_MISSES_135 = "linear-gradient(135deg, #2a0505 0%, #6b1414 50%, #c2291a 100%)";
 
 // KBO 전용 라우트 OG/twitter gradient — 21개 라우트가 design-tokens.ts 밖에서 인라인 hex 로
 // 중복/분산돼있던 걸 단일 source 로 흡수 (silent drift family, cycle 2943 design-system 스윕).
