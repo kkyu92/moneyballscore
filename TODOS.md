@@ -16783,3 +16783,15 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증**: `tsc --noEmit`/`eslint src/components/shared`/`vitest run src/components/shared`(7 files/29 tests) + 전체 `pnpm test`(603 files/4733 tests) 전부 PASS. 직접 main 커밋+push(R4, pre-push lint+type-check+version-sync-guard PASS, `2846522f`).
 
 다음 사이클 추천 = review-code(heavy) components/predictions(31 files, components/ 전수 감사 시리즈 마지막 subdir) 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap8/25)/lotto(gap24/30)/info-arch(gap6/30) 자연 대기.
+
+## 🟢 SUCCESS — fix-incident(lite): data-refresh-weekly 2연속 cron failure 진단+복구 (cycle 3421, 2026-10-20)
+
+진단: open issue 0건, approved plan 0/23. 2-chain lock 미충족(직전8(3413-3420) distinct=3: review-code/polish-ui/expand-scope). fix-incident 20-cycle 미발화 trigger 충족(직전 20 cycle 0회) — `gh run list` 로 8개 scheduled workflow 전수 확인.
+
+**발견**: `data-refresh-weekly`(주간 cron)가 최근 2회 연속(10/06, 10/13) failure, 09/29 이후 3주째 merge 공백. 로그 확인 결과 10/06 = `exceed_egress_quota`(Supabase 제한), 10/13 = `getaddrinfo ENOTFOUND` — 둘 다 CLAUDE.md 기박제 Supabase INACTIVE 인시던트(2026-10-11~16, RESOLVED cycle 3261) 구간과 정확히 겹침. 신규 버그 아님. 다른 weekly cron(lotto-pick-update/factor-backtest-weekly/op-analysis-weekly)은 이미 자연 재발화로 복구 완료 — data-refresh-weekly만 주간 cadence(화 17:15 UTC) 때문에 이번 사이클 시점까지 미복구 상태로 남아있었음(다음 정기 발화는 당일 저녁, 아직 미도달).
+
+**복구**: DNS 재확인(정상 resolve) + REST 401(정상) 으로 Supabase 완전 정상 확인 후 `gh workflow run data-refresh-weekly.yml` 수동 fire → snapshot `2026-10-20.md`(41 lines) 정상 생성 → PR #3182 자동 생성. PR 체크 결과 Vercel = build-rate-limit(FAILURE, 코드 무관 infra 한도) / GitGuardian = PASS → R7 자동머지는 "CI red" 규정대로 skip. 내용(순수 데이터 파일, GitGuardian 통과) 검토 후 수동 `gh pr merge --squash --delete-branch`, `state=MERGED` 실측 확인.
+
+**코드 변경 없음** — 진단 + 수동 fire + 수동 머지만 (workflow 자체는 이미 3-attempt retry 로직 견고, cycle 3327 교훈 반영 완료 상태 확인).
+
+다음 사이클 추천 = review-code(heavy) components/predictions 계속 또는 info-arch(gap 11/30)/lotto(gap 29/30 거의 도달)/op-analysis(gap 13/25) 자연 대기 — lotto 자연 발화 유력.
