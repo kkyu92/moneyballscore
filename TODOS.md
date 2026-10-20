@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/ 신규 스코프 2차분(leaderboard+teams+ui, 11파일) 전수 감사, 신규 drift 0건 (cycle 3375, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23 (plan #30 포함). 2-chain lock 미충족(직전8(3367-3374) distinct=4: review-code/polish-ui/info-arch/operational-analysis 혼재 — 실측 분포는 review-code 우세지만 lock 임계 ≤2 미도달). fix-incident gap=25/20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=16/25·lotto gap=11/30·info-arch gap=2/30 전부 미도달. 2차 방어선(`scripts/retro-drift-check.sh 3325 3374`) 실행 — 50-cycle 구간 전수 대조 결과 기존에 알려진 cycle 3360(commit-only, JSON 누락) 1건 외 신규 silent drift 0건. cycle 3374 next_rec 따라 review-code(heavy) components/ 잔여 12 subdir 중 중소형 우선(leaderboard 5파일/teams 5파일/ui 1파일 = 11파일) 채택.
+
+**감사**: Agent 1개 위임 — 12파일(11 소스 + 기존 테스트 1개) 전수 read + 모든 export call-site cross-grep + KBO/MLB twin 2쌍(`TeamEloChart`↔`MlbTeamEloChart`, `TeamConvergencePickRecord`↔`MlbTeamConvergencePickRecord`) 라인별 diff + localStorage/`useSyncExternalStore` 패턴 일관성 확인 + 기존 테스트 실행 + `tsc --noEmit`.
+
+**결과**: 신규 drift 0건. 코드 변경 없음. twin 쌍 전부 의도된 차이 확인(`MlbTeamEloChart`의 `locale` prop = `/en/mlb` 라우트 존재 때문, KBO 쪽은 `/en/teams` 라우트 부재로 불필요 — 정합). 부가 관찰 1건(action 아님): MLB 쪽 `MlbTeamConvergencePickRecord`/`MlbMatchupConvergencePickRecord` 의 `STRINGS` 가 KBO 쪽과 달리 팩터 개수(5/6) 를 텍스트에 명시 안 함 — 단일 파일 아닌 MLB 양쪽 위젯에 일관 적용된 패턴이라 의도된 스타일 선택으로 판단, drift 아님(fix 보류). 테스트 `MlbTeamEloChart.test.ts` 2/2 pass + 관련 16/16 pass + tsc clean. components/ 전체(20 subdir, 179파일) 중 2차분(11파일) 완료 — 잔여 10개 subdir(accuracy/layout/reviews/matchup/analysis/picks/dashboard/shared/predictions, ui 는 금번 포함되어 완료) 다음 사이클 후보.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3375%50=25≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3356-3375, 현재 cycle 포함) 표본≥10 충족, opt-out 9개 제외 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3366-3375) success 3건(3366/3369/3371) 포함으로 미충족. 2-chain lock 미충족(위 참조). 2차 방어선(cycle 3374 retro `baa09f87`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 10개 subdir 계속 감사(accuracy 8파일 우선 소형), 또는 fix-incident(gap 26/20, 재확인 필요)/op-analysis(gap 17/25)/lotto(gap 12/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 신규 스코프 1차분(9파일) 전수 감사, 신규 drift 0건 (cycle 3374, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23(plan #30 expiry 2026-10-18 경과 확인). 2-chain lock 미충족(직전8(3366-3373) distinct=3: review-code/polish-ui/info-arch). fix-incident gap=24/20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, non-actionable. op-analysis gap=15/25·lotto gap=10/30 미도달. explore-idea saturation 9/15 미충족. DESIGN.md mtime 10일 신선. cycle 3373 next_rec 따라 review-code(heavy) 신규 스코프 채택 — `components/`(179파일, 20 subdir) 는 TODOS grep 결과 review-code(heavy) 가 한번도 명시 스코프로 다룬 적 없는 최대 미감사 영역.
