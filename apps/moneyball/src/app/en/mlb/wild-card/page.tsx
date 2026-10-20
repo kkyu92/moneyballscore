@@ -72,7 +72,7 @@ function WcMagicNumberBadge({ value }: { value: number }) {
 }
 
 export default async function MlbWildCardHubEn() {
-  const divisionStandings = await buildMlbDivisionStandings();
+  const { standings: divisionStandings } = await buildMlbDivisionStandings();
   const wildcardStandings = buildMlbWildcardStandings(divisionStandings);
 
   const jsonLd = {

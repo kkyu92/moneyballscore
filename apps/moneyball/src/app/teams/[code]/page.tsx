@@ -116,10 +116,12 @@ export default async function TeamPage({ params }: PageProps) {
   const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/teams/[code]", source: "buildTeamEloTrend" });
   const upcomingResult = upcomingR.status === "fulfilled" ? upcomingR.value : captureFallback(upcomingR.reason, { items: [], degraded: true }, { route: "/teams/[code]", source: "buildTeamUpcoming" });
   const upcoming = upcomingResult.items;
-  const strongTeamStats = strongTeamStatsR.status === "fulfilled" ? strongTeamStatsR.value : captureFallback(strongTeamStatsR.reason, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(strong)" });
-  const completeTeamStats = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(complete)" });
+  const strongTeamStatsResult = strongTeamStatsR.status === "fulfilled" ? strongTeamStatsR.value : captureFallback(strongTeamStatsR.reason, { rows: [], degraded: true }, { route: "/teams/[code]", source: "getConvergencePickTeamStats(strong)" });
+  const completeTeamStatsResult = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, { rows: [], degraded: true }, { route: "/teams/[code]", source: "getConvergencePickTeamStats(complete)" });
+  const strongTeamStats = strongTeamStatsResult.rows;
+  const completeTeamStats = completeTeamStatsResult.rows;
 
-  const dbDegraded = profile.degraded || upcomingResult.degraded || [eloTrendR, strongTeamStatsR, completeTeamStatsR].some((r) => r.status === "rejected");
+  const dbDegraded = profile.degraded || upcomingResult.degraded || strongTeamStatsResult.degraded || completeTeamStatsResult.degraded || [eloTrendR, strongTeamStatsR, completeTeamStatsR].some((r) => r.status === "rejected");
 
   const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);

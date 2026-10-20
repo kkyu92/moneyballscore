@@ -93,20 +93,22 @@ describe("buildMlbTeamEloTrend", () => {
     ]);
   });
 
-  it("데이터 0건 → points: [] (silent throw 없음)", async () => {
+  it("데이터 0건 → points: [] (silent throw 없음), degraded: false", async () => {
     supabaseMock = makeSupabaseMock([]);
 
     const { buildMlbTeamEloTrend } = await import("../buildMlbTeamEloTrend");
-    const { points } = await buildMlbTeamEloTrend("NYY");
+    const { points, degraded } = await buildMlbTeamEloTrend("NYY");
 
     expect(points).toEqual([]);
+    expect(degraded).toBe(false);
   });
 
-  it("select error 시 throw 대신 points: [] degrade (cycle 2949 captureFallback)", async () => {
+  it("select error 시 throw 대신 points: [] degrade (cycle 2949 captureFallback) + degraded: true 노출", async () => {
     supabaseMock = makeSupabaseMock([], { message: "boom" });
 
     const { buildMlbTeamEloTrend } = await import("../buildMlbTeamEloTrend");
-    const { points } = await buildMlbTeamEloTrend("NYY");
+    const { points, degraded } = await buildMlbTeamEloTrend("NYY");
     expect(points).toEqual([]);
+    expect(degraded).toBe(true);
   });
 });

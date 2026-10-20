@@ -37,19 +37,21 @@ describe('buildMlbDivisionStandings', () => {
   it('스케줄 0건이면 전 팀 0-0, gamesBehind 0 (1위만 null)', async () => {
     supabaseMock = makeSupabaseMock({ schedule: [] });
     const { buildMlbDivisionStandings } = await import('../buildMlbStandings');
-    const result = await buildMlbDivisionStandings();
+    const { standings: result, degraded } = await buildMlbDivisionStandings();
     const alEast = result.AL.East;
     expect(alEast).toHaveLength(5);
     expect(alEast[0].gamesBehind).toBeNull();
     expect(alEast.every((r) => r.wins === 0 && r.losses === 0)).toBe(true);
+    expect(degraded).toBe(false);
   });
 
-  it('select 실패 시 throw 대신 전 팀 0-0 degrade (cycle 2949 captureFallback)', async () => {
+  it('select 실패 시 throw 대신 전 팀 0-0 degrade (cycle 2949 captureFallback) + degraded: true 노출', async () => {
     supabaseMock = makeSupabaseMock({ error: { message: 'boom' } });
     const { buildMlbDivisionStandings } = await import('../buildMlbStandings');
-    const result = await buildMlbDivisionStandings();
+    const { standings: result, degraded } = await buildMlbDivisionStandings();
     const alEast = result.AL.East;
     expect(alEast.every((r) => r.wins === 0 && r.losses === 0)).toBe(true);
+    expect(degraded).toBe(true);
   });
 
   it('final 경기만 집계 + 승패 정렬 + GB 계산 (BAL/NYY 예시, AL East)', async () => {
@@ -64,7 +66,7 @@ describe('buildMlbDivisionStandings', () => {
       ],
     });
     const { buildMlbDivisionStandings } = await import('../buildMlbStandings');
-    const result = await buildMlbDivisionStandings();
+    const { standings: result } = await buildMlbDivisionStandings();
     const alEast = result.AL.East;
 
     const nyy = alEast.find((r) => r.teamCode === 'NYY')!;
@@ -84,7 +86,7 @@ describe('buildMlbDivisionStandings', () => {
       schedule: [{ home_team_code: 'TB', away_team_code: 'NYY', home_score: 2, away_score: 1 }],
     });
     const { buildMlbDivisionStandings } = await import('../buildMlbStandings');
-    const result = await buildMlbDivisionStandings();
+    const { standings: result } = await buildMlbDivisionStandings();
     const tbr = result.AL.East.find((r) => r.teamCode === 'TBR')!;
     expect(tbr.wins).toBe(1);
   });
@@ -94,7 +96,7 @@ describe('buildMlbDivisionStandings', () => {
       schedule: [{ home_team_code: 'NYY', away_team_code: 'BOS', home_score: 3, away_score: 3 }],
     });
     const { buildMlbDivisionStandings } = await import('../buildMlbStandings');
-    const result = await buildMlbDivisionStandings();
+    const { standings: result } = await buildMlbDivisionStandings();
     const nyy = result.AL.East.find((r) => r.teamCode === 'NYY')!;
     expect(nyy.wins + nyy.losses).toBe(0);
   });
@@ -110,7 +112,7 @@ describe('findMlbTeamDivisionRank', () => {
       schedule: [{ home_team_code: 'NYY', away_team_code: 'BAL', home_score: 5, away_score: 2 }],
     });
     const { buildMlbDivisionStandings, findMlbTeamDivisionRank } = await import('../buildMlbStandings');
-    const standings = await buildMlbDivisionStandings();
+    const { standings } = await buildMlbDivisionStandings();
     const rank = findMlbTeamDivisionRank(standings, 'AL', 'East', 'NYY');
     expect(rank).toEqual({ rank: 1, total: 5, gamesBehind: null });
   });
@@ -124,7 +126,7 @@ describe('findMlbTeamDivisionRank', () => {
       ],
     });
     const { buildMlbDivisionStandings, findMlbTeamDivisionRank } = await import('../buildMlbStandings');
-    const standings = await buildMlbDivisionStandings();
+    const { standings } = await buildMlbDivisionStandings();
     const rank = findMlbTeamDivisionRank(standings, 'AL', 'East', 'BAL');
     expect(rank?.rank).toBe(2);
     expect(rank?.total).toBe(5);
@@ -134,7 +136,7 @@ describe('findMlbTeamDivisionRank', () => {
   it('teamCode 가 해당 division 소속 아니면 null', async () => {
     supabaseMock = makeSupabaseMock({ schedule: [] });
     const { buildMlbDivisionStandings, findMlbTeamDivisionRank } = await import('../buildMlbStandings');
-    const standings = await buildMlbDivisionStandings();
+    const { standings } = await buildMlbDivisionStandings();
     const rank = findMlbTeamDivisionRank(standings, 'AL', 'East', 'HOU');
     expect(rank).toBeNull();
   });

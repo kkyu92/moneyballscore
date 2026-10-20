@@ -17,6 +17,7 @@ export interface MlbTeamFactorAverages {
   lineupXwoba: number | null;
   lineupBarrelPct: number | null;
   sampleN: number;
+  degraded: boolean;
 }
 
 interface PredRow {
@@ -52,9 +53,10 @@ export const EMPTY_MLB_FACTOR_AVERAGES: MlbTeamFactorAverages = {
   lineupXwoba: null,
   lineupBarrelPct: null,
   sampleN: 0,
+  degraded: false,
 };
 
-type MlbFactorPerspective = Omit<MlbTeamFactorAverages, "sampleN">;
+type MlbFactorPerspective = Omit<MlbTeamFactorAverages, "sampleN" | "degraded">;
 
 const MLB_FACTOR_FIELDS = [
   "spFip",
@@ -84,6 +86,7 @@ export async function buildMlbTeamFactorAverages(
   teamCode: MlbTeamCode,
 ): Promise<MlbTeamFactorAverages> {
   const supabase = await createClient();
+  let degraded = false;
 
   // mlb_schedule 은 StatsAPI 컨벤션 저장 — canonical(Baseball-Reference) 코드로 그대로 필터링하면
   // 7팀(TBR/CHW/KCR/SDP/SFG/ARI/WSN)에서 항상 0건 매칭(silent empty, cycle 2081).
@@ -99,10 +102,11 @@ export async function buildMlbTeamFactorAverages(
       `buildMlbTeamFactorAverages mlb_schedule ${teamCode}`,
     ));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbTeamFactorAverages mlb_schedule' });
   }
   const scheduleRows = (scheduleData ?? []) as ScheduleRow[];
-  if (scheduleRows.length === 0) return EMPTY_MLB_FACTOR_AVERAGES;
+  if (scheduleRows.length === 0) return { ...EMPTY_MLB_FACTOR_AVERAGES, degraded };
 
   const scheduleByExternalId = new Map<string, ScheduleRow>();
   for (const s of scheduleRows) {
@@ -135,6 +139,7 @@ export async function buildMlbTeamFactorAverages(
       `buildMlbTeamFactorAverages predictions ${teamCode}`,
     ));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbTeamFactorAverages predictions' });
   }
 
@@ -162,5 +167,5 @@ export async function buildMlbTeamFactorAverages(
     });
   }
 
-  return computeNumericAveragesFromPerspectives(perspectives, MLB_FACTOR_FIELDS);
+  return { ...computeNumericAveragesFromPerspectives(perspectives, MLB_FACTOR_FIELDS), degraded };
 }

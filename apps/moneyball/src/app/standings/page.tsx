@@ -116,10 +116,11 @@ export default async function StandingsPage() {
     buildEloTrend(),
   ]);
   const standings = standingsR.status === "fulfilled" ? standingsR.value : captureFallback(standingsR.reason, [], { route: "/standings", source: "buildStandings" });
-  const teamAccuracy = teamAccuracyR.status === "fulfilled" ? teamAccuracyR.value : captureFallback(teamAccuracyR.reason, [], { route: "/standings", source: "buildAllTeamAccuracy" });
-  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [], teams: [] }, { route: "/standings", source: "buildEloTrend" });
+  const teamAccuracyResult = teamAccuracyR.status === "fulfilled" ? teamAccuracyR.value : captureFallback(teamAccuracyR.reason, { rows: [], degraded: true }, { route: "/standings", source: "buildAllTeamAccuracy" });
+  const teamAccuracy = teamAccuracyResult.rows;
+  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [], teams: [], degraded: true }, { route: "/standings", source: "buildEloTrend" });
 
-  const dbDegraded = [standingsR, teamAccuracyR, eloTrendR].some((r) => r !== null && r.status === "rejected");
+  const dbDegraded = teamAccuracyResult.degraded || eloTrend.degraded || [standingsR, teamAccuracyR, eloTrendR].some((r) => r !== null && r.status === "rejected");
 
   // 현재 Elo: eloTrend 마지막 데이터 포인트에서 팀별 추출 (신규 DB 쿼리 0건)
   const currentEloMap = new Map<string, number>();

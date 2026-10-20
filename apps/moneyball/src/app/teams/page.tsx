@@ -50,10 +50,11 @@ export default async function TeamsIndexPage() {
     (value) => ({ status: "fulfilled" as const, value }),
     (reason) => ({ status: "rejected" as const, reason }),
   );
-  const rows: TeamAccuracyRow[] = rowsR.status === "fulfilled"
+  const teamAccuracyResult = rowsR.status === "fulfilled"
     ? rowsR.value
-    : captureFallback(rowsR.reason, [] as TeamAccuracyRow[], { route: "/teams", source: "teams-hub-accuracy" });
-  const dbDegraded = rowsR.status === "rejected";
+    : captureFallback(rowsR.reason, { rows: [] as TeamAccuracyRow[], degraded: true }, { route: "/teams", source: "teams-hub-accuracy" });
+  const rows: TeamAccuracyRow[] = teamAccuracyResult.rows;
+  const dbDegraded = rowsR.status === "rejected" || teamAccuracyResult.degraded;
 
   const accMap = new Map<TeamCode, TeamAccuracyRow>();
   for (const row of rows) accMap.set(row.teamCode, row);

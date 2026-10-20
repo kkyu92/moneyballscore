@@ -607,7 +607,8 @@ export default async function HomePage() {
   const weekSchedule = weekScheduleR.status === "fulfilled" ? weekScheduleR.value : captureFallback(weekScheduleR.reason, [] as WeekGameDay[], { route: "/", source: "getWeekAheadSchedule" });
   const yesterdayResults = yesterdayResultsR.status === "fulfilled" ? yesterdayResultsR.value : captureFallback(yesterdayResultsR.reason, [] as YesterdayGame[], { route: "/", source: "getYesterdayResults" });
   const standings = standingsR.status === "fulfilled" ? standingsR.value : captureFallback(standingsR.reason, [], { route: "/", source: "buildStandings" });
-  const teamAccuracyRows = teamAccuracyRowsR.status === "fulfilled" ? teamAccuracyRowsR.value : captureFallback(teamAccuracyRowsR.reason, [], { route: "/", source: "buildAllTeamAccuracy" });
+  const teamAccuracyResult = teamAccuracyRowsR.status === "fulfilled" ? teamAccuracyRowsR.value : captureFallback(teamAccuracyRowsR.reason, { rows: [], degraded: true }, { route: "/", source: "buildAllTeamAccuracy" });
+  const teamAccuracyRows = teamAccuracyResult.rows;
   const weeklyTrend = weeklyTrendR.status === "fulfilled" ? weeklyTrendR.value : captureFallback(weeklyTrendR.reason, [] as WeeklyTrendPoint[], { route: "/", source: "getRecentWeeksAccuracy" });
   const teamAccuracyMap = new Map(teamAccuracyRows.map((r) => [r.teamCode, r]));
 
@@ -691,7 +692,7 @@ export default async function HomePage() {
   );
   const divergenceGame = divergenceGameR.status === "fulfilled" ? divergenceGameR.value : captureFallback(divergenceGameR.reason, null, { route: "/", source: "getTodayDivergenceGame" });
 
-  const dbDegraded = [gamesR, accuracyR, weekScheduleR, yesterdayResultsR, standingsR, teamAccuracyRowsR, weeklyTrendR, nextScheduleR, divergenceGameR].some(
+  const dbDegraded = teamAccuracyResult.degraded || [gamesR, accuracyR, weekScheduleR, yesterdayResultsR, standingsR, teamAccuracyRowsR, weeklyTrendR, nextScheduleR, divergenceGameR].some(
     (r) => r !== null && r.status === "rejected",
   );
 

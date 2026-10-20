@@ -18,14 +18,18 @@ type PredFixture = {
   home_win_prob: number | null;
 };
 
-function makeSupabaseMock(schedule: ScheduleFixture[], preds: PredFixture[] = []) {
+function makeSupabaseMock(
+  schedule: ScheduleFixture[],
+  preds: PredFixture[] = [],
+  scheduleError: { message: string } | null = null,
+) {
   const scheduleBuilder = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     gte: vi.fn().mockReturnThis(),
     or: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockResolvedValue({ data: schedule, error: null }),
+    limit: vi.fn().mockResolvedValue(scheduleError ? { data: null, error: scheduleError } : { data: schedule, error: null }),
   };
   const predsBuilder = {
     select: vi.fn().mockReturnThis(),
@@ -54,11 +58,20 @@ describe("buildMlbTeamUpcoming", () => {
     vi.clearAllMocks();
   });
 
-  it("예정 경기 없으면 빈 배열", async () => {
+  it("예정 경기 없으면 빈 배열, degraded: false", async () => {
     supabaseMock = makeSupabaseMock([]);
     const { buildMlbTeamUpcoming } = await import("../buildMlbTeamUpcoming");
     const result = await buildMlbTeamUpcoming("NYY");
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
+    expect(result.degraded).toBe(false);
+  });
+
+  it("mlb_schedule select error 시 degraded: true + items: [] (silent drift 가드)", async () => {
+    supabaseMock = makeSupabaseMock([], [], { message: "boom" });
+    const { buildMlbTeamUpcoming } = await import("../buildMlbTeamUpcoming");
+    const result = await buildMlbTeamUpcoming("NYY");
+    expect(result.items).toEqual([]);
+    expect(result.degraded).toBe(true);
   });
 
   it("예정 경기 + pre_game 예측 있음(홈) → predictedAsWinner true", async () => {
@@ -77,12 +90,12 @@ describe("buildMlbTeamUpcoming", () => {
     const { buildMlbTeamUpcoming } = await import("../buildMlbTeamUpcoming");
     const result = await buildMlbTeamUpcoming("NYY");
 
-    expect(result).toHaveLength(1);
-    expect(result[0].isHome).toBe(true);
-    expect(result[0].opponentCode).toBe("BOS");
-    expect(result[0].homeWinProb).toBe(0.62);
-    expect(result[0].predictedAsWinner).toBe(true);
-    expect(result[0].confidence).toBeCloseTo(0.62);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].isHome).toBe(true);
+    expect(result.items[0].opponentCode).toBe("BOS");
+    expect(result.items[0].homeWinProb).toBe(0.62);
+    expect(result.items[0].predictedAsWinner).toBe(true);
+    expect(result.items[0].confidence).toBeCloseTo(0.62);
   });
 
   it("예정 경기 + pre_game 예측 있음(원정) → predictedAsWinner 홈팀 기준 반전", async () => {
@@ -101,10 +114,10 @@ describe("buildMlbTeamUpcoming", () => {
     const { buildMlbTeamUpcoming } = await import("../buildMlbTeamUpcoming");
     const result = await buildMlbTeamUpcoming("BOS");
 
-    expect(result).toHaveLength(1);
-    expect(result[0].isHome).toBe(false);
-    expect(result[0].opponentCode).toBe("NYY");
-    expect(result[0].predictedAsWinner).toBe(false);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].isHome).toBe(false);
+    expect(result.items[0].opponentCode).toBe("NYY");
+    expect(result.items[0].predictedAsWinner).toBe(false);
   });
 
   it("예정 경기 있지만 pre_game 예측 부재 → predictedAsWinner false, homeWinProb null (silent drop 대신 명시적 fallback)", async () => {
@@ -122,8 +135,8 @@ describe("buildMlbTeamUpcoming", () => {
     const { buildMlbTeamUpcoming } = await import("../buildMlbTeamUpcoming");
     const result = await buildMlbTeamUpcoming("NYY");
 
-    expect(result).toHaveLength(1);
-    expect(result[0].homeWinProb).toBeNull();
-    expect(result[0].predictedAsWinner).toBe(false);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].homeWinProb).toBeNull();
+    expect(result.items[0].predictedAsWinner).toBe(false);
   });
 });

@@ -85,16 +85,16 @@ export default async function SeasonPage({ params }: PageProps) {
   const [
     strongConvergenceRecord,
     completeConvergenceRecord,
-    strongHomeAwaySplit,
-    completeHomeAwaySplit,
-    strongDayOfWeekSplit,
-    completeDayOfWeekSplit,
-    strongTeamStats,
-    completeTeamStats,
-    strongConvergenceStreak,
-    strongConvergenceBestStreak,
-    completeConvergenceStreak,
-    completeConvergenceBestStreak,
+    strongHomeAwaySplitResult,
+    completeHomeAwaySplitResult,
+    strongDayOfWeekSplitResult,
+    completeDayOfWeekSplitResult,
+    strongTeamStatsResult,
+    completeTeamStatsResult,
+    strongConvergenceStreakResult,
+    strongConvergenceBestStreakResult,
+    completeConvergenceStreakResult,
+    completeConvergenceBestStreakResult,
   ] = await Promise.all([
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
@@ -110,6 +110,18 @@ export default async function SeasonPage({ params }: PageProps) {
     getConvergencePickStreak(FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
     getConvergencePickBestStreak(FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
   ]);
+  // cycle 3402 fix — getConvergencePick* 반환 shape 변경(degraded 플래그 추가) unwrap.
+  // 이 페이지는 dbDegraded 배너가 기존에 없어 신규 추가하지 않음(범위: 타입 정합만).
+  const strongHomeAwaySplit = strongHomeAwaySplitResult.split;
+  const completeHomeAwaySplit = completeHomeAwaySplitResult.split;
+  const strongDayOfWeekSplit = strongDayOfWeekSplitResult.rows;
+  const completeDayOfWeekSplit = completeDayOfWeekSplitResult.rows;
+  const strongTeamStats = strongTeamStatsResult.rows;
+  const completeTeamStats = completeTeamStatsResult.rows;
+  const strongConvergenceStreak = strongConvergenceStreakResult.streak;
+  const strongConvergenceBestStreak = strongConvergenceBestStreakResult.streak;
+  const completeConvergenceStreak = completeConvergenceStreakResult.streak;
+  const completeConvergenceBestStreak = completeConvergenceBestStreakResult.streak;
 
   // 월별 차트 max 계산 (bar 폭 정규화)
   const maxMonthRuns = Math.max(1, ...summary.byMonth.map((m) => m.avgRuns));

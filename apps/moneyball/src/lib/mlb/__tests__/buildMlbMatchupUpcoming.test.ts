@@ -18,14 +18,18 @@ type PredFixture = {
   home_win_prob: number | null;
 };
 
-function makeSupabaseMock(schedule: ScheduleFixture[], preds: PredFixture[] = []) {
+function makeSupabaseMock(
+  schedule: ScheduleFixture[],
+  preds: PredFixture[] = [],
+  scheduleError: { message: string } | null = null,
+) {
   const scheduleBuilder = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     gte: vi.fn().mockReturnThis(),
     or: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockResolvedValue({ data: schedule, error: null }),
+    limit: vi.fn().mockResolvedValue(scheduleError ? { data: null, error: scheduleError } : { data: schedule, error: null }),
   };
   const predsBuilder = {
     select: vi.fn().mockReturnThis(),
@@ -54,12 +58,13 @@ describe("buildMlbMatchupUpcoming", () => {
     vi.clearAllMocks();
   });
 
-  it("예정 경기 없으면 빈 배열", async () => {
+  it("예정 경기 없으면 빈 배열, degraded: false", async () => {
     supabaseMock = makeSupabaseMock([]);
     const { buildMlbMatchupUpcoming } = await import("../buildMlbMatchupUpcoming");
     const pair = mlbCanonicalPair("NYY", "BOS")!;
     const result = await buildMlbMatchupUpcoming(pair);
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
+    expect(result.degraded).toBe(false);
   });
 
   it("예정 경기 + pre_game 예측 있음 → home_win_prob 기반 predictedWinnerCode derive", async () => {
@@ -79,10 +84,11 @@ describe("buildMlbMatchupUpcoming", () => {
     const pair = mlbCanonicalPair("NYY", "BOS")!;
     const result = await buildMlbMatchupUpcoming(pair);
 
-    expect(result).toHaveLength(1);
-    expect(result[0].homeWinProb).toBe(0.62);
-    expect(result[0].predictedWinnerCode).toBe("NYY");
-    expect(result[0].confidence).toBeCloseTo(0.62);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].homeWinProb).toBe(0.62);
+    expect(result.items[0].predictedWinnerCode).toBe("NYY");
+    expect(result.items[0].confidence).toBeCloseTo(0.62);
+    expect(result.degraded).toBe(false);
   });
 
   it("예정 경기 있지만 pre_game 예측 부재 → predictedWinnerCode null (silent drop 대신 명시적 null)", async () => {
@@ -101,8 +107,17 @@ describe("buildMlbMatchupUpcoming", () => {
     const pair = mlbCanonicalPair("NYY", "BOS")!;
     const result = await buildMlbMatchupUpcoming(pair);
 
-    expect(result).toHaveLength(1);
-    expect(result[0].homeWinProb).toBeNull();
-    expect(result[0].predictedWinnerCode).toBeNull();
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].homeWinProb).toBeNull();
+    expect(result.items[0].predictedWinnerCode).toBeNull();
+  });
+
+  it("mlb_schedule select error 시 degraded: true + items: [] (silent drift 가드)", async () => {
+    supabaseMock = makeSupabaseMock([], [], { message: "boom" });
+    const { buildMlbMatchupUpcoming } = await import("../buildMlbMatchupUpcoming");
+    const pair = mlbCanonicalPair("NYY", "BOS")!;
+    const result = await buildMlbMatchupUpcoming(pair);
+    expect(result.items).toEqual([]);
+    expect(result.degraded).toBe(true);
   });
 });

@@ -383,7 +383,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
   // wave-461: 수렴 픽 성적 라인 — 게임 상세 배지에 최근 N경기 적중 현황 표시
   const convergenceRecord = isConvergencePick
     ? await getRecentConvergencePickRecord()
-    : { wins: 0, losses: 0, total: 0 };
+    : { wins: 0, losses: 0, total: 0, degraded: false };
 
   const jsonLd = {
     "@context": "https://schema.org",

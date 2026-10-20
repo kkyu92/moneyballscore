@@ -21,6 +21,9 @@ import {
 // 않음(plan #28 Phase 2 조사, cycle 2316 — 목적 자체가 다름, 저장 여부와 무관).
 // computeTeamRecentRecord/computeTeamStreak 는 KBO/MLB StreakGame 구조 호환 재사용,
 // buildTeamProfile.ts:194 주석 정합 — 신규 MLB_ 접두 중복 함수 X).
+//
+// degraded-flag-exempt: 유일한 소비자 mlb/analysis(ko+en) page 양쪽 모두 dbDegraded 배너 자체가
+// 없어(cycle 3402 조사) degraded 플래그를 꽂을 UI 가 없음 — criterion b.
 
 export interface MlbTeamStrengthRow {
   teamCode: MlbTeamCode;

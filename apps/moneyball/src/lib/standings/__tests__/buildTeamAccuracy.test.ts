@@ -42,7 +42,7 @@ describe("buildAllTeamAccuracy", () => {
       ],
     });
 
-    const result = await buildAllTeamAccuracy();
+    const { rows: result, degraded } = await buildAllTeamAccuracy();
 
     const lg = result.find((r) => r.teamCode === "LG");
     const ht = result.find((r) => r.teamCode === "HT");
@@ -62,12 +62,14 @@ describe("buildAllTeamAccuracy", () => {
       const nxt = result[i + 1].accuracyRate ?? -1;
       expect(cur).toBeGreaterThanOrEqual(nxt);
     }
+    expect(degraded).toBe(false);
   });
 
-  it("데이터 없음 → 빈 배열", async () => {
+  it("데이터 없음 → 빈 배열, degraded: false", async () => {
     supabaseMock = makeMock({ data: [] });
-    const result = await buildAllTeamAccuracy();
+    const { rows: result, degraded } = await buildAllTeamAccuracy();
     expect(result).toEqual([]);
+    expect(degraded).toBe(false);
   });
 
   it("game null → 해당 row 건너뜀", async () => {
@@ -77,15 +79,16 @@ describe("buildAllTeamAccuracy", () => {
         { is_correct: true, game: { home_team: { code: "SS" }, away_team: { code: "NC" } } },
       ],
     });
-    const result = await buildAllTeamAccuracy();
+    const { rows: result } = await buildAllTeamAccuracy();
     expect(result.find((r) => r.teamCode === "SS")).toBeDefined();
     expect(result.length).toBe(2); // SS, NC만
   });
 
-  it("DB error → throw 대신 빈 배열 degrade (captureFallback)", async () => {
+  it("DB error → throw 대신 빈 배열 degrade (captureFallback) + degraded: true 노출", async () => {
     supabaseMock = makeMock({ error: { message: "db error" } });
-    const result = await buildAllTeamAccuracy();
+    const { rows: result, degraded } = await buildAllTeamAccuracy();
     expect(result).toEqual([]);
+    expect(degraded).toBe(true);
   });
 
   it("기본 cohort = CURRENT_MODEL_FILTER(v1.8 단일값) — in() 호출 확인", async () => {
@@ -123,7 +126,7 @@ describe("buildTeamBiasAnalysis", () => {
       { teamCode: "HT", winPct: 0.5, rank: 2, games: 10, wins: 5, draws: 0, losses: 5, gamesBehind: 0, recent10: "" },
     ]);
 
-    const result = await buildTeamBiasAnalysis();
+    const { rows: result } = await buildTeamBiasAnalysis();
     const lg = result.find((r) => r.teamCode === "LG");
     expect(lg).toBeDefined();
     // LG home 5경기 모두 predicted_winner === home id → predictedHomeWin=true → LG predictedWinN=5
@@ -151,7 +154,7 @@ describe("buildTeamBiasAnalysis", () => {
       { teamCode: "HT", winPct: 0.5, rank: 2, games: 10, wins: 5, draws: 0, losses: 5, gamesBehind: 0, recent10: "" },
     ]);
 
-    const result = await buildTeamBiasAnalysis();
+    const { rows: result } = await buildTeamBiasAnalysis();
     const lg = result.find((r) => r.teamCode === "LG");
     const ht = result.find((r) => r.teamCode === "HT");
     // LG(home)는 한 번도 예측승리 아님, HT(away)가 매번 예측승리
@@ -170,7 +173,7 @@ describe("buildTeamBiasAnalysis", () => {
     });
     fetchStandingsMock.mockResolvedValue([]);
 
-    const result = await buildTeamBiasAnalysis();
+    const { rows: result } = await buildTeamBiasAnalysis();
     // 3경기 → SS=3, NC=3 모두 totalN < 5 → 빈 배열
     expect(result).toEqual([]);
   });
@@ -185,12 +188,20 @@ describe("buildTeamBiasAnalysis", () => {
     });
     fetchStandingsMock.mockRejectedValue(new Error("network error"));
 
-    const result = await buildTeamBiasAnalysis();
+    const { rows: result } = await buildTeamBiasAnalysis();
     expect(result.length).toBeGreaterThan(0);
     // standings 실패 → actualWinPct=null, biasGap=null
     result.forEach((r) => {
       expect(r.actualWinPct).toBeNull();
       expect(r.biasGap).toBeNull();
     });
+  });
+
+  it("predictions select error → throw 대신 빈 배열 degrade + degraded: true 노출", async () => {
+    supabaseMock = makeMock({ error: { message: "db error" } });
+    fetchStandingsMock.mockResolvedValue([]);
+    const { rows: result, degraded } = await buildTeamBiasAnalysis();
+    expect(result).toEqual([]);
+    expect(degraded).toBe(true);
   });
 });

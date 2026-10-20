@@ -72,7 +72,7 @@ function formatGB(gb: number | null): string {
 }
 
 export default async function MlbStandingsHub() {
-  const standings = await buildMlbDivisionStandings();
+  const { standings } = await buildMlbDivisionStandings();
 
   const jsonLd = {
     "@context": "https://schema.org",

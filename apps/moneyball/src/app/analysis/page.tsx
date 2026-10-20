@@ -195,7 +195,7 @@ export default async function AnalysisIndexPage() {
     (value) => ({ status: "fulfilled" as const, value }),
     (reason) => ({ status: "rejected" as const, reason }),
   );
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthSnapshot, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord, completeTeamStats, completeHomeAwaySplit, recentCompleteConvergenceRecord, simplifiedMode] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthSnapshot, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreakResult, convergenceBestStreakResult, convergenceTeamStatsResult, convergenceHomeAwaySplitResult, seasonCompleteConvergenceRecord, completeConvergenceStreakResult, completeBestStreakResult, monthlyCompleteConvergenceRecord, completeTeamStatsResult, completeHomeAwaySplitResult, recentCompleteConvergenceRecord, simplifiedMode] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -247,7 +247,36 @@ export default async function AnalysisIndexPage() {
 
   const teamStrengthRows = teamStrengthSnapshot.rows;
 
-  const dbDegraded = teamStrengthSnapshot.degraded || [standingsR].some((r) => r !== null && r.status === "rejected");
+  // cycle 3402 fix — getConvergencePick* 계열은 내부 catch 가 Supabase 오류를 captureFallback
+  // 으로 흡수(fail-silent)해 위 Promise.all 이 절대 reject 되지 않음 — dbDegraded 가 이 15개
+  // 호출의 DB 장애를 전혀 반영 못 하던 silent drift (buildTeamProfile/buildMlbTeamProfile 과
+  // 동일 bug shape, cycle 3396/3393 fix pattern 적용). 각 결과의 degraded 플래그를 OR.
+  const convergenceStreak = convergenceStreakResult.streak;
+  const convergenceBestStreak = convergenceBestStreakResult.streak;
+  const convergenceTeamStats = convergenceTeamStatsResult.rows;
+  const convergenceHomeAwaySplit = convergenceHomeAwaySplitResult.split;
+  const completeConvergenceStreak = completeConvergenceStreakResult.streak;
+  const completeBestStreak = completeBestStreakResult.streak;
+  const completeTeamStats = completeTeamStatsResult.rows;
+  const completeHomeAwaySplit = completeHomeAwaySplitResult.split;
+
+  const dbDegraded = teamStrengthSnapshot.degraded
+    || recentConvergenceRecord.degraded
+    || recentStrongConvergenceRecord.degraded
+    || monthlyStrongConvergenceRecord.degraded
+    || seasonStrongConvergenceRecord.degraded
+    || convergenceStreakResult.degraded
+    || convergenceBestStreakResult.degraded
+    || convergenceTeamStatsResult.degraded
+    || convergenceHomeAwaySplitResult.degraded
+    || seasonCompleteConvergenceRecord.degraded
+    || completeConvergenceStreakResult.degraded
+    || completeBestStreakResult.degraded
+    || monthlyCompleteConvergenceRecord.degraded
+    || completeTeamStatsResult.degraded
+    || completeHomeAwaySplitResult.degraded
+    || recentCompleteConvergenceRecord.degraded
+    || [standingsR].some((r) => r !== null && r.status === "rejected");
 
   // wave-325: 현재 KBO 순위 맵
   const rankMap = new Map<TeamCode, number>(

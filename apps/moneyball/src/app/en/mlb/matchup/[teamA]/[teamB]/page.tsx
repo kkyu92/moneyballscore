@@ -181,16 +181,19 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
     buildMlbMatchupUpcoming(pair),
   ]);
   const profile = await profilePromise;
-  const factorA = factorAR.status === "fulfilled" ? factorAR.value : captureFallback(factorAR.reason, EMPTY_MLB_FACTOR_AVERAGES, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbTeamFactorAverages.codeA" });
-  const factorB = factorBR.status === "fulfilled" ? factorBR.value : captureFallback(factorBR.reason, EMPTY_MLB_FACTOR_AVERAGES, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbTeamFactorAverages.codeB" });
+  const factorA = factorAR.status === "fulfilled" ? factorAR.value : captureFallback(factorAR.reason, { ...EMPTY_MLB_FACTOR_AVERAGES, degraded: true }, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbTeamFactorAverages.codeA" });
+  const factorB = factorBR.status === "fulfilled" ? factorBR.value : captureFallback(factorBR.reason, { ...EMPTY_MLB_FACTOR_AVERAGES, degraded: true }, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbTeamFactorAverages.codeB" });
   const formA = formAR.status === "fulfilled" ? formAR.value : captureFallback(formAR.reason, EMPTY_RECENT_FORM, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeA" });
   const formB = formBR.status === "fulfilled" ? formBR.value : captureFallback(formBR.reason, EMPTY_RECENT_FORM, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeB" });
-  const strongH2HStats = strongH2HStatsR.status === "fulfilled" ? strongH2HStatsR.value : captureFallback(strongH2HStatsR.reason, [], { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "getMlbConvergencePickHeadToHeadRecord(strong)" });
-  const completeH2HStats = completeH2HStatsR.status === "fulfilled" ? completeH2HStatsR.value : captureFallback(completeH2HStatsR.reason, [], { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "getMlbConvergencePickHeadToHeadRecord(complete)" });
-  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupEloTrend" });
-  const upcomingMatchup = upcomingMatchupR.status === "fulfilled" ? upcomingMatchupR.value : captureFallback(upcomingMatchupR.reason, [], { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupUpcoming" });
+  const strongH2HStatsResult = strongH2HStatsR.status === "fulfilled" ? strongH2HStatsR.value : captureFallback(strongH2HStatsR.reason, { rows: [], degraded: true }, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "getMlbConvergencePickHeadToHeadRecord(strong)" });
+  const completeH2HStatsResult = completeH2HStatsR.status === "fulfilled" ? completeH2HStatsR.value : captureFallback(completeH2HStatsR.reason, { rows: [], degraded: true }, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "getMlbConvergencePickHeadToHeadRecord(complete)" });
+  const strongH2HStats = strongH2HStatsResult.rows;
+  const completeH2HStats = completeH2HStatsResult.rows;
+  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [], degraded: true }, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupEloTrend" });
+  const upcomingMatchupResult = upcomingMatchupR.status === "fulfilled" ? upcomingMatchupR.value : captureFallback(upcomingMatchupR.reason, { items: [], degraded: true }, { route: "/en/mlb/matchup/[teamA]/[teamB]", source: "buildMlbMatchupUpcoming" });
+  const upcomingMatchup = upcomingMatchupResult.items;
 
-  const dbDegraded = profile.degraded || [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR].some((r) => r.status === "rejected");
+  const dbDegraded = profile.degraded || factorA.degraded || factorB.degraded || eloTrend.degraded || upcomingMatchupResult.degraded || strongH2HStatsResult.degraded || completeH2HStatsResult.degraded || [factorAR, factorBR, formAR, formBR, strongH2HStatsR, completeH2HStatsR, eloTrendR, upcomingMatchupR].some((r) => r.status === "rejected");
 
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
   const summary = buildSummaryEn(profile);
