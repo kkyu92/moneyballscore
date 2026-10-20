@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/ 4차분(standings/debug/insights/matchup/analysis, 21파일) 전수 감사, pipelineStats.ts silent JSON-parse swallow 수정 (cycle 3390, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 평가(직전8(3382-3389) distinct=3: fix-incident1+operational-analysis1+review-code(heavy)6) 미충족. fix-incident gap=8/20·op-analysis gap=7/25·info-arch gap=17/30·lotto gap=26/30 전부 미도달. ship-0 미충족(직전10(3381-3390) success 3건=3382,3388,3390). exhaustive-sweep 서브체크 RC_HEAVY_COUNT=8/10(≥8 충족) 이나 CLEAN_DRIFT_COUNT=6/10(<7) 미충족 — EXHAUSTIVE_SWEEP 발동 X. cycle 3389 next_rec 계승 — lib/ 잔여 subdir 중 소규모 5개(standings4/debug4/insights4/matchup5/analysis4, 합 21파일) 4차분 선택.
+
+**감사**: agent 위임, standings/debug/insights/matchup/analysis 21파일 전수 read. 대부분 clean(Elo trend/magic number/매치업 프로필/convergence record/composite duel 등 기존 패턴 일치, 주석-코드 mismatch 없음, 하드코딩 상수 없음). `debug/pipelineStats.ts`의 `parseSkippedDetail` 이 `JSON.parse` 실패 시 bare `catch { }` 로 `[]` 반환 — 이 대시보드 자체가 "pipeline 이상 징후 노출"이 목적인데, 파싱 실패라는 이상 징후 자체가 조용히 사라지는 구조. 이 스윕의 다른 모든 파일(captureFallback/console.warn 사용)과 불일치. `console.warn('[parseSkippedDetail] JSON parse failed', err)` 추가.
+
+**결과**: `pipelineStats.ts` 수정 + `vitest`(4680/4680 pass) + `tsc --noEmit`(clean) 확인 후 main 직접 push(`4703da58`). 소규모 단일 파일 수정이라 PR 분리 없이 R4 직접 커밋 경로 사용.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3390%50≠0). trigger5 — 직전20(3371-3390, 현재 포함) 표본≥10, 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3381-3390) success 3건(3382/3388/3390) 포함 미충족. 2-chain lock 미충족(위 참조, 단 다음 사이클 3391 평가 시 직전8(3383-3390)=operational-analysis1+review-code(heavy)7, distinct=2 로 LOCK 발동 예상). 2차 방어선(cycle 3389 retro `6b110213`) OK.
+
+다음 사이클 추천 = 2-chain lock 발동 가능성 높음(review-code/operational-analysis 제외) — fix-incident(gap8/20)/info-arch(gap17/30)/lotto(gap26/30) trigger 재확인, 없으면 polish-ui 강제 fallback. lib/ 잔여 subdir(dashboard/predictions/teams/reviews/mlb, 40파일) 는 lock cooldown(N=1) 이후 재개.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/ 3차분(picks/lotto/players, 20파일) 전수 감사, 신규 drift 0건 (cycle 3389, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3381-3388) distinct=3: review-code(heavy)6+fix-incident1+operational-analysis1). fix-incident gap=7/20·op-analysis gap=6/25·info-arch gap=16/30·lotto gap=25/30 전부 미도달(lotto cron 산출물도 신선 — picks 2026-10-24.md/results 2026-10-17.md 둘 다 최신). ship-0 미충족(직전10(3379-3388) success 2건=3382,3388). exhaustive-sweep 서브체크 RC_HEAVY_COUNT=6/10(<8) 미충족. cycle 3388 next_rec 계승 — lib/ 잔여 subdir 중 소규모 3개(picks 6/lotto 7/players 7, 합 20파일) 3차분 선택.
