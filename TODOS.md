@@ -1,3 +1,19 @@
+## ⚪ RETRO-ONLY — review-code (heavy): app/community stub + hooks/ 2파일 + EN not-found twin 재검증, drift 0건 (cycle 3453, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3452 retro `d64e37f2`) OK. 2-chain lock 미충족(직전8(3445-3452) distinct=4: polish-ui/review-code/lotto/skill-evolution). gap 체크: fix-incident=17/20·op-analysis=20/25·info-arch=13/30·lotto=4/30(최근 발화) 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 전일 신선) 확립 skip 패턴 유지. cycle 3452 추천 중 bounded 소규모 scope(`app/community` 1파일 stale) 채택 — lib/ 2순회는 본 cycle 예산 초과 우려로 보류.
+
+**감사 1 (`app/community/page.tsx`)**: noindex coming-soon stub 페이지. `robots.ts` 의 disallow 규칙과 `metadata.robots: {index:false, follow:false}` 일치 확인. 다른 "community" 매칭(`DivergenceChip`/`PickButton`/`CommunityVsAICard`/`buildCommunityAccuracy`)은 무관한 "커뮤니티 예측 정확도" 피처(이미 lib/ 1순회 감사 완료) — 의도된 설계, drift 없음.
+
+**감사 2 (`hooks/` 2파일)**: `use-kbo-scores.ts`(SWR 폴링, 날짜별 폴링 disable 로직) + `use-user-picks.ts`(localStorage pruning) 전수 read — 둘 다 로직 정확, 가드 주석과 실제 동작 일치. 버그 없음.
+
+**감사 3 (EN not-found twin 재검증)**: cycle 3452 가 신규 추가한 `en/mlb/{team,players,games}/not-found.tsx` 포함 전체 5개 segment(`team/[code]`/`players/[id]`/`games/[date]`/`reviews/monthly/[month]`/`reviews/weekly/[week]`)가 KO `mlb/` 동일 5개와 정확히 1:1 대응 확인. 루트 `app/not-found.tsx`(전역 한국어) + `app/en` 레벨 not-found 부재는 KO/EN 양쪽 완전 동일 구조(세그먼트별 not-found 없는 다른 모든 라우트는 양쪽 다 루트로 fallback) — twin-parity 위반 아님, 의도된 공유 설계.
+
+**검증**: 코드 변경 없음(순수 read-only 검증), 커밋 없음. 3개 scope 전부 drift 0건.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3453%50=3≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3434-3453, 현재 포함) review-code(평가 대상) 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3444-3453) success 3건(3444/3451/3452) — PARTIAL_STREAK≠10 미충족. 2-chain lock(다음 사이클용) — 직전8(3446-3453) distinct=3(review-code/lotto/skill-evolution) → 미충족, 다음 사이클 자유 선택.
+
+다음 사이클 추천 = review-code(heavy) 2순회(lib/components/app-api/kbo-data 재스윕) 또는 gap 자연대기(fix-incident 18/20, op-analysis 21/25, info-arch 14/30 순차 임박).
+
 ## 🟢 SUCCESS — review-code(heavy): app/en/mlb 78파일 EN twin-parity 전수감사, drift 5건 수정 (cycle 3452, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3451 retro `ea0b3857`) OK. 2-chain lock 미충족(직전8(3444-3451) distinct=4: review-code/polish-ui/lotto/skill-evolution). gap 체크: fix-incident=16/20·op-analysis=19/25·info-arch=12/30·lotto=3/30 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. lib/·components/·app/api·packages/kbo-data 1순회 완주 상태에서 재감사 대상 탐색 중 `app/en/mlb`(78파일, 17서브디렉토리)가 체계적 전수감사 이력 전무(ad-hoc 단발 fix만 존재) 발견 — EN twin-parity drift 는 본 리포 기존 silent drift family 핵심 패턴이라 고가치 신규 scope 채택.
