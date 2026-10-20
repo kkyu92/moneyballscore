@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — review-code (heavy): KBO-only 라우트 8개(dashboard/leaderboard/search/glossary/guide/changelog/teams/seasons) MLB twin 부재 의도성 검증, drift 0건 (cycle 3459, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3458 retro `54b12fc8`) OK. 2-chain lock 미충족(직전8(3451-3458) distinct=3: skill-evolution/review-code/operational-analysis). gap 체크: fix-incident=22/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — non-actionable. op-analysis gap=4/25·info-arch gap=18/30·lotto gap=9/30 전부 미도달. explore-idea saturation 직전15 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 3시간 신선) 확립 skip 패턴 유지. cycle 3458 추천대로 KBO-only(MLB twin 없는) 라우트 8개가 의도된 설계인지 재확인.
+
+**검증**: `dashboard`(KBO_TEAMS/KBO_SEASON_YEAR/CURRENT_SCORING_RULE 하드코딩, v1.8 10팩터 모델 튜닝 전용 — MLB 모델은 별도 팩터 구조라 twin 부적합) / `teams`(TEAM_ORDER가 KBO 10팀 고정 코드, MLB team 라우트는 `mlb/team/[code]`로 이미 별도 존재) / `leaderboard`(league 필터 부재 확인 — KBO+MLB 픽 통합 집계, 의도적으로 cross-league 단일 페이지) / `search`(코드 내 KBO_TEAMS 엔트리 외에 `/mlb` 자체를 검색 결과 1개 entry로 명시 — 사이트 전역 검색이라 cross-league 설계) / `glossary`/`guide`/`changelog`(KBO/league 키워드 0건 grep — 세이버메트릭스 용어집·사용법·버전 히스토리는 리그 무관 사이트 전역 메타 페이지) / `seasons`(KBO 역대 시즌 리뷰, MLB는 `mlb/postseason`+`mlb/wild-card`가 포맷이 다른 대응 개념 보유 — MLB는 정규시즌 리뷰 대신 플레이오프 브라켓 중심 구조, 스포츠 구조 차이로 인한 의도된 분기).
+
+**코드 변경 없음** — 8개 전부 의도된 설계 확인, drift 0건, retro-only.
+
+**검증**: `pnpm --filter moneyball test -- --run` 생략(코드 변경 없음, 직전 cycle 3458 605 files/4776 tests PASS 유지).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3459%50=9≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3440-3459, 현재 포함) review-code 14회 발화로 미충족(표본=19≥10 충족). marker 미박제. ship-0 — 직전10(3449-3458) success 5건(3452/3455/3456/3458 + 1건) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3452-3459) distinct 재확인 필요하나 review-code 비중 높음, 다음 사이클 자유 선택.
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/{health,hub-dispatch}` 등 일부 app/api 잔여 또는 `components/` 2순회) 또는 fix-incident(gap 22, non-actionable 재확인 필요)/info-arch(gap 18)/lotto(gap 9)/op-analysis(gap 4) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): mlb/{accuracy,calendar,methodology,predictions,reviews}+en/mlb OG/twitter-image 20파일 누락 수정 PR #3186 머지 (cycle 3458, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3457 retro `aedbef20`) OK. 2-chain lock 미충족(직전8(3450-3457) distinct=3: review-code/skill-evolution/operational-analysis). fix-incident gap=22/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — non-actionable. op-analysis gap=4/25·info-arch gap=18/30·lotto gap=9/30 전부 미도달. cycle 3457 추천대로 app/ page-level 영역 신규 탐색.
