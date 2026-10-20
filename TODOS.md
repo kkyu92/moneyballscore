@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/ 2차분(changelog/leaderboard/v2-shadow-monitor/accuracy, 18파일) 전수 감사, accuracy 페이지 silent error-swallow 수정 — PR #3178 머지 (cycle 3388, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3380-3387) distinct=4: polish-ui1+review-code(heavy)5+fix-incident1+operational-analysis1). fix-incident gap=6(3382 발화)/op-analysis gap=5(3383 발화)/info-arch gap=15/30/lotto gap=24/30 전부 미도달. ship-0 미충족(직전10(3378-3387) success 1건=3382). exhaustive-sweep 서브체크 RC_HEAVY_COUNT=7/10(<8) 미충족. 세션 재개 사례 — active-cycle 파일이 dead pid(36637)로 stale 상태 발견, 직전 세션이 본 작업(lib/ 2차분 audit + 수정 + PR 생성)을 이미 완료한 채 crash — 본 세션은 CI 확인 + 머지 + 회고만 수행.
+
+**감사**: `lib/{changelog,leaderboard,v2-shadow-monitor,accuracy}` 18파일 전수 read + `buildFactorAccuracy` 단일 호출부 추적. 18파일 자체 drift 0건, 단 `apps/moneyball/src/app/accuracy/page.tsx` 안 `Promise.allSettled` 블록의 4개 쿼리(pollResult/completedGamesResult/predForPoll/factorResult)가 같은 블록의 다른 쿼리(result/versionHistoryResult/fallbackResult)와 달리 `assertSelectOk` 가드 없이 `.data ?? []` 직접 사용 발견. supabase-js 쿼리 에러는 throw 아닌 `{data:null, error}` resolve 라 `allSettled` 로 못 잡음 — RLS/컬럼명 변경 등 쿼리 에러 시 조용히 "0 샘플" 로 렌더링되는 silent-drift(과거 VARCHAR-overflow 사례와 동일 class).
+
+**결과**: 4개 쿼리 전부 `assertSelectOk` 가드 추가. PR #3178 → CI green(check/GitGuardian/Vercel 전부 pass) → R7 `--squash --delete-branch` 머지, `state=MERGED` 실측 확인(mergeCommit `1485a935`).
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3388%50≠0). trigger5 — 직전20(3369-3388) 표본≥10, 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3379-3388) success 2건(3382/3388) 포함 미충족. 2-chain lock 미충족(위 참조). 2차 방어선(cycle 3387 retro `6d623948`) OK.
+
+다음 사이클 추천 = review-code(heavy) lib/ 잔여 subdir(picks/lotto/players/standings/debug/insights/matchup/analysis/dashboard/predictions/teams/reviews/mlb) 순차 감사 계속 — 단 RC_HEAVY_COUNT 7/10 로 exhaustive-sweep 임계(8/10) 근접, 다음 선택 시 재확인 권장. 또는 info-arch(gap 16/30)/lotto(gap 25/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/ 1차분(seo/api/calendar/observability/stats/seasons/supabase, 15파일) 전수 감사, 신규 drift 0건 — lib/ 전수 감사 시작 (cycle 3387, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3379-3386) distinct=5: review-code(heavy)3+polish-ui1+review-code1+fix-incident1+operational-analysis1). fix-incident gap=5(3382 발화)/op-analysis gap=4(3383 발화)/info-arch gap=14/30/lotto gap=23/30 전부 미도달. ship-0 미충족(직전10(3377-3386) success 1건=3382 포함). cycle 3386 next_rec 채택 — components/ 완결 후 lib/ scope 전환, 24 subdir 중 최소 규모 7개(seo/api/calendar/observability/stats/seasons/supabase) 1차분 선택.
