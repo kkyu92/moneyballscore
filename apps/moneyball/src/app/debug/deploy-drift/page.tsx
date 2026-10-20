@@ -12,7 +12,7 @@ interface VersionPayload {
   commit_sha_short: string | null;
   commit_ref: string | null;
   deploy_env: string | null;
-  vercel_url: string | null;
+  deploy_url: string | null;
   region: string | null;
   timestamp: string;
 }
@@ -92,8 +92,8 @@ export default async function DeployDriftDashboard() {
             <dd className="break-all">{prodPayload.commit_sha ?? '?'}</dd>
             <dt className="text-gray-500">commit_ref</dt>
             <dd>{prodPayload.commit_ref ?? '?'}</dd>
-            <dt className="text-gray-500">vercel_url</dt>
-            <dd className="break-all">{prodPayload.vercel_url ?? '?'}</dd>
+            <dt className="text-gray-500">deploy_url</dt>
+            <dd className="break-all">{prodPayload.deploy_url ?? '?'}</dd>
             <dt className="text-gray-500">timestamp</dt>
             <dd>{prodPayload.timestamp}</dd>
           </dl>
