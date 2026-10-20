@@ -315,7 +315,7 @@ export function MlbAccuracyDashboard({
             <h2 className="text-lg font-bold">{s.brierTrendTitle}</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.brierTrendDesc}</p>
           </div>
-          <BrierTrendChart data={brierTrend} />
+          <BrierTrendChart data={brierTrend} locale={locale} />
         </section>
       )}
 
@@ -325,7 +325,7 @@ export function MlbAccuracyDashboard({
             <h2 className="text-lg font-bold">{s.scoringRuleDayTitle}</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.scoringRuleDayDesc}</p>
           </div>
-          <ScoringRuleDayHeatmap data={scoringRuleDayHeatmap} />
+          <ScoringRuleDayHeatmap data={scoringRuleDayHeatmap} locale={locale} />
         </section>
       )}
 
@@ -336,7 +336,7 @@ export function MlbAccuracyDashboard({
             <span className="text-xs text-gray-400 dark:text-gray-500">{s.cohortWeekSubLabel}</span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400">{s.cohortWeekDesc}</p>
-          <CohortComparisonHeatmap data={cohortWeekHeatmap} />
+          <CohortComparisonHeatmap data={cohortWeekHeatmap} locale={locale} />
         </section>
       )}
 

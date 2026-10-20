@@ -1,6 +1,7 @@
 import {
   ACCURACY_BASELINE,
   ACCURACY_GOOD_RATE,
+  WEEKDAY_LABELS_EN_MON_FIRST,
   WEEKDAY_LABELS_KO_MON_FIRST,
   WEEKDAY_ORDER_MON_FIRST,
 } from "@moneyball/shared";
@@ -10,10 +11,27 @@ import { SCORING_RULE_HEATMAP_ROWS } from "@/lib/accuracy/buildAccuracyData";
 
 interface ScoringRuleDayHeatmapProps {
   data: ScoringRuleDayCell[];
+  locale?: "ko" | "en";
 }
 
 const DAY_ORDER = WEEKDAY_ORDER_MON_FIRST;
-const DAY_LABELS_KO = WEEKDAY_LABELS_KO_MON_FIRST;
+
+const STRINGS = {
+  ko: {
+    empty: "scoring_rule × 요일 매트릭스 데이터 없음.",
+    header: "scoring_rule",
+    smallSample: "소표본",
+    legend: "색상 — 녹색 ≥60% / 노랑 ≥50% / 빨강 <50% / 회색 N<3 소표본. v1.6 anomaly + Sunday cap 효과 시각화.",
+    dayLabels: WEEKDAY_LABELS_KO_MON_FIRST,
+  },
+  en: {
+    empty: "No scoring_rule × weekday matrix data yet.",
+    header: "scoring_rule",
+    smallSample: "small N",
+    legend: "Color — green ≥60% / yellow ≥50% / red <50% / gray N<3 small sample. Visualizes v1.6 anomaly + Sunday cap effect.",
+    dayLabels: WEEKDAY_LABELS_EN_MON_FIRST,
+  },
+};
 
 // cell 배경 색상 — DESIGN.md brand/semantic 정합. BrierTrendChart 와 동일 패턴.
 // >=60% brand / >=50% yellow / <50% red / null = neutral (소표본 N<3).
@@ -31,14 +49,15 @@ const ROW_LABEL: Record<string, string> = Object.fromEntries(
   SCORING_RULE_HEATMAP_ROWS.map((sr) => [sr, sr === "all" ? "전체" : sr]),
 );
 
-export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
+export function ScoringRuleDayHeatmap({ data, locale = "ko" }: ScoringRuleDayHeatmapProps) {
+  const s = STRINGS[locale];
+  const dayLabels = s.dayLabels;
+
   if (data.length === 0) {
     return (
       <div className="h-32 flex flex-col items-center justify-center text-center">
         <span className="text-3xl mb-2">📊</span>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          scoring_rule × 요일 매트릭스 데이터 없음.
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{s.empty}</p>
       </div>
     );
   }
@@ -58,9 +77,7 @@ export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
     return (
       <div className="h-32 flex flex-col items-center justify-center text-center">
         <span className="text-3xl mb-2">📊</span>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          scoring_rule × 요일 매트릭스 데이터 없음.
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{s.empty}</p>
       </div>
     );
   }
@@ -74,14 +91,14 @@ export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
         <thead>
           <tr>
             <th className="px-2 py-2 text-left font-medium text-neutral-600 dark:text-neutral-300">
-              scoring_rule
+              {s.header}
             </th>
             {DAY_ORDER.map((day, i) => (
               <th
                 key={day}
                 className="px-2 py-2 text-center font-medium text-neutral-600 dark:text-neutral-300 min-w-[3rem]"
               >
-                {DAY_LABELS_KO[i]}
+                {dayLabels[i]}
               </th>
             ))}
           </tr>
@@ -110,13 +127,13 @@ export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
                     : `${(cell.accuracy * 100).toFixed(0)}%`;
                 const sub =
                   cell.accuracy === null
-                    ? "소표본"
+                    ? s.smallSample
                     : `${cell.hits}/${cell.n}`;
                 return (
                   <td
                     key={day}
                     className={`px-1 py-1 text-center align-middle ${cellBgClass(cell.accuracy)}`}
-                    title={`${ROW_LABEL[sr] ?? sr} × ${DAY_LABELS_KO[DAY_ORDER.indexOf(day)]}: ${cell.hits}/${cell.n}`}
+                    title={`${ROW_LABEL[sr] ?? sr} × ${dayLabels[DAY_ORDER.indexOf(day)]}: ${cell.hits}/${cell.n}`}
                   >
                     <div className="text-sm font-semibold">{label}</div>
                     <div className="text-2xs opacity-80">{sub}</div>
@@ -127,9 +144,7 @@ export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
           ))}
         </tbody>
       </table>
-      <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
-        색상 — 녹색 ≥60% / 노랑 ≥50% / 빨강 &lt;50% / 회색 N&lt;3 소표본. v1.6 anomaly + Sunday cap 효과 시각화.
-      </p>
+      <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">{s.legend}</p>
     </div>
   );
 }

@@ -20,7 +20,19 @@ import { ChartTooltip } from "./ChartTooltip";
 
 interface BrierTrendChartProps {
   data: BrierTrendPoint[];
+  locale?: "ko" | "en";
 }
+
+const STRINGS = {
+  ko: {
+    empty: "3주 이상 검증되면 Brier score 시계열 그래프가 표시됩니다.",
+    all: "전체",
+  },
+  en: {
+    empty: "The Brier score trend chart appears once 3+ weeks are verified.",
+    all: "All",
+  },
+};
 
 // scoring_rule 색상 매핑 — DESIGN.md semantic + brand token 정합.
 // v1.5 = neutral (baseline) / v1.6 = error (anomaly) / v1.7-revert = warning (revert) / CURRENT_SCORING_RULE = brand (current) / all = brand 강조.
@@ -44,14 +56,14 @@ interface PivotRow {
   [sr: string]: string | number | null;
 }
 
-export function BrierTrendChart({ data }: BrierTrendChartProps) {
+export function BrierTrendChart({ data, locale = "ko" }: BrierTrendChartProps) {
+  const s = STRINGS[locale];
+
   if (countBrierTrendWeeks(data) < 3) {
     return (
       <div className="h-64 flex flex-col items-center justify-center text-center">
         <span className="text-4xl mb-3">📈</span>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          3주 이상 검증되면 Brier score 시계열 그래프가 표시됩니다.
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{s.empty}</p>
       </div>
     );
   }
@@ -106,7 +118,7 @@ export function BrierTrendChart({ data }: BrierTrendChartProps) {
                 ((payload ?? []) as Array<{ value: number; dataKey: string; color: string }>)
                   .filter((p) => p.value !== null && p.value !== undefined)
                   .map((p) => ({
-                    label: p.dataKey === "all" ? "전체" : p.dataKey,
+                    label: p.dataKey === "all" ? s.all : p.dataKey,
                     value: Number(p.value).toFixed(4),
                     color: p.color,
                   }))
@@ -116,7 +128,7 @@ export function BrierTrendChart({ data }: BrierTrendChartProps) {
         />
         <Legend
           wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
-          formatter={(value) => (value === "all" ? "전체" : value)}
+          formatter={(value) => (value === "all" ? s.all : value)}
         />
         {activeSRs.map((sr) => (
           <Line
