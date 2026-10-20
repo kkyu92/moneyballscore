@@ -16043,3 +16043,17 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **세션 중단 하위 패턴 기록(이번 cycle 범위 밖, 다음 skill-evolution 후보)**: 2차 방어선(직전 사이클 retro commit 완전 결손 감지)은 "0건 결손"만 탐지. 이번 사례는 "중간 산출물(커밋+PR)은 존재하나 cycle 종료(merge+retro)가 누락"된 부분 진행 결손 — 새 세션이 active-cycle stale pid + 열린 PR 로 자연 발견했지만, 향후 진단 단계에 "열린 자기 소유 PR 존재 시 우선 closure" 체크 추가 고려.
 
 다음 사이클 추천 = review-code(heavy) lib/debug 잔여 3파일(agentFallbackStats/factorDeltaStats/silentDriftStats) 또는 fix-incident/info-arch/lotto gap 자연 대기.
+
+## ✅ SUCCESS — review-code(heavy): lib/debug/factorDeltaStats.ts 중복값 anomaly date 매칭 silent drift fix (cycle 3366, 2026-10-20)
+
+진단: 직전 세션 crash(active-cycle stale pid 92791) 발견 — develop-cycle/factordeltastats-anomaly-dup-fix 브랜치에 커밋+push 완료, PR #3175 open 상태로 이어받음. cycle 3365 추천 스코프(lib/debug 잔여 3파일) 중 2번째 착수.
+
+**감사/수정**: `buildFactorTimeline` 이 z-score anomaly hit 를 `ts.find(t => t.mean === hit.value)` value-equality 매칭으로 날짜 귀속 — 두 날짜가 동일 평균값(sparse-data fallback 0.5 neutral 수렴 등 흔한 케이스)을 가지면 항상 첫 매칭 날짜로만 쏠려 두번째 날짜의 진짜 anomaly 가 `/debug/silent-drift` 대시보드에서 silent 누락. hits 가 ts 와 동일 순서로 생성된다는 점을 이용해 이미 소비한 index 는 제외하고 순서대로 매칭하도록 수정 + 동일값 2-outlier 회귀 테스트 추가.
+
+**결과**: PR #3175 CI green 확인 후 R7 `--squash --delete-branch` 머지 완료 (merge commit efac23d5).
+
+**검증(skill-evolution 등)**: trigger3(3366%50≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3347-3366, SAMPLE=17≥10) review-code 12회 발화로 미충족. marker 미박제. ship-0 — 직전10(3357-3366, 2개 JSON 누락) success 1건(3365)으로 미충족. 2-chain lock — 직전8(3358-3365) distinct=4(review-code/operational-analysis/polish-ui/lotto)로 미충족. 2차 방어선(cycle 3365 retro `ffe0351a`) OK.
+
+**세션 중단 하위 패턴 2번째 재발**: cycle 3365 와 동일 패턴(중간 산출물 존재, closure 누락) — 2 occurrence 누적, meta-pattern dispatch 임계(통상 5건) 미달로 보류. 3번째 재발 시 dispatch 검토.
+
+다음 사이클 추천 = review-code(heavy) lib/debug 잔여 2파일(agentFallbackStats/silentDriftStats) 또는 fix-incident/info-arch/lotto gap 자연 대기.
