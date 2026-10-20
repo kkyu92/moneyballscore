@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code (heavy): lib/ 전수감사, weather.ts 헤더 주석 drift 수정, direct commit `98109d92` (cycle 3464, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3463 retro `cec2d46b`) OK. 2-chain lock 미충족(직전8(3456-3463) distinct=3: review-code/polish-ui/fix-incident) — 자유 선택. fix-incident gap=1/20·lotto gap=16/30·info-arch gap=25/30·op-analysis gap=11/25 전부 미도달. review-code(heavy) 직전 2연속 success(3461/3462 OG/twitter twin-parity) + next_recommended_chain 일치로 복귀, 스코프 전환: `apps/moneyball/src/lib/` 7개 파일(763줄) 전수 read.
+
+**발견**: `lib/weather.ts` 헤더 주석이 "홈 empty-state 에서 다음 경기 카드마다" 로만 서술했으나 실제 `page.tsx` 는 오늘 경기 카드(games.length>0, 주 경로)에서도 `fetchStadiumWeather` 호출 — comment-vs-code drift. `lib/tabpfn-import.ts` 의 "/accuracy/shadow 쿼리가 'tabpfn-shadow' 제외" 주장은 `shadow-pair-prob.ts`(SHADOW_SCORING_RULE 분기만 존재, tabpfn 분기 無) + `app/accuracy/shadow/page.tsx`(쿼리 filter `[CURRENT_SCORING_RULE, SHADOW_SCORING_RULE]`) 교차확인 결과 정확 유지 — drift 無(재검증만). `design-tokens.ts`/`feature-flags.ts`(5-export 대조 OK)/`hub-dispatch.ts`/`tabpfn-export.ts`/`utils.ts` 나머지 5개 drift 0건.
+
+**수정**: `lib/weather.ts` 헤더 주석 — "오늘 경기 카드(주 경로) + empty-state 다음 경기 카드" 양쪽 호출 명시로 갱신.
+
+**검증**: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm test -- --run` 605 files/4782 tests 전부 PASS. 직접 main 커밋+push(R4 범위, `98109d92`), pre-push lint+type-check+version-sync-guard 전부 PASS.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3464%50=14≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3445-3464, 현재 포함) review-code 13회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3455-3464) success 다수(3455/3456/3458/3461/3462/3464) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3457-3464) 재확인 필요, 다음 사이클 자유 선택.
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/` 20개 서브디렉토리 또는 `packages/kbo-data` 2순회) 또는 info-arch(gap26/30)/lotto(gap17/30)/op-analysis(gap12/25) 자연 대기.
+
 ## ⚪ RETRO-ONLY — fix-incident(lite): 20-cycle periodic checkpoint, incident 無 확인 (cycle 3463, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived/superseded). 2차 방어선(cycle 3462 retro `20ae44f0`) OK. **2-chain lock 충족** — 직전8(3455-3462) distinct=2(review-code 7 + polish-ui 1) → 둘 다 cooldown 제외. lock-fallback 1순위(polish-ui) 자체가 locked chain 이라 적용 불가(edge case) — 잔여 후보 중 fix-incident 만 자체 periodic trigger(gap=27/20) 충족 + 비대화형(자동 fire 환경 안전, `/office-hours` 류 AskUserQuestion 無). info-arch gap=23/30·lotto gap=14/30·op-analysis gap=9/25 전부 미도달. expand-scope(직전4 사이클 전부 review-code/polish-ui = small-fix 조건 자체는 충족)는 시퀀스 안 `/office-hours` 대화형 hang 위험으로 회피. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지.
