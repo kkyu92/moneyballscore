@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — review-code (heavy): lib/predictions/ 전수감사, lib/ 시리즈 12번째 완료, drift 0건 (cycle 3443, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3442 retro `ae00e713`) OK. 2-chain lock 미충족(직전8(3435-3442) distinct=3: review-code(heavy)6+fix-incident(lite)1+info-architecture-review1). gap 체크: fix-incident=7/20·op-analysis=10/25·lotto=21/30·info-arch=3/30 전부 미도달. cycle 3442 추천대로 lib/ 잔여 13개 서브디렉토리 중 `lib/predictions/` (12파일) 채택.
+
+**감사**: 서브에이전트 위임 read-only 전수 조사 — `lib/predictions/` 7 source + 5 test = 12 파일. 본 디렉토리는 DB 비접촉 순수 presentation/date/weight-math 헬퍼라 마이그레이션 대조 대상 없음. `factorLabels.ts`(MetricRegistry 12키 주석) / `v2Predictor.ts`(packages/kbo-data/src/engine/predictor.ts 와 공식 동일 주장) / `judgeReasoning.ts`(FALLBACK_PREFIXES) / `estimateTime.ts`(Cloudflare cron `17 0-14 * * *`) 의 "mirrors X" 주석 전부 실제 twin 파일(`context/metrics.ts`/`engine/predictor.ts`/`agentFallbackStats.ts`/`wrangler.toml`) 과 byte-level 대조 일치. dead code 0 (모든 export 소비처 확인), TODO/FIXME/XXX/@ts-ignore 0건.
+
+**결과**: drift 0건. lib/ 시리즈 12개 서브디렉토리 완료(accuracy/analysis/calendar/changelog/leaderboard/seasons/seo/stats/observability/api/mlb/predictions). 코드 변경 없음(retro-only).
+
+**검증**: `npx vitest run src/lib/predictions/__tests__` 5/5 파일 47/47 테스트 pass.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3443%50=43≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3424-3443, 현재 포함, 표본 20) review-code 14회 발화로 미충족(평가대상 review-code 단독, 0회 아님). marker 미박제. ship-0 — 직전10(3434-3443) retro-only 9건(3439 success 1건 제외) — PARTIAL_STREAK=9≠10, 미충족(emergency stop 미발동). 2-chain lock(다음 사이클용) — 직전8(3436-3443) distinct=3(fix-incident+review-code(heavy)+info-architecture-review), 미충족 — 다음 사이클 자유 선택. 2차 방어선(cycle 3442 retro `ae00e713`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(lib/ 잔여 12개: teams/12 reviews/17 dashboard/11 matchup/9 insights/8 debug/8 standings/7 lotto/7 players/7 picks/6 supabase/? v2-shadow-monitor/? 등) 또는 fix-incident(gap8/20)/op-analysis(gap11/25)/lotto(gap22/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): lib/mlb/ 전수감사, lib/ 시리즈 11번째 완료, drift 0건 (cycle 3442, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3441 retro `f4b1ab88`) OK. 2-chain lock 미충족(직전8(3434-3441) distinct=3: review-code(heavy)+fix-incident(lite)+info-architecture-review). gap 체크: fix-incident=5/20·op-analysis=8/25·lotto=19/30 전부 미도달, info-arch 직전(3440) 발화로 gap=1(재선택 부적절). cycle 3441 추천대로 lib/ 잔여 14개 서브디렉토리 중 최대 규모(35파일) `lib/mlb/` 채택.
