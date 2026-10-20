@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — operational-analysis (lite): CE/비CE 격차 재측정, n=448 동일값 35회 연속 (cycle 3408, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3400-3407) distinct=3: polish-ui1+skill-evolution1+review-code(heavy)6). fix-incident gap=26/20 도달하나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable. lotto gap=16/30·info-arch gap=35/30(23+연속 "IA 충분" 재확정 패턴) 전부 미근접/비액션. op-analysis 자체 gap=25/25 정확 도달(last fire 3383) + review-code(heavy) 직전8 중 6 dominance 완화 겸 선택. 2차 방어선(cycle 3407 retro `5f4afdcd`) OK.
+
+**재측정**: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행. 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3383 수치와 완전 동일. 신규 verified pre_game 예측 0건(KBO 2026 정규시즌 2026-10-04 종료 지속, 25-cycle 경과에도 배치 미반영 — 예상된 결과, drift 아님). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp, overlap 월(05/06/07) 통제 격차 10.8pp 그대로. LLM 부가가치 우세 결론 35회 연속 재확인.
+
+**결과**: 코드 변경 없음. CLAUDE.md 운영 섹션에 cycle 3408 측정값 append.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 상시 참)/trigger2(5연속 fail 없음)/trigger3(3408%50≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3389-3408, 현재 포함) 표본≥10 충족, 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3399-3408) success 9건 포함 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data/src/scrapers/`(15파일, 2693줄) 또는 `pipeline/` 잔여) 또는 info-arch(gap35/30 도달하나 비액션 패턴)/lotto(gap16/30)/fix-incident(gap26/20 도달하나 비액션) 자연 대기. op-analysis 다음 재측정 gap 25-cycle 주기(실제 last fire 3408) 권장.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/backtest/ 전수 감사, models.ts stale doc ref 정정 + loader.ts 테스트 공백 보강 (cycle 3407, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3406 retro `222f4d44`) OK. 2-chain lock 미충족(직전8(3399-3406) distinct=3: review-code(heavy)6+polish-ui1+skill-evolution1). gap: fix-incident last fire 3382(gap=25/20 도달, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable)·op-analysis last fire 3383(gap=24/25 미도달)·info-arch last fire 3373(gap=34/30 도달하나 23연속 "IA 충분" 재확정 패턴 지속, mtime -7 매칭 다수는 route 신규 추가 아닌 일반 파일 touch 노이즈)·lotto last fire 3392(gap=15/30 미도달). explore-idea saturation 직전15(3393-3406) review-code 12+polish-ui 1=13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 9.8일 신선) 확립 skip 패턴 유지. ship-0 미충족(직전10(3397-3406) success 9건). cycle 3406 next_rec 계승 — `packages/kbo-data/src/backtest/` (12파일, 1799줄) 채택.
