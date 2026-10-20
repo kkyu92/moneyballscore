@@ -26,8 +26,8 @@ export function parseSkippedDetail(raw: string | null): SkippedEntry[] {
   try {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) return parsed as SkippedEntry[];
-  } catch {
-    // silent fallback — main path 보호
+  } catch (err) {
+    console.warn('[parseSkippedDetail] JSON parse failed', err);
   }
   return [];
 }
