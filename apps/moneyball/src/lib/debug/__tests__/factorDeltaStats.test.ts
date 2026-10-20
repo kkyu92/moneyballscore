@@ -78,6 +78,27 @@ describe('buildFactorTimeline (M-D FactorDeltaTimeline)', () => {
     expect(result.factorKeys).toEqual(['elo', 'park_weather', 'sp_fip', 'umpire_sz']);
   });
 
+  it('중복 평균값 anomaly — 두 날짜가 동일 극값이어도 양쪽 모두 감지돼야 함', () => {
+    // 20일 baseline (각 0.50) + 2일이 동일 outlier 값(0.95) 공유 (z ≈ 3.16, 수치는
+    // node 로 사전 계산 — mean=0.5409/sd=0.1294/z=3.1623 둘 다 threshold 초과).
+    // detectFactorAnomalies 는 동일 값이면 둘 다 z>3 hit 를 만들지만, 과거 구현은
+    // ts.find(value 매칭) 가 항상 첫 매칭 날짜로만 귀속시켜 두번째 날짜의 anomaly 가
+    // 누락됐다 (동일 value → 동일 object 비교라 매번 첫 번째 occurrence 로 쏠림).
+    const baseline = Array.from({ length: 20 }, (_, i) => {
+      const d = new Date(2026, 4, 1 + i); // 2026-05-01 ~ 2026-05-20
+      return row(d.toISOString().slice(0, 10), 'v1.8', { sp_fip: 0.50 });
+    });
+    const outlierA = row('2026-05-28', 'v1.8', { sp_fip: 0.95 });
+    const outlierB = row('2026-05-29', 'v1.8', { sp_fip: 0.95 });
+    const rows: PredictionFactorRow[] = [...baseline, outlierA, outlierB];
+    const result = buildFactorTimeline(rows);
+    const hitDates = result.anomalies
+      .filter((a) => a.factorKey === 'sp_fip')
+      .map((a) => a.date)
+      .sort();
+    expect(hitDates).toEqual(['2026-05-28', '2026-05-29']);
+  });
+
   it('non-finite factor 값 skip (NaN / Infinity)', () => {
     const rows: PredictionFactorRow[] = [
       row('2026-05-28', 'v1.8', { sp_fip: 0.6 }),

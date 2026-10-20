@@ -110,12 +110,18 @@ export function buildFactorTimeline(
         factorKey,
         ts.map((t) => t.mean),
       );
-      // hit 의 value 와 매칭되는 ts entry 의 date 표기 (첫 매칭)
+      // hit 의 value 와 매칭되는 ts entry 의 date 표기.
+      // 주의: 두 날짜가 동일 평균값(예: sparse 0.5 neutral 중복)이면 value 매칭만으론
+      // 둘 다 같은(첫) 날짜로 쏠려 실제 두 번째 날짜의 anomaly 가 누락된다 — hits 는
+      // ts 와 동일 순서로 1건씩 생성되므로 이미 사용한 index 는 제외하고 순서대로
+      // 소비해 각 hit 를 서로 다른 날짜에 귀속시킨다.
+      const usedIndices = new Set<number>();
       for (const hit of hits) {
-        const match = ts.find((t) => t.mean === hit.value);
-        if (match) {
+        const idx = ts.findIndex((t, i) => !usedIndices.has(i) && t.mean === hit.value);
+        if (idx !== -1) {
+          usedIndices.add(idx);
           anomalies.push({
-            date: match.date,
+            date: ts[idx].date,
             cohort,
             factorKey,
             zScore: hit.zScore,
