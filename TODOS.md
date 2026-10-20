@@ -16029,3 +16029,17 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger3(3361%50=11) 미충족. trigger5 — 직전20 review-code 다수 발화로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3352-3361) success 2건(3352/3355)으로 미충족.
 
 다음 사이클 추천 = review-code(heavy) 신규 스코프(app/api 잔여 mention-only route 재확인 또는 components/hooks) 또는 lotto(gap 28/30 근접)/fix-incident(gap 33, 재확인 필요) 자연 대기.
+
+## ✅ SUCCESS — review-code(heavy): lib/debug/pipelineStats.ts REJECT_REASON_LABEL silent drift fix (cycle 3365, 2026-10-20)
+
+진단: 직전 세션 crash(active-cycle stale pid) 발견 — develop-cycle/review-code-lib-debug-pipeline-stats 브랜치에 커밋+push 완료, PR #3174 open 상태로 이어받음. cycle 3363 retro 추천 스코프(lib/debug 4파일) 중 1번째 착수.
+
+**감사/수정**: daily.ts 가 skipped_detail.reason='debate_fallback_quant' (debate.agentsFailed 폴백 → quant-only) 를 push하지만 pipelineStats.ts 의 REJECT_REASON_LABEL + 헤더 주석에 누락 — `/debug/pipeline` UI 에 raw unlabeled string 노출. CLAUDE.md CREDIT_EXHAUSTED 서술(debate fallback near-100%, 2026-06-06~)대로 현재 prod 데이터에 흔한 값이라 실사용자 가시 drift. REJECT_REASON_LABEL + 헤더 주석에 항목 추가로 fix.
+
+**결과**: PR #3174 CI green 확인 후 R7 `--squash --delete-branch` 머지 완료 (merge commit ac46fae6).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3365%50≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3346-3365) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 본 cycle outcome=success 로 직전10 streak 끊김, 미충족.
+
+**세션 중단 하위 패턴 기록(이번 cycle 범위 밖, 다음 skill-evolution 후보)**: 2차 방어선(직전 사이클 retro commit 완전 결손 감지)은 "0건 결손"만 탐지. 이번 사례는 "중간 산출물(커밋+PR)은 존재하나 cycle 종료(merge+retro)가 누락"된 부분 진행 결손 — 새 세션이 active-cycle stale pid + 열린 PR 로 자연 발견했지만, 향후 진단 단계에 "열린 자기 소유 PR 존재 시 우선 closure" 체크 추가 고려.
+
+다음 사이클 추천 = review-code(heavy) lib/debug 잔여 3파일(agentFallbackStats/factorDeltaStats/silentDriftStats) 또는 fix-incident/info-arch/lotto gap 자연 대기.
