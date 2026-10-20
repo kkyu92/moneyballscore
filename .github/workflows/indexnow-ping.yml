@@ -40,6 +40,15 @@ jobs:
           echo "status=$STATUS"
           echo "body=$BODY"
           if [ "$STATUS" != "200" ]; then
-            echo "::error::IndexNow ping failed with HTTP $STATUS"
-            exit 1
+            # Bing 쪽 "SiteVerificationNotCompleted" 는 keyLocation 파일이 정상
+            # 서빙되는데도(cycle 3241 확인) Bing 이 아직 재검증을 못 끝낸 외부
+            # pending 상태 — 코드 버그 아님. CI red 로 매일 false-positive alert
+            # 내지 않도록 warning 다운그레이드(cycle 2996/2999 exceed_egress_quota
+            # 와 동일 패턴). 그 외 실패는 실제 버그 가능성 있어 그대로 hard fail.
+            if echo "$BODY" | grep -q "SiteVerificationNotCompleted"; then
+              echo "::warning::IndexNow ping HTTP $STATUS — Bing SiteVerificationNotCompleted (external pending, not a code bug)"
+            else
+              echo "::error::IndexNow ping failed with HTTP $STATUS"
+              exit 1
+            fi
           fi
