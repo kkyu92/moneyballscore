@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — 2-chain-lock-forced polish-ui: DESIGN.md MLB IA 참고 섹션 self-referential stale TODO 정정 (cycle 3430, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3429 retro `8318d8a9`) OK. **2-chain lock 충족** — 직전8(3422-3429) distinct=2(lotto+review-code) → 둘 다 제외. fix-incident gap=9/20·op-analysis gap=22/25·info-arch gap=20/30 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. design-system DESIGN.md 당일 신선 미트리거, expand-scope 최근(3419) 발화. 남은 trigger 전무 → lock fallback 룰(polish-ui 강제) 적용.
+
+**감사**: DESIGN.md 토큰 vs 컴포넌트 전역 grep — flat gray pair(`text-gray-N dark:text-gray-N` 동일값), `text-[Npx]` 리터럴, `dark:border-gray-N`(비opacity), 잔존 `rounded-md`, `hover:shadow`/`transition-shadow` 패턴 전부 clean(기존 silent drift family — rounded-md/typography/muted-text-tier 등 — 완전 소진 재확인, 신규 발견 0건).
+
+**발견**: 대신 DESIGN.md 자체의 `## MLB IA` "참고" 섹션(line 179)에서 self-referential stale TODO 발견 — "결정 문서(`docs/decisions/mlb-vs-kbo-priority.md`) 의 (A)/(B) 조항은 본 section 과 함께 정정 필요, 별도 커밋에서 처리" 라고 서술했으나, `git log -S`로 확인 결과 그 문장을 쓴 바로 그 커밋(`69d89f38`, cycle 2162)이 같은 diff 안에서 해당 결정 문서를 이미 strikethrough+각주로 정정 완료했음 — "할 일"로 남아있던 문구가 작성 시점부터 이미 끝나 있던 상태로 2개월(cycle 2162→3430) 방치.
+
+**수정**: DESIGN.md 참고 섹션 문구를 "동일 커밋에서 이미 정정 완료"로 교체 + Decisions Log entry 추가.
+
+코드 변경 없음(문서만). 직접 main 커밋+push(R4 범위, `28402f4e`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3430%50=30≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3411-3430, 현재 포함) review-code 다수 발화(17/20)로 미충족(평가대상 review-code 단독). marker 미박제. ship-0 — 직전10(3421-3430) success 다수(7/10) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3423-3430) distinct=2(review-code+polish-ui), 다음 사이클 재충족 상태. 2차 방어선(cycle 3429 retro `8318d8a9`) OK.
+
+다음 사이클 추천 = 2-chain lock(review-code+polish-ui) 재충족 예상 — lock 발동 시 fix-incident(gap10/20)/op-analysis(gap23/25)/info-arch(gap21/30) 자연 대기 또는 또 다른 lock fallback 영역 탐색. lock 미충족 시 review-code(heavy) 계속(`packages/kbo-data/src/scrapers` 또는 `pipeline` 잔여) 자연 복귀.
+
 ## 🟢 SUCCESS — review-code(heavy): app/api 잔여 14개 route 전수 감사, MLB pipeline Telegram fallback 누락 수정 (cycle 3429, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3428 retro `434fe794`) OK. 2-chain lock 미충족(직전8(3421-3428) distinct=3: fix-incident/lotto/review-code). fix-incident gap=8/20·op-analysis gap=21/25·info-arch gap=19/30·lotto gap=7/30 전부 미도달. `gh run list` 재확인 — CI Failure Dispatch 전부 skipped, 실제 incident 부재. lotto cron 정상(picks `2026-10-24.md`/results `2026-10-17.md` 최신). cycle 3099/3090/3417 추천 "app/api/ 잔여 12~14 route" 채택(health×2/hub-dispatch/mlb/pipeline+waitlist/picks×4/pipeline/seo/sync-batter-stats/version, 총 14 route ~1433줄).
