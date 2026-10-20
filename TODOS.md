@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api/ 잔여 12 route 전수 감사, EXTERNAL_GAME_ID_MAX_LENGTH 추출 + PIPELINE_MODES 주석 정정 (cycle 3418, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3417 retro `1cef7b4e`) OK. 2-chain lock 미충족(직전8(3410-3417) distinct=3: review-code(heavy)6+info-architecture-review1+polish-ui1). fix-incident `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable. op-analysis gap=10/25·lotto gap=26/30·info-arch gap=8/30 전부 미도달. explore-idea saturation 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 0h 신선) 확립 skip 패턴 유지. cycle 3416 next_rec 계승 — components/ 전수 감사 시리즈 완료 후 `app/api/` 잔여 12 route(health×2/hub-dispatch/mlb×2/picks×4/pipeline/seo/sync-batter-stats/version) 채택.
+
+**감사**: Agent 1개 위임 — 12 route 전수 read + 기 감사 완료 reference route(live/revalidate) 대조 + KBO/MLB twin(picks/submit↔mlb-submit, picks/poll↔mlb-poll) 라인 단위 diff + `packages/shared` 상수 중복 점검 + auth(CRON_SECRET/API_KEY)/Sentry 패턴 일관성 확인. CONFIRMED BUG 0건 — twin parity 정합, auth 전부 정상(hub-dispatch HMAC timing-safe compare 포함), health/health-pipelines 의도된 무인증(진단용 GET, `/api/version`과 동일 카테고리) 확인.
+
+**발견 + 수정 (silent drift, minor)**: (1) `packages/shared/src/index.ts`의 `PIPELINE_STALE_HOURS_DEFAULT` 주석이 `health/pipelines/route.ts`의 `PIPELINE_MODES`를 "9개 모드"로 enumeration — 실제 배열은 `predict` 모드(별도 `PIPELINE_PREDICT_STALE_HOURS` 사용)를 포함해 10개. 주석 9→10 정정 + `predict` 모드 enumeration 누락 명시. (2) `picks/mlb-submit/route.ts`와 `picks/mlb-poll/route.ts`가 `external_game_id` 길이 상한 `20`(mlb_schedule VARCHAR(20), migration 038)을 각각 hardcode — 레포 기존 패턴(wave 303, `DEVICE_ID_MAX_LENGTH`)과 동일하게 `EXTERNAL_GAME_ID_MAX_LENGTH` 상수로 추출해 양쪽 import.
+
+**보류 (낮은 우선순위, 다음 review-code 후보)**: `pipeline/route.ts`/`mlb/pipeline/route.ts`가 `live.ts`/`sync-batter-stats.ts`와 달리 `result.errors.length>0` 시 HTTP 207을 반환하지 않음 — 그러나 `runDailyPipeline`/`runMlbPipeline` 내부가 이미 Sentry/Telegram/silent-drift-alert로 독립 alerting하고 있어 실질 영향 낮음, actionable 미확정.
+
+**검증**: `tsc --noEmit`(apps/moneyball) clean, `pnpm --filter moneyball lint` clean, `pnpm --filter moneyball test` 604 files/4736 tests 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `3ef227e8`).
+
+**검증(skill-evolution 등)**: trigger1(보류 관례)/trigger2(5연속 fail 없음)/trigger3(3418%50=18≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3399-3418) review-code 15회 발화로 미충족. marker 미박제. ship-0 — 직전10(3409-3418) success 9건 포함 미충족. 2차 방어선(cycle 3417 retro `1cef7b4e`) OK.
+
+다음 사이클 = review-code(heavy) 계속(HTTP 207 패턴 통일 재검토 또는 신규 스코프) 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap11/25)/lotto(gap27/30)/info-arch(gap9/30) 자연 대기.
+
 ## 🟢 SUCCESS — 2-chain-lock-forced polish-ui: LeaderboardJoinModal focus 스타일 legacy ring → 표준 outline 정렬 (cycle 3417, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. **2-chain lock 충족** — 직전8(3409-3416) distinct=2(review-code(heavy)7+info-architecture-review1) → 둘 다 제외. fix-incident `gh run list` 재확인 결과 CI Failure Dispatch + Vercel Deploy Failure Dispatch 전부 skipped — 실제 incident 부재, 확립된 non-actionable 패턴. op-analysis gap=9/25·lotto gap=25/30(cron 산출물 picks `2026-10-24.md`/results `2026-10-17.md` 전부 최신, 정상) 전부 미도달. explore-idea saturation 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 10일 신선) 확립 skip 패턴 유지. design-system DESIGN.md 10일(4주 미달) 미트리거. 남은 trigger 전무 → lock fallback 룰(polish-ui 강제) 적용.
