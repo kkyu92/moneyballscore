@@ -23,7 +23,7 @@ interface MockResult {
 
 function makeChainBuilder(result: MockResult) {
   const builder: Record<string, unknown> = {};
-  const chainMethods = ['select', 'eq', 'not', 'in', 'upsert'];
+  const chainMethods = ['select', 'eq', 'not', 'in', 'upsert', 'range'];
   for (const m of chainMethods) {
     builder[m] = vi.fn(() => builder);
   }
@@ -160,6 +160,39 @@ describe('retro silent drift family — cycle 174 agents 차원 첫 진입 회�
         expect(p['max_confidence']).not.toBeNull();
       }
     });
+
+    it('predictions 건수가 SUPABASE_PAGE_SIZE(1000) 초과 시 .range() 로 전체 페이지 조회 (review-code(heavy) 발견 — cycle 3406)', async () => {
+      const { SUPABASE_PAGE_SIZE } = await import('@moneyball/shared');
+      const page1 = Array.from({ length: SUPABASE_PAGE_SIZE }, (_, i) => ({
+        confidence: 0.2,
+        is_correct: i % 2 === 0,
+      }));
+      const page2 = [{ confidence: 0.6, is_correct: true }];
+      const rangeMock = vi.fn();
+      let selectCall = 0;
+      const dbMock = {
+        from: vi.fn((table: string) => {
+          if (table === 'predictions') {
+            const builder: Record<string, unknown> = {};
+            for (const m of ['select', 'eq', 'not', 'in']) builder[m] = vi.fn(() => builder);
+            builder['range'] = vi.fn((from: number, to: number) => {
+              rangeMock(from, to);
+              selectCall += 1;
+              const data = selectCall === 1 ? page1 : page2;
+              return { then: (resolve: (v: unknown) => unknown) => Promise.resolve({ data, error: null }).then(resolve) };
+            });
+            return builder;
+          }
+          if (table === 'calibration_buckets') return makeChainBuilder({ error: null });
+          throw new Error(`unexpected table: ${table}`);
+        }),
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await updateCalibration(2026, dbMock as any);
+      expect(rangeMock).toHaveBeenCalledTimes(2);
+      expect(rangeMock).toHaveBeenNthCalledWith(1, 0, SUPABASE_PAGE_SIZE - 1);
+      expect(rangeMock).toHaveBeenNthCalledWith(2, SUPABASE_PAGE_SIZE, SUPABASE_PAGE_SIZE * 2 - 1);
+    });
   });
 
   describe('generateAgentMemories', () => {
@@ -277,6 +310,48 @@ describe('retro silent drift family — cycle 174 agents 차원 첫 진입 회�
         generateAgentMemories('2026-05-06', dbMock as any),
       ).resolves.toBeUndefined();
       expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it('오답 predictions 건수가 SUPABASE_PAGE_SIZE(1000) 초과 시 .range() 로 전체 페이지 조회 (review-code(heavy) 발견 — cycle 3406)', async () => {
+      const { SUPABASE_PAGE_SIZE } = await import('@moneyball/shared');
+      const makeRow = (i: number) => ({
+        factors: { home_sp_fip: 0.5 },
+        game: {
+          id: i,
+          game_date: '2026-05-06',
+          home_team: { code: 'LG' },
+          away_team: { code: 'OB' },
+          winner: { code: 'OB' },
+        },
+      });
+      const page1 = Array.from({ length: SUPABASE_PAGE_SIZE }, (_, i) => makeRow(i));
+      const page2 = [makeRow(SUPABASE_PAGE_SIZE)];
+      const rangeMock = vi.fn();
+      let selectCall = 0;
+      const dbMock = {
+        from: vi.fn((table: string) => {
+          if (table === 'predictions') {
+            const builder: Record<string, unknown> = {};
+            for (const m of ['select', 'eq', 'in']) builder[m] = vi.fn(() => builder);
+            builder['range'] = vi.fn((from: number, to: number) => {
+              rangeMock(from, to);
+              selectCall += 1;
+              const data = selectCall === 1 ? page1 : page2;
+              return { then: (resolve: (v: unknown) => unknown) => Promise.resolve({ data, error: null }).then(resolve) };
+            });
+            return builder;
+          }
+          if (table === 'agent_memories') return makeChainBuilder({ error: null });
+          throw new Error(`unexpected table: ${table}`);
+        }),
+      };
+      await expect(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        generateAgentMemories('2026-05-06', dbMock as any),
+      ).resolves.toBeUndefined();
+      expect(rangeMock).toHaveBeenCalledTimes(2);
+      expect(rangeMock).toHaveBeenNthCalledWith(1, 0, SUPABASE_PAGE_SIZE - 1);
+      expect(rangeMock).toHaveBeenNthCalledWith(2, SUPABASE_PAGE_SIZE, SUPABASE_PAGE_SIZE * 2 - 1);
     });
   });
 });

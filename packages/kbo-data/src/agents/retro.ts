@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WIN_PROB_BUCKET_MID, CONF_WIN_PROB_BUCKET_HIGH, NEUTRAL_FACTOR, ELO_NEUTRAL_WIN_PCT, RETRO_MEMORY_CONFIDENCE, TEAM_BIAS_NEUTRAL, DEFAULT_WEIGHTS } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WIN_PROB_BUCKET_MID, CONF_WIN_PROB_BUCKET_HIGH, NEUTRAL_FACTOR, ELO_NEUTRAL_WIN_PCT, RETRO_MEMORY_CONFIDENCE, TEAM_BIAS_NEUTRAL, DEFAULT_WEIGHTS, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
 import { MetricRegistry, type MetricDefinition } from '../context/metrics';
 import { DB_CONSTRAINTS } from '../pipeline/db-constraints';
 import { canonicalizeFactorKey } from './postview';
@@ -42,17 +42,32 @@ export async function updateCalibration(
 ) {
   const db = dbInjected ?? createAdminClient();
 
-  const predictionsResult = await db
-    .from('predictions')
-    .select('confidence, is_correct')
-    .eq('prediction_type', 'pre_game')
-    .in('scoring_rule', PRODUCTION_COHORT_RULES)
-    .not('is_correct', 'is', null);
-  const { data: predictions } = assertSelectOk<
-    Array<{ confidence: number; is_correct: boolean }>
-  >(predictionsResult, 'retro.updateCalibration.predictions');
+  // review-code(heavy) 발견 (cycle 3406, mlb-pipeline.ts cycle 3405 fix 와 동일 family) —
+  // .range() 없는 단일 호출이라 검증된 predictions 수가 SUPABASE_PAGE_SIZE(1000) 넘으면
+  // PostgREST 가 나머지를 silent truncate → calibration bucket accuracy 가 표본 일부만으로
+  // 계산됨. backfill-records.ts / mlb-pipeline.ts 와 동일 .range() 페이지네이션 패턴 적용.
+  const predictions: Array<{ confidence: number; is_correct: boolean }> = [];
+  {
+    let from = 0;
+    for (;;) {
+      const predictionsResult = await db
+        .from('predictions')
+        .select('confidence, is_correct')
+        .eq('prediction_type', 'pre_game')
+        .in('scoring_rule', PRODUCTION_COHORT_RULES)
+        .not('is_correct', 'is', null)
+        .range(from, from + SUPABASE_PAGE_SIZE - 1);
+      const { data } = assertSelectOk<
+        Array<{ confidence: number; is_correct: boolean }>
+      >(predictionsResult, 'retro.updateCalibration.predictions');
+      const page = data ?? [];
+      predictions.push(...page);
+      if (page.length < SUPABASE_PAGE_SIZE) break;
+      from += SUPABASE_PAGE_SIZE;
+    }
+  }
 
-  if (!predictions || predictions.length === 0) return;
+  if (predictions.length === 0) return;
 
   const buckets = {
     low: { total: 0, correct: 0, minConf: 0.00, maxConf: CONF_WIN_PROB_BUCKET_MID },
@@ -247,28 +262,43 @@ export function buildMemoryForTeam(params: {
 export async function generateAgentMemories(date: string, dbInjected?: DB) {
   const db = dbInjected ?? createAdminClient();
 
-  const wrongResult = await db
-    .from('predictions')
-    .select(`
-      factors,
-      game:games!predictions_game_id_fkey(
-        id, game_date,
-        home_team:teams!games_home_team_id_fkey(code),
-        away_team:teams!games_away_team_id_fkey(code),
-        winner:teams!games_winner_team_id_fkey(code)
-      )
-    `)
-    .eq('prediction_type', 'pre_game')
-    .in('scoring_rule', PRODUCTION_COHORT_RULES)
-    .eq('is_correct', false);
   // .error 미체크 시 wrong 데이터 누락이 "오답 0건" 으로 위장 → agent_memories 학습 누락.
+  // review-code(heavy) 발견 (cycle 3406) — 위 select 도 .range() 없는 단일 호출이라 오답
+  // predictions 누적이 SUPABASE_PAGE_SIZE(1000) 넘으면 PostgREST silent truncate 로 일부
+  // 날짜의 오답이 조용히 학습 누락됨. updateCalibration 과 동일 .range() 페이지네이션 적용.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: wrongPredictions } = assertSelectOk<any[]>(
-    wrongResult,
-    'retro.generateAgentMemories.predictions',
-  );
+  const wrongPredictions: any[] = [];
+  {
+    let from = 0;
+    for (;;) {
+      const wrongResult = await db
+        .from('predictions')
+        .select(`
+          factors,
+          game:games!predictions_game_id_fkey(
+            id, game_date,
+            home_team:teams!games_home_team_id_fkey(code),
+            away_team:teams!games_away_team_id_fkey(code),
+            winner:teams!games_winner_team_id_fkey(code)
+          )
+        `)
+        .eq('prediction_type', 'pre_game')
+        .in('scoring_rule', PRODUCTION_COHORT_RULES)
+        .eq('is_correct', false)
+        .range(from, from + SUPABASE_PAGE_SIZE - 1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = assertSelectOk<any[]>(
+        wrongResult,
+        'retro.generateAgentMemories.predictions',
+      );
+      const page = data ?? [];
+      wrongPredictions.push(...page);
+      if (page.length < SUPABASE_PAGE_SIZE) break;
+      from += SUPABASE_PAGE_SIZE;
+    }
+  }
 
-  if (!wrongPredictions || wrongPredictions.length === 0) return;
+  if (wrongPredictions.length === 0) return;
 
   const newValidUntil = addDays(date, 7);
 
