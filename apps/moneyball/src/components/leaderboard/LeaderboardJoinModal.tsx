@@ -50,7 +50,7 @@ export function LeaderboardJoinModal({ onJoin, onClose, loading }: Props) {
             onChange={(e) => setValue(e.target.value)}
             placeholder={`닉네임 (${NICKNAME_MIN_CHARS}~${NICKNAME_MAX_CHARS}자)`}
             maxLength={NICKNAME_MAX_CHARS}
-            className="w-full border border-gray-200 dark:border-[var(--color-border)] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[var(--color-surface)] focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full border border-gray-200 dark:border-[var(--color-border)] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[var(--color-surface)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
           />
           <p className="text-xs text-gray-400 dark:text-gray-500">
             {value.trim().length}/{NICKNAME_MAX_CHARS}자
@@ -62,14 +62,14 @@ export function LeaderboardJoinModal({ onJoin, onClose, loading }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-gray-200 dark:border-[var(--color-border)] rounded-lg py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="flex-1 border border-gray-200 dark:border-[var(--color-border)] rounded-lg py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               취소
             </button>
             <button
               type="submit"
               disabled={!isValid || loading}
-              className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg py-2 text-sm font-medium transition-colors"
+              className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               {loading ? '등록 중…' : '참가하기'}
             </button>
