@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api 잔여 14개 route 전수 감사, MLB pipeline Telegram fallback 누락 수정 (cycle 3429, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3428 retro `434fe794`) OK. 2-chain lock 미충족(직전8(3421-3428) distinct=3: fix-incident/lotto/review-code). fix-incident gap=8/20·op-analysis gap=21/25·info-arch gap=19/30·lotto gap=7/30 전부 미도달. `gh run list` 재확인 — CI Failure Dispatch 전부 skipped, 실제 incident 부재. lotto cron 정상(picks `2026-10-24.md`/results `2026-10-17.md` 최신). cycle 3099/3090/3417 추천 "app/api/ 잔여 12~14 route" 채택(health×2/hub-dispatch/mlb/pipeline+waitlist/picks×4/pipeline/seo/sync-batter-stats/version, 총 14 route ~1433줄).
+
+**감사**: Agent 위임 전수 read — 14개 route 전부 + supabase migrations(025/028/038/048/053) 필드 대조. 11개 clean(health×2/hub-dispatch/mlb-waitlist/picks×4/seo/sync-batter-stats/version). 2건 발견 — `api/mlb/pipeline/route.ts` catch 블록이 KBO 쌍둥이 `api/pipeline/route.ts` 와 달리 Sentry 만 쓰고 Telegram `notifyError()` 미호출(과거 Sentry-only silent 누락 drift family 재발 패턴) + `triggeredBy` 가 KBO 쪽 union 타입(`'cron'|'manual'|'api'`) 대신 bare string.
+
+**수정**: `mlb/pipeline/route.ts` — `notifyError` import 추가 + catch 블록에 KBO 동일 패턴(`try { await notifyError('MLB Pipeline API', message); } catch {}`) 추가 + `triggeredBy` 타입 union narrowing으로 KBO 쪽과 동기.
+
+검증: `tsc --noEmit` clean, `pnpm lint` clean. 직접 main 커밋+push(R4 범위, `a2b571a2`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3429%50=29≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3410-3429, 현재 포함) 6개 chain 모두 1회+ 발화, 미충족. marker 미박제. ship-0 — 직전10(3420-3429) success 다수 포함 미충족. 2-chain lock — 직전8(3422-3429) distinct 재계산 필요(다음 사이클 진단 시). 2차 방어선(cycle 3428 retro `434fe794`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/{live,share,ui}` 소규모 재확인 또는 `packages/kbo-data/src/scrapers`/`pipeline` 재검증) 또는 fix-incident(gap9/20)/op-analysis(gap22/25)/lotto(gap8/30)/info-arch(gap20/30) 자연 대기 — review-code dominance 지속(직전8 중 7회)이라 다양성 고려 권장.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/{reviews,standings,teams} 16파일 전수 감사, drift 0건 (cycle 3428, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3427 retro `6806a624`) OK. 2-chain lock 미충족(직전8(3421-3427) distinct=3: fix-incident/lotto/review-code). fix-incident gap=7/20·op-analysis gap=20/25·info-arch gap=18/30·lotto gap=6/30 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. cycle 3427 추천 "reviews/standings/teams 또는 app/ 잔여 라우트" 채택.
