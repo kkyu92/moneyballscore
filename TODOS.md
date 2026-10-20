@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code (heavy): mlb/reviews/misses (KO+EN) OG/twitter 이미지 누락 수정, direct commit `bd44f1d7` (cycle 3461, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3460 retro `f615e614`) OK. 2-chain lock 미충족(직전8(3453-3460) distinct=3: review-code(heavy)6+operational-analysis(lite)1+polish-ui1) — 자유 선택. fix-incident gap=25/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — non-actionable. info-arch gap=21/30·lotto gap=12/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 3.3h 신선) 확립 skip 패턴 유지. review-code(heavy) twin-parity 2순회 심화 선택 — cycle 3458 PR #3186 스코프가 놓친 영역 재확인.
+
+**발견**: `app/mlb` + `app/en/mlb` 24개 page.tsx 라우트 전수 대조(KO/EN route depth 완전 동일 확인) 후 OG/twitter-image.tsx 존재 여부 grep — `reviews/misses`(KO+EN, 콘텐츠 페이지, full metadata 보유)만 두 이미지 파일 누락. `reviews/monthly`/`reviews/weekly` 도 이미지 없었으나 확인 결과 둘 다 **redirect-only 페이지**(`getCurrentMonth()`/`getCurrentWeek()` 계산 후 즉시 `redirect()`, 렌더 콘텐츠 없음) — KBO 쌍둥이(`reviews/monthly`)도 동일하게 이미지 파일 없음을 교차검증해 의도된 설계로 결론(액션 없음). `reviews/misses` 는 KBO 쌍둥이가 이미 `opengraph-image.tsx`+`twitter-image.tsx` 보유 중이라 twin-parity drift 확정.
+
+**수정**: `design-tokens.ts` 에 `MLB_GRADIENT_REVIEWS_MISSES_135` 토큰 추가(KBO가 misses 전용 별도 그라디언트를 쓰는 컨벤션과 동일하게 hub `REVIEWS_135`와 구분). `app/mlb/reviews/misses/{opengraph-image,twitter-image}.tsx` + `app/en/mlb/reviews/misses/{opengraph-image,twitter-image}.tsx` 4개 신규 파일 작성 — 기존 MLB OG/twitter 컨벤션(accuracy/calendar/methodology/predictions 패턴) 그대로, KBO `reviews/misses` 소스를 번역 템플릿으로 사용.
+
+**검증**: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm test -- --run` 605 files/4780 tests 전부 PASS. 직접 main 커밋+push(R4 범위, `bd44f1d7`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3461%50=11≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3442-3461, 현재 포함) review-code 15회 발화로 미충족(표본=19≥10 충족). marker 미박제. ship-0 — 직전10(3452-3461) success 4건(3452/3455/3456/3458/3461) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3454-3461) distinct 재확인 필요하나 review-code 비중 높음, 다음 사이클 자유 선택.
+
+다음 사이클 추천 = review-code(heavy) 계속(twin-parity 2순회 — components 내부 KO/EN 분기 또는 lib/ 2순회) 또는 info-arch(gap 22/30)/lotto(gap 13/30)/fix-incident(재확인) 자연 대기.
+
 ## ⚪ RETRO-ONLY — polish-ui (2-chain lock fallback): MLB wild-card/postseason 신규 라우트 + en twin 디자인 토큰 전수 그렙, drift 0건 (cycle 3460, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3459 retro `40338599`) OK. **2-chain lock 충족** — 직전8(3452-3459) distinct=2(review-code 7+operational-analysis 1) → 둘 다 제외. fix-incident `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — non-actionable. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. info-arch gap=20/30·lotto gap=11/30 전부 미도달. lock-fallback 룰 적용 → polish-ui 선택.
