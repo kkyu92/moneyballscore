@@ -16,6 +16,7 @@ on:
           - mlb_predict_final
           - mlb_shadow_train
           - mlb_walk_forward_measure
+          - mlb_elo_update
       date:
         description: 'Target date (YYYY-MM-DD, optional — defaults to today KST)'
         required: false
