@@ -1,3 +1,16 @@
+## ⚪ RETRO-ONLY — fix-incident (lite): pipeline_runs 7일 무결점 확인, 실제 incident 부재 (cycle 3436, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3435 retro `52ee9aef`) OK. 2-chain lock 미충족(직전8(3428-3435) distinct=3: review-code4+polish-ui3+operational-analysis1) — 자유 선택. op-analysis gap=3/25·info-arch gap=26/30·lotto gap=14/30 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. fix-incident gap=15/20 자체 trigger 미도달이나, 직전 2 사이클(3434/3435) 연속 review-code(heavy) 후 3회 연속 회피 룰(실패 모드 표 "동일 chain 3회 연속" 소프트 가드) 적용 — 다양성 확보 겸 fix-incident(lite) 선택.
+
+**점검**: `pipeline_runs` REST 직접 조회 — 최근 7일(2026-10-13~20) 전체 105건 중 non-success 0건(`status=neq.success` 필터 결과 빈 배열), 모드별(announce/predict/predict_final/verify/mlb_*) 전부 success. `gh run list --limit 10` — `CI Failure Dispatch` workflow 전부 `skipped`(실제 incident 트리거 없음), 일반 CI run 들도 전부 정상 진행 중/success. 최근 30 커밋 중 `fix:` 계열 5건(focus-visible/Telegram fallback/dark-mode contrast 등) 모두 이미 review-code/polish-ui chain 으로 처리 완료된 기존 건, 신규 미해결 bug 없음. lotto cron 산출물(`lotto-picks/2026-10-24.md`, `lotto-results/2026-10-17.md`) 최신 — cron 정상.
+
+**결과**: 실제 incident 없음 확인. 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3436%50=36≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3417-3436, 현재 포함, 표본 20≥10) review-code 11회 발화로 미충족(평가대상 review-code 단독). marker 미박제. ship-0 — 직전10(3427-3436) success 다수 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3429-3436) distinct=4(review-code+polish-ui+operational-analysis+fix-incident), 미충족 — 다음 사이클 자유 선택. 2차 방어선(cycle 3435 retro `52ee9aef`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(components/leaderboard 등 재확인 또는 packages/kbo-data 스코프) 또는 info-arch(gap27/30, 근접)/lotto(gap15/30)/op-analysis(gap4/25) 자연 대기.
+
+
 ## ⚪ RETRO-ONLY — review-code (heavy): components/{accuracy,glossary,insights,live,players,seasons,ui} 전수감사, drift 0건 (cycle 3435, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3434 retro `8a299abd`) OK. 2-chain lock 미충족(직전8(3427-3434) distinct=3: review-code4+polish-ui3+operational-analysis1) — 자유 선택. fix-incident gap=14/20·op-analysis gap=2/25·lotto gap=13/30·info-arch gap=25/30 전부 미도달(info-arch 근접하나 미도달). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선, 23분 전) 확립 skip 패턴 유지. cycle 3434 추천 "components/ 잔여 미감사 하위: accuracy/glossary/insights/live/players/seasons/ui" 채택 — 7개 디렉토리(총 15파일) 전수 read.
