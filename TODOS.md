@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — polish-ui (2-chain lock fallback): MLB wild-card/postseason 신규 라우트 + en twin 디자인 토큰 전수 그렙, drift 0건 (cycle 3460, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3459 retro `40338599`) OK. **2-chain lock 충족** — 직전8(3452-3459) distinct=2(review-code 7+operational-analysis 1) → 둘 다 제외. fix-incident `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — non-actionable. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. info-arch gap=20/30·lotto gap=11/30 전부 미도달. lock-fallback 룰 적용 → polish-ui 선택.
+
+**감사**: 최근 7일 신규 mtime 라우트 중 MLB wild-card/postseason(KO+EN) 신규 페이지 대상 디자인 토큰 그렙 — (1) hex 리터럴 색상 0건(design-tokens.ts 외부) (2) `border-gray-200`(라이트) + `dark:border-[var(--color-border)]` 패턴 전부 DESIGN.md:64 라이트모드 literal 예외 규칙과 일치 (3) `games/[date]/[slug]` 의 `border-gray-700/50`+`bg-gray-800/30` 뮤트 정보 패널 패턴(KO `app/mlb/games/[date]/[slug]/page.tsx:531` + EN `app/en/mlb/games/[date]/[slug]/page.tsx:504`) = DESIGN.md Decisions Log(2026-08-26, cycle 2625) 문서화된 5곳 예외 그룹과 정확히 일치, 신규 drift 아님 (4) wild-card/postseason 의 `<Link className="underline">` 인라인 본문 링크 — `accuracy/shadow`/`seasons/[year]`/`factors`/`players` 등 기존 established convention(순수 underline, focus-visible outline 없음)과 동일 패턴 확인 (5) `text-[Npx]` 리터럴·`rounded-md` 잔존 0건.
+
+**코드 변경 없음** — 전부 기존 established/documented 예외와 일치, drift 0건, retro-only.
+
+**검증**: 코드 변경 없음(전 cycle 3458 605 files/4776 tests PASS 유지, 재실행 생략).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3460%50=10≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3441-3460, 현재 포함) review-code 15회 발화로 미충족(표본=19≥10 충족). marker 미박제. ship-0 — 직전10(3450-3459) success 4건(3451/3452/3455/3456/3458) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3453-3460) distinct=3(review-code/operational-analysis/polish-ui) 미충족, 다음 사이클 자유 선택.
+
+다음 사이클 추천 = review-code(heavy) 복귀(cooldown 자연 해제) 또는 info-arch(gap 21/30)/lotto(gap 12/30)/fix-incident(재확인 필요) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): KBO-only 라우트 8개(dashboard/leaderboard/search/glossary/guide/changelog/teams/seasons) MLB twin 부재 의도성 검증, drift 0건 (cycle 3459, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3458 retro `54b12fc8`) OK. 2-chain lock 미충족(직전8(3451-3458) distinct=3: skill-evolution/review-code/operational-analysis). gap 체크: fix-incident=22/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — non-actionable. op-analysis gap=4/25·info-arch gap=18/30·lotto gap=9/30 전부 미도달. explore-idea saturation 직전15 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 3시간 신선) 확립 skip 패턴 유지. cycle 3458 추천대로 KBO-only(MLB twin 없는) 라우트 8개가 의도된 설계인지 재확인.
