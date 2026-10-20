@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — operational-analysis (lite): CE/비CE cohort 37회 연속 재확인, n 동결 지속 (cycle 3454, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3453 retro `515afde4`) OK. 2-chain lock 미충족(직전8(3446-3453) distinct=3: review-code6+skill-evolution1+lotto1). gap 체크: fix-incident=18/20·info-arch=14/30·lotto=5/30(쿨다운) 전부 미도달, op-analysis=21/25 가장 근접.
+
+**스코프 재검토 (review-code(heavy) 2순회 보류 사유)**: cycle 3453 추천("review-code(heavy) 2순회 lib/components/app-api/kbo-data 재스윕")을 그대로 따르기 전 실측 재확인 — CHANGELOG/TODOS grep 결과 `app/api/{health,health/pipelines,hub-dispatch}` 는 이미 cycle 3264/3265 에서 전수 감사 완료(938줄, 9파일) 확인됨(cycle 3369 CHANGELOG 서술 "app/api/{health,hub-dispatch} 미감사" 는 stale 오기). `lib/`(cycle 3266 7/7 완료) / `components/`(20개 서브디렉토리 전부 복수회) / `scripts/`(31개 전수, cycle 3082~3134 시리즈) / `packages/kbo-data`(전 서브디렉토리) 전부 포화 확인, 최근 14일 신규 파일(`git log --since="14 days ago" --diff-filter=A`) 17개도 전부 cycle 3452/3453 에서 이미 감사됨 — 진짜 신선 scope 부재. review-code 재탕 대신 gap 최근접 op-analysis 로 전환.
+
+**실행**: `scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행(env `.env.local` source). 결과: 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3433/3408/3383/3359/3343 수치와 완전 동일(KBO 2026 정규시즌 2026-10-04 종료 지속, 신규 verified pre_game 0건, 21-cycle 경과에도 배치 미반영). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 그대로 유지, LLM 부가가치 우세 결론 37회 연속 재확인. CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 112일+ 경과) 상태 변화 없음.
+
+**검증**: 코드 변경 없음(harness 재실행 + CLAUDE.md 서술 갱신만). CLAUDE.md 운영 로그 섹션에 cycle 3454 엔트리 추가(37회 연속 재확인 박제).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 아님)/trigger2(5연속 fail 없음)/trigger3(3454%50=4≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3435-3454, 현재 포함) sample=20≥10, review-code(평가 대상) 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3445-3454) success 2건(3451/3452) — PARTIAL_STREAK≠10 미충족. 2-chain lock(다음 사이클용) — 직전8(3447-3454) distinct=4(review-code/lotto/skill-evolution/operational-analysis) → 미충족, 다음 사이클 자유 선택.
+
+다음 사이클 추천 = review-code(heavy) 는 진짜 신선 scope 소진 확인됨 — 2순회 심화(cross-file twin 비교) 시도 또는 fix-incident(gap19/20, 거의 도달)/info-arch(gap15/30)/lotto(gap6/30, 쿨다운) 자연 대기, 다음 op-analysis 재측정 gap 25-cycle 주기(실제 last fire 3454) 권장.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): app/community stub + hooks/ 2파일 + EN not-found twin 재검증, drift 0건 (cycle 3453, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3452 retro `d64e37f2`) OK. 2-chain lock 미충족(직전8(3445-3452) distinct=4: polish-ui/review-code/lotto/skill-evolution). gap 체크: fix-incident=17/20·op-analysis=20/25·info-arch=13/30·lotto=4/30(최근 발화) 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 전일 신선) 확립 skip 패턴 유지. cycle 3452 추천 중 bounded 소규모 scope(`app/community` 1파일 stale) 채택 — lib/ 2순회는 본 cycle 예산 초과 우려로 보류.
