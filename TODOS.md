@@ -1,3 +1,16 @@
+## ⚪ RETRO-ONLY — review-code (heavy): components/{accuracy,glossary,insights,live,players,seasons,ui} 전수감사, drift 0건 (cycle 3435, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3434 retro `8a299abd`) OK. 2-chain lock 미충족(직전8(3427-3434) distinct=3: review-code4+polish-ui3+operational-analysis1) — 자유 선택. fix-incident gap=14/20·op-analysis gap=2/25·lotto gap=13/30·info-arch gap=25/30 전부 미도달(info-arch 근접하나 미도달). explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선, 23분 전) 확립 skip 패턴 유지. cycle 3434 추천 "components/ 잔여 미감사 하위: accuracy/glossary/insights/live/players/seasons/ui" 채택 — 7개 디렉토리(총 15파일) 전수 read.
+
+**감사**: `accuracy/`(7파일: CalibrationPlot/CommunityVsAICard/FactorAccuracyTable/ModelVersionHistory/TeamBiasTable/TeamMatchupCards/MlbAccuracyDashboard) — KBO/MLB 호출부(accuracy/mlb-accuracy/en-mlb-accuracy page.tsx) 전부 대조, sport 분기(KBO vs MLB note 문구)·locale(ko/en) parity 정상. `live/LiveScoreboard.tsx` 의 postponed 상태 처리가 cycle 3099 fix(`kbo-scores/route.ts` 의 `mapStatus` cancel/suspended 구조적 필드 우선순위)와 정합 확인. `glossary/GlossaryCategoryFilter.tsx`·`seasons/SeasonStandingsSortControl.tsx` 둘 다 focus-visible 패턴 보유(cycle 3431/3432 수정분 유지 확인). `insights/{AgentVoteCard,DebateTimeline}.tsx` 의 "5 step" 주석이 ROLE_META 5개 키(quant/home/away/calibration/judge)와 실제 일치 확인. `players/PitcherFipTrend.tsx`/`seasons/SeasonStandingsTable.tsx`/`ui/navigation-menu.tsx`(MegaMenu 가 유일 소비자, dead code 아님, a11y 전용 테스트 존재) 전부 clean.
+
+**결과**: drift 0건. 코드 변경 없음. components/ 전체 서브디렉토리(accuracy/analysis/dashboard/glossary/insights/layout/live/lotto/matchup/picks/players/predictions/reviews/search/seasons/shared/share/standings/teams/ui) 금번 기준 최소 1회 이상 감사 이력 확보 완료 추정(남은 미확인 후보는 다음 사이클 재확인 필요).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3435%50=35≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3416-3435, 현재 포함, 표본 20≥10) review-code 12회 발화로 미충족(평가대상 review-code 단독). marker 미박제. ship-0 — 직전10(3425-3434) success 다수 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3428-3434)+본 사이클 distinct=3(review-code+polish-ui+operational-analysis), 미충족 — 다음 사이클 자유 선택. 2차 방어선(cycle 3434 retro `8a299abd`) OK.
+
+다음 사이클 추천 = review-code(heavy) 잔여 재확인(components/{analysis,dashboard,lotto,matchup,picks,predictions,share,shared,standings,teams} 중 전수 read 수준 미확정분 재검증) 또는 fix-incident(gap15/20)/info-arch(gap26/30, 근접)/lotto(gap14/30) 자연 대기.
+
+
 ## ⚪ RETRO-ONLY — review-code (heavy): components/matchup/ 전수감사, drift 0건 (cycle 3434, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3433 retro `4be65450`) OK. 2-chain lock 미충족(직전8(3426-3433) distinct=3: review-code4+polish-ui3+operational-analysis1) — 자유 선택. 최근 review-code(heavy) 스윕 시리즈가 app/api 전체 + components/{predictions,reviews,standings,teams,shared,layout,dashboard,analysis} 커버했으나 components/matchup/ (11파일, 1417줄) 미감사 상태로 확인 — 스윕 대상 선정.
