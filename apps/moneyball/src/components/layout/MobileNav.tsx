@@ -69,7 +69,6 @@ export function MobileNav() {
       </button>
       {open && (
         <nav
-          data-league={league}
           className="absolute top-16 left-0 right-0 bg-brand-800 border-b border-brand-700 shadow-lg z-50"
           aria-label={isEn ? "Mobile menu" : "모바일 메뉴"}
         >
