@@ -1,4 +1,22 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/dashboard/ 전수 감사, locale 미지원 3개 차트 i18n 누락 + 매직넘버 수정 (cycle 3413, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3412 retro `1013bb59`) OK. 2-chain lock 미충족(직전8(3406-3412) distinct=3: review-code(heavy)5+operational-analysis(lite)1+info-architecture-review1). fix-incident gap=31/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=5/25·lotto gap=21/30 전부 미도달. cycle 3412 next_rec 계승 — components/ 잔여 4개 subdir(dashboard/layout/shared/predictions) 중 소형 우선(dashboard, 16파일+1테스트) 채택.
+
+**감사**: Agent 1개 위임 — 16 소스 + 1 테스트 전수 read + DESIGN.md 교차검증 + `packages/shared` 상수 대조 + 전체 call-site cross-grep(`/mlb/accuracy`, `/en/mlb/accuracy`, `MlbAccuracyDashboard.tsx`) + division-by-zero/dead-code/stale-comment 점검 + `tsc --noEmit`/`eslint`/`vitest` baseline 확인.
+
+**발견 + 수정 (i18n 누락, 확정 버그)**: `MlbAccuracyDashboard.tsx` 가 `/mlb/accuracy`(ko)와 `/en/mlb/accuracy`(en) 양쪽에 `BrierTrendChart`/`ScoringRuleDayHeatmap`/`CohortComparisonHeatmap` 3개를 렌더하면서 형제 컴포넌트(`RollingAccuracyChart`/`WinnerProbBucketChart`)에는 이미 적용된 `locale?: 'ko'|'en'` prop + `STRINGS` 맵 패턴을 이 3개에는 빠뜨림 — 영문 페이지에 요일 라벨("월화수"), 범례, empty-state 문구가 전부 한글로 노출되는 실사용자 가시 버그. 3개 파일 모두 `locale` prop + `STRINGS` ko/en 맵 추가(`WEEKDAY_LABELS_EN_MON_FIRST` 는 `packages/shared` 에 이미 존재했으나 미사용), `CohortComparisonHeatmap`은 data layer(`buildAccuracyData.ts`)가 두 locale 페이지에 공유되는 `"M/D 주"` 라벨을 고정 생성하므로 en 렌더 시 " 주" suffix만 strip 하는 표시 레벨 변환 적용(data layer 자체는 미변경 — 공유 구조라 깊은 리팩토링 불필요 판단). `MlbAccuracyDashboard.tsx` 3개 call site에 `locale={locale}` 연결.
+
+**발견 + 수정 (매직넘버)**: `CohortComparisonHeatmap.tsx` 가 같은 파일에서 `ACCURACY_GOOD_RATE`(0.6)는 import 해 쓰면서 바로 옆 tier인 `0.7`/`0.5` 는 하드코딩 — `@moneyball/shared` 의 `ACCURACY_STRONG_RATE`(0.7)/`ACCURACY_BASELINE`(0.5)로 교체(가중치 재조정 시 이 파일만 silent divergence 방지).
+
+**확인(clean, 수정 불필요)**: division-by-zero 전부 가드 확인. dead code 0건. KBO 전용 `/accuracy/page.tsx`는 en 변형이 없어 locale 미지정(기본값 ko)으로 정상 동작 — 변경 불필요.
+
+**검증**: `tsc --noEmit` clean, `eslint src/components/dashboard src/components/accuracy` clean, `vitest run src/components/dashboard src/components/accuracy`(2 files/5 tests) PASS, 전체 `pnpm test`(kbo-data+moneyball 합산 603 test files/4731 tests) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `5d7abe1a`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비된 관례) 미적용. trigger2(5연속 fail 없음) 미충족. trigger3(3413%50=13≠0) 미충족. trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3394-3413, 현재 포함, 표본 20≥10) 중 평가 대상 review-code 16회 발화로 미충족. marker 미박제. ship-0 — 직전10(3404-3413) success 8건(3404-3407/3409/3411/3412/본cycle) 포함 미충족. 2-chain lock — 직전8(3406-3413, 본cycle 포함) distinct=3(review-code/operational-analysis/info-architecture-review), 미충족. 2차 방어선(cycle 3412 retro `1013bb59`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 3개 subdir 계속(layout 19/shared 23/predictions 31, 소형 우선 layout) 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap6/25)/lotto(gap22/30)/info-arch(gap4/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): components/analysis/ 전수 감사, PostviewPanel.tsx dark mode token 누락 수정 (cycle 3412, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3411 retro `d22782de`) OK. 2-chain lock 미충족(직전8(3404-3411) distinct=3: review-code(heavy)6+operational-analysis(lite)1+info-architecture-review1). fix-incident gap≥20 나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=4/25·lotto gap=20/30 전부 미도달. cycle 3378 next_rec 계승 — components/ 잔여 5개 subdir(dashboard/layout/analysis/shared/predictions) 중 소형 우선(analysis, 15파일) 채택.
