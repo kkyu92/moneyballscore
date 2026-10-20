@@ -133,13 +133,17 @@ export default async function MlbTeamPage({ params }: PageProps) {
     buildMlbDivisionStandings(),
   ]);
 
-  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/mlb/team/[code]", source: "buildMlbTeamEloTrend" });
-  const upcoming = upcomingR.status === "fulfilled" ? upcomingR.value : captureFallback(upcomingR.reason, [], { route: "/mlb/team/[code]", source: "buildMlbTeamUpcoming" });
-  const strongTeamStats = strongTeamStatsR.status === "fulfilled" ? strongTeamStatsR.value : captureFallback(strongTeamStatsR.reason, [], { route: "/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(strong)" });
-  const completeTeamStats = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, [], { route: "/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(complete)" });
-  const divisionStandings = divisionStandingsR.status === "fulfilled" ? divisionStandingsR.value : captureFallback(divisionStandingsR.reason, null, { route: "/mlb/team/[code]", source: "buildMlbDivisionStandings" });
+  const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [], degraded: true }, { route: "/mlb/team/[code]", source: "buildMlbTeamEloTrend" });
+  const upcomingResult = upcomingR.status === "fulfilled" ? upcomingR.value : captureFallback(upcomingR.reason, { items: [], degraded: true }, { route: "/mlb/team/[code]", source: "buildMlbTeamUpcoming" });
+  const upcoming = upcomingResult.items;
+  const strongTeamStatsResult = strongTeamStatsR.status === "fulfilled" ? strongTeamStatsR.value : captureFallback(strongTeamStatsR.reason, { rows: [], degraded: true }, { route: "/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(strong)" });
+  const completeTeamStatsResult = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, { rows: [], degraded: true }, { route: "/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(complete)" });
+  const strongTeamStats = strongTeamStatsResult.rows;
+  const completeTeamStats = completeTeamStatsResult.rows;
+  const divisionStandingsResult = divisionStandingsR.status === "fulfilled" ? divisionStandingsR.value : captureFallback(divisionStandingsR.reason, null, { route: "/mlb/team/[code]", source: "buildMlbDivisionStandings" });
+  const divisionStandings = divisionStandingsResult?.standings ?? null;
 
-  const dbDegraded = profile.degraded || [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR].some((r) => r.status === "rejected");
+  const dbDegraded = profile.degraded || eloTrend.degraded || upcomingResult.degraded || strongTeamStatsResult.degraded || completeTeamStatsResult.degraded || (divisionStandingsResult?.degraded ?? true) || [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR].some((r) => r.status === "rejected");
 
   const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);

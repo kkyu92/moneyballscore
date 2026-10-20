@@ -3,6 +3,11 @@ import { assertSelectOk, PRODUCTION_COHORT_RULES, type TeamCode } from "@moneyba
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { captureFallback } from "@/lib/observability/captureFallback";
 
+// degraded-flag-exempt: getInsightsForDate 의 catch 는 /insights/[date] 정적 아카이브 전용 —
+// 호출 page 는 Promise.allSettled/dbDegraded 배너가 아니라 entries=[] → notFound() 로 degrade
+// (주석 참조, cycle 2945 취지: build-time 정적 생성 실패 방지). listInsightsDates 는 catch 없이
+// fail-loud. 소비하는 page 어디에도 dbDegraded UI 가 없어 degraded 플래그를 꽂을 곳이 없음
+// (cycle 3402 구조 가드 테스트 — CLEAN 분류, criterion b).
 const DATE_REGEX = /^20[2-9]\d-\d{2}-\d{2}$/;
 
 export function isValidInsightsDate(date: string): boolean {

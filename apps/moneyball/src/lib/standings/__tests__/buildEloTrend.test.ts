@@ -40,12 +40,21 @@ describe("buildEloTrend — wave-241 CREDIT_EXHAUSTED fix", () => {
     expect(eqCalls).not.toContain("predictions.debate_version");
   });
 
-  it("빈 데이터 시 빈 배열 반환", async () => {
+  it("빈 데이터 시 빈 배열 반환, degraded: false", async () => {
     supabaseMock = makeSupabaseMock([]);
     const { buildEloTrend } = await import("../buildEloTrend");
     const result = await buildEloTrend();
     expect(result.points).toHaveLength(0);
     expect(result.teams).toHaveLength(0);
+    expect(result.degraded).toBe(false);
+  });
+
+  it("select error 시 degraded: true 노출 (silent drift 가드)", async () => {
+    supabaseMock = makeSupabaseMock(null, { message: "boom" });
+    const { buildEloTrend } = await import("../buildEloTrend");
+    const result = await buildEloTrend();
+    expect(result.points).toHaveLength(0);
+    expect(result.degraded).toBe(true);
   });
 
   it("limit(600) 적용 시 최신 경기가 아닌 가장 오래된 경기가 잘리도록 descending 정렬 사용 (cycle 3061 — ascending+limit는 시즌 후반 Elo 데이터 silent truncation)", async () => {

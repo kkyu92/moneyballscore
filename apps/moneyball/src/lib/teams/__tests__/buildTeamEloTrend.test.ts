@@ -12,7 +12,7 @@ describe("buildTeamEloTrend", () => {
   afterEach(() => vi.clearAllMocks());
 
   it("buildEloTrend 데이터 없으면 빈 배열 반환", async () => {
-    mockBuildEloTrend.mockResolvedValue({ points: [], teams: [] });
+    mockBuildEloTrend.mockResolvedValue({ points: [], teams: [], degraded: false });
     const result = await buildTeamEloTrend("LG");
     expect(result.points).toHaveLength(0);
   });
@@ -24,6 +24,7 @@ describe("buildTeamEloTrend", () => {
         { date: "2026-04-02", LG: 1530, HT: 1470, OB: 1510 },
       ],
       teams: ["LG", "HT", "OB"],
+      degraded: false,
     });
 
     const result = await buildTeamEloTrend("LG");
@@ -48,6 +49,7 @@ describe("buildTeamEloTrend", () => {
         { date: "2026-04-02", LG: 1530, HT: 1470 },
       ],
       teams: ["LG", "HT", "OB"],
+      degraded: false,
     });
 
     const result = await buildTeamEloTrend("LG");

@@ -95,16 +95,16 @@ export default async function ReviewsPage() {
   const [
     strongConvergenceRecord,
     completeConvergenceRecord,
-    strongConvergenceStreak,
-    bestConvergenceStreak,
-    completeConvergenceStreak,
-    completeBestStreak,
-    strongTeamStats,
-    completeTeamStats,
-    strongHomeAwaySplit,
-    completeHomeAwaySplit,
-    strongDayOfWeekSplit,
-    completeDayOfWeekSplit,
+    strongConvergenceStreakResult,
+    bestConvergenceStreakResult,
+    completeConvergenceStreakResult,
+    completeBestStreakResult,
+    strongTeamStatsResult,
+    completeTeamStatsResult,
+    strongHomeAwaySplitResult,
+    completeHomeAwaySplitResult,
+    strongDayOfWeekSplitResult,
+    completeDayOfWeekSplitResult,
   ] = await Promise.all([
     // "수렴 픽 전체 성적" 카드 — CONVERGENCE_RECORD_ALL_LIMIT 는 날짜 범위(startDate)와 짝을
     // 이뤄야 "전체" 조회가 됨(주석 참조, packages/shared/src/index.ts). startDate 생략 시
@@ -133,7 +133,33 @@ export default async function ReviewsPage() {
   const predictions = predictionsR.status === "fulfilled"
     ? predictionsR.value
     : captureFallback(predictionsR.reason, [] as VerifiedPredictionRow[], { route: "/reviews", source: "getVerifiedPredictions" });
-  const dbDegraded = predictionsR.status === "rejected";
+  // cycle 3402 fix — getConvergencePick* 계열 내부 catch 가 Supabase 오류를 captureFallback 으로
+  // 흡수(fail-silent)해 위 Promise.all 이 reject 되지 않음(silent drift, buildTeamProfile 계열과
+  // 동일 bug shape). 각 결과 degraded 플래그를 dbDegraded 에 OR.
+  const strongConvergenceStreak = strongConvergenceStreakResult.streak;
+  const bestConvergenceStreak = bestConvergenceStreakResult.streak;
+  const completeConvergenceStreak = completeConvergenceStreakResult.streak;
+  const completeBestStreak = completeBestStreakResult.streak;
+  const strongTeamStats = strongTeamStatsResult.rows;
+  const completeTeamStats = completeTeamStatsResult.rows;
+  const strongHomeAwaySplit = strongHomeAwaySplitResult.split;
+  const completeHomeAwaySplit = completeHomeAwaySplitResult.split;
+  const strongDayOfWeekSplit = strongDayOfWeekSplitResult.rows;
+  const completeDayOfWeekSplit = completeDayOfWeekSplitResult.rows;
+
+  const dbDegraded = predictionsR.status === "rejected"
+    || strongConvergenceRecord.degraded
+    || completeConvergenceRecord.degraded
+    || strongConvergenceStreakResult.degraded
+    || bestConvergenceStreakResult.degraded
+    || completeConvergenceStreakResult.degraded
+    || completeBestStreakResult.degraded
+    || strongTeamStatsResult.degraded
+    || completeTeamStatsResult.degraded
+    || strongHomeAwaySplitResult.degraded
+    || completeHomeAwaySplitResult.degraded
+    || strongDayOfWeekSplitResult.degraded
+    || completeDayOfWeekSplitResult.degraded;
 
   const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
   const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);

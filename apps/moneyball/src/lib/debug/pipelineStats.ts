@@ -4,6 +4,10 @@
 //   fall-through — 게임 자체는 스킵 안 되고 quant-only 로 예측 진행되지만 동일
 //   skipped_detail 배열에 적재됨, cycle 884 D fix)
 // shouldPredictGame (schedule.ts) reject reason 분포 + debate fallback 이벤트 시각화.
+//
+// degraded-flag-exempt: 이 파일의 유일한 catch(JSON.parse 실패, parseSkippedDetail)는 Supabase
+// 조회와 무관 — `.from(` 은 전혀 없고 `Array.from(` 만 존재(cycle 3402 구조 가드 테스트 false
+// positive 패턴, grep 매칭 기준 단어 경계 없는 `.from(` 때문).
 
 export interface SkippedEntry {
   game: string;

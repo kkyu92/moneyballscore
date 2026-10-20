@@ -21,6 +21,7 @@ export interface MlbMatchupEloPoint {
 
 interface MlbMatchupEloTrendData {
   points: MlbMatchupEloPoint[];
+  degraded: boolean;
 }
 
 interface EloHistoryRow {
@@ -47,13 +48,15 @@ export async function buildMlbMatchupEloTrend(
     .in("team_code", [dbCodeA, dbCodeB])
     .order("game_date", { ascending: true })) as SelectResult<EloHistoryRow[]>;
   let data: EloHistoryRow[] | null;
+  let degraded = false;
   try {
     ({ data } = assertSelectOk(result, `buildMlbMatchupEloTrend ${codeA} vs ${codeB}`));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupEloTrend' });
   }
   const rows = data ?? [];
-  if (rows.length === 0) return { points: [] };
+  if (rows.length === 0) return { points: [], degraded };
 
   const byDate = new Map<string, { eloA: number | null; eloB: number | null }>();
   for (const row of rows) {
@@ -68,5 +71,5 @@ export async function buildMlbMatchupEloTrend(
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, v]) => ({ date, eloA: v.eloA, eloB: v.eloB }));
 
-  return { points };
+  return { points, degraded };
 }

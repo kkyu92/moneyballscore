@@ -115,11 +115,13 @@ export default async function MatchupPage({ params }: PageProps) {
   const formB = formBR.status === "fulfilled" ? formBR.value : captureFallback(formBR.reason, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeB" });
   const upcomingMatchupResult = upcomingMatchupR.status === "fulfilled" ? upcomingMatchupR.value : captureFallback(upcomingMatchupR.reason, { items: [], degraded: true }, { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupUpcoming" });
   const upcomingMatchup = upcomingMatchupResult.items;
-  const strongH2HStats = strongH2HStatsR.status === "fulfilled" ? strongH2HStatsR.value : captureFallback(strongH2HStatsR.reason, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(strong)" });
-  const completeH2HStats = completeH2HStatsR.status === "fulfilled" ? completeH2HStatsR.value : captureFallback(completeH2HStatsR.reason, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(complete)" });
+  const strongH2HStatsResult = strongH2HStatsR.status === "fulfilled" ? strongH2HStatsR.value : captureFallback(strongH2HStatsR.reason, { rows: [], degraded: true }, { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(strong)" });
+  const completeH2HStatsResult = completeH2HStatsR.status === "fulfilled" ? completeH2HStatsR.value : captureFallback(completeH2HStatsR.reason, { rows: [], degraded: true }, { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(complete)" });
+  const strongH2HStats = strongH2HStatsResult.rows;
+  const completeH2HStats = completeH2HStatsResult.rows;
   const eloTrend = eloTrendR.status === "fulfilled" ? eloTrendR.value : captureFallback(eloTrendR.reason, { points: [] }, { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupEloTrend" });
 
-  const dbDegraded = factorA.degraded || factorB.degraded || formA.degraded || formB.degraded || upcomingMatchupResult.degraded || [strongH2HStatsR, completeH2HStatsR, eloTrendR].some((r) => r.status === "rejected");
+  const dbDegraded = factorA.degraded || factorB.degraded || formA.degraded || formB.degraded || upcomingMatchupResult.degraded || strongH2HStatsResult.degraded || completeH2HStatsResult.degraded || [strongH2HStatsR, completeH2HStatsR, eloTrendR].some((r) => r.status === "rejected");
 
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 

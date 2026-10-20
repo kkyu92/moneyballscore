@@ -40,6 +40,11 @@ interface PredRow {
  * mlb_schedule(팀 코드 string) + predictions(external_game_id, league='mlb') 조인.
  * predicted_winner/is_correct 컬럼은 MLB 전량 NULL(deriveMlbOutcome.ts 주석 참조) —
  * home_win_prob + 실제 스코어로 직접 derive(buildMlbMatchupProfile.ts 와 동일 패턴 재사용).
+ *
+ * degraded-flag-exempt: 유일한 소비자 MlbHistoricalAnalogMatchup.tsx 는 page.tsx 의
+ * Promise.all/allSettled 밖에서 인라인 렌더되는 하위 컴포넌트라 dbDegraded 배너에 연결할 곳이
+ * 없음 — 에러 시 섹션 자체를 렌더하지 않는 설계가 이미 그 컴포넌트에 명시적으로 문서화됨
+ * (컴포넌트 내 주석 참조, cycle 3402 criterion b).
  */
 export async function fetchMlbHistoricalAnalogs(
   homeCode: MlbTeamCode,

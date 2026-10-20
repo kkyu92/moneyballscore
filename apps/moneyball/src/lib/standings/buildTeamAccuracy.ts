@@ -21,6 +21,22 @@ export interface TeamAccuracyRow {
   accuracyRate: number | null;
 }
 
+export interface TeamAccuracyResult {
+  rows: TeamAccuracyRow[];
+  degraded: boolean;
+}
+
+export interface MatchupDataResult {
+  matchups: MatchupRow[];
+  homeAway: TeamHomeAwayRow[];
+  degraded: boolean;
+}
+
+export interface TeamBiasAnalysisResult {
+  rows: TeamBiasRow[];
+  degraded: boolean;
+}
+
 interface MatchupRow {
   teamCode: TeamCode;
   opponentCode: TeamCode;
@@ -70,9 +86,10 @@ interface TeamBiasRow {
 
 export async function buildAllTeamAccuracy(
   options: { cohort?: readonly ScoringRule[] } = {},
-): Promise<TeamAccuracyRow[]> {
+): Promise<TeamAccuracyResult> {
   const cohort = options.cohort ?? DEFAULT_COHORT;
   const supabase = await createClient();
+  let degraded = false;
 
   const result = await supabase
     .from("predictions")
@@ -93,14 +110,15 @@ export async function buildAllTeamAccuracy(
   try {
     ({ data } = assertSelectOk(result, "buildAllTeamAccuracy"));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: "/standings", source: "buildAllTeamAccuracy" });
   }
-  if (!data || data.length === 0) return [];
+  if (!data || data.length === 0) return { rows: [], degraded };
 
-  const rows = data as unknown as PredRow[];
+  const predRows = data as unknown as PredRow[];
   const acc = new Map<string, { verifiedN: number; correctN: number }>();
 
-  for (const row of rows) {
+  for (const row of predRows) {
     const homeCode = row.game?.home_team?.code;
     const awayCode = row.game?.away_team?.code;
     for (const code of [homeCode, awayCode]) {
@@ -112,7 +130,7 @@ export async function buildAllTeamAccuracy(
     }
   }
 
-  return Array.from(acc.entries())
+  const rows = Array.from(acc.entries())
     .map(([code, { verifiedN, correctN }]) => ({
       teamCode: code as TeamCode,
       verifiedN,
@@ -120,13 +138,12 @@ export async function buildAllTeamAccuracy(
       accuracyRate: verifiedN > 0 ? correctN / verifiedN : null,
     }))
     .sort((a, b) => (b.accuracyRate ?? -1) - (a.accuracyRate ?? -1));
+  return { rows, degraded };
 }
 
-export async function buildMatchupData(): Promise<{
-  matchups: MatchupRow[];
-  homeAway: TeamHomeAwayRow[];
-}> {
+export async function buildMatchupData(): Promise<MatchupDataResult> {
   const supabase = await createClient();
+  let degraded = false;
 
   const result = await supabase
     .from("predictions")
@@ -147,9 +164,10 @@ export async function buildMatchupData(): Promise<{
   try {
     ({ data } = assertSelectOk(result, "buildMatchupData"));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: "/standings", source: "buildMatchupData" });
   }
-  if (!data || data.length === 0) return { matchups: [], homeAway: [] };
+  if (!data || data.length === 0) return { matchups: [], homeAway: [], degraded };
 
   const rows = data as unknown as PredRow[];
 
@@ -208,11 +226,12 @@ export async function buildMatchupData(): Promise<{
     }),
   );
 
-  return { matchups, homeAway };
+  return { matchups, homeAway, degraded };
 }
 
-export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
+export async function buildTeamBiasAnalysis(): Promise<TeamBiasAnalysisResult> {
   const supabase = await createClient();
+  let degraded = false;
 
   const [predResult, standings] = await Promise.all([
     supabase
@@ -239,14 +258,15 @@ export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
   try {
     ({ data } = assertSelectOk(predResult, "buildTeamBiasAnalysis"));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: "/standings", source: "buildTeamBiasAnalysis" });
   }
-  if (!data || data.length === 0) return [];
+  if (!data || data.length === 0) return { rows: [], degraded };
 
-  const rows = data as unknown as BiasExtRow[];
+  const biasRows = data as unknown as BiasExtRow[];
   const byTeam = new Map<string, { totalN: number; predictedWinN: number; verifiedN: number; correctN: number }>();
 
-  for (const row of rows) {
+  for (const row of biasRows) {
     const homeId = row.game?.home_team?.id;
     const homeCode = row.game?.home_team?.code;
     const awayCode = row.game?.away_team?.code;
@@ -267,7 +287,7 @@ export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
   const standingsMap = new Map<string, number>();
   for (const s of standings) standingsMap.set(s.teamCode, s.winPct);
 
-  return Array.from(byTeam.entries())
+  const rows = Array.from(byTeam.entries())
     .map(([code, { totalN, predictedWinN, verifiedN, correctN }]) => {
       const predictedWinRate = totalN > 0 ? predictedWinN / totalN : null;
       const actualWinPct = standingsMap.get(code) ?? null;
@@ -289,4 +309,5 @@ export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
     })
     .filter((r) => r.totalN >= SMALL_SAMPLE_N)
     .sort((a, b) => Math.abs(b.biasGap ?? 0) - Math.abs(a.biasGap ?? 0));
+  return { rows, degraded };
 }

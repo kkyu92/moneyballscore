@@ -31,6 +31,11 @@ type MlbDivisionStandings = Record<
   Record<MlbDivisionSide, MlbStandingsRow[]>
 >;
 
+export interface MlbDivisionStandingsResult {
+  standings: MlbDivisionStandings;
+  degraded: boolean;
+}
+
 interface MlbScheduleFinalRow {
   home_team_code: string;
   away_team_code: string;
@@ -38,8 +43,9 @@ interface MlbScheduleFinalRow {
   away_score: number | null;
 }
 
-export async function buildMlbDivisionStandings(): Promise<MlbDivisionStandings> {
+export async function buildMlbDivisionStandings(): Promise<MlbDivisionStandingsResult> {
   const supabase = await createClient();
+  let degraded = false;
   const result = await supabase
     .from("mlb_schedule")
     .select("home_team_code, away_team_code, home_score, away_score")
@@ -49,6 +55,7 @@ export async function buildMlbDivisionStandings(): Promise<MlbDivisionStandings>
   try {
     ({ data } = assertSelectOk(result, "buildMlbDivisionStandings mlb_schedule"));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: '/mlb/standings', source: 'buildMlbDivisionStandings mlb_schedule' });
   }
   const rows = (data ?? []) as MlbScheduleFinalRow[];
@@ -101,7 +108,7 @@ export async function buildMlbDivisionStandings(): Promise<MlbDivisionStandings>
       }));
     }
   }
-  return standings;
+  return { standings, degraded };
 }
 
 interface MlbTeamDivisionRank {

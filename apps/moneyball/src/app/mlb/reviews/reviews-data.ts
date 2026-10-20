@@ -14,16 +14,16 @@ export async function getMlbReviewsData() {
   const [
     strongConvergenceRecord,
     completeConvergenceRecord,
-    strongConvergenceStreak,
-    strongBestStreak,
-    completeConvergenceStreak,
-    completeBestStreak,
-    strongTeamStats,
-    completeTeamStats,
-    strongHomeAwaySplit,
-    completeHomeAwaySplit,
-    strongDayOfWeekSplit,
-    completeDayOfWeekSplit,
+    strongConvergenceStreakResult,
+    strongBestStreakResult,
+    completeConvergenceStreakResult,
+    completeBestStreakResult,
+    strongTeamStatsResult,
+    completeTeamStatsResult,
+    strongHomeAwaySplitResult,
+    completeHomeAwaySplitResult,
+    strongDayOfWeekSplitResult,
+    completeDayOfWeekSplitResult,
   ] = await Promise.all([
     getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_STRONG),
     getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_COMPLETE),
@@ -39,6 +39,32 @@ export async function getMlbReviewsData() {
     getMlbConvergencePickDayOfWeekSplit(MLB_FACTOR_PICK_COMPLETE),
   ]);
 
+  // cycle 3402 fix — getMlbConvergencePick* 계열 반환 shape 변경(degraded 플래그 추가) unwrap +
+  // 집계 degraded 노출 (호출 page 가 자체 dbDegraded 배너에 OR 하도록).
+  const strongConvergenceStreak = strongConvergenceStreakResult.streak;
+  const strongBestStreak = strongBestStreakResult.streak;
+  const completeConvergenceStreak = completeConvergenceStreakResult.streak;
+  const completeBestStreak = completeBestStreakResult.streak;
+  const strongTeamStats = strongTeamStatsResult.rows;
+  const completeTeamStats = completeTeamStatsResult.rows;
+  const strongHomeAwaySplit = strongHomeAwaySplitResult.split;
+  const completeHomeAwaySplit = completeHomeAwaySplitResult.split;
+  const strongDayOfWeekSplit = strongDayOfWeekSplitResult.rows;
+  const completeDayOfWeekSplit = completeDayOfWeekSplitResult.rows;
+
+  const degraded = strongConvergenceRecord.degraded
+    || completeConvergenceRecord.degraded
+    || strongConvergenceStreakResult.degraded
+    || strongBestStreakResult.degraded
+    || completeConvergenceStreakResult.degraded
+    || completeBestStreakResult.degraded
+    || strongTeamStatsResult.degraded
+    || completeTeamStatsResult.degraded
+    || strongHomeAwaySplitResult.degraded
+    || completeHomeAwaySplitResult.degraded
+    || strongDayOfWeekSplitResult.degraded
+    || completeDayOfWeekSplitResult.degraded;
+
   return {
     strongConvergenceRecord,
     completeConvergenceRecord,
@@ -53,5 +79,6 @@ export async function getMlbReviewsData() {
     strongDayOfWeekSplit,
     completeDayOfWeekSplit,
     hasAnyData: strongConvergenceRecord.total > 0 || completeConvergenceRecord.total > 0,
+    degraded,
   };
 }

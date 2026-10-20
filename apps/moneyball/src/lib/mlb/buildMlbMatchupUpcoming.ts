@@ -36,6 +36,11 @@ interface PredRow {
   home_win_prob: number | null;
 }
 
+export interface MlbMatchupUpcomingResult {
+  items: MlbMatchupUpcomingGame[];
+  degraded: boolean;
+}
+
 /**
  * 두 MLB 팀의 예정(scheduled) 맞대결 + pre_game AI 예측. KBO buildMatchupUpcoming.ts
  * 병렬 구현(review-code heavy, cycle 2474) — /mlb/matchup/[teamA]/[teamB] 에 KBO 대응
@@ -44,8 +49,9 @@ interface PredRow {
  */
 export async function buildMlbMatchupUpcoming(
   pair: MlbMatchupPair,
-): Promise<MlbMatchupUpcomingGame[]> {
+): Promise<MlbMatchupUpcomingResult> {
   const supabase = await createClient();
+  let degraded = false;
 
   const dbCodeA = toMlbStatsApiCode(pair.codeA);
   const dbCodeB = toMlbStatsApiCode(pair.codeB);
@@ -70,10 +76,11 @@ export async function buildMlbMatchupUpcoming(
       `buildMlbMatchupUpcoming mlb_schedule ${pair.codeA} vs ${pair.codeB}`,
     ));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupUpcoming mlb_schedule' });
   }
   const rows = scheduleData ?? [];
-  if (rows.length === 0) return [];
+  if (rows.length === 0) return { items: [], degraded };
 
   const predResult = (await supabase
     .from("predictions")
@@ -92,6 +99,7 @@ export async function buildMlbMatchupUpcoming(
       `buildMlbMatchupUpcoming predictions ${pair.codeA} vs ${pair.codeB}`,
     ));
   } catch (err) {
+    degraded = true;
     predData = captureFallback(err, [], { route: '/mlb/matchup', source: 'buildMlbMatchupUpcoming predictions' });
   }
 
@@ -125,5 +133,5 @@ export async function buildMlbMatchupUpcoming(
     });
   }
 
-  return result;
+  return { items: result, degraded };
 }

@@ -324,22 +324,25 @@ export default async function AccuracyPage() {
   const pollResult = pollResultR.status === 'fulfilled' ? pollResultR.value : captureFallback(pollResultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'pickPoll' });
   const completedGamesResult = completedGamesResultR.status === 'fulfilled' ? completedGamesResultR.value : captureFallback(completedGamesResultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'completedGames' });
   const predForPoll = predForPollR.status === 'fulfilled' ? predForPollR.value : captureFallback(predForPollR.reason, { data: null, error: null }, { route: '/accuracy', source: 'predForPoll' });
-  const teamRows = teamRowsR.status === 'fulfilled' ? teamRowsR.value : captureFallback(teamRowsR.reason, [] as Awaited<ReturnType<typeof buildAllTeamAccuracy>>, {
+  const teamRowsResult = teamRowsR.status === 'fulfilled' ? teamRowsR.value : captureFallback(teamRowsR.reason, { rows: [], degraded: true } as Awaited<ReturnType<typeof buildAllTeamAccuracy>>, {
     route: '/accuracy',
     source: 'buildAllTeamAccuracy',
   });
-  const matchupData = matchupDataR.status === 'fulfilled' ? matchupDataR.value : captureFallback(matchupDataR.reason, { matchups: [], homeAway: [] } as Awaited<ReturnType<typeof buildMatchupData>>, {
+  const teamRows = teamRowsResult.rows;
+  const matchupDataResult = matchupDataR.status === 'fulfilled' ? matchupDataR.value : captureFallback(matchupDataR.reason, { matchups: [], homeAway: [], degraded: true } as Awaited<ReturnType<typeof buildMatchupData>>, {
     route: '/accuracy',
     source: 'buildMatchupData',
   });
-  const biasRows = biasRowsR.status === 'fulfilled' ? biasRowsR.value : captureFallback(biasRowsR.reason, [] as Awaited<ReturnType<typeof buildTeamBiasAnalysis>>, {
+  const matchupData = matchupDataResult;
+  const biasRowsResult = biasRowsR.status === 'fulfilled' ? biasRowsR.value : captureFallback(biasRowsR.reason, { rows: [], degraded: true } as Awaited<ReturnType<typeof buildTeamBiasAnalysis>>, {
     route: '/accuracy',
     source: 'buildTeamBiasAnalysis',
   });
+  const biasRows = biasRowsResult.rows;
   const fallbackResult = fallbackResultR.status === 'fulfilled' ? fallbackResultR.value : captureFallback(fallbackResultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'fallback' });
   const factorResult = factorResultR.status === 'fulfilled' ? factorResultR.value : captureFallback(factorResultR.reason, { data: null, error: null }, { route: '/accuracy', source: 'factor' });
 
-  const dbDegraded = [resultR, versionHistoryResultR, pollResultR, completedGamesResultR, predForPollR, teamRowsR, matchupDataR, biasRowsR, fallbackResultR, factorResultR].some(
+  const dbDegraded = teamRowsResult.degraded || matchupDataResult.degraded || biasRowsResult.degraded || [resultR, versionHistoryResultR, pollResultR, completedGamesResultR, predForPollR, teamRowsR, matchupDataR, biasRowsR, fallbackResultR, factorResultR].some(
     (r) => r !== null && r.status === 'rejected',
   );
 

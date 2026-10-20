@@ -16,6 +16,7 @@ export interface EloDataPoint {
 interface EloTrendData {
   points: EloDataPoint[];
   teams: TeamCode[];
+  degraded: boolean;
 }
 
 interface EloGameRow {
@@ -49,12 +50,14 @@ export async function buildEloTrend(): Promise<EloTrendData> {
     .limit(600);
 
   let data: unknown[] | null = null;
+  let degraded = false;
   try {
     ({ data } = assertSelectOk(result, "standings.buildEloTrend"));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: "/standings", source: "buildEloTrend" });
   }
-  if (!data || data.length === 0) return { points: [], teams: [] };
+  if (!data || data.length === 0) return { points: [], teams: [], degraded };
 
   // 날짜별 팀 Elo 집계 (같은 날 여러 경기 대비 최신 값 덮어쓰기)
   const rawByDate = new Map<string, Map<string, number>>();
@@ -80,7 +83,7 @@ export async function buildEloTrend(): Promise<EloTrendData> {
     }
   }
 
-  if (rawByDate.size === 0) return { points: [], teams: [] };
+  if (rawByDate.size === 0) return { points: [], teams: [], degraded };
 
   const teams = TEAM_CODES.filter((c) => observedTeams.has(c));
   const sortedDates = Array.from(rawByDate.keys()).sort();
@@ -110,5 +113,5 @@ export async function buildEloTrend(): Promise<EloTrendData> {
       ? points.filter((_, i) => i % Math.ceil(points.length / 60) === 0 || i === points.length - 1)
       : points;
 
-  return { points: sampled, teams };
+  return { points: sampled, teams, degraded };
 }

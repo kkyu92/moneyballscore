@@ -23,6 +23,7 @@ export interface MlbTeamEloPoint {
 
 interface MlbTeamEloTrendData {
   points: MlbTeamEloPoint[];
+  degraded: boolean;
 }
 
 interface EloHistoryRow {
@@ -41,13 +42,15 @@ export async function buildMlbTeamEloTrend(
     .select("team_code, game_date, elo_rating")
     .order("game_date", { ascending: true })) as SelectResult<EloHistoryRow[]>;
   let data: EloHistoryRow[] | null;
+  let degraded = false;
   try {
     ({ data } = assertSelectOk(result, `buildMlbTeamEloTrend ${code}`));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: '/mlb/team', source: 'buildMlbTeamEloTrend' });
   }
   const rows = data ?? [];
-  if (rows.length === 0) return { points: [] };
+  if (rows.length === 0) return { points: [], degraded };
 
   const rowsByDate = new Map<string, Array<{ teamCode: MlbTeamCode; elo: number }>>();
   for (const row of rows) {
@@ -77,5 +80,5 @@ export async function buildMlbTeamEloTrend(
     points.push({ date, elo: teamElo, avg });
   }
 
-  return { points };
+  return { points, degraded };
 }

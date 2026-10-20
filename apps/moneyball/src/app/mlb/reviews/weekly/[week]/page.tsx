@@ -146,14 +146,14 @@ export default async function MlbWeeklyReviewPage({ params }: PageProps) {
     review,
     strongConvergenceRecord,
     completeConvergenceRecord,
-    strongConvergenceStreak,
-    strongConvergenceBestStreak,
-    completeConvergenceStreak,
-    completeConvergenceBestStreak,
-    strongHomeAwaySplit,
-    completeHomeAwaySplit,
-    strongTeamStats,
-    completeTeamStats,
+    strongConvergenceStreakResult,
+    strongConvergenceBestStreakResult,
+    completeConvergenceStreakResult,
+    completeConvergenceBestStreakResult,
+    strongHomeAwaySplitResult,
+    completeHomeAwaySplitResult,
+    strongTeamStatsResult,
+    completeTeamStatsResult,
   ] = await Promise.all([
     buildMlbWeeklyReview(range),
     getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_STRONG, range.startDate, range.endDate),
@@ -167,6 +167,16 @@ export default async function MlbWeeklyReviewPage({ params }: PageProps) {
     getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_STRONG, range.startDate, range.endDate),
     getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
   ]);
+  // cycle 3402 fix — getMlbConvergencePick* 반환 shape 변경(degraded 플래그 추가) unwrap.
+  // 이 페이지는 dbDegraded 배너가 기존에 없어 신규 추가하지 않음(범위: 타입 정합만).
+  const strongConvergenceStreak = strongConvergenceStreakResult.streak;
+  const strongConvergenceBestStreak = strongConvergenceBestStreakResult.streak;
+  const completeConvergenceStreak = completeConvergenceStreakResult.streak;
+  const completeConvergenceBestStreak = completeConvergenceBestStreakResult.streak;
+  const strongHomeAwaySplit = strongHomeAwaySplitResult.split;
+  const completeHomeAwaySplit = completeHomeAwaySplitResult.split;
+  const strongTeamStats = strongTeamStatsResult.rows;
+  const completeTeamStats = completeTeamStatsResult.rows;
   const url = `${SITE_URL}/mlb/reviews/weekly/${week}`;
 
   // confidence desc 순위 — date default 도착 순서에서 confidence desc rank 계산.

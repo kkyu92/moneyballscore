@@ -363,7 +363,7 @@ export default async function GameDetailEn({ params }: PageParams) {
     Math.abs(convergenceDuel.netScore) >= MLB_FACTOR_PICK_STRONG;
   const convergenceRecord = isConvergencePick
     ? await getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_STRONG)
-    : { wins: 0, losses: 0, total: 0 };
+    : { wins: 0, losses: 0, total: 0, degraded: false };
 
   return (
     <article className="max-w-4xl mx-auto space-y-6 py-6">

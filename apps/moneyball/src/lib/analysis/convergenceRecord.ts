@@ -68,9 +68,9 @@ async function fetchConvergencePickResults(
   // wave-584: endDate 지정 시 해당 날짜까지만 조회 (주간 리뷰 수렴 픽 성적 용).
   // 미지정 시 기존 동작 (today 미만).
   endDate?: string,
-): Promise<boolean[]> {
-  const detailed = await fetchConvergencePickDetailedResults(cutoff, minFactors, endDate);
-  return detailed.slice(0, limit).map(r => r.won);
+): Promise<{ results: boolean[]; degraded: boolean }> {
+  const { results: detailed, degraded } = await fetchConvergencePickDetailedResults(cutoff, minFactors, endDate);
+  return { results: detailed.slice(0, limit).map(r => r.won), degraded };
 }
 
 export async function getRecentConvergencePickRecord(
@@ -81,12 +81,12 @@ export async function getRecentConvergencePickRecord(
   startDate?: string,
   // wave-584: endDate 지정 시 해당 날짜까지만 조회 (주간 리뷰 수렴 픽 성적 용).
   endDate?: string,
-): Promise<{ wins: number; losses: number; total: number }> {
+): Promise<{ wins: number; losses: number; total: number; degraded: boolean }> {
   const cutoff = startDate ?? kstDateOffset(CONVERGENCE_RECORD_LOOKBACK_DAYS);
   const effectiveLimit = startDate != null ? Number.MAX_SAFE_INTEGER : limit;
-  const results = await fetchConvergencePickResults(cutoff, effectiveLimit, minFactors, endDate);
+  const { results, degraded } = await fetchConvergencePickResults(cutoff, effectiveLimit, minFactors, endDate);
   const wins = results.filter(r => r).length;
-  return { wins, losses: results.length - wins, total: results.length };
+  return { wins, losses: results.length - wins, total: results.length, degraded };
 }
 
 // wave-552: 강수렴 픽 연속 streak — 순수 함수 (테스트 가능)
@@ -113,10 +113,10 @@ export async function getConvergencePickStreak(
   minFactors = FACTOR_PICK_STRONG,
   startDate?: string,
   endDate?: string,
-): Promise<{ type: 'win' | 'loss'; length: number } | null> {
+): Promise<{ streak: { type: 'win' | 'loss'; length: number } | null; degraded: boolean }> {
   const cutoff = startDate ?? kstDateOffset(CONVERGENCE_RECORD_LOOKBACK_DAYS);
-  const results = await fetchConvergencePickResults(cutoff, Number.MAX_SAFE_INTEGER, minFactors, endDate);
-  return computeConvergenceStreak(results);
+  const { results, degraded } = await fetchConvergencePickResults(cutoff, Number.MAX_SAFE_INTEGER, minFactors, endDate);
+  return { streak: computeConvergenceStreak(results), degraded };
 }
 
 // wave-554: 강수렴 픽 시즌 최장 streak — 순수 함수 (테스트 가능)
@@ -152,9 +152,9 @@ export async function getConvergencePickBestStreak(
   minFactors = FACTOR_PICK_STRONG,
   startDate: string = KBO_SEASON_START_DATE,
   endDate?: string,
-): Promise<{ type: 'win' | 'loss'; length: number } | null> {
-  const results = await fetchConvergencePickResults(startDate, Number.MAX_SAFE_INTEGER, minFactors, endDate);
-  return computeConvergenceBestStreak(results);
+): Promise<{ streak: { type: 'win' | 'loss'; length: number } | null; degraded: boolean }> {
+  const { results, degraded } = await fetchConvergencePickResults(startDate, Number.MAX_SAFE_INTEGER, minFactors, endDate);
+  return { streak: computeConvergenceBestStreak(results), degraded };
 }
 
 // wave-557: 강수렴 픽 팀별 시즌 성적 — DB 독립 순수 함수 (테스트 가능)
@@ -187,7 +187,7 @@ async function fetchConvergencePickDetailedResults(
   // wave-600: endDate 지정 시 해당 날짜까지만 조회 (월간 리뷰 홈/어웨이 분리 성적 용, fetchConvergencePickResults wave-584 동일 패턴).
   // 미지정 시 기존 동작 (today 미만).
   endDate?: string,
-): Promise<Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean; gameDate: string }>> {
+): Promise<{ results: Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean; gameDate: string }>; degraded: boolean }> {
   const today = toKSTDateString();
   const supabase = await createClient();
   let query = supabase
@@ -217,12 +217,14 @@ async function fetchConvergencePickDetailedResults(
   const gamesResult = (await query) as unknown as SelectResult<ConvergenceGameRow[]>;
 
   let data: ConvergenceGameRow[] | null;
+  let degraded = false;
   try {
     ({ data } = assertSelectOk(gamesResult, 'fetchConvergencePickDetailedResults'));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, null, { route: '/analysis', source: 'fetchConvergencePickDetailedResults' });
   }
-  if (!data) return [];
+  if (!data) return { results: [], degraded };
 
   // cycle 2304: h2h(상대전적) 누락 시 computeCompositeDuel 이 h2h 팩터를 항상 제외(validCount 최대 9/10)해
   // FACTOR_PICK_COMPLETE(10) 게이팅이 구조적으로 절대 통과 불가 — 완전수렴 시즌/월간/streak/팀별/홈어웨이
@@ -234,7 +236,7 @@ async function fetchConvergencePickDetailedResults(
     if (evaluated) results.push(evaluated);
   }
 
-  return results;
+  return { results, degraded };
 }
 
 // wave-608: fetchConvergencePickDetailedResults 의 행별 판정 로직 (composite duel 계산 →
@@ -297,7 +299,7 @@ async function fetchConvergencePickDetailedResultsForPair(
   idA: number,
   idB: number,
   minFactors: number,
-): Promise<Array<{ favoredTeam: TeamCode; won: boolean }>> {
+): Promise<{ results: Array<{ favoredTeam: TeamCode; won: boolean }>; degraded: boolean }> {
   const supabase = await createClient();
   const orFilter =
     `and(home_team_id.eq.${idA},away_team_id.eq.${idB}),` +
@@ -322,12 +324,14 @@ async function fetchConvergencePickDetailedResultsForPair(
     .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)) as unknown as SelectResult<ConvergenceGameRow[]>;
 
   let data: ConvergenceGameRow[] | null;
+  let degraded = false;
   try {
     ({ data } = assertSelectOk(gamesResult, `fetchConvergencePickDetailedResultsForPair ${idA} vs ${idB}`));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, null, { route: '/matchup', source: 'fetchConvergencePickDetailedResultsForPair' });
   }
-  if (!data) return [];
+  if (!data) return { results: [], degraded };
 
   // cycle 2304: h2h 누락 시 FACTOR_PICK_COMPLETE 게이팅 구조적 불가 (evaluateConvergencePickRow 동일 fix)
   const h2hMap = await getSeasonH2HData();
@@ -337,7 +341,7 @@ async function fetchConvergencePickDetailedResultsForPair(
     if (evaluated) results.push({ favoredTeam: evaluated.favoredTeam, won: evaluated.won });
   }
 
-  return results;
+  return { results, degraded };
 }
 
 // wave-608: 두 팀 매치업 한정 강수렴/완전수렴 픽 성적 — /matchup/[teamA]/[teamB] 전용.
@@ -347,8 +351,9 @@ export async function getConvergencePickHeadToHeadRecord(
   codeA: TeamCode,
   codeB: TeamCode,
   minFactors = FACTOR_PICK_STRONG,
-): Promise<Array<{ teamCode: TeamCode; wins: number; losses: number }>> {
+): Promise<{ rows: Array<{ teamCode: TeamCode; wins: number; losses: number }>; degraded: boolean }> {
   const supabase = await createClient();
+  let degraded = false;
   const teamsResult = (await supabase
     .from('teams')
     .select('id, code')
@@ -357,16 +362,17 @@ export async function getConvergencePickHeadToHeadRecord(
   try {
     ({ data: teamRows } = assertSelectOk(teamsResult, `getConvergencePickHeadToHeadRecord teams ${codeA} vs ${codeB}`));
   } catch (err) {
+    degraded = true;
     teamRows = captureFallback(err, [], { route: '/matchup', source: 'getConvergencePickHeadToHeadRecord teams' });
   }
   const idByCode = new Map<string, number>();
   for (const t of teamRows ?? []) idByCode.set(t.code, t.id);
   const idA = idByCode.get(codeA);
   const idB = idByCode.get(codeB);
-  if (idA == null || idB == null) return [];
+  if (idA == null || idB == null) return { rows: [], degraded };
 
-  const results = await fetchConvergencePickDetailedResultsForPair(idA, idB, minFactors);
-  return computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS);
+  const { results, degraded: fetchDegraded } = await fetchConvergencePickDetailedResultsForPair(idA, idB, minFactors);
+  return { rows: computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS), degraded: degraded || fetchDegraded };
 }
 
 interface MlbPredBreakdownRow {
@@ -391,7 +397,7 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
   codeA: MlbTeamCode,
   codeB: MlbTeamCode,
   minFactors: number,
-): Promise<Array<{ favoredTeam: MlbTeamCode; won: boolean }>> {
+): Promise<{ results: Array<{ favoredTeam: MlbTeamCode; won: boolean }>; degraded: boolean }> {
   const supabase = await createClient();
   // mlb_schedule 은 StatsAPI 컨벤션 저장 — canonical(Baseball-Reference) 코드로 그대로 필터링하면
   // 7팀(TBR/CHW/KCR/SDP/SFG/ARI/WSN)에서 항상 0건 매칭(silent empty, cycle 2081).
@@ -424,15 +430,17 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
     home_team_code: string;
     away_team_code: string;
   }> | null;
+  let degraded = false;
   try {
     ({ data: scheduleRows } = assertSelectOk(
       scheduleResult,
       `fetchMlbConvergencePickDetailedResultsForPair schedule ${codeA} vs ${codeB}`,
     ));
   } catch (err) {
+    degraded = true;
     scheduleRows = captureFallback(err, null, { route: '/mlb/matchup', source: 'fetchMlbConvergencePickDetailedResultsForPair schedule' });
   }
-  if (!scheduleRows || scheduleRows.length === 0) return [];
+  if (!scheduleRows || scheduleRows.length === 0) return { results: [], degraded };
 
   const predResult = (await supabase
     .from('predictions')
@@ -453,6 +461,7 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
       `fetchMlbConvergencePickDetailedResultsForPair predictions ${codeA} vs ${codeB}`,
     ));
   } catch (err) {
+    degraded = true;
     predRows = captureFallback(err, [], { route: '/mlb/matchup', source: 'fetchMlbConvergencePickDetailedResultsForPair predictions' });
   }
   const predByExternalId = new Map((predRows ?? []).map((p) => [p.external_game_id, p]));
@@ -463,7 +472,7 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
     if (evaluated) results.push({ favoredTeam: evaluated.favoredTeam, won: evaluated.won });
   }
 
-  return results;
+  return { results, degraded };
 }
 
 // wave-625: fetchMlbConvergencePickDetailedResultsForPair(두 팀 한정) 와
@@ -511,7 +520,7 @@ async function fetchMlbConvergencePickDetailedResults(
   minFactors: number,
   startDate?: string,
   endDate?: string,
-): Promise<Array<{ favoredTeam: MlbTeamCode; favoredHome: boolean; won: boolean; gameDate: string }>> {
+): Promise<{ results: Array<{ favoredTeam: MlbTeamCode; favoredHome: boolean; won: boolean; gameDate: string }>; degraded: boolean }> {
   const supabase = await createClient();
 
   let scheduleQuery = supabase
@@ -539,12 +548,14 @@ async function fetchMlbConvergencePickDetailedResults(
     home_team_code: string;
     away_team_code: string;
   }> | null;
+  let degraded = false;
   try {
     ({ data: scheduleRows } = assertSelectOk(scheduleResult, 'fetchMlbConvergencePickDetailedResults schedule'));
   } catch (err) {
+    degraded = true;
     scheduleRows = captureFallback(err, null, { route: '/mlb', source: 'fetchMlbConvergencePickDetailedResults schedule' });
   }
-  if (!scheduleRows || scheduleRows.length === 0) return [];
+  if (!scheduleRows || scheduleRows.length === 0) return { results: [], degraded };
 
   const predResult = (await supabase
     .from('predictions')
@@ -562,6 +573,7 @@ async function fetchMlbConvergencePickDetailedResults(
   try {
     ({ data: predRows } = assertSelectOk(predResult, 'fetchMlbConvergencePickDetailedResults predictions'));
   } catch (err) {
+    degraded = true;
     predRows = captureFallback(err, [], { route: '/mlb', source: 'fetchMlbConvergencePickDetailedResults predictions' });
   }
   const predByExternalId = new Map((predRows ?? []).map((p) => [p.external_game_id, p]));
@@ -572,7 +584,7 @@ async function fetchMlbConvergencePickDetailedResults(
     if (evaluated) results.push(evaluated);
   }
 
-  return results;
+  return { results, degraded };
 }
 
 /**
@@ -586,9 +598,9 @@ export async function getMlbConvergencePickTeamStats(
   // getConvergencePickTeamStats wave-603 동일 패턴). 미지정 시 기존 동작 (시즌 전체).
   startDate?: string,
   endDate?: string,
-): Promise<Array<{ teamCode: MlbTeamCode; wins: number; losses: number }>> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
-  return computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS);
+): Promise<{ rows: Array<{ teamCode: MlbTeamCode; wins: number; losses: number }>; degraded: boolean }> {
+  const { results, degraded } = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
+  return { rows: computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS), degraded };
 }
 
 /**
@@ -602,9 +614,9 @@ export async function getMlbConvergencePickHeadToHeadRecord(
   codeA: MlbTeamCode,
   codeB: MlbTeamCode,
   minFactors: number,
-): Promise<Array<{ teamCode: MlbTeamCode; wins: number; losses: number }>> {
-  const results = await fetchMlbConvergencePickDetailedResultsForPair(codeA, codeB, minFactors);
-  return computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS);
+): Promise<{ rows: Array<{ teamCode: MlbTeamCode; wins: number; losses: number }>; degraded: boolean }> {
+  const { results, degraded } = await fetchMlbConvergencePickDetailedResultsForPair(codeA, codeB, minFactors);
+  return { rows: computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS), degraded };
 }
 
 // cycle 2226: MLB 리그 전체 강수렴/완전수렴 픽 W-L — getRecentConvergencePickRecord(KBO) 대응.
@@ -615,10 +627,10 @@ export async function getMlbRecentConvergencePickRecord(
   // cycle 2345: startDate/endDate 지정 시 해당 범위만 조회 (주간/월간 리뷰 용). 미지정 시 기존 동작 (시즌 전체).
   startDate?: string,
   endDate?: string,
-): Promise<{ wins: number; losses: number; total: number }> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
+): Promise<{ wins: number; losses: number; total: number; degraded: boolean }> {
+  const { results, degraded } = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
   const wins = results.filter((r) => r.won).length;
-  return { wins, losses: results.length - wins, total: results.length };
+  return { wins, losses: results.length - wins, total: results.length, degraded };
 }
 
 // cycle 2226: MLB 강수렴 픽 현재 streak — getConvergencePickStreak(KBO) 대응.
@@ -628,9 +640,9 @@ export async function getMlbConvergencePickStreak(
   minFactors = MLB_FACTOR_PICK_STRONG,
   startDate?: string,
   endDate?: string,
-): Promise<{ type: 'win' | 'loss'; length: number } | null> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
-  return computeConvergenceStreak(results.map((r) => r.won));
+): Promise<{ streak: { type: 'win' | 'loss'; length: number } | null; degraded: boolean }> {
+  const { results, degraded } = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
+  return { streak: computeConvergenceStreak(results.map((r) => r.won)), degraded };
 }
 
 // cycle 2226: MLB 강수렴 픽 시즌 최장 streak — getConvergencePickBestStreak(KBO) 대응.
@@ -639,11 +651,11 @@ export async function getMlbConvergencePickBestStreak(
   minFactors = MLB_FACTOR_PICK_STRONG,
   startDate?: string,
   endDate?: string,
-): Promise<{ type: 'win' | 'loss'; length: number } | null> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
+): Promise<{ streak: { type: 'win' | 'loss'; length: number } | null; degraded: boolean }> {
+  const { results, degraded } = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
   // fetchMlbConvergencePickDetailedResults 는 KBO 와 동일하게 game_date desc 로 정렬 반환 —
   // computeConvergenceBestStreak 는 정렬 순서 무관하게 전체를 스캔해 최장 streak 을 찾으므로 안전.
-  return computeConvergenceBestStreak(results.map((r) => r.won));
+  return { streak: computeConvergenceBestStreak(results.map((r) => r.won)), degraded };
 }
 
 // cycle 2226: MLB 강수렴 픽 홈/어웨이 분리 성적 — getConvergencePickHomeAwaySplit(KBO) 대응.
@@ -652,9 +664,9 @@ export async function getMlbConvergencePickHomeAwaySplit(
   minFactors = MLB_FACTOR_PICK_STRONG,
   startDate?: string,
   endDate?: string,
-): Promise<{ home: { wins: number; losses: number }; away: { wins: number; losses: number } } | null> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
-  return computeConvergenceHomeAwaySplit(results);
+): Promise<{ split: { home: { wins: number; losses: number }; away: { wins: number; losses: number } } | null; degraded: boolean }> {
+  const { results, degraded } = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
+  return { split: computeConvergenceHomeAwaySplit(results), degraded };
 }
 
 // cycle 2226: MLB 강수렴 픽 요일별 분리 성적 — getConvergencePickDayOfWeekSplit(KBO) 대응.
@@ -663,9 +675,9 @@ export async function getMlbConvergencePickDayOfWeekSplit(
   minFactors = MLB_FACTOR_PICK_STRONG,
   startDate?: string,
   endDate?: string,
-): Promise<Array<{ dayIndex: number; wins: number; losses: number }>> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
-  return computeConvergenceDayOfWeekSplit(results);
+): Promise<{ rows: Array<{ dayIndex: number; wins: number; losses: number }>; degraded: boolean }> {
+  const { results, degraded } = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
+  return { rows: computeConvergenceDayOfWeekSplit(results), degraded };
 }
 
 // wave-559: 강수렴 픽 홈/어웨이 분리 성적 — 순수 함수 (테스트 가능)
@@ -695,9 +707,9 @@ export async function getConvergencePickHomeAwaySplit(
   // wave-600: startDate/endDate 지정 시 해당 범위만 조회 (월간 리뷰 용). 미지정 시 기존 동작 (시즌 전체).
   startDate?: string,
   endDate?: string,
-): Promise<{ home: { wins: number; losses: number }; away: { wins: number; losses: number } } | null> {
-  const results = await fetchConvergencePickDetailedResults(startDate ?? KBO_SEASON_START_DATE, minFactors, endDate);
-  return computeConvergenceHomeAwaySplit(results);
+): Promise<{ split: { home: { wins: number; losses: number }; away: { wins: number; losses: number } } | null; degraded: boolean }> {
+  const { results, degraded } = await fetchConvergencePickDetailedResults(startDate ?? KBO_SEASON_START_DATE, minFactors, endDate);
+  return { split: computeConvergenceHomeAwaySplit(results), degraded };
 }
 
 export async function getConvergencePickTeamStats(
@@ -705,9 +717,9 @@ export async function getConvergencePickTeamStats(
   // wave-603: startDate/endDate 지정 시 해당 범위만 조회 (월간/주간 리뷰 용, getConvergencePickHomeAwaySplit wave-600 동일 패턴). 미지정 시 기존 동작 (시즌 전체).
   startDate?: string,
   endDate?: string,
-): Promise<Array<{ teamCode: TeamCode; wins: number; losses: number }>> {
-  const results = await fetchConvergencePickDetailedResults(startDate ?? KBO_SEASON_START_DATE, minFactors, endDate);
-  return computeConvergenceTeamStats(results);
+): Promise<{ rows: Array<{ teamCode: TeamCode; wins: number; losses: number }>; degraded: boolean }> {
+  const { results, degraded } = await fetchConvergencePickDetailedResults(startDate ?? KBO_SEASON_START_DATE, minFactors, endDate);
+  return { rows: computeConvergenceTeamStats(results), degraded };
 }
 
 // wave-599: YYYY-MM-DD → 요일 인덱스 (0=일 ~ 6=토) — 순수 함수, 타임존 무관 (달력 구성요소 직접 조립)
@@ -743,9 +755,9 @@ export async function getConvergencePickDayOfWeekSplit(
   // wave-602: startDate/endDate 지정 시 해당 범위만 조회 (월간 리뷰 용, wave-600 홈/어웨이 동일 패턴). 미지정 시 기존 동작 (시즌 전체).
   startDate?: string,
   endDate?: string,
-): Promise<Array<{ dayIndex: number; wins: number; losses: number }>> {
-  const results = await fetchConvergencePickDetailedResults(startDate ?? KBO_SEASON_START_DATE, minFactors, endDate);
-  return computeConvergenceDayOfWeekSplit(results);
+): Promise<{ rows: Array<{ dayIndex: number; wins: number; losses: number }>; degraded: boolean }> {
+  const { results, degraded } = await fetchConvergencePickDetailedResults(startDate ?? KBO_SEASON_START_DATE, minFactors, endDate);
+  return { rows: computeConvergenceDayOfWeekSplit(results), degraded };
 }
 
 // wave-570: wins/total 승률 % — Math.round(wins / total * 100) 9회 중복 추출
