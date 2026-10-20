@@ -1,4 +1,19 @@
 
+## 🟢 SUCCESS — review-code(heavy): debug/pipeline GAP/SP_UNCONFIRMED 카드 silent zero 버그 수정 (cycle 3423, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3422 retro `19a41e60`) OK. 2-chain lock 미충족(직전8(3415-3422) distinct=5: review-code/polish-ui/expand-scope/fix-incident/lotto). fix-incident gap=2/20·op-analysis gap=15/25·info-arch gap=13/30·lotto gap=1/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 1h 신선) 확립 skip 패턴 유지. cycle 3420 추천 "debug/{agent-fallback,hallucination,reliability,silent-drift} 등 잔여 debug 페이지" 채택 — deploy-drift(cycle 3420 기 감사) 제외한 7개 잔여 debug/* 페이지(agent-fallback/factor-correlation/hallucination/model-comparison/pipeline/reliability/silent-drift, 총 2471줄) 전수 감사.
+
+**감사**: Agent 위임 전수 read(7파일 + import된 lib 함수) — `deploy-drift` 와 동일 클래스(인터페이스 필드명 vs 실제 API/DB 필드 불일치) 버그 탐색. 6개는 clean(factor-correlation/hallucination/model-comparison/reliability/silent-drift — 필드 전부 실제 select/migration 과 1:1 대조 확인, agent-fallback 은 경미한 커버리지 gap 1건 발견했으나 실데이터 미확인이라 보류).
+
+**발견 + 수정**: `debug/pipeline/page.tsx`의 `PipelineRun.errors` 타입이 `string`이고 `JSON.parse(run.errors || '[]')`로 파싱하고 있었으나, 실제 `pipeline_runs.errors`는 JSONB 컬럼에 `daily.ts:190`에서 `result.errors`(string[]) 그대로(stringify 없이) insert됨 — 쌍둥이 컬럼 `skipped_detail`은 명시적으로 `JSON.stringify` 후 insert하는 것과 대조적(이중 인코딩 비대칭). supabase-js는 JSONB를 이미 파싱된 네이티브 배열로 반환하므로 `JSON.parse(네이티브배열)`은 매번 throw → 3곳(GAP 주간 카드/SP_UNCONFIRMED 주간 카드/50-row 리스트 "첫 에러" 컬럼+GAP 행 빨간 하이라이트) 전부 catch에 swallow되어 DB에 실제 `[GAP]`/`[SP_UNCONFIRMED]` 이벤트가 있어도 대시보드는 항상 0/공백으로 표시 — 출시 이후 쭉 silent 비작동.
+- 타입을 `string[]`로 정정, 3곳의 깨진 `JSON.parse` 호출 제거. 로직을 `lib/debug/pipelineStats.ts`의 신규 순수함수 `extractWeeklyMarkerEvents()`로 추출해 테스트 가능하게 구조화.
+
+**검증**: `tsc --noEmit`/`pnpm lint` clean, `pnpm test` 605 files/4744 tests 전부 PASS(신규 회귀 테스트 3건 포함 — native string[] 입력 시 마커 탐지 정상 작동 확인). 직접 main 커밋+push(R4 범위, `384bad83`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3423%50=23≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3404-3423, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3414-3423) success 다수 포함 미충족. 2-chain lock — 직전8(3416-3423) distinct=5, 미충족. 2차 방어선(cycle 3422 retro `19a41e60`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(agent-fallback 커버리지 gap 실데이터 확인 또는 `about`/`community`/`glossary`/`guide`/`login`/`privacy`/`terms`/`v2-preview`/`v2-shadow-monitor` 등 잔여 top-level page.tsx) 또는 fix-incident(gap3/20)/op-analysis(gap16/25)/lotto(gap2/30)/info-arch(gap14/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): debug/deploy-drift page.tsx vercel_url/deploy_url 필드명 drift 수정 (cycle 3420, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3419 retro `ab1acd10`) OK. 2-chain lock 미충족(직전8(3412-3419) distinct=3: review-code(heavy)/polish-ui/expand-scope). fix-incident last fire 3382(gap=38/20 도달하나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable). op-analysis gap=12/25·info-arch gap=10/30 전부 미도달. lotto gap=28/30 — cron 산출물(picks `2026-10-24.md`/results `2026-10-17.md`) 전부 최신 정상이라 (1)(2)(3) 미트리거, gap trigger(6)도 28<30 미도달. explore-idea saturation 직전15(3405-3419) 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 당일 신선) 확립 skip 패턴 유지. **cycle 3419 추천 "components/predictions/ 계속"은 stale carry-over 확인** — components/predictions/ 는 이미 cycle 3416 에서 31개 파일 전수 감사 완료(contributionPp 버그 수정) — review-code(heavy) dominance 지속(직전20 중 14회) 속 신규 스코프 탐색 필요 판단.
