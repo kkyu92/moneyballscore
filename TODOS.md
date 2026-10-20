@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/ 8차분(teams/ 6파일) 전수 감사, buildTeamProfile.ts degraded 플래그 누락 수정 (cycle 3396, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3388-3395) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=13/20·op-analysis gap=12/25·info-arch gap=22/30·lotto gap=3/30 전부 미도달. ship-0 미충족(직전10 success 3건: 3388,3390,3393). cycle 3395 next_rec 계승 — lib/ 잔여 subdir(teams 6/reviews 9) 중 양쪽 동시 선택.
+
+**감사**: agent 위임, teams/ 6 impl + reviews/ 9 impl 전수 read. reviews/ 는 전부 clean(KST boundary 처리·minSamples·sortBy 정합 기존 수정 유지 확인). teams/ 에서 `buildTeamProfile.ts`/`buildTeamFactorAverages.ts`/`buildTeamRecentForm.ts`/`buildTeamUpcoming.ts`/`buildTeamStrengthSnapshot.ts` 5개 전부 Supabase 오류를 내부 catch 로 흡수하면서 `degraded` 플래그 미노출 — `buildMlbTeamProfile.ts`(cycle 2949/3247/3393 기 수정)와 동일 버그 클래스가 KBO 쪽에 미backport 상태. `teams/[code]/page.tsx` 의 "buildTeamProfile 은 fail-loud" 주석이 stale(실제로는 내부 catch) — `dbDegraded` 가 profile 자체의 DB 장애를 전혀 못 잡음.
+
+**수정**: `buildTeamProfile.ts`(602줄, 5개 중 페이지 직접 소비하는 1차 파일)에 `degraded: boolean` 추가, catch 2곳(`teams`/`games` select) 에서 true 세팅, 조기 return 경로 포함 양쪽 return 문에 전파. `teams/[code]/page.tsx` 의 `dbDegraded` 에 `profile.degraded ||` 합류 + stale comment 정정(mlb `team/[code]/page.tsx` line 142 패턴과 동일). test 4건(`teams select error`/`games select error`/`maybeSingle 빈 row`/`정상 case`)에 `degraded` assertion 추가(true/true/false/false) — DB 장애와 진짜 빈 데이터 구분 회귀 가드.
+
+**검증**: `tsc --noEmit` clean, `pnpm lint` clean, `vitest run src/app/teams src/lib/teams src/app/matchup`(19 파일 133 테스트) 전부 PASS. 직접 main 커밋+push(R4, pre-push lint+type-check+version-sync-guard 전부 PASS, `77dc19ee`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참 기존 판단 유지)/trigger2(5연속 fail 없음)/trigger3(3396%50=46≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3377-3396, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3387-3396) success 4건(3388/3390/3393/3396) 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3389-3396) distinct=3(review-code5+polish-ui1+lotto1) 유지, 미충족. 2차 방어선(cycle 3395 retro `e34b8429`) OK.
+
+**잔여 scope(미수정, 다음 cycle 후보)**: `buildTeamFactorAverages.ts`/`buildTeamRecentForm.ts`/`buildTeamUpcoming.ts`/`buildTeamStrengthSnapshot.ts` 4개 + 쌍둥이 `matchup/[teamA]/[teamB]/page.tsx`(stale "fail-loud" 주석 동일 + `lib/matchup/buildMatchupProfile.ts` 등도 degraded 미노출) 가 동일 패턴 미수정 상태로 남음.
+
+다음 사이클 추천 = review-code(heavy) 계속(teams/ 잔여 4개 builder + matchup page degraded backport) 또는 fix-incident(gap14/20)/op-analysis(gap13/25)/info-arch(gap23/30)/lotto(gap4/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/ 7차분(predictions/ 7파일) 전수 감사, 신규 drift 0건 (cycle 3395, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3387-3394) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=13/20·op-analysis gap=12/25·info-arch gap=22/30·lotto gap=3/30 전부 미도달. ship-0 미충족(직전10 success 3건: 3388,3390,3393). cycle 3394 next_rec 계승 — lib/ 잔여 subdir(predictions 7/teams 12/reviews 17) 중 predictions/ 7차분 선택.
