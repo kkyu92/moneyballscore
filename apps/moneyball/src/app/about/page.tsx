@@ -234,9 +234,6 @@ export default async function AboutPage() {
   ).sort(
     (a, b) => DEFAULT_WEIGHTS[b.key] - DEFAULT_WEIGHTS[a.key],
   );
-  const deprecatedFactors = FACTORS.filter(
-    (f) => (DEFAULT_WEIGHTS[f.key] as number) === 0,
-  );
   const activeWeightSum = activeFactors.reduce(
     (a, f) => a + DEFAULT_WEIGHTS[f.key],
     0,
@@ -301,7 +298,7 @@ export default async function AboutPage() {
             >
               용어 자세히 →
             </Link>
-            <span className="text-xs px-2 py-1 bg-brand-100 text-brand-700 rounded-full font-medium">
+            <span className="text-xs px-2 py-1 bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 rounded-full font-medium">
               {activeFactors.length}팩터 사용 중
             </span>
           </div>
@@ -321,7 +318,7 @@ export default async function AboutPage() {
               className="flex items-start gap-4 p-4 bg-surface rounded-lg"
             >
               <div className="text-right min-w-[50px]">
-                <span className="text-xl font-bold font-mono text-brand-600">
+                <span className="text-xl font-bold font-mono text-brand-600 dark:text-brand-300">
                   {Math.round(DEFAULT_WEIGHTS[factor.key] * 100)}%
                 </span>
               </div>
@@ -341,39 +338,6 @@ export default async function AboutPage() {
           남은 {Math.round((1 - activeWeightSum - HOME_ADVANTAGE) * 100)}%는 경기 간
           무작위 변동성으로 설명되지 않는 영역.
         </p>
-
-        {deprecatedFactors.length > 0 && (
-          <div className="mt-6 pt-5 border-t border-gray-100 dark:border-[var(--color-border)]">
-            <h3 className="text-base font-semibold text-gray-700 dark:text-gray-200">
-              현재 제외된 팩터
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-3">
-              2023-2024 실측 데이터 logistic 학습 결과, 아래 3개 팩터는
-              개별 기여도가 예측 오차 범위 안 (95% 신뢰구간이 0을 포함).
-              데이터 근거 확보 전까지 가중치 0으로 설정했습니다.
-            </p>
-            <div className="space-y-2">
-              {deprecatedFactors.map((factor) => (
-                <div
-                  key={factor.key}
-                  className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] opacity-75"
-                >
-                  <div className="flex items-center gap-2 min-w-[120px]">
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                      제외
-                    </span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {FACTOR_LABELS_TECHNICAL[factor.key]}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 flex-1">
-                    {factor.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </section>
 
       <section id="agents" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
