@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): app/api 잔여 13 route.ts 전수 감사 완결, 신규 drift 0건 (cycle 3372, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3371 retro `b4c672e5`) OK. 2-chain lock 미충족(직전8(3364-3371) distinct=3: lotto/review-code/polish-ui). gap: fix-incident 22/20(`gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable)·op-analysis 13/25·info-arch 42/30(22연속 "현 IA 충분" 재확정 — 반복 non-actionable 패턴, 저ROI 판단)·lotto 8/30 전부 미도달 또는 actionable 부재. explore-idea saturation 12/15 충족하나 4-source 재확인 negative(open issue 0/plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 10일 신선) 확립 skip 패턴 유지. cycle 3370 next_rec 따라 `app/api` 잔여 7개 디렉토리 채택.
+
+**감사**: 본 메인 직접 read, agent 위임 없음. `leaderboard/{sync,mlb-sync}` — `DB_CONSTRAINTS.userPicks`/`mlbUserPicks` 전부 실제 migration(024/050) UNIQUE 제약과 일치. `mlb/pipeline` — `result.rows_inserted` 필드 `MlbPipelineResult` 인터페이스와 일치, KBO `pipeline/route.ts`와 revalidate 패턴 정합. `mlb/waitlist` — RLS/honeypot/enumeration 방어 5-layer 전부 구현과 일치하나 주석("ON CONFLICT DO NOTHING")이 실제 구현(plain insert + 23505 catch)과 메커니즘 서술 미세 불일치 발견(기능 결과는 동일 — email enumeration 차단, 액션 불필요 수준 판단, cycle 3370 유사 패턴). `picks/{mlb-poll,poll,submit,mlb-submit,results}` — KBO/MLB twin route 쌍 전부 타입·DB 컬럼 정합, `results/route.ts`(234줄, 최대 파일) 의 `deriveMlbOutcome` 통합 로직(cycle 2117/2160 lesson) 및 `MLB_PRODUCTION_COHORT_RULES` 단일 소스 참조 확인. `pipeline/route.ts` — mode 검증/triggeredBy clamp/revalidate 패턴 KBO·MLB 쌍방 일치. `seo/indexnow/ping` — `[indexnowKey].txt` route 와 `.trim()` 쌍 유지 확인(cycle 3217/3241 lesson 정합). `sync-batter-stats`/`version` — 단순 route, 필드명 일치.
+
+**결과**: 신규 drift 0건. 코드 변경 없음. app/api 13개 디렉토리 전수 감사 완료(금번 7개 + 기존 6개: kbo-scores/leaderboard-mlb-sync/live/revalidate/snapshot-pitchers/health/hub-dispatch) — **app/api 스코프 완결**.
+
+**검증(skill-evolution 등)**: trigger3(3372%50=22) 미충족. trigger5 — 직전20(3353-3372) 표본 19(3360 JSON 누락)≥10, review-code 16회 발화(opt-out 9개 제외 평가 대상 review-code 단독)로 미충족. trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3363-3372) success 3건(3365,3366,3369,3371 중 3건 범위 내)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 재탐색(packages/kbo-data 내 미감사 영역 또는 components/) 또는 op-analysis(gap 14/25)/lotto(gap 9/30) 자연 대기. app/api 스코프 소진으로 review-code(heavy) 다음 타겟 재설정 필요.
+
 ## 🟢 SUCCESS — polish-ui (2-chain-lock-forced): WeeklyTrendMini 다크모드 차트 커서 수정 (cycle 3371, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3370 retro `811cb77c`) OK. **2-chain lock 충족** — 직전8(3363-3370) distinct=2(review-code 6회 + lotto 1회 + review-code 1회 재집계, 정확히는 review-code/lotto 두 chain만). 룰에 따라 review-code/lotto 제외 후 재선정: fix-incident gap=21/20 충족이나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable. op-analysis gap=12/25·info-arch gap=11/30 미도달. explore-idea saturation 12/15 충족하나 4-source 재확인 negative(기존 skip 패턴 유지). 결과 actionable 후보 전무 → 룰 3항("어떤 chain 도 trigger 없으면 polish-ui 강제 발화") 적용.
