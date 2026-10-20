@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): packages/kbo-data/src/pipeline 0-mention 6파일 전수 감사, 신규 drift 0건 (cycle 3368, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3360-3367) distinct=3: review-code/polish-ui/lotto). gap: fix-incident 39/20(`gh run list` 재확인 CI Failure Dispatch 전부 skipped, 실제 incident 부재)·op-analysis 9/25·info-arch 8/30(cycle 3360 JSON 파일 누락 확인됐으나 commit log 상 실제 발화 확인, gap 트리거 X)·lotto 4/30 전부 미도달(또는 actionable 부재). 2차 방어선(cycle 3367 retro `91300240`) OK. cycle 3367 next_rec 따라 packages/kbo-data/src/pipeline/ CHANGELOG mention 0회 6파일(accuracy-update.ts, brier.ts, daily-summary.ts, db-error.ts, prediction-history.ts, winner-id.ts) 채택.
+
+**감사**: 본 메인 직접 read, agent 위임 없음. 6파일 전부 read 후 daily.ts 호출부와 교차대조. `buildAccuracyUpdates` — Promise.all 동시 실행 + `.error` 개별 체크 (주석 claim 그대로). `buildSummaryPredictions` — `assertSelectOk` throw + 호출측 `summary.length === 0` 가드 확인 (ghost notification 차단 claim 그대로). `computePredictionHistory` — `reverseTeamMap(teamIdMap)` 실제 전달 확인 (cycle 2823 wiring fix 주석 그대로). `computeWinnerTeamId` — 두 호출부(라인 404, 1584) 모두 동점→null 일관 적용. `db-error.ts` 는 `@moneyball/shared` re-export shim, 신규 로직 없음. `brier.ts` 는 단일 소스 유틸(순수 함수), 타 파일과 중복 없음 확인.
+
+**결과**: 신규 drift 0건. 코드 변경 없음. 커버리지 gap 1건 기록(brier.ts 전용 테스트 부재, 나머지 5개는 `__tests__/` 보유) — 기능 결함 아님.
+
+**검증(skill-evolution 등)**: trigger3(3368%50=18) 미충족. trigger5 — 직전20(3349-3368) chain-pool 표본 17≥10, review-code 14회 발화로 미충족(opt-out 9개 제외 평가 대상 review-code 단독). trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3358-3367, 3360 JSON 누락) success 2건(3365,3366)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(pipeline/ 1-mention 7파일: backfill-season/backfill-weather/backtest-wayback-run/factor-bias-bootstrap-ci/notify-status-predicate/snapshot-pitchers/sync-batter-stats, 또는 app/api/{health,hub-dispatch} 재확인) 또는 fix-incident(gap 39/20, actionable 재확인 필요)/op-analysis(gap 9/25)/info-arch(gap 8/30)/lotto(gap 4/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): lib/debug 잔여 2파일(agentFallbackStats/silentDriftStats) 전수 감사 완결, 신규 drift 0건 (cycle 3367, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3359-3366) distinct=4: operational-analysis/review-code/polish-ui/lotto). gap 전부 미도달(fix-incident 17/20·op-analysis 8/25·info-arch 7/30·lotto 3/30). 2차 방어선(cycle 3366 retro `0c8f07b7`) OK. cycle 3366 next_rec 따라 lib/debug 잔여 2파일(agentFallbackStats.ts, silentDriftStats.ts) 채택 — lib/debug 디렉토리 전수 감사 완결 목적.
