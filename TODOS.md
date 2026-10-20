@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/ 6차분(analysis, 12파일) 전수 감사, 신규 drift 0건 (cycle 3379, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3371-3378) distinct=3: review-code(heavy)6/polish-ui1/info-arch1). fix-incident gap≥20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=20/25·lotto gap=15/30·info-arch gap=6/30 전부 미도달. 2차 방어선(cycle 3378 retro `0f8a3e3e`) OK. cycle 3378 next_rec 따라 review-code(heavy) components/ 잔여 5개 subdir 중 소형 우선(analysis 12파일) 채택.
+
+**감사**: Agent 1개 위임 — 12 소스 + 3 test 파일 전수 read + 전체 call-site cross-grep(KBO/MLB/EN analysis/games 페이지) + `GameOverview` TAG_STYLES 키 vs `buildGameOverview` 생성 문자열 일치 확인 + `BigMatchDebateCard` 툴팁 문구 vs `selectBigMatchFromGames` 로직 대조 + `DetailedFactorAnalysis` ACTIVE_FACTOR_KEYS vs `DEFAULT_WEIGHTS` 교차검증 + KBO `TeamStrengthGrid` ↔ MLB `MlbTeamStrengthGrid` twin diff + `ThisWeekStatusFilter` ↔ `YesterdayStatusFilter` 로직 비교 + localStorage/`useSyncExternalStore` 안전성 확인 + `vitest run src/components/analysis` + `tsc --noEmit`.
+
+**결과**: 신규 drift 0건. 코드 변경 없음. KBO/MLB TeamStrengthGrid 차이(모델 Elo vs 실제 W/L 기록)는 문서화된 의도된 차이 확인. ThisWeek/Yesterday 필터의 day-group hiding 로직 차이도 call-site 구조(다일 vs 단일 리스트) 반영한 의도된 차이 확인. `RecentRecordBar` division-by-zero 가드(`computeTeamRecentRecord`가 최소 표본 미달 시 null 필터링)도 확인. components/ 전체(20 subdir, 179파일) 중 6차분(12파일) 완료 — 잔여 4개 subdir(dashboard 17/layout 19/shared 23/predictions 31, 총 90파일) 다음 사이클 후보.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3379%50=29≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3360-3379, 현재 cycle 포함) 표본≥10 충족, opt-out 9개 제외 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3370-3379) success 2건(3369/3371) 포함으로 미충족. 2-chain lock 미충족(위 참조). 2차 방어선(cycle 3378 retro `0f8a3e3e`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 4개 subdir 계속 감사(dashboard 17파일 우선 소형), 또는 fix-incident/op-analysis(gap 21/25)/lotto(gap 16/30)/info-arch(gap 7/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 4차분(matchup, 11파일) 전수 감사, 신규 drift 0건 (cycle 3377, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23(plan #30 포함 status 전부 non-approved/completed). 2-chain lock 미충족(직전8(3369-3376) distinct=3: review-code(heavy)/polish-ui/info-arch). fix-incident gap≥27/20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=18/25·lotto gap=13/30·info-arch gap=4/30 전부 미도달. 2차 방어선(cycle 3376 retro `9813f1a3`) OK. cycle 3376 next_rec 따라 review-code(heavy) components/ 잔여 7개 subdir 중 소형 우선(matchup 11파일) 채택.
