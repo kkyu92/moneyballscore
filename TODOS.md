@@ -1,4 +1,22 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/predictions/ 전수 감사, contributionPp 2x overstatement 버그 수정 (cycle 3416, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3415 retro `2466a786`) OK. 2-chain lock 미충족(직전8(3408-3415) distinct=3: review-code(heavy)6+operational-analysis(lite)1+info-architecture-review1). fix-incident gap=34/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=8/25·lotto gap=24/30·info-arch gap=6/30 전부 미도달. cycle 3415 next_rec 계승 — components/predictions(31파일, components/ 전수 감사 시리즈 마지막 subdir) 채택.
+
+**감사**: Agent 1개 위임 — 25 컴포넌트 + 6 테스트 전수 read + predictor.ts/FactorWaterfallChart.tsx 교차검증 + i18n/dark-mode/매직넘버/ARIA/division-by-zero/KBO-MLB twin divergence 9개 drift class 점검.
+
+**발견 + 수정 (확정 버그, 사용자 가시)**: `FactorBreakdown.tsx`/`factor-explanations.ts`의 `contributionPp()`가 `FACTOR_CONTRIBUTION_SCALE`(200)을 적용 — 이 상수는 margin(home%-away%, 양방향) 환산 전용인데 단일 factor 의 homeWinProb 기여도(one-sided)에 잘못 재사용됨. `predictor.ts`: `homeWinProb = Σ(factorValue*weight)/factorTotal` 이므로 한 factor 의 기여는 `(value-NEUTRAL)*weight/factorTotal`(확률 단위) → pp 환산은 ×100, ×200 아님. 같은 페이지 family 인 `FactorWaterfallChart.tsx`(워터폴 차트, `contribution * 100`으로 올바르게 표시)와 대조해 확정 — 동일 경기의 팩터 기여도가 `/insights/[date]`(FactorBreakdown)에서 `/analysis/game/[id]`(워터폴) 대비 정확히 2배로 표시되던 drift. cycle 3279가 "단일 source 정합" 의도로 FACTOR_CONTRIBUTION_SCALE 을 재사용했지만 margin 공식(2배)과 one-sided 공식(1배)을 혼동한 근본 원인. 두 파일 모두 ×100 으로 정정(FactorBreakdown.tsx 는 FACTOR_CONTRIBUTION_SCALE import 제거, factor-explanations.ts 는 margin 용도 OVERVIEW_CLOSE_PP/OVERVIEW_DOMINANT_PP/marginPp 에서는 그대로 ×200 유지 — 용도가 다름). locked 테스트 4건(FactorBreakdownChart.test.tsx 2건, factor-explanations.test.ts 1건, silent-drift-wave-356.test.ts 1건 — 이 중 하나는 실제 함수를 호출하지 않고 old 공식을 "정답"으로 재구현해 검증하던 self-referential 테스트였음) 전부 올바른 값으로 갱신.
+
+**발견 + 수정 (디자인 토큰)**: `TopStatPickCard.tsx` hero gradient 가 `bg-gradient-to-r from-brand-800 to-brand-700` 하드코딩 — 동일 hero 패턴 쓰는 3개 형제 컴포넌트(JudgeVerdictPanel/BigMatchDebateCard/analysis page)는 전부 `--color-bg-hero-start/end` 시맨틱 토큰 + `to-br` 대각선 방향 사용. 현재는 값이 동일해 시각적 차이 없으나 토큰이 brand 스케일과 분리될 경우 silent drift 위험 — 시맨틱 토큰 + `to-br` 로 정정.
+
+**확인(clean)**: KBO-only 컴포넌트(FactorWaterfallChart/HistoricalAnalogMatchup/RivalryMemorySurface 등)의 locale prop 부재는 `/en` 트리가 MLB 전용이라 의도된 설계(leak 아님). `--color-error` bare 사용은 repo-wide 의도된 컨벤션(dark variant 없음). `min-h-[32px]` 필터 칩은 20개 파일에 동일하게 쓰이는 established 패턴. division-by-zero 전부 가드 확인. ARIA(`role=meter`/`aria-live`) 정상. dead code/props 0건.
+
+**검증**: `tsc --noEmit`(apps/moneyball scope) clean, `eslint` clean, `vitest run` 범위 82/82 PASS, 전체 `pnpm test` 603 files/4733 tests 전부 PASS, `pnpm lint` 전체 clean. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `1fc09d61`).
+
+**components/ 전수 감사 시리즈 완료**: dashboard(3413)/layout(3414)/shared(3415)/predictions(3416) 4개 잔여 subdir 전부 완료 — analysis(3412) 포함 components/ 전체 서브디렉토리 최소 1회 이상 전수 감사 이력 확보.
+
+다음 사이클 추천 = review-code(heavy) 신규 축(app/api/ 잔여 route: health/hub-dispatch/leaderboard-sync/mlb/picks/pipeline/seo/sync-batter-stats/version — mention은 있으나 전수 감사 이력 불명확) 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap9/25)/lotto(gap25/30)/info-arch(gap7/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): components/dashboard/ 전수 감사, locale 미지원 3개 차트 i18n 누락 + 매직넘버 수정 (cycle 3413, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3412 retro `1013bb59`) OK. 2-chain lock 미충족(직전8(3406-3412) distinct=3: review-code(heavy)5+operational-analysis(lite)1+info-architecture-review1). fix-incident gap=31/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=5/25·lotto gap=21/30 전부 미도달. cycle 3412 next_rec 계승 — components/ 잔여 4개 subdir(dashboard/layout/shared/predictions) 중 소형 우선(dashboard, 16파일+1테스트) 채택.
