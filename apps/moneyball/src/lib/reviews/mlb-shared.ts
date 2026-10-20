@@ -341,16 +341,24 @@ export async function buildMlbMissReport(
   const labels = options.locale === "en" ? FACTOR_LABELS_EN : FACTOR_LABELS;
   const supabase = await createClient();
 
+  // KBO buildMissReport 대응 bound — DB-side is_correct 필터가 없어(미스 여부는
+  // schedule↔predictions JS join 후 판정) 대신 game_date desc order + overfetch
+  // limit 으로 schedule 부터 bound, predictions 는 그 schedule id 집합으로만 scope
+  // (cycle 3398 review-code(heavy) 발견 — 기존엔 두 테이블 모두 무제한 전량 조회라
+  // 시즌 누적마다 ISR 30분 재생성 때마다 쿼리 비용이 unbounded 하게 증가).
   const scheduleResult = (await supabase
     .from("mlb_schedule")
     .select(
       "external_game_id, game_date, home_score, away_score, home_team_code, away_team_code",
     )
-    .eq("status", "final")) as unknown as SelectResult<MlbMissScheduleRow[]>;
+    .eq("status", "final")
+    .order("game_date", { ascending: false })
+    .limit(limit * 30)) as unknown as SelectResult<MlbMissScheduleRow[]>;
   const { data: scheduleData } = assertSelectOk(scheduleResult, "buildMlbMissReport schedule");
   const scheduleRows = scheduleData ?? [];
   if (scheduleRows.length === 0) return [];
 
+  const scheduleExternalIds = scheduleRows.map((s) => s.external_game_id);
   const predResult = (await supabase
     .from("predictions")
     .select(
@@ -363,7 +371,8 @@ export async function buildMlbMissReport(
     )
     .eq("prediction_type", "pre_game")
     .eq("league", "mlb")
-    .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES)) as unknown as SelectResult<MlbPredBreakdownRow[]>;
+    .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES)
+    .in("external_game_id", scheduleExternalIds)) as unknown as SelectResult<MlbPredBreakdownRow[]>;
   const { data: predData } = assertSelectOk(predResult, "buildMlbMissReport predictions");
   const predByExternalId = new Map(
     (predData ?? []).filter((p) => p.external_game_id).map((p) => [p.external_game_id as string, p]),

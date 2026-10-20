@@ -11,6 +11,8 @@ function makeSupabaseMock(opts: SupabaseMockOptions = {}) {
   const scheduleBuilder = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
     then: (resolve: (v: { data: unknown; error: unknown }) => unknown) =>
       resolve({
         data: opts.scheduleError ? null : (opts.schedule ?? []),
