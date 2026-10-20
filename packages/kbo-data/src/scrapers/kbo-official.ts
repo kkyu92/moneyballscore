@@ -69,14 +69,17 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
     // GAME_INN_NO 는 라이브 판정에 쓰지 않는다. KBO API 가 경기 시작 전에도
     // inn_no=1 을 미리 set 하는 케이스 존재 (2026-04-26 prod 4/5 경기 누락 원인).
     // state_sc 단독 신뢰.
+    // CANCEL_SC_ID 를 state_sc 보다 먼저 확인 (kbo-live.ts:121 와 정합) — 진행 중/종료
+    // 상태로 이미 set 된 경기가 이후 우천취소·서스펜드 처리될 경우 cancel 신호가
+    // 묻혀 영구히 live/final 로 남는 것 방지.
     const stateCode = String(raw.GAME_STATE_SC || '');
     let status: ScrapedGame['status'] = 'scheduled';
-    if (stateCode === '3' || raw.GAME_RESULT_CK === 1) {
+    if (raw.CANCEL_SC_ID === '1' || raw.CANCEL_SC_ID === '2') {
+      status = 'postponed';
+    } else if (stateCode === '3' || raw.GAME_RESULT_CK === 1) {
       status = 'final';
     } else if (stateCode === '2') {
       status = 'live';
-    } else if (raw.CANCEL_SC_ID === '1' || raw.CANCEL_SC_ID === '2') {
-      status = 'postponed';
     }
 
     // 점수 — T_SCORE_CN=원정(Top), B_SCORE_CN=홈(Bottom)

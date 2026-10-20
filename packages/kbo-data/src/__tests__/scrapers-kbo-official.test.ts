@@ -224,6 +224,44 @@ describe('fetchGames — status 파싱 regression 보호', () => {
     });
   });
 
+  describe('CANCEL_SC_ID 우선 — state_sc=live/final 이어도 취소 신호 우선 (cycle 3409, kbo-live.ts 정합)', () => {
+    function rawWithCancel(stateSc: string, cancelScId: string) {
+      return {
+        d: JSON.stringify([
+          {
+            G_ID: '20260426LGOB0',
+            G_DT: '20260426',
+            G_TM: '14:00',
+            S_NM: '잠실',
+            HOME_ID: 'OB',
+            AWAY_ID: 'LG',
+            HOME_NM: '두산',
+            AWAY_NM: 'LG',
+            B_PIT_P_NM: '곽빈',
+            T_PIT_P_NM: '에르난데스',
+            GAME_STATE_SC: stateSc,
+            GAME_INN_NO: 5,
+            CANCEL_SC_ID: cancelScId,
+            CANCEL_SC_NM: '우천취소',
+            GAME_RESULT_CK: 0,
+          },
+        ]),
+      };
+    }
+
+    it('state_sc=2(진행중) + CANCEL_SC_ID=1 → postponed (서스펜드, live 아님)', async () => {
+      mockKboApi(rawWithCancel('2', '1'));
+      const games = await fetchGames('2026-04-26');
+      expect(games[0].status).toBe('postponed');
+    });
+
+    it('state_sc=3(종료) + CANCEL_SC_ID=2 → postponed (final 아님)', async () => {
+      mockKboApi(rawWithCancel('3', '2'));
+      const games = await fetchGames('2026-04-26');
+      expect(games[0].status).toBe('postponed');
+    });
+  });
+
   describe('externalGameId + 팀 코드 매핑', () => {
     it('weekend-mixed: G_ID 가 externalGameId 로 유지', async () => {
       mockKboApi(weekendMixed);
