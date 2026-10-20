@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { errMsg, KST_OFFSET_MS } from '@moneyball/shared';
-import { runMlbPipeline } from '@moneyball/kbo-data';
+import { runMlbPipeline, notifyError } from '@moneyball/kbo-data';
 import type { MlbPipelineMode } from '@moneyball/kbo-data';
 
 // Vercel Pro maxDuration (Plan C 정합)
@@ -37,7 +37,10 @@ export async function POST(request: NextRequest) {
   const rawDate = body.date as string | undefined;
   // pipeline_runs.triggered_by 는 VARCHAR(20) — 초과 시 supabase-js insert 가 throw
   // 없이 .error 리턴해 로그 자체가 silent 누락 (cycle 2078 발견). 경계에서 clamp.
-  const triggeredBy = ((body.triggeredBy as string) || 'api').slice(0, 20);
+  const triggeredBy = ((body.triggeredBy as string) || 'api').slice(0, 20) as
+    | 'cron'
+    | 'manual'
+    | 'api';
 
   // mode 검증
   if (!rawMode || !VALID_MODES.includes(rawMode as MlbPipelineMode)) {
@@ -90,6 +93,9 @@ export async function POST(request: NextRequest) {
       tags: { layer: 'api-route', route: 'mlb-pipeline', mode, triggered_by: triggeredBy },
       extra: { date, message },
     });
+
+    // 에러 알림 — KBO pipeline/route.ts 동일 패턴 (Sentry-only 는 silent 누락 위험)
+    try { await notifyError('MLB Pipeline API', message); } catch {}
 
     return Response.json({ error: message }, { status: 500 });
   }
