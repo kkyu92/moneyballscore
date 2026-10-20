@@ -1,6 +1,9 @@
 // M16 — pipeline_runs.skipped_detail JSONB cohort split.
 // reason enum: window_too_early / window_too_late / not_scheduled / sp_unconfirmed / already_predicted
-// shouldPredictGame (schedule.ts) reject reason 분포 시각화.
+//   (shouldPredictGame, schedule.ts) + debate_fallback_quant (daily.ts debate.agentsFailed
+//   fall-through — 게임 자체는 스킵 안 되고 quant-only 로 예측 진행되지만 동일
+//   skipped_detail 배열에 적재됨, cycle 884 D fix)
+// shouldPredictGame (schedule.ts) reject reason 분포 + debate fallback 이벤트 시각화.
 
 export interface SkippedEntry {
   game: string;
@@ -57,5 +60,6 @@ export const REJECT_REASON_LABEL: Record<string, string> = {
   not_scheduled: 'not_scheduled (status≠scheduled)',
   sp_unconfirmed: 'sp_unconfirmed (선발 미확정)',
   already_predicted: 'already_predicted (existingSet cover)',
+  debate_fallback_quant: 'debate_fallback_quant (에이전트 실패 → 정량 모델 단독)',
   unknown: 'unknown (parse fail)',
 };
