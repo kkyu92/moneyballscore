@@ -42,12 +42,12 @@ export function PostviewPanel({
   return (
     <section
       aria-labelledby="postview-title"
-      className="bg-gradient-to-br from-brand-50 to-white rounded-2xl border border-brand-200 p-6 md:p-8"
+      className="bg-gradient-to-br from-brand-50 to-white dark:from-brand-900/30 dark:to-[var(--color-surface-card)] rounded-2xl border border-brand-200 dark:border-brand-800 p-6 md:p-8"
     >
       <header className="mb-6">
         <h2
           id="postview-title"
-          className="text-xl font-bold text-brand-800 mb-1"
+          className="text-xl font-bold text-brand-800 dark:text-brand-200 mb-1"
         >
           ⚡ 사후 분석
         </h2>
@@ -89,8 +89,8 @@ export function PostviewPanel({
             </div>
           )}
           {homePostview && (
-            <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-200 p-4">
-              <h4 className="text-sm font-semibold text-brand-700 mb-2">
+            <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-200 dark:border-brand-800 p-4">
+              <h4 className="text-sm font-semibold text-brand-700 dark:text-brand-300 mb-2">
                 {homeName} 사후 의견
               </h4>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-4">
@@ -114,8 +114,8 @@ export function PostviewPanel({
 
       {/* 심판 사후 reasoning */}
       {judgeReasoning && (
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-200 p-4">
-          <h3 className="text-sm font-semibold text-brand-700 mb-2">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-200 dark:border-brand-800 p-4">
+          <h3 className="text-sm font-semibold text-brand-700 dark:text-brand-300 mb-2">
             AI 심판 종합 분석
           </h3>
           <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
