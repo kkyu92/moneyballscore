@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): app/api/{health,hub-dispatch} 전수 감사, hub-dispatch route 테스트 공백 보강 (cycle 3399, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3391-3398) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=17/20·op-analysis gap=16/25·info-arch gap=26/30·lotto gap=7/30 전부 미도달. ship-0 미충족(직전10(3390-3398) success 5건: 3390,3393,3396,3397,3398). 2차 방어선(cycle 3398 retro `c637dac7`) OK. cycle 3398 next_rec "app/api/{health,hub-dispatch}" 계승.
+
+**감사**: `health/route.ts`/`health/pipelines/route.ts`/`hub-dispatch/route.ts`/`lib/hub-dispatch.ts`/`sentry-scrub.ts` 전수 직접 read. Supabase 402 exceed_egress_quota downgrade 로직(cycle 2996/2999 수정 이력) 정합 확인, PIPELINE_MODES 10개(KBO 4 + MLB 6) 주석의 cron cadence 서술과 일치, hub-dispatch 의 PII 2중 스크럽(Sentry beforeSend 1차 + 라우트 2차) 및 tags/webUrl 모두 최종 `scrubPII(rawBody)` 단일 패스에 포함되는 구조 확인(개별 누락 없음). 코드-주석 불일치/degraded 플래그 누락 패턴 = **0건**.
+
+**발견**: `lib/hub-dispatch.ts`(PII scrub/fingerprint)와 `sentry-scrub.ts`(beforeSend)는 각 400줄 넘는 단위 테스트 보유하지만, 정작 `hub-dispatch/route.ts` 핸들러 자체(HMAC 서명 검증/non-prod env guard/secret 누락 500/GitHub repository_dispatch PAT 호출/502 relay 실패) 는 route-level 테스트 0건 — PAT 인증 GitHub dispatch 를 수행하는 보안 민감 webhook relay 가 핸들러 레벨에서 무방비.
+
+**수정**: `hub-dispatch/__tests__/route.test.ts` 신규(12 tests) — non-prod env guard(403, dry_run bypass 포함)/시크릿 누락(500+Sentry captureMessage)/서명 누락·불일치(401)/malformed JSON·event 누락(400)/dry_run 단락(fetch 미호출)/정상 dispatch(Bearer PAT 헤더 검증)/GitHub relay 실패(502+captureMessage)/no-relay scope tag/GET health marker 전부 커버.
+
+**검증**: `tsc --noEmit` clean, `pnpm lint` clean, 전체 `vitest run`(597 files, 4692 tests, +12) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `52149cdf`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참)/trigger2(5연속 fail 없음)/trigger3(3399%50=49≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3380-3399, 현재 포함) review-code 다수 발화(15/20)로 미충족. marker 미박제. ship-0 — 직전10(3390-3399) success 6건(3390/3393/3396/3397/3398/3399) 포함 미충족. 2-chain lock(선택 시점 기준, 3391-3398) distinct=3 미충족. 2차 방어선(cycle 3398 retro `c637dac7`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(KBO `lib/reviews/{shared,buildWeeklyReview,buildMonthlyReview,buildMissReport}.ts` behavioral test 공백 메우기 — cycle 3398 부가발견 carry-over, 또는 `app/api/{mlb,picks,pipeline,seo,sync-batter-stats,version}` 전수 재확인) 또는 fix-incident(gap18/20)/op-analysis(gap17/25)/info-arch(gap27/30)/lotto(gap8/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): lib/reviews/ 8파일 전수 감사, buildMlbMissReport unbounded query 수정 (cycle 3398, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3390-3397) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=16/20·op-analysis gap=15/25·info-arch gap=25/30·lotto gap=6/30 전부 미도달. ship-0 미충족(직전10 success 5건: 3390,3393,3396,3397,3398). cycle 3397 next_rec 계승 — `lib/reviews/` 8파일(1804줄).
