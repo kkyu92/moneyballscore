@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): matchup/analysis builder 5개 degraded 플래그 누락 일괄 수정 (cycle 3397, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3389-3396) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=15/20·op-analysis gap=14/25·info-arch gap=24/30·lotto gap=5/30 전부 미도달. ship-0 미충족(직전10 success 4건: 3388,3390,3393,3396). cycle 3396 next_rec 계승 — teams/ 잔여 4개 builder + matchup page degraded backport 지시.
+
+**감사**: agent 위임, `buildTeamFactorAverages.ts`/`buildTeamRecentForm.ts`/`buildTeamUpcoming.ts`(이상 teams/, matchup+teams 페이지 소비) + `buildMatchupUpcoming.ts`(matchup/, matchup 페이지 소비) + `buildTeamStrengthSnapshot.ts`(teams/, analysis 페이지 소비) 전수 read. 5개 전부 `buildTeamProfile.ts`(cycle 3396 기 수정)와 동일 버그 클래스 — Supabase select 가 catch 안에서 내부 흡수되며 degraded 플래그 미노출. `buildMatchupProfile.ts` 는 `assertSelectOk` 비가드(fail-loud) 설계로 clean 확인(주석도 정확, stale 아님).
+
+**수정**: 5개 파일 전부에 `degraded: boolean` 추가 — `buildTeamFactorAverages`/`buildTeamRecentForm` 은 기존 object 반환 형태 유지(필드 추가만), `buildTeamUpcoming`/`buildMatchupUpcoming`(이상 bare array 반환)은 `{ items, degraded }`, `buildTeamStrengthSnapshot`(bare array 반환)은 `{ rows, degraded }` 형태로 변경. 3개 소비 페이지(`teams/[code]/page.tsx`/`matchup/[teamA]/[teamB]/page.tsx`/`analysis/page.tsx`) 의 `dbDegraded` 표현식에 각 builder 의 degraded 병합(기존 `Promise.allSettled` rejection 체크만으론 내부 catch 가 절대 reject 안 해 silent-miss 였음). `buildTeamProfile.ts` 내부 `factorAverages` 필드(타입 공유)도 외부 `degraded` 와 정합 유지.
+
+**검증**: `tsc --noEmit` clean, `pnpm lint` clean, 전체 `vitest run`(596 files, 4680 tests) 전부 PASS. `buildTeamFactorAverages.test.ts`/`buildTeamRecentForm.test.ts` 에 degraded assertion 추가(에러 케이스 true / 정상·빈row 케이스 false). `buildTeamUpcoming`/`buildMatchupUpcoming`/`buildTeamStrengthSnapshot` 는 전용 단위 테스트 파일 부재(기존에도 없었음) — tsc + 전체 suite 로 커버. 직접 main 커밋+push(R4, pre-push lint+type-check+version-sync-guard 전부 PASS, `1717e35a`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참 기존 판단 유지)/trigger2(5연속 fail 없음)/trigger3(3397%50=47≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3378-3397, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3388-3397) success 5건(3388/3390/3393/3396/3397) 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3390-3397) distinct=3(review-code6+polish-ui1+lotto1) 유지, 미충족. 2차 방어선(cycle 3396 retro `97c30aac`) OK.
+
+**잔여 scope**: `lib/matchup/` 의 `buildMatchupEloTrend.ts`/`buildSeasonHeadToHead.ts` 는 이미 clean 확인(직접 Supabase 접근 없음, 순수/위임 함수). `lib/teams/` 전수감사는 사실상 완료(predictions 7 + dashboard 11 + teams 6 + 금회 5 = 29파일, reviews 17 잔여). `lib/predictions/` 는 cycle 3395 clean 확인.
+
+다음 사이클 추천 = review-code(heavy) 계속(reviews/ 17파일) 또는 fix-incident(gap16/20)/op-analysis(gap15/25)/info-arch(gap25/30)/lotto(gap6/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): lib/ 8차분(teams/ 6파일) 전수 감사, buildTeamProfile.ts degraded 플래그 누락 수정 (cycle 3396, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3388-3395) distinct=3: review-code6+polish-ui1+lotto1). fix-incident gap=13/20·op-analysis gap=12/25·info-arch gap=22/30·lotto gap=3/30 전부 미도달. ship-0 미충족(직전10 success 3건: 3388,3390,3393). cycle 3395 next_rec 계승 — lib/ 잔여 subdir(teams 6/reviews 9) 중 양쪽 동시 선택.
