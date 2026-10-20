@@ -1,7 +1,9 @@
 /**
  * Open-Meteo (key-free) 기반 구장 날씨 조회.
  *
- * 홈 empty-state 에서 다음 경기 카드마다 기온/강수확률/아이콘 노출.
+ * 홈(page.tsx) 두 경로에서 호출: (1) 오늘 경기 카드마다 (games.length>0, 주 경로)
+ * (2) 오늘 편성 없을 때 empty-state 다음 경기 카드마다 (nextSchedule). 양쪽 모두
+ * 기온/강수확률/아이콘 노출.
  * key 불필요, rate limit 10,000/일 (free tier) — 30분 ISR + revalidate 로 충분.
  *
  * API: https://api.open-meteo.com/v1/forecast
