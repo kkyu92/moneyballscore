@@ -20,7 +20,7 @@ export function TopStatPickCard({ gameId, homeTeam, awayTeam, homeWinProb, date 
   return (
     <section
       aria-labelledby="top-stat-pick-title"
-      className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white"
+      className="bg-gradient-to-br from-[var(--color-bg-hero-start)] to-[var(--color-bg-hero-end)] rounded-2xl p-6 md:p-8 text-white"
     >
       <div className="flex items-center gap-2 mb-4">
         <span className="text-brand-300 text-sm">{date}</span>

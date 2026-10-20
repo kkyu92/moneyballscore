@@ -95,7 +95,7 @@ describe("explainFactor", () => {
     expect(result.narrative).toContain("결정적");
   });
 
-  it("contribution 계산: value 0.7, sp_fip weight 0.15 (FACTOR_TOTAL=0.85 정규화, cycle 3279) → 약 7%p", () => {
+  it("contribution 계산: value 0.7, sp_fip weight 0.15 (FACTOR_TOTAL=0.85 정규화, one-sided ×100, cycle 3416 정정) → 약 4%p", () => {
     const result = explainFactor({
       key: "sp_fip",
       factorValue: 0.7,
@@ -103,8 +103,8 @@ describe("explainFactor", () => {
       homeTeamName: "KIA",
       awayTeamName: "NC",
     });
-    // (0.7-0.5)*0.15*200/0.85 = 7.0588... → Math.round = 7
-    expect(result.contributionPct).toBe(7);
+    // (0.7-0.5)*0.15*100/0.85 = 3.5294... → Math.round = 4
+    expect(result.contributionPct).toBe(4);
   });
 });
 

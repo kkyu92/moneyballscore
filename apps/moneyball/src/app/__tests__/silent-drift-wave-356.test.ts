@@ -37,11 +37,12 @@ describe('silent drift wave-356 — factor-explanations.ts NEUTRAL_FACTOR 단일
     expect(expected).toBe(20);
   });
 
-  it('contributionPp 로직: NEUTRAL_FACTOR 기준 양방향 pp 정확', () => {
-    // value=0.7, weight=0.15: (0.7 - 0.5) * 0.15 * 200 = 6
+  it('contributionPp 로직: NEUTRAL_FACTOR 기준 단일 factor one-sided pp 정확 (×100, cycle 3416 정정)', () => {
+    // 단일 factor 의 homeWinProb 기여는 margin(FACTOR_CONTRIBUTION_SCALE=200, 양방향) 과 달리 one-sided — ×100.
+    // value=0.7, weight=0.15: (0.7 - 0.5) * 0.15 * 100 = 3
     const value = 0.7;
     const weight = 0.15;
-    const pp = Math.round((value - NEUTRAL_FACTOR) * weight * FACTOR_CONTRIBUTION_SCALE);
-    expect(pp).toBe(6);
+    const pp = Math.round((value - NEUTRAL_FACTOR) * weight * 100);
+    expect(pp).toBe(3);
   });
 });

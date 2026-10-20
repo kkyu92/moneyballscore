@@ -64,8 +64,11 @@ function determineFavor(value: number): "home" | "away" | "neutral" {
 // FactorWaterfallChart.tsx 의 동일 정규화와 단일 source 정합, cycle 3279).
 const FACTOR_TOTAL: number = Object.values(DEFAULT_WEIGHTS).reduce((sum: number, w) => sum + w, 0);
 
+// FACTOR_CONTRIBUTION_SCALE(200)은 margin(home%-away%, 양방향) 환산 전용 — 단일 factor 의 homeWinProb
+// 기여도는 one-sided 라 ×100 (cycle 3279 가 margin 공식을 잘못 재사용, review-code heavy 발견/정정,
+// FactorBreakdown.tsx contributionPp 와 동일 ×100 으로 단일 source 재정합).
 function contributionPp(value: number, weight: number): number {
-  return Math.round(((value - NEUTRAL_FACTOR) * weight * FACTOR_CONTRIBUTION_SCALE) / FACTOR_TOTAL);
+  return Math.round(((value - NEUTRAL_FACTOR) * weight * 100) / FACTOR_TOTAL);
 }
 
 function fmtFip(v: number | null | undefined): string {

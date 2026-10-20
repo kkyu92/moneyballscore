@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, NEUTRAL_FACTOR, shortTeamName, type TeamCode } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, NEUTRAL_FACTOR, shortTeamName, type TeamCode } from "@moneyball/shared";
 import {
   FACTOR_GLOSSARY_ANCHORS,
   FACTOR_LABELS,
@@ -131,13 +131,15 @@ const FACTOR_TOTAL: number = Object.values(DEFAULT_WEIGHTS).reduce((sum: number,
 
 /**
  * factor 의 win prob 기여도 (percentage point).
- * value ∈ [0,1], NEUTRAL_FACTOR=중립. NEUTRAL_FACTOR 에서 멀어진 만큼 × weight × FACTOR_CONTRIBUTION_SCALE(200,
- * = ×2 home prob 변화 -1~+1 의 ×100 %p 환산) ÷ FACTOR_TOTAL — factor-explanations.ts contributionPp 와
- * 단일 source 정합 (silent drift family — 하드코딩 `* 2 * 100` 대신 shared 상수 참조).
+ * predictor.ts 정합: homeWinProb = Σ(factorValue*weight)/factorTotal — 이 한 factor 가 NEUTRAL_FACTOR
+ * 에서 벗어난 만큼의 homeWinProb 기여는 (value-NEUTRAL_FACTOR)*weight/FACTOR_TOTAL (0~1 확률 단위),
+ * ×100 하면 pp. FACTOR_CONTRIBUTION_SCALE(200)은 margin(home%-away%, 양방향) 환산 전용 상수라 여기
+ * 적용 시 2배 과대산출 (cycle 3279 가 "단일 source 정합" 의도로 잘못 적용 — review-code heavy 발견,
+ * FactorWaterfallChart.tsx 의 `contribution * 100` 표시와 동일 ×100 으로 정정).
  * 음수 = away 유리, 양수 = home 유리.
  */
 export function contributionPp(value: number, weight: number): number {
-  return ((value - NEUTRAL_FACTOR) * weight * FACTOR_CONTRIBUTION_SCALE) / FACTOR_TOTAL;
+  return ((value - NEUTRAL_FACTOR) * weight * 100) / FACTOR_TOTAL;
 }
 
 function labelFor(key: string): string {

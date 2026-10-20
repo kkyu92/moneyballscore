@@ -42,10 +42,10 @@ describe("FactorBreakdown — chart variant + shadow factor 11/12", () => {
     // 10 base + 2 shadow = 12 row
     expect(pps.length).toBeGreaterThanOrEqual(10);
 
-    // sp_fip (value=0.62, weight=0.15) → (0.62-0.5)*0.15*200/FACTOR_TOTAL(0.85) = 4.235...pp
+    // sp_fip (value=0.62, weight=0.15) → (0.62-0.5)*0.15*100/FACTOR_TOTAL(0.85) = 2.117...pp (one-sided, cycle 3416 정정)
     const spFipRow = container.querySelector('[data-factor="sp_fip"]');
     const spFipPp = spFipRow?.querySelector("[data-contribution-pp]");
-    expect(spFipPp?.textContent).toContain("+4.2pp");
+    expect(spFipPp?.textContent).toContain("+2.1pp");
   });
 
   it("factor 11/12 (park_weather + umpire_sz) row 강제 렌더 — 값 없으면 '측정 중'", () => {
@@ -128,17 +128,17 @@ describe("FactorBreakdown — chart variant + shadow factor 11/12", () => {
     expect(container.querySelector('[data-factor="sp_fip"]')).toBeTruthy();
   });
 
-  it("contributionPp 헬퍼 수학 정확성 (FACTOR_TOTAL=0.85 정규화 반영, cycle 3279)", () => {
+  it("contributionPp 헬퍼 수학 정확성 (FACTOR_TOTAL=0.85 정규화 반영, ×100 one-sided, cycle 3416 정정)", () => {
     // value=0.5, weight=any → 0pp (중립)
     expect(contributionPp(0.5, 0.15)).toBe(0);
-    // value=1, weight=0.15 → (1-0.5)*0.15*200/0.85 = 17.647...pp (max home)
-    expect(contributionPp(1, 0.15)).toBeCloseTo(17.6471, 3);
-    // value=0, weight=0.10 → (0-0.5)*0.10*200/0.85 = -11.765...pp (max away, elo weight)
-    expect(contributionPp(0, 0.1)).toBeCloseTo(-11.7647, 3);
-    // value=0.7, weight=0.05 → (0.7-0.5)*0.05*200/0.85 = 2.353...pp
-    expect(contributionPp(0.7, 0.05)).toBeCloseTo(2.3529, 3);
-    // value=0.3, weight=0.08 → (0.3-0.5)*0.08*200/0.85 = -3.765...pp
-    expect(contributionPp(0.3, 0.08)).toBeCloseTo(-3.7647, 3);
+    // value=1, weight=0.15 → (1-0.5)*0.15*100/0.85 = 8.8235...pp (max home)
+    expect(contributionPp(1, 0.15)).toBeCloseTo(8.8235, 3);
+    // value=0, weight=0.10 → (0-0.5)*0.10*100/0.85 = -5.882...pp (max away, elo weight)
+    expect(contributionPp(0, 0.1)).toBeCloseTo(-5.8824, 3);
+    // value=0.7, weight=0.05 → (0.7-0.5)*0.05*100/0.85 = 1.176...pp
+    expect(contributionPp(0.7, 0.05)).toBeCloseTo(1.1765, 3);
+    // value=0.3, weight=0.08 → (0.3-0.5)*0.08*100/0.85 = -1.882...pp
+    expect(contributionPp(0.3, 0.08)).toBeCloseTo(-1.8824, 3);
   });
 
   it("war 데이터 갭 (한쪽 totalWar<=0) 시 raw 0 stat label 숨김 (predictor.ts asymmetric-zero guard 동기)", () => {
