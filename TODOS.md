@@ -1,3 +1,23 @@
+## 🟢 SUCCESS — review-code(heavy): app/en/mlb 78파일 EN twin-parity 전수감사, drift 5건 수정 (cycle 3452, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3451 retro `ea0b3857`) OK. 2-chain lock 미충족(직전8(3444-3451) distinct=4: review-code/polish-ui/lotto/skill-evolution). gap 체크: fix-incident=16/20·op-analysis=19/25·info-arch=12/30·lotto=3/30 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. lib/·components/·app/api·packages/kbo-data 1순회 완주 상태에서 재감사 대상 탐색 중 `app/en/mlb`(78파일, 17서브디렉토리)가 체계적 전수감사 이력 전무(ad-hoc 단발 fix만 존재) 발견 — EN twin-parity drift 는 본 리포 기존 silent drift family 핵심 패턴이라 고가치 신규 scope 채택.
+
+**감사**: Agent 위임 전수 read — `apps/moneyball/src/app/en/mlb/` 전체 17서브디렉토리/78파일 KO twin diff. hub/standings/wild-card/postseason/matchup/methodology/factors/team/predictions/accuracy/insights/players/games detail 전부 clean 확인.
+
+**발견 + 수정 1~3 (한국어 텍스트 누출)**: `en/mlb/team/[code]`, `en/mlb/players/[id]`, `en/mlb/games/[date]` 3곳 모두 `notFound()` 호출하지만 EN 전용 `not-found.tsx` 부재 → 전역 한국어 `app/not-found.tsx`로 fallback, EN 유저가 잘못된 URL 접근 시 한국어 텍스트 노출(실제 silent drift). KO 버전 미러한 EN `not-found.tsx` 3개 신규 추가.
+
+**발견 + 수정 4~5 (스켈레톤 누락)**: `analysis/loading.tsx`, `games/loading.tsx` 2곳 KO 전용 세분화 스켈레톤 존재하나 EN 부재 → generic `en/mlb/loading.tsx` fallback. KO 구조 그대로 영역 번역해 2개 신규 추가.
+
+**재확인(non-drift, 미변경)**: EN `/mlb` hub 2열 vs KO 3열 accuracy grid(KO 3번째 타일이 `/accuracy` 링크, EN 대응 페이지 없음) = 기존 TODOS cycle 3331 기록된 의도된 차이, 재변경 없음. `insights/[date]`, `insights/series/[topic]`, `matchup/[teamA]/[teamB]` 는 EN/KO 양쪽 모두 전역 KO 404로 fallback — KO 자체도 페이지별 not-found 없어 twin drift 아님.
+
+**검증**: `tsc --noEmit`/`pnpm lint` clean, `vitest run src/app/mlb src/app/en` 294/294 PASS(30 files, baseline 동일). 직접 main 커밋+push(R4 범위, `f8fed106`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3452%50=2≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3433-3452, 현재 포함) review-code(평가 대상) 14회 발화로 미충족(표본≥10 충족). marker 미박제. ship-0 — 직전10(3443-3452) success 3건(3444/3451/3452) 포함 — PARTIAL_STREAK≠10 미충족. exhaustive-sweep 서브구분 — RC_HEAVY_COUNT=7/10(<8) 미충족(hard stop 자체도 미충족). 2-chain lock(다음 사이클용) — 직전8(3445-3452, 현재 포함) distinct=4(lotto/polish-ui/review-code/skill-evolution) → 미충족, 다음 사이클 자유 선택. 2차 방어선(cycle 3451 retro `ea0b3857`) OK.
+
+**참고**: 본 cycle 실행(diff+커밋)은 이전 세션에서 완료됐으나 세션 중단으로 retro commit + TODOS 박제가 누락됨(active-cycle 파일이 dead pid로 stale 방치). 본 세션이 skill 2차 방어선 메커니즘 따라 진단 단계에서 발견 + retroactive backfill.
+
+다음 사이클 추천 = review-code(heavy) 2순회(lib/components/app-api/kbo-data) 또는 `app/community`(1파일, stale) 소규모 재감사 또는 gap 자연대기(fix-incident 17/20, op-analysis 20/25, info-arch 13/30 임박).
+
 ## 🟢 SUCCESS — skill-evolution: phase 56 (90th 자가 진화, trigger3 milestone), lib/ 24/24 완주 요약 (cycle 3451, 2026-10-21)
 
 cycle 3450 milestone(cycle_n%50==0) marker 강제 소비. 자동 fire 환경 — `/office-hours` skip, 메인 직접 spec 작성.
