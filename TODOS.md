@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/ 신규 스코프 1차분(9파일) 전수 감사, 신규 drift 0건 (cycle 3374, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23(plan #30 expiry 2026-10-18 경과 확인). 2-chain lock 미충족(직전8(3366-3373) distinct=3: review-code/polish-ui/info-arch). fix-incident gap=24/20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, non-actionable. op-analysis gap=15/25·lotto gap=10/30 미도달. explore-idea saturation 9/15 미충족. DESIGN.md mtime 10일 신선. cycle 3373 next_rec 따라 review-code(heavy) 신규 스코프 채택 — `components/`(179파일, 20 subdir) 는 TODOS grep 결과 review-code(heavy) 가 한번도 명시 스코프로 다룬 적 없는 최대 미감사 영역.
+
+**감사**: 본 메인 직접 read, agent 위임 없음. 작은 subdir 8개(glossary/live/players/search/seasons/share/standings/insights, 소스 9파일) 배치 선정: `GlossaryCategoryFilter`/`SeasonStandingsSortControl`/`TeamAccuracySortControl` — localStorage try/catch + `useSyncExternalStore` 패턴 3곳 전부 동일 안전 구조, CSS `order` 기반 정렬(rundiff/sample) 로직 KBO_TEAM_COUNT 참조 일치. `LiveScoreboard` — `useKboScores` 훅 + `LiveScore` 타입 import 경로 유효, `shortTeamName`/`TeamLogo` 타입 캐스팅 일관. `PitcherFipTrend` — `ChartTooltip`/`formatChartDate` import 유효, min/max 스케일 계산 정상. `SearchClient` — Fuse.js 옵션/디바운스/키보드 nav(ArrowUp/Down/Enter/Esc) a11y(`role=combobox`+`aria-activedescendant`) 전부 구현과 주석 일치. `SeasonStandingsTable` — runDiff/sample rank map 계산 정상, `TeamRecord` 타입 일치. `ShareButtons` — Web Share API try/catch(AbortError 구분) + clipboard copy 안전, `COPY_FEEDBACK_RESET_MS` 상수 참조 유효. `TeamAccuracyList` — `SMALL_SAMPLE_N` 기준 `isReliable` 분기 정상. `AgentVoteCard`/`DebateTimeline` — 5-step 토론 timeline(quant→home→away→calibration→judge) 데이터 흐름과 주석 설명 일치, away 팀 confidence→homeWinProb 변환(`1 - confidence`) 정확.
+
+**결과**: 신규 drift 0건. 코드 변경 없음. components/ 전체(20 subdir, 179파일) 중 1차분(소형 8개 subdir, 9 소스파일) 완료 — 잔여 12개 subdir(leaderboard/teams/accuracy/layout/reviews/matchup/analysis/picks/dashboard/shared/predictions/ui, 더 큰 파일 수) 다음 사이클 후보.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3374%50=24≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3355-3374, 현재 cycle 포함) 표본≥10 충족, opt-out 9개 제외 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3365-3374) success 포함(3365/3366/3369/3371)으로 미충족. 2차 방어선(cycle 3373 retro `023e1dc7`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 12개 subdir 계속 감사(leaderboard/teams/accuracy 등 중소형 우선), 또는 fix-incident(gap 25/20, 재확인 필요)/op-analysis(gap 16/25)/lotto(gap 11/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — info-architecture-review: 43-cycle gap, 24연속 "현 IA 충분" 재확인 (cycle 3373, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. **2-chain lock 충족** — 직전8(3365-3372) distinct=2(review-code+polish-ui) → 둘 다 제외. fix-incident gap=23/20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, non-actionable. op-analysis gap=14/25·lotto gap=9/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/plan 0/TODOS Next-Up 부재/DESIGN.md mtime 10일 신선) 확립 skip 패턴 유지. 남은 후보 중 info-arch gap=43/30 이 trigger 최강으로 선택.
