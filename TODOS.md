@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — polish-ui: 2-chain lock 강제 fallback, 디자인 일관성 전수 점검 신규 drift 0건 (cycle 3391, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 충족(직전8(3383-3390) distinct=2: review-code(heavy)7+operational-analysis1) — review-code/operational-analysis 제외. fix-incident gap=9/20·info-arch gap=18/30·lotto gap=27/30 전부 미도달. 어떤 chain 도 자연 trigger 없어 룰에 따라 polish-ui 강제 발화.
+
+**점검**: DESIGN.md 컬러 토큰 vs 코드 하드코딩 hex grep — 발견된 리터럴(lotto 공식 공 색상 picks-loader.ts, OG 이미지 satori 렌더링, 팀 fallback `#888`, HallOfFame CSS var fallback) 전부 정당한 예외, drift 0건. 전체 non-debug page.tsx Breadcrumb 존재 여부 전수 grep — 누락 10곳(home/login/settings/community/reviews monthly·weekly index류) 전부 의도(redirect-only stub, 얕은 depth, placeholder)로 확인, 신규 drift 0건. `find -mtime -7` 라우트 체크는 거의 전체 파일 반환해 신뢰 불가로 판단(checkout mtime reset).
+
+**결과**: 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적)은 상시 참(이미 오래 전 소진된 조건으로 판단, 재발화 X). trigger3(3391%50≠0) 미충족. trigger5 — review-code 직전20 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3381-3390) success 3건(3382/3388/3390) 포함 미충족. 2차 방어선(cycle 3390 retro `6e9f0c57`) OK.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 → review-code(heavy) lib/ 잔여 subdir(dashboard/predictions/teams/reviews/mlb) 재개 또는 fix-incident(gap10/20)/info-arch(gap19/30)/lotto(gap28/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): lib/ 4차분(standings/debug/insights/matchup/analysis, 21파일) 전수 감사, pipelineStats.ts silent JSON-parse swallow 수정 (cycle 3390, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 평가(직전8(3382-3389) distinct=3: fix-incident1+operational-analysis1+review-code(heavy)6) 미충족. fix-incident gap=8/20·op-analysis gap=7/25·info-arch gap=17/30·lotto gap=26/30 전부 미도달. ship-0 미충족(직전10(3381-3390) success 3건=3382,3388,3390). exhaustive-sweep 서브체크 RC_HEAVY_COUNT=8/10(≥8 충족) 이나 CLEAN_DRIFT_COUNT=6/10(<7) 미충족 — EXHAUSTIVE_SWEEP 발동 X. cycle 3389 next_rec 계승 — lib/ 잔여 subdir 중 소규모 5개(standings4/debug4/insights4/matchup5/analysis4, 합 21파일) 4차분 선택.
