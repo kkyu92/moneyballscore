@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code(heavy): mlb/{accuracy,calendar,methodology,predictions,reviews}+en/mlb OG/twitter-image 20파일 누락 수정 PR #3186 머지 (cycle 3458, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3457 retro `aedbef20`) OK. 2-chain lock 미충족(직전8(3450-3457) distinct=3: review-code/skill-evolution/operational-analysis). fix-incident gap=22/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — non-actionable. op-analysis gap=4/25·info-arch gap=18/30·lotto gap=9/30 전부 미도달. cycle 3457 추천대로 app/ page-level 영역 신규 탐색.
+
+**발견**: `mlb/predictions/page.tsx` 읽던 중 KBO `predictions/page.tsx` 와 달리 `opengraph-image.tsx`/`twitter-image.tsx` 가 없음을 발견 — `find`로 KBO vs MLB top-level 라우트 전수 대조한 결과 `mlb/{accuracy,calendar,methodology,predictions,reviews}` + `en/mlb` 동일 5개(총 10개 디렉토리) 전부 OG/twitter 파일 전무 — KBO 는 21개 라우트 전부 보유. insights(cycle 3455)/matchup/analysis 이후 silent drift family wave 144 5번째 재발.
+
+**수정**: `design-tokens.ts` 에 신규 `MLB_GRADIENT_*` 토큰 5개 추가(accuracy violet≈271° / calendar lime≈74° / methodology teal-green≈155° / predictions crimson-pink≈346° / reviews orange-red≈13°, 기존 registry 10개와 hue 미충돌) → 20개 파일(5 route × KO/EN × OG/twitter) 생성, 기존 sibling 패턴(mlb/standings, mlb/analysis) 그대로 복제.
+
+**검증**: `tsc --noEmit` 클린, `pnpm --filter moneyball test -- --run` 605 files/4776 tests 전부 PASS, `pnpm --filter moneyball lint` 클린, pre-push hook(lint+type-check+version-sync-guard) 통과. PR #3186 생성 → `gh pr checks --watch --fail-fast` CI green 확인 → `gh pr merge --squash --delete-branch` → `gh pr view --json state,mergedAt` 로 MERGED 실측 확인(`057eefb9`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3458%50=8≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3439-3458, 현재 포함) review-code 14회 발화로 미충족(표본=19≥10 충족). marker 미박제. ship-0 — 직전10(3448-3457) success 4건(3451/3452/3455/3456) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3451-3458) distinct=3(review-code/skill-evolution/operational-analysis) 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속 — KBO-only 라우트(`dashboard`/`leaderboard`/`search`/`glossary`/`guide`/`changelog` 등) 의 MLB 대응 부재가 의도된 설계인지 재확인 가치, 또는 fix-incident(gap 22, non-actionable 재확인)/info-arch(gap 18)/lotto(gap 9)/op-analysis(gap 4) 자연 대기.
+
 ## 🟡 RETRO-ONLY — review-code(heavy): app/api/picks/* 5개 route + snapshot-pitchers 전수감사, drift 0건 (cycle 3457, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived/non-approved). 2차 방어선(cycle 3456 retro `74356f08`) OK. 2-chain lock 미충족(직전8(3449-3456) distinct=4: review-code/skill-evolution/operational-analysis/lotto). fix-incident gap=21/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재(non-actionable). op-analysis gap=3/25·info-arch gap=17/30·lotto gap=8/30 전부 미도달. app/api 전수감사 시리즈 잔존 스코프 중 TODOS mention 0건 route(`picks/submit`, `snapshot-pitchers`) 확인 후 관련 twin route 포함 전수 read.
