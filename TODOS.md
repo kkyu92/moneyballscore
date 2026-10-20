@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/factors/ 전수 감사, MLB Elo/recent-form unbounded query 수정 (cycle 3405, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3404 retro `cf82e6a2`) OK. 2-chain lock 미충족(직전8(3397-3404) distinct=3: review-code6+polish-ui1+skill-evolution1). gap: fix-incident last fire 3382(gap=22/20, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — non-actionable)·op-analysis last fire 3383(gap=21/25 미도달)·info-arch last fire 3373(gap=31/30 충족하나 22연속 "IA 충분" 재확정 패턴, 신규 route/nav 변경 0건 지속)·lotto last fire 3392(gap=13/30 미도달). ship-0 미충족(직전10(3395-3404) success 8건). cycle 3404 next_rec 계승 — app/api/lib/components 전부 소진 확인 후 `packages/kbo-data` 신규 vein 탐색, factors/(9파일, 991줄, MLB 예측 팩터 핵심 로직, 전수 미감사) 채택.
+
+**감사**: agent 위임, `mlb-overview.ts`/`mlb-shadow-c.ts`/`mlb-factor-detail.ts`/`mlb-form.ts`/`park-weather.ts`/`umpire-sz.ts`/`mlb-base.ts`/`mlb-waterfall.ts`/`mlb-elo.ts` 전수 read + 호출부(`mlb-pipeline.ts`/`engine/predictor.ts`/game-detail page 2종) 교차검증. degraded flag 컨벤션 부재 확인(다른 factor 모듈도 미적용, 불일치 아님), `park-weather.ts`/`umpire-sz.ts` 는 실제 KBO 전용(PredictionInput 미사용 필드, cycle 2822/2926 주석에 이미 문서화된 의도적 비활성) 확인, 9개 파일 전부 기존 테스트 보유(커버리지 공백 0건), `mlb-elo.ts` postseason K-factor dead code 는 "do not remove" 주석 있는 의도적 보존(cycle 2980) 확인.
+
+**발견(수정)**: `mlb-pipeline.ts` 의 `runEloUpdate()`/`runPredictFinal()` 가 `mlb_schedule` select 시 `.range()` 없이 단일 호출 — `supabase/config.toml` `max_rows=1000`(기존 `SUPABASE_PAGE_SIZE` 상수와 동일값)인데 MLB 시즌 누적 final 경기 ~2430건(30팀×162경기/2)으로 시즌 중반부터 PostgREST 가 나머지를 silent truncate. `computeMlbEloRatings`/`calculateMlbRecentForm`/`calculateMlbHeadToHead` 가 불완전한 게임 history 로 계산되어 모든 팀 Elo rating 과 최근폼/상대전적이 조용히 틀어지고 있었음 — 이 프로젝트 반복 drift family(unbounded query)가 처음으로 core 예측 엔진(읽기측 API route 아닌 Elo/폼 계산 자체)에서 재발한 사례.
+
+**수정**: `backfill-records.ts` 의 기존 `SUPABASE_PAGE_SIZE` `.range()` 페이지네이션 패턴을 두 쿼리에 동일 적용(for loop, page.length < SUPABASE_PAGE_SIZE 까지 반복). `mlb-pipeline.test.ts` 에 1000건 초과 시 전체 페이지 조회 검증 회귀 테스트 2건 추가(2페이지에만 존재하는 팀/매치업이 결과에 반영되는지 확인).
+
+**검증**: `apps/moneyball` `tsc --noEmit` clean, `packages/kbo-data` type-check/lint clean, 전체 `pnpm test`(turbo, 603 files/4731 tests incl kbo-data 96 files/1223 tests, +2) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `739b82c8`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참)/trigger2(5연속 fail 없음)/trigger3(3405%50=5≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3386-3405, 현재 포함) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3396-3405) success 9건 포함 미충족. 2-chain lock — 본 사이클 포함 직전8(3398-3405) distinct=3(review-code+polish-ui+skill-evolution) 유지, 미충족. 2차 방어선(cycle 3404 retro `cf82e6a2`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`packages/kbo-data` 잔여 vein — `agents/`(15파일)/`backtest/`(12파일)/`scrapers/`(15파일)/`pipeline/` 나머지 ~19파일. factors/ 에서 core engine 버그 발견 직후라 인접 영역 우선순위 상향) 또는 op-analysis(gap22/25)/lotto(gap14/30)/info-arch(22연속 "충분" 재확정 가능성) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): app/api/{mlb/waitlist,picks/{mlb-poll,mlb-submit,poll,results,submit}} 전수 감사, poll 라우트 테스트 공백 보강 (cycle 3404, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3403 retro `7f98e6ef`) OK. 2-chain lock 미충족(직전8(3396-3403) distinct=3: review-code6+polish-ui1+skill-evolution1). gap: fix-incident last fire 3382(gap=22/20, `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable 재확인)·op-analysis last fire 3383(gap=21/25 미도달)·info-arch last fire 3373(gap=31/30 충족하나 24연속 "IA 충분" 재확정 패턴 — 신규 라우트 mtime 노이즈/breadcrumb 누락 전부 기존 의도적 제외 확인된 영역, actionable 부재)·lotto last fire 3392(gap=12/30 미도달). ship-0 미충족(직전10(3394-3403) success 7건). cycle 3403 next_rec 계승 — `app/api/mlb/waitlist` + `app/api/picks/*` (mlb-poll/mlb-submit/poll/results/submit) 미감사 잔여 스코프 채택.
