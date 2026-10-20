@@ -1,3 +1,21 @@
+## 🟢 SUCCESS — review-code (heavy): lib/teams/ 전수감사, degraded 플래그 누락 수정 (cycle 3444, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3443 retro `5224c88b`) OK. 2-chain lock 미충족(직전8(3436-3443) distinct=3: review-code(heavy)6+fix-incident(lite)1+info-architecture-review1). gap 체크: fix-incident=8/20·op-analysis=11/25·lotto=22/30·info-arch=4/30 전부 미도달. cycle 3443 추천대로 lib/ 잔여 12개 서브디렉토리(dashboard/debug/insights/lotto/matchup/picks/players/reviews/standings/supabase/teams/v2-shadow-monitor) 중 `lib/teams/` (12파일) 채택.
+
+**감사**: 서브에이전트 위임 read-only 전수 조사 — `lib/teams/` 6 source + 6 test = 12 파일.
+
+**확정 버그 1건**: `buildTeamEloTrend.ts` 가 `buildEloTrend()` 반환값에서 `{ points, teams }` 만 destructure 하고 `degraded` 플래그를 버림 — `buildEloTrend()` 는 자체 DB 에러를 catch 해 throw 없이 `degraded: true` 로 반환하는데(fail-loud 아님), `TeamEloTrendData` 인터페이스 자체에 `degraded` 필드가 없어 `teams/[code]/page.tsx` 의 `dbDegraded` OR-chain 이 이 신호를 놓침 — 실제 DB 장애 시에도 Elo 차트가 "데이터 없음" 으로만 보이고 "일시적 서비스 장애" 배너가 안 뜸. 쌍둥이 `buildMlbTeamEloTrend.ts`("KBO buildTeamEloTrend.ts 병렬 구현" 명시 주석) 는 이미 `degraded` 를 올바르게 전파하고 MLB 페이지도 OR-chain 에 포함 — KBO 원본이 자신의 후속 MLB 복제본보다 누락된 상태였음.
+
+**수정**: `TeamEloTrendData` 에 `degraded: boolean` 추가 + 양쪽 return 경로(`buildTeamEloTrend.ts`) 전파 + `teams/[code]/page.tsx` 의 `dbDegraded` OR-chain 에 `eloTrend.degraded` 추가(rejected-fallback 객체도 `degraded: true` 로 정합).
+
+**결과**: lib/ 시리즈 13개 서브디렉토리 완료(accuracy/analysis/calendar/changelog/leaderboard/seasons/seo/stats/observability/api/mlb/predictions/teams). 코드 변경 2파일, 커밋+push 완료(`318d0932`).
+
+**검증**: `npx tsc --noEmit` clean. `npx eslint` clean. `npx vitest run src/lib/teams/__tests__` 6/6 파일 28/28 테스트 pass. pre-push hook (lint+type-check+version-sync-guard) 전부 PASS.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3444%50=44≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3425-3444, 현재 포함, 표본 20) review-code 15회 발화로 미충족(평가대상 review-code 단독, 0회 아님). marker 미박제. ship-0 — 직전10(3435-3444) retro-only 8건(3439/3444 success 2건 제외) — PARTIAL_STREAK=8≠10, 미충족(emergency stop 미발동). exhaustive-sweep 서브구분 — RC_HEAVY_COUNT 8/10(≥8), CLEAN_DRIFT_COUNT는 본 cycle success 로 하락(3439/3444 두 success 제외 시 drift-0 언급 ~6건 <7) — 미충족, 평가 불필요(애초 PARTIAL_STREAK 미충족이라 무관). 2-chain lock(다음 사이클용) — 직전8(3437-3444) distinct=2(review-code(heavy)7+info-architecture-review1) — **lock 충족**, 다음 사이클 review-code(heavy)/info-architecture-review 양쪽 제외 필요(단 fix-incident 포함 룰 적용 안 됨, 둘 다 비-fix-incident). 2차 방어선(cycle 3443 retro `5224c88b`) OK.
+
+다음 사이클 추천 = **2-chain lock 발동** — review-code(heavy)/info-architecture-review 제외, fix-incident(gap9/20)/op-analysis(gap12/25)/lotto(gap23/30)/polish-ui/explore-idea/expand-scope/design-system 자연 선택. lib/ 잔여 11개(dashboard/debug/insights/lotto/matchup/picks/players/reviews/standings/supabase/v2-shadow-monitor) 는 lock 해제 후 계속.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): lib/predictions/ 전수감사, lib/ 시리즈 12번째 완료, drift 0건 (cycle 3443, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3442 retro `ae00e713`) OK. 2-chain lock 미충족(직전8(3435-3442) distinct=3: review-code(heavy)6+fix-incident(lite)1+info-architecture-review1). gap 체크: fix-incident=7/20·op-analysis=10/25·lotto=21/30·info-arch=3/30 전부 미도달. cycle 3442 추천대로 lib/ 잔여 13개 서브디렉토리 중 `lib/predictions/` (12파일) 채택.
