@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): fancy-stats.ts TOCTOU 중복 fetch dedup + kbo-live.ts/kbo-pitcher.ts 재시도 로직 일관화 (cycle 3411, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3410 retro `3df6586a`) OK. 2-chain lock 미충족(직전8(3403-3410) distinct=3: review-code(heavy)6+operational-analysis(lite)1+info-architecture-review1). cycle 3409 next_rec carry-over 채택 — `fancy-stats.ts` TOCTOU dedup 또는 `kbo-pitcher.ts`/`kbo-live.ts` 재시도 로직 보강.
+
+**발견(수정1)**: `daily.ts` 최상위 `Promise.all([fetchPitcherStats, fetchTeamStats, fetchEloRatings])` 가 `fetchTeamStats` 내부 `Promise.all([fetchEloRatings, fetchBatterStats])` 와 겹쳐 `/leaders/`(fetchPitcherStats + fetchBatterStats) + `/elo/`(fetchTeamStats 내부 + 최상위 fetchEloRatings) 각 2회씩 총 4건을 동시 중복 요청 — baseball-savant.ts 의 공유 mutable rate-limit race 와는 다른 종류의 TOCTOU(동일 URL 중복 fetch). `fancy-stats.ts` 에 URL 키 in-flight 요청 캐시(`fetchHtmlDeduped`) 추가 — 겹치는 호출은 실제 HTTP 요청 1회만 공유.
+
+**발견(수정2)**: `kbo-live.ts`(`fetchLiveGames`)/`kbo-pitcher.ts`(`fetchKboPitcherBasic`) 메인 fetch 경로가 plain `fetch()` — `kbo-official.ts` 가 동일 `GetKboGameList` 엔드포인트에 이미 `fetchWithRetry` 적용한 것과 비일관. 양쪽 모두 `fetchWithRetry` 로 정합.
+
+**검증**: `tsc --noEmit`/`pnpm lint` clean, 전체 `pnpm test`(kbo-data 1234 tests, moneyball 4731 tests) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `44bb9807`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 상시 참이나 과거 소비된 관례)/trigger2(5연속 fail 없음)/trigger3(3411%50=11≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3392-3411, 현재 포함, 표본 19≥10) review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3402-3411) success 8건(3402-3407/3409/본cycle) 포함 미충족. 2-chain lock — 직전8(3403-3410) distinct=3, 미충족. 2차 방어선(cycle 3410 retro `3df6586a`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(packages/kbo-data 잔여 vein 탐색 또는 app/api/lib/components 재확인) 또는 fix-incident(비액션 패턴 지속 확인)/op-analysis(gap3/25)/lotto(gap19/30)/info-arch(gap1/30, 방금 발화) 자연 대기.
+
 ## ⚪ RETRO-ONLY — info-architecture-review: 2-chain lock(review-code+operational-analysis) 발동, 30-cycle gap trigger 발화, "IA 충분" 24연속 재확정 (cycle 3410, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. **2-chain lock 충족** — 직전8(3402-3409) distinct=2(review-code(heavy)6+operational-analysis(lite)2) → 둘 다 제외. fix-incident gap=27/20 충족하나 `gh run list` 재확인 CI Failure Dispatch 전부 skipped — 실제 incident 부재, non-actionable. lotto gap=18/30 미도달 + cron 산출물(picks `2026-10-24.md`/results `2026-10-17.md`) 전부 최신, 정상. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md mtime 10일 신선) 확립 skip 패턴 유지. 남은 후보 중 info-arch gap=37/30 이 trigger 최강으로 선택.
