@@ -1,3 +1,20 @@
+## 🟢 SUCCESS — review-code (heavy): app/api 잔여 8-route 전수감사, mlb-pipeline.yml dispatch 옵션 누락 수정 (cycle 3439, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3438 retro `4eb4acfb`) OK. 2-chain lock 미충족(직전8(3431-3438) distinct=4: polish-ui2+operational-analysis1+review-code4+fix-incident1). gap 체크: fix-incident=3/20·op-analysis=6/25·info-arch=29/30(근접, 미도달)·lotto=17/30 전부 미도달. **cycle 3438 추천("packages/kbo-data/src scrapers/pipeline/engine/agents/factors/analytics/backtest/context/features 미감사") 검증 결과 기각** — CHANGELOG grep 재확인 결과 cycle 3090이 이미 "packages/kbo-data 전체 서브디렉토리 모두 최소 1회 이상 감사 완료"로 명시적 결론 낸 바 있어, 3438 추천은 stale carry-over였음(carry-over 신뢰 전 검증 룰 적용). 대신 cycle 3099 retro가 남긴 정확한 잔여 스코프("나머지 8개 api route는 mention만 있고 전수 감사 미실시") 채택 — `health`/`hub-dispatch`/`mlb/{pipeline,waitlist}`/`picks/{mlb-poll,mlb-submit,poll,results,submit}`/`pipeline`/`seo/indexnow/ping`/`sync-batter-stats`/`version` 총 14파일.
+
+**감사**: 서브에이전트 위임 전수 read(14개 route.ts + `__tests__` 교차확인). `picks/submit` vs `picks/mlb-submit`, `picks/poll` vs `picks/mlb-poll` line-by-line 대조 — 완전 twin, 의도된 league-specific 차이(game_id INT vs external_game_id VARCHAR) 외 drift 없음. 인증 패턴 전수 확인 — cron류(`pipeline`/`mlb/pipeline`/`sync-batter-stats`/`seo/indexnow/ping`) CRON_SECRET 게이트 정상, public write(`picks/*`/`mlb/waitlist`) origin-check 정상, `hub-dispatch` HMAC 서명검증 정상(webhook 특성상 cron과 다른 패턴이 맞음). `sync-batter-stats` 207 partial-failure + Sentry 태그 컨벤션(`live`/`revalidate`/`snapshot-pitchers`와 동일) 정합. 주석 vs 코드 매칭 전수 확인 — stale comment drift 0건(health의 402-quota downgrade 로직, VARCHAR(20) clamp 등 전부 정확).
+
+**확정 버그 1건 + 수정**: `apps/moneyball/src/app/api/mlb/pipeline/route.ts`의 `VALID_MODES`(7개, `mlb_elo_update` 포함)와 `apps/moneyball/src/app/api/health/pipelines/route.ts`의 `PIPELINE_MODES`(동일 7개, `mlb_elo_update` staleness 모니터링 대상)는 서로 정합하지만, `.github/workflows/mlb-pipeline.yml`의 `workflow_dispatch.inputs.mode.options`(수동 재실행 전용 workflow)는 6개만 등록 — `mlb_elo_update` 누락. health가 이 모드를 stale 보고해도 GitHub Actions UI로 수동 재실행 불가(curl 수기 호출만 가능)했던 상태 — `VALID_MODES`가 성장했으나 sibling dispatch config가 미동기화된 전형적 drift. `options`에 `mlb_elo_update` 추가로 수정.
+
+**검증**: YAML 유효성(`python3 -c "import yaml; yaml.safe_load(...)"`) PASS. `pnpm lint` clean(워크플로 전용 변경, 코드 로직 변경 없음). 직접 main 커밋+push(R4, `054879ce`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**결과**: `app/api/` 전체 13개 route 디렉토리 금번 기준 전수 감사 완료(cycle 3099에서 5개, 금번 8개 잔여 완료).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3439%50=39≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3420-3439, 현재 포함, 표본 20≥10) review-code 13회 발화로 미충족(평가대상 review-code 단독). marker 미박제. ship-0 — 직전10(3430-3439) success 3건(3430/3431/3432/3439) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3432-3439) distinct=4(review-code5+polish-ui1+operational-analysis1+fix-incident1), 미충족 — 다음 사이클 자유 선택. 2차 방어선(cycle 3438 retro `4eb4acfb`) OK.
+
+다음 사이클 추천 = info-arch(gap30/30, 정확 도달 — 단 24연속 '현 IA 충분' 재확인 패턴이라 액션 기대 낮음) 또는 review-code(heavy) 신규 축(app 라우트 자체 page.tsx 서버 컴포넌트 로직 또는 packages/shared) 또는 lotto(gap18/30)/op-analysis(gap7/25)/fix-incident(gap4/20) 자연 대기.
+
+
 ## ⚪ RETRO-ONLY — review-code (heavy): components/{leaderboard,picks,search,share} 전수감사, drift 0건 (cycle 3437, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3436 retro `0bb79e23`) OK. 2-chain lock 미충족(직전8(3429-3436) distinct=4: review-code2+polish-ui3+operational-analysis1+fix-incident1) — 자유 선택. fix-incident gap=1/20·op-analysis gap=4/25·info-arch gap=27/30·lotto gap=15/30 전부 미도달. cycle 3436 추천 "review-code(heavy) 계속(components/leaderboard 등 재확인)" 채택.
