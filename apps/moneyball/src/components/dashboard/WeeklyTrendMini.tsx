@@ -18,7 +18,7 @@ import {
   WINNER_PROB_CONFIDENT,
   WINNER_PROB_LEAN,
 } from "@moneyball/shared";
-import { neutral, semantic } from "@/lib/design-tokens";
+import { chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 
 export interface WeeklyTrendPoint {
   label: string;
@@ -157,7 +157,7 @@ export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(0,0,0,0.05)" }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: chartCursorTint }} />
         </BarChart>
       </ResponsiveContainer>
     </div>
