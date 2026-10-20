@@ -71,6 +71,14 @@ export const NEUTRAL_GRADIENT_135 = "linear-gradient(135deg, #1a1d24 0%, #2d3140
 export const MLB_GRADIENT_MATCHUP_135 = "linear-gradient(135deg, #2a0e2e 0%, #5c1a66 50%, #c22e8f 100%)";
 export const MLB_GRADIENT_ANALYSIS_135 = "linear-gradient(135deg, #2b1207 0%, #7a3410 50%, #e8720f 100%)";
 
+// MLB insights OG/twitter gradients (review-code heavy cycle 3455) — mlb/insights 서브트리
+// (base hub + series/[topic] + [date]) 전체가 opengraph-image.tsx/twitter-image.tsx 없이
+// 발행돼 KBO twin(KBO_GRADIENT_INSIGHTS_DATE_135, violet) 대비 공유 카드가 누락되던 갭 해소.
+// gold(hue≈45) 채택 — registry 내 violet/magenta(wild-card/postseason/matchup) 및
+// amber(analysis, hue≈27) 와 구분되는 미사용 hue.
+export const MLB_GRADIENT_INSIGHTS_135 = "linear-gradient(135deg, #1f1606 0%, #5c4512 50%, #d4a017 100%)";
+export const MLB_GRADIENT_INSIGHTS_DATE_135 = "linear-gradient(135deg, #1f1a06 0%, #6b5214 50%, #eab308 100%)";
+
 // KBO 전용 라우트 OG/twitter gradient — 21개 라우트가 design-tokens.ts 밖에서 인라인 hex 로
 // 중복/분산돼있던 걸 단일 source 로 흡수 (silent drift family, cycle 2943 design-system 스윕).
 // factors(ko/en mirror)는 완전 동일 hex라 토큰 1개 공유.
