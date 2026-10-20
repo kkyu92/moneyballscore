@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
-import { DEVICE_ID_MAX_LENGTH } from '@moneyball/shared';
+import { DEVICE_ID_MAX_LENGTH, EXTERNAL_GAME_ID_MAX_LENGTH } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isOriginAllowed } from '@/lib/api/is-origin-allowed';
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   if (
     typeof external_game_id !== 'string' ||
     external_game_id.length === 0 ||
-    external_game_id.length > 20
+    external_game_id.length > EXTERNAL_GAME_ID_MAX_LENGTH
   ) {
     return NextResponse.json({ error: 'invalid external_game_id' }, { status: 400 });
   }

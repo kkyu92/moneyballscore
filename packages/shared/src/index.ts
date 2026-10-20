@@ -2168,11 +2168,13 @@ export const PICKS_POLL_IDS_LIMIT = 50;
 
 /**
  * 파이프라인 staleness 기본 임계 (시간) — silent drift family wave 303 (cycle 1632).
- * app/api/health/pipelines/route.ts 의 PIPELINE_MODES 9개 모드가 사용 (announce /
+ * app/api/health/pipelines/route.ts 의 PIPELINE_MODES 10개 모드가 사용 (announce /
  * predict_final / verify + MLB 일일 cadence 6종: mlb_statsapi_scrape /
  * mlb_fancy_scrape / mlb_savant_scrape / mlb_shadow_train / mlb_elo_update /
- * mlb_predict_final). 원래 KBO 3 surface 로 박제됐으나 cycle 2000년대 MLB 파이프라인
- * 추가로 6개 모드 더 사용 — 모두 24h 주기 cron 이라 동일 임계 적용 (cycle 3307 주석 정정).
+ * mlb_predict_final — predict 모드는 별도 PIPELINE_PREDICT_STALE_HOURS 사용, 본 상수
+ * 미적용). 원래 KBO 3 surface 로 박제됐으나 cycle 2000년대 MLB 파이프라인 추가로 6개
+ * 모드 더 사용 — 모두 24h 주기 cron 이라 동일 임계 적용 (cycle 3307 주석 정정, cycle
+ * 3418 모드 수 9→10 정정 — predict 모드 enumeration 누락 수정).
  *
  * Cron '17 0-14 * * *' (UTC) 기준 KBO 3모드 + MLB cron 기준 MLB 6모드 — 전부 하루 1회
  * 고정 cadence. 28h = 24h 주기 + 4h tolerance. 변경 시 본 상수 1곳만 갱신.
@@ -2215,6 +2217,17 @@ export const NICKNAME_MAX_CHARS = 12;
  * 투표 제출 요청의 device_id 최대 문자 수 (UUID 36자 + 여유). 변경 시 본 상수 1곳만 갱신.
  */
 export const DEVICE_ID_MAX_LENGTH = 64;
+
+/**
+ * external_game_id 최대 길이 — silent drift family wave (cycle 3418) fix 완료.
+ * 동일 숫자 20 hardcoded 2 surface:
+ *   - app/api/picks/mlb-submit/route.ts: external_game_id.length > 20
+ *   - app/api/picks/mlb-poll/route.ts: s.length <= 20
+ *
+ * mlb_schedule.external_game_id VARCHAR(20) (migration 038) 스키마 제약 반영.
+ * 변경 시 본 상수 1곳 + migration 038 VARCHAR 폭 동기 갱신.
+ */
+export const EXTERNAL_GAME_ID_MAX_LENGTH = 20;
 
 /**
  * 커뮤니티 픽 최소 투표 수 — silent drift family wave 305 (cycle 1634) fix 완료.

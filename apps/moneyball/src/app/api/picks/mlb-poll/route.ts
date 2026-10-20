@@ -1,5 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { PICKS_POLL_IDS_LIMIT, assertSelectOk } from '@moneyball/shared';
+import {
+  EXTERNAL_GAME_ID_MAX_LENGTH,
+  PICKS_POLL_IDS_LIMIT,
+  assertSelectOk,
+} from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -19,7 +23,7 @@ export async function GET(req: NextRequest) {
   const ids = raw
     .split(',')
     .map((s) => s.trim())
-    .filter((s) => s.length > 0 && s.length <= 20)
+    .filter((s) => s.length > 0 && s.length <= EXTERNAL_GAME_ID_MAX_LENGTH)
     .slice(0, PICKS_POLL_IDS_LIMIT);
 
   if (ids.length === 0) return NextResponse.json({} as MlbPickPollResult);
