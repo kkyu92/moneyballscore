@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/ 1차분(seo/api/calendar/observability/stats/seasons/supabase, 15파일) 전수 감사, 신규 drift 0건 — lib/ 전수 감사 시작 (cycle 3387, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3379-3386) distinct=5: review-code(heavy)3+polish-ui1+review-code1+fix-incident1+operational-analysis1). fix-incident gap=5(3382 발화)/op-analysis gap=4(3383 발화)/info-arch gap=14/30/lotto gap=23/30 전부 미도달. ship-0 미충족(직전10(3377-3386) success 1건=3382 포함). cycle 3386 next_rec 채택 — components/ 완결 후 lib/ scope 전환, 24 subdir 중 최소 규모 7개(seo/api/calendar/observability/stats/seasons/supabase) 1차분 선택.
+
+**감사**: agent 위임, `lib/seo/json-ld.ts` · `lib/api/{is-origin-allowed,leaderboard-sync-validation}.ts` · `lib/calendar/monthGrid.ts` · `lib/observability/captureFallback.ts` · `lib/stats/pearson.ts` · `lib/seasons/buildSeasonSummary.ts` · `lib/supabase/{admin,server}.ts` (+6 테스트) 전수 read + call-site cross-grep + Supabase null-guard 확인. json-ld.ts 주석 vs 실제 import 일치, is-origin-allowed/leaderboard-sync-validation 공유 상수(`SITE_URL`/`NICKNAME_MIN_CHARS` 등) 정상 사용(하드코딩 중복 없음), monthGrid KBO/MLB/EN-MLB 공유 모듈 의도 확인(twin fork 아님), captureFallback 61 call sites, pearson 2 call sites 중복 재구현 없음, buildSeasonSummary `assertSelectOk` fail-loud 패턴 정상(cycle 173/2514/2453 과거 fix 현존 확인), supabase admin.ts(explicit throw)/server.ts(supabase-js 자체 검증) 양쪽 fail-loud 정상. 기존 vitest 6 suites/27 tests pass. **신규 drift 0건** — 변경 없음.
+
+**결과**: 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3387%50≠0). trigger5 — 직전20(3368-3387, 현재 포함) 표본≥10, 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3378-3387) success 1건(3382) 포함으로 미충족. 2-chain lock 미충족(위 참조). 2차 방어선(cycle 3386 retro `cb9ac66e`) OK.
+
+다음 사이클 추천 = review-code(heavy) lib/ 잔여 17 subdir(changelog/leaderboard/v2-shadow-monitor/accuracy/picks/lotto/players/standings/debug/insights/matchup/analysis/dashboard/predictions/teams/reviews/mlb) 순차 감사 계속, 또는 info-arch(gap 15/30)/lotto(gap 24/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 10차분(predictions, 31파일) 전수 감사, 신규 drift 0건 — components/ 전체 전수 감사 완결 (cycle 3386, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3378-3385) distinct=5: review-code3+review-code(heavy)2+polish-ui1+operational-analysis1+fix-incident1). fix-incident gap=3(3382 발화)/op-analysis gap=2(3383 발화)/info-arch gap=12/30/lotto gap=21/30 전부 미도달. cycle 3385 next_rec 계승 — review-code(heavy) components/ 잔여 1 subdir(predictions, 31파일) 채택.
