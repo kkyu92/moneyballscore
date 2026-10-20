@@ -90,6 +90,7 @@ interface MlbTeamProfile {
   closeGame: TeamCloseGameStats | null;
   homeAwayEdge: TeamHomeAwaySplit | null;
   recentRecord: TeamRecentRecord | null;
+  degraded: boolean;
 }
 
 interface ScheduleRow {
@@ -193,7 +194,9 @@ export async function buildMlbTeamProfile(
     closeGame: null,
     homeAwayEdge: null,
     recentRecord: null,
+    degraded: false,
   };
+  let degraded = false;
 
   // mlb_team_stats.team_code 는 canonical(Baseball-Reference) 컨벤션 — teamCode 파라미터와
   // 동일 컨벤션이라 정규화 없이 직접 매칭(mlb_schedule 과 달리 alias 변환 불필요).
@@ -208,6 +211,7 @@ export async function buildMlbTeamProfile(
   try {
     ({ data: statsRow } = assertSelectOk(statsResult, 'buildMlbTeamProfile mlb_team_stats'));
   } catch (err) {
+    degraded = true;
     statsRow = captureFallback(err, null, { route: '/mlb/team', source: 'buildMlbTeamProfile mlb_team_stats' });
   }
   const battedBall = statsRow as BattedBallStatsRow | null;
@@ -238,11 +242,12 @@ export async function buildMlbTeamProfile(
   try {
     ({ data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbTeamProfile mlb_schedule'));
   } catch (err) {
+    degraded = true;
     scheduleData = captureFallback(err, [], { route: '/mlb/team', source: 'buildMlbTeamProfile mlb_schedule' });
   }
   const scheduleRows = (scheduleData ?? []) as ScheduleRow[];
 
-  if (scheduleRows.length === 0) return { ...emptyProfile, battedBallProfile };
+  if (scheduleRows.length === 0) return { ...emptyProfile, battedBallProfile, degraded };
 
   const scheduleByExternalId = new Map<string, ScheduleRow>();
   for (const s of scheduleRows) {
@@ -272,6 +277,7 @@ export async function buildMlbTeamProfile(
   try {
     ({ data } = assertSelectOk(predResult, 'buildMlbTeamProfile predictions'));
   } catch (err) {
+    degraded = true;
     data = captureFallback(err, [], { route: '/mlb/team', source: 'buildMlbTeamProfile predictions' });
   }
 
@@ -394,5 +400,6 @@ export async function buildMlbTeamProfile(
     closeGame,
     homeAwayEdge,
     recentRecord,
+    degraded,
   };
 }

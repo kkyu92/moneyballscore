@@ -119,6 +119,12 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
   // inside the component body, which this repo's lint rule blocks).
   // wave-625: per-team strong/complete convergence pick record — season-wide,
   // separate from the two-team aggregate on the matchup page (KBO wave-607 parity).
+  // cycle 3393 review-code heavy fix — buildMlbTeamProfile absorbs mlb_team_stats/
+  // mlb_schedule/predictions DB errors via catch-and-log (fail-silent) but had no
+  // degraded flag, so dbDegraded never reflected it (the matchup page started folding
+  // in profile.degraded at cycle 3247 — only the team page was missing this, meaning
+  // a DB outage looked identical to "team genuinely has no data"). Added degraded to
+  // buildMlbTeamProfile and fold it in here.
   const [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR] = await Promise.allSettled([
     buildMlbTeamEloTrend(code),
     buildMlbTeamUpcoming(code),
@@ -133,7 +139,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
   const completeTeamStats = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, [], { route: "/en/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(complete)" });
   const divisionStandings = divisionStandingsR.status === "fulfilled" ? divisionStandingsR.value : captureFallback(divisionStandingsR.reason, null, { route: "/en/mlb/team/[code]", source: "buildMlbDivisionStandings" });
 
-  const dbDegraded = [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR].some((r) => r.status === "rejected");
+  const dbDegraded = profile.degraded || [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR].some((r) => r.status === "rejected");
 
   const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);

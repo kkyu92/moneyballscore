@@ -120,6 +120,11 @@ export default async function MlbTeamPage({ params }: PageProps) {
   // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (컴포넌트 내 재할당 금지 lint 룰 준수).
   // wave-625: 팀별 강수렴/완전수렴 픽 성적 — matchup 페이지의 두 팀 한정 집계와 별개로
   // 시즌 전체 기준 (TeamConvergencePickRecord KBO wave-607 대응).
+  // cycle 3393 review-code heavy fix — buildMlbTeamProfile 은 내부에서 mlb_team_stats/
+  // mlb_schedule/predictions DB 오류를 catch-and-log 로 흡수(fail-silent)하지만 그동안
+  // degraded 플래그가 없어 dbDegraded 에 전혀 반영되지 않았음(matchup 페이지는 cycle 3247
+  // 부터 profile.degraded 를 합류시켰는데 team 페이지만 누락 — DB 장애 시 "데이터 없음"과
+  // "일시 장애"를 구분 못 하는 silent drift). buildMlbTeamProfile 에 degraded 필드 추가 후 합류.
   const [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR] = await Promise.allSettled([
     buildMlbTeamEloTrend(code),
     buildMlbTeamUpcoming(code),
@@ -134,7 +139,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
   const completeTeamStats = completeTeamStatsR.status === "fulfilled" ? completeTeamStatsR.value : captureFallback(completeTeamStatsR.reason, [], { route: "/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(complete)" });
   const divisionStandings = divisionStandingsR.status === "fulfilled" ? divisionStandingsR.value : captureFallback(divisionStandingsR.reason, null, { route: "/mlb/team/[code]", source: "buildMlbDivisionStandings" });
 
-  const dbDegraded = [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR].some((r) => r.status === "rejected");
+  const dbDegraded = profile.degraded || [eloTrendR, upcomingR, strongTeamStatsR, completeTeamStatsR, divisionStandingsR].some((r) => r.status === "rejected");
 
   const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);
