@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/ 4차분(matchup, 11파일) 전수 감사, 신규 drift 0건 (cycle 3377, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23(plan #30 포함 status 전부 non-approved/completed). 2-chain lock 미충족(직전8(3369-3376) distinct=3: review-code(heavy)/polish-ui/info-arch). fix-incident gap≥27/20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=18/25·lotto gap=13/30·info-arch gap=4/30 전부 미도달. 2차 방어선(cycle 3376 retro `9813f1a3`) OK. cycle 3376 next_rec 따라 review-code(heavy) components/ 잔여 7개 subdir 중 소형 우선(matchup 11파일) 채택.
+
+**감사**: Agent 1개 위임 — 11파일(5 twin pair + 1 filter) 전수 read + 5쌍 twin 라인별 diff(`MatchupSeasonHeadToHead`↔`MlbMatchupSeasonHeadToHead`/`MatchupRecentForm`↔`MlbMatchupRecentForm`/`MatchupEloChart`↔`MlbMatchupEloChart`/`MatchupConvergencePickRecord`↔`MlbMatchupConvergencePickRecord`/`MatchupFactorCompare`↔`MlbMatchupFactorCompare`) + magic number `packages/shared` 교차검증 + `MatchupGamesCloseFilter` localStorage/`useSyncExternalStore` 안전성 확인(`TeamRecentGamesFilter.tsx` 패턴과 대조) + 전체 call-site grep(KBO/MLB/EN matchup 페이지).
+
+**결과**: 신규 drift 0건. 코드 변경 없음. 모든 twin 차이(locale STRINGS, MLB 7팩터 vs KBO 8팩터 — xFIP/WAR builder-level 갭 기존 문서화, `MlbMatchupEloChart`가 dedup 후 KBO 차트로 delegate하는 구조) 전부 의도된 차이 확인. MLB convergence 컴포넌트 2종이 threshold 숫자를 텍스트에 안 보여주는 것도 양쪽 일관 패턴 — drift 아님. `MatchupEloChart` min/max 계산의 Infinity 엣지케이스는 `buildMatchupEloTrend.ts`가 null point 사전 필터링해 배제 확인. `computeWinRatePct` 분모 0 케이스도 `computeSeasonHeadToHeadFromGames`가 played/생성 atomic 증가라 발생 불가 확인. components/ 전체(20 subdir, 179파일) 중 4차분(11파일) 완료 — 잔여 6개 subdir(picks 13/dashboard 17/layout 19/analysis 15/shared 23/predictions 31, 총 118파일) 다음 사이클 후보.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3377%50=27≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3358-3377, 현재 cycle 포함) 표본≥10 충족, opt-out 9개 제외 평가대상 review-code 다수 발화(13/20)로 미충족. marker 미박제. ship-0 — 직전10(3368-3377) success 2건(3369/3371) 포함으로 미충족. 2-chain lock 미충족(위 참조). 2차 방어선(cycle 3376 retro `9813f1a3`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 6개 subdir 계속 감사(picks 13파일 우선 소형), 또는 fix-incident(gap 28/20, 재확인 필요)/op-analysis(gap 19/25)/lotto(gap 14/30)/info-arch(gap 5/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 3차분(accuracy+reviews, 18파일) 전수 감사, 신규 drift 0건 (cycle 3376, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전수 재확인, plan #30 포함 status 전부 non-approved). 2-chain lock 미충족(직전8(3368-3375) distinct=3: review-code/polish-ui/info-arch). fix-incident gap=26/20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=17/25·lotto gap=12/30 전부 미도달. explore-idea saturation 9/15 미충족. DESIGN.md mtime 10일 신선. cycle 3375 next_rec 따라 review-code(heavy) components/ 잔여 subdir 중 소형 우선(accuracy 8파일 + reviews 10파일 = 18파일) 채택.
