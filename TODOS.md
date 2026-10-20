@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — 2-chain-lock-forced polish-ui: 다크모드 차트 커서 drift family 전수 재스윕, 신규 drift 0건 (cycle 3380, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. **2-chain lock 충족** — 직전8(3372-3379) distinct=2(review-code(heavy)7+info-architecture-review1) → 둘 다 제외. fix-incident `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. op-analysis gap=21/25·lotto gap=16/30 전부 미도달. explore-idea saturation 15/15 충족하나 4-source negative(open issue 0/plan 0/TODOS Next-Up 부재/DESIGN.md mtime 10일 신선) 확립 skip 패턴 유지. design-system DESIGN.md 10일(4주 미달) 미트리거. 남은 trigger 전무 → lock fallback 룰(polish-ui 강제) 적용.
+
+**스윕**: cycle 3371(WeeklyTrendMini) + PR #3176(FactorWaterfallChart/MlbFactorWaterfallChart) 가 고친 다크모드 차트 커서 fill drift(`rgba(0,0,0,0.05)` 하드코딩 → 다크 surface #0c0e0d 위 거의 안 보임, `chartCursorTint` 토큰 전환) 후속으로 전체 레포 BarChart 계열 9개 차트(dashboard 7개 + predictions 2개) 전수 grep — 전부 이미 `chartCursorTint` 토큰 사용 확인, 하드코딩 rgba 잔존 0건. LineChart 계열 6개(CalibrationPlot/EloTrendChart/MatchupEloChart/PitcherFipTrend/MlbTeamEloChart/TeamEloChart)는 Tooltip cursor prop 미지정(기본 crosshair stroke) — BarChart fill 버그 클래스와 무관 확인. 하드코딩 hex 2건(HallOfFame.tsx CSS var+fallback, ShareButtons.tsx Twitter/Facebook 브랜드 컬러) 전부 의도된 사용 확인.
+
+**결과**: 신규 UI drift 0건. 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3380%50=30≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3361-3380, 현재 cycle 포함) 표본≥10 충족, review-code 다수 발화(15회)로 미충족. marker 미박제. ship-0 — 직전10(3371-3380) success 1건(3371) 포함으로 미충족. 2차 방어선(cycle 3379 retro `5e47a4c3`) OK.
+
+다음 사이클 추천 = lock cooldown(N=1) 만료 후 review-code(heavy) components/ 잔여 4 subdir(dashboard 17/layout 19/shared 23/predictions 31) 계속, 또는 fix-incident/op-analysis(gap 22/25)/lotto(gap 17/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 6차분(analysis, 12파일) 전수 감사, 신규 drift 0건 (cycle 3379, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3371-3378) distinct=3: review-code(heavy)6/polish-ui1/info-arch1). fix-incident gap≥20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=20/25·lotto gap=15/30·info-arch gap=6/30 전부 미도달. 2차 방어선(cycle 3378 retro `0f8a3e3e`) OK. cycle 3378 next_rec 따라 review-code(heavy) components/ 잔여 5개 subdir 중 소형 우선(analysis 12파일) 채택.
