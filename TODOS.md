@@ -16489,3 +16489,17 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 재평가, 본 cycle 자체 marker 재박제 여부)**: trigger1(chain-evolution 10건, 상시 참이나 과거 소비된 관례 유지) 미적용. trigger2(5연속 fail 없음) 미충족. trigger3(3401%50=1≠0) 미충족. trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3382-3401, 현재 cycle 포함, 표본 20≥10) review-code 14회 발화(0회 아님)로 미충족. 신규 marker 박제 없음. ship-0 — 직전10(3392-3401) success 5건(3393/3396/3397/3398/3399/본cycle) 포함으로 미충족.
 
 다음 사이클(3402) = 2-chain lock(review-code+polish-ui, 직전8 3393-3400 기준) cooldown 재평가 필요 — review-code(heavy) 복귀(degraded-flag 누락 버그 클래스 3396/3397 재발 — 3차 재발 시 구조적 가드(공통 헬퍼/lint rule) 검토 권장) 또는 fix-incident(gap19/20 근접)/op-analysis(gap18/25)/info-arch(gap28/30)/lotto(gap9/30) 자연 대기.
+
+## 🟢 SUCCESS — review-code(heavy): app/api/{seo,sync-batter-stats,pipeline,mlb/pipeline} 전수 감사, verify-mode revalidate /accuracy 누락 수정 (cycle 3402, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3394-3401) distinct=3: review-code6+polish-ui1+skill-evolution1, cooldown 해제). fix-incident gap=20/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재(skip). op-analysis gap=19/25·info-arch gap=29/30·lotto gap=10/30 전부 미도달. 2차 방어선(cycle 3401 retro `cc8a4d23`) OK. cycle 3399/3401 next_rec 계승 — app/api 잔여 route(seo/sync-batter-stats/pipeline 등) 재확인.
+
+**감사**: `app/api/seo/indexnow/ping/route.ts`(CHANGELOG mention 0건, 완전 미감사) + `[indexnowKey].txt/route.ts` + `sync-batter-stats/route.ts`(mention 1건) + `mlb/pipeline/route.ts` 전수 read — 전부 clean(과거 cycle 3217/3241 fix 이력과 정합, trim defensive 처리 일관, MIN_EXPECTED_BATTERS=8 주석 실측 일치).
+
+**발견 + 수정**: `app/api/pipeline/route.ts`(KBO, mention 2건) verify-mode revalidate 블록 주석이 "CE/accuracy 통계·is_correct 직접 참조 페이지 전부 포함"이라 명시하지만, 실제 `paths` 배열엔 `/accuracy`(1hr ISR, is_correct 직접 참조 페이지, `cycle d261b5eb`가 이 주석을 쓴 시점부터 누락)가 빠져 있었음 — verify cron 실행 후 최대 1시간 동안 accuracy 통계가 stale 가능했던 comment-vs-code mismatch. `/accuracy` 를 paths 배열에 추가.
+
+**검증**: `tsc --noEmit`/`pnpm lint` clean, 전체 `vitest run`(597 files, 4692 tests) 전부 PASS. 직접 main 커밋+push(R4 범위, pre-push lint+type-check+version-sync-guard 전부 PASS, `b1b2d925`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비된 관례) 미적용. trigger2(5연속 fail 없음) 미충족. trigger3(3402%50=2≠0) 미충족. trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3383-3402, 현재 포함, 표본 19≥10) review-code 14회 발화로 미충족. marker 미박제. ship-0 — 직전10(3393-3402) success 6건(3393/3396/3397/3398/3399/3401/본cycle) 포함 미충족. 2-chain lock — 직전8(3394-3401) distinct=3, 미충족(review-code 선택 가능 상태 확인됨). 2차 방어선(cycle 3401 retro `cc8a4d23`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(app/api 잔여: mlb/picks/version route 재확인 또는 lib/reviews/ KBO twin behavioral test 공백 메우기, cycle 3398 carry-over) 또는 fix-incident(실제 incident 재확인 필요)/op-analysis(gap20/25)/info-arch(gap30/30 도달)/lotto(gap11/30) 자연 대기.
