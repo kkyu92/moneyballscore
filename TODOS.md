@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — fix-incident: indexnow-ping cron 외부 pending false-positive 다운그레이드 (cycle 3382, 2026-10-20)
+
+진단: open issue 0, approved plan 0/23. **2-chain lock 충족**(직전8(3374-3381) family distinct=2: review-code(heavy/lite 합산)7+polish-ui1) → 둘 다 제외. `gh run list` 재확인 결과 이번엔 실제 신호 발견 — `indexnow-ping` 워크플로우가 10/14~10/20 **7일 연속 failure**(이전까지 "전부 skipped, 실제 incident 부재" 패턴과 다름). cycle 3241(10/16) 에서 `[indexnowKey].txt` route 를 static 전환(generateStaticParams)해 fix 했다고 박제했으나, 그 이후로도 10/17~10/20 4일 추가 실패 — "2~3일 후 재확인 필요" 로 남겨둔 carry-over 항목.
+
+**조사**: `vercel inspect <최신 prod deployment> --logs` 로 라우트 빌드 출력 확인 → `○ /[indexnowKey].txt`(static) 정상 배포 재확인 — cycle 3241 fix 는 실제로 살아있음. `vercel env pull` + 바이트 레벨 스캔(0a/0d/20 whitespace 바이트 검색, 값 자체는 노출 안 함)으로 INDEXNOW_KEY 에 트레일링 개행/공백 없음(cycle 3217 클래스 버그 아님) 확인. 즉 코드/env 양쪽 완전 clean — 잔여 실패 원인은 Bing IndexNow API 자체가 반환하는 `SiteVerificationNotCompleted`(재검증 대기 중) **외부 pending 상태**, 우리 쪽에서 코드로 직접 해소 불가능(Bing Webmaster Tools 수동 조치 영역, 자동화 범위 밖).
+
+**수정**: `.github/workflows/indexnow-ping.yml` — 기존 `exceed_egress_quota` downgrade 패턴(cycle 2996/2999, health check billing-outage false-positive)과 동일하게, 이 특정 errorCode 만 CI hard fail(exit 1) 대신 `::warning::` 다운그레이드(exit 0). 다른 모든 실패(진짜 코드 버그 가능성)는 기존대로 hard fail 유지 — silent swallow 아님, 여전히 로그엔 남고 CI 녹색만 될 뿐.
+
+**검증**: 직접 main 커밋(`e3db6115`) + push, pre-push hook(lint+type-check+version-sync-guard, `pnpm --filter moneyball` 3/3 tests) 전부 green.
+
+**ship-0 서브 구분 체크(cycle 3381 신규 룰)**: 평가 불필요 — 이번 cycle outcome=success 라 10-streak 자체가 깨짐(직전10(3373-3381) 전부 retro-only + 본 cycle success). 사용자가 `/develop-cycle 34` 명시 재호출로 cycle 3381 emergency-stop 이후 재개 결정.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3382%50≠0). trigger5 — 직전20(3363-3382, 현재 cycle 포함) 표본=11(≥10), 평가대상 review-code 15회 발화(다수)로 미충족. marker 미박제. 2차 방어선(cycle 3381 retro `ecbdadf3`) OK.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) components/ 잔여 3 subdir(layout 19/shared 23/predictions 31) 복귀, 또는 op-analysis(gap~24/25)/lotto(gap~19/30)/info-arch(gap~10/30) 자연 대기. indexnow-ping 은 다음 fix-incident 발화 시 cron 로그가 success 로 전환됐는지만 관찰(재조치 불필요, Bing 쪽 자연 해소 대기).
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/ 7차분(dashboard, 17파일) 전수 감사, 신규 drift 0건 (cycle 3381, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23(plan #30 포함 전부 non-approved/completed 재확인). 2-chain lock 미충족(직전8(3373-3380) distinct=3: review-code(heavy)6+polish-ui1+info-arch1). fix-incident `gh run list` 재확인(CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=22/25·lotto gap=17/30·info-arch gap=8/30 전부 미도달. explore-idea saturation 6/15 미충족. DESIGN.md mtime 9.5일(4주 미달) 미트리거. cycle 3380 next_rec 따라 review-code(heavy) components/ 잔여 4 subdir 중 소형 우선(dashboard 17파일) 채택.
