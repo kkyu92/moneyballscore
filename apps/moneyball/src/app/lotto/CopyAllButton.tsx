@@ -41,7 +41,7 @@ export function CopyAllButton({ sets, className }: { sets: LottoSet[]; className
       <button
         type="button"
         onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         aria-label={`추천 ${sets.length}조합 전체 복사`}
       >
         {label}
@@ -50,7 +50,7 @@ export function CopyAllButton({ sets, className }: { sets: LottoSet[]; className
         <button
           type="button"
           onClick={() => setSep("comma")}
-          className={`px-3 py-1.5 ${sep === "comma" ? "bg-gray-100 dark:bg-gray-800 font-semibold" : "text-gray-500"}`}
+          className={`px-3 py-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${sep === "comma" ? "bg-gray-100 dark:bg-gray-800 font-semibold" : "text-gray-500"}`}
           aria-pressed={sep === "comma"}
         >
           콤마
@@ -58,7 +58,7 @@ export function CopyAllButton({ sets, className }: { sets: LottoSet[]; className
         <button
           type="button"
           onClick={() => setSep("space")}
-          className={`px-3 py-1.5 ${sep === "space" ? "bg-gray-100 dark:bg-gray-800 font-semibold" : "text-gray-500"}`}
+          className={`px-3 py-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${sep === "space" ? "bg-gray-100 dark:bg-gray-800 font-semibold" : "text-gray-500"}`}
           aria-pressed={sep === "space"}
         >
           스페이스

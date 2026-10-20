@@ -110,13 +110,13 @@ export function ComboCheckClient({ pickKeys, picksByFile, winnersMap, totalPickS
                   next[i] = e.target.value;
                   setInputs(next);
                 }}
-                className="w-14 h-12 text-center rounded-lg border border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-gray-900 text-lg font-semibold"
+                className="w-14 h-12 text-center rounded-lg border border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-gray-900 text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                 aria-label={`번호 ${i + 1}`}
               />
             ))}
             <button
               type="submit"
-              className="px-4 h-12 rounded-lg font-semibold bg-brand-600 hover:bg-brand-700 text-white"
+              className="px-4 h-12 rounded-lg font-semibold bg-brand-600 hover:bg-brand-700 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               확인
             </button>
@@ -132,11 +132,11 @@ export function ComboCheckClient({ pickKeys, picksByFile, winnersMap, totalPickS
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="예: 1,7,13,22,34,45 또는 1 7 13 22 34 45"
-              className="flex-1 h-12 px-3 rounded-lg border border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-gray-900"
+              className="flex-1 h-12 px-3 rounded-lg border border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             />
             <button
               type="submit"
-              className="px-4 h-12 rounded-lg font-semibold bg-brand-600 hover:bg-brand-700 text-white"
+              className="px-4 h-12 rounded-lg font-semibold bg-brand-600 hover:bg-brand-700 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               확인
             </button>
