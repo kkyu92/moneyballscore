@@ -24,6 +24,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { FACTOR_LABELS, NEUTRAL_HI, NEUTRAL_LO } from "@/lib/predictions/factorLabels";
+import { chartCursorTint } from "@/lib/design-tokens";
 
 interface Props {
   factors: Record<string, number>;
@@ -186,7 +187,7 @@ export function FactorWaterfallChart({ factors, homeTeam, awayTeam }: Props) {
               stroke="var(--color-brand-300)"
             />
             <ReferenceLine x={NEUTRAL_FACTOR} stroke="var(--color-brand-400)" strokeDasharray="3 3" />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--color-brand-50)" }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: chartCursorTint }} />
             <Bar
               dataKey={(d: WaterfallBar) => [d.base, d.end]}
               fill="var(--color-brand-500)"
