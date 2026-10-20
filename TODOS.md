@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): lib/debug 잔여 2파일(agentFallbackStats/silentDriftStats) 전수 감사 완결, 신규 drift 0건 (cycle 3367, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3359-3366) distinct=4: operational-analysis/review-code/polish-ui/lotto). gap 전부 미도달(fix-incident 17/20·op-analysis 8/25·info-arch 7/30·lotto 3/30). 2차 방어선(cycle 3366 retro `0c8f07b7`) OK. cycle 3366 next_rec 따라 lib/debug 잔여 2파일(agentFallbackStats.ts, silentDriftStats.ts) 채택 — lib/debug 디렉토리 전수 감사 완결 목적.
+
+**감사**: 본 메인 직접 read. (1) agentFallbackStats.ts — debate.verdict/homeArgument/awayArgument/agentsFailed/agentError 필드명을 daily.ts:788-802 + agents/types.ts 실제 구조와 대조, 완전 일치. "에이전트 토론 불가" fallback 리터럴을 debate.ts:86 과 대조, 정확 일치. (2) silentDriftStats.ts — predict_final/verify silent drift replay 로직을 production `silent-drift-alert.ts`의 `shouldAlertSilentDrift` 와 대조. predict_final 의 existingPredictionsCount 미반영 approximation 은 코드 주석(line 11-15)에 이미 "proxy 안 measure" 로 명시 문서화된 known 단순화 — 신규 drift 아님. verify mode 는 cycle 2832 fix 이후 양쪽 로직(games_found>0 && predictions===0) 완전 일치. 양쪽 테스트 파일 전부 코드와 정합 확인.
+
+**결과**: 신규 drift 0건. 코드 변경 없음. lib/debug 4파일(agentFallbackStats/factorDeltaStats/pipelineStats/silentDriftStats) 전수 감사 완결(cycle 3365/3366/3367 3-cycle 시리즈 종료).
+
+**검증(skill-evolution 등)**: trigger3(3367%50=17) 미충족. trigger5 — 직전20(3348-3367) review-code 13회 발화로 미충족(sample=17≥10). trigger2/4 미충족. marker 미박제. ship-0 — 직전10(3357-3366, 3360 JSON 누락) success 2건(3365,3366)으로 미충족.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프 탐색(lib/debug 완료 — 다음 후보: app/api 잔여 또는 packages/kbo-data/src/pipeline) 또는 fix-incident(gap 18/20)/op-analysis(gap 9/25)/info-arch(gap 8/30)/lotto(gap 4/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — lotto(lite): 30-cycle gap trigger 재도달, cron 정상 재확인 (cycle 3364, 2026-10-19)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3363 retro `fe0d51af`) OK. 2-chain lock 미충족(직전8(3356-3363) distinct=4: review-code/operational-analysis/info-architecture-review/polish-ui). lotto gap=30/30 정확 재도달(직전 발화 cycle 3334, 3334+30=3364 — 동일 주기 2회 연속 정확 재현). fix-incident gap=14/20·op-analysis gap=5/25·info-arch gap=4/30 전부 미도달. explore-idea saturation 11/15 미충족.
