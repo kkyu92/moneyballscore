@@ -18,6 +18,7 @@ import {
   YAxis,
   ReferenceLine,
 } from "recharts";
+import { chartCursorTint } from "@/lib/design-tokens";
 
 interface Props {
   input: MlbWaterfallInput;
@@ -101,7 +102,7 @@ export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam, locale = "k
               stroke="var(--color-brand-300)"
             />
             <ReferenceLine x={NEUTRAL_FACTOR} stroke="var(--color-brand-400)" strokeDasharray="3 3" />
-            <Tooltip content={<CustomTooltip locale={locale} />} cursor={{ fill: "var(--color-brand-50)" }} />
+            <Tooltip content={<CustomTooltip locale={locale} />} cursor={{ fill: chartCursorTint }} />
             <Bar
               dataKey={(d: ReturnType<typeof computeMlbWaterfall>[number]) => [d.base, d.end]}
               fill="var(--color-brand-500)"
