@@ -16675,3 +16675,15 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비된 관례) 미적용. trigger2(5연속 fail 없음) 미충족. trigger3(3402%50=2≠0) 미충족. trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3383-3402, 현재 포함, 표본 19≥10) review-code 14회 발화로 미충족. marker 미박제. ship-0 — 직전10(3393-3402) success 6건(3393/3396/3397/3398/3399/3401/본cycle) 포함 미충족. 2-chain lock — 직전8(3394-3401) distinct=3, 미충족(review-code 선택 가능 상태 확인됨). 2차 방어선(cycle 3401 retro `cc8a4d23`) OK.
 
 다음 사이클 추천 = review-code(heavy) 계속(app/api 잔여: mlb/picks/version route 재확인 또는 lib/reviews/ KBO twin behavioral test 공백 메우기, cycle 3398 carry-over) 또는 fix-incident(실제 incident 재확인 필요)/op-analysis(gap20/25)/info-arch(gap30/30 도달)/lotto(gap11/30) 자연 대기.
+
+## 🟢 SUCCESS (retroactive backfill) — review-code(heavy): components/layout/ 전수 감사, LeagueSelector ARIA 오용 + dead attr + touch-target 표준화 (cycle 3414, 2026-10-20)
+
+**세션 중단 사례**: cycle 3414 세션이 작업 완료(커밋 `fc84b3c8`, PR #3180 생성) 후 회고 단계 도달 전 종료(active-cycle stale pid 확인, dead process). cycle 3415 세션이 진단 단계에서 발견 → PR CI green 재확인 후 R7 머지(`219cde12`) + 본 TODOS/retro backfill 수행. 코드 손실 없음 — retro/merge 만 1 세션 지연.
+
+진단: cycle 3413 next_rec carry-over — components/ 잔여 3개 subdir(layout/shared/predictions) 중 소형 우선 layout 채택.
+
+**감사 + 수정**: `LeagueSelector.tsx` 가 `role="tablist"`/`role="tab"`/`aria-selected` 를 same-page 패널 전환 아닌 full-page nav link 에 사용 — WAI-ARIA Tabs 계약 미충족(`aria-controls`/`tabpanel`/roving tabindex 부재). 디렉토리의 다른 nav link 들과 동일하게 `role="group"` + `aria-current` 로 교체. `data-league`/`data-active` 속성(NavLinks/MobileNav/LeagueSelector) 전체 repo grep 결과 소비자 0건 — dead instrumentation 제거. `CookieConsent.tsx` 의 raw `min-h-[44px]` 를 디렉토리 관례(`min-h-11`, MegaMenu/MobileNav 와 동일)로 표준화.
+
+**확인(clean)**: i18n/dark-mode/매직넘버 drift 없음 — layout/ 자체 isEn 관례 + 의도적 non-theme-reactive brand-* 색상 확인.
+
+다음 사이클 추천 = review-code(heavy) components/shared(23)/predictions(31) 계속 (소형 우선 shared) 또는 fix-incident/op-analysis/lotto/info-arch gap 자연 대기.
