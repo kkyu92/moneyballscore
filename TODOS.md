@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — operational-analysis (lite): CE/비CE 격차 재측정, n=448 동일값 34회 연속 (cycle 3383, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3375-3382) distinct=4: review-code(heavy)5+polish-ui1+review-code1+fix-incident1). fix-incident 방금 3382 발화(gap=1), info-arch gap=10/30·lotto gap=19/30 전부 미도달. op-analysis 자체 gap=24/25 (last fire 3359) — 거의 임계 도달 + review-code(heavy) dominance(직전8 중 6) 완화 겸 자율 선택.
+
+**재측정**: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행. 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3359 수치와 완전 동일. 신규 verified pre_game 예측 0건(KBO 2026 정규시즌 2026-10-04 종료 지속, 24-cycle 경과에도 배치 미반영 — 예상된 결과, drift 아님). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp, overlap 월(05/06/07) 통제 격차 10.8pp 그대로. LLM 부가가치 우세 결론 34회 연속 재확인.
+
+**결과**: 코드 변경 없음. CLAUDE.md 운영 섹션에 cycle 3383 측정값 append.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3383%50≠0). trigger5 — 직전20(3364-3383, 현재 cycle 포함) 표본≥10 충족, 평가대상 review-code 다수 발화로 미충족. marker 미박제. ship-0 — 직전10(3374-3383) success 1건(3382) 포함으로 미충족(streak 깨짐). 2차 방어선(cycle 3382 retro `3eda2fb8`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 3 subdir(layout 19/shared 23/predictions 31) 복귀, 또는 info-arch(gap 11/30)/lotto(gap 20/30) 자연 대기. op-analysis 다음 재측정은 gap 25-cycle 주기(실제 last fire 3383) 권장.
+
 ## 🟢 SUCCESS — fix-incident: indexnow-ping cron 외부 pending false-positive 다운그레이드 (cycle 3382, 2026-10-20)
 
 진단: open issue 0, approved plan 0/23. **2-chain lock 충족**(직전8(3374-3381) family distinct=2: review-code(heavy/lite 합산)7+polish-ui1) → 둘 다 제외. `gh run list` 재확인 결과 이번엔 실제 신호 발견 — `indexnow-ping` 워크플로우가 10/14~10/20 **7일 연속 failure**(이전까지 "전부 skipped, 실제 incident 부재" 패턴과 다름). cycle 3241(10/16) 에서 `[indexnowKey].txt` route 를 static 전환(generateStaticParams)해 fix 했다고 박제했으나, 그 이후로도 10/17~10/20 4일 추가 실패 — "2~3일 후 재확인 필요" 로 남겨둔 carry-over 항목.
