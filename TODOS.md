@@ -16177,3 +16177,15 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **세션 중단 하위 패턴 2번째 재발**: cycle 3365 와 동일 패턴(중간 산출물 존재, closure 누락) — 2 occurrence 누적, meta-pattern dispatch 임계(통상 5건) 미달로 보류. 3번째 재발 시 dispatch 검토.
 
 다음 사이클 추천 = review-code(heavy) lib/debug 잔여 2파일(agentFallbackStats/silentDriftStats) 또는 fix-incident/info-arch/lotto gap 자연 대기.
+
+## ⚪ RETRO-ONLY — review-code(heavy): components/ 5차분(picks, 13파일) 전수 감사, 신규 drift 0건 (cycle 3378, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전수 재확인). 2-chain lock 미충족(직전8(3370-3377) distinct=3: review-code(heavy)6/polish-ui1/info-arch1). fix-incident gap≥20 충족하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재, 확립된 non-actionable 패턴 재확인 후 skip. op-analysis gap=19/25·lotto gap=14/30·info-arch gap=5/30 전부 미도달. cycle 3377 next_rec 따라 review-code(heavy) components/ 잔여 6 subdir 중 소형 우선(picks 13파일) 채택.
+
+**감사**: Agent 1개 위임 — 13파일(12 소스 + 기존 regression test 1개) 전수 read + 전체 call-site cross-grep(KBO/MLB/EN picks·analysis·games 페이지 전역) + localStorage/`useSyncExternalStore` 안전성 확인(`PicksSortControl`/`PicksStatusFilter`/`WeeklyHistorySortControl`) + 매직넘버 `packages/shared` 교차검증 + division-by-zero 가드 확인 + `vitest run src/components/picks` + `tsc --noEmit`.
+
+**결과**: 신규 drift 0건. 코드 변경 없음. `picks/` 안엔 KBO/MLB twin 쌍 부재 확인(`PickButton.tsx` 가 `league` prop 으로 단일 컴포넌트가 양쪽 처리 — 분리 파일 없음). 모든 percentage/rate 계산(`PickButton`/`UserVsAIScorecard`/`PicksTrendChart`/`MyPicksClient` divergent-rate) 분모 0 가드 확인. `FactorAgreementCard.tsx` 로컬 상수(`MIN_FACTOR_SAMPLES=3`/`MIN_TOTAL_MEASURED=5`) 는 shared 미등록이나 단일 파일 전용(중복 없음) 확인, drift 아님. 테스트 5/5 pass + tsc clean. components/ 전체(20 subdir, 179파일) 중 5차분(13파일) 완료 — 잔여 5개 subdir(dashboard 17/layout 19/analysis 15/shared 23/predictions 31, 총 105파일) 다음 사이클 후보.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적, 평가 보류 관례)/trigger2(5연속 fail 없음)/trigger3(3378%50=28≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3359-3378, 현재 cycle 포함) 표본≥10 충족, opt-out 9개 제외 평가대상 review-code 다수 발화(14/20)로 미충족. marker 미박제. ship-0 — 직전10(3369-3378) success 2건(3369/3371) 포함으로 미충족. 2-chain lock 미충족(위 참조). 2차 방어선(cycle 3377 retro `d35daf84`) OK.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 5개 subdir 계속 감사(analysis 15파일 우선 소형), 또는 fix-incident(gap 29/20, 재확인 필요)/op-analysis(gap 20/25)/lotto(gap 15/30)/info-arch(gap 6/30) 자연 대기.
