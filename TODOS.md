@@ -1,4 +1,18 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): components/{reviews,standings,teams} 16파일 전수 감사, drift 0건 (cycle 3428, 2026-10-20)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3427 retro `6806a624`) OK. 2-chain lock 미충족(직전8(3421-3427) distinct=3: fix-incident/lotto/review-code). fix-incident gap=7/20·op-analysis gap=20/25·info-arch gap=18/30·lotto gap=6/30 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. cycle 3427 추천 "reviews/standings/teams 또는 app/ 잔여 라우트" 채택.
+
+**감사**: 본 메인 직접 전수 read — `components/reviews/`(10파일: Convergence{DayOfWeek,HomeAway,Streak,TeamStats}Badges, {Highlight,MlbHighlight}Card, {Misses,MonthlyTeamStats,WeeklyGames}SortControl, ReviewsResultFilter) + `components/standings/`(2파일: TeamAccuracyList, TeamAccuracySortControl) + `components/teams/`(4파일: {Team,MlbTeam}ConvergencePickRecord, {Team,MlbTeam}EloChart) + 누락 1파일 TeamRecentGamesFilter.
+
+**결과**: 16개 전부 clean. twin KBO/MLB pair 전부 정합(locale 분기, 필드명 차이 주석 정확). sort-control CSS order 패턴 전부 점검 — MissesSortControl/WeeklyGamesSortControl/MonthlyTeamStatsSortControl 은 CSS var(`--mb-*-order`) 동적 패턴(cycle 3010 수정 반영 확인), `TeamAccuracySortControl` 는 `KBO_TEAM_COUNT` 참조 고정 rank CSS 지만 standings 페이지는 KBO 전용(MLB standings 페이지에 팀 적중률 섹션 자체 부재 확인) — cycle 3010 류 "30팀 초과 시 21번째+ 누락" 버그 재현 조건 자체가 없음, false alarm 배제. dead code/FK mismatch 없음.
+
+코드 변경 없음(retro-only, 전수 감사 완료 + drift 0건 확정).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3428%50=28≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3409-3428, 현재 포함) 6개 chain 모두 1회+ 발화, 미충족. marker 미박제. ship-0 — 직전10(3419-3428) success 다수 포함 미충족. 2-chain lock — 직전8(3421-3428) distinct=3(fix-incident/lotto/review-code), 미충족. 2차 방어선(cycle 3427 retro `6806a624`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/api` 잔여 route 또는 `components/{live,share,ui}` 등) 또는 fix-incident(gap8/20)/op-analysis(gap21/25)/lotto(gap7/30)/info-arch(gap19/30) 자연 대기 — review-code dominance 지속 중(직전8 중 7회)이라 다양성 고려 권장.
+
 ## 🟢 SUCCESS — review-code(heavy): components/predictions 24파일 전수 감사, globals.css 주석 drift 수정 (cycle 3427, 2026-10-20)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3426 retro `586b2640`) OK. 2-chain lock 미충족(직전8(3419-3426) distinct=4: expand-scope/review-code/fix-incident/lotto). fix-incident gap=5/20·op-analysis gap=18/25·info-arch gap=16/30·lotto gap=4/30 전부 미도달. cycle 3426 추천 "components/predictions(31 files) 신규 스코프" 채택.
