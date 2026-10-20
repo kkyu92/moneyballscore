@@ -192,6 +192,20 @@ const SECTIONS = [
             </a>
             )
           </li>
+          <li>
+            <strong>Sentry (Functional Software, Inc.)</strong> — 오류 및
+            성능 모니터링. 오류 발생 시에 한해 화면 세션 일부를 녹화할 수
+            있으며, 이메일·식별값 등 개인정보는 전송 전 자동 제거됩니다. (
+            <a
+              href="https://sentry.io/privacy/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-500 hover:underline"
+            >
+              정책
+            </a>
+            )
+          </li>
         </ul>
         <p className="mt-3">
           경기·기록 데이터는 KBO 공식(koreabaseball.com), KBO Fancy Stats

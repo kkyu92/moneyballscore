@@ -109,7 +109,7 @@ export default function GuidePage() {
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
               심판 에이전트 (Claude Sonnet) 가 정리한 한두 문장. 정량 모델 결과 +
               홈/원정 에이전트 토론 결과를 종합. &quot;에이전트 토론 불가&quot; 가 표시되면
-              정량 모델만 가동된 fallback 결과 (드물지만 데이터 일시 장애 시).
+              AI 심층 분석이 일시 중단된 상태 — 통계 기반 승부예측은 그대로 제공됩니다.
             </p>
           </li>
           <li className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
