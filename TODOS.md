@@ -1,3 +1,17 @@
+## 🟡 RETRO-ONLY — review-code(heavy): app/api/picks/* 5개 route + snapshot-pitchers 전수감사, drift 0건 (cycle 3457, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived/non-approved). 2차 방어선(cycle 3456 retro `74356f08`) OK. 2-chain lock 미충족(직전8(3449-3456) distinct=4: review-code/skill-evolution/operational-analysis/lotto). fix-incident gap=21/20 도달하나 `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재(non-actionable). op-analysis gap=3/25·info-arch gap=17/30·lotto gap=8/30 전부 미도달. app/api 전수감사 시리즈 잔존 스코프 중 TODOS mention 0건 route(`picks/submit`, `snapshot-pitchers`) 확인 후 관련 twin route 포함 전수 read.
+
+**감사**: 직접 Read — `picks/submit`+`picks/mlb-submit`(KBO/MLB twin, 검증+upsert+Sentry 패턴 일치), `picks/poll`+`picks/mlb-poll`(twin GET 집계 로직 일치), `picks/results`(KBO `CURRENT_SCORING_RULE` fallback 체인 vs MLB `MLB_PRODUCTION_COHORT_RULES` — 비대칭이나 주석으로 설명된 의도된 설계), `snapshot-pitchers`(CRON_SECRET `.trim()` 방어 코드 cycle 3217 패턴 정합, cron 스케줄 주석을 `cloudflare-worker/wrangler.toml`+`worker.ts`(`37 * * * *` UTC 토요일 15시) 와 직접 대조 — 일치, `SnapshotResult.upserted` 필드명이 worker.ts 로그 참조와 일치).
+
+**코드 변경 없음** — drift 0건, retro-only.
+
+**검증**: `pnpm --filter moneyball test` 605 files / 4756 tests 전부 PASS.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3457%50=7≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3438-3457, 현재 포함) review-code 15회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3448-3457) success 4건(3451/3452/3455/3456) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3450-3457) distinct=3(review-code/skill-evolution/operational-analysis) 미충족. 2차 방어선(cycle 3456 retro `74356f08`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속 시 app/ page-level 비즈니스 로직 신규 탐색 필요(api routes 거의 소진) 또는 fix-incident(gap 21, non-actionable 재확인 필요)/info-arch(gap 17)/lotto(gap 8)/op-analysis(gap 3) 자연 대기.
+
 ## 🟢 SUCCESS — review-code (heavy): 9개 not-found.tsx 추가 PR #3185 머지 — 직전 세션 2연속 중단 복구 (cycle 3456, 2026-10-21)
 
 진단: active-cycle stale 파일(pid 32992, dead) + branch `develop-cycle/notfound-triad-coverage` 에 미완료 PR #3185 발견. 직전(interrupted) 세션이 cycle 3455(PR #3184 머지) 직후 같은 패턴(OG/twitter-image 누락)이 `not-found.tsx` 에도 있는지 전수 점검 — notFound() 를 호출하는 9개 디렉토리(KBO/MLB-KO/MLB-EN triad: insights/series/[topic], matchup/[teamA]/[teamB], mlb/games/[date]/[slug] KO+EN, teams/[code]/recent)가 커스텀 not-found.tsx 없이 루트 generic 404 로 폴백 중이던 걸 발견·수정·커밋·push·PR 생성까지 마쳤으나 CI 확인/머지/retro 전에 세션 재중단 — "회고 단계 전 끊김" 사각지대 2연속 재발(cycle 3455/3456).
