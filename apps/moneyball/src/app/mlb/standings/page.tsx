@@ -72,7 +72,7 @@ function formatGB(gb: number | null): string {
 }
 
 export default async function MlbStandingsHub() {
-  const { standings } = await buildMlbDivisionStandings();
+  const { standings, degraded: dbDegraded } = await buildMlbDivisionStandings();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -114,6 +114,14 @@ export default async function MlbStandingsHub() {
           { label: "AL/NL 순위" },
         ]}
       />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB AL/NL 순위</h1>
         <p className="text-gray-500 dark:text-gray-400">

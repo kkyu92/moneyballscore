@@ -72,7 +72,7 @@ function WcMagicNumberBadge({ value }: { value: number }) {
 }
 
 export default async function MlbWildCardHubEn() {
-  const { standings: divisionStandings } = await buildMlbDivisionStandings();
+  const { standings: divisionStandings, degraded: dbDegraded } = await buildMlbDivisionStandings();
   const wildcardStandings = buildMlbWildcardStandings(divisionStandings);
 
   const jsonLd = {
@@ -102,6 +102,14 @@ export default async function MlbWildCardHubEn() {
         ]}
         locale="en"
       />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          Some data may be temporarily unavailable due to a service disruption. Please try again shortly.
+        </div>
+      )}
 
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold text-amber-700 dark:text-amber-200">

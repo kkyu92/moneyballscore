@@ -73,7 +73,7 @@ function formatGB(gb: number | null): string {
 }
 
 export default async function MlbStandingsHubEn() {
-  const { standings } = await buildMlbDivisionStandings();
+  const { standings, degraded: dbDegraded } = await buildMlbDivisionStandings();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -116,6 +116,14 @@ export default async function MlbStandingsHubEn() {
         ]}
         locale="en"
       />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          Some data may be temporarily unavailable due to a service disruption. Please try again shortly.
+        </div>
+      )}
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB AL/NL Standings</h1>
         <p className="text-gray-500 dark:text-gray-400">
