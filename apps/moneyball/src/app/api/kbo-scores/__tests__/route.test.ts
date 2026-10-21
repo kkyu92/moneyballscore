@@ -98,6 +98,34 @@ describe('GET /api/kbo-scores', () => {
     expect(json.scores[0].status).toBe('postponed');
   });
 
+  it('suspended 플래그 true → postponed (cancel 과 동일 우선순위, statusInfo 텍스트와 무관)', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          result: {
+            games: [
+              {
+                categoryId: 'kbo',
+                gameId: 'g4',
+                homeTeamName: 'SSG',
+                awayTeamName: 'KT',
+                statusCode: 'DURING',
+                statusInfo: '경기중',
+                suspended: true,
+              },
+            ],
+          },
+        }),
+        { status: 200 },
+      ),
+    );
+
+    const { GET } = await import('../route');
+    const resp = await GET(makeRequest());
+    const json = await resp.json();
+    expect(json.scores[0].status).toBe('postponed');
+  });
+
   it('Naver API non-OK 응답 → 502 + Sentry warning', async () => {
     fetchMock.mockResolvedValue(new Response('error', { status: 503 }));
     const { GET } = await import('../route');
