@@ -17585,3 +17585,15 @@ silent-drift-wave-207 테스트 2건이 교체 전 문구("검증 표본 임계 
 **검증(skill-evolution 등)**: trigger3(3474%50=24≠0)/trigger5(직전20 review-code 다수 발화, 0회 아님) 미충족. ship-0(직전10(3465-3474) success 3건 포함) 미충족. 2-chain lock(직전8(3467-3474) distinct=3: review-code+info-arch+polish-ui) 미충족. 2차 방어선(cycle 3473 retro `698b76e1`) OK.
 
 다음 사이클 추천 = review-code(heavy) 신규 스코프(`app/` 잔여 또는 `lib/`/`hooks/`) 또는 info-arch(gap5/30)/fix-incident(gap12/20)/op-analysis(gap21/25)/lotto(gap26/30) 자유 선택.
+
+## 🟡 RETRO-ONLY — operational-analysis(lite): CE/비CE 격차 재측정, 코드 변경 없음 (cycle 3479, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23(plan #30 expiry 2026-10-18 경과, 전부 completed/archived — 신규 unprocessed 없음). 2차 방어선(cycle 3478 retro `e2c8c130`) OK. 2-chain lock 미충족(직전8(3471-3478) distinct=3: review-code/polish-ui/lotto). fix-incident gap=16/20·info-arch gap=9/30·lotto gap=3/30 전부 미도달. **op-analysis gap=25/25 정확 도달**(last fire cycle 3454) — 동일 harness(`scripts/op-analysis-ce-cohort.ts`) 재실행 채택.
+
+**측정**: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행 — 전체 n=448 (CE n=401 / 비CE n=47) = cycle 3433/3454/3462/3476 수치와 완전 동일(신규 verified pre_game 0건). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 유지, LLM 부가가치 우세 결론 재확인(연속 재확인 누적, 값 고정 장기화). KBO 2026 정규시즌 2026-10-04 종료 지속(확인된 원인, cycle 3276에서 규명) — 신규 verified pre_game 유입 자체가 없어 매 재측정이 동일값 반환하는 것이 정상. CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 112일+ 경과) 상태 변화 없음.
+
+**코드 변경 없음**(retro-only) — 다음 op-analysis 재측정은 gap 25-cycle 주기(실제 last fire 3479) 또는 KBO 2027 시즌 개막 신호 기준 권장.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3479%50=29≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3460-3479, 현재 포함) review-code 14회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3469-3478) success 4건 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3472-3479) distinct=4(polish-ui/review-code/lotto/operational-analysis) 미충족. 2차 방어선(cycle 3478 retro `e2c8c130`) OK.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프(`app/` 잔여 또는 `lib/`/`hooks/`) 또는 fix-incident(gap17/20, 거의 도달)/info-arch(gap10/30)/lotto(gap4/30) 자연 대기.
