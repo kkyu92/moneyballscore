@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# build-time generated IndexNow key verification file (scripts/generate-indexnow-key-file.mjs)
+/public/*.txt
