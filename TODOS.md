@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code(heavy): KBO 최상위 라우트 잔여(teams/players/guide/about/glossary/insights/reviews) 전수감사, fail-loud fetch drift 1건 발견+수정 (cycle 3512, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3505-3512) 2-chain lock 미충족. ship-0 미충족(직전10 success 4건). trigger5 미충족(직전20 review-code 14회). gap 전부 미도달(fix-incident 5/20, op-analysis 8/25, info-arch 16/30, lotto 6/30). cycle 3511 추천대로 review-code(heavy) 계속 — KBO 최상위 page.tsx 잔여(teams/players/guide/about/glossary/insights/reviews) 선정.
+
+**감사**: `teams/page.tsx`(157줄) — 이미 fail-soft(`.then()` fulfilled/rejected + captureFallback), drift 0건. `guide/page.tsx`+`glossary/page.tsx` — DB fetch 없는 static 콘텐츠, 해당없음. `about/page.tsx`+`insights/page.tsx`+`reviews/page.tsx` — grep 확인 결과 기존 fail-soft(`.then()` 또는 Promise.all 뒤 fail-silent 처리, cycle 3247 기수정) 확인, drift 0건.
+
+**발견+수정**: `players/page.tsx`가 `buildPitcherLeaderboard`/`buildBatterLeaderboard`(둘 다 `assertSelectOk` fail-loud) 를 bare `Promise.all` 로 호출 — cycle 3511 이 leaderboard 에서 발견·수정한 것과 동일 regression family(단일 DB 장애 시 raw 500, ISR cold-cache 위험). `Promise.allSettled` + `captureFallback` + `dbDegraded` 배너로 전환(teams/standings/leaderboard 와 동일 컨벤션). 두 builder 파일의 row interface 를 export 로 변경해 fallback 배열 타이핑.
+
+검증: `tsc --noEmit`/`pnpm lint` clean. 직접 main commit+push(R4, pre-push lint+type-check+version-sync-guard 전부 PASS, `619ad44e`).
+
+**검증(skill-evolution 등)**: trigger1(과거 소비)/trigger2(5연속 fail 없음)/trigger3(3512%50=12≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3493-3512, 현재 포함) review-code 15회 발화 — 미충족. ship-0 — 직전10(3503-3512) success 5건 — 미충족. 2-chain lock(다음 사이클용) — 직전8(3505-3512) distinct=5 — 미충족.
+
+다음 사이클 추천 = review-code(heavy) KBO 최상위 page.tsx 잔여(community/contact/dashboard/debug/feed/login/privacy/search/seasons/settings/terms/v2-preview/v2-shadow-monitor) 계속 또는 fix-incident(gap6/20)/op-analysis(gap9/25)/info-arch(gap17/30)/lotto(gap7/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): KBO app 잔여 라우트(predictions/accuracy/picks/leaderboard) 전수감사, fail-loud fetch drift 1건 발견+수정 (cycle 3511, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3504-3511) distinct=5(review-code/operational-analysis/lotto/fix-incident 포함) — 2-chain lock 미충족. ship-0 미충족(직전10(3502-3511) success 4건: 3503/3509/3510/3511). trigger5 미충족(직전20(3492-3511) review-code 14회 발화). cycle 3510 추천대로 review-code(heavy) 계속 — KBO 최상위 `app/*/page.tsx` 잔여 스코프(predictions/accuracy/picks/leaderboard, CHANGELOG mention 0회) 선정.
