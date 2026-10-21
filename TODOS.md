@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — review-code (heavy): cycle 3474 carry-over "바어 표본" jargon 재검증 + hooks/ 전수감사 (cycle 3475, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived/superseded). 2차 방어선(cycle 3474 retro `178b1827`) OK. 2-chain lock 미충족(직전8(3467-3474) distinct=3: review-code+info-architecture-review+polish-ui). fix-incident gap=12/20, op-analysis gap=21/25, lotto gap=26/30 전부 미도달 — op-analysis 는 KBO 시즌 종료 지속(n=448 동결, cycle 3262 이후 35회 연속 동일값)이라 재측정 ROI 낮음 판단. `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped — 실제 incident 부재. explore-idea saturation 15/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. DESIGN.md 당일 신선 — design-system 미근접. cycle 3474 가 flag 한 "바어 표본(소표본 아닌 단독형) 맥락별 검토" carry-over 후속으로 review-code(heavy) 선택.
+
+**감사 결과**: `grep -rln '표본'` 사이트 전체 재검사 — 18개 파일 매칭되나 전부 (1) 코드 주석 (`FactorAgreementCard.tsx`/`MatchupSeasonHeadToHead.tsx`/`dashboard/page.tsx` 등), (2) 테스트 파일 describe/it 문자열(70+ 건, `silent-drift-wave-*`/`wave-6xx-*` 류), (3) `/debug/factor-correlation/page.tsx`·`/debug/reliability/page.tsx` 렌더 텍스트 — `feedback_ui_copy_no_dev_jargon` 메모리 규칙이 명시적으로 예외 처리하는 `/debug` 라우트. **실제 사용자 가시 텍스트(비-`/debug`) 위반 0건** — cycle 3474 flag 는 false lead 로 확정(이미 과거 cycle 들의 silent-drift-wave 테스트 harness 가 glossary/methodology/about 등 통계 설명 페이지에서 "표본" 완전 제거 완료된 상태였음, `grep -rn '표본' apps/moneyball/src/app/{glossary,methodology,about}` 결과 0건). `MonthlyTeamStatsSortControl.tsx` 의 "표본순" 도 렌더 label 아닌 comment 뿐(라벨 자체엔 미등장) — TODOS cycle 3474 우려 해소.
+
+**추가 신선 스코프**: `hooks/` 디렉토리(`use-kbo-scores.ts`/`use-user-picks.ts`, 2파일, 기존 미감사 영역) 전수 read — SWR polling 로직(today-only key, 30s refresh), localStorage pick 저장(30일 TTL prune, try/catch silent fail 의도적)  모두 정상. silent drift 0건.
+
+**코드 변경 없음** — actionable fix 없음, carry-over 해소 확인.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3475%50=25≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3456-3475, 현재 포함) review-code 16회 발화로 미충족(표본=20≥10 충족, 0회 아님). marker 미박제. ship-0 — 직전10(3466-3475) outcome 중 success 3건(3472/3473/3474) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3468-3475) distinct=3(review-code+info-architecture-review+polish-ui) 미충족. 2차 방어선(cycle 3474 retro `178b1827`) OK.
+
+다음 사이클 추천 = fix-incident(gap13/20)/op-analysis(gap22/25)/lotto(gap27/30) 자유 선택 또는 review-code(heavy) 복귀(신규 디렉토리 탐색 — hooks/ 완주, lib/ 완주 확인된 상태라 `app/` 라우트 잔여 또는 2순회 심화 검토).
+
 ## 🟢 SUCCESS — review-code (heavy): components/picks 전수감사 중 발견한 '소표본' dev jargon site-wide 수정 (cycle 3473, 2026-10-21)
 
 진단: 2-chain lock 미충족(직전8(3465-3472) distinct=3: review-code+info-architecture-review+polish-ui). fix-incident gap=10/20, op-analysis gap=19/25, lotto gap=24/30, info-arch gap=3/30 전부 미도달. DESIGN.md 4분 신선 — design-system 미근접. explore-idea saturation 15/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. review-code(heavy) components/ round2 잔여(analysis/dashboard/layout/picks/predictions) 중 파일수 최소 `picks/`(13파일) 선정.
