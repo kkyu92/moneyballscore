@@ -18047,3 +18047,15 @@ silent-drift-wave-207 테스트 2건이 교체 전 문구("검증 표본 임계 
 **검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3508%50=8≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3489-3508, 현재 포함) review-code 14회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3499-3508) success 2건(3501/3503) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3501-3508) distinct=5(skill-evolution/review-code/operational-analysis/lotto/fix-incident) 미충족. 2차 방어선(cycle 3507 retro `98ae4273`) OK.
 
 다음 사이클 추천 = review-code(heavy) `app/` 라우트 2순회 또는 `hooks/`/`scripts/` 신규 스코프, 또는 fix-incident(gap2/20)/op-analysis(gap5/25)/info-arch(gap13/30)/lotto(gap3/30) 자연 대기.
+
+## 🟢 SUCCESS — review-code(heavy): mlb/players KBO+EN 내부 스크래퍼 경로 노출 수정 (cycle 3515, 2026-10-21)
+
+진단: open issue 0, approved+unexpired plan 0/22. 직전8(3507-3514) distinct=2(fix-incident+review-code) 2-chain lock 탐지되나 잠긴 chain 중 fix-incident 포함 → lock 무시(안전 우선 룰). ship-0 미충족(직전10 success 6건+retro-only 3건). gap 전부 미도달(fix-incident 8/20, op-analysis 11/25, info-arch 19/30, lotto 9/30). cycle 3514 retro가 명시적으로 지목한 범위 밖 발견(carry-over) — `mlb/players/[id]/page.tsx`/`mlb/players/page.tsx`가 사용자 가시 텍스트에 `packages/kbo-data/src/scrapers/baseball-savant.ts`, \`mlb-base.ts\` factor pipeline 등 내부 소스 파일 경로를 직접 노출 — 선정.
+
+**발견+수정**: KBO 로케일 2파일 3곳 + grep 재확인 결과 누락됐던 EN 로케일 미러 2파일(`en/mlb/players/page.tsx`, `en/mlb/players/[id]/page.tsx`) 3곳 추가 발견 — 총 4파일 6곳. 내부 스크래퍼/모듈 경로 문구 제거, 공개 출처(Baseball Savant 링크 + MLB Advanced Media 표기)는 유지. 레포 전체 재grep(`packages/kbo-data/src/scrapers`, `` `*.ts` factor pipeline/scraper ``) 결과 잔존 0건 확인.
+
+검증: `tsc --noEmit`/`eslint` 변경 파일 clean. 전체 `vitest` 606 files / 4793 tests 통과(회귀 0, 어썰션 변경 없음 — 제거 문구가 기존 테스트 대상이 아니었음). 직접 main commit+push(R4, pre-push lint+type-check+version-sync-guard 전부 PASS, `54bdc65f`).
+
+**검증(skill-evolution 등)**: trigger1(과거 소비)/trigger2(5연속 fail 없음)/trigger3(3515%50=15≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3496-3515, 현재 포함) 표본 20≥10, review-code 15회 발화 — 미충족. ship-0 — 직전10(3506-3515) success 7건 — 미충족. EXHAUSTIVE_SWEEP — 직전9 review-code(heavy) 7건(<8) — 미충족. 2-chain lock(다음 사이클용) — 직전8(3508-3515) distinct 재확인 필요.
+
+다음 사이클 추천 = review-code(heavy) 신규 scope(소스 경로 누출 재grep 결과 clean이라 새 영역 필요) 또는 fix-incident(gap9/20)/op-analysis(gap12/25)/info-arch(gap20/30)/lotto(gap10/30) 자연 대기. 본 cycle = develop-cycle 2사이클 호출 중 1/2.
