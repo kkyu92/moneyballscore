@@ -1,3 +1,11 @@
+## ⚪ RETRO-ONLY — fix-incident (lite): 20-cycle 주기 점검, 5개 cron workflow 전수 확인 — 신규 incident 0건 (cycle 3507, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3499-3506) chain 분포 distinct=4(review-code/skill-evolution/operational-analysis/lotto) — 2-chain lock 미충족. review-code(heavy) 직전20 중 14회(70%) dominance 지속. fix-incident gap=24(마지막 발화 3483, ≥20 trigger 충족) — 다양성 redirect 겸 선택.
+
+**점검 결과**: `gh run list --workflow <name> --limit 3` 로 5개 scheduled cron(data-refresh-weekly/factor-backtest-weekly/lotto-result-update/lotto-pick-update/op-analysis-weekly) 전수 확인. 2026-10-04~10-13 구간에 다수 failure 발견(data-refresh 10/13, factor-backtest 10/04+10/11, op-analysis 10/05+10/12, lotto-pick 10/13) — `git log` 대조 결과 전부 이미 알려진 사건으로 설명됨: (1) 2026-10-11 Supabase INACTIVE 인시던트(cycle 3261 RESOLVED) 구간과 날짜 일치, (2) cycle 3327/3329 가 data-refresh-weekly + op-analysis/factor-backtest-weekly 에 DNS flake retry 로직 이미 추가, (3) lotto-pick-update 10/13 실패는 cycle 3128 fix + cycle 3315 재확인으로 기 해소. 각 workflow 최신 1~2건은 전부 success — 재발 없음. **신규 incident 0건, 코드 변경 없음**(retro-only, 점검만).
+
+다음 사이클 추천 = review-code(heavy) components/layout+search+share+glossary 잔여 또는 app/ 비-mlb 잔여 스코프. info-arch(gap12/30)/op-analysis(gap4/25)/lotto(gap2/30) 전부 미도달.
+
 ## ⚪ RETRO-ONLY — lotto (lite): 30-cycle gap 체크, cron 건강 재확인 — delta 0 (cycle 3506, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3498-3505) chain 분포 distinct=3(review-code 6+skill-evolution 1+operational-analysis 1) — 2-chain lock 미충족. fix-incident gap=23/20 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재(cycle 3503 재확인과 동일 결론). lotto gap=30/30 정확 도달(마지막 발화 3476) — 가장 오래 미발화 + review-code dominance(직전8 중 6) 완화 겸 선택.
