@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code(heavy): cycle 3513 meta-pattern carry-over '실측' jargon + raw ops 용어 11파일 치환 (cycle 3514, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3506-3513) distinct=3(lotto/fix-incident/review-code) — 2-chain lock 미충족. ship-0 미충족(직전10 success 5건). trigger5 미충족(직전20, 현재 포함 review-code 14회). gap 전부 미도달(fix-incident 7/20, op-analysis 11/25, info-arch 18/30, lotto 8/30). cycle 3513 meta-pattern dispatch(12e06b57)가 명시적으로 지목한 carry-over 소진 — '실측' jargon + lotto/methodology raw 운영 용어 재작성 선정.
+
+**발견+수정**: `feedback_ui_copy_no_dev_jargon` 룰 위반 "실측" 잔존 grep 결과 11개 파일(v2-shadow-monitor/glossary/mlb 전반)에서 자연어("실제 데이터"/"실제 측정"/"실제 경기 기록") 치환. 추가로 lotto/methodology "사이클 진행 history" 섹션 + mlb/wild-card·mlb/postseason footer 가 "develop-cycle skill 안 lotto chain fire", "chain trigger 조건 (chain pool table)", "Header NAV 깨진 link 회수 layer" 등 내부 harness 엔지니어링 용어를 사용자 가시 문구로 직접 노출하던 것 발견 — 자연어로 재작성. `silent-drift-wave-240.test.ts` 의 "hub description preserved" 단언이 역설적으로 제거 대상 jargon 문자열 자체를 보존 검증하고 있었음(wild-card/postseason) — 신규 문구 동기화 + "no dev jargon" 역방향 단언 추가.
+
+**범위 밖 발견(다음 cycle 후보)**: `mlb/players/[id]/page.tsx`:197 "측정 layer = \`mlb-base.ts\` factor pipeline + \`baseball-savant.ts\` scraper" + `mlb/players/page.tsx` footer "스크래퍼: \`packages/kbo-data/src/scrapers/baseball-savant.ts\`" — 소스 코드 파일 경로를 사용자 가시 텍스트에 직접 노출 (jargon 단어 목록엔 없으나 동일 성격의 내부 구현 노출).
+
+검증: `tsc --noEmit`/`eslint` clean. 전체 `vitest` 606 files / 4793 tests 통과(기존 4791 + wave-240 신규 2 단언). 직접 main commit+push(R4, pre-push lint+type-check+version-sync-guard 전부 PASS, `9e295e6e`).
+
+**검증(skill-evolution 등)**: trigger1(과거 소비)/trigger2(5연속 fail 없음)/trigger3(3514%50=14≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3495-3514, 현재 포함) 표본 20≥10, review-code 14회 발화 — 미충족. ship-0 — 직전10(3505-3514) success 6건 — 미충족. 2-chain lock(다음 사이클용) — 직전8(3507-3514) distinct=3(lotto/fix-incident/review-code) — 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(players 소스경로 노출 수정) 또는 fix-incident(gap7/20)/op-analysis(gap11/25)/info-arch(gap18/30)/lotto(gap8/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): KBO 최상위 라우트 12개 fail-loud/fail-soft 재확인(drift 0) + UI jargon 룰 위반 '박제' 12파일 발견+수정 (cycle 3513, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3506-3513) distinct=3 — 2-chain lock 미충족. ship-0 미충족(직전10 success 5건). trigger5 미충족(직전20 review-code 13회). gap 전부 미도달(fix-incident 6/20, op-analysis 10/25, info-arch 17/30, lotto 7/30). cycle 3512 추천대로 review-code(heavy) 계속 — KBO 최상위 page.tsx 잔여(community/contact/dashboard/debug×7/feed/login/privacy/search/seasons×2/settings/terms/v2-preview/v2-shadow-monitor) 12개 선정.
