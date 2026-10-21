@@ -239,7 +239,7 @@ export default async function DashboardPage() {
               ? `적중 예측 ${confidentStat.correct}/${confidentStat.total}`
               : '적중 예측 표본 없음'}
             {confidentStat.total > 0 && confidentStat.total < SMALL_SAMPLE_N && (
-              <> · 소표본(n&lt;{SMALL_SAMPLE_N})</>
+              <> · 참고용({SMALL_SAMPLE_N}경기 미만)</>
             )}
           </p>
         </div>

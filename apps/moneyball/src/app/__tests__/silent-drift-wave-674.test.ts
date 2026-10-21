@@ -23,6 +23,6 @@ describe('silent drift wave 674 — MyPicksClient 내/AI 적중률 히어로 소
   });
 
   it('surfaces an inline small-sample note on the StatCard', () => {
-    expect(src).toMatch(/소표본\(n<\$\{SMALL_SAMPLE_N\}\)/);
+    expect(src).toMatch(/참고용\(\$\{SMALL_SAMPLE_N\}경기 미만\)/);
   });
 });

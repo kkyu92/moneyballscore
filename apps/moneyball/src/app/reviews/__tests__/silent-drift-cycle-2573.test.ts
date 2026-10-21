@@ -21,12 +21,12 @@ const monthlySrc = readFileSync(
 describe('silent drift cycle 2573 — reviews weekly/monthly 헤드라인 적중률 소표본 게이트', () => {
   it('weekly 헤드라인이 verifiedGames < SMALL_SAMPLE_N 소표본 힌트 렌더링', () => {
     expect(weeklySrc).toContain('review.verifiedGames < SMALL_SAMPLE_N');
-    expect(weeklySrc).toContain('소표본(n&lt;{SMALL_SAMPLE_N})');
+    expect(weeklySrc).toContain('참고용({SMALL_SAMPLE_N}경기 미만)');
   });
 
   it('monthly 헤드라인이 verifiedGames < SMALL_SAMPLE_N 소표본 힌트 렌더링', () => {
     expect(monthlySrc).toContain('review.verifiedGames < SMALL_SAMPLE_N');
-    expect(monthlySrc).toContain('소표본(n&lt;{SMALL_SAMPLE_N})');
+    expect(monthlySrc).toContain('참고용({SMALL_SAMPLE_N}경기 미만)');
   });
 
   it('SMALL_SAMPLE_N 값은 5 (기존 상수 유지)', () => {

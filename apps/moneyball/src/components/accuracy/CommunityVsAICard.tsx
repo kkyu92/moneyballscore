@@ -26,7 +26,7 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     communityLeads: (delta) => `커뮤니티가 AI보다 ${delta}%p 앞섭니다`,
     aiLeads: (delta) => `AI가 커뮤니티보다 ${delta}%p 앞섭니다`,
     tie: '커뮤니티와 AI가 동률입니다',
-    smallSample: (n) => ` · 소표본(n<${n})`,
+    smallSample: (n) => ` · 참고용(${n}경기 미만)`,
     smallSampleNote: (n) => `검증된 경기가 적어 참고용입니다 (${n}경기 이상부터 신뢰 가능)`,
   },
   en: {

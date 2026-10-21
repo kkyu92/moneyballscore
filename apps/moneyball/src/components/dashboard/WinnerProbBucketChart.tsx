@@ -37,7 +37,7 @@ const STRINGS = {
     empty: '확률 bucket 측정에는 더 많은 검증 예측이 필요합니다.',
     yAxisLabel: '실제 적중률',
     sample: '표본',
-    smallSample: (n: number) => `n=${n} (소표본)`,
+    smallSample: (n: number) => `n=${n}, 참고용`,
     avgPredicted: '예측 평균',
     actualAccuracy: '실제 적중률',
   },

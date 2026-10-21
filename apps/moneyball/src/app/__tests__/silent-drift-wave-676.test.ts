@@ -16,7 +16,7 @@ describe('silent drift wave 676 — 수렴 픽 W-L 카드 소표본 게이트 �
     expect(src).toMatch(/SMALL_SAMPLE_N/);
     expect(src).toMatch(/strongConvergenceRecord\.total < SMALL_SAMPLE_N/);
     expect(src).toMatch(/completeConvergenceRecord\.total < SMALL_SAMPLE_N/);
-    expect(src).toMatch(/소표본\(n<\$\{SMALL_SAMPLE_N\}\)/);
+    expect(src).toMatch(/참고용\(\$\{SMALL_SAMPLE_N\}경기 미만\)/);
   });
 
   it('en/mlb/reviews 미러는 영문 small sample 배지를 노출한다', () => {

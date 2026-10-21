@@ -84,7 +84,7 @@ export function AccuracyHeaderCard({
           </div>
           {totalVerified < SMALL_SAMPLE_N && (
             <div className="text-2xs text-gray-400 dark:text-gray-500">
-              {locale === 'en' ? `small sample (n<${SMALL_SAMPLE_N})` : `소표본(n<${SMALL_SAMPLE_N})`}
+              {locale === 'en' ? `small sample (n<${SMALL_SAMPLE_N})` : `참고용(${SMALL_SAMPLE_N}경기 미만)`}
             </div>
           )}
         </div>

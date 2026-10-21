@@ -84,7 +84,7 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     brierTrendTitle: 'Brier Score 추이',
     brierTrendDesc: '주차별 Brier score 변화입니다. 값이 낮을수록 AI 예측이 정확합니다.',
     scoringRuleDayTitle: '요일별 적중률',
-    scoringRuleDayDesc: '요일별 적중률 매트릭스입니다. N<3 인 요일은 소표본으로 회색 처리됩니다.',
+    scoringRuleDayDesc: '요일별 적중률 매트릭스입니다. 경기 수가 적은(3경기 미만) 요일은 회색으로 처리됩니다.',
     cohortWeekTitle: 'cohort × 주차 비교',
     cohortWeekSubLabel: '최근 4주',
     cohortWeekDesc: 'scoring_rule (모델 가중치 버전) × 주차 적중률 매트릭스입니다. 요일별 매트릭스의 시간 축 자매 view입니다.',

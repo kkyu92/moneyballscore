@@ -41,7 +41,7 @@ export function AccuracySummary({
         </span>
         <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">
           ({correct}/{total})
-          {total > 0 && total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
+          {total > 0 && total < SMALL_SAMPLE_N && ` · 참고용(${SMALL_SAMPLE_N}경기 미만)`}
         </span>
       </div>
       <div className="w-full bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-full h-2 mb-4">
@@ -73,7 +73,7 @@ export function AccuracySummary({
                       {pct}%{' '}
                       <span className="text-gray-400 dark:text-gray-500 font-normal">
                         ({stat.correct}/{stat.total})
-                        {stat.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
+                        {stat.total < SMALL_SAMPLE_N && ` · 참고용(${SMALL_SAMPLE_N}경기 미만)`}
                       </span>
                     </>
                   )}

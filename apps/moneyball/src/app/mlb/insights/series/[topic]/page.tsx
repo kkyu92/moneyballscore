@@ -129,7 +129,7 @@ export default async function MlbSeriesTopicPage({ params }: Props) {
               <span>검증 {verifiedN}경기</span>
               <span>적중률 {rate}% ({correctN}/{verifiedN})</span>
               {verifiedN < SMALL_SAMPLE_N && (
-                <span>· 소표본(n&lt;{SMALL_SAMPLE_N}, 참고용)</span>
+                <span>· 참고용({SMALL_SAMPLE_N}경기 미만)</span>
               )}
             </>
           )}

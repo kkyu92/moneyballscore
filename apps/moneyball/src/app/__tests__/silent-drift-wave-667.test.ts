@@ -22,6 +22,6 @@ describe('silent drift wave 667 — 홈페이지 "최근 4주 성과" 히어로 
   });
 
   it('surfaces an inline small-sample note in tooltip and hero label', () => {
-    expect(src).toMatch(/소표본/);
+    expect(src).toMatch(/참고용/);
   });
 });

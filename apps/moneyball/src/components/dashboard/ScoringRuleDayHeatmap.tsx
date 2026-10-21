@@ -20,8 +20,8 @@ const STRINGS = {
   ko: {
     empty: "scoring_rule × 요일 매트릭스 데이터 없음.",
     header: "scoring_rule",
-    smallSample: "소표본",
-    legend: "색상 — 녹색 ≥60% / 노랑 ≥50% / 빨강 <50% / 회색 N<3 소표본. v1.6 anomaly + Sunday cap 효과 시각화.",
+    smallSample: "참고용",
+    legend: "색상 — 녹색 ≥60% / 노랑 ≥50% / 빨강 <50% / 회색 3경기 미만(참고용). v1.6 anomaly + Sunday cap 효과 시각화.",
     dayLabels: WEEKDAY_LABELS_KO_MON_FIRST,
   },
   en: {

@@ -605,7 +605,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
                 최근 {convergenceRecord.total}경기 {convergenceRecord.wins}승{convergenceRecord.losses}패{' '}
                 ({computeWinRatePct(convergenceRecord.wins, convergenceRecord.total)}%)
                 {convergenceRecord.total < SMALL_SAMPLE_N && (
-                  <span className="ml-1">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>
+                  <span className="ml-1">· 참고용({SMALL_SAMPLE_N}경기 미만)</span>
                 )}
               </p>
             )}

@@ -18,6 +18,6 @@ describe('silent drift wave 664 — analysis/game/[id] 팩터 수렴 픽 성적 
   });
 
   it('surfaces a small-sample note inline', () => {
-    expect(src).toMatch(/소표본\(n&lt;\{SMALL_SAMPLE_N\}\)/);
+    expect(src).toMatch(/참고용\(\{SMALL_SAMPLE_N\}경기 미만\)/);
   });
 });

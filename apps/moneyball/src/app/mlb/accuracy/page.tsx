@@ -143,7 +143,7 @@ export default async function MlbAccuracyPage() {
             <h2 className="text-lg font-bold">팀별 상대 강약 분석</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               각 팀 경기에서 AI가 어떤 상대팀을 만날 때 잘 맞추고 못 맞추는지 분석합니다.
-              소표본(n&lt;{SMALL_SAMPLE_N}) 결과는 연하게 표시됩니다. 홈/원정 적중률은 각 n을 함께 표시합니다.
+              경기 수가 적은({SMALL_SAMPLE_N}경기 미만) 결과는 연하게 표시됩니다. 홈/원정 적중률은 각 경기 수와 함께 표시합니다.
             </p>
           </div>
           <TeamMatchupCards

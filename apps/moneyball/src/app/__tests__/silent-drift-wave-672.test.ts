@@ -13,7 +13,7 @@ describe('silent drift wave 672 — 커뮤니티 vs AI 대결 / MLB accuracy 히
     });
 
     it('surfaces an inline small-sample note near the AI stat', () => {
-      expect(src).toMatch(/소표본\(n<\$\{SMALL_SAMPLE_N\}\)/);
+      expect(src).toMatch(/참고용\(\$\{SMALL_SAMPLE_N\}경기 미만\)/);
     });
   });
 

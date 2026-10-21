@@ -429,7 +429,7 @@ export default async function PredictionDatePage({ params }: Props) {
                 {totalN})
                 {totalN < SMALL_SAMPLE_N && (
                   <span className="ml-1 text-gray-400 dark:text-gray-500">
-                    · 소표본(n&lt;{SMALL_SAMPLE_N})
+                    · 참고용({SMALL_SAMPLE_N}경기 미만)
                   </span>
                 )}
               </span>

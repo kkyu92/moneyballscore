@@ -24,7 +24,7 @@ describe('silent drift wave 670 — dashboard 시즌/확신구간/적중예측 �
     });
 
     it('surfaces an inline small-sample note near the stats', () => {
-      expect(src).toMatch(/소표본\(n<\$\{SMALL_SAMPLE_N\}\)/);
+      expect(src).toMatch(/참고용\(\$\{SMALL_SAMPLE_N\}경기 미만\)/);
     });
   });
 
@@ -40,7 +40,7 @@ describe('silent drift wave 670 — dashboard 시즌/확신구간/적중예측 �
     });
 
     it('surfaces an inline small-sample note near the stat', () => {
-      expect(src).toMatch(/소표본\(n&lt;\{SMALL_SAMPLE_N\}\)/);
+      expect(src).toMatch(/참고용\(\{SMALL_SAMPLE_N\}경기 미만\)/);
     });
   });
 });

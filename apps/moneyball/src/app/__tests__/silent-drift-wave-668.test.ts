@@ -17,6 +17,6 @@ describe('silent drift wave 668 — predictions/[date] 헤더 적중률 소표�
   });
 
   it('surfaces an inline small-sample note near the header stat', () => {
-    expect(src).toMatch(/소표본\(n&lt;\{SMALL_SAMPLE_N\}\)/);
+    expect(src).toMatch(/참고용\(\{SMALL_SAMPLE_N\}경기 미만\)/);
   });
 });

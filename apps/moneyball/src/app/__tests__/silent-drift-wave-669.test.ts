@@ -17,7 +17,7 @@ describe('silent drift wave 669 — teams/[code]/recent + players/[id] 소표본
     });
 
     it('surfaces an inline small-sample note near the stat', () => {
-      expect(src).toMatch(/소표본\(n<\$\{SMALL_SAMPLE_N\}\)/);
+      expect(src).toMatch(/참고용\(\$\{SMALL_SAMPLE_N\}경기 미만\)/);
     });
   });
 
@@ -33,7 +33,7 @@ describe('silent drift wave 669 — teams/[code]/recent + players/[id] 소표본
     });
 
     it('surfaces an inline small-sample note near the stat', () => {
-      expect(src).toMatch(/소표본\(n<\$\{SMALL_SAMPLE_N\}\)/);
+      expect(src).toMatch(/참고용\(\$\{SMALL_SAMPLE_N\}경기 미만\)/);
     });
   });
 });

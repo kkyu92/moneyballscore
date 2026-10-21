@@ -59,7 +59,7 @@ function CustomTooltip({
           <p className="text-gray-600 dark:text-gray-300 mt-0.5">
             {Math.round(d.rate * 100)}% ({d.correct}/{d.verified})
             {d.verified < SMALL_SAMPLE_N && (
-              <span className="ml-1 text-gray-400 dark:text-gray-500">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>
+              <span className="ml-1 text-gray-400 dark:text-gray-500">· 참고용({SMALL_SAMPLE_N}경기 미만)</span>
             )}
           </p>
           {d.isCurrent && (
@@ -109,7 +109,7 @@ export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
           <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">
             이번 주
             {(current?.verified ?? 0) < SMALL_SAMPLE_N && (
-              <span className="ml-1 text-gray-400 dark:text-gray-500">· 소표본</span>
+              <span className="ml-1 text-gray-400 dark:text-gray-500">· 참고용</span>
             )}
           </span>
         </div>

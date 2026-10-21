@@ -162,7 +162,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
     name: profile.name,
     sport: "Baseball",
     logo: logoUrl,
-    description: `MLB ${profile.name} 시즌 예측 기록 — 평균 선발 FIP ${fmtFip(profile.factorAverages.spFip)}, 적중률 ${fmtPct(profile.accuracyRate)}${profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N ? ` (소표본 n<${SMALL_SAMPLE_N})` : ""}, 홈구장 ${profile.stadium} (파크팩터 ${profile.parkPf}).`,
+    description: `MLB ${profile.name} 시즌 예측 기록 — 평균 선발 FIP ${fmtFip(profile.factorAverages.spFip)}, 적중률 ${fmtPct(profile.accuracyRate)}${profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N ? ` (참고용, ${SMALL_SAMPLE_N}경기 미만)` : ""}, 홈구장 ${profile.stadium} (파크팩터 ${profile.parkPf}).`,
     location: { "@type": "Place", name: profile.stadium },
     memberOf: {
       "@type": "SportsOrganization",

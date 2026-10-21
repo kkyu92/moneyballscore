@@ -20,7 +20,7 @@ describe('silent drift wave 671 — 리더보드 AI 적중률 베이스라인 �
     });
 
     it('surfaces an inline small-sample note near the AI baseline stat', () => {
-      expect(src).toMatch(/소표본\(n&lt;\{SMALL_SAMPLE_N\}\)/);
+      expect(src).toMatch(/참고용\(\{SMALL_SAMPLE_N\}경기 미만\)/);
     });
   });
 });

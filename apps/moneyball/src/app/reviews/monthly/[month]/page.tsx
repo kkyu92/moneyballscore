@@ -211,7 +211,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
             </p>
             {review.verifiedGames < SMALL_SAMPLE_N && (
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                소표본(n&lt;{SMALL_SAMPLE_N})
+                참고용({SMALL_SAMPLE_N}경기 미만)
               </p>
             )}
           </div>
@@ -260,7 +260,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {strongConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
-                  {strongConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
+                  {strongConvergenceRecord.total < SMALL_SAMPLE_N && ` · 참고용(${SMALL_SAMPLE_N}경기 미만)`}
                 </p>
               </div>
             )}
@@ -273,7 +273,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {completeConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
-                  {completeConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
+                  {completeConvergenceRecord.total < SMALL_SAMPLE_N && ` · 참고용(${SMALL_SAMPLE_N}경기 미만)`}
                 </p>
               </div>
             )}

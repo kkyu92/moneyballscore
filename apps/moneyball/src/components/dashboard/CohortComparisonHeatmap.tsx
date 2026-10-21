@@ -12,9 +12,9 @@ const STRINGS = {
     emptyData: "scoring_rule × 주차 매트릭스 데이터 없음.",
     emptyCohort: "최근 주차에서 검증된 cohort 가 없습니다.",
     header: "scoring_rule",
-    smallSample: "소표본",
+    smallSample: "참고용",
     legend:
-      "색상 — brand-700 ≥70% / brand-500 ≥60% / brand-300 ≥50% / brand-100 <50% / 회색 N<3 소표본. 최근 4주 cohort 시계열 비교.",
+      "색상 — brand-700 ≥70% / brand-500 ≥60% / brand-300 ≥50% / brand-100 <50% / 회색 3경기 미만(참고용). 최근 4주 cohort 시계열 비교.",
   },
   en: {
     emptyData: "No scoring_rule × week matrix data yet.",

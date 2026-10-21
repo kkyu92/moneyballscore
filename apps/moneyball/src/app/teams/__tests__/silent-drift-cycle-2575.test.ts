@@ -29,7 +29,7 @@ const playerSrc = readFileSync(
 describe('silent drift cycle 2575 — 팀/선수 프로필 SEO description 소표본 게이트', () => {
   it('teams/[code] generateMetadata description이 소표본 힌트 포함', () => {
     expect(teamsKoSrc).toContain('sampleHint');
-    expect(teamsKoSrc).toContain('소표본 n<${SMALL_SAMPLE_N}');
+    expect(teamsKoSrc).toContain('참고용, ${SMALL_SAMPLE_N}경기 미만');
   });
 
   it('teams/[code] JSON-LD description이 소표본 조건부 렌더링', () => {
@@ -46,7 +46,7 @@ describe('silent drift cycle 2575 — 팀/선수 프로필 SEO description 소�
 
   it('players/[id] generateMetadata + JSON-LD description 둘 다 소표본 힌트 포함', () => {
     expect(playerSrc).toContain('sampleHint');
-    const descriptionMatches = playerSrc.match(/소표본 n<\$\{SMALL_SAMPLE_N\}/g) ?? [];
+    const descriptionMatches = playerSrc.match(/참고용, \$\{SMALL_SAMPLE_N\}경기 미만/g) ?? [];
     expect(descriptionMatches.length).toBeGreaterThanOrEqual(2);
   });
 

@@ -21,7 +21,7 @@ describe('silent drift cycle 3243 — 팀별 수렴 배지 SMALL_SAMPLE_N 가드
     expect(src).toMatch(/\$\{opts\.badgeBgClass\} \$\{isSmallSample \? 'opacity-60' : ''\}/);
   });
 
-  it('소표본 배지 title 에 소표본(n<N) 경고 문구가 포함된다', () => {
-    expect(src).toContain('isSmallSample ? ` · 소표본(n<${SMALL_SAMPLE_N})` : \'\'');
+  it('소표본 배지 title 에 참고용(N경기 미만) 경고 문구가 포함된다', () => {
+    expect(src).toContain('isSmallSample ? ` · 참고용(${SMALL_SAMPLE_N}경기 미만)` : \'\'');
   });
 });

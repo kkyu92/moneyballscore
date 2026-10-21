@@ -71,7 +71,7 @@ export function LeaderboardTable({
             AI 적중률 <span className="text-gray-400 dark:text-gray-500">(n={aiBaseline.total})</span>
             {aiBaseline.total < SMALL_SAMPLE_N && (
               <span className="ml-1 text-gray-400 dark:text-gray-500">
-                · 소표본(n&lt;{SMALL_SAMPLE_N})
+                · 참고용({SMALL_SAMPLE_N}경기 미만)
               </span>
             )}
           </span>

@@ -19,6 +19,6 @@ describe('silent drift wave 673 — AccuracyHeaderCard 누적 적중률 헤드�
   });
 
   it('surfaces an inline small-sample note near the headline stat', () => {
-    expect(src).toMatch(/소표본\(n<\$\{SMALL_SAMPLE_N\}\)/);
+    expect(src).toMatch(/참고용\(\$\{SMALL_SAMPLE_N\}경기 미만\)/);
   });
 });

@@ -549,7 +549,7 @@ export default async function AccuracyPage() {
                   <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
                     {communityStats.aiGamesWithPoll > 0
                       ? `${communityStats.aiCorrectWithPoll}/${communityStats.aiGamesWithPoll} 적중${
-                          communityStats.aiGamesWithPoll < SMALL_SAMPLE_N ? ` · 소표본(n<${SMALL_SAMPLE_N})` : ''
+                          communityStats.aiGamesWithPoll < SMALL_SAMPLE_N ? ` · 참고용(${SMALL_SAMPLE_N}경기 미만)` : ''
                         }`
                       : '예측 없음'}
                   </p>
@@ -728,7 +728,7 @@ export default async function AccuracyPage() {
           <div className="flex items-baseline justify-between">
             <h2 className="text-lg font-bold">요일별 scoring_rule cohort</h2>
             <span className="text-xs text-gray-400 dark:text-gray-500">
-              N&lt;3 = 소표본 회색
+              3경기 미만 = 참고용(회색)
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -1040,7 +1040,7 @@ export default async function AccuracyPage() {
             <h2 className="text-lg font-bold">팀별 상대 강약 분석</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               각 팀 경기에서 AI가 어떤 상대팀을 만날 때 잘 맞추고 못 맞추는지 분석합니다.
-              소표본(n&lt;5) 결과는 연하게 표시됩니다. 홈/원정 적중률은 각 n을 함께 표시합니다.
+              경기 수가 적은(5경기 미만) 결과는 연하게 표시됩니다. 홈/원정 적중률은 각 경기 수와 함께 표시합니다.
             </p>
           </div>
           <TeamMatchupCards

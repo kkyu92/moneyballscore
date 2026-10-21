@@ -30,7 +30,7 @@ describe('silent drift wave 665 — analysis/page.tsx 팩터 수렴 픽 성적 �
   }
 
   it('surfaces a small-sample note inline (at least 7 occurrences, one per gated record)', () => {
-    const matches = src.match(/소표본\(n&lt;\{SMALL_SAMPLE_N\}\)/g) ?? [];
+    const matches = src.match(/참고용\(\{SMALL_SAMPLE_N\}경기 미만\)/g) ?? [];
     expect(matches.length).toBeGreaterThanOrEqual(7);
   });
 });

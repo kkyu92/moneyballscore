@@ -241,7 +241,7 @@ export default async function TeamRecentPage({ params }: PageProps) {
                 accuracyRate !== null
                   ? ` · 적중률 ${accuracyRate}% (${correctN}/${verifiedRows.length})${
                       verifiedRows.length < SMALL_SAMPLE_N
-                        ? ` · 소표본(n<${SMALL_SAMPLE_N})`
+                        ? ` · 참고용(${SMALL_SAMPLE_N}경기 미만)`
                         : ''
                     }`
                   : ''
