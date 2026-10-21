@@ -1,3 +1,19 @@
+## 🟢 SUCCESS — review-code (heavy): components/predictions/ 전수감사, twin wrap-guard + dev-jargon + MLB prose 누락 문장 수정 (cycle 3480, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/24(전부 완료/보류 status). 2-chain lock 미충족(직전8(3472-3479) distinct=4: review-code5+polish-ui1+lotto1+operational-analysis1). fix-incident gap=17/20·lotto gap=4/30·info-arch gap=10/30 전부 미도달. 2차 방어선(cycle 3479 retro `fa613d8b`) OK. components/ round2 잔여(layout/predictions) 중 twin KBO/MLB 쌍이 많은 `predictions/`(24파일, TODOS/CHANGELOG grep 0건) 선정.
+
+**감사 결과**: Agent 위임 전수 read — 24파일 + 6테스트 + out-of-dir twin(components/analysis/GameAnalysisProse·DetailedFactorAnalysis) cross-reference. 6 CONFIRMED BUGS 발견+수정.
+
+**발견+수정 6건**: (1) `MlbRivalryMemorySurface.tsx` 팀명 span `whitespace-nowrap` 누락 — KBO twin 은 보유, 영문 긴 팀명("Arizona Diamondbacks") vs confidence% 배지 squeeze 시 줄바꿈 위험(13번째 재발하는 팀명 wrap 버그 패밀리). (2) `MlbHistoricalAnalogMatchup.tsx` away@home 매치업 span `whitespace-nowrap` 누락 — KBO twin 은 전용 regression test(`HistoricalAnalogMatchup-wrap-guard.test.ts`)까지 보유하나 MLB twin 은 누락. (3) `FactorBreakdown.tsx` shadow factor(park_weather/umpire_sz) tooltip 이 raw DB 테이블명(`umpire_stats`)과 "shadow 측정" 내부 용어를 그대로 노출(dev-jargon 금지 규칙 위반) → 사용자 언어로 재작성. (4) `MlbFactorWaterfallChart.tsx` 차트 서브타이틀에 "실측"/"placeholder" dev-jargon 노출(ko/en 양쪽) → 재작성. (5) `MlbGameOverview.tsx` — KBO twin `GameAnalysisProse.tsx` 의 종합 요약 마무리 문장("핵심 팩터 가중합산 결과이며 당일 선발 변경/돌발 변수 미반영")이 MLB 포트(`8b3e5844` parity 커밋) 시 누락 확인 — ko/en 양쪽에 동등 문장 추가. (6) `MlbDetailedFactorAnalysis.tsx` — KBO twin `DetailedFactorAnalysis.tsx` 의 top-factor 요약 문장("가장 영향력 큰 팩터는 X, Y%p 기여")이 MLB 포트(`d46d0896`)에 없음 — 해당 커밋은 KBO 전용 severity 임계값 서사만 의도적으로 skip 했을 뿐 순수 contribution 기반 top-factor 문장은 포트 누락으로 판단, ko/en 양쪽 추가(가중치 최대 팩터 선정 + `favor==='neutral'` 시 비노출 가드).
+
+**스킵(디자인 판단 영역, 버그 아님)**: PlaceholderCardLive 의 PickButton 미노출(제품 판단), MlbGameOverview `favored` 비교 연산자(`>=` vs KBO `>`, 0.5 정확 동률 시에만 영향·확률 사실상 0), MlbFactorWaterfallChart footer 가중치합 캡션 생략(MLB per-factor multiplier 구조상 의도적 가능성), FactorBreakdown shadow factor 상시 노출(weight=0 명시 주석 존재 — UX noise 가능성만 기록).
+
+**검증**: `tsc --noEmit`/`eslint` clean, `vitest run` 607 files/4794 tests 전부 PASS. 직접 main 커밋+push(R4 범위, `8775a204`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3480%50=30≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3461-3480, 현재 포함) review-code 다회 발화로 미충족(표본≥10 충족, 0회 아님). marker 미박제. ship-0 — 직전10(3471-3480) outcome 중 success 다수(3473/3474/3477/3478/3480) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3473-3480) distinct=4(review-code+lotto+operational-analysis+review-code 중복 포함) 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/layout` 10파일 잔여) 또는 fix-incident(gap18/20)/lotto(gap5/30)/info-arch(gap11/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code (heavy): components/dashboard/ 전수감사, dev-jargon + BRIER_BASELINE drift + twin 분기 + a11y 수정 (cycle 3478, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived/superseded/partial). 2-chain lock 미충족(직전8(3470-3477) distinct=4: review-code5+polish-ui1+lotto1+info-architecture-review1). fix-incident gap=15/20·op-analysis gap=24/25·info-arch gap=8/30·lotto gap=2/30 전부 미도달. ship-0 미충족(직전10(3468-3477) success 4건). 2차 방어선(cycle 3477 retro `0fb86335`) OK. components/ round2 잔여(dashboard/layout/predictions) 중 cycle 3477 추천 `dashboard/` 선정.
