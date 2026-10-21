@@ -9,17 +9,17 @@ interface CohortComparisonHeatmapProps {
 
 const STRINGS = {
   ko: {
-    emptyData: "scoring_rule × 주차 매트릭스 데이터 없음.",
+    emptyData: "모델 버전 × 주차 매트릭스 데이터 없음.",
     emptyCohort: "최근 주차에서 검증된 cohort 가 없습니다.",
-    header: "scoring_rule",
+    header: "모델 버전",
     smallSample: "참고용",
     legend:
       "색상 — brand-700 ≥70% / brand-500 ≥60% / brand-300 ≥50% / brand-100 <50% / 회색 3경기 미만(참고용). 최근 4주 cohort 시계열 비교.",
   },
   en: {
-    emptyData: "No scoring_rule × week matrix data yet.",
+    emptyData: "No model-version × week matrix data yet.",
     emptyCohort: "No verified cohort in recent weeks.",
-    header: "scoring_rule",
+    header: "Model version",
     smallSample: "small N",
     legend:
       "Color — brand-700 ≥70% / brand-500 ≥60% / brand-300 ≥50% / brand-100 <50% / gray N<3 small sample. Recent 4-week cohort comparison.",

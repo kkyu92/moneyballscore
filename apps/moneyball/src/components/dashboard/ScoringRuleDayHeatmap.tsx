@@ -18,15 +18,15 @@ const DAY_ORDER = WEEKDAY_ORDER_MON_FIRST;
 
 const STRINGS = {
   ko: {
-    empty: "scoring_rule × 요일 매트릭스 데이터 없음.",
-    header: "scoring_rule",
+    empty: "모델 버전 × 요일 매트릭스 데이터 없음.",
+    header: "모델 버전",
     smallSample: "참고용",
     legend: "색상 — 녹색 ≥60% / 노랑 ≥50% / 빨강 <50% / 회색 3경기 미만(참고용). v1.6 anomaly + Sunday cap 효과 시각화.",
     dayLabels: WEEKDAY_LABELS_KO_MON_FIRST,
   },
   en: {
-    empty: "No scoring_rule × weekday matrix data yet.",
-    header: "scoring_rule",
+    empty: "No model-version × weekday matrix data yet.",
+    header: "Model version",
     smallSample: "small N",
     legend: "Color — green ≥60% / yellow ≥50% / red <50% / gray N<3 small sample. Visualizes v1.6 anomaly + Sunday cap effect.",
     dayLabels: WEEKDAY_LABELS_EN_MON_FIRST,

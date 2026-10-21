@@ -28,7 +28,8 @@ export function FactorErrorTable({ rows }: FactorErrorTableProps) {
   return (
     <ul className="space-y-3">
       {rows.map((row) => {
-        const label = FACTOR_LABELS_TECHNICAL[row.factor] ?? row.factor;
+        const translated = FACTOR_LABELS_TECHNICAL[row.factor];
+        const label = translated ?? row.factor;
         const isHomeFavor = row.avg_bias > 0;
         const widthPct = Math.min(100, (Math.abs(row.avg_bias) / maxAbsBias) * 100);
         const biasLabel = row.avg_bias >= 0 ? `+${row.avg_bias.toFixed(2)}` : row.avg_bias.toFixed(2);
@@ -44,9 +45,11 @@ export function FactorErrorTable({ rows }: FactorErrorTableProps) {
             <div className="flex justify-between items-baseline mb-1 gap-4">
               <span className="font-medium text-gray-700 dark:text-gray-200">
                 {label}
-                <span className="ml-2 font-mono text-xs text-gray-400 dark:text-gray-500">
-                  {row.factor}
-                </span>
+                {translated && (
+                  <span className="ml-2 font-mono text-xs text-gray-400 dark:text-gray-500">
+                    {row.factor}
+                  </span>
+                )}
               </span>
               <div className="flex items-baseline gap-3 shrink-0">
                 <span className="text-xs text-gray-500 dark:text-gray-400">

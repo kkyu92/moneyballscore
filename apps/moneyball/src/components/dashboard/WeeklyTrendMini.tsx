@@ -1,5 +1,6 @@
 "use client";
 
+import type { KeyboardEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -147,6 +148,15 @@ export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
                 opacity={w.isCurrent ? 1 : 0.7}
                 strokeWidth={w.isCurrent ? 1.5 : 0}
                 stroke={w.isCurrent ? barColor(w.rate, w.verified) : "none"}
+                role="button"
+                tabIndex={0}
+                aria-label={`${w.label} 주간 리뷰 보기 (${Math.round(w.rate * 100)}%)`}
+                onKeyDown={(e: KeyboardEvent) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    router.push(`/reviews/weekly/${w.weekId}`);
+                  }
+                }}
               />
             ))}
           </Bar>

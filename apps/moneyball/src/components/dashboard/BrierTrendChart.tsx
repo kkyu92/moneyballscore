@@ -12,7 +12,7 @@ import {
   ReferenceLine,
 } from "recharts";
 
-import { CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY } from "@moneyball/shared";
+import { BRIER_BASELINE, CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY } from "@moneyball/shared";
 
 import { countBrierTrendWeeks, type BrierTrendPoint } from "@/lib/accuracy/buildAccuracyData";
 import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
@@ -108,7 +108,7 @@ export function BrierTrendChart({ data, locale = "ko" }: BrierTrendChartProps) {
           tickFormatter={(v) => v.toFixed(2)}
           label={{ value: "Brier", angle: -90, position: "insideLeft", fontSize: 11, fill: neutral[400] }}
         />
-        <ReferenceLine y={0.25} stroke={neutral[400]} strokeDasharray="4 4" strokeOpacity={0.4} />
+        <ReferenceLine y={BRIER_BASELINE} stroke={neutral[400]} strokeDasharray="4 4" strokeOpacity={0.4} />
         <Tooltip
           cursor={{ fill: chartCursorTint }}
           content={(props) => (
