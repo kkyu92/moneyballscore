@@ -1,3 +1,19 @@
+## 🟢 SUCCESS — review-code (heavy): components/picks 전수감사 중 발견한 '소표본' dev jargon site-wide 수정 (cycle 3473, 2026-10-21)
+
+진단: 2-chain lock 미충족(직전8(3465-3472) distinct=3: review-code+info-architecture-review+polish-ui). fix-incident gap=10/20, op-analysis gap=19/25, lotto gap=24/30, info-arch gap=3/30 전부 미도달. DESIGN.md 4분 신선 — design-system 미근접. explore-idea saturation 15/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. review-code(heavy) components/ round2 잔여(analysis/dashboard/layout/picks/predictions) 중 파일수 최소 `picks/`(13파일) 선정.
+
+**감사 결과**: Agent 위임 전수 read — 13파일 + 테스트 1개. DEFAULT_WEIGHTS 하드코딩 없음(`KBO_FACTOR_COUNT` import 사용). dark-mode 페어링 clean(기존 `silent-drift-cycle-2619.test.ts` 가 gray-400/500 규칙 고정, 5/5 PASS). KBO/MLB twin parity — `PickButton.tsx` 단일 컴포넌트가 league prop 분기로 양쪽 처리(의도적, 정확). 접근성(aria-pressed/aria-labelledby/aria-expanded/focus-visible) 전부 적절. dead code/stale comment 없음.
+
+**발견+수정**: `MyPicksClient.tsx:42` 에서 `소표본(n<${SMALL_SAMPLE_N})` dev jargon 발견 — `feedback_ui_copy_no_dev_jargon` 메모리 규칙(2026-04-21 박제, "표본" 명시적 금지 단어) 위반. 사이트 전체 grep 결과 **26개 파일, 50+ 지점**에서 동일 패턴("소표본"/"n<N"/"N<3" 표기) 확인 — 수년간 신규 코드 작성 시 계속 재유입된 누적 drift(개별 directory 단위 review-code 스윕으로는 분산돼 안 잡히던 site-wide 패턴). 전부 자연스러운 한국어("참고용(N경기 미만)" 류)로 교체, `/debug`/`/api`/코드 주석/영문 로케일은 기존 규칙 예외 범위 그대로 유지. 테스트 파일 13개 기대 문자열 동기화.
+
+**검증**: `tsc --noEmit`/`eslint` clean, `vitest run` 606 files/4784 tests 전부 PASS. 직접 main 커밋+push(R4 범위, `2087ab6d`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**잔여 발견 (범위 밖, carry-over)**: 바어 단어 "표본"(소표본 아닌 단독형) 은 `methodology`/`about`/`glossary` 통계 설명 페이지, `*SortControl.tsx` 정렬 라벨("표본순"), `CalibrationPlot`/`WinnerProbBucketChart` 등에 추가 잔존 확인(grep 결과 30여 지점). 통계 설명 페이지는 맥락상 전문용어 유지가 적절할 수도 있어 맥락별 판단 필요 — 금번 "소표본" 명확 위반 패턴과 달리 신중 검토 권장, 다음 사이클 candidate.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3473%50=23≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3454-3473, 현재 포함) review-code 15회 발화로 미충족(표본≥10 충족, 0회 아님). marker 미박제. ship-0 — 직전10(3464-3473) success 2건(3464/3472)+현재 success 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3466-3473) distinct=3(review-code+info-architecture-review+polish-ui) 미충족. 2차 방어선(cycle 3472 retro `eb82bc8c`) OK.
+
+다음 사이클 추천 = review-code(heavy) 계속(바어 "표본" 잔존 맥락별 검토) 또는 fix-incident(gap11/20)/op-analysis(gap20/25)/lotto(gap25/30) 자유 선택.
+
 ## 🟢 SUCCESS — polish-ui (lock-fallback): CohortComparisonHeatmap 다크모드 최저-tier 셀 밝기 역전 수정 (cycle 3472, 2026-10-21)
 
 진단: 2-chain alternation lock 충족 — 직전8(3464-3471) distinct=2(review-code 7+info-architecture-review 1) → 둘 다 제외. 잔여 후보(fix-incident gap=8/20 실제 incident 부재, op-analysis gap=17/25, lotto gap=22/30, explore-idea saturation 15/15이나 4-source negative, design-system DESIGN.md 11h 신선) 전부 trigger 미충족 → lock-fallback 룰 적용, polish-ui 강제 발화.
