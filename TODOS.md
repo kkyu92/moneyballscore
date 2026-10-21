@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): scripts/backfill-*.ts 6개 전수감사 (cycle 3489, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3482-3488) distinct=3). fix-incident gap=6/20·op-analysis gap=10/25·info-arch gap=19/30·lotto gap=13/30 전부 미도달. app/api 13개 + components/ 20개 + lib/ 24개 + hooks/config 전부 과거 완주 확인됨(CHANGELOG 교차검증) — 신규 scope 탐색 결과 `scripts/backfill-*.ts` 6개(home-win-prob/is-correct-shadow-fix/kbo-confirmed-postponed/kbo-stuck-verify/shadow-cohort/tie-winner-null, 904줄) CHANGELOG mention 0회 확인, DB-write 스크립트라 blast radius 고려해 우선 채택.
+
+**감사 결과**: 6개 전부 one-shot 과거 incident 대응 스크립트(이미 실행완료, `--apply` 없으면 dry-run default 안전설계, PAGE/offset pagination 일관). 특히 `backfill-kbo-stuck-verify.ts` 가 `computeWinnerTeamId`/`buildAccuracyUpdates`/`DB_CONSTRAINTS` 를 daily.ts 와 동일하게 shared helper import 로 사용 — cycle 2505/2506 lesson(live.ts 가 독립 inline 로직을 써서 winner_team_id 동점 fix 전파가 안 됐던 사례)과 달리 애초에 duplicate-logic drift trap 을 피한 설계임을 확인. `backfill-shadow-cohort.ts`(v2.1-B shadow, CLAUDE.md 기준 rejected 실험)는 과거 one-shot 기록용이라 제거 불필요. `DB_CONSTRAINTS.games` 단일 소스 참조 확인(ESLint 가드 존재).
+
+**결론**: 6개 파일 전부 clean, 코드 변경 0건.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3489%50≠0). trigger5 — 직전20(3470-3489, 현재 포함) 분포에 review-code 다수 포함, 0회 chain 없음 — 미충족. marker 미박제. ship-0 — 직전10(3480-3489) success 다수(3480/3481/3483/3486) 포함 — 미충족. PASS_ship 단일 grep 실측 3098(cycle 3488과 동일, 금번 retro-only 라 증가 없음).
+
+다음 사이클 추천 = review-code(heavy) scripts/ 잔여 7개(dev-backend-compare/dev-debate/llm-context-baseline/measure-context-layer-brier/op-analysis-cohort/run-pipeline/smoke-umpire-scraper) 계속 또는 fix-incident(gap7/20)/op-analysis(gap11/25)/info-arch(gap20/30)/lotto(gap14/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): app/api/{picks/*,hub-dispatch,pipeline} 전수감사 (cycle 3488, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23(plan #30 completed, 재처리 불필요). 2-chain lock 재계산(직전8=3480-3487) distinct=2(review-code6+fix-incident2) 충족하나 fix-incident 포함 룰(4)로 무시. fix-incident gap=2/20·op-analysis gap=9/25·info-arch gap=18/30·lotto gap=12/30 전부 미도달. explore-idea saturation 13/15 미도달 + 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. cycle 3487 추천대로 app/api 잔여 scope(picks/* 5개 route + hub-dispatch 본체 + pipeline) 채택.
