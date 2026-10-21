@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 격차 재측정 40회 연속, n=448 불변 (cycle 3522, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 2차 방어선(cycle 3521 retro `5e706475`) OK. review-code EXHAUSTIVE_SWEEP cooldown 발동 중(cycle 3521, 3522~3531 후보 제외). 직전8(3514-3521) distinct=3(review-code6+info-arch1+polish-ui1) — 2-chain lock 무관(review-code 이미 cooldown). fix-incident gap=14/20·lotto gap=15/30·info-arch gap=5/30 전부 미도달. `gh run list` 재확인 — CI Failure Dispatch 전부 skipped, 실제 incident 부재. `pipeline_runs` 최근 14건 직접 조회 — KBO predict 모드 전부 games_found=0 정확 매칭(시즌 종료 정상 no-op, mismatch 아님), MLB 파이프라인(savant/fancy/statsapi/elo/shadow_train) 전부 success — fix-incident 실제 trigger 부재. op-analysis(gap18/25, `scripts/op-analysis-ce-cohort.ts` 동일 harness) 자율 선택.
+
+**측정**: 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3504 수치와 완전 동일. CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 그대로 유지. LLM 부가가치 우세 결론 40회 연속 재확인. CREDIT_EXHAUSTED 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 112일+ 경과) 상태 변화 없음.
+
+**코드 변경 없음** — CLAUDE.md op-analysis 로그 1줄 추가만, retro-only.
+
+**검증(skill-evolution 등)**: trigger1(과거 소비)/trigger2(5연속 fail 없음)/trigger3(3522%50=22≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3503-3522, 현재 포함) 표본 20≥10, review-code 다수 발화 — 미충족(0회 아님). marker 미박제. ship-0 — 직전10(3513-3522) success 5건(3513-3515 영역) 포함 — 미충족. EXHAUSTIVE_SWEEP — CYCLE_N-9..CYCLE_N(3513-3522) review-code(heavy) 6건(<8) — 미충족(cooldown 중이라 자연 감소). 2-chain lock 직전8(3515-3522) distinct=4(review-code/info-arch/polish-ui/operational-analysis) — 미충족.
+
+다음 사이클 추천 = review-code cooldown 유지 중(3531 만료까지) fix-incident(gap15/20, 가장 근접)/lotto(gap16/30)/info-arch(gap6/30) 자연 대기, 다음 op-analysis 재측정 gap 25-cycle 주기(실제 last fire 3522) 권장.
+
 ## 🟢 RETRO-ONLY — review-code(heavy): app/ 2순회 2차(predictions+reviews+analysis+accuracy+picks+teams+players) 전수 read, drift 0건 (cycle 3521, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 2차 방어선(cycle 3520 retro `3183c509`) OK. 직전8(3513-3520) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. fix-incident gap=14/20·op-analysis gap=17/25·info-arch gap=5/30·lotto gap=15/30 전부 미도달. ship-0 — 직전10(3511-3520) success 5건 포함 — 미충족. EXHAUSTIVE_SWEEP — 직전9 review-code(heavy) 7건(<8) — 미충족. explore-idea saturation 직전15 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 7.2h 신선) 확립 skip 패턴 유지. cycle 3520 추천대로 app/ 2순회 잔여(predictions/reviews/analysis/accuracy/picks/teams/players, 19 content 파일) 채택.
