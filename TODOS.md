@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — review-code(heavy): app/ 2순회 2차(predictions+reviews+analysis+accuracy+picks+teams+players) 전수 read, drift 0건 (cycle 3521, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 2차 방어선(cycle 3520 retro `3183c509`) OK. 직전8(3513-3520) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. fix-incident gap=14/20·op-analysis gap=17/25·info-arch gap=5/30·lotto gap=15/30 전부 미도달. ship-0 — 직전10(3511-3520) success 5건 포함 — 미충족. EXHAUSTIVE_SWEEP — 직전9 review-code(heavy) 7건(<8) — 미충족. explore-idea saturation 직전15 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md mtime 7.2h 신선) 확립 skip 패턴 유지. cycle 3520 추천대로 app/ 2순회 잔여(predictions/reviews/analysis/accuracy/picks/teams/players, 19 content 파일) 채택.
+
+**감사**: Agent 위임 전수 read — page.tsx/analysis-data.ts 19개 파일 전부(analysis/page.tsx 2892줄 3-chunk 포함). en/ 미러 없음(이 7개 라우트는 KBO 전용, `app/en/`엔 `mlb` subdir만 존재). `PRODUCTION_COHORT_RULES` vs `CURRENT_SCORING_RULE` 분리 의도 정합(analysis/game/[id]/page.tsx cycle-2407 주석), CREDIT_EXHAUSTED 배너 휴리스틱 일관(cycle-2534/2539 패턴), dbDegraded 플래그 전파 전 파일 정합(cycle 3247/3396/3402/3511/3512 과거 fix 대상 regress 없음), tie-break/null-handling(취소 경기·소표본·convergence tier) 전부 정상. dev jargon/내부 경로 노출 grep 0건, dark mode 페어링 완비. weekly review 의 day-of-week 배지 생략(reviews/weekly/[week]) = wave-602 주석 명시 의도(요일당 1경기뿐이라 breakdown 항상 공백) — 버그 아님.
+
+**코드 변경 없음** — drift 0건, retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3521%50=21≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3502-3521, 현재 포함) 표본 20≥10, review-code 다수 발화 — 미충족(0회 아님). marker 미박제. ship-0 — 직전10(3512-3521) success 5건(3512-3515 영역) 포함 — 미충족. EXHAUSTIVE_SWEEP — CYCLE_N-9..CYCLE_N(3512-3521, 10 cycle) review-code(heavy) 8건(≥8)·clean_drift 7건(≥7) 양쪽 충족 — **발동**: review-code(모든 variant) cooldown N=10(다음 10 cycle 후보 제외), hard stop 아님(사용자 N 그대로 유지). 2-chain lock(다음 사이클용) — 직전8(3514-3521) distinct=3(review-code/info-arch/polish-ui) — 재확인 필요(다음 사이클 진단 시, cooldown 과 별개 레이어).
+
+다음 사이클 추천 = review-code cooldown(3522~3531) 발동으로 fix-incident(gap15/20, 거의 도달)/op-analysis(gap18/25)/info-arch(gap6/30)/lotto(gap16/30) 자연 대기 또는 explore-idea/design-system/expand-scope 다양성 전환 검토.
+
 ## 🟢 RETRO-ONLY — review-code(heavy): app/ 2순회 1차(guide+about+glossary+leaderboard+insights) 전수 read, drift 0건 (cycle 3520, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3512-3519) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. fix-incident gap=12/20·op-analysis gap=15/25·lotto gap=13/30·info-arch gap=3/30 전부 미도달. scripts/ 디렉토리 완전 소진(cycle 3518+3519) + lib/ 완전 소진(cycle 3508) — cycle 3519 추천대로 app/ 2순회 신규 축 채택. app/*/page.tsx 중 CHANGELOG mention 최저 5개(guide 11/about 23/glossary 38/leaderboard 45/insights 101, 총 1471줄) 1차 배치 선정 — 컴포넌트 단위는 과거 감사됐으나 top-level page.tsx 자체는 미확인 상태였음.
