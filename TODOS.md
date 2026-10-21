@@ -1,3 +1,19 @@
+## 🟢 SUCCESS — review-code (heavy): app/mlb/ 7라우트 전수감사, drift 2건 발견+수정 — degraded flag 누락 regression fix (cycle 3503, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 직전8(3495-3502) distinct=4(polish-ui+info-architecture-review+review-code x5+skill-evolution) — 미충족. fix-incident gap=20/20 정확 도달 — lite 체크 실행: `pipeline_runs` 최근 7일 123건 전부 status=success(errors=[] 전부), `gh run list` CI/GitGuardian/Vercel Deploy Failure Dispatch/CI Failure Dispatch 전부 success 또는 정상 skipped — 실제 incident 부재 확인(trigger 충족했으나 결과 "이상 없음"). op-analysis gap=24/25·lotto gap=27/30·info-arch gap=7/30 전부 미도달. 직전 3 cycle(3500/3501/3502) 추천 = review-code(heavy) 계속(`app/mlb/` 라우트 또는 `components/` 잔여) — 자연 채택, `app/mlb/{accuracy,factors,matchup,methodology,postseason,standings,wild-card}` 7라우트(TODOS 저-mention 미감사 scope) 배치.
+
+**감사 결과**: Agent(Explore) 위임 전수 read — 19개 파일(7개 page.tsx + loading/not-found + factors 7개 테스트 + methodology/standings 테스트) + 연관 lib 함수(`buildMlbStandings.ts`/`deriveMlbOutcome.ts`/`buildMlbMatchupUpcoming.ts`) + `mlb-base.ts` 상수 + KBO twin(`app/standings/page.tsx`) 교차확인. confidence 이중스케일링 전수 추적(`Math.round(x*100)` 1회만 확인), KST 날짜 경계(`toKSTDateString`) 정상, `MLB_PLACEHOLDER_FACTOR_KEYS` single-source 일치, methodology 홈어드밴티지 수식-코드 일치 — 전부 clean.
+
+**CONFIRMED drift 2건 (동일 근본원인)**: `mlb/standings/page.tsx:75`+`mlb/wild-card/page.tsx:72` 가 `buildMlbDivisionStandings()` 반환값에서 `degraded` 플래그를 destructure 안 하고 버림 — 어제 커밋 `ee5092e8`(degraded-flag 구조적 가드 sweep)가 해당 함수 반환 shape 를 `{standings, degraded}` 로 바꾸며 다른 모든 소비 페이지(accuracy, matchup)는 banner 연결했으나 이 2개 페이지만 1-line destructure-only diff 로 누락 — DB 장애 시 all-0-0 fake standings 가 "시즌 시작 전"처럼 silent 렌더(amber 배너 없음). `en/mlb/standings`+`en/mlb/wild-card` 도 동일 패턴(동일 커밋이 건드림) 확인 후 포함 — 총 4개 파일 수정. 기존 `degraded-flag-convention.test.ts` 가드는 `lib/**/*.ts` builder 만 스캔해 "flag 받고 페이지가 무시" 케이스를 못 잡는 gap — review-code(heavy) 가 page-level consumption 을 직접 read 해서만 발견 가능했던 케이스.
+
+**fix**: 4개 파일 모두 `const { standings, degraded: dbDegraded } = await buildMlbDivisionStandings();` + 기존 accuracy page 의 amber 배너 JSX 패턴(KO/EN 각각 기존 wording 재사용) 그대로 삽입.
+
+검증: `tsc --noEmit` clean / `eslint` 4개 파일 clean / vitest(standings+wild-card suite) 9 passed. PR #3188 → CI check pass(4m21s) + GitGuardian pass, Vercel preview fail(빌드 rate-limit 24h, 코드 무관 인프라 제한 — `upgradeToPro=build-rate-limit`) → `gh pr merge --squash --delete-branch` → main `f50dd50b` 반영 확인(`gh pr view --json state,mergedAt` MERGED 실측).
+
+**검증(skill-evolution 등)**: trigger3 미충족(3503%50=3). trigger5 — 직전20(3484-3503, 현재 포함) 표본 19(≥10), review-code 다수 발화(0회 아님) — 미충족. ship-0 — 직전10(3494-3503) success 4건(3494/3495/3501/3503) — 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`en/mlb/{accuracy,factors,matchup,methodology,postseason}` EN twin 잔여 또는 `components/layout+live+search+share+glossary` 잔여 스코프) 또는 fix-incident(이번 cycle lite 체크 완료, cooldown 자연)/op-analysis(gap25/25 거의 도달)/lotto(gap28/30)/info-arch(gap8/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): lib/mlb/ 잔여 14개 파일 전수감사, drift 0건 — lib/mlb/ 전체 완주 (cycle 3502, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived). 2-chain lock 직전8(3494-3501) distinct=4(review-code+polish-ui+info-architecture-review+skill-evolution 혼재) — 미충족. fix-incident gap=19/20·op-analysis gap=23/25·lotto gap=26/30·info-arch gap=6/30 전부 미도달. explore-idea saturation 직전15 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up stale) 확립 skip 패턴 유지. 2차 방어선 — cycle 3501 retro commit(87673f3c) 존재 확인 OK. 직전 cycle(3501) 추천 = review-code(heavy) 계속 — 자연 채택, `lib/mlb/` 잔여 14개 파일(cycle 3499 가 17개 중 3개만 커버) 배치.
