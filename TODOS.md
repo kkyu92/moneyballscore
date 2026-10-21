@@ -1,3 +1,13 @@
+## 🟢 RETRO-ONLY — review-code(heavy): scripts/ CHANGELOG mention 0회 11개 전수 read, drift 0건 (cycle 3518, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3510-3517) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap=11/20·op-analysis gap=14/25·lotto gap=12/30·info-arch gap=2/30 전부 미도달. cycle 3517 retro 추천(review-code(heavy) 복귀) 채택. `scripts/` 36개 파일 중 CHANGELOG mention count 0회인 11개(backfill-home-win-prob/backfill-is-correct-shadow-fix/backfill-kbo-confirmed-postponed/backfill-kbo-stuck-verify/backfill-shadow-cohort/backfill-tie-winner-null/dev-backend-compare/dev-debate/llm-context-baseline/measure-context-layer-brier/smoke-umpire-scraper)를 신규 미탐색 스코프로 선정.
+
+**검증 결과 — drift 0건**: 11개 파일 전수 read. 전부 과거 특정 cycle(1014/1229/1239/2185/2184/2506 등)의 일회성 backfill/dev-test 목적 완결 스크립트 — 헤더 주석이 배경/사용법/환경변수 명시, 실제 코드와 주석 간 mismatch 없음, pagination(PAGE loop + offset safety-stop 100000) 패턴이 sibling 스크립트 컨벤션과 일관, DB 스키마 참조(컬럼명/scoring_rule 상수) drift 없음, cron 미등록 archival artifact(runtime 영향 없음) 확인. 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1(5건 미만)/trigger2(5연속 fail 없음)/trigger3(3518%50=18≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3499-3518, 현재 포함) 표본 19≥10, review-code 13회 — 미충족(0회 아님). ship-0 — 직전10(3509-3518) success 7건 — 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(scripts/ 잔여 — backtest-v2-candidate/export-predictions-tabpfn/import-tabpfn-predictions/measure-n178-vs-n165/backfill-mlb-elo/backfill-mlb-factor-breakdown/backfill-mlb-schedule-status/dev-postview, mention 1~3회뿐이라 전수 감사 미실시) 또는 fix-incident(gap12/20)/op-analysis(gap15/25)/lotto(gap13/30)/info-arch(gap3/30) 자연 대기.
+
 ## 🟢 RETRO-ONLY — polish-ui (2-chain lock fallback): DESIGN.md 토큰 vs 컴포넌트 hex 대조, drift 0건 (cycle 3517, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3509-3516) distinct=2(review-code(heavy)7+info-architecture-review1) — 2-chain lock 탐지, review-code/info-arch 제외(cooldown N=1). 남은 pool: fix-incident gap=10/20·op-analysis gap=13/25·lotto gap=11/30 전부 미도달. lotto cron 정상 확인(picks 2026-10-24/results 2026-10-17 생성 완료). `gh run list` — CI Failure Dispatch 전부 skipped, 실제 incident 부재. DESIGN.md mtime 6h(신선) — design-system 미근접. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. 신규 라우트 7일 안 0건(git log 실측, find -mtime 는 파일시스템 touch 오탐) — polish-ui 자체 trigger 도 약함. 어떤 chain 도 강한 trigger 없어 2-chain lock 룰(3) fallback = polish-ui 강제 선택.
