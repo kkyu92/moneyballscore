@@ -90,6 +90,15 @@ export default async function MlbAnalysisPageEn() {
         locale="en"
       />
 
+      {accuracySummary.degraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          Some data may be temporarily unavailable due to a service disruption. Please try again shortly.
+        </div>
+      )}
+
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-brand-700 dark:text-brand-100">
           MLB AI Analysis Hub
