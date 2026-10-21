@@ -17767,3 +17767,15 @@ silent-drift-wave-207 테스트 2건이 교체 전 문구("검증 표본 임계 
 **검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3479%50=29≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3460-3479, 현재 포함) review-code 14회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3469-3478) success 4건 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3472-3479) distinct=4(polish-ui/review-code/lotto/operational-analysis) 미충족. 2차 방어선(cycle 3478 retro `e2c8c130`) OK.
 
 다음 사이클 추천 = review-code(heavy) 신규 스코프(`app/` 잔여 또는 `lib/`/`hooks/`) 또는 fix-incident(gap17/20, 거의 도달)/info-arch(gap10/30)/lotto(gap4/30) 자연 대기.
+
+## 🟡 RETRO-ONLY — review-code(heavy): lib/accuracy+picks+standings+seasons 22 files 신규 scope 전수감사, drift 0건 (cycle 3493, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3492 retro `3280b4ac`) OK. 2-chain lock 직전8(3485-3492) distinct=2(review-code 7+fix-incident(verify) 1) — fix-incident 포함이라 룰(4)로 무시. fix-incident gap=10/20·op-analysis gap=14/25·info-arch gap=23/30·lotto gap=17/30 전부 미도달, CI Failure Dispatch 전부 skipped(실제 incident 없음), lotto cron 정상(10/24 picks 기존재). cycle 3492가 scripts/ 디렉토리 자연 완주(lotto.ts 1개만 잔존, lotto chain 관할) 박제 — 신규 scope 전환점으로 `lib/` 하위 미감사 subdir(accuracy/picks/standings/seasons/leaderboard/dashboard/stats/predictions/mlb/reviews/teams/matchup/players/calendar/v2-shadow-monitor/changelog/observability/supabase/api/seo/lotto, insights/analysis/debug 는 기존 감사 완료) 중 핵심 예측 정확도/픽/순위 영역(accuracy+picks+standings+seasons, 22 files) 1차 배치 채택.
+
+**감사**: Agent 위임 전수 read — 22 files 전부. `ALL_SCORING_RULES`(packages/shared)·`CURRENT_SCORING_RULE`='v1.8'·`PRODUCTION_COHORT_RULES`=['v1.8','v1.8-credit-fail']·`PRODUCTION_ERA_HISTORY`·`SHADOW_SCORING_RULE`='v2.1-B-shadow' 전부 lib 코드와 일치, 하드코딩 n=/정확도/가중치 없음(전부 `@moneyball/shared` 상수 또는 DB row 계산 경유). `accuracyRateColorClass`(유일한 Tailwind 클래스 반환 함수) dark: 페어링 완비. pure data-builder 모듈이라 dev jargon/i18n twin/aria 해당 없음(UI 코드 없음). 과거 fix 유지 확인: `computeMagicNumber`(cycle 3216, win-pct 비교) / `findChampionship`(cycle 2453, KS 동률 null 처리) / `buildPickEntries`(cycle 2734, 동률 양쪽 오답 처리) / `buildBrierTrend`(cycle 2187, Sunday-cap 의도적 confidence 사용 주석 명시) 전부 regress 없음.
+
+**코드 변경 없음** — drift 0건, retro-only. `lib/` 잔여 16개 subdir(leaderboard/dashboard/stats/predictions/mlb/reviews/teams/matchup/players/calendar/v2-shadow-monitor/changelog/observability/supabase/api/seo/lotto) 다음 배치 대상.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3493%50=43≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3474-3493, 현재 포함) review-code 16회+ 발화로 미충족(표본≥10 충족). marker 미박제. ship-0 — 직전10(3484-3493) success 2건(3486/3483 영역) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3486-3493) 재계산 필요(다음 사이클 진단 시). 2차 방어선(cycle 3492 retro `3280b4ac`) OK.
+
+다음 사이클 추천 = review-code(heavy) lib/ 잔여 16개 subdir 계속 또는 fix-incident(gap11/20)/op-analysis(gap15/25)/info-arch(gap24/30)/lotto(gap18/30) 자연 대기.
