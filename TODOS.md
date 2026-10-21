@@ -1,3 +1,19 @@
+## 🟢 SUCCESS — review-code (heavy): components/dashboard/ 전수감사, dev-jargon + BRIER_BASELINE drift + twin 분기 + a11y 수정 (cycle 3478, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived/superseded/partial). 2-chain lock 미충족(직전8(3470-3477) distinct=4: review-code5+polish-ui1+lotto1+info-architecture-review1). fix-incident gap=15/20·op-analysis gap=24/25·info-arch gap=8/30·lotto gap=2/30 전부 미도달. ship-0 미충족(직전10(3468-3477) success 4건). 2차 방어선(cycle 3477 retro `0fb86335`) OK. components/ round2 잔여(dashboard/layout/predictions) 중 cycle 3477 추천 `dashboard/` 선정.
+
+**감사 결과**: Agent 위임 전수 read — 16파일 + 2 테스트 + 연관 builder 함수(buildAccuracyData/buildConfidenceBuckets/buildDailyAccuracy/factor-accuracy/buildModelTuningInsights/buildEloTrend/factorLabels) 전부 cross-reference. 6 findings (HIGH 2 / MEDIUM 2 / LOW-MEDIUM 1 / LOW 1).
+
+**발견+수정 4건**: (1) `ScoringRuleDayHeatmap`/`CohortComparisonHeatmap` 의 raw DB 컬럼명 `"scoring_rule"` 이 공개 `/accuracy` 페이지 테이블 헤더 + empty-state 문구로 그대로 노출(ko/en 양쪽) — "모델 버전"/"Model version" 으로 교체(dev-jargon 금지 규칙 위반, `feedback_ui_copy_no_dev_jargon` 해당). (2) `BrierTrendChart` 의 ReferenceLine 이 `shared.BRIER_BASELINE`(=0.25) 를 import 안 하고 리터럴 `0.25` 하드코딩 — 재도출 시 silent stale 위험, import 로 교체. (3) `FactorErrorTable` 이 twin `FactorErrorsBars`(components/analysis) 와 달리 `FACTOR_LABELS_TECHNICAL` 미매칭 시에도 raw factor slug 를 중복 렌더 — conditional 렌더 패턴 동기화(latent bug, 현재는 라벨맵이 superset 이라 미발현이지만 신규 factor 추가 시 노출 가능). (4) `WeeklyTrendMini` 차트 bar 클릭 네비게이션(`router.push`)에 키보드/스크린리더 접근성 부재(유일한 chart-driven nav) — `role="button"`/`tabIndex`/`aria-label`/`onKeyDown` 추가.
+
+**스킵(버그 아님)**: `CohortComparisonHeatmap`(brand ramp) vs `ScoringRuleDayHeatmap`(traffic-light) 색상 스킴 분기 — 자매 view 인데 동일 데이터가 다른 색으로 표시되나 디자인 판단 영역, DESIGN.md rationale 부재만으론 버그 단정 불가. `WeeklyTrendMini` 자체 tooltip 미사용 — low confidence, 의도적 mini-widget 분기 가능.
+
+**검증**: `tsc --noEmit`/`eslint` clean, `vitest run` 607 files/4794 tests 전부 PASS(기존 테스트 전부 통과, "scoring_rule" 언급은 테스트명/주석뿐 assertion 없음 확인). 직접 main 커밋+push(R4 범위, `446fbc97`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3478%50=28≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3459-3478, 현재 포함) review-code 다회 발화로 미충족(표본≥10 충족, 0회 아님). marker 미박제. ship-0 — 직전10(3469-3478) outcome 중 success 5건(3472/3473/3474/3477/3478) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3471-3478) distinct=4(review-code+polish-ui+lotto+info-architecture-review) 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(components/layout 또는 components/predictions 잔여) 또는 fix-incident(gap16/20)/op-analysis(gap25/25 정확 도달, CE/비CE 재측정 lite 자연 후보).
+
 ## 🟢 SUCCESS — review-code (heavy): components/analysis/ 전수감사, GameOverview TAG_STYLES drift 수정 (cycle 3477, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived/superseded). 2-chain lock 미충족(직전8(3469-3476) distinct=4: review-code5+polish-ui1+lotto1+info-architecture-review1). fix-incident gap=14/20·op-analysis gap=23/25·info-arch gap=7/30 전부 미도달, lotto 직전 발화(gap=1). `gh run list` 재확인 — CI Failure Dispatch 전부 skipped, 실제 incident 부재. 2차 방어선(cycle 3476 retro `d660a739`) OK. components/ round2 잔여(analysis/dashboard/layout/predictions) 중 파일수 최소 `analysis/`(15파일) 선정.
