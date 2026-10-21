@@ -17955,3 +17955,15 @@ silent-drift-wave-207 테스트 2건이 교체 전 문구("검증 표본 임계 
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3493%50=43≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3474-3493, 현재 포함) review-code 16회+ 발화로 미충족(표본≥10 충족). marker 미박제. ship-0 — 직전10(3484-3493) success 2건(3486/3483 영역) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3486-3493) 재계산 필요(다음 사이클 진단 시). 2차 방어선(cycle 3492 retro `3280b4ac`) OK.
 
 다음 사이클 추천 = review-code(heavy) lib/ 잔여 16개 subdir 계속 또는 fix-incident(gap11/20)/op-analysis(gap15/25)/info-arch(gap24/30)/lotto(gap18/30) 자연 대기.
+
+## 🟡 RETRO-ONLY — review-code(heavy): lib/ 잔여 11개 subdir(calendar/changelog/matchup/observability/players/reviews/seo/supabase/teams/v2-shadow-monitor/api, 63 files) 전수감사, drift 0건 — lib/ 시리즈 완결 (cycle 3508, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/superseded). 2차 방어선(cycle 3507 retro `98ae4273`) OK. 2-chain lock 미충족(직전8(3500-3507) distinct=5: review-code/skill-evolution/operational-analysis/lotto/fix-incident). fix-incident gap=1/20·op-analysis gap=4/25·info-arch gap=12/30·lotto gap=2/30 전부 미도달. cycle 3493 추천대로 `lib/` 잔여 11개 subdir(calendar/changelog/matchup/observability/players/reviews/seo/supabase/teams/v2-shadow-monitor/api) 채택.
+
+**감사**: Agent 위임 전수 read — 37 non-test 소스 파일(+29 테스트 파일 grep spot-check) 전부. 공유 상수(`MATCHUP_UPCOMING_LIMIT`/`TEAM_UPCOMING_LIMIT`/`RECENT_FORM_GAMES`/`PRODUCTION_COHORT_RULES`/`CURRENT_SCORING_RULE` 등) 전부 `packages/shared` 단일 출처 import 확인, 하드코딩 중복 없음. 과거 fix(예: `buildMlbTeamStats` sortBy parity) regress 없음 확인. dark-mode 페어링(`changelog/renderMarkdown.tsx`), i18n(MLB twin `locale` prop EN 미러), dev jargon, CREDIT_EXHAUSTED 서술, dead code 전부 clean.
+
+**코드 변경 없음** — drift 0건, retro-only. **`lib/` 전수감사 시리즈 완결** (components/ 19개 subdir + lib/ 전체 24개 subdir, cycle 3438/3493/3499/3500/3502/3508 누적). 다음 review-code(heavy) 발화 시 `app/` 잔여 라우트 2순회 또는 `hooks/`/`scripts/` 등 신규 디렉토리 전환 필요.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3508%50=8≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3489-3508, 현재 포함) review-code 14회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3499-3508) success 2건(3501/3503) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3501-3508) distinct=5(skill-evolution/review-code/operational-analysis/lotto/fix-incident) 미충족. 2차 방어선(cycle 3507 retro `98ae4273`) OK.
+
+다음 사이클 추천 = review-code(heavy) `app/` 라우트 2순회 또는 `hooks/`/`scripts/` 신규 스코프, 또는 fix-incident(gap2/20)/op-analysis(gap5/25)/info-arch(gap13/30)/lotto(gap3/30) 자연 대기.
