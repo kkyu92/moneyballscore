@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — polish-ui (lock-fallback): CohortComparisonHeatmap 다크모드 최저-tier 셀 밝기 역전 수정 (cycle 3472, 2026-10-21)
+
+진단: 2-chain alternation lock 충족 — 직전8(3464-3471) distinct=2(review-code 7+info-architecture-review 1) → 둘 다 제외. 잔여 후보(fix-incident gap=8/20 실제 incident 부재, op-analysis gap=17/25, lotto gap=22/30, explore-idea saturation 15/15이나 4-source negative, design-system DESIGN.md 11h 신선) 전부 trigger 미충족 → lock-fallback 룰 적용, polish-ui 강제 발화.
+
+**감사**: Agent 위임 — 사전 grep(flat `text-gray-400 dark:text-gray-400`, `text-[11px]`) 전부 clean 확인 후, 실제 dev server 기동 + headless browser 로 `/`, `/accuracy` light/dark 모드 시각 검사(grep 으로는 못 잡는 영역).
+
+**발견+수정**: `components/dashboard/CohortComparisonHeatmap.tsx:54` — 최저 정확도 tier(<50%) 셀이 `dark:bg-brand-50`(팔레트 전체 중 가장 밝은 shade, #edf7f0) 사용 — 다크모드에서 페이지 전체 중 유일하게 거의 흰색으로 튀어 "가장 약한 tier=눈에 안 띄어야" 의도와 정반대로 렌더. 자매 컴포넌트 `ScoringRuleDayHeatmap`(명시적 "자매 view" 주석, 저tier `bg-red-400 dark:bg-red-500` 로 항상 어둡게 유지) 및 site-wide `bg-brand-100`/`dark:bg-brand-900` 뱃지 페어링(30+ 건, 전부 다크모드에 어둡게) 과 대조해 확정. `dark:bg-brand-50 dark:text-neutral-800` → `dark:bg-brand-900 dark:text-brand-300` 로 정정. DESIGN.md Decisions Log 동봉 갱신.
+
+**검증**: `tsc --noEmit`/`eslint` clean, `vitest run` 606 files/4784 tests(신규 `silent-drift-cycle-3472.test.ts` 2건 포함) 전부 PASS. 직접 main 커밋+push(R4 범위, `f81600b1`, pre-push lint+type-check+version-sync-guard 전부 PASS). 부수적으로 `next dev` 자동재생성 `apps/moneyball/AGENTS.md` diff 1건 발생 — 본 작업과 무관한 dev-server 노이즈라 미커밋 상태로 방치(다음 세션 `git status` 확인 시 참고).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3472%50=22≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3453-3472, 현재 포함) review-code 15회 발화로 미충족(표본=19≥10 충족, review-code 0회 아님). marker 미박제. ship-0 — 직전10(3463-3472) 3464/3472 success 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3465-3472) distinct=3(review-code+info-architecture-review+polish-ui) 미충족. 2차 방어선(cycle 3471 retro `b6476eb5`) OK.
+
+다음 사이클 추천 = fix-incident(gap9/20)/op-analysis(gap18/25)/lotto(gap23/30) 자유 선택 또는 review-code(heavy) 복귀(lock 해제, `app/` 잔여 또는 `lib/`/`hooks/` 신규 스코프).
+
 ## ⚪ RETRO-ONLY — review-code (heavy): components/matchup 전수감사, drift 0건 (cycle 3471, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3470 retro `2e4b18cd`) OK. 직전8(3463-3470) distinct=3(fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족, 자유 선택. fix-incident gap=8/20·op-analysis gap=17/25·lotto gap=22/30 전부 미도달. explore-idea saturation 15/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 전일 신선) 확립 skip 패턴 유지. cycle 3470 추천대로 components/ round2 잔여(analysis/dashboard/layout/matchup/picks/predictions) 중 파일수 최소 `matchup/`(11파일, KBO/MLB twin 5쌍+1) 선정.
