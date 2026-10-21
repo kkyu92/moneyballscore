@@ -8,7 +8,7 @@ import {
   type TeamCode,
 } from "@moneyball/shared";
 
-interface BatterLeaderboardRow {
+export interface BatterLeaderboardRow {
   playerId: number;
   nameKo: string;
   teamCode: TeamCode | null;

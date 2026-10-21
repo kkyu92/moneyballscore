@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {SMALL_SAMPLE_N, type TeamCode, SITE_URL, LEADERBOARD_TOP_N, toKSTDateString } from "@moneyball/shared";
-import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
-import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
+import { buildPitcherLeaderboard, type PitcherLeaderboardRow } from "@/lib/players/buildPitcherLeaderboard";
+import { buildBatterLeaderboard, type BatterLeaderboardRow } from "@/lib/players/buildBatterLeaderboard";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const metadata: Metadata = {
   title: "선수 리더보드",
@@ -48,10 +49,29 @@ function fmtWar(v: number): string {
 }
 
 export default async function PlayersIndexPage() {
-  const [pitchers, batters] = await Promise.all([
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 사용 (leaderboard/standings/teams 등과 동일 컨벤션 — review-code
+  // heavy 감사, cycle 3512. fail-loud Promise.all 은 ISR cold-cache 시 boundary 대신
+  // raw 500 반환 위험, cycle 2946/2947/3511 확인 패턴).
+  const [pitchersR, battersR] = await Promise.allSettled([
     buildPitcherLeaderboard({ limit: LEADERBOARD_TOP_N, minAppearances: 1 }),
     buildBatterLeaderboard({ limit: LEADERBOARD_TOP_N }),
   ]);
+  const pitchers =
+    pitchersR.status === "fulfilled"
+      ? pitchersR.value
+      : captureFallback(pitchersR.reason, [] as PitcherLeaderboardRow[], {
+          route: "/players",
+          source: "buildPitcherLeaderboard",
+        });
+  const batters =
+    battersR.status === "fulfilled"
+      ? battersR.value
+      : captureFallback(battersR.reason, [] as BatterLeaderboardRow[], {
+          route: "/players",
+          source: "buildBatterLeaderboard",
+        });
+  const dbDegraded = [pitchersR, battersR].some((r) => r.status === "rejected");
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -106,6 +126,14 @@ export default async function PlayersIndexPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Breadcrumb items={[{ label: '선수 리더보드' }]} />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
       <header className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white space-y-1">
         <h1 className="text-2xl font-bold">선수 리더보드</h1>
         <p className="text-sm text-white/70">

@@ -8,7 +8,7 @@ import {
   PRODUCTION_COHORT_RULES,
 } from "@moneyball/shared";
 
-interface PitcherLeaderboardRow {
+export interface PitcherLeaderboardRow {
   playerId: number;
   nameKo: string;
   teamCode: TeamCode | null;
