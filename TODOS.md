@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): components/glossary+leaderboard+teams 전수감사, drift 0건 (cycle 3468, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3467 retro `c4495bc8`) OK. 2-chain lock 미충족(직전8(3460-3467) distinct=3: review-code/polish-ui/fix-incident) — 자유 선택. fix-incident gap=5/20·lotto gap=19/30·info-arch gap=28/30(근접이나 미도달)·op-analysis gap=14/25 전부 미도달. components/live+players+standings 전수감사 완료(cycle 3467) 후속 — 잔여 10개 서브디렉토리 중 파일 수 최소 묶음 `glossary/`(1)+`leaderboard/`(6)+`teams/`(6) = 13파일 스코프 선정.
+
+**감사 결과**: `GlossaryCategoryFilter.tsx` — `TeamRecentGamesFilter` 와 동일 `useSyncExternalStore` localStorage 패턴 일관. `HallOfFame.tsx`/`LeaderboardTable.tsx` — 헤더 주석("SVG 메달 전용" vs "이모지 메달") 실제 코드와 일치 확인. `LeaderboardClient`/`LeaderboardJoinModal`/`LeaderboardSortControl`/`LeaderboardTable` 4개 wiring 전부 일치(`sortMeta`/`useLeaderboardSortMode`/`useLeaderboard()` 반환 shape), `LeaderboardJoinModal` 은 `MyPicksClient.tsx` 재사용처도 동일 contract. `silent-drift-cycle-3417.test.ts` — focus-visible 컨벤션 회귀 가드, 현재 코드와 일치·통과. `TeamConvergencePickRecord`/`TeamEloChart` (KBO) vs `MlbTeamConvergencePickRecord`/`MlbTeamEloChart` (MLB) — KBO 는 EN twin 라우트 자체가 없어 `locale` prop 부재가 의도된 설계(MLB 쪽은 `en/mlb/team/[code]/page.tsx` 에서 `locale="en"` 정상 전달, `MlbTeamEloChart.test.ts` 회귀 가드 통과 확인). `TeamRecentGamesFilter.tsx` — KBO 전용 라우트 단일 사용처, parity 요구 없음. `pnpm vitest run src/components/leaderboard src/components/teams` 5 tests 전부 PASS.
+
+**코드 변경 없음** — actionable fix 없음, drift 0건 확인.
+
+**검증(skill-evolution 등)**: trigger3(3468%50=18≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3449-3468, 현재 포함) 표본=19(≥10 충족)이나 review-code 14회 발화(0회 아님)로 미충족. marker 미박제. ship-0 — 직전9(3459-3467, 현재 미포함) outcome 중 success 3건(3461/3462/3464) 포함 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/` 잔여: accuracy/analysis/dashboard/layout/matchup/picks/predictions — 파일수 순 재선정) 또는 info-arch(gap29/30, 거의 도달)/lotto(gap20/30)/op-analysis(gap15/25) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): components/live+players+standings 전수감사, drift 0건 (cycle 3467, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3466 retro `36078a13`) OK. 2-chain lock 미충족(직전8(3459-3466) distinct=3: review-code/polish-ui/fix-incident) — 자유 선택. fix-incident gap=4/20·lotto gap=18/30·info-arch gap=27/30·op-analysis gap=13/25 전부 미도달. components/insights+search+share+ui 전수감사 완료(cycle 3466) 후속 — TODOS/CHANGELOG mention count 최하위(grep-count-depth 가드레일 따라 직접 read 로 재검증) `live/`(2파일)+`players/`(1파일)+`standings/`(2파일) 미감사 스코프 선정.
