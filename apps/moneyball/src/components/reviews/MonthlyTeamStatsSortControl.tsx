@@ -8,7 +8,7 @@ const STORAGE_SORT = 'mb_monthly_team_stats_sort_v1';
 
 const LABELS: Record<SortMode, string> = {
   accuracy: '정확도순',
-  sample: '표본순',
+  sample: '경기수순',
 };
 
 // cycle 2356 (en/mlb/reviews/monthly 미러): locale prop 추가 — 기본값 'ko' 라

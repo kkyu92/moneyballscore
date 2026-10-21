@@ -208,7 +208,7 @@ export default async function ShadowAccuracyPage() {
 
       <section className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-[var(--color-border)] dark:bg-gray-900">
-          <div className="text-xs text-gray-500 dark:text-gray-400">누적 표본 (n)</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">누적 경기 수 (n)</div>
           <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{totalN}</div>
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-[var(--color-border)] dark:bg-gray-900">

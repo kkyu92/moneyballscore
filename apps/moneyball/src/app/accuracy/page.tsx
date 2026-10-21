@@ -1195,8 +1195,8 @@ function V18SubCohortPanel({ stats }: { stats: V18SubCohortStats }) {
         </p>
       )}
       <p className="text-xs text-gray-400 dark:text-gray-500">
-        AI 토론 사용률 = {realDebatePct}% ({stats.realDebate.n}/{stats.total}). 표본이 작은
-        구간은 신뢰구간이 넓습니다 (±15~25%p).
+        AI 토론 사용률 = {realDebatePct}% ({stats.realDebate.n}/{stats.total}). 경기 수가 적은
+        구간은 오차 범위가 넓습니다 (±15~25%p).
       </p>
     </section>
   );

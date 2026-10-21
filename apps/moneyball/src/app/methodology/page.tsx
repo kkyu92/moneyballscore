@@ -86,7 +86,7 @@ const FACTOR_WEIGHTS: Array<{ slug: MetricSlug; rationale: string }> = [
   {
     slug: "head_to_head",
     rationale:
-      "두 팀 시즌 내 맞대결 기록. 분석에서 가장 작은 가중치 — 표본이 작아 노이즈가 크다는 사실을 누적 데이터로 확인.",
+      "두 팀 시즌 내 맞대결 기록. 분석에서 가장 작은 가중치 — 경기 수가 적어 노이즈가 크다는 사실을 누적 데이터로 확인.",
   },
 ];
 
@@ -120,7 +120,7 @@ const VERSION_HISTORY = [
     version: "v1.8",
     date: "2026-05-12 ~ 현재",
     change:
-      `head_to_head 5% → 3% (표본 부족 노이즈 인정) + elo 8% → 10% (정보가치 Δ +0.30 최강). Sunday cap 도입 — 일요일 신뢰도 ${WINNER_PROB_LEAN_PCT}% 초과 시 ${SUNDAY_CAP_CONFIDENCE_PCT}% 로 강등.`,
+      `head_to_head 5% → 3% (경기 수 부족 노이즈 인정) + elo 8% → 10% (정보가치 Δ +0.30 최강). Sunday cap 도입 — 일요일 신뢰도 ${WINNER_PROB_LEAN_PCT}% 초과 시 ${SUNDAY_CAP_CONFIDENCE_PCT}% 로 강등.`,
   },
   {
     version: "v2.0 (v2.1-B rejected — v1.8 유지 확정)",
@@ -181,7 +181,7 @@ export default function MethodologyPage() {
           가지 데이터 소스에서 매일 자동 수집한 세이버메트릭스 지표 {KBO_FACTOR_COUNT}개를
           가중합산한 뒤, AI 에이전트 3개가 토론하여 최종 승률을 결정합니다.
           매 경기 종료 후 실제 결과와 비교하여 적중률을 측정합니다.
-          n={V2_PROMOTION_COHORT_N} 검증 표본 임계 달성 완료 — v1.8 유지 확정 (2026-07-06).
+          n={V2_PROMOTION_COHORT_N} 검증 경기 수 임계 달성 완료 — v1.8 유지 확정 (2026-07-06).
           이 페이지는 그 전체 과정을 숨김없이 공개합니다.
         </p>
       </header>
@@ -210,7 +210,7 @@ export default function MethodologyPage() {
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
             <h3 className="font-semibold mb-2">③ 결과 검증</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-              매 경기 종료 후 적중률을 누적. n={V2_PROMOTION_COHORT_N}+ 임계 도달 (2026-07-06) 이후 v1.8 유지 확정. 최신 표본과 실시간 적중률은 /accuracy 참조.
+              매 경기 종료 후 적중률을 누적. n={V2_PROMOTION_COHORT_N}+ 임계 도달 (2026-07-06) 이후 v1.8 유지 확정. 최신 경기 수와 실시간 적중률은 /accuracy 참조.
             </p>
           </div>
         </div>
@@ -463,7 +463,7 @@ export default function MethodologyPage() {
             가중치에 반영되지 않습니다.
           </li>
           <li>
-            KBO 한 시즌 {KBO_REGULAR_SEASON_GAMES} 경기 (정규 시즌) 의 표본은 메이저리그 ({MLB_REGULAR_SEASON_GAMES} 경기) 의
+            KBO 한 시즌 {KBO_REGULAR_SEASON_GAMES} 경기 (정규 시즌) 는 메이저리그 ({MLB_REGULAR_SEASON_GAMES} 경기) 의
             1/3 수준. 통계 모델의 정밀도 한계가 명확.
           </li>
           <li>

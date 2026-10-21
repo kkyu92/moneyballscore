@@ -67,7 +67,7 @@ export function AccuracySummary({
                 </span>
                 <span className="font-medium text-gray-700 dark:text-gray-200">
                   {pct == null ? (
-                    <span className="text-gray-400 dark:text-gray-500">표본 없음</span>
+                    <span className="text-gray-400 dark:text-gray-500">데이터 없음</span>
                   ) : (
                     <>
                       {pct}%{' '}

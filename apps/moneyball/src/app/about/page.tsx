@@ -200,7 +200,7 @@ const FAQS = [
   },
   {
     q: `모델 버전 ${CURRENT_SCORING_RULE} 은 무엇을 의미하나요?`,
-    a: `현재 가동 중인 가중치 조합 버전입니다. ${CURRENT_SCORING_RULE} (2026-05-12 ~) 의 변경: head_to_head 가중치 5% → 3% 축소(표본 부족 노이즈 인정), elo 가중치 8% → 10% 확대(정보가치 ↑). 일요일 경기는 신뢰도 ${WINNER_PROB_LEAN_PCT}% 초과 시 ${SUNDAY_CAP_CONFIDENCE_PCT}% 로 강등(Sunday cap). 누적 검증 표본 n=${V2_PROMOTION_COHORT_N} 달성 완료 — v2.1-B rejected, v1.8 유지 확정 (calibration 정상). 실시간 진척은 /accuracy 참조.`,
+    a: `현재 가동 중인 가중치 조합 버전입니다. ${CURRENT_SCORING_RULE} (2026-05-12 ~) 의 변경: head_to_head 가중치 5% → 3% 축소(경기 수 부족 노이즈 인정), elo 가중치 8% → 10% 확대(정보가치 ↑). 일요일 경기는 신뢰도 ${WINNER_PROB_LEAN_PCT}% 초과 시 ${SUNDAY_CAP_CONFIDENCE_PCT}% 로 강등(Sunday cap). 누적 검증 n=${V2_PROMOTION_COHORT_N} 달성 완료 — v2.1-B rejected, v1.8 유지 확정 (calibration 정상). 실시간 진척은 /accuracy 참조.`,
   },
   {
     q: "픽 기록은 어떻게 시작하나요?",
@@ -307,7 +307,7 @@ export default async function AboutPage() {
           세이버메트릭스 팩터를 3개 데이터 소스에서 수집하여 가중합산합니다.
           홈팀 어드밴티지(+{HOME_ADVANTAGE_PCT.toFixed(1)}%p, 최근 3시즌 {HOME_WIN_RATE_SAMPLE_N.toLocaleString('ko-KR')}경기 실제 홈 승률 {HOME_WIN_RATE_PCT.toFixed(2)}% ±{HOME_WIN_RATE_CI_PP.toFixed(1)}%p 기준)를
           추가 반영하며, 각 팩터를 상대 비교로 정규화한 후 최종 승리 확률을
-          산출합니다. n={V2_PROMOTION_COHORT_N} 검증 표본 임계 달성 완료 — v1.8 유지 확정 (2026-07-06).
+          산출합니다. n={V2_PROMOTION_COHORT_N} 검증 경기 수 임계 달성 완료 — v1.8 유지 확정 (2026-07-06).
           {KBO_FACTOR_COUNT}개 팩터 전체 활용 확정.
         </p>
 

@@ -10,7 +10,7 @@ const STORAGE_SORT = 'mb_leaderboard_sort_v1';
 const LABELS: Record<LeaderboardSortMode, string> = {
   accuracy: '정확도순',
   streak: '연속순',
-  sample: '표본순',
+  sample: '참여횟수순',
 };
 
 const ORDER: LeaderboardSortMode[] = ['accuracy', 'streak', 'sample'];

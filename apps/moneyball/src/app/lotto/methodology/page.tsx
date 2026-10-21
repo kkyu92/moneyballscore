@@ -65,7 +65,7 @@ function oosSampleCaveat(n: number): string {
   if (n < OOS_ACTIONABLE_FLOOR) {
     return `N=${n} preliminary (actionable 임계 N=${OOS_ACTIONABLE_FLOOR} 미달) — 검증 단정 차단.`;
   }
-  return `N=${n} actionable (N≥${OOS_ACTIONABLE_FLOOR}) — 표본 임계 도달, 지속 monitoring 필요.`;
+  return `N=${n} actionable (N≥${OOS_ACTIONABLE_FLOOR}) — 회차 수 임계 도달, 지속 모니터링 필요.`;
 }
 
 const PERCENTILE_MARKERS: PercentileMarker[] = [
@@ -361,7 +361,7 @@ export default function LottoMethodologyPage() {
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           <div className="bg-brand-900 border border-brand-800 rounded p-2 space-y-1">
-            <div className="text-brand-400">표본 수 N</div>
+            <div className="text-brand-400">회차 수 N</div>
             <div className="text-brand-100 font-semibold">
               {formatNumber(scoreBacktest.score_stats.n)}
             </div>

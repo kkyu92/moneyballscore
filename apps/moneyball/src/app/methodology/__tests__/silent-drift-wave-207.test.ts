@@ -13,7 +13,7 @@ describe('silent drift wave 207 — methodology + about "재조정" stale claim 
   });
 
   it('methodology intro reflects v1.8 confirmed threshold', () => {
-    expect(METHODOLOGY_SRC).toMatch(/V2_PROMOTION_COHORT_N.*검증 표본 임계 달성/);
+    expect(METHODOLOGY_SRC).toMatch(/V2_PROMOTION_COHORT_N.*검증 경기 수 임계 달성/);
   });
 
   it('methodology intro reflects v1.8 유지 확정', () => {
@@ -25,7 +25,7 @@ describe('silent drift wave 207 — methodology + about "재조정" stale claim 
   });
 
   it('about page reflects v1.8 confirmed threshold', () => {
-    expect(ABOUT_SRC).toMatch(/V2_PROMOTION_COHORT_N.*검증 표본 임계 달성/);
+    expect(ABOUT_SRC).toMatch(/V2_PROMOTION_COHORT_N.*검증 경기 수 임계 달성/);
   });
 
   it('about page reflects v1.8 유지 확정', () => {

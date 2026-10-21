@@ -178,7 +178,7 @@ export default function MlbMethodologyPage() {
           한계 + 면책
         </h2>
         <ul className="text-sm text-gray-700 dark:text-gray-200 space-y-2 list-disc pl-5">
-          <li>MLB 모델은 KBO 대비 운영 기간이 짧아 표본이 KBO 만큼 누적되지 않았습니다.</li>
+          <li>MLB 모델은 KBO 대비 운영 기간이 짧아 누적 경기 수가 KBO 만큼 쌓이지 않았습니다.</li>
           <li>LLM 토론 layer 가 없어 부상·트레이드 등 정성적 맥락은 팩터에 반영되지 않습니다.</li>
           <li>본 예측은 참고용 콘텐츠이며 배팅·투자 조언이 아닙니다.</li>
         </ul>

@@ -217,7 +217,7 @@ export default async function StandingsPage() {
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">승률</th>
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">게임차</th>
                   <th className="px-3 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">최근{RECENT_FORM_GAMES}</th>
-                  <th className="px-3 py-3 text-center font-semibold text-gray-600 dark:text-gray-300" title={`홈/원정 성적 (${VENUE_RECORD_MIN_GAMES}경기 미만은 표본 부족으로 -로 표시)`}>홈/원정</th>
+                  <th className="px-3 py-3 text-center font-semibold text-gray-600 dark:text-gray-300" title={`홈/원정 성적 (${VENUE_RECORD_MIN_GAMES}경기 미만은 경기 수가 적어 -로 표시)`}>홈/원정</th>
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums" title={`Elo 레이팅 (기준: ${ELO_NEUTRAL})`}>Elo</th>
                 </tr>
               </thead>

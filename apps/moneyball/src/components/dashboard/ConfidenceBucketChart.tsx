@@ -75,7 +75,7 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
                     label: "구간 적중률",
                     value: d.hasData
                       ? `${Number(p.value).toFixed(1)}% · ${d.total}경기`
-                      : "표본 없음",
+                      : "데이터 없음",
                     color: brand[500],
                     muted: !d.hasData,
                   };

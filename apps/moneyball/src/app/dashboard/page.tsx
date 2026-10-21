@@ -237,7 +237,7 @@ export default async function DashboardPage() {
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
             {confidentStat.total > 0
               ? `적중 예측 ${confidentStat.correct}/${confidentStat.total}`
-              : '적중 예측 표본 없음'}
+              : '적중 예측 데이터 없음'}
             {confidentStat.total > 0 && confidentStat.total < SMALL_SAMPLE_N && (
               <> · 참고용({SMALL_SAMPLE_N}경기 미만)</>
             )}

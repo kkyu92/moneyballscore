@@ -9,7 +9,7 @@ const STORAGE_SORT = 'mb_standings_team_accuracy_sort_v1';
 
 const LABELS: Record<SortMode, string> = {
   accuracy: '정확도순',
-  sample: '표본순',
+  sample: '경기수순',
 };
 
 const ORDER: SortMode[] = ['accuracy', 'sample'];

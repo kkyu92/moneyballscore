@@ -28,7 +28,7 @@ interface RollingAccuracyChartProps {
 
 const STRINGS = {
   ko: {
-    empty: (windowDays: number) => `${windowDays}일 rolling 적중률 측정에는 누적 표본이 더 필요합니다.`,
+    empty: (windowDays: number) => `${windowDays}일 rolling 적중률 측정에는 누적 경기 수가 더 필요합니다.`,
     yAxisLabel: '적중률',
     baseline: '동전 50%',
     tooltipLabel: (windowDays: number) => `${windowDays}일 rolling`,

@@ -42,7 +42,7 @@ export const CATEGORIES: GlossaryCategory[] = [
         korean: '기대 FIP',
         fullName: 'Expected FIP',
         definition:
-          'FIP 의 홈런율을 리그 평균으로 정규화한 지표. 작은 표본에서 발생하는 홈런 변동성(운)을 제거. 시즌 후반 성적 예측에 강하다.',
+          'FIP 의 홈런율을 리그 평균으로 정규화한 지표. 등판 수가 적을 때 생기는 홈런 변동성(운)을 제거. 시즌 후반 성적 예측에 강하다.',
         range: 'KBO 평균 ≈ 4.50. FIP 와 큰 차이 = 홈런운 가능성.',
         modelUsage: `선발 투수: 가중치 ${Math.round(DEFAULT_WEIGHTS.sp_xfip * 100)}%`,
         source: 'KBO Fancy Stats',

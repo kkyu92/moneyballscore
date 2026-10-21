@@ -102,7 +102,7 @@ export function ModelVersionHistory({ versions }: Props) {
         </table>
       </div>
       <p className="text-xs text-gray-400 dark:text-gray-500">
-        각 버전 표본이 작아 95% 신뢰구간이 넓습니다 (±14~21%p). 절대 수치보다 방향성 참고용입니다.
+        각 버전 경기 수가 적어 95% 신뢰구간이 넓습니다 (±14~21%p). 절대 수치보다 방향성 참고용입니다.
       </p>
     </div>
   );

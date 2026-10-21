@@ -10,7 +10,7 @@ const STORAGE_SORT = 'mb_season_standings_sort_v1';
 const LABELS: Record<SeasonStandingsSortMode, string> = {
   winRate: '승률순',
   runDiff: '득실순',
-  sample: '표본순',
+  sample: '경기수순',
 };
 
 const ORDER: SeasonStandingsSortMode[] = ['winRate', 'runDiff', 'sample'];

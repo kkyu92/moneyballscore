@@ -79,7 +79,7 @@ export function CalibrationPlot({ series, totalN }: CalibrationPlotProps) {
       {totalN !== undefined && totalN < CALIBRATION_FULL_N && (
         <div className="mb-3 rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
           <div className="flex items-center justify-between mb-1">
-            <span>표본 수집 중 — n={totalN} / {CALIBRATION_FULL_N} (n={CALIBRATION_FULL_N} 도달 시 신뢰도 ↑)</span>
+            <span>데이터 쌓는 중 — n={totalN} / {CALIBRATION_FULL_N} (n={CALIBRATION_FULL_N} 도달 시 신뢰도 ↑)</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-yellow-200 dark:bg-yellow-800">
             <div
@@ -159,7 +159,7 @@ export function CalibrationPlot({ series, totalN }: CalibrationPlotProps) {
                     color: items[0].color,
                   },
                   {
-                    label: "표본",
+                    label: "경기 수",
                     value: `n=${row.n}`,
                     color: items[0].color,
                   },
