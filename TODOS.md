@@ -1,3 +1,19 @@
+## 🟢 SUCCESS — review-code(heavy): KBO 최상위 라우트 12개 fail-loud/fail-soft 재확인(drift 0) + UI jargon 룰 위반 '박제' 12파일 발견+수정 (cycle 3513, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3506-3513) distinct=3 — 2-chain lock 미충족. ship-0 미충족(직전10 success 5건). trigger5 미충족(직전20 review-code 13회). gap 전부 미도달(fix-incident 6/20, op-analysis 10/25, info-arch 17/30, lotto 7/30). cycle 3512 추천대로 review-code(heavy) 계속 — KBO 최상위 page.tsx 잔여(community/contact/dashboard/debug×7/feed/login/privacy/search/seasons×2/settings/terms/v2-preview/v2-shadow-monitor) 12개 선정.
+
+**감사**: fail-loud/fail-soft regression family(leaderboard/players 류) 재확인 — `dashboard/page.tsx`(Promise.all+assertSelectOk fail-loud, 자체 `/dashboard/error.tsx` boundary + 명시 주석으로 의도된 설계 확인), `seasons/[year]/page.tsx`(convergence 함수 내부 fail-soft 기존 확인 + `buildSeasonSummary` fail-loud 는 cycle 3402 의도적 결정 + 전역 error.tsx 흡수), debug/* 7개(자체 `{error, data:null}` 기존 컨벤션) — 전부 drift 0건.
+
+**발견+수정(별도 경로)**: 병행 수행한 `feedback_ui_copy_no_dev_jargon` 메모리 룰 grep 감사에서 내부 dev slang "박제"(표준 국어 "박제"=taxidermy, 맥락 무관한 혼란스러운 단어) 가 실사용자 가시 텍스트에 노출된 12개 파일 발견: `settings`/`login`/`community` placeholder 문구, `lotto/archive` + `lotto/archive/[date]/not-found`, `mlb/wild-card` + `mlb/postseason` "박제 완료" 리스트, `mlb/players/[id]` + `mlb/factors` + `mlb/players` 설명문, `v2-shadow-monitor` + `accuracy/shadow` 안내문. "준비 중"/"공개"/"반영"/"완료" 등 자연어로 치환, `placeholders.test.tsx` 어썰션 동기화.
+
+**범위 밖 발견(meta-pattern dispatch)**: 동일 룰의 금지어 "실측" 이 glossary/methodology/mlb 페이지 전역 수십 건 잔존 — 의미 보존(실측값 vs 모델 추정값 구분) 재작성 필요해 더 큰 scope. `lotto/methodology` "사이클 진행 history" 섹션은 "develop-cycle skill"/"chain fire"/"chain trigger" 등 raw 운영 엔지니어링 용어 노출 — 의도된 투명성 기능이나 재작성 필요.
+
+검증: `tsc --noEmit`/`eslint` clean. 전체 `vitest` 606 files / 4791 tests 통과. 직접 main commit+push(R4, pre-push lint+type-check+version-sync-guard 전부 PASS, `8205b16e`).
+
+**검증(skill-evolution 등)**: trigger1(10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3513%50=13≠0)/trigger4(없음) 미충족. trigger5 — 직전20(3494-3513, 현재 포함) 표본 19≥10, review-code 13회 발화 — 미충족. ship-0 — 직전10(3504-3513) success 5건 — 미충족. 2-chain lock(다음 사이클용) — 직전8(3506-3513) distinct=3(lotto/fix-incident/review-code) — 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(실측 치환 전용 cycle 또는 lotto/methodology 섹션 재작성 또는 KBO 잔여 page.tsx) 또는 fix-incident(gap6/20)/op-analysis(gap10/25)/info-arch(gap17/30)/lotto(gap7/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): KBO 최상위 라우트 잔여(teams/players/guide/about/glossary/insights/reviews) 전수감사, fail-loud fetch drift 1건 발견+수정 (cycle 3512, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3505-3512) 2-chain lock 미충족. ship-0 미충족(직전10 success 4건). trigger5 미충족(직전20 review-code 14회). gap 전부 미도달(fix-incident 5/20, op-analysis 8/25, info-arch 16/30, lotto 6/30). cycle 3511 추천대로 review-code(heavy) 계속 — KBO 최상위 page.tsx 잔여(teams/players/guide/about/glossary/insights/reviews) 선정.
