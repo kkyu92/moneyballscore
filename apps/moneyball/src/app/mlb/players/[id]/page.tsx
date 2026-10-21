@@ -236,10 +236,10 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
         </h2>
         <div className="rounded-xl border border-dashed border-gray-300 dark:border-[var(--color-border)] p-6 text-center space-y-2">
           <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-            📌 선수별 individual Statcast layer 박제 중
+            📌 선수별 individual Statcast layer 준비 중
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            현재 statsapi.mlb / Baseball Savant roster + per-player Statcast scrape 미박제. <br />
+            현재 statsapi.mlb / Baseball Savant roster + per-player Statcast scrape 미반영. <br />
             ETA = MLB 풀 인제스트 결정 후 (사용자 영역). 진행 상태 ={" "}
             <Link href="/mlb/factors" className="underline">
               /mlb/factors

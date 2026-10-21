@@ -200,7 +200,7 @@ export default function MlbPlayersHub() {
           </span>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          각 팀 카드 → 팀 프로필 (현재: 시즌 placeholder + {FACTOR_TOTAL}팩터 explainer + 홈구장 파크팩터). Statcast 실측 수치는 팀 프로필 안 carry-over 박제.
+          각 팀 카드 → 팀 프로필 (현재: 시즌 placeholder + {FACTOR_TOTAL}팩터 explainer + 홈구장 파크팩터). Statcast 실측 수치는 팀 프로필 안 추후 반영 예정.
         </p>
         {LEAGUES.map((league) => (
           <div key={league} className="space-y-4" aria-labelledby={`mlb-${league}-statcast`}>
@@ -250,7 +250,7 @@ export default function MlbPlayersHub() {
           ※ Statcast 측정 출처: <a href="https://baseballsavant.mlb.com/" target="_blank" rel="noopener noreferrer" className="underline">Baseball Savant</a> (MLB Advanced Media). 스크래퍼: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
         </p>
         <p>
-          ※ 본 hub = {FACTOR_TOTAL}팩터 본선 안 Statcast {FACTOR_STATCAST} 의 설명 layer. 라이브 팀별 실측 데이터 = 별도 ingestion 통합 시 박제. KBO {FACTOR_KBO}팩터 = <Link href="/mlb/factors" className="underline">/mlb/factors</Link>.
+          ※ 본 hub = {FACTOR_TOTAL}팩터 본선 안 Statcast {FACTOR_STATCAST} 의 설명 layer. 라이브 팀별 실측 데이터 = 별도 ingestion 통합 시 반영 예정. KBO {FACTOR_KBO}팩터 = <Link href="/mlb/factors" className="underline">/mlb/factors</Link>.
         </p>
       </footer>
     </main>

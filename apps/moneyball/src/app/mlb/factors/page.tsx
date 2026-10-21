@@ -124,8 +124,8 @@ const KBO_FACTORS: readonly FactorRow[] = [
     category: "기록",
     range: "0.00 ~ 1.00",
     description:
-      "두 팀 시즌 안 직접 대결 승률. 매치업 (구장 / 라이벌리 / 특정 투수 vs 라인업) 박제 layer.",
-    why: "small sample (시즌 ~13~19 경기) but 매치업 quirk 박제. 가중치 3% 작은 layer.",
+      "두 팀 시즌 안 직접 대결 승률. 매치업 (구장 / 라이벌리 / 특정 투수 vs 라인업) 반영 layer.",
+    why: "small sample (시즌 ~13~19 경기) but 매치업 quirk 반영. 가중치 3% 작은 layer.",
     source: "statsapi.mlb.com (schedule aggregate)",
   },
   {
@@ -218,7 +218,7 @@ const HOME_BONUS: FactorRow = {
   range: `+${HOME_ELO_BONUS} Elo (~ +${HOME_ELO_BONUS_WIN_PROB_PCT}%)`,
   description:
     `홈팀에 가산되는 Elo bonus ${HOME_ELO_BONUS}점 = 승률 약 +${HOME_ELO_BONUS_WIN_PROB_PCT}% (Elo 400 변환 기준). 구장 친숙 + travel fatigue 차이 + 관중 layer.`,
-  why: "homefield advantage 의 정량화 layer. 매 경기 일관 박제.",
+  why: "homefield advantage 의 정량화 layer. 매 경기 일관 반영.",
   source: `FiveThirtyEight Elo (MLB) · KBO 자체 측정 +${HOME_ADVANTAGE_PCT.toFixed(1)}%`,
 };
 

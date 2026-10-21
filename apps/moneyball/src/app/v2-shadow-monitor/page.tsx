@@ -101,7 +101,7 @@ export default function V2ShadowMonitorPage() {
           MoneyBall Score 의 모델 진화 과정을 모두 공개합니다. 현재 운용 중인
           {" "}{CURRENT_SCORING_RULE}{" "}가중치와 함께 {ERA_COVERAGE_LABEL_PROSE}{" "}
           era 별 적중률과 Brier 점수를 같은 cohort 위에서 비교하여,
-          {CURRENT_SCORING_RULE} 유지 확정 결정의 근거를 투명하게 박제합니다.
+          {CURRENT_SCORING_RULE} 유지 확정 결정의 근거를 투명하게 공개합니다.
         </p>
         <p className="text-sm text-brand-600 dark:text-brand-300 leading-relaxed">
           <strong className="text-brand-800 dark:text-brand-100">결정 임계</strong>{" "}

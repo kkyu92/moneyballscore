@@ -279,7 +279,7 @@ export default async function ShadowAccuracyPage() {
         </h2>
         {daily.length === 0 ? (
           <div className="rounded border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-[var(--color-border)] dark:text-gray-400">
-            shadow cohort pair 가 아직 박제되지 않았습니다. (daily 파이프라인 fire 후 누적)
+            shadow cohort 비교 데이터가 아직 쌓이지 않았습니다. (매일 자동 업데이트 후 누적)
           </div>
         ) : (
           <div className="overflow-x-auto">

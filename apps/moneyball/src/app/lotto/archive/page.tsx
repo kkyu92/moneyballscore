@@ -85,20 +85,20 @@ export default function LottoArchiveIndexPage() {
         </h1>
         <p className="text-sm text-brand-300">
           토요일 추첨일별 {LOTTO_PICK_COUNT}조합 통계 분석 기록입니다. {LOTTO_RULE_COUNT}개 회피 규칙을 통과한
-          조합만 박제됩니다. 당첨 확률 향상 X · 행동/베팅/구매 권유 X · 통계
+          조합만 공개됩니다. 당첨 확률 향상 X · 행동/베팅/구매 권유 X · 통계
           학습 자료.
         </p>
       </header>
 
       <section aria-label="회차별 archive list" className="space-y-4">
         <h2 className="text-sm font-semibold text-brand-300 uppercase tracking-wide">
-          박제된 회차 ({dates.length}건)
+          공개된 회차 ({dates.length}건)
         </h2>
 
         {dates.length === 0 ? (
           <div className="bg-brand-900/30 border border-dashed border-brand-800 rounded-lg p-8 text-center">
             <p className="text-sm text-brand-400">
-              아직 박제된 회차가 없습니다.
+              아직 공개된 회차가 없습니다.
             </p>
           </div>
         ) : (

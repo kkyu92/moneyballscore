@@ -20,16 +20,16 @@ export default function LottoArchiveDateNotFound() {
           해당 회차 archive 가 없습니다
         </h1>
         <p className="text-base text-gray-600 dark:text-gray-300">
-          요청하신 회차의 {LOTTO_PICK_COUNT}조합 archive 가 박제되지 않았거나 잘못된 날짜 형식입니다.
+          요청하신 회차의 {LOTTO_PICK_COUNT}조합 archive 가 공개되지 않았거나 잘못된 날짜 형식입니다.
           <br className="hidden sm:block" />
-          아래에서 최근 박제된 회차 archive 를 확인하세요.
+          아래에서 최근 공개된 회차 archive 를 확인하세요.
         </p>
       </header>
 
       {recentDates.length > 0 ? (
         <nav aria-label="최근 회차" className="space-y-3">
           <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-            최근 박제된 회차
+            최근 공개된 회차
           </h2>
           <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {recentDates.map((date) => (
