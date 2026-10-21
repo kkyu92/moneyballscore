@@ -51,7 +51,7 @@ function cellBgClass(acc: number | null): string {
   if (acc >= ACCURACY_GOOD_RATE) return "bg-brand-500 text-white";
   if (acc >= ACCURACY_BASELINE)
     return "bg-brand-300 text-neutral-900 dark:bg-brand-400 dark:text-neutral-900";
-  return "bg-brand-100 text-neutral-700 dark:bg-brand-50 dark:text-neutral-800";
+  return "bg-brand-100 text-neutral-700 dark:bg-brand-900 dark:text-brand-300";
 }
 
 export function CohortComparisonHeatmap({ data, locale = "ko" }: CohortComparisonHeatmapProps) {
