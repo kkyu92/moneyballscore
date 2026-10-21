@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — polish-ui: megamenu-state-matrix.md 스펙 테이블 실측 정정 (cycle 3495, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. **2-chain lock 탐지** — 직전8(3487-3494) distinct=1(review-code(heavy) 8/8 전부) → review-code 후보 제외. fix-incident gap=12/20·op-analysis gap=16/25·info-arch gap=25/30·lotto gap=19/30 전부 미도달. explore-idea saturation 직전15 15/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. DESIGN.md mtime 당일 신선 — design-system 미근접. lotto cron 산출물 둘 다 최신. **어떤 chain 도 trigger 없음 → lock fallback 룰대로 polish-ui 강제 발화**.
+
+**감사 결과**: 전체 `gstack browse` 기반 `/design-review` 는 자동 fire 환경에 과중(라이브 브라우저+Codex 호출+hang 위험)하다 판단해 생략, DESIGN.md 토큰 grep + Header.tsx/MegaMenu.tsx/MobileNav.tsx/NavLinks.tsx 수동 대조로 대체. `ShareButtons.tsx` 하드코딩 hex(`#1DA1F2`/`#1877F2`)는 Twitter/Facebook 브랜드 컬러라 의도된 예외(drift 아님). `text-gray-400` 패턴은 repo 전역 기존 컨벤션(cycle 3025 재확인과 동일 결론).
+
+**확정 drift 1건**: `docs/design/megamenu-state-matrix.md` 의 "메가메뉴 spec" 테이블이 cycle 1044 당시 스냅샷 그대로 — 이후 explore-idea 로 KBO 그룹명 자체가 "분석"/"기록"/"더보기" → "예측·기록"/"리뷰·시즌" 으로 개편됐고(해당 그룹명 자체가 코드에 더 이상 존재하지 않음), MLB "경기·팀" 그룹은 3개→13개 항목으로 성장(matchup/insights/calendar/reviews 등 신규 라우트 누적)했는데도 테이블 panel-width/column-count/item-count 가 갱신 안 됨. cycle 3017 이 DESIGN.md 본문 prose 설명은 이미 정정했지만 이 별도 spec 파일의 표는 누락됐던 것 — 동일 근본원인(신규 라우트 누적 → stale 참조 문서)의 또 다른 위치 재발. Header.tsx `KBO_NAV`/`MLB_NAV`/`LOTTO_LINKS` 실측 기준 테이블 전면 재작성(코드 변경 없음, 문서 전용).
+
+검증: 문서 전용 변경이라 `tsc --noEmit`/`pnpm lint`/vitest 전부 cache-hit PASS(코드 미변경), pre-push lint+type-check+version-sync-guard 통과, main 직접 커밋+push(`007d0ef7`).
+
+**검증(skill-evolution 등)**: trigger3 미충족(3495%50≠0, =45). trigger5 — 직전20(3476-3495, 현재 포함) 표본 충분(≥10, review-code 다수 포함) — 미충족. marker 미박제. ship-0 — 직전10(3486-3495) success 3건(3486/3494/3495 본 cycle) 포함 — 미충족. 2-chain lock 발동 + fallback 룰 정상 작동 evidence(사례 자체가 lock 설계 의도 검증). PASS_ship 단일 grep 실측 증가(+1, 본 cycle docs fix ship).
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 복귀(신규 scope: `hooks/` 2순회 또는 `lib/` 2순회) 또는 fix-incident(gap13/20)/op-analysis(gap17/25)/info-arch(gap26/30)/lotto(gap20/30) 자연 대기. megamenu-state-matrix.md 의 "상태 매트릭스 12 case" #12 "full-screen accordion" 서술도 실제론 `absolute top-16` dropdown(내부 스크롤 없이 페이지 스크롤 의존)이라 완전한 "full-screen" 은 아님 — 후속 polish-ui 재확인 후보로 flag(본 cycle scope 밖, 영향 경미해 보류).
+
 ## 🟢 SUCCESS — review-code (heavy): scripts/lotto.ts 감사 + lotto-data.json count_valid 실측 보정 (cycle 3494, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 탐지(직전8(3486-3493) distinct=2: fix-incident(verify)+review-code)되나 fix-incident 계열 포함 → override. fix-incident gap=8/20·op-analysis gap=15/25·info-arch gap=24/30·lotto gap=18/30 전부 미도달. cron 산출물 둘 다 최신(lotto-picks 2026-10-24.md, lotto-results 2026-10-17.md) — lotto chain 자체 trigger 없음. scripts/ 잔여 유일 파일 `lotto.ts`(2637줄, cycle 3492 권고) 채택.
