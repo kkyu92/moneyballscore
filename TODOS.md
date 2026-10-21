@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): components/accuracy/ 전수감사, drift 0건 (cycle 3469, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3468 retro `1a2aba53`) OK. 직전8(3461-3468) distinct=2(review-code+fix-incident) 2-chain lock 탐지되나 잠긴 chain 중 fix-incident 포함 → 룰4(안전 우선)로 lock 무시, 자유 선택. fix-incident gap=6/20·op-analysis gap=15/25·info-arch gap=29/30(근접이나 미도달)·lotto gap=20/30 전부 미도달. `gh run list` CI 전부 정상(실제 incident 부재), DESIGN.md 신선(20h), lotto picks/results 양쪽 cron 정상 반영 확인. components/glossary+leaderboard+teams 전수감사 완료(cycle 3468) 후속 — 잔여 7개 서브디렉토리 중 파일 수 최소(`accuracy/`, 8파일) 선정.
+
+**감사 결과**: `CalibrationPlot.tsx`/`FactorAccuracyTable.tsx`/`ModelVersionHistory.tsx`/`TeamBiasTable.tsx`/`TeamMatchupCards.tsx` — 전부 clean (소표본 게이트 `SMALL_SAMPLE_N` 일관 적용, KO/EN copy 분기 정합). `CommunityVsAICard.tsx` — `MIN_POLL_TOTAL` 게이트 + KBO/MLB 양쪽 사용처 정합 (cycle 2544 explore-idea 이력 주석과 실제 코드 일치). `MlbAccuracyDashboard.tsx`(가장 큰 파일, 403줄) — 9개 섹션(calibration/rolling/winner-prob/brier-trend/scoring-rule-day/cohort-week/confidence/team) 전부 데이터 유무 조건부 렌더 가드 정확, KO/EN STRINGS 양쪽 완전 대응 확인. `pnpm vitest run src/components/accuracy` 3 tests 전부 PASS.
+
+**코드 변경 없음** — actionable fix 없음, drift 0건 확인.
+
+**검증(skill-evolution 등)**: trigger3(3469%50=19≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3450-3469, 현재 포함) 표본=19(≥10 충족), review-code 15회 발화(0회 아님)로 미충족. marker 미박제. ship-0 — 직전9(3460-3468) outcome 중 success 3건(3461/3462/3464) 포함 미충족.
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/` 잔여: analysis/dashboard/layout/matchup/picks/predictions — 파일수 순 재선정) 또는 info-arch(gap29/30, 거의 도달)/lotto(gap20/30)/op-analysis(gap15/25) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): components/glossary+leaderboard+teams 전수감사, drift 0건 (cycle 3468, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3467 retro `c4495bc8`) OK. 2-chain lock 미충족(직전8(3460-3467) distinct=3: review-code/polish-ui/fix-incident) — 자유 선택. fix-incident gap=5/20·lotto gap=19/30·info-arch gap=28/30(근접이나 미도달)·op-analysis gap=14/25 전부 미도달. components/live+players+standings 전수감사 완료(cycle 3467) 후속 — 잔여 10개 서브디렉토리 중 파일 수 최소 묶음 `glossary/`(1)+`leaderboard/`(6)+`teams/`(6) = 13파일 스코프 선정.
