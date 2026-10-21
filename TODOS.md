@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): app/api/{health,mlb,sync-batter-stats,version} 전수감사 (cycle 3487, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3479-3486) distinct=4: review-code6+fix-incident1+operational-analysis1). fix-incident gap=4/20·op-analysis gap=8/25·info-arch gap=17/30·lotto gap=11/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. 2차 방어선: cycle 3486 policy:cycle-retro commit 실존 확인 OK. cycle 3486 추천대로 `app/api/{health,mlb,sync-batter-stats,version}` (seo 는 cycle 3483/3486 에서 이미 집중 감사됨) 채택.
+
+**감사 결과**: `health/route.ts`(138줄) + `health/pipelines/route.ts`(130줄) + `mlb/waitlist/route.ts`(92줄) + `mlb/pipeline/route.ts`(103줄) + `sync-batter-stats/route.ts`(75줄) + `version/route.ts`(30줄) 전수 read(직접, agent 위임 없음, ~470줄). `health/pipelines/route.ts` 의 `PIPELINE_MODES` cron cadence 주석(UTC hour→mode 매핑)을 `cloudflare-worker/wrangler.toml` + `worker.ts` scheduled handler 실제 코드와 교차 대조 — 완전 일치, drift 0건. `mlb/pipeline/route.ts` vs KBO `pipeline/route.ts` twin 비교 — mode 체계 차이(KBO predict/predict_final 분리 vs MLB predict_final 단일)는 의도된 정상, revalidate path 커버리지 적절. `mlb/waitlist/route.ts` 문서 주석의 "ON CONFLICT DO NOTHING" 표현은 실제로는 app-level 23505 에러코드 catch 구현이나, DB UNIQUE(league,email) 제약 + 중복 시 동일 200 응답 효과는 동일 — 버그 아님.
+
+**결론**: 6개 route 전부 clean, 코드 변경 0건. app/api/ 13개 route 디렉토리 중 대다수가 과거 사이클 누적으로 이미 전수 감사 또는 테스트 추가 완료 상태 — 거의 전체 완료 접근.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3487%50≠0). trigger5 — 직전20(3468-3487, 현재 포함) 분포 review-code13/기타 6종 각1 — 0회 chain 없음(미충족). marker 미박제. ship-0 — 직전10(3478-3487) success 다수 포함 미충족. PASS_ship 단일 grep 실측 3098(cycle 3486 이전 3097 대비 +1).
+
+다음 사이클 추천 = review-code(heavy) 계속(components/ 2순회 심화 또는 packages/kbo-data 2순회) 또는 info-arch(gap18/30)/lotto(gap12/30)/op-analysis(gap9/25)/fix-incident(gap5/20) 자연 대기.
+
 ## 🟢 SUCCESS — fix-incident(verify) + review-code(heavy): indexnow-ping fix 실측 검증 + kbo-scores suspended 테스트 공백 보강 (cycle 3486, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3478-3485) distinct=3: review-code6+operational-analysis1+fix-incident1). fix-incident gap=3·op-analysis gap=7·info-arch gap=16·lotto gap=10 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative 확립 skip 패턴 유지. 2차 방어선: cycle 3485 policy:cycle-retro commit 실존 확인 OK.
