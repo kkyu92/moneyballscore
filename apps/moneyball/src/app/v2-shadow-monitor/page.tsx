@@ -105,7 +105,7 @@ export default function V2ShadowMonitorPage() {
         </p>
         <p className="text-sm text-brand-600 dark:text-brand-300 leading-relaxed">
           <strong className="text-brand-800 dark:text-brand-100">결정 임계</strong>{" "}
-          = {CURRENT_SCORING_RULE} real cohort n={V2_PROMOTION_COHORT_N} — 실측 cohort 진척 및
+          = {CURRENT_SCORING_RULE} real cohort n={V2_PROMOTION_COHORT_N} — 실제 cohort 진척 및
           Brier drift 원인 분석은{" "}
           <Link
             href="/accuracy"

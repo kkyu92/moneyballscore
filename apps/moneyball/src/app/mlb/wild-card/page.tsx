@@ -211,7 +211,7 @@ export default async function MlbWildCardHub() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ 본 hub = Header NAV 깨진 link 회수 layer 로 시작 — 이후 mlb_schedule 종료 경기 실측 기반 라이브 Wild Card race 로 확장(cycle 2305).
+          ※ 종료된 경기 기록을 바탕으로 실시간 와일드카드 순위를 계산합니다.
         </p>
         <p>
           ※ 관련: <Link href="/mlb/standings" className="underline">/mlb/standings</Link> · <Link href="/mlb/postseason" className="underline">/mlb/postseason</Link> · <Link href="/mlb" className="underline">/mlb</Link> hub.

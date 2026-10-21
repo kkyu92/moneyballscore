@@ -449,16 +449,14 @@ export default function LottoMethodologyPage() {
       <section id="fire" className="scroll-mt-20 space-y-3">
         <h2 className="text-xl font-semibold text-brand-100">사이클 진행 history</h2>
         <p className="text-sm text-brand-300 leading-relaxed">
-          develop-cycle skill 안 lotto chain fire 누적. 본 사이트 운영
-          시스템이 매 사이클 본 규칙 검증을 실행한 운영 기록입니다.
+          자동 운영 시스템이 매 주기 본 규칙 검증을 실행한 기록입니다.
         </p>
         <div className="bg-brand-900 border border-brand-800 rounded p-3 text-xs text-brand-300 space-y-2">
           <p className="text-brand-200 font-semibold">규칙 정합 evidence</p>
           <p>
-            본 chain trigger 조건 (chain pool table) = 신규 회차 추첨 D-7 안 picks
-            부재 / 추첨 직후 OOS 박제 부재 / 30+ 사이클 미발화 gap / 사용자 자연
-            발화 등. 매 fire 의 outcome 과 다음 추천 chain 은 본 운영 spec
-            정합으로 자가 검증됩니다.
+            검증 실행 조건 = 신규 회차 추첨 D-7 안 조합 미생성 / 추첨 직후
+            결과 검증 미실행 / 장기 미점검 구간 / 수동 요청 등. 매 실행
+            결과와 다음 조치는 내부 운영 기준에 따라 자동 검증됩니다.
           </p>
         </div>
         <details className="bg-brand-900 border border-brand-800 rounded">

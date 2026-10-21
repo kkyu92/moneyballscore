@@ -153,7 +153,7 @@ export default function MlbPlayersHub() {
           MLB {FACTOR_TOTAL}팩터 본선 = KBO {FACTOR_KBO} (FIP / xFIP / wOBA / 불펜 FIP / 최근폼 / WAR / 상대전적 / 구장보정 / Elo / 수비 SFR) + Statcast {FACTOR_STATCAST}.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          현재 표시: {FACTOR_STATCAST} 팩터 설명 + {MLB_TEAM_COUNT}팀 진입 path. 팀별 Statcast 실측 (xwOBA · Barrel% · Hard Hit% · Launch Angle) 라이브 데이터 연동 = 별도 datasource 통합 carry-over.
+          현재 표시: {FACTOR_STATCAST} 팩터 설명 + {MLB_TEAM_COUNT}팀 진입 path. 팀별 Statcast 실제 측정 (xwOBA · Barrel% · Hard Hit% · Launch Angle) 라이브 데이터 연동 = 별도 datasource 통합 carry-over.
         </p>
       </header>
 
@@ -200,7 +200,7 @@ export default function MlbPlayersHub() {
           </span>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          각 팀 카드 → 팀 프로필 (현재: 시즌 placeholder + {FACTOR_TOTAL}팩터 explainer + 홈구장 파크팩터). Statcast 실측 수치는 팀 프로필 안 추후 반영 예정.
+          각 팀 카드 → 팀 프로필 (현재: 시즌 placeholder + {FACTOR_TOTAL}팩터 explainer + 홈구장 파크팩터). Statcast 실제 측정 수치는 팀 프로필 안 추후 반영 예정.
         </p>
         {LEAGUES.map((league) => (
           <div key={league} className="space-y-4" aria-labelledby={`mlb-${league}-statcast`}>
@@ -250,7 +250,7 @@ export default function MlbPlayersHub() {
           ※ Statcast 측정 출처: <a href="https://baseballsavant.mlb.com/" target="_blank" rel="noopener noreferrer" className="underline">Baseball Savant</a> (MLB Advanced Media). 스크래퍼: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
         </p>
         <p>
-          ※ 본 hub = {FACTOR_TOTAL}팩터 본선 안 Statcast {FACTOR_STATCAST} 의 설명 layer. 라이브 팀별 실측 데이터 = 별도 ingestion 통합 시 반영 예정. KBO {FACTOR_KBO}팩터 = <Link href="/mlb/factors" className="underline">/mlb/factors</Link>.
+          ※ 본 hub = {FACTOR_TOTAL}팩터 본선 안 Statcast {FACTOR_STATCAST} 의 설명 layer. 라이브 팀별 실제 측정 데이터 = 별도 연동 완료 시 반영 예정. KBO {FACTOR_KBO}팩터 = <Link href="/mlb/factors" className="underline">/mlb/factors</Link>.
         </p>
       </footer>
     </main>

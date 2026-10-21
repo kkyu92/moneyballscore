@@ -92,8 +92,11 @@ describe('wave-240: stale cycle-ref annotations removed', () => {
     it('no user-visible cycle 1029 dev jargon', () => {
       expect(src).not.toMatch(/\(cycle 1029\)/);
     });
+    it('no "Header NAV 깨진 link 회수 layer" dev jargon (cycle 3514)', () => {
+      expect(src).not.toMatch(/Header NAV 깨진 link 회수 layer/);
+    });
     it('hub description preserved', () => {
-      expect(src).toMatch(/Header NAV 깨진 link 회수 layer/);
+      expect(src).toMatch(/종료된 경기 기록을 바탕으로 실시간 와일드카드 순위를 계산합니다/);
     });
   });
 
@@ -102,8 +105,11 @@ describe('wave-240: stale cycle-ref annotations removed', () => {
     it('no user-visible cycle 1029 dev jargon', () => {
       expect(src).not.toMatch(/\(cycle 1029\)/);
     });
+    it('no "Header NAV 깨진 link 회수 layer" dev jargon (cycle 3514)', () => {
+      expect(src).not.toMatch(/Header NAV 깨진 link 회수 layer/);
+    });
     it('hub description preserved', () => {
-      expect(src).toMatch(/Header NAV 깨진 link 회수 layer/);
+      expect(src).toMatch(/라이브 Postseason 브라켓/);
     });
   });
 

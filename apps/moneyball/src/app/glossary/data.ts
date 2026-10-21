@@ -273,9 +273,9 @@ export const CATEGORIES: GlossaryCategory[] = [
         fullName: 'Home Advantage',
         definition:
           `홈경기에서 유리한 정도. 친숙한 그라운드·이동 피로 없음·관중 응원 영향. 모든 정량 팩터 합산 후 별도로 +${HOME_ADVANTAGE_PCT.toFixed(1)}%p 가산.`,
-        range: `실측 (2023~2026 N=${HOME_WIN_RATE_SAMPLE_N}) ${HOME_WIN_RATE_PCT.toFixed(2)}% — 가산 ${(HOME_WIN_RATE_PCT - 50).toFixed(2)}%p.`,
+        range: `실제 경기 기록 (2023~2026 N=${HOME_WIN_RATE_SAMPLE_N}) ${HOME_WIN_RATE_PCT.toFixed(2)}% — 가산 ${(HOME_WIN_RATE_PCT - 50).toFixed(2)}%p.`,
         modelUsage: `+${HOME_ADVANTAGE_PCT.toFixed(1)}%p 고정 가산 (HOME_ADVANTAGE=${(HOME_ADVANTAGE_PCT / 100).toFixed(3)})`,
-        source: '실측 데이터',
+        source: '실제 경기 기록',
       },
       {
         id: 'pythagorean',
@@ -301,7 +301,7 @@ export const CATEGORIES: GlossaryCategory[] = [
         fullName: 'Brier Score',
         definition:
           '예측 승률과 실제 결과(0 또는 1)의 제곱 오차 평균. 적중률만 보면 신뢰도 정보가 빠지지만 Brier 는 신뢰도까지 평가. 낮을수록 ↑정확.',
-        range: `${BRIER_BASELINE} = 동전 던지기 / 0.20 이하 = 우수. 우리 모델 실측치는 /accuracy 페이지 참조 (실시간 갱신).`,
+        range: `${BRIER_BASELINE} = 동전 던지기 / 0.20 이하 = 우수. 우리 모델의 실제 수치는 /accuracy 페이지 참조 (실시간 갱신).`,
         modelUsage: '모델 진화 결정 기준 — 새 가중치 후보 채택 여부 판정.',
         source: '내부 계산',
       },
