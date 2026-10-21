@@ -247,7 +247,7 @@ export default function MlbPlayersHub() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ Statcast 측정 출처: <a href="https://baseballsavant.mlb.com/" target="_blank" rel="noopener noreferrer" className="underline">Baseball Savant</a> (MLB Advanced Media). 스크래퍼: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
+          ※ Statcast 측정 출처: <a href="https://baseballsavant.mlb.com/" target="_blank" rel="noopener noreferrer" className="underline">Baseball Savant</a> (MLB Advanced Media).
         </p>
         <p>
           ※ 본 hub = {FACTOR_TOTAL}팩터 본선 안 Statcast {FACTOR_STATCAST} 의 설명 layer. 라이브 팀별 실제 측정 데이터 = 별도 연동 완료 시 반영 예정. KBO {FACTOR_KBO}팩터 = <Link href="/mlb/factors" className="underline">/mlb/factors</Link>.

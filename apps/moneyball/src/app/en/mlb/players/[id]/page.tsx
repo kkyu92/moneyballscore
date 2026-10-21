@@ -199,7 +199,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
           Team Statcast {FACTOR_STATCAST} Factors (Measurement ETA)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Currently shown = factor definitions + ranges. Team season measurements (Baseball Savant aggregates) integration ETA carry-over. Measurement layer = `mlb-base.ts` factor pipeline + `baseball-savant.ts` scraper.
+          Currently shown = factor definitions + ranges. Team season measurements (Baseball Savant aggregates) integration ETA carry-over.
         </p>
         <ol className="grid md:grid-cols-2 gap-4">
           {STATCAST_METRICS.map((m, idx) => (
@@ -311,7 +311,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
           >
             Baseball Savant
           </a>{" "}
-          (MLB Advanced Media). Scraper: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
+          (MLB Advanced Media).
         </p>
         <p>
           ※ Live player performance metrics integration coming soon.

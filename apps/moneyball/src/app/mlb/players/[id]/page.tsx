@@ -194,7 +194,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
           팀 Statcast {MLB_FACTOR_COUNTS.statcast} 팩터 (측정 ETA)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          현재 표시 = 팩터 정의 + range. 팀별 시즌 실제 측정값 (Baseball Savant 집계) 연동 준비 중. 측정 layer = `mlb-base.ts` factor pipeline + `baseball-savant.ts` scraper.
+          현재 표시 = 팩터 정의 + range. 팀별 시즌 실제 측정값 (Baseball Savant 집계) 연동 준비 중.
         </p>
         <ol className="grid md:grid-cols-2 gap-4">
           {STATCAST_METRICS.map((m, idx) => (
@@ -306,7 +306,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
           >
             Baseball Savant
           </a>{" "}
-          (MLB Advanced Media). 스크래퍼: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
+          (MLB Advanced Media).
         </p>
         <p>
           ※ 실제 측정 데이터 연동 준비 중.

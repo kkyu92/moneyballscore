@@ -248,7 +248,7 @@ export default function MlbPlayersHubEn() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ Statcast data source: <a href="https://baseballsavant.mlb.com/" target="_blank" rel="noopener noreferrer" className="underline">Baseball Savant</a> (MLB Advanced Media). Scraper: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
+          ※ Statcast data source: <a href="https://baseballsavant.mlb.com/" target="_blank" rel="noopener noreferrer" className="underline">Baseball Savant</a> (MLB Advanced Media).
         </p>
         <p>
           ※ This hub = Statcast {FACTOR_STATCAST} explanation layer within the {FACTOR_TOTAL}-factor model. Live team measurements = pending separate ingestion integration. KBO {FACTOR_KBO} factors = <Link href="/en/mlb/factors" className="underline">/en/mlb/factors</Link>.
