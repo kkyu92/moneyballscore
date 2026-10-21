@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): scripts/ 잔여 7개 2차 전수감사 (cycle 3491, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3483-3490) distinct=3: fix-incident+review-code+fix-incident(verify)). fix-incident gap=7/20·op-analysis gap=11/25·info-arch gap=20/30·lotto gap=14/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative 확립 skip 패턴 유지. cycle 3490 추천대로 scripts/ 잔여 scope(backtest.ts/backtest-v2-candidate.ts/cohort-cleanup.ts/op-analysis-postbreak.ts/op-analysis-postbreak-full.ts/op-analysis-war-check.ts/op-analysis-mlb-elo-backtest.ts, 1133줄) 채택.
+
+**감사 결과**: 7개 전부 clean. `backtest.ts`(104줄)는 2025 시즌 KBO 공식 scraper 직접 호출하는 구형 season-level harness, cron 미등록 manual-only — `predict()`/`PredictionInput` 필드(game/homeSPStats/awaySPStats/homeTeamStats/awayTeamStats/homeElo/awayElo/headToHead/homeRecentForm/awayRecentForm/parkFactor) 전부 현재 타입과 일치 확인. `backtest-v2-candidate.ts`(383줄, plan #14/#15/#16 v2.0 backtest harness)는 `backtest-v2-helpers`/`walk-forward-helpers`/`logistic-regression`/`fancy-stats` 전체 export(`evaluatePair`/`evaluateFancyElo`/`evaluateThreeWay`/`scoringRuleSplit`/`rollingTimeCV`/`fitWeightedLogistic`/`fetchEloRatings`) 시그니처 일치 확인, `DEFAULT_WEIGHTS`/`SHADOW_V20_WEIGHTS`/`GAME_STATUS_FINAL` 전부 `@moneyball/shared` 안 존재 확인 — silent rename drift 없음. `cohort-cleanup.ts`(224줄)는 `CURRENT_SCORING_RULE='v1.8'` 최신값과 일치, Step A(식별 dry-run)/Step B(write) 분리 설계 그대로 clean. `op-analysis-postbreak.ts`/`op-analysis-postbreak-full.ts`/`op-analysis-war-check.ts`/`op-analysis-mlb-elo-backtest.ts`는 전부 1회성 진단 스크립트 — `isCE()` 로직이 `op-analysis-ce-cohort.ts`와 동일 패턴(scoring_rule='v1.8-credit-fail' 또는 v1.8+debate_version null) 일관 유지, PAGE=1000 pagination 일관 확인.
+
+**결론**: 7개 파일 전부 clean, 코드 변경 0건. scripts/ 디렉토리 거의 완주 — 잔여 11개(dev-postview.ts/export-predictions-tabpfn.ts/import-tabpfn-predictions.ts/measure-n178-vs-n165.ts/op-analysis-brier-drift.ts/op-analysis-ce-cohort.ts/update-stale-data.ts/backfill-mlb-elo.ts/backfill-mlb-factor-breakdown.ts/backfill-mlb-schedule-status.ts/lotto.ts).
+
+**검증(skill-evolution 등)**: trigger3 미충족(3491%50≠0, =41). trigger5 — 직전20(3472-3491, 현재 포함) 표본 충분(≥10), review-code 다수 포함 — 미충족. marker 미박제. ship-0 — 직전10(3481-3490) success 3건(3481/3483/3486) 포함 — 미충족. 2-chain lock — 직전8(3483-3490) distinct=3 — 미충족. PASS_ship 단일 grep 실측 3098(cycle 3490과 동일, 금번 retro-only라 증가 없음).
+
+다음 사이클 추천 = review-code(heavy) scripts/ 잔여 11개 계속 또는 fix-incident(gap8/20)/op-analysis(gap12/25)/info-arch(gap21/30)/lotto(gap15/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): scripts/ 잔여 7개 전수감사 (cycle 3490, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3482-3489) distinct=3: review-code6+fix-incident(verify)1+fix-incident1). fix-incident gap=7/20·op-analysis gap=11/25·info-arch gap=20/30·lotto gap=14/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. cycle 3489 추천대로 scripts/ 잔여 7개(dev-backend-compare/dev-debate/llm-context-baseline/measure-context-layer-brier/op-analysis-cohort/run-pipeline/smoke-umpire-scraper, 857줄) 채택.
