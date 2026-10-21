@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — review-code(heavy): app/ 2순회 1차(guide+about+glossary+leaderboard+insights) 전수 read, drift 0건 (cycle 3520, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3512-3519) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. fix-incident gap=12/20·op-analysis gap=15/25·lotto gap=13/30·info-arch gap=3/30 전부 미도달. scripts/ 디렉토리 완전 소진(cycle 3518+3519) + lib/ 완전 소진(cycle 3508) — cycle 3519 추천대로 app/ 2순회 신규 축 채택. app/*/page.tsx 중 CHANGELOG mention 최저 5개(guide 11/about 23/glossary 38/leaderboard 45/insights 101, 총 1471줄) 1차 배치 선정 — 컴포넌트 단위는 과거 감사됐으나 top-level page.tsx 자체는 미확인 상태였음.
+
+**감사**: Agent 위임 전수 read — 5개 파일 전부. EN 로케일 미러 없음(이 5개 라우트는 KBO 전용, `app/en/`에 `mlb` subdir만 존재해 해당사항 없음). shared 상수(`KBO_TEAM_COUNT`/`WINNER_PROB_CONFIDENT_PCT`/`SUNDAY_CAP_CONFIDENCE_PCT`/`BRIER_BASELINE`/`MIN_LEADERBOARD_PICKS`/ISR 상수들/`CE_DETECT_THRESHOLD`/`CE_MIN_SAMPLES` 등) 전부 `packages/shared` 실제 값과 일치(revalidate 주석 vs 실제 ISR 상수 cross-check 포함, 테스트 파일로도 재확인). dev jargon(표본/실측/cron/upsert/백필/극값)/내부 경로 노출(packages/kbo-data/scrapers) grep 전부 0건. dark mode 페어링 전부 완비. 구조적 관찰 1건(버그 아님) — `guide/page.tsx` 가 `about/page.tsx` 에서 `FAQ_COUNT` 직접 import(코드베이스 유일한 cross-page-module import 패턴), 정상 작동 확인(모듈 top-level 부작용 없음).
+
+**코드 변경 없음** — drift 0건, retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 5 미만)/trigger2(5연속 fail 없음)/trigger3(3520%50=20≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3501-3520, 현재 포함) 표본 20≥10, review-code 다수 발화 — 미충족(0회 아님). ship-0 — 직전10(3511-3520) success 5건(3511-3515) 포함 — 미충족. EXHAUSTIVE_SWEEP 참고치 — RC_HEAVY_COUNT(3511-3520)=8/10, 미충족 단독으로는 hard stop 무관(success 5건 존재). 2-chain lock(다음 사이클용) — 직전8(3513-3520) distinct=3(review-code/info-arch/polish-ui) — 미충족. 2차 방어선(cycle 3519 retro `b81cd357`) OK.
+
+다음 사이클 추천 = review-code(heavy) app/ 2순회 잔여(predictions/reviews/analysis/accuracy/picks/teams/players — CHANGELOG mention 다수지만 top-level page.tsx 자체 미확인) 계속 또는 fix-incident(gap13/20)/op-analysis(gap16/25)/info-arch(gap4/30)/lotto(gap14/30) 자연 대기.
+
 ## 🟢 RETRO-ONLY — review-code(heavy): scripts/ CHANGELOG mention 1~3회 8개 전수 read, drift 0건 (cycle 3519, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/expired). 직전8(3511-3518) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. fix-incident gap=12/20·op-analysis gap=15/25·lotto gap=13/30·info-arch gap=3/30 전부 미도달. cycle 3518 retro 추천(review-code(heavy) scripts/ 잔여 — mention 1~3회뿐이라 전수 감사 미실시 8개) 채택: backtest-v2-candidate/export-predictions-tabpfn/import-tabpfn-predictions/measure-n178-vs-n165/backfill-mlb-elo/backfill-mlb-factor-breakdown/backfill-mlb-schedule-status/dev-postview.
