@@ -1,6 +1,10 @@
 import { josa, mlbShortTeamName, NEUTRAL_FACTOR, FACTOR_CONTRIBUTION_SCALE, type MlbTeamCode } from '@moneyball/shared';
 import { buildMlbGameOverview, type MlbWaterfallBar } from '@moneyball/kbo-data';
 import { OVERVIEW_CLOSE_PP, OVERVIEW_DOMINANT_PP } from '@/lib/analysis/factor-explanations';
+import { FACTOR_LABELS, FACTOR_LABELS_EN } from '@/lib/predictions/factorLabels';
+
+// GameAnalysisProse.tsx(KBO) 의 SUMMARY_FACTOR_KEYS 와 동일 — 종합 요약 문장 핵심 팩터 나열용.
+const SUMMARY_FACTOR_KEYS = ['sp_fip', 'lineup_woba', 'elo', 'recent_form'] as const;
 
 interface MlbGameOverviewProps {
   homeTeam: MlbTeamCode;
@@ -59,6 +63,8 @@ export function MlbGameOverview({ homeTeam, awayTeam, homeWinProb, bars, factorC
           Combining {factorCount} sabermetric factors, the quantitative model sees {confidenceLabel} with {favored}
           {' '}
           {marginPp > 0 ? `ahead by ${marginPp}pp.` : 'in a dead heat.'}
+          {' '}
+          This is a weighted combination of key factors such as {SUMMARY_FACTOR_KEYS.map((k) => FACTOR_LABELS_EN[k]).join(', ')}, and does not account for same-day starting pitcher changes or other sudden factors.
         </p>
       </section>
     );
@@ -99,6 +105,7 @@ export function MlbGameOverview({ homeTeam, awayTeam, homeWinProb, bars, factorC
       <p>
         {factorCount}개 세이버메트릭스 팩터를 종합한 정량 모델은 {confidenceLabel}으로 {favored}
         {josa(favored, '이', '가')} {marginPp > 0 ? `${marginPp}%p 앞선다` : '팽팽하다'}고 평가한다.
+        핵심 팩터인 {SUMMARY_FACTOR_KEYS.map((k) => FACTOR_LABELS[k]).join('·')} 등을 가중합산한 결과이며, 당일 선발 변경이나 돌발 변수는 반영되지 않는다.
       </p>
     </section>
   );

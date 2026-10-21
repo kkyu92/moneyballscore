@@ -48,8 +48,8 @@ interface FactorBreakdownProps {
 // factor 11/12 = shadow-only (production weight=0). chart=true 시에만 렌더.
 const SHADOW_FACTOR_KEYS = ["park_weather", "umpire_sz"] as const;
 const SHADOW_FACTOR_LABELS: Record<string, { label: string; tip: string }> = {
-  park_weather: { label: "구장 날씨", tip: "Open-Meteo 기상 (저온 / 외야 바람 / 강수) — shadow 측정" },
-  umpire_sz: { label: "주심 SZ", tip: "주심 strike zone bias (umpire_stats) — shadow 측정" },
+  park_weather: { label: "구장 날씨", tip: "구장 날씨 (기온 / 외야 바람 / 강수) — 아직 예측에 반영되지 않는 실험 지표" },
+  umpire_sz: { label: "주심 SZ", tip: "주심 스트라이크존 성향 — 아직 예측에 반영되지 않는 실험 지표" },
 };
 
 function getStatLabel(

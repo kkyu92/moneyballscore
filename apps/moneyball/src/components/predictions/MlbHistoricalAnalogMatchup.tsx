@@ -82,7 +82,7 @@ export async function MlbHistoricalAnalogMatchup({
                   <span className="text-xs font-mono text-brand-500 dark:text-brand-400 w-20">
                     {a.gameDate}
                   </span>
-                  <span className="text-sm font-semibold text-brand-700 dark:text-brand-200">
+                  <span className="text-sm font-semibold text-brand-700 dark:text-brand-200 whitespace-nowrap">
                     {mlbShortTeamName(a.awayCode)} @ {mlbShortTeamName(a.homeCode)}
                   </span>
                   <span className="text-sm font-mono text-brand-600 dark:text-brand-300">

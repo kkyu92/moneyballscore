@@ -76,8 +76,8 @@ export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam, locale = "k
         </h2>
         <p className="text-xs md:text-sm text-brand-500 dark:text-brand-400 mt-1">
           {locale === "en"
-            ? `Starts at a neutral 50% → each factor's impact accumulates → final ${homeName} win probability. Right (green) = home favored / left (red) = away favored. Defense SFR is an unimplemented MLB placeholder (always neutral) and is omitted from this chart — Elo, recent form, and head-to-head are real per-team data.`
-            : `중립 50% 시작 → 각 팩터 영향 누적 → 최종 ${homeName} 승리 확률. 우(녹색)=홈 유리 / 좌(빨강)=원정 유리. 수비SFR 은 MLB 미구현 placeholder(항상 중립)라 본 차트엔 미표시 — Elo·최근폼·상대전적은 실측 데이터입니다.`}
+            ? `Starts at a neutral 50% → each factor's impact accumulates → final ${homeName} win probability. Right (green) = home favored / left (red) = away favored. Defense is not yet part of the MLB model and is excluded from this chart — Elo, recent form, and head-to-head reflect real per-team data.`
+            : `중립 50% 시작 → 각 팩터 영향 누적 → 최종 ${homeName} 승리 확률. 우(녹색)=홈 유리 / 좌(빨강)=원정 유리. 수비 지표는 아직 MLB 버전에 반영되지 않아 이 차트에선 제외했습니다 — Elo·최근폼·상대전적은 실제 데이터입니다.`}
         </p>
       </header>
       <div className="h-72">

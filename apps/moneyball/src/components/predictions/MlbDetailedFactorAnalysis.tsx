@@ -1,5 +1,5 @@
 import { buildMlbFactorDetailRows, type MlbWaterfallBar, type MlbWaterfallInput } from "@moneyball/kbo-data";
-import { mlbShortTeamName, MLB_TEAMS, type MlbTeamCode } from "@moneyball/shared";
+import { josa, mlbShortTeamName, MLB_TEAMS, type MlbTeamCode } from "@moneyball/shared";
 
 interface MlbDetailedFactorAnalysisProps {
   homeTeam: MlbTeamCode;
@@ -30,17 +30,30 @@ export function MlbDetailedFactorAnalysis({
   const title = locale === "en" ? `${rows.length} Factor Breakdown` : `${rows.length}개 팩터 상세 해설`;
   const weightLabel = (pct: number) => (locale === "en" ? `weight ${pct}%` : `가중치 ${pct}%`);
 
+  // KBO DetailedFactorAnalysis.tsx 의 topFactor 요약 문장 parity (가장 비중 큰 팩터 하이라이트).
+  const topFactor = rows.reduce((best, row) => (row.weightPct > best.weightPct ? row : best), rows[0]);
+  const topFactorTeam = topFactor.favor === "home" ? homeName : topFactor.favor === "away" ? awayName : null;
+
   return (
     <section
       aria-labelledby="mlb-factor-analysis-title"
       className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4"
     >
-      <h2
-        id="mlb-factor-analysis-title"
-        className="text-lg font-bold text-brand-700 dark:text-brand-100"
-      >
-        {title}
-      </h2>
+      <header className="space-y-1">
+        <h2
+          id="mlb-factor-analysis-title"
+          className="text-lg font-bold text-brand-700 dark:text-brand-100"
+        >
+          {title}
+        </h2>
+        {topFactorTeam && (
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            {locale === "en"
+              ? <>The most influential factor is <strong>{topFactor.label}</strong>, contributing {topFactor.contributionPct > 0 ? "+" : ""}{topFactor.contributionPct}pp to {topFactorTeam}&apos;s predicted win probability.</>
+              : <>가장 영향력 큰 팩터는 <strong>{topFactor.label}</strong>으로, {topFactorTeam}{josa(topFactorTeam, "이", "가")} 예측 승률에 {topFactor.contributionPct > 0 ? "+" : ""}{topFactor.contributionPct}%p 기여합니다.</>}
+          </p>
+        )}
+      </header>
 
       <div className="space-y-3">
         {rows.map((row) => {
