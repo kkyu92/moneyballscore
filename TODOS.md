@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — operational-analysis (lite): CE/비CE 격차 재측정, 수치 동일(n=448) — KBO 시즌 종료 지속 확인 (cycle 3504, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 2-chain lock 직전8(3496-3503) distinct=3(info-architecture-review+review-code+skill-evolution) — 미충족. op-analysis gap=25/25 정확 도달(마지막 발화 3479). 직전20(3484-3503) chain 분포 review-code 80%(16/20) dominance — 다양성 redirect 겸 op-analysis 선택. fix-incident gap=18/20·lotto gap=28/30·info-arch gap=8/30 전부 미도달.
+
+**측정**: `scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행 → 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3479 수치와 완전 동일. KBO 2026 정규시즌 2026-10-04 종료 지속, 신규 verified pre_game 0건(stove league 기간 신규 유입 없음, drift 아님). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp, overlap 월(05/06/07) 통제 격차 10.8pp 그대로 — LLM 부가가치 우세 결론 39회 연속 재확인. CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 112일+ 경과) 상태 변화 없음. CLAUDE.md 가중치 섹션에 cycle 3504 entry 추가.
+
+코드 변경 없음(retro-only, harness 재실행 + 문서 entry만).
+
+**검증(skill-evolution 등)**: trigger3 미충족(3504%50=4). trigger5 — 직전20(3485-3504, 현재 포함) 표본 20(≥10), review-code 다수 발화(0회 아님) — 미충족. ship-0 — 직전10(3495-3504) success 3건(3495/3501/3503) 포함 — 미충족.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프(`app/` 잔여 또는 `lib/`/`hooks/`) 계속 또는 fix-incident(gap18/20)/info-arch(gap8/30)/lotto(gap28/30, 거의 도달) 자연 대기. 다음 op-analysis 재측정 gap 25-cycle 주기(실제 last fire 3504) 권장.
+
 ## 🟢 SUCCESS — review-code (heavy): app/mlb/ 7라우트 전수감사, drift 2건 발견+수정 — degraded flag 누락 regression fix (cycle 3503, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 직전8(3495-3502) distinct=4(polish-ui+info-architecture-review+review-code x5+skill-evolution) — 미충족. fix-incident gap=20/20 정확 도달 — lite 체크 실행: `pipeline_runs` 최근 7일 123건 전부 status=success(errors=[] 전부), `gh run list` CI/GitGuardian/Vercel Deploy Failure Dispatch/CI Failure Dispatch 전부 success 또는 정상 skipped — 실제 incident 부재 확인(trigger 충족했으나 결과 "이상 없음"). op-analysis gap=24/25·lotto gap=27/30·info-arch gap=7/30 전부 미도달. 직전 3 cycle(3500/3501/3502) 추천 = review-code(heavy) 계속(`app/mlb/` 라우트 또는 `components/` 잔여) — 자연 채택, `app/mlb/{accuracy,factors,matchup,methodology,postseason,standings,wild-card}` 7라우트(TODOS 저-mention 미감사 scope) 배치.
