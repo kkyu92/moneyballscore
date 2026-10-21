@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): scripts/ 잔여 10개 전수감사 (cycle 3492, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 탐지(직전8(3484-3491) distinct=2: review-code+fix-incident(verify))되나 잠긴 chain 중 fix-incident 계열 포함 → lock override(안전 우선, 룰 명문). fix-incident gap=9/20·op-analysis gap=13/25·info-arch gap=22/30·lotto gap=16/30 전부 미도달. EXHAUSTIVE_SWEEP 게이트 미충족(RC_HEAVY_COUNT=7<8, CLEAN_DRIFT=6<7). ship-0 hard stop 미충족(직전10 success 2건: 3483/3486). cycle 3491 추천대로 scripts/ 잔여 11개 중 lotto.ts(2637줄, 별도 lotto chain 관할) 제외 10개(~1437줄) 채택.
+
+**감사 결과**: 10개 전부 clean. `dev-postview.ts`(147줄)는 postview 오케스트레이터 로컬 드라이런 fixture — GameContext/ActualResult/OriginalPrediction 필드 전부 현재 타입과 일치. `export-predictions-tabpfn.ts`(124줄)/`import-tabpfn-predictions.ts`(136줄)는 tabpfn-export/tabpfn-import helper(`CSV_HEADER`/`buildCsvRow`/`parseTabpfnOutputCsv`/`buildTabpfnPredictionInsert`) export 시그니처 일치, PAGE_SIZE/CHUNK_SIZE pagination 패턴(cycle 3131/3171 fix 계열) 일관 유지. `measure-n178-vs-n165.ts`(117줄)는 cycle 1549 1회성 표본 미스매치 진단 스크립트, clean. `op-analysis-brier-drift.ts`(213줄)의 `isCE()`는 `!debate_version`만 체크하는데 쿼리가 이미 `scoring_rule='v1.8'`로 필터돼 있어 `op-analysis-ce-cohort.ts`의 완전한 isCE 정의(`v1.8-credit-fail` OR `v1.8`+null debate)와 그 필터링된 범위 내에서 동치 — 스크립트 내부 주석이 이미 "single source" 참조 명시, drift 아님. `op-analysis-ce-cohort.ts`(266줄) isCE 정의 기존 유지 확인. `update-stale-data.ts`(61줄)는 `buildStaleSnapshot`/`PredRowMin` export 일치. `backfill-mlb-elo.ts`(118줄)/`backfill-mlb-factor-breakdown.ts`(167줄)/`backfill-mlb-schedule-status.ts`(88줄)는 `@moneyball/kbo-data`(`computeMlbEloRatings`/`computeMlbEloHistory`/`DB_CONSTRAINTS.mlbTeamElo*`/`runMlbPipeline`) + `@moneyball/shared`(`normalizeMlbTeamCode`/`MLB_SCORING_RULE`) export grep 실측 확인(최초 index.ts 직접 grep에서 하위 모듈 간접 재export라 누락되어 재확인 — mlb-elo.ts/mlb-teams.ts/model-version-labels.ts/mlb-pipeline.ts 원본 정의 확인).
+
+**결론**: 10개 파일 전부 clean, 코드 변경 0건. `pnpm exec tsc --noEmit -p packages/kbo-data/tsconfig.json` 0 errors. scripts/ 디렉토리 사실상 완주 — 잔여 `lotto.ts`(2637줄, 규모상 lotto chain 자체 관할이 적합)만 남음.
+
+**검증(skill-evolution 등)**: trigger3 미충족(3492%50≠0, =42). trigger5 — 직전20(3473-3492, 현재 포함) 표본 충분(≥10), review-code 다수 포함 — 미충족. marker 미박제. ship-0 — 직전10(3483-3492) success 2건(3483/3486) 포함 — 미충족. 2-chain lock — 직전8(3484-3491) distinct=2 이나 fix-incident 계열 포함으로 override. PASS_ship 단일 grep 실측 유지(금번 retro-only라 증가 없음).
+
+다음 사이클 추천 = review-code(heavy) 신규 scope(lotto.ts 자체 또는 hooks//lib/ 2순회) 또는 fix-incident(gap10/20)/op-analysis(gap14/25)/info-arch(gap23/30)/lotto(gap17/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): scripts/ 잔여 7개 2차 전수감사 (cycle 3491, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3483-3490) distinct=3: fix-incident+review-code+fix-incident(verify)). fix-incident gap=7/20·op-analysis gap=11/25·info-arch gap=20/30·lotto gap=14/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative 확립 skip 패턴 유지. cycle 3490 추천대로 scripts/ 잔여 scope(backtest.ts/backtest-v2-candidate.ts/cohort-cleanup.ts/op-analysis-postbreak.ts/op-analysis-postbreak-full.ts/op-analysis-war-check.ts/op-analysis-mlb-elo-backtest.ts, 1133줄) 채택.
