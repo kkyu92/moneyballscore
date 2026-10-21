@@ -55,6 +55,15 @@ export default async function MlbHub() {
         <LanguageSwitch koHref="/mlb" enHref="/en/mlb" current="ko" />
       </div>
 
+      {accuracy.degraded && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
+
       <section className="text-center space-y-3 py-6">
         <h1 className="text-3xl md:text-5xl font-bold text-brand-700 dark:text-brand-100">
           MLB 분석
