@@ -4,8 +4,9 @@ import { LEADERBOARD_TOP_N, MIN_LEADERBOARD_PICKS, SITE_URL } from '@moneyball/s
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { HallOfFame } from '@/components/leaderboard/HallOfFame';
 import { LeaderboardClient } from '@/components/leaderboard/LeaderboardClient';
+import { captureFallback } from '@/lib/observability/captureFallback';
 import { fetchAiBaseline, fetchLeaderboard } from '@/lib/leaderboard/server';
-import type { LeaderboardMode } from '@/lib/leaderboard/types';
+import type { AiBaseline, LeaderboardEntry, LeaderboardMode } from '@/lib/leaderboard/types';
 
 export const revalidate = 30; // LEADERBOARD_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -58,10 +59,29 @@ export default async function LeaderboardPage({
   const params = await searchParams;
   const period = parsePeriod(params.period);
 
-  const [entries, aiBaseline] = await Promise.all([
+  // 서버 장애(DB 연결 실패 등)로 인한 fallback 과 "실제 데이터 없음" 을 구분하기 위해
+  // Promise.allSettled 로 각 fetch 의 성공/실패를 순수 파생값으로 추적 (predictions/accuracy/
+  // standings 등과 동일 컨벤션 — review-code heavy 감사, cycle 3511. fail-loud Promise.all
+  // 은 ISR cold-cache 시 boundary 대신 raw 500 반환 위험, cycle 2946/2947 확인 패턴).
+  const [entriesR, aiBaselineR] = await Promise.allSettled([
     fetchLeaderboard(period),
     fetchAiBaseline(period),
   ]);
+  const entries =
+    entriesR.status === 'fulfilled'
+      ? entriesR.value
+      : captureFallback(entriesR.reason, [] as LeaderboardEntry[], {
+          route: '/leaderboard',
+          source: 'fetchLeaderboard',
+        });
+  const aiBaseline =
+    aiBaselineR.status === 'fulfilled'
+      ? aiBaselineR.value
+      : captureFallback(aiBaselineR.reason, null as AiBaseline | null, {
+          route: '/leaderboard',
+          source: 'fetchAiBaseline',
+        });
+  const dbDegraded = [entriesR, aiBaselineR].some((r) => r.status === 'rejected');
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -89,6 +109,14 @@ export default async function LeaderboardPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Breadcrumb items={[{ label: '픽 리더보드' }]} />
+      {dbDegraded && (
+        <div
+          role="status"
+          className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          일시적인 서비스 장애로 일부 정보가 표시되지 않을 수 있습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
       <h1 className="text-2xl font-bold mb-2 mt-4">픽 리더보드</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
         KBO 팬들의 승부예측 적중률 순위입니다. 픽 {MIN_LEADERBOARD_PICKS}개 이상 완료 시 등장합니다.
