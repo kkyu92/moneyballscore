@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — info-architecture-review(조기 체크포인트): page.tsx/breadcrumb/nav 전수 재확인, drift 0건 (cycle 3525, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/superseded). 2차 방어선(cycle 3524 retro `3ca28e81`) OK. review-code EXHAUSTIVE_SWEEP cooldown 유지(3522~3531). 직전8(3517-3524) distinct=5(review-code4+operational-analysis+fix-incident+lotto+polish-ui) — 2-chain lock 미충족. 남은 pool gap 비율: info-arch 9/30(30%, 최고)·op-analysis 3/25(12%)·fix-incident 2/20(10%)·lotto 1/30(3.3%, 직전 cycle 발화). explore-idea saturation 직전15 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 7.5h 신선) 확립 skip 패턴 유지. info-arch 최고 gap 비율 — 다양성 확보 겸 선택.
+
+**점검**: `git log --diff-filter=A -- '**/page.tsx'` cycle 3516(`fe90fcba`) 이후 신규 라우트 0건(page.tsx 총 111개 불변). Header/MegaMenu/Footer 최근 변경 `526502c3`(cycle 3219 dead code 제거) 이후 불변 — nav 구조 불변. Breadcrumb 미커버 18건 — debug/* 8 + reviews weekly/monthly KBO+MLB+EN twin 6 + community/login/settings 3 + root 1, 기존 체크포인트(cycle 3330/3373/3410/3440/3470/3496/3516)와 100% 동일 리스트, 신규 미분류 0건. sitemap.ts 동적 생성 구조 cycle 3036 이후 불변, 재검증 불필요.
+
+**결론**: IA drift 0건 재확인. 코드 변경 없음, retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3525%50=25≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3506-3525, 현재 포함) 표본 20≥10, review-code 12건(0회 아님) — 미충족. marker 미박제.
+
+**ship-0 emergency stop 발동 (cycle 3525)**: 직전10(3516-3525) outcome 전수 재확인 — 10/10 retro-only(success 0건). EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT=4(<8 임계, review-code(heavy)=3518~3521 4건뿐) → 미충족, exhaustive-sweep-clean 예외 적용 불가(해당 예외는 review-code 단독 dominance 8+/10 전용, 본 window 는 info-arch/polish-ui/review-code/op-analysis/fix-incident/lotto 다양한 lite 체크포인트 혼재). CLAUDE.md 원 ship-0 룰 literal 충족 → **EMERGENCY_STOP=true**. signal next_n=0 강제(사용자 요청 N=42 중 잔여 41 무시), `memory: meta-pattern emergency-stop` dispatch 로 사용자 결정 요청. 자가 의심 아님(객관 evidence: KBO 2026 시즌 종료(10/4) 이후 생산적 신규 작업 소재 고갈 — periodic 체크포인트만 반복, 전부 "drift 0건/정상" 확인형 retro-only).
+
+2-chain lock(다음 사이클용) — 직전8(3518-3525) 재계산 필요(재개 시 다음 사이클 진단).
+
+다음 사이클 추천 = fix-incident(gap2/20)/operational-analysis(gap3/25)/lotto(gap1/30) 자연 대기, 또는 review-code cooldown(3531 만료) 후 복귀 — **단 emergency stop 발동으로 사용자 결정 전까지 zero-touch 재개 보류**.
+
 ## 🟢 RETRO-ONLY — lotto(조기 체크포인트): cron 산출물 전수 재확인, 정상 (cycle 3524, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/superseded). 2차 방어선(cycle 3523 retro `f833c6c3`) OK. review-code EXHAUSTIVE_SWEEP cooldown 유지(3522~3531). 직전8(3516-3523) distinct=5(info-arch/polish-ui/review-code4/operational-analysis/fix-incident) — 2-chain lock 미충족. 남은 pool gap 비율: lotto 19/30(63.3%, 최고)·info-arch 9/30(30%)·op-analysis 2/25(8%)·fix-incident 1/20(5%, 직전 cycle 발화). explore-idea saturation 직전15 14/15 충족하나 4-source negative(open issue 0/approved plan 0/23/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. lotto 최고 gap 비율 — cycle 3516/3523 조기 체크포인트와 동일 패턴으로 다양성 확보 겸 선택.
