@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — fix-incident(verify) + review-code(heavy): indexnow-ping fix 실측 검증 + kbo-scores suspended 테스트 공백 보강 (cycle 3486, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3478-3485) distinct=3: review-code6+operational-analysis1+fix-incident1). fix-incident gap=3·op-analysis gap=7·info-arch gap=16·lotto gap=10 전부 미도달. explore-idea saturation 13/15 충족하나 4-source negative 확립 skip 패턴 유지. 2차 방어선: cycle 3485 policy:cycle-retro commit 실존 확인 OK.
+
+**indexnow-ping 검증**: cycle 3483 이 `[indexnowKey].txt` route 를 build-time static 파일 생성 스크립트로 교체하는 fix(`ab0ac585`, 02:57 UTC 10/21 배포)를 했으나, 당시 retro 는 "다음 schedule 10/22 05시경까지 검증 불가"로 미확정 남김. 본 사이클이 `gh workflow run indexnow-ping.yml` 로 수동 workflow_dispatch 재현 → conclusion=success(run 39537858897, 직전 5일 10/16~10/20 전부 schedule-trigger failure 였던 것과 대조) — **fix 실효 최초 실측 확인**. CLAUDE.md R5 "체크포인트 주장 현실 대조" 원칙 적용 사례.
+
+**review-code(heavy)**: app/api 신규 route.test.ts 9개(hub-dispatch/kbo-scores/leaderboard-sync/live/picks-mlb-poll/picks-poll/pipeline/revalidate/snapshot-pitchers) + degraded-flag-convention.test.ts 전수 read. `kbo-scores/__tests__/route.test.ts`(cycle 3099 cancel/suspended 구조적 필드 우선순위 수정의 회귀 테스트)가 `cancel` 플래그만 커버하고 동일 우선순위·동일 코드 경로(`cancel || suspended`)인 `suspended` 플래그는 테스트 공백 상태였음을 발견 — suspended 테스트 케이스 1건 추가(5 tests, 전부 PASS). 나머지 8개 테스트 파일은 전수 read 결과 drift 0건(mlb-poll vs kbo-poll 의 ID validation 차이는 game_id 숫자형 vs external_game_id 문자열형 데이터 모델 차이로 의도된 정상).
+
+검증: `tsc --noEmit`/`pnpm lint`/`vitest run` 전부 clean. 직접 main 커밋+push(R4 범위, `88ddaa9c`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3486%50≠0). trigger5 — 직전20(3467-3486) 분포: review-code 다수 발화로 0회 아님(미충족). marker 미박제. ship-0 — 직전10(3477-3486) success 다수 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3479-3486) distinct=3(review-code6+operational-analysis1+fix-incident1), 미충족. PASS_ship 단일 grep 실측 3097(cycle 3485 이전 3096 대비 +1).
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/api/{health,mlb,seo,sync-batter-stats,version}` 등 과거 CHANGELOG mention 있으나 전수 감사 이력 불명확한 route 재확인) 또는 info-arch(gap17/30)/lotto(gap11/30)/op-analysis(gap8/25) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): app/en/mlb/ 신규 SEO 메타데이터 31파일 twin-parity 감사 (cycle 3485, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3477-3484) distinct=3: review-code6+operational-analysis1+fix-incident1). fix-incident gap=2/20·op-analysis gap=6/25·info-arch gap=15/30·lotto gap=9/30 전부 미도달. DESIGN.md 당일 신선 — design-system 미근접. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. indexnow-ping cron 익일 재확인은 아직 불가(fix 배포 02:57 UTC 이후 cron 미재실행, 다음 스케줄 10/22 05시경) — 보류. 최근 14일 신규 파일 전수 조회(`git log --since="14 days ago" --diff-filter=A`) 결과 `apps/moneyball/src/app/en/mlb/` 하위 OG/twitter-image/loading/not-found/page 31개 파일이 한 번도 감사된 적 없는 진짜 신선 scope로 확인되어 채택.
