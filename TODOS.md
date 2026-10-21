@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): components/matchup 전수감사, drift 0건 (cycle 3471, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3470 retro `2e4b18cd`) OK. 직전8(3463-3470) distinct=3(fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족, 자유 선택. fix-incident gap=8/20·op-analysis gap=17/25·lotto gap=22/30 전부 미도달. explore-idea saturation 15/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 전일 신선) 확립 skip 패턴 유지. cycle 3470 추천대로 components/ round2 잔여(analysis/dashboard/layout/matchup/picks/predictions) 중 파일수 최소 `matchup/`(11파일, KBO/MLB twin 5쌍+1) 선정.
+
+**감사 결과**: Agent 위임 전수 read — 11 파일 전부. DEFAULT_WEIGHTS 하드코딩 없음(`MatchupFactorCompare.tsx`는 라벨/비교값만, weight % 미표시 — 드리프트 불가 구조). `packages/shared/src/index.ts` DEFAULT_WEIGHTS vs CLAUDE.md v1.8 10팩터 값 재대조 일치. `MlbMatchupFactorCompare.tsx:65-77` spXfip/war 미집계 + SFR placeholder 주장을 `buildMlbTeamFactorAverages.ts`/`computeMlbCompositeDuel.ts` 교차확인 — 정확, stale 아님. dark-mode 클래스 페어링 11 파일 전부 정합(twin 파일 라인 단위 일치). KBO/MLB twin parity — `MlbMatchupEloChart.tsx`는 의도된 dedup(cycle 2582, `MatchupEloChart` 위임), `locale` prop 와이어링 KBO/MLB-KO/MLB-EN 3 라우트 전수 확인 누락 0건, `MatchupGamesCloseFilter.tsx` MLB twin 부재는 3라우트 공용 설계로 의도적. convergence-pick 임계값(KBO `FACTOR_PICK_*` vs MLB `MLB_FACTOR_PICK_*`) 교차배선 없음. dev 용어 0건. dead code/stale comment 0건. a11y(`aria-pressed`/`focus-visible`/`aria-labelledby`) 전부 적절. `__tests__` 디렉토리 자체는 없으나 하위 data builder(`buildSeasonHeadToHead` 등) 쪽에 정상 분리 존재.
+
+**코드 변경 없음** — actionable fix 없음, drift 0건 확인.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3471%50=21≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3452-3471, 현재 포함) review-code 16회 발화로 미충족(표본≥10 충족). marker 미박제. ship-0 — 직전10(3462-3471) outcome 중 success 2건(3462/3464) 포함 미충족. **2-chain lock(다음 사이클용) 충족** — 직전8(3464-3471) distinct=2(review-code 7+info-architecture-review 1) → 다음 사이클 둘 다 cooldown 제외 대상. 2차 방어선(cycle 3470 retro `2e4b18cd`) OK.
+
+다음 사이클 추천 = 2-chain lock(review-code+info-architecture-review 제외) 적용 시 fix-incident(gap9/20)/op-analysis(gap18/25)/lotto(gap23/30) 중 자유 선택 또는 lock-fallback(polish-ui). lock 무시 조건(잠긴 chain 중 fix-incident 포함) 해당 없음 — lock 그대로 적용 권장.
+
 ## ⚪ RETRO-ONLY — info-architecture-review: 30-cycle gap checkpoint, 26연속 "IA 충분" 재확정 (cycle 3470, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3469 retro `605cfbb5`) OK. 직전8(3462-3469) distinct=2(review-code7+fix-incident1) 2-chain lock 탐지되나 fix-incident 포함 → 룰4(안전 우선)로 lock 무시, 자유 선택. info-arch gap=30/30 정확 도달(last fire 3440) — review-code 7/8 dominance 완화 겸 선택. fix-incident gap=7/20·op-analysis gap=16/25·lotto gap=21/30 전부 미도달.
