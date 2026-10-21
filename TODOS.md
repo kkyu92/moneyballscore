@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — review-code (heavy): en/mlb/{accuracy,factors,matchup,methodology,postseason} 5라우트 전수감사, drift 0건 — EN twin 시리즈 완주 (cycle 3505, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 2-chain lock 직전8(3497-3504) distinct=3(review-code(heavy)+skill-evolution+operational-analysis) — 미충족. fix-incident gap=22/20 도달 — `gh run list` 재확인(CI Failure Dispatch 전부 skipped) + 5개 scheduled cron workflow(data-refresh-weekly/factor-backtest-weekly/lotto-pick-update/lotto-result-update/op-analysis-weekly) 최신 run 전부 success, lotto picks/results 파일 최신(10/24, 10/17) 확인 — 실제 incident 부재. op-analysis gap=1/25(직전 cycle 발화)·lotto gap=29/30·info-arch gap=9/30 전부 미도달. 직전20(3485-3504) chain 분포 review-code 70%(14/20) dominance 지속 — cycle 3503 추천 carry-over(EN mlb twin 잔여 5라우트) 자연 채택.
+
+**감사 결과**: Agent(Explore) 위임 전수 read — `en/mlb/{accuracy,factors,matchup,methodology,postseason}/page.tsx` 5개를 cycle 3503 에서 이미 clean 확인된 KO 쌍둥이와 line-by-line 대조. accuracy 의 `dbDegraded` 도출 로직(Promise.allSettled 6 builder + reject/degraded 병합) KO/EN 동일, factors 의 `PLACEHOLDER_WEIGHT_SUM` 수식 동일(EN 영문 라벨 하드코딩은 `MetricRegistry` 에 `en_name` 필드 자체가 없어 구조적으로 불가피 — 버그 아님), matchup/methodology/postseason 전부 텍스트·링크 prefix(`/en`) 차이만. cycle 3503 fix(degraded flag threading) 가 적용된 `en/mlb/{standings,wild-card}/page.tsx` 도 재확인 — destructure + 배너 JSX 그대로 유지, revert 없음.
+
+**drift 0건** — KO/EN twin 시리즈(`mlb/`+`en/mlb/` 전 라우트) 전수감사 완주.
+
+코드 변경 없음(retro-only).
+
+**검증(skill-evolution 등)**: trigger3 미충족(3505%50=5). trigger5 — 직전20(3486-3505, 현재 포함) 표본 20(≥10), review-code 다수 발화(0회 아님) — 미충족. ship-0 — 직전10(3496-3505) success 2건(3501/3503) 포함 — 미충족. trigger1(chain-evolution 누적 10건)은 부트스트랩 1회성 게이트(migration path 단계1 "N≥5 dispatch 가능") 이미 통과 상태 — 재발화 트리거 아님, 과거 cycle 들과 동일 처리.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프(`components/layout+live+search+share+glossary` 잔여 또는 `app/` 비-mlb 잔여) 또는 fix-incident(이번 cycle 체크 완료, cooldown 자연)/lotto(gap29/30, 거의 도달)/info-arch(gap9/30) 자연 대기. 다양성 확보 겸 lotto 는 다음 사이클 gap=30 정확 도달 예정.
+
 ## ⚪ RETRO-ONLY — operational-analysis (lite): CE/비CE 격차 재측정, 수치 동일(n=448) — KBO 시즌 종료 지속 확인 (cycle 3504, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 2-chain lock 직전8(3496-3503) distinct=3(info-architecture-review+review-code+skill-evolution) — 미충족. op-analysis gap=25/25 정확 도달(마지막 발화 3479). 직전20(3484-3503) chain 분포 review-code 80%(16/20) dominance — 다양성 redirect 겸 op-analysis 선택. fix-incident gap=18/20·lotto gap=28/30·info-arch gap=8/30 전부 미도달.
