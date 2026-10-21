@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — info-architecture-review (lite): 조기 체크포인트, 2-chain lock 다양성 확보 (cycle 3496, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived). **2-chain lock 탐지** — 직전8(3488-3495) distinct=2(review-code(heavy) 7/8 + polish-ui 1/8) → 양쪽 다 후보에서 제외(fix-incident 미포함이라 override 불가). fix-incident gap=13/20·op-analysis gap=17/25·lotto gap=20/30 전부 미도달. explore-idea saturation 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. lock fallback 룰의 명시 타겟(polish-ui)이 이번엔 잠긴 chain 자체라 발화 불가 — 남은 pool 중 자체 주기 gap 비율이 가장 높은(26/30=87%) info-architecture-review 를 다양성 확보 차원에서 조기 선택(정식 30-cycle 트리거는 cycle 3500 근방).
+
+**체크 결과 — cycle 3470 체크포인트 이후 변화 0건**: `page.tsx` 총 111개(cycle 3470과 동일, 신규 라우트 0건 — `mtime -7` 매칭 59건은 전부 review-code(heavy) 편집 흔적). `Header.tsx`/`MegaMenu.tsx`/`Footer.tsx` 최근 커밋 = `526502c3`(cycle 3219, dead code 제거)로 cycle 3470 당시와 동일, nav 구조 불변. breadcrumb 미적용 18건 — cycle 3470 리스트(debug/* 8 + reviews weekly/monthly KBO/MLB/EN 트윈 6 + community/login/settings 3 + root 1)와 완전 동일, 신규 미분류 항목 0건. `sitemap.ts` 최근 변경 = cycle 3118~3119(MLB 인사이트 아카이브) 이후 불변, 재검증 불필요.
+
+**결론**: "현 IA 충분" 27연속 재확정(…→3410→3440→3470→3496). 코드/문서 변경 0건(TODOS entry 제외) — cycle 3470 과 동일 결론이라 별도 `docs/design/ia-*.md` 신규 spec 불필요 판단.
+
+**검증(skill-evolution 등)**: trigger3 미충족(3496%50≠0, =46). trigger5 — 직전20(3477-3496, 현재 포함) 표본 충분(≥10, review-code 다수 포함) — 미충족. marker 미박제. ship-0 — 직전10(3487-3496) success 2건(3494/3495) 포함 — 미충족. EXHAUSTIVE_SWEEP 게이트 평가 불필요(hard stop 자체 미충족). PASS_ship 단일 grep 실측 변화 없음(본 cycle 코드 변경 0, retro-only).
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 복귀(`hooks/` 또는 `lib/` 2순회) 또는 fix-incident(gap14/20)/op-analysis(gap18/25)/lotto(gap21/30) 자연 대기. info-arch 정식 30-cycle gap 재도달 지점 = cycle 3500 근방(이번 조기 체크포인트와 별개로 유지).
+
 ## 🟢 SUCCESS — polish-ui: megamenu-state-matrix.md 스펙 테이블 실측 정정 (cycle 3495, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. **2-chain lock 탐지** — 직전8(3487-3494) distinct=1(review-code(heavy) 8/8 전부) → review-code 후보 제외. fix-incident gap=12/20·op-analysis gap=16/25·info-arch gap=25/30·lotto gap=19/30 전부 미도달. explore-idea saturation 직전15 15/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. DESIGN.md mtime 당일 신선 — design-system 미근접. lotto cron 산출물 둘 다 최신. **어떤 chain 도 trigger 없음 → lock fallback 룰대로 polish-ui 강제 발화**.
