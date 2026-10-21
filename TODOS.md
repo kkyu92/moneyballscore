@@ -1,3 +1,13 @@
+## 🟢 RETRO-ONLY — polish-ui (2-chain lock fallback): DESIGN.md 토큰 vs 컴포넌트 hex 대조, drift 0건 (cycle 3517, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3509-3516) distinct=2(review-code(heavy)7+info-architecture-review1) — 2-chain lock 탐지, review-code/info-arch 제외(cooldown N=1). 남은 pool: fix-incident gap=10/20·op-analysis gap=13/25·lotto gap=11/30 전부 미도달. lotto cron 정상 확인(picks 2026-10-24/results 2026-10-17 생성 완료). `gh run list` — CI Failure Dispatch 전부 skipped, 실제 incident 부재. DESIGN.md mtime 6h(신선) — design-system 미근접. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. 신규 라우트 7일 안 0건(git log 실측, find -mtime 는 파일시스템 touch 오탐) — polish-ui 자체 trigger 도 약함. 어떤 chain 도 강한 trigger 없어 2-chain lock 룰(3) fallback = polish-ui 강제 선택.
+
+**검증 결과 — drift 0건**: 하드코딩 hex 색상 grep (`apps/moneyball/src/components` + `apps/moneyball/src/app`, `*.tsx`) → 2파일 18건. `HallOfFame.tsx` — 전부 `var(--color-accent, #c5a23e)` 형태 CSS var-with-fallback, DESIGN.md 토큰 정의(accent/brand 계열)와 hex 값 완전 일치(의도된 fallback, drift 아님). `ShareButtons.tsx` — `#1DA1F2`(Twitter)/`#1877F2`(Facebook) 플랫폼 브랜드 색상, DESIGN.md 토큰 범위 밖 의도된 예외(SNS 공유 버튼은 플랫폼 고유색 사용이 표준 관행). 코드 변경 없음.
+
+**검증(skill-evolution 등)**: trigger1(신규 chain-evolution 5건 미만)/trigger2(5연속 fail 없음)/trigger3(3517%50=17≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3498-3517, 현재 포함) 표본 20≥10, review-code 14회 — 미충족(0회 아님). ship-0 — 직전10(3508-3517) success 7건(retro-only 2+success 7) — 미충족.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy) 복귀 또는 fix-incident(gap11/20)/op-analysis(gap14/25)/lotto(gap12/30) 자연 대기.
+
 ## 🟢 RETRO-ONLY — info-architecture-review(lite): 2-chain lock 조기 체크포인트, drift 0건 (cycle 3516, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3508-3515) distinct=1 — review-code(heavy) 8/8 전부 — 2-chain lock 탐지(lock 조건은 distinct≤2, 본 사이클은 그보다 강한 distinct=1). review-code lock 대상 fix-incident 아니므로 룰4 예외 미적용 — 제외. 남은 pool gap: fix-incident 9/20(45%)·op-analysis 12/25(48%)·lotto 10/30(33%)·info-arch 20/30(67%, 최근접) — info-arch 선정.
