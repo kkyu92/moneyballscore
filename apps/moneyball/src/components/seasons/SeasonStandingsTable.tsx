@@ -6,8 +6,9 @@ import { TeamLogo } from '@/components/shared/TeamLogo';
 import type { TeamRecord } from '@/lib/seasons/buildSeasonSummary';
 import { useSeasonStandingsSortMode } from './SeasonStandingsSortControl';
 
-function fmtPct(v: number, digits = 1): string {
-  return (v * 100).toFixed(digits) + "%";
+function formatWinPct(v: number): string {
+  if (v === 0) return "-.---";
+  return v.toFixed(3).replace(/^0/, "");
 }
 
 interface Props {
@@ -69,7 +70,7 @@ export function SeasonStandingsTable({ teams }: Props) {
                 <span className="text-right font-mono">{t.wins}</span>
                 <span className="text-right font-mono">{t.losses}</span>
                 <span className="text-right font-mono text-gray-500 dark:text-gray-400">{t.draws}</span>
-                <span className="text-right font-mono font-semibold">{fmtPct(t.winPct, 3)}</span>
+                <span className="text-right font-mono font-semibold">{formatWinPct(t.winPct)}</span>
                 <span className="text-right font-mono">{t.runsScored}</span>
                 <span className="text-right font-mono">{t.runsAllowed}</span>
                 <span className={`text-right font-mono ${t.runDiff > 0 ? "text-brand-600 dark:text-brand-400" : t.runDiff < 0 ? "text-red-600 dark:text-red-400" : ""}`}>
