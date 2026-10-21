@@ -1,3 +1,19 @@
+## 🟢 SUCCESS — review-code (heavy): components/standings+seasons+players 전수감사, 승률 포맷 버그 수정 (cycle 3481, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/24(전부 완료/보류). 2-chain lock 미충족(직전8(3473-3480) distinct=3: review-code6+operational-analysis1+lotto1). fix-incident gap=18/20·lotto gap=5/30·info-arch gap=11/30·op-analysis gap=2/25 전부 미도달. 2차 방어선(cycle 3480 retro `77ab9ce7`) OK. components/ 전체 17개 서브디렉토리 중 grep commit count 최저 3개(standings 0건, seasons 1건, players 2건, 합계 5파일 474줄, twin KBO/MLB 쌍 없음 — grep-count-depth 가드레일(cycle 3001) 따라 실제 전수 read 로 커버리지 직접 확인) 선정.
+
+**감사 결과**: Agent(Explore) 위임 전수 read — 5파일 + call site(`/standings`, `/seasons/[year]`, `/players/[id]` 페이지) + builder(`buildSeasonSummary`/`buildTeamAccuracy`/`buildPitcherFipTrend`) + 패턴 동일 타 `*SortControl`/`*AccuracyList` 컴포넌트 cross-reference. 1 CONFIRMED BUG 발견+수정.
+
+**발견+수정 1건**: `SeasonStandingsTable.tsx:9,72` — 승률 컬럼이 범용 percent formatter(`fmtPct`, `(v*100).toFixed(digits)+"%"`)를 오용 — `0.611` → `"61.100%"` 로 노출(야구 승률 표기 관행 위반, 4rem 컬럼 폭도 `.611` 기준이라 overflow 위험). 형제 `/standings` 페이지는 동일 지표를 `formatWinPct()`(`.611` 포맷, KBO 표준)로 올바르게 표시 — 두 화면 간 불일치. `SeasonStandingsTable.tsx` 가 생성 커밋 이후 한 번도 안 건드려진 상태(grep 0건)라 미감사 상태로 남아있던 전형적 사례. `formatWinPct()` 로 교체, 미사용된 `fmtPct` 제거.
+
+**스킵(버그 아님)**: `TeamAccuracyList`/`TeamAccuracySortControl`(필드명 builder 와 정합, 기존 테스트 커버), `SeasonStandingsSortControl`(ARIA 패턴 타 SortControl 과 동일, 이탈 아님), `PitcherFipTrend`(필드명/날짜 포맷 패턴 타 차트와 동일, 로컬 결함 아님), `KBO_TEAM_COUNT` 기반 고정 order CSS reorder(동적 도출값이라 overflow 위험 없음 — `MonthlyTeamStatsSortControl` cycle-3010 fix 와 다른 케이스).
+
+**검증**: `tsc --noEmit`/`eslint` clean, `vitest run` 607 files/4794 tests 전부 PASS. 직접 main 커밋+push(R4 범위, `db379d9d`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3481%50=31≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3462-3481, 현재 포함) review-code 다회 발화로 미충족(표본≥10, 0회 아님). marker 미박제. ship-0 — 직전10(3472-3481) success 다수(3472/3473/3474/3477/3478/3480/3481) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3474-3481) distinct 확인 필요하나 review-code 비중 높음 — 다음 사이클 진단 시 재확인.
+
+다음 사이클 추천 = review-code(heavy) components/ 17개 서브디렉토리 사실상 전수 완료(남은 저빈도 영역 search(3)/teams(4)/leaderboard(4)) 또는 fix-incident(gap19/20, 거의 도달)/lotto(gap6/30)/info-arch(gap12/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code (heavy): components/predictions/ 전수감사, twin wrap-guard + dev-jargon + MLB prose 누락 문장 수정 (cycle 3480, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/24(전부 완료/보류 status). 2-chain lock 미충족(직전8(3472-3479) distinct=4: review-code5+polish-ui1+lotto1+operational-analysis1). fix-incident gap=17/20·lotto gap=4/30·info-arch gap=10/30 전부 미도달. 2차 방어선(cycle 3479 retro `fa613d8b`) OK. components/ round2 잔여(layout/predictions) 중 twin KBO/MLB 쌍이 많은 `predictions/`(24파일, TODOS/CHANGELOG grep 0건) 선정.
