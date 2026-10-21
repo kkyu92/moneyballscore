@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — lotto (lite): 30-cycle gap 체크, cron 건강 재확인 — delta 0 (cycle 3506, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3498-3505) chain 분포 distinct=3(review-code 6+skill-evolution 1+operational-analysis 1) — 2-chain lock 미충족. fix-incident gap=23/20 도달하나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재(cycle 3503 재확인과 동일 결론). lotto gap=30/30 정확 도달(마지막 발화 3476) — 가장 오래 미발화 + review-code dominance(직전8 중 6) 완화 겸 선택.
+
+**측정**: `pnpm tsx scripts/lotto.ts count` — 유효 조합 7,706,313 / 전체 8,145,060 / 제거 438,747(5.39%), cycle 3476 측정치와 완전 동일(delta=0, 신규 회차 데이터 무변화). `lotto-data.json` mtime 2026-10-19(2일 전, 신선). cron 산출물 양쪽 확인: picks `2026-10-24.md`(1247회, cron Oct 20 16:08 정상 생성) + results `2026-10-17.md`(1246회, cron Oct 19 09:07 정상, 256/256 PASS 이미 검증 완료 — 1등 0건/4등 3건/5등 38건, cycle 3476 기 박제). `lotto-pick-update`/`lotto-result-update` 최근 run 전부 success(과거 10/13 실패 1건은 cycle 3128 fix + cycle 3315 재확인 기 해소 사건, 재발 아님). 1247회(10/24 토) 추첨 미도래 — 신규 OOS 검증 대상 없음.
+
+코드 변경 없음(retro-only, harness 재실행 + cron 건강 확인만). 신규 rule 후보 없음.
+
+**검증(skill-evolution 등)**: trigger3 미충족(3506%50=6). trigger5 — 직전20(3487-3506, 현재 포함) 표본 20(≥10), review-code 15회 발화(0회 아님) — 미충족. ship-0 — 직전10(3497-3506) success 2건(3501/3503) 포함 — 미충족.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프(`components/layout+live+search+share+glossary` 잔여 또는 `app/` 비-mlb 잔여) 또는 fix-incident(이번 cycle 체크 완료)/info-arch(gap10/30)/op-analysis(gap2/25) 자연 대기. 다음 lotto 재측정 gap 30-cycle 주기(실제 last fire 3506) 권장.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): en/mlb/{accuracy,factors,matchup,methodology,postseason} 5라우트 전수감사, drift 0건 — EN twin 시리즈 완주 (cycle 3505, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 2-chain lock 직전8(3497-3504) distinct=3(review-code(heavy)+skill-evolution+operational-analysis) — 미충족. fix-incident gap=22/20 도달 — `gh run list` 재확인(CI Failure Dispatch 전부 skipped) + 5개 scheduled cron workflow(data-refresh-weekly/factor-backtest-weekly/lotto-pick-update/lotto-result-update/op-analysis-weekly) 최신 run 전부 success, lotto picks/results 파일 최신(10/24, 10/17) 확인 — 실제 incident 부재. op-analysis gap=1/25(직전 cycle 발화)·lotto gap=29/30·info-arch gap=9/30 전부 미도달. 직전20(3485-3504) chain 분포 review-code 70%(14/20) dominance 지속 — cycle 3503 추천 carry-over(EN mlb twin 잔여 5라우트) 자연 채택.
