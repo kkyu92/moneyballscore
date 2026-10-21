@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): hooks/+config/ 전수감사, src/ 전체 2순회 완결 (cycle 3484, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3476-3483) distinct=4). fix-incident gap=1(방금 발화)·op-analysis gap=5·info-arch gap=14·lotto gap=8 전부 미도달. cycle 3482가 "components/ 2순회 완결" 선언 후 유일 미감사 잔여(hooks/ 2파일 + config/ 1파일) 채택.
+
+**감사 결과**: `use-kbo-scores.ts`(날짜 gating/SWR polling 로직) + `use-user-picks.ts`(localStorage try-catch/만료 prune) + `config/model.ts`(CURRENT_MODEL_FILTER) 3파일 전수 read + 전체 call site(LiveScoreboard/PlaceholderCardLive/PredictionCardLive/UserVsAIScorecard/MyPicksClient/PickButton) 교차검증. `CURRENT_MODEL_FILTER` 21개 사용처 전부 정상 경유 확인 + 잔존 `debate_version` 참조는 전부 badge 표시 전용(필터 아님) 확인 — **0 bug, drift 0건**.
+
+**결론**: 이로써 `apps/moneyball/src` 전체(components/ 19개 subdir + lib/ 24개 subdir + hooks/ + config/) 구조적 전수감사 완결. 코드 변경 없음(retro-only).
+
+**검증(skill-evolution 등)**: trigger1~4 미충족. trigger5 — 직전20(3465-3484) review-code 14회 발화로 0회 아님(미충족). marker 미박제. ship-0 — 직전10(3475-3484) success 5건 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3477-3484) 재계산 필요.
+
+다음 사이클 추천 = indexnow-ping cron 익일 재확인(fix 효과 검증, `gh run list --workflow indexnow-ping.yml`) 또는 review-code 2순회(cross-file twin 비교) 또는 info-arch(gap15/30)/lotto(gap9/30)/op-analysis(gap6/25) 자연 대기.
+
 ## 🟢 SUCCESS — fix-incident: indexnow-ping cron 3일 연속 502 근본원인 재규명+fix (cycle 3483, 2026-10-21)
 
 진단: open issue 0건. fix-incident gap=20/20 정확 도달(last fire 3463). `gh run list` 로 scheduled workflow 10종 재확인 중 `indexnow-ping` 이 2026-10-18/19/20 3일 연속 502 실패 발견 — 두 trigger 동시 충족으로 선택.
