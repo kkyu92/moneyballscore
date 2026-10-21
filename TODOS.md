@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): scripts/ 잔여 7개 전수감사 (cycle 3490, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3482-3489) distinct=3: review-code6+fix-incident(verify)1+fix-incident1). fix-incident gap=7/20·op-analysis gap=11/25·info-arch gap=20/30·lotto gap=14/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. cycle 3489 추천대로 scripts/ 잔여 7개(dev-backend-compare/dev-debate/llm-context-baseline/measure-context-layer-brier/op-analysis-cohort/run-pipeline/smoke-umpire-scraper, 857줄) 채택.
+
+**감사 결과**: 7개 전부 clean. `dev-backend-compare.ts`/`dev-debate.ts`는 1회성 수동 디버그(크레딧 비교·Ollama dry-run), cron 미등록. `llm-context-baseline.ts`/`measure-context-layer-brier.ts`/`op-analysis-cohort.ts`는 plan #23/#8 harness — `callLLM`/`runDebate`/`buildAgentContext`/`renderContextForLLM`/`measureContextTokenBudget`/`measureHallucinations`/`measureContextLayerBrierDelta` 전부 export 존재 + 시그니처 일치 확인(silent rename drift 없음). `measure-context-layer-brier.ts`+`op-analysis-cohort.ts` 양쪽 PAGE=1000 pagination 패턴(cycle 3131/3171 fix) 일관 유지 확인. `run-pipeline.ts`는 `runDailyPipeline(date, mode, 'manual')` 호출 — `triggeredBy: 'cron'|'manual'|'api'` 타입과 일치. `smoke-umpire-scraper.ts`는 cycle 1014 Naver API 전환 검증용 1회성, `scrapeGameUmpires` export 확인.
+
+**결론**: 7개 파일 전부 clean, 코드 변경 0건. scripts/ 디렉토리는 아직 미완주(backtest*/cohort-cleanup/op-analysis-postbreak*/op-analysis-war-check/op-analysis-mlb-elo-backtest/measure-n178-vs-n165/op-analysis-brier-drift/update-stale-data/tabpfn import-export 등 잔여).
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3490%50≠0). trigger5 — 직전20(3471-3490, 현재 포함) 표본 18(≥10 충족), review-code 14회(0회 아님) — 미충족. marker 미박제. ship-0 — 직전10(3480-3489) success 다수(3481/3483/3486) 포함 — 미충족. PASS_ship 단일 grep 실측 3098(cycle 3489와 동일, 금번 retro-only라 증가 없음).
+
+다음 사이클 추천 = review-code(heavy) scripts/ 잔여 scope 계속 또는 fix-incident(gap8/20)/op-analysis(gap12/25)/info-arch(gap21/30)/lotto(gap15/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): scripts/backfill-*.ts 6개 전수감사 (cycle 3489, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3482-3488) distinct=3). fix-incident gap=6/20·op-analysis gap=10/25·info-arch gap=19/30·lotto gap=13/30 전부 미도달. app/api 13개 + components/ 20개 + lib/ 24개 + hooks/config 전부 과거 완주 확인됨(CHANGELOG 교차검증) — 신규 scope 탐색 결과 `scripts/backfill-*.ts` 6개(home-win-prob/is-correct-shadow-fix/kbo-confirmed-postponed/kbo-stuck-verify/shadow-cohort/tie-winner-null, 904줄) CHANGELOG mention 0회 확인, DB-write 스크립트라 blast radius 고려해 우선 채택.
