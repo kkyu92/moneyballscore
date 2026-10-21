@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — review-code (heavy): components/search+teams+leaderboard 전수감사, drift 0건 — 2순회 사실상 완결 (cycle 3482, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived). 2-chain lock 미충족(직전8(3473-3480) distinct=3: review-code6+operational-analysis1+lotto1). fix-incident gap=19/20(거의 도달)·op-analysis gap=3/25·info-arch gap=12/30·lotto gap=6/30 전부 미도달. 2차 방어선(cycle 3481 retro `d1c31b39`, cycle 3480 retro `77ab9ce7`) OK. cycle 3481 추천대로 components/ 저빈도 잔여 3개(search 3파일/teams 6파일/leaderboard 6파일, 합계 15파일) 채택.
+
+**감사 결과**: Agent(Explore) 위임 전수 read — 15파일 전체 + KBO/MLB twin pair 2쌍(`TeamConvergencePickRecord`↔`MlbTeamConvergencePickRecord`, `TeamEloChart`↔`MlbTeamEloChart`) line-by-line diff + call site(`/teams/[code]`, `/mlb/team/[code]`, `/en/mlb/team/[code]`, `/search`, leaderboard 전체) + builder(`lib/leaderboard/server.ts`, `lib/analysis/convergenceRecord.ts`) cross-reference. **0 bug 발견** — 전부 clean. twin pair 양쪽 모두 설명 텍스트 생략 패턴(MLB 쪽 factor-count 인터폴레이션 생략)은 기존 `MatchupConvergencePickRecord`/`MlbMatchupConvergencePickRecord` 쌍에 이미 확립된 의도된 패턴과 동일함을 확인 — drift 아님. `HallOfFame.tsx`/`LeaderboardTable.tsx` dark-mode 클래스 페어링 차이도 repo 전체 `bg-accent/` 사용처 재확인 결과 `HallOfFame.tsx` 쪽이 outlier(5/6 call site 가 dark variant 생략 — `--color-accent` 고정 미테마 토큰 관례)임을 확인, `LeaderboardTable.tsx` 가 정상 관례.
+
+**1건 비-버그 아키텍처 노트**: `LeaderboardClient.tsx`가 사용하는 `mlb_user_picks` 동기화 데이터가 leaderboard SQL view(`leaderboard_monthly/season/all/weekly`)에 미반영 — migration `050_mlb_user_picks.sql` 주석이 이미 "Phase 3 뷰 대비"로 명시한 의도된 보류 상태라 silent drift 아님. 향후 Phase 3 뷰 작업 또는 미사용 동기화 제거 여부는 제품 결정 필요(기록만, 액션 없음).
+
+**결론 — components/ 2순회 사실상 완결**: layout(3414)/shared(3415)/reviews(3465)/insights+search+share+ui(3466)/live+players+standings(3467)/glossary+leaderboard+teams(3468)/accuracy(3469)/matchup(3471)/picks(3473)/analysis(3477)/dashboard(3478)/predictions(3480)/standings+seasons+players(3481)/search+teams+leaderboard(3482) — 19개 서브디렉토리 전체 2순회 완료. 2순회에서 실제 버그 4건 발견(TAG_STYLES drift/BRIER_BASELINE drift/MLB twin wrap-guard+prose 누락/승률 포맷) — 1순회(cycle 3438 완결) 이후 누적된 신규 silent drift 를 잡아낸 유효한 재감사였음을 재확인. **코드 변경 없음**(retro-only).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3482%50=32≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3463-3482, 현재 포함) review-code 15회 발화로 미충족(표본≥10 충족, 0회 아님). marker 미박제. ship-0 — 직전10(3473-3482) success 6건 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3475-3482) distinct=3(review-code6+operational-analysis1+lotto1) 미충족. 2차 방어선(cycle 3481 retro `d1c31b39`) OK.
+
+다음 사이클 추천 = fix-incident(gap19/20, 다음 사이클 정확히 20/20 도달 자연 trigger) 또는 review-code(heavy) 신규 소형 스코프(`hooks/` 2파일 한번도 미감사 + `config/`) 또는 info-arch(gap13/30)/lotto(gap7/30)/op-analysis(gap4/25) 자연 대기.
+
 ## 🟢 SUCCESS — review-code (heavy): components/standings+seasons+players 전수감사, 승률 포맷 버그 수정 (cycle 3481, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/24(전부 완료/보류). 2-chain lock 미충족(직전8(3473-3480) distinct=3: review-code6+operational-analysis1+lotto1). fix-incident gap=18/20·lotto gap=5/30·info-arch gap=11/30·op-analysis gap=2/25 전부 미도달. 2차 방어선(cycle 3480 retro `77ab9ce7`) OK. components/ 전체 17개 서브디렉토리 중 grep commit count 최저 3개(standings 0건, seasons 1건, players 2건, 합계 5파일 474줄, twin KBO/MLB 쌍 없음 — grep-count-depth 가드레일(cycle 3001) 따라 실제 전수 read 로 커버리지 직접 확인) 선정.
