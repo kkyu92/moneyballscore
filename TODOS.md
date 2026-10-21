@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy): degraded flag regression 잔여 수정 완결 + 세션-중단 재개 (cycle 3509, 2026-10-21)
+
+진단: 세션 시작 시 `~/.develop-cycle/active-cycle` 가 CYCLE_N=3509 / PID 86320(dead) 로 stale 방치 발견 — 직전 세션이 cycle 3503(SUCCESS, standings+wild-card degraded flag 수정, PR #3188) 후속으로 hub+analysis 페이지 잔여 수정을 진행하다 PR #3189 생성 직후(CI pending) 중단됨. cycle 3508 retro commit(`53685d89`)은 정상 존재 — 2차 방어선 OK, 미완결은 cycle 3509 단독.
+
+**재개**: PR #3189("fix: thread degraded flag into MLB hub + analysis pages") 상태 확인(OPEN, MERGEABLE) → `gh pr checks 3189 --watch --fail-fast` CI green 대기(~7분) → `gh pr merge 3189 --squash --delete-branch` R7 자동 머지 → `state=MERGED`(`319296c0`) 확인 → main fast-forward sync. 수정 내용(4 files, +36 lines): KBO `app/mlb/page.tsx` + `app/mlb/analysis/page.tsx`, EN twin `app/en/mlb/page.tsx` + `app/en/mlb/analysis/page.tsx` 전부 degraded flag prop 누락 수정 — cycle 3503 의 standings+wild-card 수정과 동일 regression 의 잔여 2개 영역(KBO+EN twin 4파일).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3509%50=9≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3490-3509, 현재 포함) chain pool 표본 20≥10 충족, review-code 다수 발화(13+) — 미충족. ship-0 — 직전10(3500-3509) success 3건(3501/3503/3509) 포함 — 미충족. 2-chain lock(다음 사이클용) — 직전8(3501-3508) distinct=5(skill-evolution/review-code/operational-analysis/lotto/fix-incident) — 미충족. 2차 방어선(cycle 3508 retro `53685d89`) OK.
+
+다음 사이클 추천 = review-code(heavy) `app/` 2순회 또는 `hooks/`/`scripts/` 신규 스코프, 또는 fix-incident(gap3/20)/op-analysis(gap6/25)/info-arch(gap14/30)/lotto(gap4/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — fix-incident (lite): 20-cycle 주기 점검, 5개 cron workflow 전수 확인 — 신규 incident 0건 (cycle 3507, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3499-3506) chain 분포 distinct=4(review-code/skill-evolution/operational-analysis/lotto) — 2-chain lock 미충족. review-code(heavy) 직전20 중 14회(70%) dominance 지속. fix-incident gap=24(마지막 발화 3483, ≥20 trigger 충족) — 다양성 redirect 겸 선택.
