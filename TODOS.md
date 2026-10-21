@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): app/en/mlb/ 신규 SEO 메타데이터 31파일 twin-parity 감사 (cycle 3485, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3477-3484) distinct=3: review-code6+operational-analysis1+fix-incident1). fix-incident gap=2/20·op-analysis gap=6/25·info-arch gap=15/30·lotto gap=9/30 전부 미도달. DESIGN.md 당일 신선 — design-system 미근접. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. indexnow-ping cron 익일 재확인은 아직 불가(fix 배포 02:57 UTC 이후 cron 미재실행, 다음 스케줄 10/22 05시경) — 보류. 최근 14일 신규 파일 전수 조회(`git log --since="14 days ago" --diff-filter=A`) 결과 `apps/moneyball/src/app/en/mlb/` 하위 OG/twitter-image/loading/not-found/page 31개 파일이 한 번도 감사된 적 없는 진짜 신선 scope로 확인되어 채택.
+
+**감사 결과**: Agent(Explore) 위임 read-only 전수 조사 — 31개 신규 파일 전부 read + 각각의 non-en(`mlb/`) twin과 line-by-line 대조 + `reviews/misses` 신규 page.tsx는 자체 test(`en-mlb-reviews-misses-page.test.ts`)가 실제 `isEn` prop wiring(page.tsx:158-163)을 정확히 타겟하는지도 확인. `SITE_HOST` URL 구성(`/en/mlb/...` prefix 일관), OG/twitter 이미지 size/contentType/alt 1:1 일치, loading.tsx 스켈레톤 locale-neutral(JSX 주석만 한글, 출력 무관), 404 페이지 전부 `/en/...` 링크+영문 카피 정상, `insights/series/[topic]/page.tsx`의 `buildArticleJsonLd` `inLanguage: "en-US"` vs KO twin 생략(json-ld.ts 기본값 `ko-KR`)은 의도된 정상 — **0 bug, drift 0건**.
+
+**결론**: review-code(heavy) 가 "진짜 신선 scope 소진" 상태(src/ 2순회 완결, packages/kbo-data 전체, scripts/ 전체 기감사)에서도 신규 추가 코드(en/mlb SEO 완성 작업)를 추적해 추가 감사 가치를 찾아낸 사례 — grep-count 낮은 신규 디렉토리도 전수 read 필요하다는 cycle 2991/3001 가드레일 재확인. 코드 변경 없음(retro-only).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적 변화 없음)/trigger2(5연속 fail 없음)/trigger3(3485%50=35≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3466-3485, 현재 포함) 분포: review-code14/polish-ui1/operational-analysis1/lotto1/info-architecture-review1/fix-incident1 — 0회 chain 없음(미충족). marker 미박제. ship-0 — 직전10(3476-3485) success 5건(3477/3478/3480/3481/3483) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3478-3485) 재계산 필요. PASS_ship 단일 grep 실측 3096(cycle 3484 이전 대비 +26).
+
+다음 사이클 추천 = indexnow-ping cron 익일 재확인(`gh run list --workflow indexnow-ping.yml`, 10/22 05시경 스케줄 이후) 또는 review-code(heavy) 신규 scope 계속 탐색(`app/en/mlb/` 잔여 page.tsx류 또는 14일 신규 파일 목록 재조회) 또는 info-arch(gap16/30)/lotto(gap10/30)/op-analysis(gap7/25) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): hooks/+config/ 전수감사, src/ 전체 2순회 완결 (cycle 3484, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3476-3483) distinct=4). fix-incident gap=1(방금 발화)·op-analysis gap=5·info-arch gap=14·lotto gap=8 전부 미도달. cycle 3482가 "components/ 2순회 완결" 선언 후 유일 미감사 잔여(hooks/ 2파일 + config/ 1파일) 채택.
