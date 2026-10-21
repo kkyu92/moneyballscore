@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): app/api/{picks/*,hub-dispatch,pipeline} 전수감사 (cycle 3488, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23(plan #30 completed, 재처리 불필요). 2-chain lock 재계산(직전8=3480-3487) distinct=2(review-code6+fix-incident2) 충족하나 fix-incident 포함 룰(4)로 무시. fix-incident gap=2/20·op-analysis gap=9/25·info-arch gap=18/30·lotto gap=12/30 전부 미도달. explore-idea saturation 13/15 미도달 + 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. cycle 3487 추천대로 app/api 잔여 scope(picks/* 5개 route + hub-dispatch 본체 + pipeline) 채택.
+
+**감사 결과**: `picks/mlb-poll/route.ts`(63줄)+`picks/poll/route.ts`(59줄) twin 비교 — external_game_id VARCHAR vs game_id INT 모델 차이만, 로직 정합. `picks/submit/route.ts`(62줄)+`picks/mlb-submit/route.ts`(69줄) twin 비교 — validation/upsert 패턴 1:1 일치. `picks/results/route.ts`(234줄, 최대) — KBO 경로 predictions fallback chain(`pre_game+CURRENT_SCORING_RULE` 우선 → `pre_game` any → `preds[0]`)이 테스트 커버리지는 없으나 주석("legacy null scoring_rule row 도 호환")과 일치 — 버그 아님. `hub-dispatch/route.ts`(191줄, 테스트 아닌 본체) — HMAC 검증/no-relay 태그/secret trim(cycle 3217 동일 클래스 defensive)/GitHub dispatch 에러 핸들링 전부 clean. `pipeline/route.ts`(123줄) — mode 검증/triggeredBy clamp/revalidate 경로 확인, insights 페이지가 revalidate 목록에 없는 이유는 ISR revalidate=86400/3600(시간기반 일간 아카이브, 즉시성 불필요) 확인 — 의도된 설계. `DB_CONSTRAINTS.mlbPickPollEvents`가 migration 048 UNIQUE 와 일치 확인.
+
+**결론**: 7개 파일 전부 clean, 코드 변경 0건. `app/api/` 13개 route 디렉토리 전부 최소 1회 전수 감사 완주(picks/* 5개 + hub-dispatch 본체 + pipeline 금번 신규로 마지막 공백 메움).
+
+**검증(skill-evolution 등)**: trigger1~4 미충족(3488%50=38≠0). trigger5 — 직전20(3469-3488, 현재 포함) 표본 19(≥10 충족), review-code 13회(0회 아님) — 미충족. marker 미박제. ship-0 — 직전10(3479-3488) success 다수(3480/3481/3483/3486) 포함 — 미충족. PASS_ship 단일 grep 실측 3098(cycle 3487 과 동일, 금번 retro-only 라 증가 없음).
+
+다음 사이클 추천 = review-code(heavy) components/ 2순회 심화 또는 packages/kbo-data 2순회, 또는 info-arch(gap19/30)/lotto(gap13/30)/op-analysis(gap10/25)/fix-incident(gap3/20) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): app/api/{health,mlb,sync-batter-stats,version} 전수감사 (cycle 3487, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 미충족(직전8(3479-3486) distinct=4: review-code6+fix-incident1+operational-analysis1). fix-incident gap=4/20·op-analysis gap=8/25·info-arch gap=17/30·lotto gap=11/30 전부 미도달. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. 2차 방어선: cycle 3486 policy:cycle-retro commit 실존 확인 OK. cycle 3486 추천대로 `app/api/{health,mlb,sync-batter-stats,version}` (seo 는 cycle 3483/3486 에서 이미 집중 감사됨) 채택.
