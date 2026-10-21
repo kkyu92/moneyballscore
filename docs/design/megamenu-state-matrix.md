@@ -40,25 +40,24 @@ cd apps/moneyball && pnpm dlx shadcn@latest add navigation-menu
 | 11 | disabled | item.disabled=true | text-brand-400 opacity-50, no pointer | aria-disabled=true |
 | 12 | mobile-collapse | viewport < 768px | hamburger 패턴, panel = full-screen accordion | aria-expanded toggle |
 
-## 메가메뉴 spec (각 메뉴별 — cycle 1044 KBO_NAV 정합)
+## 메가메뉴 spec (각 메뉴별 — cycle 3495 Header.tsx 실측 정합)
 
-cycle 1022 polish 후 KBO 9 top-level → 6 (33% 압축) — 매트릭스 spec 갱신.
+cycle 1022 polish 후 KBO 9 top-level → 6 (33% 압축) — 매트릭스 spec 갱신. **cycle 3495 재정정**: cycle 1044 이후 explore-idea 신규 라우트 누적(예측·기록/리뷰·시즌 그룹 신설, MLB 경기·팀 3→13개)으로 그룹명·item-count·panel 치수 전부 stale — Header.tsx `KBO_NAV`/`MLB_NAV`/`LOTTO_LINKS` 실측 기준 전면 재작성(코드 변경 없음, 그룹명 "분석"/"기록"/"더보기" 는 이미 "예측·기록"/"리뷰·시즌" 으로 개편되어 더 이상 존재하지 않음).
 
 | league | 메뉴 | trigger label | panel-width | column-count | item-count | icon |
 |---|---|---|---|---|---|---|
-| KBO | 분석 | `분석` | 640px | 2 | 4 | true |
-| KBO | 기록 | `기록` | 640px | 2 | 4 | true |
-| KBO | 팀·선수 | `팀·선수` | 280px | 1 | 3 | true |
+| KBO | 예측·기록 | `예측·기록` | 640px | 2 | 6 | true |
+| KBO | 팀·선수 | `팀·선수` | 640px | 2 | 4 | true |
+| KBO | 리뷰·시즌 | `리뷰·시즌` | 280px | 1 | 3 | true |
 | KBO | 커뮤니티 | `커뮤니티` | 280px | 1 | 2 | true |
-| KBO | 더보기 | `더보기` | 640px | 2 | 8 | true |
-| MLB | 경기·팀 | `경기·팀` | 280px | 1 | 3 | true |
+| MLB | 경기·팀 | `경기·팀` | 640px | 2 | 13 | true |
 | MLB | 포스트시즌 | `포스트시즌` | 280px | 1 | 2 | true |
-| Lotto | 로또 | `로또` | 280px | 1 | 2 | true |
+| Lotto | 로또 | `로또` | 640px | 2 | 4 | true |
 
-**룰 (MegaMenu.tsx 자동 적용)**:
-- `item.items.length >= 4 && sub.description` → `grid grid-cols-2 w-[640px]` (분석 / 기록 / 더보기)
+**룰 (MegaMenu.tsx 자동 적용, 변경 없음)**:
+- `item.items.length >= 4 && sub.description` → `grid grid-cols-2 w-[640px]` (예측·기록 / 팀·선수 / 경기·팀 / 로또)
 - `item.items.length >= 4 && !description` → `grid grid-cols-2 w-[440px]`
-- `item.items.length < 4 && sub.description` → `w-[280px]` (팀·선수 / 커뮤니티 / 경기·팀 / 포스트시즌 / 로또)
+- `item.items.length < 4 && sub.description` → `w-[280px]` (리뷰·시즌 / 커뮤니티 / 포스트시즌)
 - `item.items.length < 4 && !description` → `w-[200px]`
 
 ## brand token override 매핑
