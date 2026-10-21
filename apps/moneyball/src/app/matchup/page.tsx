@@ -27,18 +27,7 @@ export const metadata: Metadata = {
   },
 };
 
-const TEAMS: TeamCode[] = [
-  "HT",
-  "HH",
-  "KT",
-  "LG",
-  "LT",
-  "NC",
-  "OB",
-  "SK",
-  "SS",
-  "WO",
-];
+const TEAMS = Object.keys(KBO_TEAMS) as TeamCode[];
 
 export default function MatchupIndexPage() {
   return (

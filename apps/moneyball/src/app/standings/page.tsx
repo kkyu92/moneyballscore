@@ -67,7 +67,7 @@ function Recent10({ text }: { text: string }) {
   );
 }
 
-// wave-488: 홈/원정 성적 — StandingRow.homeWins/homeLosses (column 8, kbo-official scraper) 는 이미 fetch 중이나 테이블에 미노출
+// wave-488: 홈/원정 성적 — StandingRow.homeWins/homeLosses (column 8, kbo-official scraper) 기반, 아래 '홈/원정' 컬럼에 렌더
 function HomeAwayRecord({ wins, losses, homeWins, homeLosses }: { wins: number; losses: number; homeWins?: number; homeLosses?: number }) {
   if (homeWins === undefined || homeLosses === undefined) {
     return <span className="text-gray-300 dark:text-gray-600">-</span>;

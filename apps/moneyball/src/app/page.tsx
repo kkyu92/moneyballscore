@@ -672,7 +672,7 @@ export default async function HomePage() {
 
   const topStatPick = hasBigMatchHero ? null : selectTopStatPick(games);
 
-  // wave-495: 오늘 예측 신뢰도 티어 분포 — 홈 카드 신규 (홈 오늘 경기 수 카드 대체)
+  // wave-495: 오늘 예측 신뢰도 티어 분포 — 기존 경기 수 카드에 추가 (대체 아님)
   const todayTierDist = games.reduce(
     (acc, g) => {
       const pred = g.predictions?.[0];
