@@ -17517,3 +17517,13 @@ skill-evolution trigger 5개 평가 — 전부 미충족(trigger3 milestone 3278
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3438%50=38≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3419-3438, 현재 포함) review-code 12회 발화로 미충족(표본=19≥10 충족). marker 미박제. ship-0 — 직전10(3429-3438) success 4건 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3431-3438) distinct=4(polish-ui/operational-analysis/review-code/fix-incident) 미충족. 2차 방어선(cycle 3437 retro `d34f717a`) OK.
 
 다음 사이클 추천 = review-code(heavy) 신규 스코프(`app/` 잔여 또는 `lib/`/`hooks/`) 또는 info-arch(gap29/30, 거의 도달 — 자연 trigger 유력)/fix-incident(gap3/20)/op-analysis(gap6/25)/lotto(gap17/30) 자연 대기.
+
+## cycle 3474 — review-code(heavy) 표본 dev jargon site-wide 잔존 처리, SUCCESS
+
+cycle 3473 carry-over todo 처리: "표본" 단어 잔존 44 occurrence 전수 grep + context triage. comment/`.test.`/`/debug/*` 제외 24건이 실제 사용자 가시 텍스트(methodology/about/accuracy/dashboard/lotto/glossary 페이지 본문 + 4개 정렬 칩 라벨)였음을 확인, 전부 자연어로 교체("경기 수"/"데이터 없음"/"경기수순"/"참여횟수순" 등). feedback_ui_copy_no_dev_jargon 규칙 3번("통계 용어는 /debug/* 전용, 사용자 페이지는 자연어")이 methodology/about 같은 통계설명 페이지에도 예외 없이 적용됨을 재확인 — N=/±%p 표기는 유지, "표본" 단어 자체만 교체. 남은 "표본" grep hit 전부 `//` 또는 `/* */` 코드 주석(렌더 안 됨) — clean 확인.
+
+silent-drift-wave-207 테스트 2건이 교체 전 문구("검증 표본 임계 달성")를 정규식으로 검사 중이었음 — 신규 문구("검증 경기 수 임계 달성")에 맞춰 갱신. tsc/lint/vitest(606 files/4784 tests) 전부 clean. 직접 main 커밋+push(R4, `3fe752f4`).
+
+**검증(skill-evolution 등)**: trigger3(3474%50=24≠0)/trigger5(직전20 review-code 다수 발화, 0회 아님) 미충족. ship-0(직전10(3465-3474) success 3건 포함) 미충족. 2-chain lock(직전8(3467-3474) distinct=3: review-code+info-arch+polish-ui) 미충족. 2차 방어선(cycle 3473 retro `698b76e1`) OK.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프(`app/` 잔여 또는 `lib/`/`hooks/`) 또는 info-arch(gap5/30)/fix-incident(gap12/20)/op-analysis(gap21/25)/lotto(gap26/30) 자유 선택.
