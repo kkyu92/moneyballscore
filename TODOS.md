@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code (heavy): scripts/lotto.ts 감사 + lotto-data.json count_valid 실측 보정 (cycle 3494, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 탐지(직전8(3486-3493) distinct=2: fix-incident(verify)+review-code)되나 fix-incident 계열 포함 → override. fix-incident gap=8/20·op-analysis gap=15/25·info-arch gap=24/30·lotto gap=18/30 전부 미도달. cron 산출물 둘 다 최신(lotto-picks 2026-10-24.md, lotto-results 2026-10-17.md) — lotto chain 자체 trigger 없음. scripts/ 잔여 유일 파일 `lotto.ts`(2637줄, cycle 3492 권고) 채택.
+
+**감사 결과**: `LOTTO_RULE_COUNT=256`(packages/shared) vs RULES 배열 grep 수동 집계 241 로 drift 의심됐으나, 실제 `pnpm exec tsx scripts/lotto.ts count` 직접 실행 결과 "규칙 256개" 확인 — grep 패턴이 생성자 블록 2개(`...ZONES.map(...)` 5개 + `...[0-9].map(d=>...)` 끝자리 10개 = 15개)를 누락한 집계 오류였음, 241+15=256 정합. **교훈**: 동적 생성 rule 배열은 정적 grep count 로 검증 불가 — 실제 실행 결과로 교차검증 필수 (CLAUDE.md "데이터로만 이야기" 원칙 재확인, 허위 drift 보고 자가 차단).
+
+실제 발견 — `apps/moneyball/data/lotto-data.json`(methodology 페이지 소스): `generated_at=2026-08-24`, `count_valid=7705415` 로 2개월 전 스냅샷 고정. 실측 재계산 결과 `count_valid=7706313`(898건 차이, 1246회차까지 데이터 누적에 따른 경계값 자연 이동). `rules_total=256` 자체는 정확 일치(drift 아님). methodology 페이지 "유효 조합 ({ratio}%)" 표시치 보정 — `generated_at`/`count_valid` 갱신 커밋(94053df8), `pnpm vitest` lotto-data-schema 17/17 PASS, pre-push lint+type-check+버전가드 통과, main 직푸시.
+
+**미처리 (다음 lotto heavy 권장)**: `oos_pass_rate` 배열이 draw 1237(2026-08-15) 이후 9회차(1238~1246) 누락 — 과거 당첨번호 재조회 + 매칭분포 재계산 필요한 별도 작업, 본 cycle scope 밖.
+
+**검증(skill-evolution 등)**: trigger3 미충족(3494%50≠0, =44). trigger5 — 직전20(3475-3494, 현재 포함) 표본 충분, review-code 다수 — 미충족. marker 미박제. ship-0 — 직전10(3485-3494) success 2건(3486/3494 본 cycle) 포함 — 미충족. 2-chain lock override(fix-incident 포함). PASS_ship 단일 grep 실측 증가(+1, 본 cycle data fix ship).
+
+다음 사이클 추천 = lotto(heavy) oos_pass_rate 9회차 백필 또는 review-code(heavy) hooks/lib/ 2순회 또는 fix-incident(gap9/20)/op-analysis(gap16/25)/info-arch(gap25/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): scripts/ 잔여 10개 전수감사 (cycle 3492, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23. 2-chain lock 탐지(직전8(3484-3491) distinct=2: review-code+fix-incident(verify))되나 잠긴 chain 중 fix-incident 계열 포함 → lock override(안전 우선, 룰 명문). fix-incident gap=9/20·op-analysis gap=13/25·info-arch gap=22/30·lotto gap=16/30 전부 미도달. EXHAUSTIVE_SWEEP 게이트 미충족(RC_HEAVY_COUNT=7<8, CLEAN_DRIFT=6<7). ship-0 hard stop 미충족(직전10 success 2건: 3483/3486). cycle 3491 추천대로 scripts/ 잔여 11개 중 lotto.ts(2637줄, 별도 lotto chain 관할) 제외 10개(~1437줄) 채택.
