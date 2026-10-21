@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code(heavy): KBO app 잔여 라우트(predictions/accuracy/picks/leaderboard) 전수감사, fail-loud fetch drift 1건 발견+수정 (cycle 3511, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3504-3511) distinct=5(review-code/operational-analysis/lotto/fix-incident 포함) — 2-chain lock 미충족. ship-0 미충족(직전10(3502-3511) success 4건: 3503/3509/3510/3511). trigger5 미충족(직전20(3492-3511) review-code 14회 발화). cycle 3510 추천대로 review-code(heavy) 계속 — KBO 최상위 `app/*/page.tsx` 잔여 스코프(predictions/accuracy/picks/leaderboard, CHANGELOG mention 0회) 선정.
+
+**감사**: `predictions/page.tsx`(424줄) + `predictions/[date]/page.tsx`(632줄) + `accuracy/page.tsx`(1279줄) + `accuracy/shadow/page.tsx`(332줄) 전수 read — degraded flag threading(Promise.allSettled + captureFallback) 전부 정상, drift 0건. `picks/page.tsx`(22줄)는 client-delegated(MyPicksClient), DB fetch 자체 없어 해당 없음.
+
+**발견+수정**: `leaderboard/page.tsx`가 `Promise.all` + fail-loud `assertSelectOk`(`fetchLeaderboard`/`fetchAiBaseline`, lib/leaderboard/server.ts) 사용 중이었음 — 단일 DB 장애 시 전체 throw, ISR route(revalidate=30) cold-cache 시 boundary 대신 raw 500 반환 위험(cycle 2946/2947 이미 확인된 regression family). predictions/accuracy/standings/mlb 등 대부분 라우트는 이미 `Promise.allSettled` + `captureFallback` fail-soft 전환됐으나 leaderboard만 누락된 silent drift — 동일 패턴으로 전환(`entries`/`aiBaseline` 양쪽 fallback + `dbDegraded` 배너 추가).
+
+검증: `tsc --noEmit`/`eslint` clean. 직접 main commit+push(R4, pre-push lint+type-check+version-sync-guard 전부 PASS, `584002d4`).
+
+**검증(skill-evolution 등)**: trigger1(과거 소비)/trigger2(5연속 fail 없음)/trigger3(3511%50=11≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3492-3511, 현재 포함) 표본 20≥10, review-code 14회 발화 — 미충족. ship-0 — 직전10(3502-3511) success 4건 — 미충족. 2-chain lock(다음 사이클용) — 직전8(3504-3511) distinct=5(review-code/operational-analysis/lotto/fix-incident) — 미충족.
+
+다음 사이클 추천 = review-code(heavy) KBO 최상위 page.tsx 잔여(teams/players/guide/about/glossary/insights/reviews 등) 계속 또는 fix-incident(gap5/20)/op-analysis(gap8/25)/info-arch(gap16/30)/lotto(gap6/30) 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): KBO 최상위 라우트 4개 신규 전수감사, degraded flag 회귀 0건 + stale comment/하드코딩 drift 3건 수정 (cycle 3510, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3509 retro `887b1a37`) OK. 2-chain lock 미충족(직전8(3502-3509) distinct=4: review-code5+operational-analysis1+lotto1+fix-incident1). fix-incident gap=3/20·op-analysis gap=6/25·info-arch gap=14/30·lotto gap=4/30 전부 미도달. DESIGN.md 6h 신선 — design-system 미근접. explore-idea saturation 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 신선) 확립 skip 패턴 유지. cycle 3509 추천대로 review-code(heavy) 계속 — lib/+components/+app/api+packages/kbo-data+app/mlb+app/en/mlb twin 전부 완주된 상태에서 남은 미탐색 축으로 KBO 본진 최상위 `app/*/page.tsx` 라우트(CHANGELOG mention 0회) 선정.
