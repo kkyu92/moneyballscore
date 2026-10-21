@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code (heavy): hooks/ + lib/ 저-mention 5개 파일 전수감사, drift 0건 (cycle 3497, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived — plan #30 completed 지만 expiry 2026-10-18 경과, 다음 cleanup 후보로 flag만). 2-chain lock 탐지 — 직전8(3489-3496) distinct=3(review-code(heavy)6 + polish-ui1 + info-architecture-review1) → 미충족, lock 없음. fix-incident gap=14/20·op-analysis gap=18/25·lotto gap=21/30·info-arch gap=1/30 전부 미도달. explore-idea saturation 직전15 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선, ~2.9h) 확립 skip 패턴 유지. 직전 3 cycle 추천(3494/3495/3496 전부) = review-code(heavy) 복귀(hooks/ 또는 lib/ 2순회) — 자연 채택.
+
+**감사 결과**: CHANGELOG mention count 낮은(grep-count-depth 가드레일 — cycle 3001 룰 준수, count 를 감사 완료 지표로 대체하지 않고 직접 read) 5개 파일 전수 read — `hooks/use-kbo-scores.ts`(cycle 3099 kbo-scores route 의 `cancel`/`suspended` 구조적 필드 cross-check 포함, 정합 확인) / `hooks/use-user-picks.ts`(localStorage expiry pruning 로직 clean) / `lib/feature-flags.ts`(packages/shared re-export, 5개 flag 전부 CLAUDE.md CE 서술과 정합) / `lib/hub-dispatch.ts`(PII 2차 스크럽 + fingerprint 로직, 기존 테스트 파일 `__tests__/lib/hub-dispatch.test.ts` 보유 확인) / `lib/tabpfn-export.ts` + `lib/tabpfn-import.ts`(TabPFN shadow CSV 변환 pure function, deriveHomeWon null-guard 정확, import 모듈 주석이 shadow 비교 페이지 미연결 한계 self-aware 명시). **drift 0건** — 전부 clean.
+
+검증: 코드 변경 없음(read-only 감사) — `tsc`/`lint`/vitest 재실행 불필요.
+
+**검증(skill-evolution 등)**: trigger3 미충족(3497%50≠0, =47). trigger5 — 직전20(3478-3497, 현재 포함) review-code 14회 발화(0회 아님) — 미충족. marker 미박제. ship-0 — 직전10(3488-3497) success 2건(3494/3495) 포함 — 미충족. EXHAUSTIVE_SWEEP 게이트 평가 불필요(hard stop 자체 미충족). PASS_ship 단일 grep 실측 변화 없음(본 cycle 코드 변경 0, retro-only).
+
+다음 사이클 추천 = review-code(heavy) 계속(plan #30 completed+expired cleanup/archive 또는 신규 scope 탐색) 또는 fix-incident(gap15/20)/op-analysis(gap19/25)/lotto(gap22/30) 자연 대기. info-arch 는 cycle 3496 조기 체크포인트 직후라 당분간 skip.
+
 ## ⚪ RETRO-ONLY — info-architecture-review (lite): 조기 체크포인트, 2-chain lock 다양성 확보 (cycle 3496, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived). **2-chain lock 탐지** — 직전8(3488-3495) distinct=2(review-code(heavy) 7/8 + polish-ui 1/8) → 양쪽 다 후보에서 제외(fix-incident 미포함이라 override 불가). fix-incident gap=13/20·op-analysis gap=17/25·lotto gap=20/30 전부 미도달. explore-idea saturation 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 당일 신선) 확립 skip 패턴 유지. lock fallback 룰의 명시 타겟(polish-ui)이 이번엔 잠긴 chain 자체라 발화 불가 — 남은 pool 중 자체 주기 gap 비율이 가장 높은(26/30=87%) info-architecture-review 를 다양성 확보 차원에서 조기 선택(정식 30-cycle 트리거는 cycle 3500 근방).
