@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — fix-incident: indexnow-ping cron 3일 연속 502 근본원인 재규명+fix (cycle 3483, 2026-10-21)
+
+진단: open issue 0건. fix-incident gap=20/20 정확 도달(last fire 3463). `gh run list` 로 scheduled workflow 10종 재확인 중 `indexnow-ping` 이 2026-10-18/19/20 3일 연속 502 실패 발견 — 두 trigger 동시 충족으로 선택.
+
+**근본원인**: cycle 3241 이 `[indexnowKey].txt` route 를 `generateStaticParams` + `dynamicParams:false` 로 고쳐 SUCCESS 박제했으나, 실측(prod curl `x-matched-path: /_not-found`) 결과 **여전히 깨져 있었음** — 지난 cycle 의 "SUCCESS" 박제가 실측 미검증 상태였던 사례. 로컬 `vercel build --prod` 로 재현: Vercel 이 "폴더명에 리터럴 확장자(`.txt`)가 붙은 dynamic segment" 를 edge 라우팅 manifest 에 전혀 등록하지 못함 — static(`generateStaticParams`)이든 plain dynamic(ƒ)이든 동일하게 실패(`.vercel/output/static` 에 실제 키 파일 부재, prerender-fallback 함수만 생성됨). Next.js 렌더 모드 전환으로는 해결 불가능한 Vercel 자체 라우팅 제약으로 판단.
+
+**수정**: dynamic route 를 완전히 제거하고 `scripts/generate-indexnow-key-file.mjs` 가 build 시점에 `INDEXNOW_KEY` 를 읽어 `public/<key>.txt` 를 **진짜 static 파일**로 생성하도록 전환 — `robots.txt`/`ads.txt` 와 달리 Next.js dynamic routing 을 아예 거치지 않아 위 Vercel 제약을 구조적으로 회피. stale key 파일 자동 정리(키 로테이션 대비) + env 미설정 시 graceful skip 포함. 로컬 `next build` + `next start` 로 실제 200 OK + 정확한 body 응답 실측 확인. `tsc --noEmit`/`eslint`/`vitest`(606 files/4790 tests) 전부 PASS.
+
+**검증**: 직접 main 커밋+push(R4, `ab0ac585`, pre-push lint+type-check+version-sync-guard 전부 PASS). CI green(`73d27fba` 포함 전부 success). Vercel production 배포 로그 직접 확인 — `[generate-indexnow-key-file] public/[REDACTED].txt 생성 완료` 출력, 실제 `INDEXNOW_KEY` 값으로 정상 생성됨 확인. 단, 배포 직후 ping route 재호출 시에도 IndexNow API 는 여전히 `SiteVerificationNotCompleted` 502 반환 — 에러 메시지 자체가 "Please wait for some time... try again" 명시하는 IndexNow(Bing) 측 자체 캐시/propagation 지연으로 추정. 우리 쪽 코드 fix 는 배포+실측 확인 완료, 외부 서비스 쪽 재검증 완료 여부는 익일 이후 cron 자연 재확인 필요.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 5건 누적 변화 없음)/trigger2(5연속 fail 없음)/trigger3(3483%50=33≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3464-3483, 현재 포함) review-code 15회 발화로 미충족(표본=20, 0회 아님). marker 미박제. ship-0 — 직전10(3474-3483) success 다수 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3476-3483) distinct=4(review-code4+lotto1+operational-analysis1+fix-incident1+review-code 재계산 필요없음) 미충족.
+
+다음 사이클 추천 = indexnow-ping 익일 이후 cron 결과 재확인(`gh run list --workflow indexnow-ping`) 또는 review-code(heavy) 잔여 소형 스코프(`hooks/`/`config/`) 또는 info-arch(gap14/30)/lotto(gap8/30)/op-analysis(gap5/25) 자연 대기.
+
 ## ⚪ RETRO-ONLY — review-code (heavy): components/search+teams+leaderboard 전수감사, drift 0건 — 2순회 사실상 완결 (cycle 3482, 2026-10-21)
 
 진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived). 2-chain lock 미충족(직전8(3473-3480) distinct=3: review-code6+operational-analysis1+lotto1). fix-incident gap=19/20(거의 도달)·op-analysis gap=3/25·info-arch gap=12/30·lotto gap=6/30 전부 미도달. 2차 방어선(cycle 3481 retro `d1c31b39`, cycle 3480 retro `77ab9ce7`) OK. cycle 3481 추천대로 components/ 저빈도 잔여 3개(search 3파일/teams 6파일/leaderboard 6파일, 합계 15파일) 채택.
