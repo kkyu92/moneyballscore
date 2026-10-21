@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — review-code (heavy): lib/mlb/ 잔여 14개 파일 전수감사, drift 0건 — lib/mlb/ 전체 완주 (cycle 3502, 2026-10-21)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived). 2-chain lock 직전8(3494-3501) distinct=4(review-code+polish-ui+info-architecture-review+skill-evolution 혼재) — 미충족. fix-incident gap=19/20·op-analysis gap=23/25·lotto gap=26/30·info-arch gap=6/30 전부 미도달. explore-idea saturation 직전15 14/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up stale) 확립 skip 패턴 유지. 2차 방어선 — cycle 3501 retro commit(87673f3c) 존재 확인 OK. 직전 cycle(3501) 추천 = review-code(heavy) 계속 — 자연 채택, `lib/mlb/` 잔여 14개 파일(cycle 3499 가 17개 중 3개만 커버) 배치.
+
+**감사 결과**: Agent 위임 전수 read — `buildMlbAccuracySummary`/`buildMlbCommunityAccuracy`/`buildMlbFactorAccuracy`/`buildMlbMatchupProfile`/`buildMlbMatchupUpcoming`/`buildMlbSeasonHeadToHead`/`buildMlbStandings`/`buildMlbTeamAccuracy`/`buildMlbTeamFactorAverages`/`buildMlbTeamProfile`/`buildMlbTeamStrengthSnapshot`/`buildMlbTeamUpcoming`/`fetchMlbHistoricalAnalogs`/`mlbCanonicalPair` 14개 전부 KBO twin 대조 + confidence 이중스케일링 전수 추적(모든 소비처 `Math.round(x*100)` 1회만 확인) + StatsAPI↔canonical 코드 경계(`toMlbStatsApiCode`/`normalizeMlbTeamCode`) 일관성 확인. 의도된 설계 차이 다수 확인(`buildMlbTeamStrengthSnapshot` = KBO Elo twin 과 달리 실제 W/L streak 기반, plan #28 Phase 2 문서화됨 / `fetchMlbHistoricalAnalogs`·`buildMlbTeamStrengthSnapshot` = degraded-flag-exempt 문서화, cycle 3402). **drift 0건** — 14개 전부 clean. 코드 변경 없음(read-only 감사, `git status --short` clean 확인). 잠재 관심사(버그 아님, human awareness 용): `buildAllMlbTeamAccuracy` 가 cohort override param 없이 `MLB_PRODUCTION_COHORT_RULES` 하드코딩 — 현재는 MLB scoring rule 단일값이라 무해하나, 향후 KBO v1.8/v1.8-credit-fail 류 2차 scoring rule 분기 생기면 cycle 3176 가드(cohort override param) 동일 적용 필요.
+
+**lib/mlb/ 전체 17개 파일 감사 완주** (cycle 3499 3개 + 본 cycle 14개) — 테스트 커버리지: `buildMlbTeamStrengthSnapshot.ts` 제외 전부 전용 `__tests__` 보유, 해당 파일은 app-level integration test 2건으로 간접 커버.
+
+검증: `git status --short` clean 확인 — `tsc`/`lint`/vitest 재실행 불필요(코드 변경 0).
+
+**검증(skill-evolution 등)**: trigger3 미충족(3502%50=2). trigger5 — 직전20(3483-3502, 현재 포함) 표본 19(≥10 충분), review-code 다수 발화(0회 아님) — 미충족. ship-0 — 직전10(3493-3502) success 3건(3494/3495/3501) 포함 — 미충족. EXHAUSTIVE_SWEEP 게이트 — RC_HEAVY_COUNT=7/10(<8), CLEAN_DRIFT_COUNT=6/10(<7) — 미충족(hard stop 자체도 미충족이라 무관).
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/mlb/` 라우트 또는 `components/` 잔여 스코프) 또는 fix-incident(gap20/20, 도달 근접)/op-analysis(gap24/25)/lotto(gap27/30)/info-arch(gap7/30) 자연 대기.
+
 ## 🟢 SUCCESS — skill-evolution(91회, phase57) 세션-중단 재개 완결 + PR #3187 merge (cycle 3501, 2026-10-21)
 
 진단: watch.sh 자동 fire(next_n=16, attempt 2) — attempt 1 이 cycle 3500 trigger3(milestone) marker 박제 후 skill-evolution chain 실행(SKILL.md/MIGRATION-PATH.md 글로벌 파일 갱신 + empty-diff dispatch commit 2a7f9887 + PR #3187 open) 까지 완료했으나 retro 단계 도달 전 세션 중단(active-cycle pid 89725 dead 확인, 세션-중단 사각지대, cycle 2651 룰 해당 케이스). 2차 방어선: PREV=3500 cycle-retro commit(2160de4e) 존재 확인 — 3500 자체 결손 없음, 결손은 3501 레벨.
