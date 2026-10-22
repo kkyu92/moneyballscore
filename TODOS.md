@@ -1,3 +1,21 @@
+## ✅ SUCCESS — review-code(heavy): KBO/MLB pipeline maxDuration 비대칭 수정 (cycle 3531, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/21. 2차 방어선(cycle 3530 retro `6300170b`) OK. review-code EXHAUSTIVE_SWEEP cooldown 만료(3522~3531, 본 cycle 부터 재활성). 직전8(3523-3530) distinct=4(fix-incident/lotto/info-arch/operational-analysis) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 2/20·lotto 3/30·info-arch 1/30·op-analysis 4/25). TODOS 반복 추천("review-code cooldown 만료(3531) 후 복귀") 따라 선택.
+
+**스코프**: `app/api/{health,mlb,picks,pipeline,seo,version}` 6개 route — CHANGELOG mention 1건 이상이나 전수 감사 이력 불명확(cycle 3099 note carry-over). 본 메인 직접 전수 read(6 route.ts + 관련 테스트).
+
+**발견+수정**: `/api/mlb/pipeline/route.ts` 는 `export const maxDuration = 300;`(주석 "Vercel Pro maxDuration (Plan C 정합)") + 회귀 테스트로 명시 보호 — 경기당 `runDebate()` LLM 호출 루프가 오래 걸려 justify. `/api/pipeline/route.ts`(KBO daily pipeline) 는 predict/predict_final 모드에서 `packages/kbo-data/src/pipeline/daily.ts` 의 동일 `runDebate()` 호출을 경기마다 반복하는 동일 작업 클래스인데 maxDuration 미설정 — 다경기일 default timeout 중도 절단 위험. mlb twin 과 동일하게 `maxDuration = 300` export 추가 + `maxDuration export = 300` 회귀 테스트 추가(`09eda824`, 직접 main commit+push, R4).
+
+나머지 5개 route(health/health-pipelines/mlb-waitlist/version/seo-indexnow/picks-submit/mlb-submit/results/poll/mlb-poll) 전수 read — 전부 clean(인증/validation/Sentry 패턴 기존 컨벤션과 일치), 신규 drift 0건.
+
+**검증**: `tsc --noEmit` clean, `pnpm lint` clean, `pnpm test` 606 files/4794 tests 전량 pass. pre-push hook(lint+type-check+version-sync-guard) 전부 PASS.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3531%50=31≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3512-3531, 현재 포함) review-code 다수 발화(0회 아님) — 미충족. marker 미박제.
+
+**ship-0 재확인**: 직전10(3522-3531, 현재 포함) — success 다건(3526, 3529, 3531) 포함 — 미충족. emergency-stop 미발동.
+
+다음 사이클 추천 = fix-incident(gap3/20) 또는 lotto(gap4/30)/info-arch(gap2/30)/operational-analysis(gap5/25) 자연 대기 — review-code dominance 재발 방지 위해 1cycle 다양성 redirect 권장. review-code 계속 시 app/api 잔여(hub-dispatch 등 이미 cycle 3099/3090 감사 완료 확인) 대신 신규 미탐색 디렉토리 재탐색 필요.
+
 ## ✅ SUCCESS — fix-incident: deploy-drift-alert turbo-ignore fix 실 cron 환경 검증 PASS (cycle 3529, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/21(전부 completed/archived/superseded). 2차 방어선(cycle 3528 retro `770eb686`) OK. review-code EXHAUSTIVE_SWEEP cooldown 유지(3522~3531, 제외). 직전8(3521-3528) distinct=5(review-code+operational-analysis2+fix-incident2+lotto2+info-architecture-review) — 2-chain lock 미충족. 남은 pool gap: info-arch 3/30(10%)·fix-incident 2/20(10%, 동률)·op-analysis 1/25(직전 발화)·lotto 0/30(직전 발화). explore-idea saturation 직전15 11/15 미충족, established skip 패턴 유지. DESIGN.md mtime 29h 신선.
