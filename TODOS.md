@@ -1,3 +1,19 @@
+## 🟡 RETRO-ONLY — review-code(heavy): app/api 잔여 11개 route 전수 감사, drift 0건 (cycle 3566, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3558-3565) distinct=5: review-code3/fix-incident1/lotto1/operational-analysis1/info-architecture-review1). CI 전부 success/skipped. gap 전부 미근접(fix-incident 7/20, lotto 6/30, op-analysis 5/25, info-arch 1/30, 방금 발화). cycle 3099 가 식별한 app/api 잔여 미감사 route(`mlb/{waitlist,pipeline}`, `picks/{submit,mlb-poll,results,mlb-submit,poll}`, `pipeline`, `seo/indexnow/ping`, `sync-batter-stats`, `version` — 총 11파일) 선정.
+
+본 메인 직접 전수 read. KBO/MLB picks parity 교차검증(`picks/submit` vs `picks/mlb-submit`, `picks/poll` vs `picks/mlb-poll`) — origin check/device_id 길이 제한/upsert onConflict 전부 정합. `DB_CONSTRAINTS.mlbPickPollEvents`('device_id,external_game_id') 를 migration 048 `UNIQUE (device_id, external_game_id)` 와 1:1 대조 확인. `picks/results/route.ts`(234L, 최대 파일) 의 `deriveMlbOutcome` 기반 MLB `ai_is_correct` 계산이 KBO 쪽 DB 저장 `is_correct` 컬럼과 다른 방식(동적 계산, FK 부재로 저장 불가)임을 확인 — 설계상 의도된 차이, drift 아님. `mlb/pipeline`/`pipeline` 두 route 의 revalidate 경로 구성(KBO 는 verify 모드에 `/dashboard`+`/accuracy` 추가, MLB 는 verify 모드 자체 없음 — MLB 는 is_correct 미저장이라 별도 verify 불필요)도 동일 이유로 정합. **코드 변경 없음, drift 0건.**
+
+`app/api/` 전체 13개 디렉토리(health/hub-dispatch/kbo-scores/leaderboard/live/revalidate/snapshot-pitchers/mlb/picks/pipeline/seo/sync-batter-stats/version) 전수 감사 완료 — cycle 3099 가 식별한 잔여 6개 전부 해소.
+
+**ship-0 재확인**: 직전10(3557-3566, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT=6(<8, 혼합 chain 분포 지속) → literal 로는 진짜 hard-stop 조건 재충족. 단 cycle 3564 가 이미 동일 조건으로 emergency-stop dispatch(`a70a4595`) 했고, 사용자가 본 cycle 자체를 유발한 `/develop-cycle 48` 명시적 재호출로 응답함 — cycle 3549/3565 선례와 동일 해석(명시적 재호출 = 재개 결정)으로 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3566%50=16≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3547-3565) 표본=19(≥10), review-code 10회 발화(0회 아님) — 미충족, marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3559-3566) distinct=5(fix-incident/lotto/operational-analysis/review-code/info-architecture-review), 미충족.
+
+다음 사이클 추천 = fix-incident(gap8/20)/lotto(gap7/30)/operational-analysis(gap6/25) 자연 대기, 또는 review-code(heavy) 신규 축(`app/` 서버 컴포넌트 page.tsx 내부 로직 또는 `lib/` 잔여) 탐색 — app/api 전체 완주로 기존 스코프 소진.
+
+---
+
 ## 🟡 RETRO-ONLY — info-architecture-review(lite): 라우트/breadcrumb/sitemap 재점검, drift 0건 (cycle 3565, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 archived/completed/superseded). 2-chain lock 미충족(직전8(3557-3564) distinct=4: review-code5/operational-analysis1/lotto1/fix-incident1). CI 전부 success(runtime-error-alert/health-alert/deploy-drift-alert/heartbeat-stale). info-arch 16-cycle 미발화(gap16/30, 최고비율) — 선택.
