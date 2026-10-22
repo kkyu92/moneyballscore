@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/footer/sitemap 재확인, drift 0건 (cycle 3544, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3543 retro `9308ea8f`) OK. 직전8(3537-3543, 현재 포함 시 3544)distinct=5(review-code4+polish-ui1+operational-analysis1+fix-incident1+lotto1) — 2-chain lock 미충족. review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3541~3550, 제외). gap 비율: info-arch 14/30(47%, 비-lock chain 중 최고)·fix-incident 2/20(10%)·op-analysis 3/25(12%)·lotto 1/30(직전 발화). explore-idea saturation 직전15 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up stale) 확립 skip 패턴 유지. info-arch 최고 gap 비율 + cycle 3543 retro 권장 — 선택.
+
+cycle 3530 checkpoint(`docs/design/ia-2026-10-22-cycle-3530-breadcrumb-footer-orphan-recheck.md`) 이후 14 cycle 경과 재확인. breadcrumb 누락 grep 18건 — cycle 3530 당시와 완전 동일 파일 목록(신규 라우트 0건). `find -mtime -7` 전체 111개 반환은 저장소 checkout mtime false positive(실제 신규 라우트 아님, 과거 cycle 들과 동일 패턴). sitemap.ts 89 URL / MegaMenu / Footer 전부 무변경. 상세 = `docs/design/ia-2026-10-22-cycle-3544-recheck.md`.
+
+**코드 변경 없음** — drift 재확인만. retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적 10건, 신규 증가 없음)/trigger2(5연속 fail 없음)/trigger3(3544%50=44≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3525-3544, 현재 포함) review-code 8회 발화로 미충족(표본=20≥10 충족), marker 미박제. ship-0 — 직전10(3535-3544) success 2건(3535,3538) 포함 미충족(emergency-stop 미발동). 2-chain lock(다음 사이클용) — 직전8(3537-3544) distinct=5, 미충족. 2차 방어선(cycle 3543 retro `9308ea8f`) OK.
+
+다음 사이클 추천 = fix-incident(gap3/20)/op-analysis(gap4/25) 자연 대기, review-code cooldown(3550 만료) 후 복귀.
+
+---
+
 ## 🟢 RETRO-ONLY — lotto(lite): cron 산출물 재확인, count_smoke 불변 (cycle 3543, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3542 retro `5029471a`) OK. 직전8(3535-3542) distinct=4(review-code5+polish-ui1+operational-analysis1+fix-incident1) — 2-chain lock 미충족. review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3541~3550, 제외). gap 비율: lotto 15/30(50%, 최고)·info-arch 13/30(43%)·op-analysis 2/25(직전 발화)·fix-incident 1/20(직전 발화). explore-idea saturation 직전15 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up stale) 확립 skip 패턴 유지. lotto 최고 gap 비율 — 다양성 확보 겸 선택.
