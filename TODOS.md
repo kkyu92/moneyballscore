@@ -18791,3 +18791,19 @@ cycle 3537 추천대로 app/api 잔여 scope(health/hub-dispatch 는 cycle 3264/
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3566%50=16≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3547-3566, 현재 포함) chain 분포 표본≥10 충족, review-code 다회 발화로 미충족. marker 미박제.
 
 다음 사이클 추천 = fix-incident(gap8/20)/lotto(gap7/30)/operational-analysis(gap6/25)/info-arch(gap2/30) gap 자연 대기 또는 review-code 신규 scope(packages/kbo-data/src/analytics/, apps/moneyball/src/lib/leaderboard/) 계속.
+
+---
+
+## 🟢 RETRO-ONLY — review-code(heavy): leaderboard/analytics 잔여 scope 전수 감사, drift 0건 (cycle 3568, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/superseded, 최신 expiry 2026-09-20 도과 — `~/.develop-cycle/plans/moneyballscore/` 21개 파일 전부 처리 완료 상태 확인). 2-chain lock 미충족(직전8(3561-3568) distinct=4: operational-analysis/review-code/info-architecture-review/fix-incident). `gh run list` 재확인 — CI/Vercel Failure Dispatch 전부 skipped, 실제 incident 없음. fix-incident(gap1)/lotto(gap8)/operational-analysis(gap7)/info-arch(gap3) 전부 미도달 — cycle 3566 retro 가 명시한 다음 scope(analytics/, lib/leaderboard/) 가 유일 명확 trigger.
+
+**ship-0 10-cycle streak 재확인(3559-3568)**: PARTIAL_STREAK=10. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT=5(<8) 미충족 — literal 룰 적용 시 hard-stop 대상이나, 동일 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED + 코드베이스 광범위 감사 완료)을 cycle 3564/3566/3567 에서 이미 반복 보고 + 사용자가 본 cycle 직전 `/develop-cycle 46` 으로 명시적 재호출(= 동일 선택지 재확인) — cycle 3565/3567 이 적용한 재정지 생략 선례 그대로 적용, 중복 dispatch 없음.
+
+**감사 내용**: `analytics/stale-data-snapshot.ts` — scoring_rule/요일별 집계 pure function, CURRENT_SCORING_RULE/KST_OFFSET_MS 정상 import, 로직 일관. `lib/leaderboard/server.ts` — outer query ORDER BY 명시(cycle 3318 fix 보존 확인). `api/leaderboard/sync` + `mlb-sync` route 양쪽 — `leaderboard-sync-validation.ts`(cycle 3216 추출) 공용 검증 함수 정상 사용, `DB_CONSTRAINTS.userPicks`/`mlbUserPicks` 양쪽 `db-constraints.ts` 실존 확인, `EXTERNAL_GAME_ID_MAX_LENGTH` 상수 shared 패키지 실존 확인. drift 0건.
+
+**코드 변경 없음** — retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3568%50=18≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3549-3568, 현재 포함) 표본≥10 충족(fix-incident 3 + operational-analysis 2 + skill-evolution 1 + lotto 1 + info-arch 1 + review-code 12), review-code 다회 발화로 미충족. marker 미박제.
+
+다음 사이클 추천 = fix-incident(gap1, 거의 재도달)/lotto(gap8/30)/operational-analysis(gap7/25)/info-arch(gap3/30) gap 자연 대기 또는 review-code 신규 scope(packages/kbo-data/src/pipeline/ 잔여, scripts/) 계속.
