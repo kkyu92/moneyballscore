@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
-import { NICKNAME_MIN_CHARS, NICKNAME_MAX_CHARS } from '@moneyball/shared';
+import { NICKNAME_MIN_CHARS, NICKNAME_MAX_CHARS, EXTERNAL_GAME_ID_MAX_LENGTH } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isOriginAllowed } from '@/lib/api/is-origin-allowed';
 import { isValidNickname, isValidDeviceId } from '@/lib/api/leaderboard-sync-validation';
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       (p) =>
         typeof p.external_game_id === 'string' &&
         p.external_game_id.length > 0 &&
-        p.external_game_id.length <= 20 &&
+        p.external_game_id.length <= EXTERNAL_GAME_ID_MAX_LENGTH &&
         (p.pick === 'home' || p.pick === 'away') &&
         typeof p.picked_at === 'string'
     )
