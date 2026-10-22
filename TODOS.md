@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — review-code(heavy): app/calendar + app/v2-shadow-monitor 전수 감사, drift 0건 (cycle 3533, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/21. 2차 방어선(cycle 3532 retro `07a4353a`) OK. 직전8(3525-3532) distinct=5(info-arch2+fix-incident2+operational-analysis2+lotto+review-code) — 2-chain lock 미충족. gap 비율: fix-incident 4/20(20%)·lotto 5/30(16.7%)·info-arch 3/30(10%)·op-analysis 1/25(4%, 직전 발화) — 전부 강한 trigger 미도달. `gh run list` 재확인 — 전부 success/skipped, 실 incident 부재. DESIGN.md mtime 29.3h 신선. review-code EXHAUSTIVE_SWEEP 미충족(직전10 heavy 1건). TODOS 직전 추천 "신규 미탐색 디렉토리(app/dashboard, app/calendar, app/matchup, app/v2-shadow-monitor)" 중 CHANGELOG grep 재확인 — dashboard(3회)/matchup(2회)는 이미 과거 스윕 완료, calendar(0회)/v2-shadow-monitor(0회)가 진짜 미감사 — 선택.
+
+**전수 read**: `app/calendar/page.tsx`(253줄) + `app/v2-shadow-monitor/page.tsx`(253줄) + `lib/calendar/monthGrid.ts` + `lib/v2-shadow-monitor/{loader,parse}.ts` + 테스트 2건 + `calendar/opengraph-image.tsx`, 쌍둥이 `mlb/calendar/page.tsx` 대조. drift 0건 — `assertSelectOk`/`Promise.allSettled` dbDegraded 패턴 정상, shared 상수(`PRODUCTION_ERA_HISTORY`/`SHADOW_V20_SCORING_RULE`/`SHADOW_SCORING_RULE`) 전부 실존+일치, og-image 문구 metadata 와 일치. mlb twin 의 `getMlbMonthHeatmap` 별도 경로는 `predictions.is_correct` 전량 NULL(MLB) 특성상 의도된 차이(주석 명시), drift 아님.
+
+**부수 발견(액션 보류)**: `app/calendar/`에 `loading.tsx` 부재 — 단 앱 전체 111개 page.tsx 중 39개만 loading.tsx 보유하는 기존 광범위 불일치 패턴(이번 스코프 특유 아님). polish-ui 차원 후보로만 기록, 즉시 수정 안 함.
+
+**검증**: `pnpm --filter moneyball exec vitest run` 해당 스코프 5 test files/32 tests 전량 pass. `pnpm lint`/`turbo type-check` clean(캐시 hit). 코드 변경 없음(retro-only). 직접 main commit+push(`d00db467`).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3533%50=33≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3514-3533, 현재 포함) review-code 다수 발화 — 미충족. marker 미박제.
+
+**ship-0 재확인**: 직전10(3524-3533, 현재 포함) — success 3건(3526, 3529, 3531) 포함 — 미충족. emergency-stop 미발동.
+
+다음 사이클 추천 = fix-incident(gap5/20) 또는 lotto(gap6/30)/info-arch(gap4/30) 자연 대기, review-code 계속 시 CHANGELOG mention 0회 잔여 축(`app/about`, `app/contact`, `app/glossary`, `app/guide` 등) 재탐색 가능.
+
 ## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 격차 재측정 42회 연속, n=448 불변 (cycle 3532, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/21(전부 completed/archived/superseded — 21개 plan frontmatter 전수 재확인, status:approved 0건). 2차 방어선(cycle 3531 retro `c6c2559c`) OK. review-code EXHAUSTIVE_SWEEP cooldown 만료(3531 부로 재활성, 3532 부터 정상 평가). 직전8(3524-3531) distinct=5(lotto2+info-arch2+fix-incident2+operational-analysis+review-code) — 2-chain lock 미충족. gap 비율: op-analysis 5/25(20%, 최고)·fix-incident 3/20(15%)·lotto 4/30(13.3%)·info-arch 2/30(6.7%, 직전 cycle 발화). explore-idea 132-cycle 연속 0회(3400-3531) 이나 opt-out 대상(improvement saturation 자체 trigger 보유) + 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. op-analysis 최고 gap 비율 — 선택.
