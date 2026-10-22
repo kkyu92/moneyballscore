@@ -101,4 +101,9 @@ describe('POST /api/pipeline', () => {
     const body = await resp.json();
     expect(body.error).toBe('DB connection failed');
   });
+
+  it('maxDuration export = 300', async () => {
+    const routeModule = await import('../route');
+    expect(routeModule.maxDuration).toBe(300);
+  });
 });

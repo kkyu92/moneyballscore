@@ -3,6 +3,11 @@ import * as Sentry from '@sentry/nextjs';
 import { errMsg } from '@moneyball/shared';
 import { runDailyPipeline, notifyError } from '@moneyball/kbo-data';
 
+// predict/predict_final 모드는 경기당 runDebate() LLM 호출(daily.ts) 루프를 돈다 —
+// mlb/pipeline/route.ts 와 동일 작업 클래스(Plan C 정합)인데 maxDuration 미설정 상태였음
+// (cycle 3531 review-code(heavy) 발견). 다경기일 default timeout 중도 절단 위험 방지.
+export const maxDuration = 300;
+
 export async function POST(request: NextRequest) {
   // CRON_SECRET 인증
   const authHeader = request.headers.get('authorization');
