@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — review-code(heavy): app/about + app/contact + app/glossary + app/guide 전수 감사, drift 0건 (cycle 3534, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/21. 2차 방어선(cycle 3533 retro `d00db467` 존재 확인 OK). 직전8(3526-3533) distinct=5(fix-incident2+operational-analysis2+lotto+info-arch+review-code2) — 2-chain lock 미충족. gap 비율: fix-incident 5/20(25%)·lotto 6/30(20%)·info-arch 4/30(13.3%) — 전부 강한 trigger 미도달. `gh run list` 재확인 — 전부 success/skipped, 실 incident 부재. DESIGN.md mtime 29h 신선. lotto cron 산출물(다음 토 10/24 picks, 직전 토 10/17 results) 정상 최신. review-code EXHAUSTIVE_SWEEP 미충족(직전9 heavy 2건). TODOS 직전 추천 CHANGELOG mention 0회 잔여 축(app/about, app/contact, app/glossary, app/guide) 선택.
+
+**전수 read**: `app/about/page.tsx`(448줄) + `app/contact/page.tsx` + `app/glossary/page.tsx`+`data.ts` + `app/guide/page.tsx` + 4개 `opengraph-image.tsx`. drift 0건 — 전 팩터 가중치/카운트(`DEFAULT_WEIGHTS`, `GLOSSARY_TERM_COUNT`, `FAQ_COUNT`, `CURRENT_SCORING_RULE`, `PRODUCTION_ERA_HISTORY` 등)가 `@moneyball/shared` 동적 참조라 하드코딩 drift 원천 차단 설계 확인. `guide/page.tsx`가 참조하는 `/methodology` 라우트 실존 확인. 테스트 3건(contact/glossary/guide) 전량 pass, `pnpm lint` clean.
+
+**부수 발견(액션 보류)**: `app/about/`에 `__tests__` 디렉토리 부재 — 111개 page.tsx 중 다수가 동일 패턴(cycle 3533 발견과 동일 카테고리), 이번 스코프 특유 아님. 즉시 수정 안 함.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 누적 10건 — 신규 아님)/trigger2(5연속 fail 없음)/trigger3(3534%50=34≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3515-3534, 현재 포함) review-code 다수 발화 — 미충족. marker 미박제.
+
+**ship-0 재확인**: 직전10(3525-3534, 현재 포함) — success 3건(3526, 3529, 3531) 포함 — 미충족. emergency-stop 미발동.
+
+코드 변경 없음(retro-only). 직접 main commit+push.
+
+다음 사이클 추천 = fix-incident(gap5/20) 또는 lotto(gap6/30)/info-arch(gap4/30) 자연 대기, review-code 계속 시 app/standings, app/leaderboard, app/picks 등 잔여 미탐색 축 재탐색 가능.
+
 ## 🟢 RETRO-ONLY — review-code(heavy): app/calendar + app/v2-shadow-monitor 전수 감사, drift 0건 (cycle 3533, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/21. 2차 방어선(cycle 3532 retro `07a4353a`) OK. 직전8(3525-3532) distinct=5(info-arch2+fix-incident2+operational-analysis2+lotto+review-code) — 2-chain lock 미충족. gap 비율: fix-incident 4/20(20%)·lotto 5/30(16.7%)·info-arch 3/30(10%)·op-analysis 1/25(4%, 직전 발화) — 전부 강한 trigger 미도달. `gh run list` 재확인 — 전부 success/skipped, 실 incident 부재. DESIGN.md mtime 29.3h 신선. review-code EXHAUSTIVE_SWEEP 미충족(직전10 heavy 1건). TODOS 직전 추천 "신규 미탐색 디렉토리(app/dashboard, app/calendar, app/matchup, app/v2-shadow-monitor)" 중 CHANGELOG grep 재확인 — dashboard(3회)/matchup(2회)는 이미 과거 스윕 완료, calendar(0회)/v2-shadow-monitor(0회)가 진짜 미감사 — 선택.
