@@ -1,3 +1,21 @@
+## 🔴 EMERGENCY-STOP — review-code(heavy): agent-context.ts 전수 감사, drift 0건 + ship-0 hard-stop 발동 (cycle 3564, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3556-3563) distinct=4: review-code/fix-incident/lotto/operational-analysis). gap 전부 미도달(fix-incident 4/20, op-analysis 2/25, info-arch 15/30, lotto 3/30). cycle 3563 추천(`context/agent-context.ts`) 채택 — packages/kbo-data/src/context/ 디렉토리 마지막 잔여 파일.
+
+`agent-context.ts`(279L) 전문 read: MetricObservation/AgentGameMeta/AgentContext 타입 + buildAgentContext/renderContextForLLM/renderMetricsAndRecentFormForLLM/formatGapAwareStat 전부 소비처(team-agent.ts/judge-agent.ts/postview.ts/validator.ts) 와 1:1 교차검증 — 4곳 전부 import/사용 패턴 일치, drift 없음. KBO_FACTOR_COUNT(=ACTIVE_FACTOR_KEYS.length)/ELO_NEUTRAL_WIN_PCT(=0.5) 상수 실측 확인. DATA_GAP_ZERO_SLUGS(war/sfr) sentinel 처리가 team-agent.ts/validator.ts 양쪽에서 formatGapAwareStat 으로 일관 소비됨 재확인. 헤더 주석 "personas.ts/debate.ts 미소비" 주장 cycle 3563 에 이미 실측 검증됨 — 본 cycle 은 agent-context.ts 자체의 내부 일관성 확인에 집중. 기존 테스트(`context/__tests__/agent-context.test.ts`, 19 tests) 전부 통과. 코드 변경 없음, drift 0건.
+
+`packages/kbo-data/src/context/` 4개 파일(domain/metrics/measurement/agent-context) 전수 감사 완료.
+
+**ship-0 hard-stop 발동 (cycle 3564)**: 직전10(3555-3564) outcome 전부 retro-only(success 0건) — PARTIAL_STREAK=10 충족. EXHAUSTIVE_SWEEP 서브체크: RC_HEAVY_COUNT(동일 window 내 review-code(heavy) 선택 수)=7(<8 임계) → EXHAUSTIVE_SWEEP=false(review-code 비중이 cycle 3548 때보다는 높으나 8 임계 미달 — 혼합 chain 분포, 순수 review-code 연속 스윕 아님: fix-incident/lotto/operational-analysis/info-arch 도 섞여 있었음). 룰 정의대로 **진짜 hard-stop** 발동 — signal next_n=0 강제(사용자 원 N=35 override) + `memory: meta-pattern emergency-stop` dispatch. 사용자 다음 행동 = 명시적 `/develop-cycle N` 재호출 (cycle 3548 선례와 동일 패턴).
+
+코드 변경 없음, drift 0건, EMERGENCY-STOP.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음, 과거 처리됨)/trigger2(5연속 fail 없음)/trigger3(3564%50=14≠0)/trigger4(meta-pattern 없음, 단 본 cycle 자체가 emergency-stop meta-pattern dispatch) 미충족. trigger5 — 직전20(3545-3564, 현재 포함) chain pool 표본 20(≥10 충족), review-code(heavy) 9회 발화(0회 아님) — 미충족, marker 미박제.
+
+다음 사이클 추천 = 사용자 결정 대기. 재개 시 review-code(heavy) 계속(`agents/validator-logger.ts` 1건 mention, 최저 — 다음 후보) 또는 info-architecture-review(gap16/30)/fix-incident(gap5/20)/lotto(gap4/30)/operational-analysis(gap3/25) 자연 대기.
+
+---
+
 ## 🟡 RETRO-ONLY — review-code(heavy): context/{domain,metrics,measurement}.ts 전수 감사, drift 0건 (cycle 3563, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 archived/completed 류). 2-chain lock 미충족(직전8(3555-3562) distinct=4: review-code/fix-incident/lotto/operational-analysis). ship-0 미충족(직전10(3553-3562) success 2건: 3553/3554). gap 전부 미도달(fix-incident 3/20, op-analysis 1/25, info-arch 14/30, lotto 2/30) — cycle 3562 추천(info-arch/fix-incident) 재확인 결과 둘 다 신선 trigger 부재: 신규 라우트 추가 0건(git log 7일), breadcrumb 누락 목록 = 기존과 동일한 의도된 제외만(최신 `docs/design/ia-2026-10-22-cycle-3544-recheck.md` 가 이미 drift 0건 재확인함), `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped(실제 incident 없음). 대신 `packages/kbo-data/src/` 서브디렉토리별 최종 커밋일 스캔 결과 `context/` 가 CHANGELOG mention count 최저(domain.ts 2건/metrics.ts 2건/measurement.ts 3건) — 미감사 추정 스코프로 선정.
