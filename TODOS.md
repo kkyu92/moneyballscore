@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 격차 재측정 43회 연속, n=448 불변, 2-chain lock 최초 실전 발동 (cycle 3541, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3540 retro `832c1511`) OK. 직전8(3533-3540) distinct=2(review-code7+polish-ui1) — **2-chain lock 발동**(최초 실전 사례). 둘 다 후보 제외. gap: fix-incident 12/20·lotto 13/30·info-arch 8/30 — 전부 미도달. `gh run list`/Vercel 재확인 결과 CI Failure Dispatch 전부 skipped, 실제 incident 부재. lotto cron 산출물 양쪽 최신 확인(picks 2026-10-24, results 2026-10-17) — 수동 개입 불필요. 남은 가용 chain 중 op-analysis(gap9/25) 선택.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3522/3527/3532와 완전 동일. CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp, overlap 월(05/06/07) 통제 격차 10.8pp 유지. LLM 부가가치 우세 결론 **43회 연속 재확인**. CREDIT_EXHAUSTED 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 113일+ 경과) 변화 없음.
+
+**SKILL.md edge case 발견**: 2-chain lock 발동 시 step3 fallback("어떤 chain도 trigger 없으면 polish-ui 강제 발화")이 이번처럼 잠긴 2개 chain 중 하나가 바로 polish-ui인 경우를 다루지 못함(강제 발화하면 lock 의도와 모순). 본 사이클은 판단으로 op-analysis 선택 후 lesson dispatch로 기록 — 다음 skill-evolution 때 룰 보강 후보.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적, 신규 증가 없음)/trigger2(5연속 fail 없음)/trigger3(3541%50=41≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3522-3541) review-code 다수 발화, 0회 아님) 전부 미충족. marker 미박제. ship-0 재확인: 직전10(3532-3541) success 2건(3535,3538) — emergency-stop 미충족.
+
+코드 변경 없음(retro-only, CLAUDE.md 수치만 갱신). 직접 main commit+push.
+
+다음 사이클 추천 = fix-incident(gap13/20) 또는 lotto(gap14/30)/info-arch(gap9/30) 자연 대기, review-code cooldown(3550 만료) 후 복귀.
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): lib/reviews/ KBO/MLB twin 2순회 심화, drift 0건, EXHAUSTIVE_SWEEP cooldown 발동 (cycle 3540, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3539 retro `987b4e6f`) OK. 직전8(3532-3539) distinct=3(review-code6+polish-ui1+operational-analysis1) — 2-chain lock 미충족. gap: fix-incident 11/20·lotto 12/30·info-arch 10/30·op-analysis 8/25 — 전부 미도달. `gh run list --json conclusion` 재확인 — 최근 30 run 중 failure/timed_out/cancelled 0건. explore-idea saturation 직전15 12/15 충족하나 TODOS "Next-Up" 섹션(2026-04-25 작성, develop-cycle 자동화 인프라 1-line 항목, 이미 작동 중인 stale historical)만 존재 — 4-source negative 기존 skip 패턴 유지. DESIGN.md mtime 30h 신선. packages/kbo-data + lib/ + components/ + app/ 전체 1차 스윕 완료 확인(CHANGELOG grep 교차검증, migration phase57 각주) — 2순회 심화(cross-file twin 비교) 단계로 전환.
