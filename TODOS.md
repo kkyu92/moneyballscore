@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — review-code(heavy): app/privacy + app/terms 전수 감사, drift 0건 (cycle 3536, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22(plan 1~30 전수 status 재확인, approved 0건). 2차 방어선(cycle 3535 retro `6176cac1` 존재 확인 OK). 직전8(3528-3535) distinct=5(lotto+fix-incident+info-arch+review-code3+operational-analysis) — 2-chain lock 미충족. gap: fix-incident 7/20·lotto 8/30·info-arch 6/30·op-analysis 4/25 — 전부 미도달. `gh run list` 재확인 — Failure Dispatch 전부 skipped, 실 incident 부재. review-code EXHAUSTIVE_SWEEP 미충족(직전10 heavy 4건, <8). DESIGN.md mtime 20h 신선. lotto cron 산출물 정상 최신(다음 토 10/24 picks, 직전 토 10/17 results). 직전 추천(app/picks, app/v2-preview, app/privacy, app/terms) CHANGELOG mention count 재확인 — privacy/terms 0회로 최저, 선정.
+
+**전수 read**: `app/privacy/page.tsx`(330줄) + `app/terms/page.tsx`(257줄). drift 0건 — privacy 의 Sentry "오류 발생 시 화면 세션 일부 녹화" 서술을 `instrumentation-client.ts`(`replaysOnErrorSampleRate: 0.1`) 와 대조 확인(정합). GA/AdSense 서술을 `layout.tsx`/`ads.txt` 실제 통합과 대조 확인(정합). privacy 의 "회원가입·로그인 기능 미제공" 서술을 `app/login/page.tsx`(noindex placeholder, 미출시) 와 대조 — 모순 없음(아직 ship 전). CONTACT_EMAIL/SITE_URL 전부 `@moneyball/shared` 동적 참조라 하드코딩 drift 원천 차단 확인. 시행일 2026-04-17 두 문서 동일(최종 개정일 로직 확인됨, placeholder 값 아님).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적 10건, 신규 증가 없음)/trigger2(5연속 fail 없음)/trigger3(3536%50=36≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3517-3536, 현재 포함) review-code 8회 발화 — 0회 아님) 전부 미충족. marker 미박제.
+
+**ship-0 재확인**: 직전10(3527-3536, 현재 포함) — success 4건(3529, 3531, 3535 + fix-incident 3526 포함 시 4건) — 미충족. emergency-stop 미발동.
+
+코드 변경 없음(retro-only). 직접 main commit+push.
+
+다음 사이클 추천 = fix-incident(gap8/20) 또는 lotto(gap9/30)/info-arch(gap7/30) 자연 대기, review-code 계속 시 app/picks, app/v2-preview 등 저빈도(1~2회 mention) 잔여 축 탐색 가능.
+
 ## ✅ SUCCESS — review-code(heavy): login/settings/community placeholder dev jargon 수정 (cycle 3535, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3534 retro `92677060` 존재 확인 OK). 직전8(3527-3534) distinct=5 — 2-chain lock 미충족. gap: fix-incident 6/20·lotto 7/30·info-arch 5/30·op-analysis 3/25 — 전부 미도달. `gh run list` 재확인 — Failure Dispatch 전부 skipped, 실 incident 부재. review-code EXHAUSTIVE_SWEEP 미충족(직전9 heavy 3건). 직전 추천(app/standings+leaderboard+picks) 재확인 결과 standings/leaderboard는 cycle 3510/3511에서 이미 감사 완료(최근 git mtime과 감사 이력 혼동 방지) — CHANGELOG mention count 기준으로 재탐색, 전 디렉토리 3회 이상이라 "0회 미감사 축" 패턴 소진 확인 후 저빈도 axis(login 11/settings 11/community 31)로 전환.
