@@ -1,3 +1,19 @@
+## 🟡 RETRO-ONLY — review-code(heavy): scripts/ 내 live-cron 스크립트 2개 전수 감사, drift 0건 (cycle 3569, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3568 retro `3d30bbef`) OK. 직전8(3561-3568) distinct=4(operational-analysis/review-code5/info-architecture-review/fix-incident) — 2-chain lock 미충족. gap 비율: op-analysis 8/25(32%, 최고)·lotto 9/30(30%)·info-arch 4/30(13%)·fix-incident 2/20(10%, 직전전 발화). `gh run list` 전수 확인 — CI/Submit-Lesson 전부 success, CI/Vercel Failure Dispatch 전부 skipped, 실제 incident 0건. lotto cron 산출물 양쪽 최신(picks 2026-10-24.md=다음 토요일, results 2026-10-17.md=직전 토요일) — 수동 개입 불필요.
+
+op-analysis 가 gap 비율 최고였으나 48회 연속 동일 수치(n=448) 재측정은 한계 효용 거의 0 판단 — 대신 `packages/kbo-data/src/pipeline/`(CHANGELOG 52회 언급, 과포화) 와 달리 `scripts/`(36개 파일 중 10개만 CHANGELOG 언급, 26개 미감사) 를 review-code(heavy) 신규 스코프로 선정. 26개 미감사 파일 중 `.github/workflows/`·`package.json` 실참조 교차검증 결과 **실제 운영 cron 경로에 물린 파일은 2개뿐**: `op-analysis-cohort.ts`(op-analysis-weekly.yml) / `run-pipeline.ts`(daily-pipeline.yml, 2026-04-29 schedule 비활성화 후 workflow_dispatch 수동 전용으로 이미 전환 확인 — Cloudflare Workers Cron 이관 기존 문서화 상태, 신규 아님). 나머지 24개는 1회성 backfill/measure/dev 스크립트(재실행 안 되는 과거 마이그레이션 도구) — 운영 경로 아님, 감사 ROI 낮음 판단해 제외.
+
+본 메인 직접 전수 read. `op-analysis-cohort.ts`: supabase pagination 1000-row cap 가드 정상(cycle 3131/3171 패턴 재확인, offset>100000 안전장치 존재), `tierOf()` 경계값 처리 정상(conf=1.0 edge case 포함), 요일 매핑(`DAYS[getUTCDay()]`) 정합. `run-pipeline.ts`: `runDailyPipeline` 단순 wrapper, mode/date 인자 전달 정상. **drift 0건, 코드 변경 없음.**
+
+**ship-0 재확인**: 직전10(3560-3569, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT=5(<8, 혼합 분포 지속) 미충족 → literal 로는 hard-stop 조건. 단 cycle 3564 가 이미 동일 조건으로 emergency-stop dispatch(`a70a4595`) 완료했고, 사용자가 본 cycle(3569) 을 유발한 `/develop-cycle 45` 명시적 재호출로 재차 응답함 — cycle 3565~3568 선례(명시적 재호출 = 재개 결정)와 동일 해석으로 중복 dispatch 생략, 정상 진행(next_n=44).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3569%50=19≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3550-3569, 현재 포함) 표본=19(≥10), review-code 12회 발화(0회 아님) — 미충족, marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3562-3569) distinct 계산 시 review-code 비중 높음, 다음 사이클 진단 때 재확인 필요.
+
+다음 사이클 추천 = operational-analysis(gap8/25, lite 재측정 한계효용 낮음 — 필요 시만)/lotto(gap9/30)/fix-incident 자연 대기, review-code(heavy) 는 scripts/pipeline/app/api 모두 1회 이상 소진 — 다음은 `lib/` 또는 `hooks/` 잔여 재확인 또는 `components/` 2순회 심화 권장.
+
+---
+
 ## 🟡 RETRO-ONLY — fix-incident(lite): 정기 건강 확인, 실제 incident 0건 (cycle 3567, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22(10~28 전수 재확인, completed 3건 + 나머지 draft/만료). 직전8(3559-3566) distinct=5(fix-incident/lotto/operational-analysis/review-code3/info-architecture-review) — 2-chain lock 미충족. explore-idea saturation 직전15 13/15 충족하나 4-source negative(open issue 0/plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. gap 비율: fix-incident 8/20(40%, 최고)·op-analysis 6/25(24%)·lotto 7/30(23%)·info-arch 2/30(7%, 직전 발화). fix-incident 최고 비율 — 선택.
