@@ -18487,3 +18487,17 @@ cycle 3537 추천대로 app/api 잔여 scope(health/hub-dispatch 는 cycle 3264/
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3539%50=39≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3520-3539, 현재 포함) review-code 9회 발화로 미충족(표본=19 chain-pool cycle, op-analysis/fix-incident/info-arch/lotto 포함 ≥10 충족). marker 미박제. ship-0 — 직전10(3530-3539) success 3건(3531/3535/3538) 포함 미충족. 2-chain lock cooldown(N=1) 적용 — 다음 사이클 review-code/operational-analysis 복귀 가능.
 
 다음 사이클 추천 = review-code(heavy) 복귀 또는 fix-incident(gap11/20)/info-arch(gap10/30)/lotto(gap12/30) 자연 대기. polish-ui 는 소진 재확인 지속이라 당분간 재발화 ROI 낮음.
+
+## 🟢 RETRO-ONLY — lotto(lite): cron 산출물 + count smoke 재확인, valid_delta=0 (cycle 3547, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3546 retro `58301ec8`) OK. 직전8(3539-3546) distinct=6(polish-ui1+review-code1+operational-analysis2+fix-incident2+lotto1+info-architecture-review1) — 2-chain lock 미충족. review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3541~3550, 제외). gap 비율: lotto 4/30(13.3%, 최고)·info-arch 3/30(10%)·op-analysis 2/25(8%)·fix-incident 1/20(5%). 다음 추첨(1247회, 2026-10-24 토) 2일 앞둔 시점 — 타이밍 겸 lotto 선택.
+
+`apps/moneyball/data/lotto-picks/2026-10-24.md`(다음 토요일) 존재 확인(mtime 10/20) + `lotto-results/2026-10-17.md`(직전 토요일) 존재 확인(mtime 10/19) — cron 양쪽 정상. `gh run list --workflow=lotto-pick-update.yml`/`lotto-result-update.yml` 최근 실행 전부 success(10/13 1건 failure 는 cycle 3128 에서 이미 해소된 과거 건). `pnpm tsx scripts/lotto.ts count` 재실행: 1246회차 기준 256 rule, 유효 7,706,313 / 제거 438,747(5.39%) — cycle 3524/3542 baseline 과 완전 동일, valid_delta=0. 신규 규칙 후보 없음.
+
+**코드 변경 없음** — cron 정상 작동 + count 불변 확인만. retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 증가 없음)/trigger2(5연속 fail 없음)/trigger3(3547%50=47≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3528-3547, 현재 포함) review-code 8회 발화(표본=20≥10 충족)로 미충족, marker 미박제. ship-0 — 직전10(3538-3547) success 1건(3538) 포함 미충족(emergency-stop 미발동). 2-chain lock(다음 사이클용) — 직전8(3540-3547) distinct=5(review-code/op-analysis/fix-incident/lotto/info-arch), 미충족.
+
+다음 사이클 추천 = info-arch(gap4/30)/op-analysis(gap3/25)/fix-incident(gap2/20) 자연 대기, review-code cooldown(3550 만료) 후 복귀.
+
+---
