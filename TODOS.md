@@ -1,3 +1,17 @@
+## 🟡 RETRO-ONLY — review-code(heavy): hooks/ 2개 파일 전수 감사, drift 0건 (cycle 3570, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22(10~28 전수 재확인, completed 3건 + 나머지 draft/만료). 2차 방어선(cycle 3569 retro `d78ea887`) OK. 직전8(3562-3569) distinct=3(review-code6/info-architecture-review1/fix-incident1) — 2-chain lock 미충족. explore-idea saturation 직전15 13/15 충족하나 4-source negative(open issue 0/plan 0/TODOS Next-Up 섹션 부재, DESIGN.md 46h 신선) 확립 skip 패턴 유지. gap 비율: op-analysis 9/25(36%, 최고)·lotto 10/30(33%)·info-arch 5/30(17%)·fix-incident 3/20(15%) — 전부 구조적 trigger(20/25/30-cycle) 미도달. lotto cron 산출물 재확인(picks 2026-10-24.md/results 2026-10-17.md 양쪽 최신) — 수동 개입 불필요.
+
+`lib/`(189파일, 과포화) 와 달리 `hooks/`(2파일, 미감사) 를 review-code(heavy) 신규 스코프로 선정. 본 메인 직접 전수 read. `use-user-picks.ts`: localStorage CRUD + 30일 TTL pruning 정상, 버전드 key(`mb_user_picks_v1`), try/catch silent fail 의도적(storage 가용성 무관 기능 유지). `use-kbo-scores.ts`: SWR polling + KST 날짜 비교(`toKSTDateString`) + `isPolling`/`isToday` 로직 문서 주석과 실제 동작 일치, import 한 `LiveScore` 타입(`app/api/kbo-scores/route.ts`) 존재 확인 + `status: 'live'` enum 값 일치. 양쪽 호출부(`MyPicksClient`/`UserVsAIScorecard`/`PickButton`/`LiveScoreboard`/`PredictionCardLive`/`PlaceholderCardLive`) 전수 확인 — 시그니처 불일치 없음. **drift 0건, 코드 변경 없음.**
+
+**ship-0 재확인**: 직전10(3561-3570, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT=7(<8) 미충족 → literal 로는 hard-stop 조건. 단 cycle 3564 가 이미 동일 조건으로 emergency-stop dispatch(`a70a4595`) 완료했고, 그 이후 cycle 3565~3569 가 전부 "사용자 명시적 재호출 = 재개 결정" 해석으로 중복 dispatch 생략해온 선례 — 본 cycle 도 사용자가 `/develop-cycle 44` 로 명시적 재호출(본 세션 유발)해 동일 해석 적용, 중복 dispatch 생략, 정상 진행(next_n=43).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3570%50=20≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3551-3570, 현재 포함) 표본=19(≥10), review-code 13회 발화(0회 아님) — 미충족, marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3563-3570) distinct=3(review-code6/info-arch1/fix-incident1), 미충족.
+
+다음 사이클 추천 = op-analysis(gap9/25)/lotto(gap10/30)/fix-incident(gap3/20)/info-arch(gap5/30) 자연 대기, review-code(heavy) 는 lib/hooks/scripts/pipeline/app/api 전부 1회 이상 소진 — 다음은 `components/` 2순회 심화(cross-file twin 비교) 또는 `packages/shared/` 스코프 권장.
+
+---
+
 ## 🟡 RETRO-ONLY — review-code(heavy): scripts/ 내 live-cron 스크립트 2개 전수 감사, drift 0건 (cycle 3569, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3568 retro `3d30bbef`) OK. 직전8(3561-3568) distinct=4(operational-analysis/review-code5/info-architecture-review/fix-incident) — 2-chain lock 미충족. gap 비율: op-analysis 8/25(32%, 최고)·lotto 9/30(30%)·info-arch 4/30(13%)·fix-incident 2/20(10%, 직전전 발화). `gh run list` 전수 확인 — CI/Submit-Lesson 전부 success, CI/Vercel Failure Dispatch 전부 skipped, 실제 incident 0건. lotto cron 산출물 양쪽 최신(picks 2026-10-24.md=다음 토요일, results 2026-10-17.md=직전 토요일) — 수동 개입 불필요.
