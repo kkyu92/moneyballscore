@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — review-code(heavy): lib/reviews/ KBO/MLB twin 2순회 심화, drift 0건, EXHAUSTIVE_SWEEP cooldown 발동 (cycle 3540, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3539 retro `987b4e6f`) OK. 직전8(3532-3539) distinct=3(review-code6+polish-ui1+operational-analysis1) — 2-chain lock 미충족. gap: fix-incident 11/20·lotto 12/30·info-arch 10/30·op-analysis 8/25 — 전부 미도달. `gh run list --json conclusion` 재확인 — 최근 30 run 중 failure/timed_out/cancelled 0건. explore-idea saturation 직전15 12/15 충족하나 TODOS "Next-Up" 섹션(2026-04-25 작성, develop-cycle 자동화 인프라 1-line 항목, 이미 작동 중인 stale historical)만 존재 — 4-source negative 기존 skip 패턴 유지. DESIGN.md mtime 30h 신선. packages/kbo-data + lib/ + components/ + app/ 전체 1차 스윕 완료 확인(CHANGELOG grep 교차검증, migration phase57 각주) — 2순회 심화(cross-file twin 비교) 단계로 전환.
+
+**전수 read(twin cross-file 비교)**: `lib/reviews/shared.ts`(KBO) ↔ `mlb-shared.ts`(MLB) ↔ `buildWeeklyReview.ts`/`buildMlbWeeklyReview.ts` ↔ `buildMonthlyReview.ts`/`buildMlbMonthlyReview.ts` ↔ `buildMissReport.ts`(MLB 대응은 mlb-shared.ts 내 `buildMlbMissReport`) 7개 파일 전수 read + 구조 대조. 확인 사항: (1) `computeMagicNumber(leader, chaser, gamesPerTeam)` — KBO 기본값 `KBO_GAMES_PER_TEAM` 생략 호출(`app/standings/page.tsx`) vs MLB 4곳(`app/{,en/}mlb/{standings,wild-card}/page.tsx`) 전부 `MLB_GAMES_PER_TEAM` 명시 전달 확인, 정합. (2) `buildTeamStats`/`buildMlbTeamStats` sortBy 옵션 — weekly(기본값 `predicted`)/monthly(`sortBy:"accuracy"`) 패턴이 KBO/MLB 양쪽 동일(과거 parity bug 수정 흔적이 mlb-shared.ts 주석에 박제돼 있음, 재발 없음 확인). (3) `CURRENT_MODEL_FILTER`(KBO, `scoring_rule='v1.8'`)가 `.eq("league","kbo")` 명시 없이 단독 사용되는 점 재확인 — `MLB_SCORING_RULE='mlb_v0.1'`과 값 네임스페이스 완전 분리(`packages/shared/src/model-version-labels.ts` 확인)라 버그 아님. (4) `buildMlbMissReport`가 KBO `buildMissReport`와 달리 judgeReasoning/factorErrors 없이 정량 지표로 대체하는 이유(MLB postview 에이전트 부재)가 주석에 명시돼 있고 실제 스키마와 일치. 신규 drift 0건.
+
+**EXHAUSTIVE_SWEEP 발동**: RC_HEAVY_COUNT=8/10(cycle 3540 포함 직전10 중 review-code(heavy) 8회) ≥8, CLEAN_DRIFT_COUNT=7/10("drift 0건" 등 언급 7회) ≥7 — 동시 충족. ship-0 hard stop 아님(직전10 success 3건: 3531/3535/3538 — emergency-stop 미충족), 대신 review-code 전용 cooldown N=10(3541~3550) 적용 — 다음 10 사이클은 chain 후보에서 review-code 제외, 다른 chain 자연 redirect.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적 10건, 신규 증가 없음 — 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3540%50=40≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3521-3540, 현재 포함) review-code 다수 발화, 0회 아님) 전부 미충족. marker 미박제.
+
+코드 변경 없음(retro-only). 직접 main commit+push.
+
+다음 사이클 추천 = review-code cooldown 적용 중(3550 만료까지) — fix-incident(gap12/20) 또는 lotto(gap13/30)/info-arch(gap11/30)/op-analysis(gap9/25) 자연 대기, 전부 미도달 시 polish-ui 또는 dimension-cycle fallback.
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): app/privacy + app/terms 전수 감사, drift 0건 (cycle 3536, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22(plan 1~30 전수 status 재확인, approved 0건). 2차 방어선(cycle 3535 retro `6176cac1` 존재 확인 OK). 직전8(3528-3535) distinct=5(lotto+fix-incident+info-arch+review-code3+operational-analysis) — 2-chain lock 미충족. gap: fix-incident 7/20·lotto 8/30·info-arch 6/30·op-analysis 4/25 — 전부 미도달. `gh run list` 재확인 — Failure Dispatch 전부 skipped, 실 incident 부재. review-code EXHAUSTIVE_SWEEP 미충족(직전10 heavy 4건, <8). DESIGN.md mtime 20h 신선. lotto cron 산출물 정상 최신(다음 토 10/24 picks, 직전 토 10/17 results). 직전 추천(app/picks, app/v2-preview, app/privacy, app/terms) CHANGELOG mention count 재확인 — privacy/terms 0회로 최저, 선정.
