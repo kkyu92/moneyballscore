@@ -1,3 +1,17 @@
+## 🟡 RETRO-ONLY — review-code(heavy): pipeline/ 13개 파일 메인 직접 재확인, drift 0건 (cycle 3556, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3555 retro `85bad28a`) OK. 2-chain lock 미충족(직전8(3548-3555) distinct=6). ship-0 미충족(직전10 success 3건: 3551/3553/3554). gap 전부 미도달(fix-incident 7/20, op-analysis 6/25, info-arch 8/30, lotto 9/30). cycle 3555 retro 추천(pipeline/ 잔여 19개 파일) 따라 review-code(heavy) 계속.
+
+13개 파일 전문 read: `live.ts`(366L) — 라이브 이닝 업데이트 + postview trigger + postponed 처리, 전부 assertSelectOk/assertWriteOk 일관. `silent-drift-alert.ts`(384L) — 7개 alert 함수(predict_final/verify/postview/mlb silent drop + credit-exhausted + sparse-prediction + confidence-flat), 각 mode 분기 호출부(daily.ts/mlb-pipeline.ts/postview-daily.ts)와 교차검증 완료. `notify-status-predicate.ts`/`model-version.ts`/`db-constraints.ts`/`db-error.ts`/`save-game-record.ts`/`schedule.ts`/`final-reasoning.ts`/`daily-summary.ts`/`accuracy-update.ts`/`winner-id.ts`/`prediction-history.ts` — 전부 clean.
+
+drift 0건 — 모든 파일이 silent drift family 가드(assertWriteOk/assertSelectOk, 명시적 fail-loud)를 일관 적용 중이고 주석이 과거 수정 이력을 정확히 반영. 신규 코드 변경 없음.
+
+`packages/kbo-data/src/pipeline/` 31개 파일 중 daily.ts/mlb-pipeline.ts(3553)+backtest-*(3554,6개)+backfill-*(3555,4개)+본cycle(13개) = 24개 메인 직접 감사 완료. 잔여 5개: `factor-bias-bootstrap-ci`/`postview-daily`/`shadow-cohort`/`snapshot-pitchers`/`sync-batter-stats`.
+
+다음 사이클 추천 = review-code(heavy) 계속(pipeline/ 잔여 5개 파일 완주) 또는 fix-incident(gap8/20)/op-analysis(gap7/25)/info-arch(gap9/30)/lotto(gap10/30) 자연 대기.
+
+---
+
 ## 🟡 RETRO-ONLY — review-code(heavy): pipeline/ backfill-*.ts 4개 메인 직접 재확인, drift 0건 (cycle 3555, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3554 retro `0b0b5caa`) OK. 2-chain lock 미충족(직전8(3547-3554) distinct=6). ship-0 미충족(직전10 success 3건: 3551/3553/3554). gap 전부 미도달(fix-incident 6/20, op-analysis 5/25, info-arch 7/30, lotto 8/30). trigger5 미충족(직전20 inclusive sample 내 review-code 4회). cycle 3554 retro 추천(pipeline/ backfill-* 잔여) 따라 review-code(heavy) 계속.
