@@ -874,8 +874,11 @@ export async function runMlbPipeline(
   }
 
   // pipeline_runs 기록 — MLB 실행 추적
+  // KBO daily.ts:178-181 과 동일 3-way 로직 — errors>0 && rowsInserted>0 을 'success' 로
+  // 뭉개면 health route(.eq('status','success')) 가 부분 실패를 완전 성공으로 오인
+  // (cycle 3553 review-code heavy 발견, daily.ts 와의 drift)
   const hasErrors = errors.length > 0;
-  const runStatus = hasErrors && rowsInserted === 0 ? 'error' : 'success';
+  const runStatus = hasErrors ? (rowsInserted > 0 ? 'partial' : 'error') : 'success';
   await db.from('pipeline_runs').insert({
     run_date: date,
     league: 'mlb',
