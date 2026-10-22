@@ -1,3 +1,13 @@
+## 🟡 RETRO-ONLY — operational-analysis(lite): CE/비CE cohort 46회 연속 재측정, n=448 불변 (cycle 3561, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3553-3560) distinct=3: review-code/fix-incident/lotto). ship-0 미충족(직전10 success 3건). info-arch 직전 3회(3530/3544/3548) 연속 drift-0 재확인 완료 상태라 반복 가치 낮음 — op-analysis(gap10/25) 선택.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3541/3550 수치와 완전 동일. CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp, overlap 월(05/06/07) 통제 격차 10.8pp 그대로, LLM 부가가치 우세 결론 46회 연속 재확인. cycle 3550 이 master 문서(CLAUDE.md) append 를 누락한 1-cycle 공백 확인 — cycle JSON 교차검증으로 숫자 연속성 복구. CREDIT_EXHAUSTED·비CE 표본 동결 상태 변화 없음. 코드 변경 없음, RETRO-ONLY.
+
+다음 사이클 추천 = review-code(heavy) 신규 스코프(components/ 또는 lib/) 자연 복귀 — fix-incident/lotto 직전 발화, info-arch 포화.
+
+---
+
 ## 🟡 RETRO-ONLY — lotto(lite): 2-chain lock 하 cron 정상 확인 + count_smoke 재측정, valid_delta=0 (cycle 3560, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 유지(직전8(3552-3559) distinct=2: review-code7+fix-incident1) — 두 chain 제외. 남은 pool gap 비율: lotto 13/30(43.3%, 최고) > info-arch 12/30(40%) ≈ op-analysis 10/25(40%). lotto 선택 (cycle 3559 retro 추천과 일치).
