@@ -18343,3 +18343,15 @@ silent-drift-wave-207 테스트 2건이 교체 전 문구("검증 표본 임계 
 **검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3530%50=30≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3511-3530, 현재 포함) review-code 9회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3521-3530) success 2건(3526/3529) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3523-3530) distinct=4(fix-incident/lotto/info-architecture-review/operational-analysis) 미충족. 2차 방어선(cycle 3529 retro `9e50dbea`) OK.
 
 다음 사이클 추천 = fix-incident(gap0)/op-analysis(gap2)/lotto(gap1) 자연 대기, review-code cooldown(3531) 만료 후 복귀.
+
+## 🟡 RETRO-ONLY — review-code(heavy): app/picks+v2-preview 전수 감사, drift 0건 (cycle 3537, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3536 retro `8843705a`) OK. 2-chain lock 미충족(직전8(3529-3536) distinct=4: review-code5/operational-analysis1/info-architecture-review1/fix-incident1). gap 전부 미도달(fix-incident 8/20, op-analysis 5/25, info-arch 7/30, lotto 9/30). EXHAUSTIVE_SWEEP 미충족(RC_HEAVY 5/10 <8, CLEAN_DRIFT 4/10 <7). cycle 3536 추천대로 app/picks + app/v2-preview 채택.
+
+**감사**: Agent 위임 전수 read — 9 files 전부(picks 4 + v2-preview 5, 테스트 파일 포함). `v2-preview/page.tsx` 공유 상수(`CURRENT_SCORING_RULE`/`V2_PROMOTION_COHORT_N`/`SITE_URL`/`SITE_HOST`) 전부 `@moneyball/shared` import 확인, `CURRENT_MODEL_FILTER`(`@/config/model`) 사용 — wave-656 fix 및 `silent-drift-cycle-2298.test.ts` 와 정합. dark-mode Tailwind pairing 전부 완비(OG/twitter 이미지는 next/og inline style이라 해당 없음). dev jargon 없음. EN mirror(`en/picks`, `en/v2-preview`) 부재는 `Footer.tsx` 주석에 명시된 의도된 결과(picks=localStorage 클라이언트 기능, v2-preview=`noindex` 내부 전용 페이지, sitemap/search 양쪽 제외 확인). 내부 구현 경로 노출 없음.
+
+**코드 변경 없음** — drift 0건, retro-only. (cosmetic 전용: `v2-preview/page.tsx` 주석 안 템플릿 리터럴 아닌 플레인 comment 라 `{V2_PROMOTION_COHORT_N}` 미보간 — dev-only 주석, 미렌더링, 액션 불필요.)
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3537%50=37≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3518-3537, 현재 포함) review-code 10회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3528-3537) success 3건(3529/3531/3535) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3530-3537) 재계산 필요. 2차 방어선(cycle 3536 retro `8843705a`) OK.
+
+다음 사이클 추천 = deploy-drift-alert 실제 cron fire(07:17 UTC+) 결과 확인(fix-incident carry-over), 또는 fix-incident(gap9/20)/op-analysis(gap6/25)/info-arch(gap8/30)/lotto(gap10/30) 자연 대기. review-code 계속 시 app/ 잔여 라우트 2순회 검토(1순회 거의 완료).
