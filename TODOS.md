@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code(heavy): backtest-bootstrap-ci-run.ts 비대칭 결측 가드 누락 수정 (cycle 3554, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3553 retro `874ac3bc`) OK. 2-chain lock 미충족(직전8(3546-3553) distinct=6). ship-0 미충족(직전10 success 2건: 3551/3553). gap 전부 미도달(fix-incident 4/20, op-analysis 3/25, info-arch 5/30, lotto 6/30). trigger5 미충족(직전20 inclusive, polish-ui 1회 포함 sample=19≥10). cycle 3553 retro 추천(pipeline/ 잔여 28파일: backtest-*/backfill-*) 따라 review-code(heavy) 계속 선택.
+
+**점검**: `packages/kbo-data/src/pipeline/backtest-*-run.ts` 7개 harness(backtest-run/v3/wayback/grid/logistic/manual-weights/bootstrap-ci, 공통 `computeFactors()` 구조 twin) agent 위임 감사 + 메인 직접 재확인. **발견**: `backtest-bootstrap-ci-run.ts:104,106` 의 `sp_fip`/`lineup_woba` 가 `?? 4.5`/`?? 0` 단일측 default 사용 — `homeFip`/`awayFip`/`homeWoba`/`awayWoba` 전부 optional(`backtest/types.ts:34-37`, Wayback 팀별 독립 lookup이라 비대칭 결측 가능)인데 한쪽만 결측이면 실측값을 임의 상수와 비교해 왜곡된 factor 산출. 같은 파일 내 `sfr` factor(line 119-122)는 이미 both-present guard 보유 — 파일 내부 불일치. twin `backtest-manual-weights-run.ts:119-134`는 이미 동일 guard 적용됨(predictor.ts cycle 2977 WAR/SFR 가드와 동일 패턴, 명시 주석 포함). H1 bootstrap-CI 하네스가 v1.5/v1.6/v2.1 계열 Brier/CI 신뢰구간 산출에 쓰이는 핵심 harness라 silent bias 실질 영향.
+
+**수정**: 두 factor에 `(homeX != null && awayX != null) ? normalize(...) : 0.5` 가드 포팅. `pnpm type-check` clean, pre-push lint+typecheck+test 전부 통과. 커밋 `65727cf2` (main 직접 push).
+
+backtest-run/v3/wayback/grid/logistic 5개 + backfill-* 4개는 신규 drift 0건(agent 보고, 메인 핵심 범위 재확인).
+
+다음 사이클 추천 = fix-incident(gap5/20)/op-analysis(gap4/25)/info-arch(gap6/30)/lotto(gap7/30) 자연 대기, review-code 는 backtest-run/v3/wayback/grid/logistic 2순회 또는 backfill-* 4파일 잔여 다음 재진입 후보.
+
+---
+
 ## 🟢 SUCCESS — review-code(heavy): pipeline/ daily.ts↔mlb-pipeline.ts 감사, MLB status silent-mask drift 1건 수정 (cycle 3553, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3552 retro `49909d1d`) OK. 2-chain lock 미충족(직전8(3545-3552) distinct=6). ship-0 미충족(3551 skill-evolution success 포함). gap 전부 미도달(fix-incident 4/20, op-analysis 3/25, info-arch 5/30, lotto 6/30) — cycle 3552 retro 의 next-scope 추천(pipeline/ 또는 notify/features) 따라 review-code(heavy) 선택.
