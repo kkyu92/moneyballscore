@@ -1,3 +1,15 @@
+## 🟡 RETRO-ONLY — review-code(heavy): factors/ 9개 파일 메인 직접 감사, drift 0건 (cycle 3558, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3550-3557) distinct=3: operational-analysis/skill-evolution/review-code). ship-0 미충족(직전10 success 3건: 3551/3553/3554). gap 전부 미도달(fix-incident 9/20, op-analysis 8/25, info-arch 10/30, lotto 11/30). pipeline/ 디렉토리 완주(cycle 3557) 따라 review-code(heavy) 신규 스코프 선정 — `packages/kbo-data/src/factors/` (MLB 10-factor 엔진, 최근 14일 내 활발히 수정).
+
+9개 파일 전문 read: `mlb-base.ts`(145L, MLB_BASE_WEIGHTS 14항목 합=1.00 정확) `mlb-elo.ts`(189L, K-factor 출처 인용 + postseason 미사용 상수 문서화) `mlb-factor-detail.ts`(71L, EXCLUDED_DETAIL_FACTORS 와 waterfall placeholder 정합) `mlb-form.ts`(82L, 동점 스코어 guard mlb-elo.ts 와 정합) `mlb-overview.ts`(58L) `mlb-shadow-c.ts`(65L, shadow weight 훈련용) `mlb-waterfall.ts`(159L, HOME_ADVANTAGE_CONSTANT 분해가 mlb-base.ts computeMlbProbability 의 elo/home_elo_bonus 분리와 정확히 일치) `park-weather.ts`(107L)/`umpire-sz.ts`(115L, 둘 다 shadow-only weight=0 claim 을 predictor.ts/DEFAULT_WEIGHTS 교차확인 — 일치).
+
+drift 0건. 전부 과거 cycle(2080/2082/2083/2097/2103/2104/2108/2111/2169/2171/2349/2353/2402/2512/2822/2977/2978/2980) 에서 이미 발견·수정·문서화된 안정 상태 재확인.
+
+다음 사이클 추천 = **2-chain lock 주의** — 직전8(3551-3558) distinct=2(skill-evolution+review-code) 충족, 다음 진단 시 review-code 제외 권장 + fix-incident(gap10/20)/op-analysis(gap9/25)/info-arch(gap11/30)/lotto(gap12/30) 자연 대기.
+
+---
+
 ## 🟡 RETRO-ONLY — review-code(heavy): pipeline/ 잔여 5개 파일 메인 직접 재확인, drift 0건, 디렉토리 완주 (cycle 3557, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3556 retro `60f20961`) OK. 2-chain lock 미충족(직전8(3549-3556) distinct=4). ship-0 미충족(직전10 success 3건: 3551/3553/3554). gap 전부 미도달(fix-incident 7/20, op-analysis 6/25, info-arch 8/30, lotto 9/30). cycle 3556 retro 추천(pipeline/ 잔여 5개 파일) 따라 review-code(heavy) 완주.
