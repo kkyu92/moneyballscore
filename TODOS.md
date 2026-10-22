@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — review-code(heavy): scrapers/ 2순회 twin 재감사, drift 0건 (cycle 3552, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/superseded). 2차 방어선(cycle 3551 retro `40b4cf22`) OK. 2-chain lock 미충족(직전8(3544-3551) distinct=5: info-arch/operational-analysis/fix-incident/lotto/skill-evolution). review-code EXHAUSTIVE_SWEEP cooldown(3541~3550) 3550 만료, 3551부터 재평가 가능 — gap 12(마지막 발화 3540)로 최장 미발화. gap 전부 미도달(fix-incident 3/20, op-analysis 2/25, info-arch 4/30, lotto 5/30) — review-code 복귀가 다양성·소재 양쪽 최선으로 선택.
+
+**점검**: `packages/kbo-data/src/scrapers/` KBO/MLB twin 2순회 — `fangraphs.ts`↔`fangraphs-mlb.ts`(cycle 2278/2326 User-Agent fix 유지 확인, parseNum 전략 차이는 데이터 소스 구조 차이(HTML table vs __NEXT_DATA__ JSON)로 의도된 결과), `baseball-savant.ts`↔`statsapi-mlb.ts`(TOCTOU race 직렬화 양쪽 유지 확인). **발견**: `statsapi-mlb.ts` 가 공용 `fetch-with-retry.ts` 유틸 대신 동일 이름(`fetchWithRetry`)의 로컬 함수를 자체 재구현(exponential backoff + 401/403 ToS-cooldown 분기) — 네이밍 충돌 가능성 있으나 공용 유틸엔 없는 ToS-cooldown 처리가 MLB statsapi 전용 요구사항이라 의도된 분리로 판단, 코드 변경 보류(behavior bug 아님, 단순 중복 네이밍). 나머지 팀/스크레이퍼 전부 cycle 3163/3409 전수감사 + 본 cycle 재확인 결과 신규 drift 0건.
+
+**코드 변경 없음** — drift 0건, retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3552%50=2≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3533-3552, 현재 포함) review-code 8회 발화(표본=20≥10 충족)로 미충족, marker 미박제. ship-0 — 직전10(3543-3552) success 1건(3551 skill-evolution) 포함 미충족(emergency-stop 미발동). 2-chain lock(다음 사이클용) — 직전8(3545-3552) distinct=6(op-analysis/fix-incident/lotto/info-arch/skill-evolution/review-code), 미충족.
+
+다음 사이클 추천 = fix-incident(gap4/20)/op-analysis(gap3/25)/info-arch(gap5/30)/lotto(gap6/30) 자연 대기, review-code 는 scrapers/ 2순회 완료 후 당분간 소재 재고갈 — 다음 재진입은 pipeline/ 또는 notify/features 2순회 검토.
+
+---
+
 ## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 격차 재측정 45회 연속, n=448 불변 + skill-evolution milestone marker 박제 (cycle 3550, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3549 retro `73f318a6`) OK. 직전8(3542-3549) distinct=4(fix-incident3+lotto2+info-architecture-review2+operational-analysis1) — 2-chain lock 미충족. review-code EXHAUSTIVE_SWEEP cooldown 마지막 cycle(3541~3550, 본 cycle로 만료 — 3551부터 복귀 가능). gap 비율: op-analysis 5/25(20%, 최고)·lotto 3/30(10%)·info-arch 2/30(6.7%)·fix-incident 1/20(직전 발화). `gh run list`/`vercel ls` 재확인 — CI green, CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped, 실제 incident 없음(fix-incident 트리거 약함). op-analysis 최고 gap 비율 — 선택.
