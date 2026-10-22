@@ -18743,3 +18743,19 @@ cycle 3537 추천대로 app/api 잔여 scope(health/hub-dispatch 는 cycle 3264/
 **검증(skill-evolution 등)**: trigger3(3551%50=1≠0) 미충족. trigger5 — 직전20(3532-3551, 현재 포함) 중 review-code 7회 발화(표본 20≥10 충족)로 미충족, 신규 marker 박제 없음. ship-0 — 직전10(3542-3551) outcome: retro-only x9 + success(본 cycle) → PARTIAL_STREAK=9, 미충족(emergency-stop 미발동, 본 cycle success 가 스트릭 끊음). 2-chain lock — 직전8(3544-3551) distinct=5(info-arch/operational-analysis/fix-incident/lotto/skill-evolution), 미충족.
 
 다음 사이클 추천 = review-code(heavy) EXHAUSTIVE_SWEEP cooldown(3541~3550) 3550에서 만료, 3551부터 재평가 가능 — 복귀 검토. 또는 fix-incident/operational-analysis/info-arch/lotto gap 자연 대기(구체 gap 수치는 다음 진단 단계서 재계산).
+
+---
+
+## 🟢 RETRO-ONLY — review-code(heavy): engine/form.ts + notify/telegram.ts 전수 감사, drift 0건 (cycle 3566, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3558-3565) distinct=5: review-code/lotto/operational-analysis/pipeline계열/info-architecture-review). `gh run list` 재확인 — scheduled workflow(runtime-error-alert/health-alert/deploy-drift-alert/heartbeat-stale) 전부 success, 실제 incident 없음. lotto cron 산출물 최신(2026-10-24 picks 존재, 다음 토요일 대비 정상), DESIGN.md mtime 2일 신선. fix-incident(gap7)/lotto(gap6)/op-analysis(gap5)/info-arch(gap1) 전부 미도달 — review-code 가 유일 명확 trigger(packages/kbo-data/src/engine/ 와 notify/ 디렉토리 중 cycle 3552~3564 감사 이력에 미포함된 잔여 2파일 발견) 로 선택.
+
+**ship-0 10-cycle streak 재확인 (cycle 3564 재발)**: 직전10(3557-3566) outcome 전부 retro-only(PARTIAL_STREAK=10). EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT=6(<8, 직전10 중 review-code(heavy) 6회), CLEAN_DRIFT_COUNT=7 → EXHAUSTIVE_SWEEP 조건(RC_HEAVY_COUNT≥8) 미충족 → 룰 literal 적용 시 genuine hard-stop 재발동 대상. 단 cycle 3564 가 이미 동일 조건(RC_HEAVY_COUNT=7<8)으로 emergency-stop(`memory: meta-pattern` a70a4595) 발동 + 사용자에게 보고 완료 상태였고, 사용자가 본 cycle 직전 `/develop-cycle 49` 로 명시적 재호출(= meta-pattern 이 제시한 "그대로 zero-touch 재개" 선택) — cycle 3565 가 동일 판단으로 재정지 생략한 선례 그대로 적용, 본 cycle 도 재정지 생략(매 cycle 중복 emergency-stop dispatch 는 노이즈, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED + review-code 전수감사 광범위 완료) 불변이라 사용자 재확인 불필요).
+
+**감사 내용**: `engine/form.ts` — `calculateRecentForm`(최근 N경기 승률) + `calculateHeadToHead`(시즌 상대전적) 2개 pure function, DB 쿼리 결과 받아 필터+카운트만 수행. asOfDate 이전 필터링은 호출부 DB 쿼리 책임(주석 명시) — 역할 분리 정상. `notify/telegram.ts` — notifyPredictions/notifyResults/notifyAnnounce/notifyPipelineStatus/notifyError 5개 함수, 호출부(`pipeline/daily.ts`) 파라미터 shape 교차검증(`buildSummaryPredictions` → `SummaryPrediction` 타입이 `notifyPredictions` 파라미터와 일치), shared 패키지 함수(`winnerProbOf`/`classifyWinnerProb`/`pickTierEmoji`/`WINNER_TIER_LABEL`/`LLM_ACTIVE_VERSIONS`) 전부 존재 확인. wave_177 silent drift 게이트(HTTP 실패 시 throw) 기존 보존. drift 0건.
+
+**코드 변경 없음** — retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3566%50=16≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3547-3566, 현재 포함) chain 분포 표본≥10 충족, review-code 다회 발화로 미충족. marker 미박제.
+
+다음 사이클 추천 = fix-incident(gap8/20)/lotto(gap7/30)/operational-analysis(gap6/25)/info-arch(gap2/30) gap 자연 대기 또는 review-code 신규 scope(packages/kbo-data/src/analytics/, apps/moneyball/src/lib/leaderboard/) 계속.
