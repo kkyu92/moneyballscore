@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 격차 재측정 42회 연속, n=448 불변 (cycle 3532, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/21(전부 completed/archived/superseded — 21개 plan frontmatter 전수 재확인, status:approved 0건). 2차 방어선(cycle 3531 retro `c6c2559c`) OK. review-code EXHAUSTIVE_SWEEP cooldown 만료(3531 부로 재활성, 3532 부터 정상 평가). 직전8(3524-3531) distinct=5(lotto2+info-arch2+fix-incident2+operational-analysis+review-code) — 2-chain lock 미충족. gap 비율: op-analysis 5/25(20%, 최고)·fix-incident 3/20(15%)·lotto 4/30(13.3%)·info-arch 2/30(6.7%, 직전 cycle 발화). explore-idea 132-cycle 연속 0회(3400-3531) 이나 opt-out 대상(improvement saturation 자체 trigger 보유) + 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. op-analysis 최고 gap 비율 — 선택.
+
+**점검**: `gh run list` 재확인 — deploy-drift-alert 포함 전부 success(cycle 3529 수동 dispatch 검증 PASS 이후 재발 없음), CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped(실제 incident 부재). 신규 incident 0건.
+
+`pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행(42회 연속 동일 harness): 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3527/3531 수치와 완전 동일(신규 verified pre_game 0건, KBO 2026 정규시즌 2026-10-04 종료 지속). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 그대로 유지, LLM 부가가치 우세 결론 42회 연속 재확인. CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 110일+ 경과) 상태 변화 없음. 코드 변경 없음(retro-only).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3532%50=32≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3513-3532, 현재 포함) review-code 1회 이상 발화(3531) — 미충족. marker 미박제.
+
+**ship-0 재확인**: 직전10(3523-3532, 현재 포함) — success 3건(3526, 3529, 3531) 포함 — 미충족. emergency-stop 미발동.
+
+다음 사이클 추천 = fix-incident(gap3/20) 또는 lotto(gap4/30)/info-arch(gap2/30) 자연 대기, review-code cooldown 완전 만료 — 신규 미탐색 디렉토리(app/dashboard, app/calendar, app/matchup, app/v2-shadow-monitor 등 최근 전수 감사 이력 불명확 라우트) 재탐색 가능.
+
 ## ✅ SUCCESS — review-code(heavy): KBO/MLB pipeline maxDuration 비대칭 수정 (cycle 3531, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/21. 2차 방어선(cycle 3530 retro `6300170b`) OK. review-code EXHAUSTIVE_SWEEP cooldown 만료(3522~3531, 본 cycle 부터 재활성). 직전8(3523-3530) distinct=4(fix-incident/lotto/info-arch/operational-analysis) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 2/20·lotto 3/30·info-arch 1/30·op-analysis 4/25). TODOS 반복 추천("review-code cooldown 만료(3531) 후 복귀") 따라 선택.
