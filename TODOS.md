@@ -1,3 +1,19 @@
+## 🟡 RETRO-ONLY — review-code(heavy): pipeline/ backfill-*.ts 4개 메인 직접 재확인, drift 0건 (cycle 3555, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3554 retro `0b0b5caa`) OK. 2-chain lock 미충족(직전8(3547-3554) distinct=6). ship-0 미충족(직전10 success 3건: 3551/3553/3554). gap 전부 미도달(fix-incident 6/20, op-analysis 5/25, info-arch 7/30, lotto 8/30). trigger5 미충족(직전20 inclusive sample 내 review-code 4회). cycle 3554 retro 추천(pipeline/ backfill-* 잔여) 따라 review-code(heavy) 계속.
+
+**점검**: cycle 3554 TODOS 재확인 결과 `backfill-*.ts` 4개(records/season/sp/weather)는 당시 agent 위임 보고(drift 0건)만 있었고 메인 직접 재확인은 미실시 — `backtest-*` 는 이미 메인 직접 재확인 완료된 비대칭 상태였음. 이번 사이클이 그 잔여 메인 직접 검증 수행.
+
+4개 파일 전문 read 결과 agent 보고와 일치 확인 — 전부 clean: idempotent 설계(이미 저장/채워진 row skip), DB write 에러 명시적 체크(`assertWriteOk`/`error` 분기, silent skip 없음). `backfill-season.ts` 의 `is_canceled = status === 'postponed'` 로직을 별도 의심했으나 `naver-schedule.ts mapStatus()` 가 `cancel`/`suspended` 둘 다 이미 `'postponed'` 로 정규화하는 걸 확인 — drift 아님(교차검증 완료).
+
+신규 코드 변경 없음(drift 0건).
+
+`packages/kbo-data/src/pipeline/` 31개 파일 중 daily.ts/mlb-pipeline.ts(3553)+backtest-*(3554, 6개)+backfill-*(3555, 4개) = 12개 메인 직접 감사 완료. 잔여 19개: `accuracy-update`/`daily-summary`/`db-constraints`/`db-error`/`factor-bias-bootstrap-ci`/`final-reasoning`/`live`/`model-version`/`notify-status-predicate`/`postview-daily`/`prediction-history`/`save-game-record`/`schedule`/`shadow-cohort`/`silent-drift-alert`/`snapshot-pitchers`/`sync-batter-stats`/`winner-id`.
+
+다음 사이클 추천 = review-code(heavy) 계속(pipeline/ 잔여 19개 파일, 우선 `live.ts`/`silent-drift-alert.ts`/`winner-id.ts` 등 핵심 로직 파일) 또는 fix-incident(gap7/20)/op-analysis(gap6/25)/info-arch(gap8/30)/lotto(gap9/30) 자연 대기.
+
+---
+
 ## 🟢 SUCCESS — review-code(heavy): backtest-bootstrap-ci-run.ts 비대칭 결측 가드 누락 수정 (cycle 3554, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3553 retro `874ac3bc`) OK. 2-chain lock 미충족(직전8(3546-3553) distinct=6). ship-0 미충족(직전10 success 2건: 3551/3553). gap 전부 미도달(fix-incident 4/20, op-analysis 3/25, info-arch 5/30, lotto 6/30). trigger5 미충족(직전20 inclusive, polish-ui 1회 포함 sample=19≥10). cycle 3553 retro 추천(pipeline/ 잔여 28파일: backtest-*/backfill-*) 따라 review-code(heavy) 계속 선택.
