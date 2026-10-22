@@ -1,3 +1,13 @@
+## 🟡 RETRO-ONLY — lotto(lite): 2-chain lock 하 cron 정상 확인 + count_smoke 재측정, valid_delta=0 (cycle 3560, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 유지(직전8(3552-3559) distinct=2: review-code7+fix-incident1) — 두 chain 제외. 남은 pool gap 비율: lotto 13/30(43.3%, 최고) > info-arch 12/30(40%) ≈ op-analysis 10/25(40%). lotto 선택 (cycle 3559 retro 추천과 일치).
+
+`apps/moneyball/data/lotto-picks/2026-10-24.md`(다음 토요일 대비 기 생성) / `lotto-results/2026-10-17.md`(직전 토요일 반영) 둘 다 최신 존재. `gh run list` 재확인 — lotto-pick-update 최근 2회 success(10/20), lotto-result-update 최근 3회 success(10/17~18) — cron 정상. `pnpm tsx scripts/lotto.ts count` 재측정: 1246회차 기준 256 rule, valid=7,706,313/removed=438,747(5.39%) — cycle 3547 baseline과 완전 동일, valid_delta=0, 신규 rule 후보 없음. RETRO-ONLY.
+
+다음 사이클 추천 = 2-chain lock cooldown(N=1) 유지 — info-architecture-review(lite, gap13/30) 또는 operational-analysis(lite, gap11/25) 자연 대기.
+
+---
+
 ## 🟡 RETRO-ONLY — fix-incident(lite): 2-chain lock 하 CI/Vercel 재검증, 실제 incident 부재 (cycle 3559, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 충족(직전8(3551-3558) distinct=2: review-code7+skill-evolution1) — 두 chain 제외. expand-scope trigger(1) 형식 충족(직전4 전부 review-code(heavy))하나 cycle 3419 선례(반복 버그 클래스 구조적 flag) 대비 현재는 drift-0 exhaustive sweep 성격이라 실질 신호 부재로 기각. gap 비율: fix-incident 10/20(50%, 최고)·lotto 12/30(40%)·info-arch 11/30(36.7%)·op-analysis 9/25(36%). fix-incident 최고 gap 비율 — 선택.
