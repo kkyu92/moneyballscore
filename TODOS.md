@@ -1,3 +1,13 @@
+## 🟡 RETRO-ONLY — review-code(heavy): features/game-record-features.ts + loader.ts 교차검증, drift 0건 (cycle 3562, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3554-3561) distinct=4: review-code/fix-incident/lotto/operational-analysis). ship-0 미충족(직전10 success 2건). 디렉토리 last-touch 스캔 결과 `packages/kbo-data/src/features/` 가 2026-09-29 로 10개 디렉토리 중 최장 미수정(3주+) — review-code(heavy) 신규 스코프 선정.
+
+`game-record-features.ts`(136L, 단일 파일) 전문 read: `shiftDate`/`bullpenInningsLastNDays`/`getRecentTeamGames`/`teamRunsPerGameLastN`/`teamRunsAllowedPerGameLastN`/`teamHomeRunsLastN` 전부 날짜 경계(`cutoff <= gameDate < targetDate`)·teamId 매칭·HR 귀속 로직(상대 투수진 피홈런 = 자팀 공격 HR) 주석과 정확히 일치. 소비처 `backtest/loader.ts` buildFeatures() 호출부(인자 순서 homeTeamId/awayTeamId/date/N) 교차검증 — mismatch 없음. research harness 전용(production predictor 비관여) 재확인. drift 0건, RETRO-ONLY.
+
+다음 사이클 추천 = info-architecture-review(lite, gap14/30 최고 비율) 또는 fix-incident(lite, gap3/20).
+
+---
+
 ## 🟡 RETRO-ONLY — operational-analysis(lite): CE/비CE cohort 46회 연속 재측정, n=448 불변 (cycle 3561, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3553-3560) distinct=3: review-code/fix-incident/lotto). ship-0 미충족(직전10 success 3건). info-arch 직전 3회(3530/3544/3548) 연속 drift-0 재확인 완료 상태라 반복 가치 낮음 — op-analysis(gap10/25) 선택.
