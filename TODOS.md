@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 격차 재측정 44회 연속, n=448 불변 (cycle 3545, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3544 retro `18c5330b`) OK. 직전8(3538-3544, 현재 포함 시 3545) distinct=6(review-code2+polish-ui1+operational-analysis1+fix-incident1+lotto1+info-architecture-review1) — 2-chain lock 미충족. review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3541~3550, 제외). gap 비율: op-analysis 4/25(16%, 최고)·fix-incident 3/20(15%)·lotto 2/30(6.7%)·info-arch 1/30(직전 발화). explore-idea saturation 직전15 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재) 확립 skip 패턴 유지. `gh run list` 재확인 — CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped, 실제 incident 부재. op-analysis 최고 gap 비율 — 선택.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행 — 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3541 수치와 완전 동일(신규 verified pre_game 0건, 4-cycle 경과에도 배치 미반영). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 그대로 유지, LLM 부가가치 우세 결론 44회 연속 재확인. CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 113일+ 경과) 상태 변화 없음.
+
+**코드 변경 없음** — 재측정만. retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적 10건, 신규 증가 없음)/trigger2(5연속 fail 없음)/trigger3(3545%50=45≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3526-3545, 현재 포함) review-code 8회 발화로 미충족(표본=20≥10 충족), marker 미박제. ship-0 — 직전10(3536-3545) success 2건(3538 포함) 미충족(emergency-stop 미발동). 2-chain lock(다음 사이클용) — 직전8(3538-3545) distinct=6, 미충족. 2차 방어선(cycle 3544 retro `18c5330b`) OK.
+
+다음 사이클 추천 = fix-incident(gap4/20)/lotto(gap3/30)/info-arch(gap2/30) 자연 대기, review-code cooldown(3550 만료) 후 복귀.
+
+---
+
 ## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/footer/sitemap 재확인, drift 0건 (cycle 3544, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3543 retro `9308ea8f`) OK. 직전8(3537-3543, 현재 포함 시 3544)distinct=5(review-code4+polish-ui1+operational-analysis1+fix-incident1+lotto1) — 2-chain lock 미충족. review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3541~3550, 제외). gap 비율: info-arch 14/30(47%, 비-lock chain 중 최고)·fix-incident 2/20(10%)·op-analysis 3/25(12%)·lotto 1/30(직전 발화). explore-idea saturation 직전15 12/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up stale) 확립 skip 패턴 유지. info-arch 최고 gap 비율 + cycle 3543 retro 권장 — 선택.
