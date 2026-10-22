@@ -18355,3 +18355,19 @@ silent-drift-wave-207 테스트 2건이 교체 전 문구("검증 표본 임계 
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3537%50=37≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3518-3537, 현재 포함) review-code 10회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3528-3537) success 3건(3529/3531/3535) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3530-3537) 재계산 필요. 2차 방어선(cycle 3536 retro `8843705a`) OK.
 
 다음 사이클 추천 = deploy-drift-alert 실제 cron fire(07:17 UTC+) 결과 확인(fix-incident carry-over), 또는 fix-incident(gap9/20)/op-analysis(gap6/25)/info-arch(gap8/30)/lotto(gap10/30) 자연 대기. review-code 계속 시 app/ 잔여 라우트 2순회 검토(1순회 거의 완료).
+
+## 🟢 SUCCESS — review-code(heavy): app/api 잔여 13 routes 전수 감사, magic-number drift 1건 수정 (cycle 3538, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/23(전부 completed/archived). 2차 방어선(cycle 3537 retro `2633c98c`) OK. 2-chain lock 미충족(직전8(3530-3537) distinct=3: info-arch/review-code/operational-analysis). gap 전부 미도달(fix-incident 9/20, op-analysis 6/25, info-arch 8/30, lotto 10/30). EXHAUSTIVE_SWEEP 미충족(RC_HEAVY 6/10 <8). deploy-drift-alert 전체 cron 스케줄 공백(05:53 UTC 이후 schedule 이벤트 0건, 전체 workflow 공통 — gh actions 전역 지연 패턴, deploy-drift-alert 단독 이슈 아님) 확인했으나 gap 미도달 + 신규 incident 아닐 가능성 높아 fix-incident 승격 보류, 다음 사이클 재확인 carry-over.
+
+cycle 3537 추천대로 app/api 잔여 scope(health/hub-dispatch 는 cycle 3264/3265 기감사) 채택 — picks/mlb-poll, picks/mlb-submit, picks/results, leaderboard/sync, leaderboard/mlb-sync, mlb/pipeline, pipeline, snapshot-pitchers, sync-batter-stats, live, kbo-scores, revalidate, seo/indexnow/ping (13 files).
+
+**감사**: Agent 위임 전수 read. KBO/MLB pipeline twin 재확인 — cycle 3531 maxDuration=300 fix 양쪽 정상 반영 확인. twin pair(picks/submit↔mlb-submit, picks/poll↔mlb-poll, leaderboard/sync↔mlb-sync) 구조 대칭 확인. CRON_SECRET/API_KEY 가드 전체 존재 확인(cycle 3217 lesson 정합). VARCHAR overflow 위험 없음.
+
+**발견 1건**: `leaderboard/mlb-sync/route.ts:47` — `external_game_id.length <= 20` 하드코딩, sibling route(`picks/mlb-submit/route.ts`)는 이미 `EXTERNAL_GAME_ID_MAX_LENGTH`(`@moneyball/shared`, 현재값 20) import해 사용 중. 현재는 값 일치라 live bug 아니지만 상수 변경 시 route 간 silent 불일치 위험(CLAUDE.md 매직넘버 vs 공유상수 패턴). **수정**: `EXTERNAL_GAME_ID_MAX_LENGTH` import 후 하드코딩 `20` 교체.
+
+검증: `npx tsc --noEmit` clean, `pnpm --filter moneyball lint` clean. R4 직접 main commit+push(`180ceafb`), pre-push lint+type-check+vitest 전부 PASS.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3538%50=38≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3519-3538, 현재 포함) review-code 10회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3529-3538) success 4건(3529/3531/3535/3538) 포함 미충족. **2-chain lock(다음 사이클용) — 직전8(3531-3538) distinct=2(review-code/operational-analysis) 충족! 다음 사이클(3539) 진단 시 review-code·operational-analysis 후보 제외 필요 (단, fix-incident 트리거면 lock 무시 가능).** 2차 방어선(cycle 3537 retro `2633c98c`) OK.
+
+다음 사이클 추천 = **2-chain lock 발동 — review-code/operational-analysis 제외**. fix-incident(gap10/20, deploy-drift-alert cron 공백 재확인 carry-over)/info-arch(gap9/30)/lotto(gap11/30)/polish-ui(lock fallback) 중 선택.
