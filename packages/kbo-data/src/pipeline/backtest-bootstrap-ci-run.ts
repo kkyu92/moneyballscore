@@ -101,9 +101,15 @@ function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): n
 
 function computeFactors(f: GameFeatures): Record<string, number> {
   const factors: Record<string, number> = {};
-  factors.sp_fip = normalize(f.homeFip ?? 4.5, f.awayFip ?? 4.5, false);
+  // 양쪽 다 있을 때만 비교 — 한쪽만 결측이면 실측값을 임의 default 와 비교하는
+  // 왜곡 방지 (backtest-manual-weights-run.ts / predictor.ts cycle 2977 가드와 동일 패턴).
+  factors.sp_fip = (f.homeFip != null && f.awayFip != null)
+    ? normalize(f.homeFip, f.awayFip, false)
+    : 0.5;
   factors.sp_xfip = 0.5;
-  factors.lineup_woba = normalize(f.homeWoba ?? 0, f.awayWoba ?? 0, true);
+  factors.lineup_woba = (f.homeWoba != null && f.awayWoba != null)
+    ? normalize(f.homeWoba, f.awayWoba, true)
+    : 0.5;
   factors.bullpen_fip = 0.5;
   factors.recent_form = normalize(f.homeForm ?? 0.5, f.awayForm ?? 0.5, true);
   factors.war = 0.5;
