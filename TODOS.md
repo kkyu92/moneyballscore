@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code(heavy): pipeline/ daily.ts↔mlb-pipeline.ts 감사, MLB status silent-mask drift 1건 수정 (cycle 3553, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3552 retro `49909d1d`) OK. 2-chain lock 미충족(직전8(3545-3552) distinct=6). ship-0 미충족(3551 skill-evolution success 포함). gap 전부 미도달(fix-incident 4/20, op-analysis 3/25, info-arch 5/30, lotto 6/30) — cycle 3552 retro 의 next-scope 추천(pipeline/ 또는 notify/features) 따라 review-code(heavy) 선택.
+
+**점검**: `packages/kbo-data/src/pipeline/daily.ts`(1675L, KBO) ↔ `mlb-pipeline.ts`(918L, MLB) 전문 + `notify/telegram.ts`(256L) + `features/game-record-features.ts`(136L) 전문. **발견**: `mlb-pipeline.ts:877-878` 의 `pipeline_runs.status` 산출이 binary(`hasErrors && rowsInserted===0 ? 'error' : 'success'`)인 반면 `daily.ts:178-181`(KBO)는 이미 3-way(`error`/`partial`/`success`) — `apps/moneyball/src/app/api/health/pipelines/route.ts` 가 `.eq('status','success')` 로 각 모드 last-success 조회하는데, MLB 쪽은 errors>0 이어도 rowsInserted>0 이면 무조건 'success' 로 기록돼 7개 MLB mode 전부에서 반복 부분실패가 health dashboard 에 전혀 안 뜨는 silent masking. KBO 와 동일 3-way 로 수정 (`runStatus = hasErrors ? (rowsInserted > 0 ? 'partial' : 'error') : 'success'`). `partial` 은 마이그레이션 004 코멘트에 이미 문서화된 값, CHECK constraint 없음 — 안전. route.ts 는 'success' 만 필터링하므로 수정 후 자동으로 KBO 와 동일하게 partial/error 가 stale 분류로 흡수됨 (route.ts 자체 변경 불필요).
+
+`telegram.ts` / `game-record-features.ts` = 신규 drift 0건.
+
+**커밋**: `9387b550` (fix, main 직접 push — cycle 3535 선례와 동일 패턴). `pnpm type-check` clean, pre-push lint+typecheck+test 전부 통과.
+
+다음 사이클 추천 = fix-incident(gap5/20)/op-analysis(gap4/25)/info-arch(gap6/30)/lotto(gap7/30) 자연 대기, review-code 는 pipeline/ 잔여 28 파일(backtest-*/backfill-* 등) 다음 재진입 후보.
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): scrapers/ 2순회 twin 재감사, drift 0건 (cycle 3552, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/superseded). 2차 방어선(cycle 3551 retro `40b4cf22`) OK. 2-chain lock 미충족(직전8(3544-3551) distinct=5: info-arch/operational-analysis/fix-incident/lotto/skill-evolution). review-code EXHAUSTIVE_SWEEP cooldown(3541~3550) 3550 만료, 3551부터 재평가 가능 — gap 12(마지막 발화 3540)로 최장 미발화. gap 전부 미도달(fix-incident 3/20, op-analysis 2/25, info-arch 4/30, lotto 5/30) — review-code 복귀가 다양성·소재 양쪽 최선으로 선택.
