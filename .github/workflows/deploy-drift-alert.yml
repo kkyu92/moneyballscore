@@ -45,6 +45,20 @@ name: deploy-drift-alert
 #   prod_sha 가 직전 실행과 동일(지난 1시간 진전 0) + gap_hours >= 3 일 때만
 #   ::error:: (진짜 정체 의심). prod_sha 가 전진 중이면 gap_hours 커도
 #   ::notice:: (drain 진행 중, 정상). gap_hours < 3 은 기존대로 유지.
+#
+# cycle 3526 (fix-incident) — turbo-ignore 인지 추가 (false positive 차단):
+# - 실측: 2026-10-21 17:07~2026-10-22 04:37 사이 4회 연속 ::error::. 원인 =
+#   apps/moneyball/vercel.json 의 ignoreCommand(`turbo-ignore moneyball`) 가
+#   CLAUDE.md/TODOS.md 등 app-irrelevant 루트 파일만 바뀐 커밋(develop-cycle
+#   cycle-retro 정책상 매 사이클 1회 발생)에 대해 Vercel 빌드 자체를
+#   의도적으로 skip함. production 은 마지막 app-relevant 커밋에 정확히
+#   고정돼 있는 정상 상태인데, 본 워크플로는 raw git SHA 만 비교해 "정체"로
+#   오판 — docs-only 커밋이 연속되는 흔한 패턴(이 리포는 거의 매 사이클
+#   CLAUDE.md/TODOS.md 커밋 발생)에서 반복 재발 확정.
+# - fix: PROD_SHA..MAIN_SHA 사이 변경 파일이 app-relevant 경로(apps/moneyball,
+#   packages/, turbo.json, pnpm-lock.yaml, pnpm-workspace.yaml) 를 하나도
+#   안 건드리면 — turbo-ignore 가 빌드를 skip하는 게 설계대로 정상이므로 —
+#   gap_hours/연속-정체 판정 없이 즉시 ::notice:: + exit 0.
 
 on:
   schedule:
@@ -129,6 +143,13 @@ jobs:
 
           echo "main_short=$MAIN_SHORT prod_short=$(echo $PROD_SHA | cut -c1-7)"
           echo "commits_ahead=$COMMITS_AHEAD gap_hours=$GAP_HOURS"
+
+          RELEVANT_CHANGED=$(git diff --name-only "$PROD_SHA" "$MAIN_SHA" -- apps/moneyball packages turbo.json pnpm-lock.yaml pnpm-workspace.yaml 2>/dev/null | wc -l | tr -d ' ')
+          echo "relevant_changed_files=$RELEVANT_CHANGED"
+          if [ "$RELEVANT_CHANGED" = "0" ]; then
+            echo "::notice::main HEAD 와 production mismatch($COMMITS_AHEAD commit ahead)이지만 전부 app-irrelevant 경로(apps/moneyball, packages, turbo.json, lockfile 미포함) — turbo-ignore 가 의도적으로 빌드 skip. drift 아님."
+            exit 0
+          fi
 
           PREV_PROD_SHA=$(cat .drift-state 2>/dev/null || echo "")
           echo "prev_prod_sha=$PREV_PROD_SHA"
