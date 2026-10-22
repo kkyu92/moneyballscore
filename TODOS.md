@@ -1,3 +1,19 @@
+## 🟡 RETRO-ONLY — fix-incident(lite): deploy-drift-alert 4연속 실패 재확인, cycle 3526 fix로 이미 해소 (cycle 3542, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3541 retro `dc09d405`) OK. 2-chain lock 미충족(직전8(3534-3541) distinct=3: review-code6/polish-ui1/operational-analysis1). gap 전부 미도달(fix-incident 13/20, lotto 14/30, info-arch 12/30). review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3541~3550) — 후보 제외.
+
+`gh run list` 재확인 중 `deploy-drift-alert` 워크플로가 2026-10-21 17:07~2026-10-22 04:37 UTC 사이 schedule 트리거 4회 연속 `::error::`(사례 9/10 family 재발 의심 문구) 발견. `gh run view --log` 로 실제 원인 조사: 4회 전부 main HEAD/production 간 diff 가 `CLAUDE.md`/`TODOS.md` only(app-irrelevant)였는데, **cycle 3526 turbo-ignore fix(commit `71301193`, 2026-10-22 06:01 UTC 머지) 이전 구버전 workflow 가 실행**돼 오탐 발생. fix 머지 직후 수동 `workflow_dispatch`(06:11 UTC) 1건 success 확인 — turbo-ignore 인지 로직(RELEVANT_CHANGED=0 분기) 정상 작동 재검증 완료. 현재 main(`1a72d44f`) vs production(`987b4e6`) diff 도 app-irrelevant only 라 다음 scheduled 실행도 정상 notice 예상.
+
+**부수 확인**: `sitemap-warmup` 워크플로 마지막 실행이 2026-04-29(6개월 전)라 이상 신호로 보였으나, 워크플로 주석 확인 결과 2026-04-29 Cloudflare Worker cron 으로 의도적 이관(workflow_dispatch 수동 trigger 만 보존) — false alarm, 액션 불필요.
+
+**코드 변경 없음** — 이미 cycle 3526 이 근본 원인 해소, 본 사이클은 재확인/검증만. retro-only.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 누적, 신규 증가 없음)/trigger2(5연속 fail 없음)/trigger3(3542%50=42≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3523-3542, 현재 포함) review-code 8회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3533-3542) success 2건(3535,3538) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3535-3542) distinct=4(review-code/polish-ui/operational-analysis/fix-incident), 미충족. 2차 방어선(cycle 3541 retro `dc09d405`) OK.
+
+다음 사이클 추천 = 다음 scheduled deploy-drift-alert 실행(07:17+ UTC) 결과 자연 확인, 또는 fix-incident(gap14/20)/lotto(gap15/30)/info-arch(gap13/30) 자연 대기, review-code cooldown(3550 만료) 후 복귀.
+
+---
+
 ## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 격차 재측정 43회 연속, n=448 불변, 2-chain lock 최초 실전 발동 (cycle 3541, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3540 retro `832c1511`) OK. 직전8(3533-3540) distinct=2(review-code7+polish-ui1) — **2-chain lock 발동**(최초 실전 사례). 둘 다 후보 제외. gap: fix-incident 12/20·lotto 13/30·info-arch 8/30 — 전부 미도달. `gh run list`/Vercel 재확인 결과 CI Failure Dispatch 전부 skipped, 실제 incident 부재. lotto cron 산출물 양쪽 최신 확인(picks 2026-10-24, results 2026-10-17) — 수동 개입 불필요. 남은 가용 chain 중 op-analysis(gap9/25) 선택.
