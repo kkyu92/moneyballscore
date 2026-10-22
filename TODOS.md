@@ -1,3 +1,15 @@
+## 🟡 RETRO-ONLY — review-code(heavy): pipeline/ 잔여 5개 파일 메인 직접 재확인, drift 0건, 디렉토리 완주 (cycle 3557, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3556 retro `60f20961`) OK. 2-chain lock 미충족(직전8(3549-3556) distinct=4). ship-0 미충족(직전10 success 3건: 3551/3553/3554). gap 전부 미도달(fix-incident 7/20, op-analysis 6/25, info-arch 8/30, lotto 9/30). cycle 3556 retro 추천(pipeline/ 잔여 5개 파일) 따라 review-code(heavy) 완주.
+
+5개 파일 전문 read: `factor-bias-bootstrap-ci.ts`(133L) — bootstrap CI 측정 스크립트, 명시적 throw, silent path 없음. `postview-daily.ts`(378L) — 멱등 postview runner, assertSelectOk/assertWriteOk 일관 + silent-drift-alert 연동 확인. `shadow-cohort.ts`(259L) — v2.1-B/v2.0 shadow row insert, failure-tolerant try/catch 의도적 격리(문서화됨, production path 영향 차단). `snapshot-pitchers.ts`(215L) — 투수 주간 snapshot, assertWriteOk + try/catch continue 로직 정상(cycle 170 통일 확인). `sync-batter-stats.ts`(208L) — 타자 sync, MIN_EXPECTED_BATTERS 임계 알림 + CRITICAL 알림 로직 정상.
+
+drift 0건. **`packages/kbo-data/src/pipeline/` 31개 파일 전수 감사 완주** (cycle 3553 daily.ts/mlb-pipeline.ts 2개 + cycle 3554 backtest-* 6개 + cycle 3555 backfill-* 4개 + cycle 3556 live/silent-drift-alert 등 13개 + 본cycle 5개 = 31/31).
+
+다음 사이클 추천 = review-code(heavy) 신규 디렉토리(`agents/` 또는 `scripts/`) 선정 또는 fix-incident(gap8/20)/op-analysis(gap7/25)/info-arch(gap9/30)/lotto(gap10/30) 자연 대기.
+
+---
+
 ## 🟡 RETRO-ONLY — review-code(heavy): pipeline/ 13개 파일 메인 직접 재확인, drift 0건 (cycle 3556, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3555 retro `85bad28a`) OK. 2-chain lock 미충족(직전8(3548-3555) distinct=6). ship-0 미충족(직전10 success 3건: 3551/3553/3554). gap 전부 미도달(fix-incident 7/20, op-analysis 6/25, info-arch 8/30, lotto 9/30). cycle 3555 retro 추천(pipeline/ 잔여 19개 파일) 따라 review-code(heavy) 계속.
