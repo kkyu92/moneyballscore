@@ -18177,3 +18177,17 @@ silent-drift-wave-207 테스트 2건이 교체 전 문구("검증 표본 임계 
 **검증(skill-evolution 등)**: trigger1(과거 소비)/trigger2(5연속 fail 없음)/trigger3(3515%50=15≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3496-3515, 현재 포함) 표본 20≥10, review-code 15회 발화 — 미충족. ship-0 — 직전10(3506-3515) success 7건 — 미충족. EXHAUSTIVE_SWEEP — 직전9 review-code(heavy) 7건(<8) — 미충족. 2-chain lock(다음 사이클용) — 직전8(3508-3515) distinct 재확인 필요.
 
 다음 사이클 추천 = review-code(heavy) 신규 scope(소스 경로 누출 재grep 결과 clean이라 새 영역 필요) 또는 fix-incident(gap9/20)/op-analysis(gap12/25)/info-arch(gap20/30)/lotto(gap10/30) 자연 대기. 본 cycle = develop-cycle 2사이클 호출 중 1/2.
+
+## 🟢 SUCCESS — fix-incident: deploy-drift-alert turbo-ignore false positive 수정 (cycle 3526, 2026-10-22)
+
+진단: 직전 cycle 3525가 ship-0 emergency-stop(직전10(3516-3525) 전부 retro-only) 발동 + meta-pattern dispatch + signal next_n=0 박제. 사용자가 즉시 `/develop-cycle 41` 재호출 — 속행 결정으로 해석. EXHAUSTIVE_SWEEP 서브체크 재확인: 직전10 review-code(heavy) 4건(<8 임계, info-arch/polish-ui/op-analysis/fix-incident/lotto 다양한 periodic 체크포인트 혼재) — 예외 미적용, 진짜 hard stop 조건 확정. review-code는 EXHAUSTIVE_SWEEP cooldown(3522-3531) 유지로 제외. 나머지 gap 전부 직전 4사이클 안 리셋됨. 기계적 reconfirm 대신 `gh run list` 전체 workflow 재확인 — cycle 3523 fix-incident(lite)가 `pipeline_runs`/CI Failure Dispatch만 보고 놓친 **deploy-drift-alert 워크플로 자체 4연속 실패**(10/21 17:07~10/22 04:37) 발견.
+
+**진단**: 수동 `curl /api/version` 확인 결과 HTTP 200, prod_sha=9b1079b(main HEAD 대비 1 commit, 마지막 app-relevant 커밋 `54bdc65f` 기준 22시간/25commit 뒤). 근본원인 = `apps/moneyball/vercel.json`의 `ignoreCommand`(`turbo-ignore moneyball`)가 CLAUDE.md/TODOS.md-only 커밋(develop-cycle 매 사이클 정책/문서 산출물)에 대해 Vercel 빌드를 의도적으로 skip — production은 정확히 정상 상태인데 워크플로가 raw git SHA 비교만으로 "정체"를 오판. 이 리포는 거의 매 사이클 docs-only 커밋이 나오는 구조라 반복 재발 확정적.
+
+**수정**: `.github/workflows/deploy-drift-alert.yml` — `PROD_SHA..MAIN_SHA` diff가 app-relevant 경로(`apps/moneyball`, `packages/`, `turbo.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`)를 하나도 안 건드리면 gap_hours/연속-정체 판정 없이 즉시 `::notice::`+exit 0 분기 추가.
+
+검증: 실제 SHA 쌍(9b1079b→HEAD)으로 RELEVANT_CHANGED 계산 시뮬레이션 0 확인(수정 전 로직이면 이 케이스서 바로 `::error::`). YAML syntax 확인. `pnpm lint` clean. 직접 main commit+push(R4, pre-push lint+type-check+vitest 전부 PASS, `71301193`). 워크플로 자체는 cron 전용(매시 17분) — 다음 실제 fire에서 notice 전환 최종 확인 필요(carry-over).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3526%50=26≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3507-3526, 현재 포함) review-code 12회 발화 — 미충족(표본 20≥10 충족). marker 미박제. ship-0 — 본 cycle outcome=success로 직전10(3517-3526) streak 즉시 해소, 미충족. 2-chain lock(다음 사이클용) — 직전8(3519-3526) distinct=5(fix-incident/info-arch/lotto/operational-analysis/review-code) 미충족. 2차 방어선(cycle 3525 retro `9b1079b3`) OK.
+
+다음 사이클 추천 = 다음 정시 cron fire(17분)에서 deploy-drift-alert 실제 notice 전환 확인, 또는 review-code cooldown 만료(3531) 대기, 그 전까지 fix-incident(gap0, 방금 발화)/op-analysis(gap4/25)/info-arch(gap1/30)/lotto(gap2/30) 자연 대기.
