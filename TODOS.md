@@ -18237,3 +18237,15 @@ silent-drift-wave-207 테스트 2건이 교체 전 문구("검증 표본 임계 
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3526%50=26≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3507-3526, 현재 포함) review-code 12회 발화 — 미충족(표본 20≥10 충족). marker 미박제. ship-0 — 본 cycle outcome=success로 직전10(3517-3526) streak 즉시 해소, 미충족. 2-chain lock(다음 사이클용) — 직전8(3519-3526) distinct=5(fix-incident/info-arch/lotto/operational-analysis/review-code) 미충족. 2차 방어선(cycle 3525 retro `9b1079b3`) OK.
 
 다음 사이클 추천 = 다음 정시 cron fire(17분)에서 deploy-drift-alert 실제 notice 전환 확인, 또는 review-code cooldown 만료(3531) 대기, 그 전까지 fix-incident(gap0, 방금 발화)/op-analysis(gap4/25)/info-arch(gap1/30)/lotto(gap2/30) 자연 대기.
+
+## 🟡 RETRO-ONLY — info-architecture-review: breadcrumb/footer/orphan page 전수 재확인, drift 0건 (cycle 3530, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/21(전부 completed/archived). 2차 방어선(cycle 3529 retro `9e50dbea`) OK. 2-chain lock 미충족(직전8(3522-3529) distinct=4: fix-incident/lotto/operational-analysis/info-architecture-review). review-code EXHAUSTIVE_SWEEP cooldown(3522-3531) 유지로 제외. fix-incident gap=0(방금 발화)·lotto gap=1·op-analysis gap=2·info-arch gap=4·polish-ui gap=12 — 전부 주기 trigger 미도달이나, breadcrumb 누락 라우트 grep(`grep -L Breadcrumb apps/moneyball/src/app/**/page.tsx`)이 18건 반환 — 반복 no-op reconfirm 대신 concrete 발견으로 선정.
+
+**검증**: 18건 전수 read — 전부 의도된 결과. (1) `reviews/monthly`·`reviews/weekly`·`mlb/reviews/monthly`·`mlb/reviews/weekly`·`en/mlb/reviews/monthly`·`en/mlb/reviews/weekly` 6건은 `redirect()` 전용 shim(UI 렌더 없음, breadcrumb 은 리다이렉트 타깃 `[month]`/`[week]` 상세 페이지에 이미 존재 확인). (2) 루트 `/`·`/settings`·`/community`·`/login` 4건은 `robots.ts` 주석에 "placeholder(색인 가치 0)" 명시된 top-level 페이지. (3) `debug/*` 8건은 BASIC auth 내부 대시보드. 추가로 Footer sitemap(`Footer.tsx`, 7컬럼 46링크)을 현재 라우트 전수와 대조 — 누락 없음(cycle 2587 재발 패턴 주석 대비 정상). Orphan page 후보(`/community`/`/login`/`/settings`/`/v2-shadow-monitor`, 내부 링크 0건)도 `robots.ts`/`sitemap.ts` 주석으로 전부 의도된 비노출 확인 — 신규 발견 아님.
+
+**코드 변경 없음** — drift 0건, retro-only. spec 박제: `docs/design/ia-2026-10-22-cycle-3530-breadcrumb-footer-orphan-recheck.md`.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비)/trigger2(5연속 fail 없음)/trigger3(3530%50=30≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3511-3530, 현재 포함) review-code 9회 발화로 미충족(표본=20≥10 충족). marker 미박제. ship-0 — 직전10(3521-3530) success 2건(3526/3529) 포함 미충족. 2-chain lock(다음 사이클용) — 직전8(3523-3530) distinct=4(fix-incident/lotto/info-architecture-review/operational-analysis) 미충족. 2차 방어선(cycle 3529 retro `9e50dbea`) OK.
+
+다음 사이클 추천 = fix-incident(gap0)/op-analysis(gap2)/lotto(gap1) 자연 대기, review-code cooldown(3531) 만료 후 복귀.
