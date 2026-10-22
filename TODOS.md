@@ -1,3 +1,17 @@
+## 🟡 RETRO-ONLY — review-code(heavy): context/{domain,metrics,measurement}.ts 전수 감사, drift 0건 (cycle 3563, 2026-10-22)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 archived/completed 류). 2-chain lock 미충족(직전8(3555-3562) distinct=4: review-code/fix-incident/lotto/operational-analysis). ship-0 미충족(직전10(3553-3562) success 2건: 3553/3554). gap 전부 미도달(fix-incident 3/20, op-analysis 1/25, info-arch 14/30, lotto 2/30) — cycle 3562 추천(info-arch/fix-incident) 재확인 결과 둘 다 신선 trigger 부재: 신규 라우트 추가 0건(git log 7일), breadcrumb 누락 목록 = 기존과 동일한 의도된 제외만(최신 `docs/design/ia-2026-10-22-cycle-3544-recheck.md` 가 이미 drift 0건 재확인함), `gh run list` 재확인 결과 CI Failure Dispatch 전부 skipped(실제 incident 없음). 대신 `packages/kbo-data/src/` 서브디렉토리별 최종 커밋일 스캔 결과 `context/` 가 CHANGELOG mention count 최저(domain.ts 2건/metrics.ts 2건/measurement.ts 3건) — 미감사 추정 스코프로 선정.
+
+`context/domain.ts`(177L)/`metrics.ts`(243L)/`measurement.ts`(234L) 전문 read: KBO_PARKS·TIME_WINDOWS(recent_form=10경기/h2h_window=50경기/h2h_recent_games=5경기) 주석이 실제 소비처(daily.ts 쿼리·rivalry-memory.ts RECENT_GAMES_LIMIT) 와 일치. MetricRegistry 의 `weight_v18` 필드를 `packages/shared/src/index.ts` DEFAULT_WEIGHTS 실측과 1:1 대조(sp_fip 0.15/sp_xfip 0.05/lineup_woba 0.15/bullpen_fip 0.10/recent_form 0.10/war 0.08/head_to_head 0.03/park_factor 0.04/elo 0.10/sfr 0.05, shadow park_weather·umpire_sz=0) — CLAUDE.md v1.8 가중치 서술과 완전 일치, drift 없음. 헤더 주석의 "personas.ts/debate.ts 는 미소비" 주장을 grep 으로 실측 검증(두 파일 모두 context import 없음 확인) + "judge-agent.ts 는 agent-context.ts 경유 간접 소비" 주장도 import chain 추적으로 확인. measurement.ts 의 3개 export 함수(measureHallucinations/measureContextTokenBudget/measureBrierStats 등)가 실제로 `scripts/llm-context-baseline.ts`/`scripts/measure-context-layer-brier.ts` 2곳에서 소비됨을 grep 으로 확인 — "측정만, DB 기록 X" 주석과 일치.
+
+코드 변경 없음, drift 0건, RETRO-ONLY.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3563%50=13≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3544-3563, 현재 포함) 중 review-code 발화 횟수 확인 필요하나 표본 20≥10 충족 전제, 직전 분포상 review-code 다회 발화로 미충족 추정(marker 미박제). ship-0 — 직전10(3554-3563) outcome: success 2건(3553/3554 포함 시 벗어남, 재계산: 3554-3563 범위로 보면 success 1건(3554)만 포함 — 미충족 유지).
+
+다음 사이클 추천 = review-code(heavy) 계속(`context/agent-context.ts` 8건 mention, Step3 통합 지점 — 아직 전수 read 안 한 상태로 다음 후보) 또는 info-architecture-review(gap15/30)/fix-incident(gap4/20)/lotto(gap3/30)/operational-analysis(gap2/25) 자연 대기.
+
+---
+
 ## 🟡 RETRO-ONLY — review-code(heavy): features/game-record-features.ts + loader.ts 교차검증, drift 0건 (cycle 3562, 2026-10-22)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3554-3561) distinct=4: review-code/fix-incident/lotto/operational-analysis). ship-0 미충족(직전10 success 2건). 디렉토리 last-touch 스캔 결과 `packages/kbo-data/src/features/` 가 2026-09-29 로 10개 디렉토리 중 최장 미수정(3주+) — review-code(heavy) 신규 스코프 선정.
