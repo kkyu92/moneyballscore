@@ -1,3 +1,17 @@
+## 🟡 RETRO-ONLY — review-code(heavy): packages/shared/ 7개 파일 전수 감사, drift 0건 (cycle 3571, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전수 재확인, completed/archived/partial 뿐). 2차 방어선(cycle 3570 retro `4140232f`) OK. 직전8(3563-3570) distinct=3(review-code6/info-architecture-review1/fix-incident1) — 2-chain lock 미충족. gap 비율: op-analysis 10/25(40%, 최고)·lotto 11/30(37%)·info-arch 6/30(20%)·fix-incident 4/20(20%) — 전부 구조적 trigger(20/25/30-cycle) 미도달.
+
+TODOS 직전 추천(cycle 3570) 따라 `packages/shared/`(커밋 수 낮은 7파일: db-error/review-badge-labels/rivalries/korean/mlb-teams/site/feature-flags, grep-count-depth 가드레일 — 저 커밋 수를 감사 완료로 추정 금지, 전수 read) 선정. 본 메인 직접 전수 read. `db-error.ts`: supabase `.error` 검증 helper 정상(assertSelectOk/assertWriteOk 패턴 일관). `review-badge-labels.ts`: 3개 배지 상수 전부 lib/reviews/{build*Review}.ts + {Highlight,MlbHighlightCard}.tsx 에서 import 사용 확인 — 하드코딩 리터럴 잔존 0건(cycle 3273/3274 통합 정상 유지). `rivalries.ts`: KBO_RIVALRIES 5쌍(LG/OB, HT/SS, OB/HH, HH/KT, NC/LT) 전부 `index.ts` KBO_TEAMS 실제 키(SK/HT/LG/OB/KT/SS/LT/HH/NC/WO)와 일치 확인. `korean.ts`: 조사 lookup table(ENGLISH_TOKEN_HAS_BATCHIM/DIGIT_HAS_BATCHIM) 로직 정상, 테스트 24건 통과. `mlb-teams.ts`: `toMlbStatsApiCode`/`normalizeMlbTeamCode` 양방향 변환 전체 호출부(10+ 파일) 확인 — alias 매핑 일관. `site.ts`: SITE_URL/SITE_HOST/KBO_SCHEDULE_URL derive 체인 정상. `feature-flags.ts`: kill switch/rollout flag 구분 정상, 주석과 실제 default 값 일치. `pnpm test --filter @moneyball/shared` 8 test files 218 tests 전체 통과. **drift 0건, 코드 변경 없음.**
+
+**ship-0 재확인**: 직전10(3562-3571, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT=8(≥8) + CLEAN_DRIFT_COUNT 재확인(drift 0건/drift 없음 언급 다수, ≥7 추정 충족) → EXHAUSTIVE_SWEEP=true 판단 — review-code(heavy) 가 체계적 전수감사 작업(가치 있는 검증, 발견 없음일 뿐)이라는 cycle 3381 서브분류 룰 적용. signal next_n 강제 변경 없음(원 N 유지), review-code cooldown N=10 적용 — 다음 10 cycle 은 review-code 후보 제외, 다른 chain(fix-incident/lotto/op-analysis/info-arch 등) 자연 redirect. `memory: meta-pattern` informational 1줄 dispatch 예정(사용자 결정 요청 아님).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3571%50=21≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3552-3571, 현재 포함) 표본 review-code 다수(0회 아님) — 미충족, marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3564-3571) distinct=3, 미충족이나 review-code cooldown 별도 적용으로 다음 사이클 review-code 자동 제외.
+
+다음 사이클 추천 = review-code cooldown(3572~3581) 기간 중 fix-incident(gap4/20)/lotto(gap11/30)/op-analysis(gap10/25)/info-arch(gap6/30) 자연 대기 우선 — gap 비율 최고인 op-analysis 또는 lotto 자연 선택 권장.
+
+---
+
 ## 🟡 RETRO-ONLY — review-code(heavy): hooks/ 2개 파일 전수 감사, drift 0건 (cycle 3570, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22(10~28 전수 재확인, completed 3건 + 나머지 draft/만료). 2차 방어선(cycle 3569 retro `d78ea887`) OK. 직전8(3562-3569) distinct=3(review-code6/info-architecture-review1/fix-incident1) — 2-chain lock 미충족. explore-idea saturation 직전15 13/15 충족하나 4-source negative(open issue 0/plan 0/TODOS Next-Up 섹션 부재, DESIGN.md 46h 신선) 확립 skip 패턴 유지. gap 비율: op-analysis 9/25(36%, 최고)·lotto 10/30(33%)·info-arch 5/30(17%)·fix-incident 3/20(15%) — 전부 구조적 trigger(20/25/30-cycle) 미도달. lotto cron 산출물 재확인(picks 2026-10-24.md/results 2026-10-17.md 양쪽 최신) — 수동 개입 불필요.
