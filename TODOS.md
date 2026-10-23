@@ -19213,3 +19213,15 @@ cycle 3537 추천대로 app/api 잔여 scope(health/hub-dispatch 는 cycle 3264/
 **검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3587%50=37≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3567-3586, 현재 포함 시 3568-3587) 표본≥10 충족, review-code 다회 발화(0회 아님)로 미충족. marker 미박제.
 
 다음 사이클 추천 = fix-incident(gap3/20)/info-arch(gap2/30) gap 자연 대기, review-code/operational-analysis cooldown(3595 만료까지) 유지.
+
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE cohort 재측정, n=448 50회 연속 불변 (cycle 3598, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 2-chain lock 미충족(직전8(3590-3597) distinct=4: fix-incident/lotto/info-architecture-review/review-code). gap 비율: operational-analysis 17/25(68%, 최고)·fix-incident 5/20(25%)·lotto 4/30(13%)·info-arch 3/30(10%) — operational-analysis 선택. lite cap 체크: 직전5 fire(3550/3561/3572/3576/3581) 전부 retro-only → cooldown N=10 적용됐으나 last fire 3581 기준 만료(3591) 이미 지나 재평가 가능 확인.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행(env `.env.local` 로드) — 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3581 수치와 완전 동일, **50회 연속 불변**. CE 55.9%(224/401, Brier 0.4003) / 비CE 63.8%(30/47, Brier 0.2534) → 격차 8.0pp 그대로. overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 유지, LLM 부가가치 우세 결론 50회 연속 재확인. 원인 = KBO 2026 정규시즌 2026-10-04 종료 지속 + CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 111일+ 경과) 상태 변화 없음. **코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3588-3597, 본 cycle 미포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT(3588-3597 구간)=2(<8) 미충족. 단 cycle 3564 가 이미 동일 조건으로 genuine emergency-stop(`memory: meta-pattern` a70a4595) dispatch 완료 + 그 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석(cycle 3565/3567/3578/3587 등 선례) — 본 cycle 도 사용자가 `/develop-cycle 16` 명시적 재호출로 시작 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3598%50=48≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3579-3598, 현재 포함) 표본≥10 충족, review-code 다회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3591-3598) distinct=5(lotto/info-architecture-review/fix-incident/review-code/operational-analysis), 미충족.
+
+다음 사이클 추천 = fix-incident(gap6/20)/lotto(gap5/30)/info-arch(gap4/30) gap 자연 대기 또는 review-code(heavy) 신규 scope(packages/kbo-data/src/pipeline/ 잔여, scripts/) 계속.
