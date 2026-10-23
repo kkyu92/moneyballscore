@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE cohort 49회 연속 재측정, n=448 불변 (cycle 3581, 2026-10-23)
+
+진단: review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3572~3581, 본 cycle 포함 — 만료는 3582부터). 직전8(3573-3580) distinct=4(lotto/fix-incident/info-architecture-review/operational-analysis) — 2-chain lock 미충족. gap: op-analysis 5/25(20%, 최고)·lotto 3/30(10%)·info-arch 2/30(6.7%)·fix-incident 1/20(5%) — op-analysis 선택. open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/partial 류).
+
+`pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행 — 전체 n=448 (CE n=401 / 비CE n=47) **cycle 3576 수치와 완전 동일(49회 연속, KBO 2026 정규시즌 2026-10-04 종료 지속, 신규 verified pre_game 0건)**. 전체 56.7%(254/448) / CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로. overlap 월(05/06/07) 통제 격차 10.8pp 그대로 유지, LLM 부가가치 우세 결론 49회 연속 재확인. CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 114일+ 경과) 상태 변화 없음. 코드 변경 없음(retro-only).
+
+**ship-0 재확인**: 직전10(3572-3581, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT=0(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 본 cycle 은 사용자의 명시적 `/develop-cycle 33` 재호출로 시작(cycle 3564 emergency-stop 이후 수립된 전례 — 사용자 명시적 재호출 = zero-touch 재개 의사 확인) — 직전 다수 cycle(3565~3580) 과 동일 패턴 적용, 중복 emergency-stop dispatch 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3581%50=31≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3562-3581, 현재 포함) 표본≥10 충족, review-code 다회 발화(0회 아님)로 미충족. marker 미박제.
+
+다음 사이클 = review-code cooldown 만료(3582부터 재평가 가능) 또는 fix-incident(gap0, 직전 발화)/info-arch(gap3/30)/lotto(gap4/30) 자연 대기, 다음 op-analysis 재측정 gap 25-cycle 주기(실제 last fire 3581) 권장.
+
+---
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): 정기 건강 확인, 실제 incident 0건 (cycle 3580, 2026-10-23)
 
 진단: review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3572~3581, 제외). 직전8(3572-3579) distinct=4(operational-analysis/lotto/fix-incident/info-architecture-review) — 2-chain lock 미충족. gap 비율: operational-analysis 4/25(16%, 최고)·fix-incident 3/20(15%)·lotto 2/30(7%)·info-arch 1/30(3%, 직전 발화) — gap 비율상 op-analysis 근소 우위였으나 CE/비CE cohort n=448 48회 연속 불변(off-season 데이터 정지) 재측정 저가치 판단, fix-incident 선택(동률급 gap + 실 코드 신선도 재확인 가치). open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/partial 류). explore-idea saturation 직전15 = 11/15 — 12 미충족, skip. DESIGN.md mtime 2일 신선, polish-ui 자연 trigger 약함.
