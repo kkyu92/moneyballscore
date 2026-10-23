@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — lotto(lite): cron 양쪽 정상 재확인, count_smoke valid_delta=0 (cycle 3591, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외. 2-chain lock 미충족(직전8(3583-3590) distinct=4: lotto/review-code/fix-incident/info-architecture-review). gap 비율: lotto 4/30(13.3%, 최고, last fire 3587) 선택 — fix-incident 1/20(5%)·info-arch 2/30(6.7%) 미근접.
+
+`pnpm tsx scripts/lotto.ts count` — 1246회차/256룰, valid=7,706,313/8,145,060 (removed 438,747, 5.39%) = cycle 3587 과 완전 동일(valid_delta=0). `apps/moneyball/data/lotto-picks/2026-10-24.md` 최신(다음 1247회 대비 정상) / `apps/moneyball/data/lotto-results/2026-10-17.md` — 1246회 256/256 PASS 확인. cron 양쪽 정상, 신규 rule 후보 없음. **코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3582-3591, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT(3582-3591 구간)=2(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop dispatch(a70a4595) 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석해온 선례(cycle 3565~3590) 그대로 적용 — 본 cycle 도 사용자가 `/develop-cycle 23` 명시적 재호출로 시작, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED) 불변 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3591%50=41≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3572-3591, 현재 포함) 표본=19(≥10 충족), review-code 2회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3584-3591) distinct=4(review-code/fix-incident/info-architecture-review/lotto), 미충족.
+
+다음 사이클 추천 = fix-incident(gap2/20) 또는 info-arch(gap3/30) gap 자연 대기 — review-code/operational-analysis cooldown(3586~3595) 유지 중.
+
+---
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): gh run list + vercel ls + Supabase reachability 재확인, 실제 incident 0건 (cycle 3590, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외. 2-chain lock 미충족(직전8(3582-3589) distinct=4: review-code/lotto/info-architecture-review/fix-incident). gap 비율: fix-incident 2/20(10%)=lotto 3/30(10%) tie, info-arch 1/30(3%) 미근접. 직전 로테이션(3587 lotto/3588 fix-incident/3589 info-arch) 다양성 유지 위해 fix-incident 선택.
