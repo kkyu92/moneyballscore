@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE cohort 48회 연속 재측정, n=448 불변 (cycle 3576, 2026-10-23)
+
+진단: review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3572~3581, 제외). 직전8(3568-3575) distinct=5(review-code/operational-analysis/lotto/fix-incident/info-architecture-review) — 2-chain lock 미충족. gap 비율: operational-analysis 4/25(16%, 최고)·lotto 3/30(10%)·fix-incident 2/20(10%)·info-arch 1/30(3%, 직전 발화) — operational-analysis 선택. open issue 0건, approved+unexpired plan 0/22. CI/Vercel scheduled workflow 전부 정상(실패 0), lotto cron 산출물 양쪽 최신(picks 2026-10-24/results 2026-10-17), DESIGN.md mtime 2일 신선.
+
+`pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행 (동일 harness) — 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3572 수치와 완전 동일(신규 verified pre_game 0건, KBO 2026 정규시즌 2026-10-04 종료 지속). CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 그대로 유지, LLM 부가가치 우세 결론 **48회 연속 재확인**. CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 114일+ 경과) 상태 변화 없음. 코드 변경 없음 — retro-only.
+
+**ship-0 재확인**: 직전10(3567-3576, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 재충족. EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT=4(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop 발동 + 사용자 보고 완료 + 본 cycle 자체가 사용자의 명시적 `/develop-cycle 38` 재호출로 시작됨(= meta-pattern 제시 "zero-touch 재개" 선택 재확인) — cycle 3565/3567/3568/3569/3572/3573/3574/3575 가 적용한 재정지 생략 선례 그대로 적용, 중복 emergency-stop dispatch 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3576%50=26≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3557-3576, 현재 포함) 표본=20≥10 충족, review-code 다회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3569-3576) distinct=5, 당장 미충족.
+
+다음 사이클 추천 = lotto 또는 fix-incident 또는 info-arch(gap 재소진 대기), review-code cooldown(3581 만료까지) 유지.
+
+---
+
 ## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap/nav 재확인, drift 0건 (cycle 3575, 2026-10-23)
 
 진단: review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3572~3581, 제외). 직전8(3567-3574) distinct=4(fix-incident/review-code/operational-analysis/lotto) — 2-chain lock 미충족. gap 비율: info-arch 10/30(33%, 최고)·fix-incident 1/20·lotto 2/30·op-analysis 3/25 — 전부 직전 발화라 info-arch 선택. explore-idea saturation 11/15 미충족, open issue 0건, approved+unexpired plan 0/22.
