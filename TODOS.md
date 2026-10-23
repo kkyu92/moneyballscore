@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — review-code(heavy): scripts/ 6개 backfill 스크립트 전수 감사, drift 0건 (cycle 3606, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/21 (plan 27/28 모두 phase-done/completed). 직전8(3598-3605) distinct=6(operational-analysis/fix-incident/review-code/skill-evolution/lotto/info-architecture-review) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 7/20·op-analysis 8/25·info-arch 1/30·lotto 3/30). `gh run list` 전부 success/skipped(CI Failure Dispatch skipped=실제 incident 부재). 직전 cycle(3603/3605) 공통 추천 "review-code(heavy) 신규 scope(scripts/)" 채택 — scripts/*.ts 중 CHANGELOG 0-mention 파일 교차검증 결과 backfill-home-win-prob.ts/backfill-is-correct-shadow-fix.ts/backfill-kbo-confirmed-postponed.ts/backfill-kbo-stuck-verify.ts/backfill-shadow-cohort.ts/backfill-tie-winner-null.ts 6개(총 904줄) 미감사 확인.
+
+본 메인 직접 전수 read(agent 위임 없이). 각 스크립트의 import 대상(CURRENT_SCORING_RULE/SHADOW_SCORING_RULE/SHADOW_V20_SCORING_RULE/PRODUCTION_COHORT_RULES/fetchGames/computeWinnerTeamId/buildAccuracyUpdates/DB_CONSTRAINTS/insertShadowRow/computeShadowPrediction)를 실제 export 소스와 1:1 대조 — 전부 유효(하나는 grep 패턴 불일치로 false negative 발견했으나 재확인 결과 `shadow-cohort.ts:127`에 정상 존재). `is_canceled` 컬럼 스키마(`001_initial_schema.sql:118`) 존재 확인. pagination(`.range()` 루프 + safety stop) / batch / rate-limit(2000ms) 패턴이 sibling 스크립트 컨벤션과 일관. `backfill-kbo-confirmed-postponed.ts` 의 하드코딩 9개 game_id 는 KBO 공식 뉴스 출처까지 주석에 명시돼 추적 가능. **drift 0건, 코드 변경 없음** — retro-only.
+
+검증: 1차 방어선(본 retro commit) + 2차 방어선(cycle 3605 retro `0d3bee90` 존재 확인 OK).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 신규 누적 없음)/trigger2(5연속 fail 없음)/trigger3(3606%50≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3587-3606) 샘플=20, review-code 다회 발화 — 0회 아님, 미충족) 전부 미충족 — marker 박제 없음. ship-0 서브체크: 직전10(3597-3606) 중 success 1건(3601) 존재 — PARTIAL_STREAK≠10, emergency stop 미해당. 2-chain lock(다음 사이클용) — 직전8(3599-3606) distinct=6, 미충족.
+
+다음 사이클 추천 = fix-incident(gap8/20)/info-architecture-review(gap2/30) gap 자연 대기 또는 review-code(heavy) scripts/ 잔여 scope(dev-backend-compare.ts/dev-debate.ts/llm-context-baseline.ts/measure-context-layer-brier.ts/op-analysis-cohort.ts/run-pipeline.ts/smoke-umpire-scraper.ts, 전부 0-mention) 계속.
+
+---
+
 ## 🟢 RETRO-ONLY — info-architecture-review(lite): 신규 MLB 라우트 7일내 ≥3 재확인, drift 0건 (cycle 3605, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3598-3605) distinct=6(operational-analysis/fix-incident/review-code×3/skill-evolution/lotto/info-architecture-review) — 2-chain lock 미충족. gap: info-arch 10/30(33%, 최고)·fix-incident 6/20(30%)·op-analysis 7/25(28%)·lotto 2/30(7%) — review-code 직전10 중 5회 dominance 겹쳐 info-architecture-review(lite) 선택.
