@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — review-code(heavy): kbo-data pipeline/ 11개 파일 전수 감사, drift 0건 + milestone marker (cycle 3600, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3592-3599) distinct=5(info-arch/review-code/operational-analysis/fix-incident/lotto) — 2-chain lock 미충족. gap 전부 미도달(fix-incident 0/20·review-code 2·operational-analysis 1/25·info-arch 4/30·lotto 5/30) — 직전 다회 cycle(3598/3599) 이 명시 추천한 `packages/kbo-data/src/pipeline/` 잔여 scope 착수. stale `active-cycle`(dead pid, 직전 세션이 cycle 3600 미완주 중단) 발견 — `cycles/3600.json` 부재 확인 후 신규 실행(retroactive 불필요).
+
+`db-error.ts`(shared re-export shim, 의도)/`winner-id.ts`(동점 null 처리)/`db-constraints.ts`(predictions UNIQUE ↔ migration 030 `(game_id,prediction_type,scoring_rule)` 일치 확인)/`accuracy-update.ts`(Promise.all + `.error` 체크 ↔ daily.ts:1666-1673 일치)/`notify-status-predicate.ts`/`daily-summary.ts`(assertSelectOk + length===0 가드 ↔ daily.ts:1282-1289 일치)/`model-version.ts`/`final-reasoning.ts`(root vs verdict 의도적 비대칭 주석 — "UI 가 root.predictedWinner 직접 read 0건" grep 재확인 PASS)/`brier.ts`/`silent-drift-alert.ts`(384줄, mode별 alert predicate 전부 주석과 일치)/`save-game-record.ts` — 11개 파일 전수 read. **drift 0건, 코드 변경 없음** — retro-only.
+
+**milestone (trigger3)**: `3600 % 50 == 0` — 다른 trigger 평가와 독립적으로 항상 먼저 체크하는 룰(cycle 2051 박제)에 따라 즉시 marker 박제. `~/.develop-cycle/skill-evolution-pending` 작성 완료 — 다음 사이클(3601) skill-evolution 강제 발화, phase59 자가 진화 예정(phase58 entry 가 명시한 "다음 milestone = cycle 3600" 대상).
+
+**ship-0 재확인**: 직전10(3591-3600, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT(3591-3600 구간)=3(<8) 미충족 → literal 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop(a70a4595) 이후 확립된 선례(사용자 명시적 `/develop-cycle N` 재호출=재개 결정) 그대로 적용 — 본 cycle 도 사용자가 `/develop-cycle 14` 명시적 재호출로 시작, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED) 불변 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/**trigger3 충족(marker 박제, 위 참조)**/trigger4(meta-pattern 없음). trigger5 — 직전20(3581-3600, 현재 포함) 표본=19(review-code 포함 5개 chain 발화, 0회 chain 없음)로 추가 미충족이나 trigger3 가 이미 marker 박제했으므로 무관. PASS_ship 단일 grep 실측 3153(cycle 3550 기준 대비 +28).
+
+다음 사이클 = skill-evolution 강제 발화(marker 발견) — phase59, 직전 50 cycle(3551-3600) chain 분포 + PASS_ship 재측정 + 2차 방어선 무결손 재확인.
+
 ## 🟢 RETRO-ONLY — review-code(heavy): hub-dispatch/leaderboard/revalidate 4개 route 전수 감사, drift 0건 (cycle 3597, 2026-10-23)
 
 진단: open issue 0건, git status clean, cycle 3596 retro commit 결손 0 확인. 직전8(3589-3596) distinct=4(info-arch/fix-incident/lotto/review-code) — 2-chain lock 미충족. cycle 3596 이 추천한 잔여 scope(hub-dispatch/leaderboard 서브폴더/revalidate) 그대로 이어감.
