@@ -115,11 +115,10 @@ function computeFactors(f: GameFeatures): Record<string, number> {
   factors.war = 0.5;
   const h2hTotal = f.h2hHomeWins + f.h2hAwayWins;
   factors.head_to_head = h2hTotal > 0 ? f.h2hHomeWins / h2hTotal : 0.5;
+  // parkPf = KBO_TEAMS index-100 scale (~92-108), never the decimal-ratio-near-1
+  // scale a naive `pf > 1` check would assume — that branch was always overwritten below.
   const pf = f.parkPf;
-  let park = pf > 1 ? 0.5 + (pf - 1) * 2 : 0.5 - (1 - pf) * 2;
-  if (pf > 10) {
-    park = pf > 100 ? 0.5 + (pf - 100) / 100 * 2 : 0.5 - (100 - pf) / 100 * 2;
-  }
+  const park = pf > 100 ? 0.5 + (pf - 100) / 100 * 2 : 0.5 - (100 - pf) / 100 * 2;
   factors.park_factor = Math.max(0.3, Math.min(0.7, park));
   factors.elo = normalize(f.homeElo, f.awayElo, true);
   // sfr=0 on either side = Fancy Stats data gap (predictor.ts cycle 1904 wave-533 guard) — neutral.
