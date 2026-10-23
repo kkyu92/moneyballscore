@@ -18935,3 +18935,15 @@ cycle 3537 추천대로 app/api 잔여 scope(health/hub-dispatch 는 cycle 3264/
 **검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3568%50=18≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3549-3568, 현재 포함) 표본≥10 충족(fix-incident 3 + operational-analysis 2 + skill-evolution 1 + lotto 1 + info-arch 1 + review-code 12), review-code 다회 발화로 미충족. marker 미박제.
 
 다음 사이클 추천 = fix-incident(gap1, 거의 재도달)/lotto(gap8/30)/operational-analysis(gap7/25)/info-arch(gap3/30) gap 자연 대기 또는 review-code 신규 scope(packages/kbo-data/src/pipeline/ 잔여, scripts/) 계속.
+
+## 🟢 RETRO-ONLY — lotto(lite): cron 양쪽 정상 재확인, count_smoke valid_delta=0 (cycle 3578, 2026-10-23)
+
+진단: review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3572~3581, 제외). 직전8(3570-3577) distinct=5(review-code/operational-analysis/lotto/fix-incident/info-architecture-review) — 2-chain lock 미충족. gap 비율: lotto 5/30(17%, 최고)·info-arch 3/30(10%)·operational-analysis 2/25(8%)·fix-incident 1/20(5%, 직전 발화) — lotto 선택. open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). CI 최근 15건 전부 success/skipped/in_progress, 실패 0건.
+
+`pnpm tsx scripts/lotto.ts count` 재실행 — 1246회차 기준 256 rule, valid=7,706,313/8,145,060(removed 438,747, 5.39%) — cycle 3573 baseline과 완전 동일, valid_delta=0. cron 산출물 양쪽 재확인: `apps/moneyball/data/lotto-picks/2026-10-24.md`(다음 토 추첨, cron 2026-10-20 생성) + `apps/moneyball/data/lotto-results/2026-10-17.md`(직전 토 추첨 결과, 256/256 PASS) 둘 다 최신. **신규 rule 후보 없음, 코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3569-3578, 본 cycle 포함) 중 3569-3571 review-code(heavy) retro-only + 3572-3577 lite chain retro-only + 본 cycle(3578) retro-only = 전부 retro-only, PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT(3569-3578 구간)=3(<8) 미충족. 단 cycle 3564 가 이미 동일 조건 genuine emergency-stop dispatch(a70a4595) 완료 + 그 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출로 재개(cycle 3565/3566/3567 등 선례와 동일 해석 — 명시적 재호출=재개 결정) — 본 cycle 도 사용자가 `/develop-cycle 36` 명시적 재호출로 시작 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3578%50=28≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3559-3578, 현재 포함) 표본≥10 충족, review-code 다회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3571-3578) distinct=5(review-code/operational-analysis/lotto/fix-incident/info-architecture-review), 미충족.
+
+다음 사이클 추천 = info-arch 또는 operational-analysis(gap 재소진 대기), review-code cooldown(3581 만료까지) 유지.
