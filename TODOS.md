@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — review-code(heavy): scripts/ 잔여 7개 파일 전수 감사, drift 0건, scripts/ scope 전수 완료 (cycle 3607, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/21. 직전8(3600-3607) review-code dominant — 2-chain lock 평가 대상이나 cooldown 미충족. gap 전부 미근접(fix-incident 8/20·op-analysis 9/25·info-arch 2/30·lotto 4/30). 직전 cycle(3606) 추천 "scripts/ 잔여 scope" 채택 — dev-backend-compare.ts/dev-debate.ts/llm-context-baseline.ts/measure-context-layer-brier.ts/op-analysis-cohort.ts/run-pipeline.ts/smoke-umpire-scraper.ts 7개(총 857줄) CHANGELOG 0-mention 확인 후 선정.
+
+본 메인 직접 전수 read. import 대상(callLLM/BASE_PROMPT·HOME_ROLE·AWAY_ROLE·RESPONSE_FORMAT/checkHallucinatedNumbers·checkInventedPlayerNames·buildInjectionText/runDebate/PredictionHistory(재export 확인)/buildAgentContext·renderContextForLLM/measureContextTokenBudget·measureHallucinations·measureContextLayerBrierDelta·JudgmentRecord/runDailyPipeline·PipelineMode/scrapeGameUmpires)를 실제 export 소스와 1:1 대조 — 전부 유효. `measure-context-layer-brier.ts`의 WAVE43_BOUNDARY_UTC(2026-06-19T02:36:00Z) 를 실제 commit a7c794a 타임스탬프(2026-06-19T11:36:07+0900 KST = 02:36 UTC)와 교차검증 — 정합. pagination(`.range()` + safety stop) 패턴이 cycle 3131/3171 발견 패턴 주석과 함께 일관 유지. **drift 0건, 코드 변경 없음** — retro-only.
+
+**scripts/ 디렉토리 전체(31개) CHANGELOG mention 재확인 결과 0-mention 파일 0건** — scripts/ scope 전수 감사 완료 (cycle 3606+3607 양쪽 조합).
+
+검증: 1차 방어선(본 retro commit) + 2차 방어선(cycle 3606 retro `139b0258` 존재 확인 OK).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 신규 누적 없음)/trigger2(5연속 fail 없음)/trigger3(3607%50≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3588-3607) review-code 다회 발화 — 0회 아님, 미충족) 전부 미충족 — marker 박제 없음. ship-0 서브체크: 직전10(3598-3607) 중 success 1건(3601) 존재 — PARTIAL_STREAK=9/10, emergency stop 미해당.
+
+다음 사이클 추천 = fix-incident(gap9/20)/info-architecture-review(gap3/30) gap 자연 대기 또는 review-code(heavy) 신규 스코프(scripts/ 소진 — `apps/moneyball/src/lib/` 재확인 또는 1-mention 파일 심화) 계속.
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): scripts/ 6개 backfill 스크립트 전수 감사, drift 0건 (cycle 3606, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/21 (plan 27/28 모두 phase-done/completed). 직전8(3598-3605) distinct=6(operational-analysis/fix-incident/review-code/skill-evolution/lotto/info-architecture-review) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 7/20·op-analysis 8/25·info-arch 1/30·lotto 3/30). `gh run list` 전부 success/skipped(CI Failure Dispatch skipped=실제 incident 부재). 직전 cycle(3603/3605) 공통 추천 "review-code(heavy) 신규 scope(scripts/)" 채택 — scripts/*.ts 중 CHANGELOG 0-mention 파일 교차검증 결과 backfill-home-win-prob.ts/backfill-is-correct-shadow-fix.ts/backfill-kbo-confirmed-postponed.ts/backfill-kbo-stuck-verify.ts/backfill-shadow-cohort.ts/backfill-tie-winner-null.ts 6개(총 904줄) 미감사 확인.
