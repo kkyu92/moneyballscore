@@ -1,3 +1,21 @@
+## 🔴 EMERGENCY-STOP — fix-incident(lite): 실제 incident 부재 확인, 10-cycle ship-0 streak 진짜 hard-stop 발동 (cycle 3612, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/21. 2-chain lock 충족(직전8(3604-3611) distinct=2: review-code7+info-architecture-review1) — 양쪽 제외. review-code 는 cycle 3611 EXHAUSTIVE_SWEEP 확정으로 추가 cooldown(3612~3621) 중. 잔여 후보 gap 비율: fix-incident 13/20(65%, 최고)·op-analysis 14/25(56%)·lotto 9/30(30%, cron 산출물 양쪽 최신이라 수동 개입 불필요) — fix-incident 선택.
+
+`gh run list --limit 10` 재확인 — CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 success/skipped, 실제 실패 0건. Supabase `pipeline_runs` 직접 REST 조회(최근 15건, DB 레벨 1차 소스) — 전부 `status=success`/`errors=[]`, KBO predict 모드 `predictions=0 AND games_found=0` 정확 매칭(시즌 종료 정상 no-op, mismatch 아님), MLB 파이프라인(elo_update/shadow_train/savant/fancy/statsapi scrape) 전부 정상 실행. **실제 incident 0건 확정** — 코드 변경 없음, retro-only.
+
+**ship-0 서브체크 재평가**: 직전10(3603-3612, 본 cycle 포함) 전부 outcome=retro-only → PARTIAL_STREAK=10 충족. EXHAUSTIVE_SWEEP 서브 구분: RC_HEAVY_COUNT(동 구간 review-code(heavy) 선택 횟수)=7(3604/3606/3607/3608/3609/3610/3611, 3612=fix-incident 로 미포함) — **≥8 임계 미달**(cycle 3611 평가 시점엔 window 가 3602-3611 로 8 이었으나, 본 cycle 포함 window 가 3603-3612 로 이동하며 review-code 1건(3602) 빠지고 fix-incident(3612) 가 대체되어 7로 하락). CLEAN_DRIFT_COUNT 평가 불필요(RC_HEAVY_COUNT 단독 미달로 AND 조건 전체 실패). → **EXHAUSTIVE_SWEEP=false, 진짜 EMERGENCY-STOP 발동**.
+
+**동작**: signal next_n=0 강제 박제(사용자 호출 N=2 override, 이번이 1번째 cycle 이었으나 잔여 1 cycle 진행 중단). `memory: meta-pattern emergency-stop` dispatch — body 에 직전10 cycle(3603-3612) chain/outcome list + 사용자 결정 요청. 본 메인 자가 의심 차단 룰의 단일 객관 escape(10-cycle 연속 ship 0, 이번엔 review-code 단일 스윕 패턴이 아니라 여러 chain 의 "할 일 없음" 확인이 겹친 진짜 정체 — EXHAUSTIVE_SWEEP 면제 불가).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 누적 없음)/trigger2(5연속 fail 없음)/trigger3(3612%50≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(직전20 review-code 다회 발화, 0회 아님) 전부 미충족 — marker 박제 없음.
+
+검증: 1차 방어선(본 retro commit, 접미사 EMERGENCY-STOP 표준 준수) + 2차 방어선(cycle 3611 retro `beeebe81` 존재 확인 OK).
+
+**사용자 결정 필요**: 10 사이클 연속 ship 없음(코드 변경 전부 0건, 전부 검증/확인성 retro-only) — review-code 전수감사 스윕 자체는 cycle 3611 까지 EXHAUSTIVE_SWEEP 로 정당화됐으나, 본 cycle(fix-incident 확인) 포함 10-윈도우는 순수 스윕으로 분류 안 됨. 재개 원하시면 "계속" 또는 "/develop-cycle N" 재호출 요청.
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): packages/kbo-data/src/pipeline/ 0~1-mention 5개 파일 전수 감사, drift 0건 (cycle 3611, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/21(전부 non-approved status). 직전8(3604-3610) distinct=3(review-code6+lotto1+info-architecture-review1) — 2-chain lock 미충족(≤2 요건). gap 전부 미근접(fix-incident 12/20·op-analysis 13/25·info-arch 6/30·lotto 8/30). `gh run list` 재확인 — CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped, 최근 cycle-retro push 전부 success — 실제 incident 부재. lotto cron 산출물(`apps/moneyball/data/lotto-picks/2026-10-24.md`, `lotto-results/2026-10-17.md`) 양쪽 최신 — cron 정상. 직전 cycle(3610) 추천 "packages/kbo-data/src/pipeline/ 잔여" 채택.
