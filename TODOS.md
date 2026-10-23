@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — review-code(heavy): app/api 잔여 12개 route 전수 감사, drift 0건 (cycle 3596, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 쿨다운(cycle 3585 룰, 3586~3595) 본 cycle 부터 만료 — 첫 복귀. 2-chain lock 미충족(직전8(3588-3595) distinct=3: fix-incident/lotto/info-architecture-review). 직전 10 cycle 이 fix-incident/lotto/info-arch 3-chain lite loop 로만 순환 — 다양성 redirect + cycle 3099 가 추천한 미완료 scope(`app/api/{health,mlb,picks,pipeline,seo,version,sync-batter-stats}`) 실존 확인 후 review-code(heavy) 선택.
+
+`health/route.ts`(Supabase 402/exceed_egress_quota 양쪽 다운그레이드 정합) / `version/route.ts` / `sync-batter-stats/route.ts`(CRON_SECRET trim + revalidate 체인) / `pipeline/route.ts` / `mlb/pipeline/route.ts`(maxDuration=300 정합) / `mlb/waitlist/route.ts`(CSRF+honeypot+email enum 보호 6-layer) / `seo/indexnow/ping/route.ts`(INDEXNOW_KEY trim) / `picks/{submit,mlb-submit,poll,mlb-poll,results}/route.ts` — 총 12개 파일 전수 read. `picks/submit` vs `picks/mlb-submit`, `picks/poll` vs `picks/mlb-poll` 트윈 비교 — KBO/MLB 양쪽 구조 정합(INT FK vs VARCHAR external_game_id 분리만 의도된 차이). `lib/mlb/deriveMlbOutcome.ts` 교차확인(cycle 2117/2160 통합 로직, confidence 스케일 주석 정확). CRON_SECRET `.trim()` 패턴(cycle 3217 버그 클래스 방지) 전부 적용 확인. **drift 0건, 코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3587-3596, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT(3587-3596 구간)=1(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop dispatch(a70a4595) 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석해온 선례(cycle 3565~3595) 그대로 적용 — 본 cycle 도 사용자가 `/develop-cycle 18` 명시적 재호출로 시작, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED) 불변 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3596%50=46≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3577-3596, 현재 포함) 표본=20(≥10 충족), review-code 3회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3589-3596) distinct=4(info-architecture-review/fix-incident/lotto/review-code), 미충족. lite chain cap — review-code 직전5(3591-3595) 0회 발화, STREAK=0, 쿨다운 미충족.
+
+다음 사이클 추천 = fix-incident(gap1/20)/lotto(gap2/30)/info-architecture-review(gap1/30) gap 자연 대기 또는 review-code(heavy) 잔여 scope(`hub-dispatch`/`leaderboard` 서브폴더/`revalidate` 재확인) 계속.
+
+---
+
 ## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap/megamenu 재확인, drift 0건 (cycle 3595, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외 — 본 cycle 이 쿨다운 마지막 cycle. 2-chain lock 미충족(직전8(3587-3594) distinct=3: lotto/fix-incident/info-architecture-review). gap 비율: fix-incident 2/20(10%)와 info-architecture-review 3/30(10%) 동률 — info-arch 가 덜 최근 발화(gap3 vs gap2)라 선택.
