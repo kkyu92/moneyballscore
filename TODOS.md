@@ -19061,3 +19061,15 @@ cycle 3537 추천대로 app/api 잔여 scope(health/hub-dispatch 는 cycle 3264/
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3578%50=28≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3559-3578, 현재 포함) 표본≥10 충족, review-code 다회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3571-3578) distinct=5(review-code/operational-analysis/lotto/fix-incident/info-architecture-review), 미충족.
 
 다음 사이클 추천 = info-arch 또는 operational-analysis(gap 재소진 대기), review-code cooldown(3581 만료까지) 유지.
+
+## 🟢 RETRO-ONLY — lotto(lite): cron 양쪽 정상 재확인, count_smoke valid_delta=0 (cycle 3587, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis lite-cooldown 적용 중(3586~3595, cycle 3585 직전5 retro-only 트리거로 발동) — 두 chain 후보 제외. fix-incident(gap2/20)/lotto(gap4/30)/info-arch(gap1/30) 전부 미도달이나 lotto 가 상대 gap 최고(13%) — cron 재확인 겸 선택. 2-chain lock 미충족(직전8(3579-3586) distinct=5). gh run list 재확인 — 전부 success/skipped, 실제 incident 없음.
+
+`pnpm tsx scripts/lotto.ts count` 재실행 — 1246회차 256 rule, valid=7,706,313/8,145,060(removed 438,747, 5.39%) — cycle 3583 baseline과 완전 동일, valid_delta=0. cron 산출물 양쪽 재확인: `apps/moneyball/data/lotto-picks/2026-10-24.md`(다음 토 1247회 추첨, cron 2026-10-20 04:52 UTC 생성) + `apps/moneyball/data/lotto-results/2026-10-17.md`(직전 토 1246회 결과, 256/256 PASS) 둘 다 최신. **신규 rule 후보 없음, 코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3578-3587, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT(3578-3587 구간)=2(<8) 미충족. 단 cycle 3564 가 이미 동일 조건으로 genuine emergency-stop(`memory: meta-pattern` a70a4595) dispatch 완료 + 그 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석(cycle 3565/3567/3578 등 선례) — 본 cycle 도 사용자가 `/develop-cycle 27` 명시적 재호출로 시작 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3587%50=37≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3567-3586, 현재 포함 시 3568-3587) 표본≥10 충족, review-code 다회 발화(0회 아님)로 미충족. marker 미박제.
+
+다음 사이클 추천 = fix-incident(gap3/20)/info-arch(gap2/30) gap 자연 대기, review-code/operational-analysis cooldown(3595 만료까지) 유지.
