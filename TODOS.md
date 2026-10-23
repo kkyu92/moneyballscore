@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE cohort 47회 연속 재측정, n=448 불변 (cycle 3572, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3571 retro `b3a19bdd`) OK. review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3572~3581, cycle 3571 발동) — review-code 후보 제외. 직전8(3564-3571) distinct=3(review-code5/info-architecture-review1/fix-incident1) — 2-chain lock 미충족. gap: fix-incident 5/20(25%)·lotto 12/30(40%)·operational-analysis 11/25(44%, 최고)·info-arch 7/30(23%) — 전부 구조적 trigger 미도달이나 op-analysis 가 gap 비율 최고 + cycle 3571 retro 명시 추천과 일치 — 자연 선택. `gh run list`/lotto cron 재확인 — 전부 정상, 신규 incident 없음.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행 — 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3561(46회 연속) 수치와 완전 동일. CE 55.9%(224/401) / 비CE 63.8%(30/47) → 격차 8.0pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 그대로 유지, LLM 부가가치 우세 결론 47회 연속 재확인. KBO 2026 정규시즌 2026-10-04 종료 지속 + CREDIT_EXHAUSTED(Anthropic 크레딧) 지속 + 비CE 표본 동결(마지막 예측 2026-07-01, 114일+ 경과) — 신규 verified pre_game 0건, 11-cycle 경과에도 배치 미반영. **코드 변경 없음, CLAUDE.md 데이터 섹션만 append** — retro-only.
+
+**ship-0 재확인**: 직전10(3563-3572, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 재충족. EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT=7(3563/3564/3566/3568/3569/3570/3571, <8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 동일 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED + review-code 전수감사 광범위 완료)을 cycle 3564 에서 이미 emergency-stop 발동 + 사용자 보고 완료 상태였고, 본 cycle 자체가 사용자의 명시적 `/develop-cycle 42` 재호출로 시작됨(= meta-pattern 이 제시한 "그대로 zero-touch 재개" 선택 재확인) — cycle 3565/3567/3569 이 적용한 재정지 생략 선례 그대로 적용, 중복 emergency-stop dispatch 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3572%50=22≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3553-3572, 현재 포함) 표본≥10 충족, review-code 다수 발화로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3565-3572) distinct=4(review-code/info-arch/fix-incident/operational-analysis), 미충족.
+
+다음 사이클 추천 = review-code cooldown(3581 만료까지) 유지 중 fix-incident(gap6/20)/lotto(gap13/30)/info-arch(gap8/30) 자연 대기, 다음 op-analysis 재측정 gap 25-cycle 주기(실제 last fire 3572) 권장.
+
+---
+
 ## 🟡 RETRO-ONLY — review-code(heavy): packages/shared/ 7개 파일 전수 감사, drift 0건 (cycle 3571, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전수 재확인, completed/archived/partial 뿐). 2차 방어선(cycle 3570 retro `4140232f`) OK. 직전8(3563-3570) distinct=3(review-code6/info-architecture-review1/fix-incident1) — 2-chain lock 미충족. gap 비율: op-analysis 10/25(40%, 최고)·lotto 11/30(37%)·info-arch 6/30(20%)·fix-incident 4/20(20%) — 전부 구조적 trigger(20/25/30-cycle) 미도달.
