@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — review-code(heavy): packages/shared/src 전수 감사, drift 0건 (cycle 3604, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22 (기존 반복 확인). 직전8(3596-3603) distinct=5(review-code×3/operational-analysis/fix-incident/skill-evolution/lotto) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 5/20·lotto 1/30·info-arch 9/30·op-analysis 6/25). `gh run list` 정상(CI Failure Dispatch 전부 skipped, 실제 incident 0건), `vercel ls` 정상(Production Ready). 직전 3 cycle(3602/3603 retro) 이 공통 추천한 "review-code(heavy) 신규 scope(scripts/ 또는 packages/shared/)" 중 packages/shared/src 선택 — lib/ 대부분 CHANGELOG mention 보유로 소진, shared 는 db-error.ts 외 미탐색.
+
+`feature-flags.ts`(rollout/kill-switch 패턴 주석 정확) / `korean.ts`(조사 josa/ro 판별 로직, 영문 약어·디지트 lookup 주석 일치) / `mlb-teams.ts`(MLB_TEAMS 30팀 + StatsAPI alias 7종, normalizeMlbTeamCode/toMlbStatsApiCode 양방향 변환 정상) / `model-version-labels.ts`(ScoringRule/DebateVersion 단일 source, silent drift family wave 7/88/89/182 이력 주석 정확) / `review-badge-labels.ts`(3종 배지 라벨 단순 export) / `rivalries.ts`(KBO_RIVALRIES 5쌍, 주석 목록과 코드 일치, HT=KIA 표기 설명 정확) / `site.ts`(SITE_URL/SITE_HOST/KBO_OFFICIAL_URL/KBO_SCHEDULE_URL derive 체인 정상) 전수 read.
+
+`index.ts`(3475줄) 는 전수 read 대신 CLAUDE.md 박제 핵심 수치(DEFAULT_WEIGHTS v1.8 10-factor + HOME_ADVANTAGE) grep 대조 — sp_fip 0.15/sp_xfip 0.05/lineup_woba 0.15/bullpen_fip 0.10/recent_form 0.10/war 0.08/head_to_head 0.03/park_factor 0.04/elo 0.10/sfr 0.05 전부 CLAUDE.md 서술과 정확히 일치. 합계 0.85(≠1.0)는 `wave-420-factor-pick-weighted-edge.test.ts`/`v2Predictor.test.ts` 양쪽이 "정확히 0.85" 로 명시 검증 — 의도된 값, drift 아님. HOME_ADVANTAGE=0.015 도 CLAUDE.md 서술과 일치.
+
+**drift 0건, 코드 변경 없음** — retro-only. 검증: 1차 방어선(본 retro commit) + 2차 방어선(cycle 3603 retro `5ab67c0a` 존재 확인 OK).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 신규 누적 없음)/trigger2(5연속 fail 없음)/trigger3(3604%50≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3585-3604) 샘플=20, review-code 5회 발화 — 0회 아님, 미충족) 전부 미충족 — marker 박제 없음. ship-0 서브체크: 직전10(3595-3604) 중 success 1건(3601) 존재 — PARTIAL_STREAK≠10, emergency stop 미해당.
+
+다음 사이클 추천 = fix-incident/lotto/info-architecture-review gap 자연 대기 또는 review-code(heavy) 계속(packages/shared/src 도 소진 — 다음은 scripts/ 디렉토리 검토 권장, 단 review-code 4/8(last8) dominance 주의).
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): lib/api·lib/standings·lib/utils + cron workflow 5개 재확인, drift 0건 (cycle 3602, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3594-3601) distinct=6(lotto/info-arch/review-code×2/operational-analysis/fix-incident/skill-evolution) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 3/20·lotto 8/30·info-arch 7/30·op-analysis 4/25). explore-idea saturation 10/15 미충족. DESIGN.md mtime 2일(신선). lotto cron 양쪽 정상(picks 10-24 / results 10-17). `gh run list` 정상.
