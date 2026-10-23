@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap/nav 재확인, drift 0건 (cycle 3575, 2026-10-23)
+
+진단: review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3572~3581, 제외). 직전8(3567-3574) distinct=4(fix-incident/review-code/operational-analysis/lotto) — 2-chain lock 미충족. gap 비율: info-arch 10/30(33%, 최고)·fix-incident 1/20·lotto 2/30·op-analysis 3/25 — 전부 직전 발화라 info-arch 선택. explore-idea saturation 11/15 미충족, open issue 0건, approved+unexpired plan 0/22.
+
+`grep -L Breadcrumb apps/moneyball/src/app/**/page.tsx` 18건 — cycle 3544/3530 당시와 완전 동일 목록, 신규 라우트 0건. `find -mtime -7` 전체 111개 반환은 저장소 checkout mtime false positive(과거 패턴과 동일). sitemap.ts 89 url, MegaMenu/Footer 무변경. **drift 0건, 코드 변경 없음** — retro-only. 상세 = `docs/design/ia-2026-10-23-cycle-3575-recheck.md`.
+
+**ship-0 재확인**: 직전10(3566-3575, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 재충족. EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT=5(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop 발동 + 사용자 보고 완료 + 본 cycle 자체가 사용자의 명시적 `/develop-cycle 39` 재호출로 시작됨(= meta-pattern 제시 "zero-touch 재개" 선택 재확인) — cycle 3565/3567/3568/3569/3572/3573/3574 가 적용한 재정지 생략 선례 그대로 적용, 중복 emergency-stop dispatch 없음.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3575%50=25≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3556-3575, 현재 포함) 표본=20≥10 충족, review-code 11회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3568-3575) 재확인 필요, 당장 미충족.
+
+다음 사이클 추천 = fix-incident 또는 lotto 또는 operational-analysis(gap 재소진 대기), review-code cooldown(3581 만료까지) 유지.
+
+---
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): 정기 건강 확인, 실제 incident 0건 (cycle 3574, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/partial). 2차 방어선(cycle 3573 retro `9d75ff02`) OK. review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3572~3581, cycle 3571 발동) — review-code 제외. 직전8(3567-3574) distinct=4(fix-incident/review-code/operational-analysis/lotto) — 2-chain lock 미충족. gap 비율: fix-incident 7/20(35%, 최고)·info-arch 9/30(30%)·lotto 1/30(3%, 직전 발화)·op-analysis 2/25(8%, 직전 발화) — fix-incident 최고 gap 비율로 선택. explore-idea saturation 직전15(3559-3573) = 11/15 — 12 미충족, skip.
