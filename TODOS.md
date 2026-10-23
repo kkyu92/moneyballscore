@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — review-code(heavy): packages/kbo-data/src/pipeline/ 소규모 유틸 10개 전수 감사, drift 0건 (cycle 3584, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 2-chain lock 미충족(직전8(3576-3583) distinct=5: operational-analysis/lotto/fix-incident/review-code/info-architecture-review). gap 전부 낮음: fix-incident 4/20·op-analysis 3/25·lotto 1/30·info-arch 5/30, review-code EXHAUSTIVE_SWEEP cooldown 만료 — 명확한 lite trigger 부재. cycle 3568/3582 retro 가 명시한 잔여 scope(`packages/kbo-data/src/pipeline/`) 미감사 확인 — review-code(heavy) 선택.
+
+**감사 내용**: pipeline/ 34개 파일 중 소규모 유틸 10개(`db-constraints`/`db-error`/`notify-status-predicate`/`model-version`/`winner-id`/`schedule`/`final-reasoning`/`brier`/`daily-summary`/`accuracy-update`, 합계 494줄) 전수 read + 호출부 grep cross-check. `DB_CONSTRAINTS`(16키 전부 daily.ts/postview-daily.ts/live.ts/mlb-pipeline.ts/agents/retro.ts/api routes 호출부 일치, mlbPickPollEvents·mlbUserPicks 신규 라우트 포함) / `decideModelVersion`+`decidePostviewModelVersion`(daily.ts·postview-daily.ts 파라미터 일치, 테스트 8종 커버) / `computeWinnerTeamId`(daily.ts 2곳+live.ts+backfill-season.ts 4개 호출부 일치) / `shouldPredictGame`+`estimateNotificationTime`(daily.ts 호출 일치) / `buildFinalReasoning`(daily.ts 2곳 일치) / `brierMean`+`brierBootstrapCI`(scripts/op-analysis-brier-drift.ts 단일 사용처 일치) / `buildSummaryPredictions`(daily.ts SummaryRow shape 일치) / `buildAccuracyUpdates`(daily.ts 호출 일치) / `shouldNotifyPipelineStatus`(daily.ts 호출 일치, mlb_* 모드 false 반환 테스트 기대값과 일치). **drift 0건, 코드 변경 없음** — retro-only. 대형 파일(daily.ts 76KB·mlb-pipeline.ts 41KB·postview-daily.ts)은 다음 review-code heavy scope.
+
+**ship-0 재확인**: 직전10(3575-3584, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT(3575-3584 구간)=2(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop dispatch(a70a4595) 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석해온 선례(cycle 3565~3583) 그대로 적용 — 본 cycle 도 사용자가 `/develop-cycle 30` 명시적 재호출로 시작, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED) 불변 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3584%50=34≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3565-3584, 현재 포함) 표본≥10 충족, review-code 다회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3577-3584) distinct=5(lotto/fix-incident/review-code/info-architecture-review/operational-analysis), 미충족.
+
+다음 사이클 추천 = fix-incident(gap5/20)/lotto(gap2/30)/operational-analysis(gap4/25)/info-arch(gap6/30) gap 자연 대기 또는 review-code 계속(pipeline/ 대형 파일 또는 scripts/ 잔여).
+
+---
+
 ## 🟢 RETRO-ONLY — lotto(lite): cron 양쪽 정상 재확인, count_smoke valid_delta=0 (cycle 3583, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22(10~28 전수 재확인, 전부 completed/archived). 2-chain lock 미충족(직전8(3575-3582) distinct=5: info-architecture-review/operational-analysis/fix-incident/lotto/review-code). gap 비율: lotto 5/30(17%, 최고)·fix-incident 3/20(15%)·info-arch 4/30(13%)·op-analysis 2/25(8%) — lotto 선택. explore-idea saturation 직전15 10/15, 12 미충족 skip.
