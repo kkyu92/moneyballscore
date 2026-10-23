@@ -1,3 +1,21 @@
+## 🟢 RETRO-ONLY — review-code(heavy): packages/kbo-data/src/pipeline/ 0~1-mention 5개 파일 전수 감사, drift 0건 (cycle 3611, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/21(전부 non-approved status). 직전8(3604-3610) distinct=3(review-code6+lotto1+info-architecture-review1) — 2-chain lock 미충족(≤2 요건). gap 전부 미근접(fix-incident 12/20·op-analysis 13/25·info-arch 6/30·lotto 8/30). `gh run list` 재확인 — CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped, 최근 cycle-retro push 전부 success — 실제 incident 부재. lotto cron 산출물(`apps/moneyball/data/lotto-picks/2026-10-24.md`, `lotto-results/2026-10-17.md`) 양쪽 최신 — cron 정상. 직전 cycle(3610) 추천 "packages/kbo-data/src/pipeline/ 잔여" 채택.
+
+pipeline/ 31개 파일 CHANGELOG mention count 측정 → 0건(prediction-history.ts) + 1건(accuracy-update.ts/daily-summary.ts/db-error.ts/winner-id.ts) 5개 선정(총 230줄) 후 본 메인 직접 전수 read. **grep count ≠ audit depth 가드(phase47) 준수** — low-mention 을 후보 선정 기준으로만 쓰고 실제 drift 판정은 import/export 1:1 대조로 수행.
+
+교차검증: `computePredictionHistory` → daily.ts:1385 `reverseTeamMap(teamIdMap)` 실제 전달 확인(주석의 "cycle 2823 wiring fix" 주장과 일치, 주석이 "미전달 시 known gap" 과 실제 호출부 wiring 상태 모두 정확). 리턴 타입 `PredictionHistory` 필드(totalPredictions/correctPredictions/recentResults/homeTeamAccuracy/awayTeamAccuracy/teamAccuracy) → calibration-agent.ts interface 1:1 일치. `buildAccuracyUpdates` → daily.ts:1665-1674 호출부가 실제로 `Promise.all` + `.error` destructure + errors[] push 패턴(주석이 주장하는 N+1 sequential 회피 + silent skip 차단) 그대로 구현 확인. `buildSummaryPredictions` → daily.ts:1347 호출부 + `summary.length === 0` 가드(daily.ts:1283) 실제 존재 확인(주석의 "호출 site summary.length===0 가드 추가" 주장과 일치). `db-error.ts` re-export shim → `packages/shared/src/index.ts:70-71` 실제 `assertSelectOk`/`assertWriteOk`/`SelectResult`/`WriteResult` export 확인, shim 의도(daily.ts 기존 import path 보전) 유효. `computeWinnerTeamId` → daily.ts(2곳)/live.ts/backfill-season.ts 4개 호출부 전부 동점 처리(null 리턴) 의도대로 소비. **drift 0건, 코드 변경 없음** — retro-only.
+
+검증: 1차 방어선(본 retro commit) + 2차 방어선(cycle 3610 retro `1b370f12` 존재 확인 OK).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 신규 누적 없음)/trigger2(5연속 fail 없음)/trigger3(3611%50≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3592-3611) review-code 다회 발화 — 0회 아님, 미충족) 전부 미충족 — marker 박제 없음.
+
+**ship-0 서브체크 — EXHAUSTIVE_SWEEP 확정**: 직전10(3602-3611, 본 cycle 포함) 전부 outcome=retro-only, success 0건 → PARTIAL_STREAK=10 충족(원 hard-stop 대상). 서브 구분 평가: RC_HEAVY_COUNT(동 구간 review-code(heavy) 선택 횟수)=8(3602/3604/3606/3607/3608/3609/3610/3611) ≥8 충족 + CLEAN_DRIFT_COUNT(retro summary "drift 0건" 류 명시)=9(3602/3604/3605/3606/3607/3608/3609/3610/3611) ≥7 충족 → **EXHAUSTIVE_SWEEP=true**. 원 hard-stop(next_n=0 강제 + 사용자 결정 요청) 대신 서브 룰 적용: next_n 변경 없음(사용자 원 N=3 그대로 유지, 본 cycle 이 1번째 — next_n=2 진행), review-code(모든 variant) cooldown N=10(cycle 3612~3621) 발동 — 다음 10 사이클 chain 선택 후보에서 review-code 제외, fix-incident/lotto/op-analysis/info-arch/explore-idea/polish-ui 등 자연 redirect. `memory: meta-pattern` informational dispatch 예정("review-code exhaustive sweep streak 8회, cooldown 발동, 자동 redirect 중" 한줄, 사용자 결정 요청 아님). 사용자 진행 중단 보고 안 함(정상 진행 취급).
+
+다음 사이클(3612) 추천 = review-code cooldown(3621 만료까지) 적용 중 — fix-incident(gap12/20)/info-architecture-review(gap6/30)/lotto(gap8/30) 중 gap 비율 최고(fix-incident) 우선 검토 또는 explore-idea/polish-ui/operational-analysis 자연 진단.
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): components/ 잔여 12개 filter·sort 컴포넌트 전수 감사, drift 0건 (cycle 3609, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/21. 직전8(3601-3608) distinct=4(review-code5+skill-evolution1+lotto1+info-architecture-review1) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 10/20·op-analysis 11/25·info-arch 4/30·lotto 6/30). 직전 cycle(3608) 추천 "components/ 잔여 12개 0-mention 파일" 채택 — picks/analysis/matchup/leaderboard/predictions 소속 filter·sort 컴포넌트 12개(ThisWeekStatusFilter.tsx, YesterdayStatusFilter.tsx, MatchupGamesCloseFilter.tsx, LeaderboardSortControl.tsx, LeaderboardJoinModal.tsx, PicksSortControl.tsx, PicksStatusFilter.tsx, FactorAgreementCard.tsx, PredictionsSortControl.tsx, PredictionsStatusFilter.tsx, PredictionsTierFilter.tsx, PredictionsMonthFilter.tsx) 선정 후 본 메인 직접 전수 read.
