@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — review-code(heavy): lib/api·lib/standings·lib/utils + cron workflow 5개 재확인, drift 0건 (cycle 3602, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3594-3601) distinct=6(lotto/info-arch/review-code×2/operational-analysis/fix-incident/skill-evolution) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 3/20·lotto 8/30·info-arch 7/30·op-analysis 4/25). explore-idea saturation 10/15 미충족. DESIGN.md mtime 2일(신선). lotto cron 양쪽 정상(picks 10-24 / results 10-17). `gh run list` 정상.
+
+CHANGELOG 전수 grep 재검증 결과 0-mention 비-test 소스 파일 = `lib/api/leaderboard-sync-validation.ts` 단 1개로 확인 — 해당 파일 + 인접 trivial 파일(`lib/standings/buildStandings.ts`, `lib/utils.ts`) 전수 read. `leaderboard-sync-validation.ts`(닉네임/device_id 검증, cycle 3216 추출)는 `NICKNAME_MIN/MAX_CHARS` shared 상수와 일치, `sync`/`mlb-sync` 양쪽 호출부 정상 사용 확인 — 주석도 정확. `buildStandings.ts`/`utils.ts` 는 단순 passthrough/표준 헬퍼, drift 없음.
+
+추가로 과거 cycle 3090/3091 이 수정한 5개 cron workflow(`data-refresh-weekly`/`factor-backtest-weekly`/`op-analysis-weekly`/`lotto-pick-update`/`lotto-result-update`)의 `--label` + `gh pr create` 패턴 재확인 — 전부 `set -e` fail-fast 유지, silent swallow(`2>/dev/null || echo ""`) 재발 0건.
+
+검증: 코드 변경 없음(retro-only), `tsc`/`lint` 실행 불필요. 1차 방어선(본 retro commit 자체) + 2차 방어선(cycle 3601 retro `e2ba20b3` 존재 확인 OK).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 10건 누적이나 기존 소비분, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3602%50≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3583-3602) 샘플=20, review-code 5회 발화 — 0회 아님, 미충족) 전부 미충족 — marker 박제 없음. ship-0 서브체크: 직전10(3593-3602) 중 success 1건(3601) 존재 — PARTIAL_STREAK≠10, emergency stop 미해당.
+
+다음 사이클 추천 = fix-incident/lotto/info-architecture-review gap 자연 대기 또는 review-code(heavy) 계속(단 lib/ 미탐색 scope 거의 소진 — 다음은 scripts/ 또는 packages/shared/ 축 검토 권장).
+
+---
+
 ## ✅ SUCCESS — skill-evolution 93회(phase 59): grep 신뢰성 drift 2건 발견 + 3차 방어선 추가 (cycle 3601, 2026-10-23)
 
 진단: carry-over PR #3191(cycle 3600 kbo-data pipeline dead branch 제거) open+checks pending 발견 — CI green 확인 후 먼저 merge. 이후 `skill-evolution-pending` marker(cycle 3600 trigger3, cycle_n%50==0) 확인 — 본 cycle skill-evolution 강제 발화.
