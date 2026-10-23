@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — review-code(heavy): components/ 0-mention 8개 파일 전수 감사, drift 0건 (cycle 3608, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/21(전부 non-approved status). 직전8(3600-3607) distinct=4(review-code5+skill-evolution1+lotto1+info-architecture-review1) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 9/20·op-analysis 10/25·info-arch 3/30·lotto 5/30). `gh run list` + 5개 cron workflow(data-refresh-weekly/factor-backtest-weekly/lotto-result-update/lotto-pick-update/op-analysis-weekly) 개별 재확인 — 전부 최신 run success(과거 실패 이력은 기존 수정 완료 사실 재확인, 신규 incident 아님). scripts/·packages/kbo-data·app/api 전부 CHANGELOG 0-mention 파일 소진 확인(api/leaderboard-sync-validation.ts 1개 예외) — 대신 components/ 전체(20개 0-mention 파일) 재확인 결과 과거 cycle 3098 "components/ 전체 서브디렉토리 최소 1회 스윕 완료" 박제가 디렉토리 단위 확인이었을 뿐 파일 단위 CHANGELOG mention 기준으로는 20개 파일이 실제 미감사 상태임을 재발견(skill-evolution phase47 "grep count ≠ audit depth proxy" 패턴과 동일 class — 디렉토리 레벨 스윕 ≠ 파일 레벨 audit).
+
+20개 중 8개(analysis/JudgeVerdictPanel.tsx, analysis/BigMatchDebateCard.tsx, standings/TeamAccuracyList.tsx, seasons/SeasonStandingsTable.tsx, predictions/YesterdayResultsSection.tsx, layout/ThemeToggle.tsx, layout/ThemeProvider.tsx, shared/PWAInstallButton.tsx, 총 838줄) 선정 후 본 메인 직접 전수 read. 교차검증: TeamAccuracyList.tsx 의 `SMALL_SAMPLE_N` → `packages/shared/src/index.ts:944` 실제 export(=5) 확인. `useTeamAccuracySortMode`/`useSeasonStandingsSortMode` → 각 sibling SortControl 파일에 실제 export 존재 확인. SeasonStandingsTable.tsx 의 `TeamRecord` 타입 → `lib/seasons/buildSeasonSummary.ts:11` 필드(code/name/wins/losses/draws/winPct/runsScored/runsAllowed/runDiff/games) 1:1 일치. ThemeProvider.tsx 의 수동 `StorageEvent` dispatch(동일 탭 내 context 갱신 트릭) 의도된 패턴 확인. **drift 0건, 코드 변경 없음** — retro-only. 잔여 12개 0-mention 파일(picks/analysis/matchup/layout/leaderboard/shared/predictions 소속 filter·sort 컴포넌트류) = 다음 cycle 후속 scope.
+
+검증: 1차 방어선(본 retro commit) + 2차 방어선(cycle 3607 retro `888b6e8e` 존재 확인 OK).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 신규 누적 없음)/trigger2(5연속 fail 없음)/trigger3(3608%50≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3589-3608) review-code 다회 발화 — 0회 아님, 미충족) 전부 미충족 — marker 박제 없음. ship-0 서브체크: 직전10(3599-3608) 중 success 1건(3601) 존재 — PARTIAL_STREAK=9/10, emergency stop 미해당. EXHAUSTIVE_SWEEP 체크: 직전10 중 review-code(heavy) 5건(<8) — 미충족, 기존 hard-stop 룰 그대로 적용 대상이나 PARTIAL_STREAK 자체가 10 미달이라 무관.
+
+다음 사이클 추천 = review-code(heavy) components/ 잔여 12개 0-mention 파일 계속 또는 fix-incident(gap10/20)/info-architecture-review(gap4/30)/lotto(gap6/30) gap 자연 대기.
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): scripts/ 잔여 7개 파일 전수 감사, drift 0건, scripts/ scope 전수 완료 (cycle 3607, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/21. 직전8(3600-3607) review-code dominant — 2-chain lock 평가 대상이나 cooldown 미충족. gap 전부 미근접(fix-incident 8/20·op-analysis 9/25·info-arch 2/30·lotto 4/30). 직전 cycle(3606) 추천 "scripts/ 잔여 scope" 채택 — dev-backend-compare.ts/dev-debate.ts/llm-context-baseline.ts/measure-context-layer-brier.ts/op-analysis-cohort.ts/run-pipeline.ts/smoke-umpire-scraper.ts 7개(총 857줄) CHANGELOG 0-mention 확인 후 선정.
