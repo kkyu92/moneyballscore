@@ -19285,3 +19285,15 @@ cycle 3537 추천대로 app/api 잔여 scope(health/hub-dispatch 는 cycle 3264/
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3599%50=49≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3580-3599, 현재 포함) 표본=20(≥10 충족), review-code 4회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3592-3599) distinct=5, 미충족.
 
 다음 사이클 추천 = lotto(gap5/30) 또는 info-architecture-review(gap4/30) gap 자연 대기 또는 review-code(heavy) 신규 scope(packages/kbo-data/src/pipeline/, scripts/) 계속.
+
+## 🟢 RETRO-ONLY — lotto(lite): 1247회(10/24) 추첨 직전 cron 재확인, count smoke 정상 (cycle 3603, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/21. 직전8(3595-3602) distinct=5(info-arch/review-code×3/operational-analysis/fix-incident/skill-evolution) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 4/20·lotto 9/30·info-arch 8/30·op-analysis 5/25). explore-idea saturation 11/15 미충족. DESIGN.md mtime ~2일(신선).
+
+내일(10/24 토) 1247회 추첨 직전 적기로 lotto(lite) 선택 — `apps/moneyball/data/lotto-picks/2026-10-24.md` 존재 확인(cron 2026-10-20 04:52 UTC 생성, 1000세트 정상 포맷) + `apps/moneyball/data/lotto-results/2026-10-17.md` 존재 확인(직전 회차 정상, 10/24 추첨 전이라 결과 아직 없음 = 정상). `pnpm tsx scripts/lotto.ts count` 재실행 — 256 rules 적용 유효조합 7,706,313/8,145,060(5.39% 제거), valid_delta=0, 신규 rule 없음.
+
+검증: 코드 변경 없음(retro-only). 1차 방어선(본 retro commit 자체) + 2차 방어선(cycle 3602 retro `3264cf23` 존재 확인 OK).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 10건, 기존 소비분 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3603%50≠0)/trigger4(meta-pattern 없음)/trigger5(직전20 샘플=19≥10, review-code 5회 발화 — 0회 아님, 미충족) 전부 미충족 — marker 박제 없음. ship-0 서브체크: 직전10(3594-3603) 중 success 1건(3601) 존재 — PARTIAL_STREAK≠10, emergency stop 미해당.
+
+다음 사이클 추천 = fix-incident 또는 info-architecture-review 자연 대기 또는 review-code(heavy) 신규 scope(scripts/ 또는 packages/shared/) 자율 선택.
