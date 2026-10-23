@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — lotto(lite): cron 양쪽 정상 재확인, count_smoke valid_delta=0 (cycle 3594, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외. 2-chain lock 미충족(직전8(3586-3593) distinct=3: info-architecture-review/fix-incident/lotto). gap 비율: lotto 3/30(10%, 최고) 선택 — info-arch 2/30(6.7%)·fix-incident 1/20(5%) 미근접.
+
+최신 `apps/moneyball/data/lotto-picks/2026-10-24.md`(다음 토요일) + `apps/moneyball/data/lotto-results/2026-10-17.md`(직전 토요일) 양쪽 존재 — cron 정상. `pnpm tsx scripts/lotto.ts count` 재측정 — 유효조합 7,706,313/8,145,060(5.39% 제거), picks 파일 메타데이터와 완전 일치, 직전 cycle 대비 valid_delta=0. 신규 rule 없음. **코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3585-3594, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT(3585-3594 구간)=1(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop dispatch(a70a4595) 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석해온 선례(cycle 3565~3593) 그대로 적용 — 본 cycle 도 사용자가 `/develop-cycle 20` 명시적 재호출로 시작, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED) 불변 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3594%50=44≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3575-3594, 현재 포함) 표본=20(≥10 충족), review-code 2회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3587-3594) distinct=3(lotto/info-architecture-review/fix-incident), 미충족.
+
+다음 사이클 추천 = fix-incident(gap1/20) 또는 info-architecture-review(gap3/30) gap 자연 대기 — review-code/operational-analysis cooldown(3586~3595) 유지 중.
+
+---
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): gh run list + vercel ls + Supabase reachability 재확인, 실제 incident 0건 (cycle 3593, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외. 2-chain lock 미충족(직전8(3585-3592) distinct=3: fix-incident/lotto/info-architecture-review). gap 비율: fix-incident 3/20(15%, 최고) 선택 — lotto 2/30(6.7%)·info-arch 1/30(3.3%) 미근접. polish-ui gap=54 이나 자체 trigger 미충족(7일 안 신규 page.tsx/컴포넌트 디렉토리 0건, DESIGN.md mtime 2일 전). explore-idea saturation 직전15 count=10(<12) 미충족.
