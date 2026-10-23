@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap/megamenu 재확인, drift 0건 (cycle 3595, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외 — 본 cycle 이 쿨다운 마지막 cycle. 2-chain lock 미충족(직전8(3587-3594) distinct=3: lotto/fix-incident/info-architecture-review). gap 비율: fix-incident 2/20(10%)와 info-architecture-review 3/30(10%) 동률 — info-arch 가 덜 최근 발화(gap3 vs gap2)라 선택.
+
+breadcrumb grep 미보유 페이지 18건(`debug/*` 내부 도구 9건, 홈/login/settings 독립 라우트, reviews weekly/monthly index 페이지) — 전부 기대된 제외 대상, 신규 drift 아님. `sitemap.ts` 존재 확인, `MegaMenu.tsx`/`NavLinks.tsx` 컴포넌트 존재 확인 — IA 구조 정상. **코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3586-3595, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT(3586-3595 구간)=0(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop dispatch(a70a4595) 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석해온 선례(cycle 3565~3594) 그대로 적용 — 본 cycle 도 사용자가 `/develop-cycle 19` 명시적 재호출로 시작, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED) 불변 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3595%50=45≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3576-3595, 현재 포함) 표본=20(≥10 충족), review-code 2회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3588-3595) distinct=3(fix-incident/lotto/info-architecture-review), 미충족.
+
+다음 사이클 추천 = review-code/operational-analysis 쿨다운(3586~3595) 만료 — 다음 cycle(3596)부터 자연 복귀 가능. fix-incident(gap3/20)도 근접.
+
+---
+
 ## 🟢 RETRO-ONLY — lotto(lite): cron 양쪽 정상 재확인, count_smoke valid_delta=0 (cycle 3594, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외. 2-chain lock 미충족(직전8(3586-3593) distinct=3: info-architecture-review/fix-incident/lotto). gap 비율: lotto 3/30(10%, 최고) 선택 — info-arch 2/30(6.7%)·fix-incident 1/20(5%) 미근접.
