@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap/megamenu/footer 재확인, drift 0건 (cycle 3592, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외. 2-chain lock 미충족(직전8(3584-3591) distinct=4: review-code/fix-incident/lotto/info-architecture-review). gap 비율: fix-incident 2/20(10%)=info-arch 3/30(10%) tie — 직전8 안 빈도 낮은 쪽(info-arch 2회 vs fix-incident 3회) 선택.
+
+`grep -L Breadcrumb` → 18건, cycle 3586/3589 와 완전 동일 목록. `src/app/sitemap.ts` 507줄 = 동일. `src/components/layout/{MegaMenu,Footer}.tsx` 최근 커밋 2026-10-16(cycle 3584 review-code 전수감사) 이후 변경 없음. `find -mtime -7` → 75개 = git checkout mtime false positive(기존 패턴), 실제 신규 라우트 0건. **drift 0건, 코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3582-3591) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT(3582-3591 구간)=2(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop dispatch(a70a4595) 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석해온 선례(cycle 3565~3591) 그대로 적용 — 본 cycle 도 사용자가 `/develop-cycle 22` 명시적 재호출로 시작, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED) 불변 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3592%50=42≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3573-3592, 현재 포함) 표본=20(≥10 충족), review-code 2회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3585-3592) distinct=3(fix-incident/info-architecture-review/lotto), 미충족.
+
+다음 사이클 추천 = fix-incident(gap1/20) 또는 lotto(gap2/30) gap 자연 대기 — review-code/operational-analysis cooldown(3586~3595) 유지 중.
+
+---
+
 ## 🟢 RETRO-ONLY — lotto(lite): cron 양쪽 정상 재확인, count_smoke valid_delta=0 (cycle 3591, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외. 2-chain lock 미충족(직전8(3583-3590) distinct=4: lotto/review-code/fix-incident/info-architecture-review). gap 비율: lotto 4/30(13.3%, 최고, last fire 3587) 선택 — fix-incident 1/20(5%)·info-arch 2/30(6.7%) 미근접.
