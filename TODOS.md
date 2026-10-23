@@ -1,3 +1,21 @@
+## 🔴 EMERGENCY-STOP — operational-analysis(lite): 51회 연속 동일 수치 재확인, 10-cycle ship-0 streak 재발동 (cycle 3613, 2026-10-24)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3605-3612) distinct=3: review-code6+info-arch1+fix-incident1). review-code EXHAUSTIVE_SWEEP cooldown(3612~3621) 유지 중 제외. gap 비율: op-analysis 15/25(60%, 최고)·lotto 10/30(33%)·info-arch 8/30(27%)·fix-incident 1/20(직전 발화) — op-analysis 선택. **사용자 `/develop-cycle 50` 명시적 재호출로 cycle 3612 genuine emergency-stop 직후 zero-touch 재개 (cycle 3564 전례 적용).**
+
+`scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행 — 전체 n=448(CE 401/비CE 47), CE 55.9%/비CE 63.8%, 격차 8.0pp, overlap 월 통제 격차 10.8pp 전부 cycle 3598 수치와 완전 동일. **51회 연속 불변** — KBO 시즌 종료(2026-10-04) + CREDIT_EXHAUSTED 지속, 신규 verified 예측 0건. 코드 변경 없음, retro-only.
+
+**ship-0 서브체크**: 직전10(3604-3613, 본 cycle 포함) 전부 outcome=retro-only → PARTIAL_STREAK=10 재충족. RC_HEAVY_COUNT(동 구간 review-code(heavy))=7(3604/3606/3607/3608/3609/3610/3611) — **≥8 임계 미달** (cycle 3612 평가와 동일 결과, window 가 거의 동일 구간이라 재충족 자연스러움). → **EXHAUSTIVE_SWEEP=false, 진짜 EMERGENCY-STOP 재발동**.
+
+**동작**: signal next_n=0 강제 박제(사용자 호출 N=50 override). `memory: meta-pattern emergency-stop` dispatch — 직전10 cycle(3604-3613) chain/outcome list + 사용자 결정 요청.
+
+skill-evolution trigger 평가: trigger1(chain-evolution 신규 누적 없음)/trigger2(5연속 fail 없음)/trigger3(3613%50≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(직전20 review-code 다회 발화 11건, 0회 아님) 전부 미충족 — marker 박제 없음.
+
+검증: 1차 방어선(본 retro commit, 접미사 EMERGENCY-STOP 표준 준수) + 2차 방어선(cycle 3612 retro `0ed3d64f` 존재 확인 OK).
+
+**사용자 결정 필요**: /develop-cycle 재호출 직후 1번째 cycle 에서 바로 동일 hard-stop 재충족 — 10-window 평가 구간이 cycle 3612 때와 90% 겹쳐 구조적으로 재발. review-code EXHAUSTIVE_SWEEP cooldown(3621 만료까지)이 해제되거나, 다른 chain(lotto/info-arch/fix-incident) 이 실제 ship 가능한 발견을 내기 전까지 동일 패턴 반복 가능성 높음. 재개 원하시면 "계속" 또는 "/develop-cycle N" 재호출 요청.
+
+---
+
 ## 🔴 EMERGENCY-STOP — fix-incident(lite): 실제 incident 부재 확인, 10-cycle ship-0 streak 진짜 hard-stop 발동 (cycle 3612, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/21. 2-chain lock 충족(직전8(3604-3611) distinct=2: review-code7+info-architecture-review1) — 양쪽 제외. review-code 는 cycle 3611 EXHAUSTIVE_SWEEP 확정으로 추가 cooldown(3612~3621) 중. 잔여 후보 gap 비율: fix-incident 13/20(65%, 최고)·op-analysis 14/25(56%)·lotto 9/30(30%, cron 산출물 양쪽 최신이라 수동 개입 불필요) — fix-incident 선택.
