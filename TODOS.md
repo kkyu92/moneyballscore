@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap/megamenu/footer 재확인, drift 0건 (cycle 3586, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 는 lite-chain cooldown(cycle 3585 룰, 3586~3595) 제외. 2-chain lock 미충족(직전8(3578-3585) distinct=5: review-code2/lotto2/fix-incident2/operational-analysis1/info-architecture-review1). gap 비율: info-arch 7/30(23%, 최고, last fire 3579) — 선택.
+
+`grep -L Breadcrumb apps/moneyball/src/app/**/page.tsx` → 18건, cycle 3575 checkpoint 와 완전 동일 목록(root/settings/community/login 4건 + debug/* 8건 + reviews monthly/weekly redirect shim 6건). `find -mtime -7` → 111개 전부 반환 = git checkout mtime false positive(기존 패턴), 실제 신규 라우트 0건. sitemap.ts 507줄/url 89개 = cycle 3575 와 동일. MegaMenu.tsx/Footer.tsx git log 재확인 — 최근 수정 전부 cycle 3530 이전 커밋, 이후 변경 없음. **drift 0건, 코드 변경 없음** — retro-only. spec: `docs/design/ia-2026-10-23-cycle-3586-recheck.md`.
+
+**ship-0 재확인**: 직전10(3577-3586, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT(3577-3586 구간)=2(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop dispatch(a70a4595) 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석해온 선례(cycle 3565~3585) 그대로 적용 — 본 cycle 도 사용자가 `/develop-cycle 28` 명시적 재호출로 시작, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED) 불변 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3586%50=36≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3567-3586, 현재 포함) 표본=20(≥10 충족), review-code 6회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3579-3586) distinct=5(info-architecture-review/fix-incident/operational-analysis/review-code/lotto), 미충족.
+
+다음 사이클 추천 = fix-incident(gap2/20) 또는 lotto(gap4/30) gap 자연 대기 — review-code/operational-analysis cooldown(3586~3595) 유지 중.
+
+---
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): gh run list + vercel ls 재확인, 실제 incident 0건 (cycle 3585, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3577-3584) distinct=5). review-code/operational-analysis 는 직전5회 전부 outcome=retro-only → lite-chain cooldown(cycle 124 룰) 발동, 다음 10 cycle(3586~3595) 후보 제외. 남은 후보 중 fix-incident gap=4/20(20%, 최고 비율) 선택.
