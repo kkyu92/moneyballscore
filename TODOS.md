@@ -19389,3 +19389,17 @@ cycle 3537 추천대로 app/api 잔여 scope(health/hub-dispatch 는 cycle 3264/
 skill-evolution trigger 평가: trigger1(chain-evolution 10건, 기존 소비분 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3603%50≠0)/trigger4(meta-pattern 없음)/trigger5(직전20 샘플=19≥10, review-code 5회 발화 — 0회 아님, 미충족) 전부 미충족 — marker 박제 없음. ship-0 서브체크: 직전10(3594-3603) 중 success 1건(3601) 존재 — PARTIAL_STREAK≠10, emergency stop 미해당.
 
 다음 사이클 추천 = fix-incident 또는 info-architecture-review 자연 대기 또는 review-code(heavy) 신규 scope(scripts/ 또는 packages/shared/) 자율 선택.
+
+## 🟢 RETRO-ONLY — review-code(heavy): components/dashboard/ 15개 차트 컴포넌트 전수 감사, drift 0건 (cycle 3610, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3603-3610) distinct=3(lotto/info-architecture-review/review-code) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 11/20·lotto 7/30·info-arch 5/30·operational-analysis 12/25). 직전 cycle 3609 recommendation = review-code(heavy) 계속.
+
+scripts/, packages/shared/src, lib/api·standings·utils, components/(0-mention 8개+filter·sort 12개) 전수 완료 이력 확인 후, 미감사 신규 scope로 `apps/moneyball/src/components/dashboard/` 15개 차트 컴포넌트(AccuracyChart/AccuracySummary/BrierTrendChart/ChartTooltip/CohortComparisonHeatmap/ConfidenceBucketChart/DailyAccuracyChart/EloTrendChart/FactorErrorTable/ModelTuningInsights/RollingAccuracyChart/ScoringRuleDayHeatmap/TeamPerformanceChart/WeeklyTrendMini/WinnerProbBucketChart) + chart-format.ts 전수 read.
+
+교차검증 항목: ACCURACY_STRONG_RATE(0.7)/ACCURACY_GOOD_PCT(60)/ACCURACY_BASELINE(0.5) 색상 임계 주석 vs 실제 상수 일치, CURRENT_SCORING_RULE='v1.8' computed key 정합(하드코딩 없음), FactorErrorTable의 `avg_bias>0 → isHomeFavor` 부호 규약이 postview.ts predictedBias 정의("홈 유리 편향 = +")와 일치, NEUTRAL_LO/HI(0.45/0.55) ModelTuningInsights↔factor-accuracy.ts 공유 정합. **drift 0건, 코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3600-3609) 중 success 1건(3601 skill-evolution) 존재 — PARTIAL_STREAK≠10, emergency stop 미해당.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3610%50=10≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3591-3610, 현재 포함) 표본=19(≥10 충족), review-code 9회 발화(0회 아님)로 미충족. marker 미박제. 1차 방어선 — 본 commit 자체. 2차 방어선 — cycle 3609 retro `56f1b87c` 존재 확인 OK.
+
+다음 사이클 추천 = review-code(heavy) 신규 scope(packages/kbo-data/src/pipeline/ 잔여) 또는 fix-incident(gap12/20)/lotto(gap8/30)/info-arch(gap6/30) gap 자연 대기. components/ 전체 scope 거의 소진 — 다음은 packages/kbo-data 전환 권장.
