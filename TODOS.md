@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — review-code(heavy): hub-dispatch/leaderboard/revalidate 4개 route 전수 감사, drift 0건 (cycle 3597, 2026-10-23)
+
+진단: open issue 0건, git status clean, cycle 3596 retro commit 결손 0 확인. 직전8(3589-3596) distinct=4(info-arch/fix-incident/lotto/review-code) — 2-chain lock 미충족. cycle 3596 이 추천한 잔여 scope(hub-dispatch/leaderboard 서브폴더/revalidate) 그대로 이어감.
+
+`hub-dispatch/route.ts`(Sentry HMAC 검증 + PII 재스크럽 + GitHub repository_dispatch relay, no-relay tag 정상) / `leaderboard/sync/route.ts`(KBO, game_id INT FK) / `leaderboard/mlb-sync/route.ts`(MLB, external_game_id VARCHAR(20) FK — 분리 의도적) / `revalidate/route.ts`(CRON_SECRET trim 패턴 cycle 3217 클래스 적용 확인) — 4개 파일 전수 read. 공용 검증 lib(`leaderboard-sync-validation.ts` nickname/device_id, `is-origin-allowed.ts` CSRF origin) 교차 확인 정상. `DB_CONSTRAINTS.userPicks`/`mlbUserPicks` ↔ migrations 024/050 UNIQUE 제약 정확히 일치. `EXTERNAL_GAME_ID_MAX_LENGTH=20` ↔ VARCHAR(20) 일치. **drift 0건, 코드 변경 없음** — retro-only. 이로써 `app/api` 전체 20개 route 전부 최근 사이클 내 감사 완료.
+
+**ship-0 재확인**: 직전10(3588-3597, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 재충족. EXHAUSTIVE_SWEEP 서브체크 RC_HEAVY_COUNT(3588-3597 구간)=2(<8) 미충족 → literal 룰 적용 시 genuine hard-stop 대상. 단 cycle 3564 emergency-stop dispatch(a70a4595) 이후 확립된 선례(사용자 명시적 `/develop-cycle N` 재호출 = 재개 결정) 그대로 적용 — 본 cycle 도 사용자가 `/develop-cycle 17` 명시적 재호출로 시작, 구조적 원인(KBO 시즌종료 2026-10-04 + CREDIT_EXHAUSTED) 불변 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3597%50=47≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3578-3597, 현재 포함) 표본=20(≥10 충족), review-code 3회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3590-3597) distinct=4(fix-incident/lotto/info-architecture-review/review-code), 미충족.
+
+다음 사이클 추천 = app/api 전수감사 완료로 review-code(heavy) 신규 scope 당분간 부재 — fix-incident(gap)/lotto(gap)/info-architecture-review(gap) lite-chain rotation 자연 대기 또는 operational-analysis gap 재확인.
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): app/api 잔여 12개 route 전수 감사, drift 0건 (cycle 3596, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22. review-code/operational-analysis 쿨다운(cycle 3585 룰, 3586~3595) 본 cycle 부터 만료 — 첫 복귀. 2-chain lock 미충족(직전8(3588-3595) distinct=3: fix-incident/lotto/info-architecture-review). 직전 10 cycle 이 fix-incident/lotto/info-arch 3-chain lite loop 로만 순환 — 다양성 redirect + cycle 3099 가 추천한 미완료 scope(`app/api/{health,mlb,picks,pipeline,seo,version,sync-batter-stats}`) 실존 확인 후 review-code(heavy) 선택.
