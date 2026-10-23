@@ -1,3 +1,21 @@
+## ✅ SUCCESS — skill-evolution 93회(phase 59): grep 신뢰성 drift 2건 발견 + 3차 방어선 추가 (cycle 3601, 2026-10-23)
+
+진단: carry-over PR #3191(cycle 3600 kbo-data pipeline dead branch 제거) open+checks pending 발견 — CI green 확인 후 먼저 merge. 이후 `skill-evolution-pending` marker(cycle 3600 trigger3, cycle_n%50==0) 확인 — 본 cycle skill-evolution 강제 발화.
+
+직전50(3551-3600) cycle-retro commit 전수 대조: chain 분포 review-code(heavy) 41%(21/50, cycle 3566 중복 dispatch 정정 후) + fix-incident 20%(10/50) + lotto 14%(7/50) + info-architecture-review 14%(7/50) + operational-analysis 10%(5/50) + skill-evolution 2%(1/50) — phase58(46%) 대비 review-code dominance 추가 하락. outcome 분포 **success 6%(3/50, phase58 28% 대비 급락)** + retro-only 92%(46/50) + emergency-stop 4%(2건).
+
+**grep 신뢰성 drift 2건 발견 (본 cycle 핵심 성과)**: (1) cycle 3566 retro commit 2개 중복 생성(`04c62fa5`+`739323f0`, 둘 다 같은 번호) — chain 분포 집계 +1 과대. (2) cycle 3567 subject 가 `...ship-0 emergency-stop 발동` 으로 끝나 표준 대문자 접미사(`EMERGENCY-STOP`) 누락 — outcome 집계 3종 어디에도 안 걸려 완전 silent 누락. 실제로는 ship-0 hard-stop 이 3564+3567 **2회** 발생했는데 단순 grep 집계는 1회로만 잡힘. 두 drift 가 우연히 총합(50)을 맞춰 눈에 안 띄었던 case.
+
+**대응**: `~/.claude/skills/develop-cycle/SKILL.md` 에 "커밋 subject 접미사 표준화" 3차 방어선 추가 — subject 가 `SUCCESS`/`PARTIAL`/`RETRO-ONLY`/`EMERGENCY-STOP`/`FAIL` 중 하나로 끝나야 함 의무화 + 같은 cycle_n 재커밋 전 기존 존재 확인 의무화. MIGRATION-PATH.md 에 phase58 archive + phase59 entry 박제. PASS_ship 단일 grep 재실측 **3129**(`git log --oneline --grep "subtype: cycle-retro" -F | grep -c SUCCESS`) — cycle 3600 retro 가 인용한 3153 은 측정 방식 불일치로 폐기, 3129 신규 baseline 채택.
+
+검증: `pnpm test` 606 files / 4794 tests PASS. PR #3192 CI green 확인 후 squash merge(`f4f85cbb`). `memory: meta-pattern grep-reliability-drift-cycle3566-3567`(informational only, `6acb3e1d`) dispatch.
+
+**2차 방어선**: cycle 3600 retro commit(`5071ac07`) 존재 확인 OK. 결손 0건.
+
+다음 사이클 추천 = success rate 6% 급락 추세 전환을 위해 fix-incident/lotto/info-architecture-review gap 자연 대기 권장(review-code dominance 41%도 여전히 높음). 다음 milestone = cycle 3650(success 반등 여부 + ship-0 hard-stop 2연발 재발 여부 + 3차 방어선 신규 drift 0건 확인).
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): kbo-data pipeline/ 11개 파일 전수 감사, drift 0건 + milestone marker (cycle 3600, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). 직전8(3592-3599) distinct=5(info-arch/review-code/operational-analysis/fix-incident/lotto) — 2-chain lock 미충족. gap 전부 미도달(fix-incident 0/20·review-code 2·operational-analysis 1/25·info-arch 4/30·lotto 5/30) — 직전 다회 cycle(3598/3599) 이 명시 추천한 `packages/kbo-data/src/pipeline/` 잔여 scope 착수. stale `active-cycle`(dead pid, 직전 세션이 cycle 3600 미완주 중단) 발견 — `cycles/3600.json` 부재 확인 후 신규 실행(retroactive 불필요).
