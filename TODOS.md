@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — info-architecture-review(lite): 신규 MLB 라우트 7일내 ≥3 재확인, drift 0건 (cycle 3605, 2026-10-23)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3598-3605) distinct=6(operational-analysis/fix-incident/review-code×3/skill-evolution/lotto/info-architecture-review) — 2-chain lock 미충족. gap: info-arch 10/30(33%, 최고)·fix-incident 6/20(30%)·op-analysis 7/25(28%)·lotto 2/30(7%) — review-code 직전10 중 5회 dominance 겹쳐 info-architecture-review(lite) 선택.
+
+`find src/app -name page.tsx -mtime -7` → mlb/postseason·wild-card·calendar·community·settings 등 다수(실제 add date git log 로 재확인, mtime false positive 아님 — postseason 2026-10-21/community 2026-10-22). **trigger(1) 충족 확인**: 신규 라우트 7일 내 3개 이상.
+
+실제 배선 상태 재확인: `sitemap.ts` 에 `/mlb/wild-card`·`/mlb/postseason`·`/mlb/calendar`(+en 미러) 이미 포함 / `Header.tsx` MLB_NAV 에도 동일 3개 href 이미 등록(label "Wild Card"/"Postseason"/"월별 캘린더") — IA 배선 이미 완료 상태(신규 route 추가와 IA 갱신이 동시 커밋됐던 것으로 추정). breadcrumb 누락 라우트(`grep -L Breadcrumb`) 재검토 — community/login/settings 는 "준비 중" placeholder(noindex, 콘텐츠 없음)라 breadcrumb 불필요, reviews/monthly·weekly index 는 redirect-only 페이지(sitemap.ts 주석 확인) 라 역시 불필요. 홈페이지(`page.tsx`)는 루트라 breadcrumb 대상 아님. **실제 actionable 누락 0건**.
+
+**drift 0건, 코드 변경 없음** — retro-only. IA 현재 상태 충분 결론 재확인 (CLAUDE.md 서술 "23+ 연속 IA 충분 재확정 패턴"과 정합). 검증: 1차 방어선(본 retro commit) + 2차 방어선(cycle 3604 retro `4c92a81c` 존재 확인 OK).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 신규 누적 없음)/trigger2(5연속 fail 없음)/trigger3(3605%50≠0)/trigger4(meta-pattern 없음)/trigger5(직전20(3586-3605) 샘플=20, review-code 6회 발화 — 0회 아님, 미충족) 전부 미충족 — marker 박제 없음. ship-0 서브체크: 직전10(3596-3605) 중 success 1건(3601) 존재 — PARTIAL_STREAK≠10, emergency stop 미해당.
+
+다음 사이클 추천 = fix-incident(gap7/20)/lotto(gap3/30, 1247회 10/24 추첨 당일) gap 자연 대기 또는 review-code(heavy) 신규 scope(scripts/) 계속.
+
+---
+
 ## 🟢 RETRO-ONLY — review-code(heavy): packages/shared/src 전수 감사, drift 0건 (cycle 3604, 2026-10-23)
 
 진단: open issue 0건, approved+unexpired plan 0/22 (기존 반복 확인). 직전8(3596-3603) distinct=5(review-code×3/operational-analysis/fix-incident/skill-evolution/lotto) — 2-chain lock 미충족. gap 전부 미근접(fix-incident 5/20·lotto 1/30·info-arch 9/30·op-analysis 6/25). `gh run list` 정상(CI Failure Dispatch 전부 skipped, 실제 incident 0건), `vercel ls` 정상(Production Ready). 직전 3 cycle(3602/3603 retro) 이 공통 추천한 "review-code(heavy) 신규 scope(scripts/ 또는 packages/shared/)" 중 packages/shared/src 선택 — lib/ 대부분 CHANGELOG mention 보유로 소진, shared 는 db-error.ts 외 미탐색.
