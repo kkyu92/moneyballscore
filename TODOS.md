@@ -1,3 +1,19 @@
+## 🟢 RETRO-ONLY — review-code(heavy): components/glossary·players·share·live 4개 디렉토리 전수 감사, drift 0건 (cycle 3582, 2026-10-23)
+
+진단: review-code EXHAUSTIVE_SWEEP cooldown(3572~3581) 만료, 3582부터 재평가 가능 — cycle 3581 retro 명시 추천. open issue 0건, approved+unexpired plan 0/22(전부 completed/archived). `gh run list` 재확인 — CI Failure Dispatch 전부 skipped, 실제 incident 없음. 2-chain lock 미충족(직전8(3574-3581) distinct=4: fix-incident/info-architecture-review/lotto/operational-analysis). fix-incident(gap2)/lotto(gap4)/operational-analysis(gap1)/info-arch(gap3) 전부 미도달 — review-code 가 유일 명확 trigger. grep-count 기반 "저 grep ≠ 미감사" 가드레일(cycle 3001) 따라 review-code 커밋 touch count 최저 4개 컴포넌트 디렉토리(glossary 1건/players 1건/share 1건/live 3건) 식별 후 전수 read(합계 587줄, 4파일 전부) 로 실제 커버리지 확인.
+
+**감사 내용**: `GlossaryCategoryFilter.tsx` — `useSyncExternalStore` 기반 localStorage 필터, `dangerouslySetInnerHTML` CSS selector 삽입은 `isCategorySlug` 화이트리스트 통과 값만 사용 — injection 안전. `PitcherFipTrend.tsx` — FIP/xFIP 차트 min/max 계산 + Y축 도메인 패딩 로직 정상. `ShareButtons.tsx` — Web Share API fallback(AbortError 예외처리) + 클립보드 복사 정상, Twitter/Facebook intent URL encodeURIComponent 정상. `LiveScoreboard.tsx` — `LiveScore['status']` union(`scheduled`/`live`/`final`/`postponed`) 4종 switch 문 exhaustive 매칭 확인(default = scheduled gameTime 표시), `useKboScores` 훅의 날짜별 polling on/off 로직과 정합. **drift 0건.**
+
+**코드 변경 없음** — retro-only.
+
+**ship-0 재확인**: 직전10(3573-3582, 본 cycle 포함) 전부 retro-only — PARTIAL_STREAK=10 literal 재충족. EXHAUSTIVE_SWEEP 서브체크 — RC_HEAVY_COUNT(3573-3582 구간)=1(<8) 미충족. 단 cycle 3564 genuine emergency-stop dispatch(a70a4595) 이후 매 cycle 이 사용자의 명시적 `/develop-cycle N` 재호출을 재개 결정으로 해석(cycle 3565~3581 선례) — 본 cycle 도 사용자가 `/develop-cycle 32` 명시적 재호출로 시작 — 중복 dispatch 생략, 정상 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3582%50=32≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3563-3582, 현재 포함) 표본≥10 충족, review-code 8회 발화(0회 아님)로 미충족. marker 미박제. 2-chain lock(다음 사이클용) — 직전8(3575-3582) distinct=5(info-architecture-review/operational-analysis/fix-incident/lotto/review-code), 미충족.
+
+다음 사이클 추천 = fix-incident(gap3/20)/lotto(gap5/30)/operational-analysis(gap2/25)/info-arch(gap4/30) gap 자연 대기 또는 review-code 신규 scope(components/insights, components/search — grep count 차저 후보).
+
+---
+
 ## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE cohort 49회 연속 재측정, n=448 불변 (cycle 3581, 2026-10-23)
 
 진단: review-code EXHAUSTIVE_SWEEP cooldown 유지 중(3572~3581, 본 cycle 포함 — 만료는 3582부터). 직전8(3573-3580) distinct=4(lotto/fix-incident/info-architecture-review/operational-analysis) — 2-chain lock 미충족. gap: op-analysis 5/25(20%, 최고)·lotto 3/30(10%)·info-arch 2/30(6.7%)·fix-incident 1/20(5%) — op-analysis 선택. open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/partial 류).
