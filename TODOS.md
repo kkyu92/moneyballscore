@@ -1,3 +1,8 @@
+## ⚪ RETRO-ONLY — review-code(heavy): analysis/page.tsx 부분 감사, drift 0건 (cycle 3677, 2026-10-26)
+- 186-585행 직접 read + h2h 나눗셈/toFixed null 가드 grep. 1517행 total 0 가드 없으나 analysis-data.ts H2H_MIN_GAMES=3 gate 로 NaN 불가
+- 미감사 잔여: page.tsx 586-2892 (렌더 블록)
+- 코드 변경 없음
+
 ## ⚪ RETRO-ONLY — info-architecture-review(lite): 현 IA 충분, drift 0건 (cycle 3676, 2026-10-26)
 - page.tsx 111개, 7일 내 신규 라우트 없음. Breadcrumb 누락 = redirect/debug/login/settings/community 류, 사용자 IA 갭 아님
 - 코드 변경 없음
