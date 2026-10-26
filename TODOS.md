@@ -19976,3 +19976,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, gap 미도달, 직전8 distinct=6 lock 無, polish-ui gap 7.
 - 결과: components/app hex 하드코딩 grep — HallOfFame `var(--color-*, fallback)` 토큰 정합, ShareButtons 소셜 브랜드색(#1DA1F2/#1877F2) 의도적. DESIGN.md mtime 5일 신선. drift 0건, 코드 변경 없음 (retro-only).
 - 다음: lotto(10/27 picks cron 확인) 또는 review-code 신규 scope 자연 대기.
+
+## cycle 3664 — review-code (heavy)
+- 진단: main=origin 클린, open hub-dispatch 0, 직전8 distinct=5 lock 無, gap 전부 미도달(fix-incident 8/20·op-analysis 5/25·info-arch 6/30·lotto 2/30).
+- 결과: components/dashboard 잔여 차트 8종 read — BrierTrendChart Y축 `[0.15,0.35]` 고정이 소표본/CE 구간 Brier(~0.40) 를 plot 밖으로 잘라냄 → `brierYDomain` 헬퍼(데이터 기반 0.05 단위 확장) + 테스트 4건. 커밋 70908ca8 push 완료.
+- 다음: RollingAccuracyChart `[0.3,0.7]` 동형 clip 후보(윈도우 n 큼 → 저우선), lotto(10/31 picks cron) 자연 대기.
