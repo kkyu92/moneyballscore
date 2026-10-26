@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — polish-ui(lite): DESIGN.md token vs 컴포넌트 hex grep, drift 0건 (cycle 3686, 2026-10-26)
+- palette 밖 hex 2건 = ShareButtons Twitter(#1DA1F2)/Facebook(#1877F2) 브랜드색, 의도된 서드파티 — drift 아님
+- 코드 변경 없음. 다음 = op-analysis(gap 6/25)/info-arch(gap 10/30) 자연 대기
+
 ## ⚪ RETRO-ONLY — review-code(heavy): api/pipeline + leaderboard mlb-sync/sync twin 감사, drift 0건 (cycle 3685, 2026-10-26)
 
 - 최근 5일 변경 route 2건 전수 read. pipeline: maxDuration=300 / mode 400 검증 / triggeredBy 20자 clamp / revalidate 실패 격리 정상. mlb-sync ↔ sync: 검증 공용 모듈 정합, external_game_id 길이 상수 적용 확인. 코드 변경 없음.
