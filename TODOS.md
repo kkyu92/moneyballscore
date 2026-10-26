@@ -19936,3 +19936,7 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, 전 chain gap 미도달(fix-incident 6/20·op-analysis 8/25·info-arch 9/30·lotto 1/30).
 - 결과: `mlb/team/[code]` ko↔en twin diff 전수 — locale/문구/href/route 라벨만 상이, 로직·degraded 플래그·필터 parity 확인, drift 0건, 코드 변경 없음 (retro-only).
 - 다음: fix-incident gap 자연 대기 또는 10/27 picks cron fire 확인.
+
+## cycle 3656 — fix-incident
+- cron data PR (#3193/#3194) CI "workflow file issue": `gh pr checks --watch` 가 CI check 등록 전 반환 → 머지 11s 후 branch 삭제. 5 workflow 에 등록 대기 추가 (PR #3197 MERGED, CI pass).
+- 검증 대기: 다음 cron fire(화 lotto-pick-update) 에서 CI check 등록 후 머지 확인.
