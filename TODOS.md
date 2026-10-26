@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — polish-ui(lite): DESIGN.md token grep, drift 0건 (cycle 3690, 2026-10-26)
+- arbitrary tailwind color 4건 전부 DESIGN.md 등재 브랜드색(#1DA1F2/#1877F2), DESIGN.md mtime 10/21 신선 = 균열 0
+- 코드 변경 없음. STRUCTURAL_DRY_SPELL_SUPPRESS 적용(marker age <24h). 다음 = op-analysis(gap 10/25)/lotto 10/27 cron 자연 대기
+
 ## ⚪ RETRO-ONLY — lotto(lite): cron 산출물 최신성 확인, 이상 0건 (cycle 3689, 2026-10-26)
 - picks/results 최신 2026-10-24(1247회), lotto-result-update 10/24~25 cron 3회 success, pick-update 10/20 success. 수동 개입 불필요
 - 코드 변경 없음. STRUCTURAL_DRY_SPELL_SUPPRESS 적용(marker age 9.3h). 다음 = op-analysis(gap 9/25)/lotto pick 10/27 cron 자연 대기
