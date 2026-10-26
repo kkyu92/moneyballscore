@@ -19940,3 +19940,7 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 ## cycle 3656 — fix-incident
 - cron data PR (#3193/#3194) CI "workflow file issue": `gh pr checks --watch` 가 CI check 등록 전 반환 → 머지 11s 후 branch 삭제. 5 workflow 에 등록 대기 추가 (PR #3197 MERGED, CI pass).
 - 검증 대기: 다음 cron fire(화 lotto-pick-update) 에서 CI check 등록 후 머지 확인.
+
+## cycle 3657 — review-code (heavy)
+- #3197 cron CI 대기 guard 5 workflow 감사: job 이름 `check` 일치, bot PR 도 pull_request CI 트리거 확인(기존 run 존재), ci.yml paths 필터 없음 → drift 0건, 코드 변경 없음.
+- 실측 검증은 여전히 다음 cron fire 대기.
