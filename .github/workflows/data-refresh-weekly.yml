@@ -120,6 +120,16 @@ jobs:
 
           PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
 
+          CI_SEEN=false
+          for _ in $(seq 1 18); do
+            if gh pr checks "$PR_NUM" --json name --jq '.[].name' | grep -qx check; then CI_SEEN=true; break; fi
+            sleep 5
+          done
+          if [ "$CI_SEEN" != "true" ]; then
+            echo "::warning::CI check never registered for PR $PR_NUM — skip merge, needs manual review"
+            exit 0
+          fi
+
           if ! gh pr checks "$PR_NUM" --watch --fail-fast; then
             echo "::warning::CI failed for PR $PR_NUM — skip merge, needs manual review"
             exit 0
