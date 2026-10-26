@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — fix-incident(lite): gh run list/scheduled workflow 재확인, 실제 incident 0건 (cycle 3636, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 29` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/pending-step). 직전8(3628-3635) distinct=5(review-code/info-arch/fix-incident/operational-analysis/lotto) — 2-chain lock 미충족. gap: info-arch 6/30·fix-incident 4/20·operational-analysis 3/25·lotto 2/30·review-code 1/10 — 전부 lite trigger 미도달. review-code(heavy) 범위(lib/components/app-api/scripts/shared/factors/scrapers/agents/context) 대부분 "전수감사 완료"/"시리즈 완결"/"vein 소진" 기박제 상태라 신규 scope 희박 — fix-incident(lite) 다양성 선택.
+
+`gh run list --limit 15` — CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped(실제 incident 부재), 나머지 push 트리거 run 전부 success. 5개 cron scheduled workflow(`data-refresh-weekly`/`factor-backtest-weekly`/`lotto-result-update`/`lotto-pick-update`/`op-analysis-weekly`) 각각 최근 3회 확인 — **전부 최신 실행 success**. 과거 failure(10/11~10/13)는 이미 알려진 시즌전환기 일시 이슈(cycle 3128 등 기존 fix 로 해소), 신규 incident 아님. **코드 변경 없음** — retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK(현재 포함 3627-3636)=9/10(3635 success 1건 존재) → 10 미충족, hard-stop 불발동. RC_HEAVY_COUNT(3627-3636)=4/10(<8) → EXHAUSTIVE_SWEEP 미충족. NO_NEW_INFO_COUNT(직전9, 3627-3635)=6/9(<8) → STRUCTURAL_DRY_SPELL_SUPPRESS 미적용(이번 cycle 은 재확인형이지만 윈도우 기준 미충족).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3636%50=36≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음) 미충족. trigger5 — 직전20(3617-3636, 현재 포함) review-code/fix-incident/operational-analysis/lotto/info-arch 전부 발화(0회 없음) → 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3635 " -F` → `3f9284d0` 존재 확인 OK.
+
+다음 사이클 추천 = info-architecture-review(gap6/30)/operational-analysis(gap3/25)/lotto(gap2/30) 자연 대기 또는 review-code(heavy) 는 포화 상태라 신규 scope 명확할 때만 — app/ page routes 자체(components/API 는 완료) 또는 packages/kbo-data/src/agents/__tests__ 등 테스트 디렉토리 재점검 후보.
+
 ## 🟢 RETRO-ONLY — lotto(lite): count_smoke 재확인(delta=0), 화/토 cron 양쪽 정상 (cycle 3634, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 31` 호출. open issue 0건, approved+unexpired plan 0/22. 직전8(3626-3633) distinct=4(operational-analysis/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap: lotto 9/30(30%, 최고 비율)·fix-incident 2/20·info-arch 4/30·operational-analysis 1/25(직전 cycle 발화 직후) — lotto(lite) 선택.
