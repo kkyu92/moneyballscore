@@ -20011,3 +20011,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=4 lock 無, gap 전부 미도달(fix 3/20·op 12/25·info 4/30·lotto 9/30).
 - 결과: count_smoke 유효 7,716,994/8,145,060 (제거 5.26%), lotto-result-update 10/24~25 success 3회, pick-update 10/20 success, cron 화 UTC 00/03/06 → 10/27 fire 대기 정상. drift 0건, 코드 변경 없음 (retro-only).
 - 다음: op-analysis(gap 12/25) 또는 10/27 picks cron 확인 자연 대기.
+
+## cycle 3672 — operational-analysis (lite)
+- 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=5 lock 無, gap 전부 미도달(fix 4/20·op 13/25·info 5/30·lotto 1/30), review-code scope 포화(v2-shadow-monitor 3638/3639 기감사).
+- 결과: `op-analysis-ce-cohort.ts` 재실행(.env.local 로드 필요) — 전체 n=448 (CE 401 / 비CE 47) 불변, KBO 시즌 종료 지속. drift 0건, 코드 변경 없음 (retro-only).
+- 다음: lotto(10/27 화 picks cron 확인) 자연 대기.
