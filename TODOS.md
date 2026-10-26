@@ -19931,3 +19931,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, 전 chain gap 미도달(fix-incident 5/20·op-analysis 7/25·info-arch 8/30·lotto 6/30), picks/results 2026-10-24 최신.
 - 결과: count_smoke 유효 7,716,994 (제거 5.26%), pick/result cron 최근 실행 success, 10/31 picks 는 화 10/27 cron 예정, drift 0건, 코드 변경 없음 (retro-only).
 - 다음: fix-incident gap 자연 대기 또는 10/27 picks cron fire 확인.
+
+## cycle 3655 — review-code (heavy)
+- 진단: main=origin 클린, open hub-dispatch 0, 전 chain gap 미도달(fix-incident 6/20·op-analysis 8/25·info-arch 9/30·lotto 1/30).
+- 결과: `mlb/team/[code]` ko↔en twin diff 전수 — locale/문구/href/route 라벨만 상이, 로직·degraded 플래그·필터 parity 확인, drift 0건, 코드 변경 없음 (retro-only).
+- 다음: fix-incident gap 자연 대기 또는 10/27 picks cron fire 확인.
