@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — review-code(heavy): pipeline/ 잔여 9개 소형 파일 전수 read, drift 0건 (cycle 3631, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 34` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=3/10, <8 임계). 직전8(3623-3630) distinct=5(fix-incident/info-arch/lotto/operational-analysis/review-code), 2-chain lock 미충족. gap: info-arch 1/30·review-code 2/10·fix-incident 4/20·operational-analysis 5/25·lotto 6/30 — 전부 lite trigger 미도달, cycle 3630 carry-over 추천(`packages/kbo-data/src/pipeline/` 잔여) 따라 review-code(heavy) 선택.
+
+`accuracy-update.ts`/`brier.ts`/`daily-summary.ts`/`db-constraints.ts`/`db-error.ts`/`factor-bias-bootstrap-ci.ts`/`final-reasoning.ts`/`notify-status-predicate.ts`/`schedule.ts` 9개 전수 read (총 520줄, pipeline/ 디렉토리 중 아직 개별 fix(review-code) 커밋 안 걸린 소형 파일). 검증: (1) `DB_CONSTRAINTS` 16개 테이블 onConflict 값 전부 `supabase/migrations/*.sql` 실제 UNIQUE 제약과 grep 대조 — 전부 일치 (predictions/user_picks/mlb_team_elo/mlb_team_elo_history/mlb_pick_poll_events 등) (2) `estimateNotificationTime` cron 계산식(`ceil((h*60+m-180)/60)`) 을 docstring 예시 2건(18:30→16:00, 14:00→11:00)으로 수치 재검산 — 일치 (3) `shouldPredictGame` 우선순위(window_too_late→window_too_early→not_scheduled→sp_unconfirmed→already_predicted) 로직과 cycle 629 사례 11 주석 정합 확인. drift 0건, 코드 변경 없음. `pnpm test` 606 files/4794 tests 전부 PASS (smoke 재확인).
+
+**ship-0 서브체크**: PARTIAL_STREAK=10(3622-3631) 재충족. RC_HEAVY_COUNT=4/10(<8 임계) → EXHAUSTIVE_SWEEP 미충족. NO_NEW_INFO_COUNT(semantic) 재평가 필요 — 본 cycle 은 "drift 0건" 이나 신규 파일 전수 read 라는 실질 검증 작업(review-code 전수감사 유효성, EXHAUSTIVE_SWEEP 문턱 미도달이라 해당 예외 미적용) → dry-spell marker 경과 측정(아래) 기준 판단.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3631%50=31≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(window 3612-3631 review-code 다회 발화 — 0회 아님) 전부 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3630 " -F` → `a015bf41` 존재 확인 OK.
+
+다음 사이클 추천 = fix-incident(gap5/20)/lotto(gap7/30)/operational-analysis(gap6/25)/info-arch(gap2/30) 자연 대기 또는 review-code(heavy) 신규 스코프(`packages/kbo-data/src/pipeline/` 대형 파일 `daily.ts`/`mlb-pipeline.ts`/backtest 계열 재점검 또는 `apps/moneyball/src/lib/` 미감사 영역) 계속 — 구조적 dry spell(KBO 시즌종료/CREDIT_EXHAUSTED) 지속, 변화 신호 없으면 lite chain rotation 자연 유지 권장.
+
 ## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap 격차 재확인, 전부 의도된 제외 재확인 (cycle 3630, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 35` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 archived/completed/pending_user_step/superseded). `gh run list` — CI/Vercel Deploy Failure Dispatch 전부 skipped, 실제 incident 부재. review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=3/10, <8 임계). 직전8(3622-3629) distinct=5(fix-incident/lotto/info-architecture-review/operational-analysis/review-code), 2-chain lock 미충족. gap: info-arch 6/30(20%, 최고)·lotto 5/30(16.7%)·operational-analysis 4/25(16%)·fix-incident 3/20(15%) — info-architecture-review(lite) 선택.
