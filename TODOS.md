@@ -1,3 +1,8 @@
+## ⚪ RETRO-ONLY — review-code(heavy): MLB 팀 페이지 KO/EN twin diff, drift 0건 (cycle 3693, 2026-10-26)
+- 대상: `mlb/team/[code]/page.tsx` vs `en/mlb/team/[code]/page.tsx` (최근 10일 다중 수정)
+- 결과: route/canonical/locale prop/내부 링크(/en 접두) parity 정상, 번역 누락 0건
+- 다음: lotto(화요일 cron 후 10/31 picks 확인)
+
 ## ⚪ RETRO-ONLY — operational-analysis(lite): CE cohort harness 재실행, n=448 불변 (cycle 3692, 2026-10-26)
 - `op-analysis-ce-cohort.ts` 실행: 전체 n=448 (CE 401 / 비CE 47) — cycle 3598 이후 동일, KBO 2026 정규시즌 10/4 종료로 신규 verified 0건. CREDIT_EXHAUSTED·비CE 동결 지속
 - 코드 변경 없음. STRUCTURAL_DRY_SPELL_SUPPRESS 적용(marker age 9.4h, NO_NEW_INFO 9/10, RC_HEAVY 2). 다음 = review-code 신규 scope 또는 info-arch/lotto/fix-incident gap 자연 대기
