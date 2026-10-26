@@ -1,3 +1,21 @@
+## 🔴 EMERGENCY-STOP — info-architecture-review(lite): 4연속 동일 breadcrumb checkpoint, 10-cycle ship-0 streak 재발동 (cycle 3614, 2026-10-26)
+
+진단: 로컬 checkout origin 대비 2 commit 지연 발견 (cron 산출물 2건: lotto 1247회 결과 + factor-backtest weekly) → `git pull --ff-only` 로 해소, cron 양쪽 정상 작동 확인 (silent drift 아님). open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3606-3613) distinct=3: review-code6+fix-incident1+operational-analysis1). review-code EXHAUSTIVE_SWEEP cooldown(3612~3621) 유지 중 제외. gap 비율: lotto 11/30(37%, 최고이나 cron 산출물 양쪽 직접 확인 결과 완전 정상 — lite 확인 불필요 판단)·info-arch 9/30(30%)·fix-incident 2/20(직전 발화)·op-analysis 1/25(직전 발화) — info-arch 선택.
+
+breadcrumb 누락 18건 재확인 — cycle 3586/3589 와 완전 동일 목록 (root/settings/community/login 4건 + debug/* 8건 + reviews monthly/weekly redirect shim 6건), **4연속 동일**. sitemap page count 111건 mismatch 없음. 신규 라우트 0건 (mtime false positive 패턴 재확인). 코드 변경 없음, retro-only. 부가: plan #8 M1/cycle-56 factor-backtest 신규 데이터(2026-10-25) 검토 — 전부 ΔBrier < 0.001 "미미" 결론 유지, v1.8 가중치 재조정 불필요 재확인 (CLAUDE.md 기존 결론과 정합, 신규 기록 불필요).
+
+**ship-0 서브체크**: 직전10(3605-3614, 본 cycle 포함) 전부 outcome=retro-only → PARTIAL_STREAK=10 재충족. RC_HEAVY_COUNT(동 구간 review-code(heavy))=6(3606/3607/3608/3609/3610/3611) — **≥8 임계 미달** (cooldown 으로 review-code 자체가 후보에서 빠진 cycle 이 늘면서 비중 자연 하락). → **EXHAUSTIVE_SWEEP=false, 진짜 EMERGENCY-STOP 재발동**.
+
+**동작**: signal next_n=0 강제 박제(사용자 호출 N=50 override). `memory: meta-pattern emergency-stop` dispatch — 직전10 cycle(3605-3614) chain/outcome list + 사용자 결정 요청.
+
+skill-evolution trigger 평가: trigger1(chain-evolution 신규 누적 없음)/trigger2(5연속 fail 없음)/trigger3(3614%50≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(직전20 review-code 다회 발화, 0회 아님) 전부 미충족 — marker 박제 없음.
+
+검증: 1차 방어선(본 retro commit, 접미사 EMERGENCY-STOP 표준 준수) + 2차 방어선(cycle 3613 retro `1a1429b2` 존재 확인 OK).
+
+**사용자 결정 필요**: cycle 3612/3613/3614 3연속 동일 hard-stop — 원인은 review-code EXHAUSTIVE_SWEEP cooldown(3621 만료까지, 잔여 7 cycle) 이 RC_HEAVY_COUNT 분모를 깎아 EXHAUSTIVE_SWEEP 면제 조건(≥8)을 구조적으로 막는 것. 다른 chain(fix-incident/op-analysis/lotto/info-arch) 전부 "확인함, 변화 없음" 상태 — KBO 시즌 종료 + CREDIT_EXHAUSTED 지속 국면이라 실제 ship 가능한 발견이 자연 발생하기 어려운 구간. cooldown 만료(3621) 후 review-code 재개 시 패턴 해소 가능성 높음. 재개 원하시면 "계속" 또는 "/develop-cycle N" 재호출 요청.
+
+---
+
 ## 🔴 EMERGENCY-STOP — operational-analysis(lite): 51회 연속 동일 수치 재확인, 10-cycle ship-0 streak 재발동 (cycle 3613, 2026-10-24)
 
 진단: open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3605-3612) distinct=3: review-code6+info-arch1+fix-incident1). review-code EXHAUSTIVE_SWEEP cooldown(3612~3621) 유지 중 제외. gap 비율: op-analysis 15/25(60%, 최고)·lotto 10/30(33%)·info-arch 8/30(27%)·fix-incident 1/20(직전 발화) — op-analysis 선택. **사용자 `/develop-cycle 50` 명시적 재호출로 cycle 3612 genuine emergency-stop 직후 zero-touch 재개 (cycle 3564 전례 적용).**
