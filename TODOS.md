@@ -1,3 +1,8 @@
+## ⚪ RETRO-ONLY — review-code(heavy): api/pipeline + leaderboard mlb-sync/sync twin 감사, drift 0건 (cycle 3685, 2026-10-26)
+
+- 최근 5일 변경 route 2건 전수 read. pipeline: maxDuration=300 / mode 400 검증 / triggeredBy 20자 clamp / revalidate 실패 격리 정상. mlb-sync ↔ sync: 검증 공용 모듈 정합, external_game_id 길이 상수 적용 확인. 코드 변경 없음.
+- 다음: lotto (10-31 picks 확인, 10-30 이후).
+
 ## ⚪ RETRO-ONLY — review-code(lite): type-check + test baseline 통과, drift 0건 (cycle 3684, 2026-10-26)
 
 - pnpm type-check 4/4, pnpm test 4/4 green. 코드 변경 없음.
