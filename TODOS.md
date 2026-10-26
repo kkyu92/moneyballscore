@@ -1,3 +1,11 @@
+## ✅ SUCCESS — review-code(heavy): dashboard/ heatmap 2종 i18n 누수·n=0 cell·legend 토큰명 수정 (cycle 3661, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 36` 호출. open issue 0건, 2차 방어선(3660 retro `66d2a449`) OK, 직전8 distinct=6 lock 미충족, gap 전부 미도달, CI 실패 0. 최근 6일 변경 `components/dashboard/` 5파일 신선 scope 전수 read.
+
+수정(`ec310d4c`): (1) `CohortComparisonHeatmap`/`ScoringRuleDayHeatmap` en locale 'all' 행 라벨 '전체' 누수 → 'All'. (2) Day heatmap n=0 cell 이 'N=0 참고용' 렌더 → '—' (Cohort parity). (3) Cohort legend 의 `brand-700` 등 토큰명·'cohort'·'v1.6 anomaly + Sunday cap' 개발 용어 → 사용자 언어. 회귀 테스트 5건 추가. vitest 4832 PASS, tsc clean, pre-push PASS.
+
+미검증 carry-over: `WeeklyTrendMini` 문자열 ko 하드코딩 (홈 KBO 전용이면 무해).
+
 ## ⚪ RETRO-ONLY — fix-incident(lite): CI/scheduled workflow 실패 0건, drift 0건 (cycle 3649, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 48` 호출. open issue 0건, approved plan 0건. 2차 방어선(cycle 3648 retro `cb8bedb4`) OK. review-code cooldown(3646~3655) 유지. `gh run list` 60건 non-success 0, schedule workflow 15건(health/runtime-error/deploy-drift/heartbeat/indexnow/factor-backtest) 전부 success. 실제 incident 부재, 코드 변경 없음.
