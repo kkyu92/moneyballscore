@@ -19876,3 +19876,15 @@ cycle 3639~3641 추천 계승 — `apps/moneyball/src/components/reviews/` 10개
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3645%50=45≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3626-3645, 현재 포함) 표본=20, review-code 12회 발화(0회 아님) → 미충족. marker 박제 없음.
 
 다음 사이클 추천 = review-code(heavy) 복귀(2-chain lock cooldown N=1 만료, `components/{insights,leaderboard,live,search,seasons,share,standings,players,glossary,ui}` 잔여 scope) 또는 fix-incident(gap10/20)/operational-analysis(gap13/25)/lotto(gap12/30)/info-arch(gap16/30) 자연 대기. **주의**: review-code 복귀 후 다시 8연속 쌓이면 재-lock — 중간 비-review-code 1회 자연 삽입 권장.
+
+## ⚪ RETRO-ONLY — info-architecture-review(recheck): breadcrumb/sitemap 구조 5연속 동일 확인, drift 0건 (cycle 3646, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 19` 호출. open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3645 retro `7e0b8448`) OK. **2-chain lock 재탐지**: 직전8(3638-3645) distinct=2(review-code 7+polish-ui 1) — 룰 발동, review-code+polish-ui 양쪽 이번 사이클 후보 제외. 잔여 gap 비율: info-arch 16/30=53.3%(최고)·operational-analysis 13/25=52%·fix-incident 10/20=50%·lotto 12/30=40%. explore-idea saturation 13/15 충족하나 4-source negative(open issue 0/approved plan 0/TODOS Next-Up 섹션 부재/DESIGN.md 5일 신선) 확립 skip 패턴 유지. info-architecture-review 최고 gap 비율로 선택.
+
+breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/settings/community/login 4건 + debug/* 8건 + reviews monthly/weekly redirect shim 6건). **5번째 연속 동일 확인.** sitemap.ts 는 루프 기반 동적 생성이라 literal `url:` 라인 수(89)를 page.tsx 수(111)와 비교하는 지표 자체가 부정확(과거 체크포인트도 미사용) — 실제 구조(canonicalPair/computeWeekRange/listArchiveDates 등) 변경 없음. `find -mtime -7` 다수 건 = git checkout mtime false positive(기존 반복 확인), 실제 신규 라우트 0건. Footer/Header MegaMenu 최근 변경 없음(cycle 3644 nav i18n fix 는 문구 수정, 구조 변경 아님). **drift 0건, 코드 변경 없음** — retro-only. spec = `docs/design/ia-2026-10-26-cycle-3646-recheck.md`.
+
+**ship-0 서브체크**: PARTIAL_STREAK(3637-3646, 현재 포함)=7/10(success 3636해당없음, 실제 success 3건: 3637/3643/3644) → 10 미충족, hard-stop 불발동. **EXHAUSTIVE_SWEEP 충족**: RC_HEAVY_COUNT(3637-3646)=8/10 + CLEAN_DRIFT_COUNT(동일 window, "drift 0건" 언급)=7/10(3638/3639/3640/3641/3642/3645/3646) — 양쪽 임계 충족. review-code(모든 variant) cooldown N=10 발동(3646~3655, 사용자 N 그대로 유지, 하드스탑 아님). `memory: meta-pattern` informational dispatch 1건.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음 — cycle 3645 와 동일)/trigger2(5연속 fail 없음)/trigger3(3646%50=46≠0)/trigger4(meta-pattern 없음, 본 cycle 의 것은 informational EXHAUSTIVE_SWEEP 용으로 "SKILL 갱신 필요" 문구 아님) 미충족. trigger5 — 직전20(3627-3646, 현재 포함) chain 분포: review-code12/fix-incident3/info-arch1/lotto1/op-analysis1/polish-ui1, 평가대상 review-code 12회(0회 아님) → 미충족. marker 박제 없음.
+
+다음 사이클 추천 = review-code cooldown(3646~3655) 유지 중이므로 fix-incident(gap10/20)/operational-analysis(gap13/25)/lotto(gap12/30) 자연 대기 또는 explore-idea 재평가(saturation 유지 시 4-source 재확인) — info-arch 는 5연속 동일 확인으로 당분간 재점검 불필요, 다음 재측정은 신규 라우트 추가 또는 30-cycle gap 자연 도래 시.
