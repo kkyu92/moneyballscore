@@ -19983,3 +19983,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 다음: RollingAccuracyChart `[0.3,0.7]` 동형 clip 후보(윈도우 n 큼 → 저우선), lotto(10/31 picks cron) 자연 대기.
 
 - [x] cycle 3665 review-code(heavy): RollingAccuracyChart Y domain 고정 [0.3,0.7] → accuracyYDomain (fb9e8bbc). DailyAccuracy/AccuracyChart 는 [0,100] 이라 무관.
+
+## cycle 3666 — review-code (heavy)
+- 진단: main=origin 클린, open hub-dispatch 0, 직전8 distinct=5 lock 無.
+- 결과: `domain=` 전수 grep — Elo/FIP 5종(MatchupElo/TeamElo/MlbTeamElo/EloTrend/PitcherFip) 데이터 기반 domain + 빈 입력 guard 확인, drift 0건, 코드 변경 없음 (retro-only).
+- 다음: lotto(10/27 picks cron 확인) 자연 대기.
