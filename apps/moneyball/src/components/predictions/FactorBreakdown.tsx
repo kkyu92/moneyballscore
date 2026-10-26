@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, NEUTRAL_FACTOR, shortTeamName, type TeamCode } from "@moneyball/shared";
+import { ACTIVE_FACTOR_KEYS, DEFAULT_WEIGHTS, NEUTRAL_FACTOR, shortTeamName, type TeamCode } from "@moneyball/shared";
 import {
   FACTOR_GLOSSARY_ANCHORS,
   FACTOR_LABELS,
@@ -166,9 +166,10 @@ export function FactorBreakdown({
   const awayName = shortTeamName(awayTeam);
 
   // chart=true 시 shadow factor 11/12 row 강제 노출 (값 nullable → "측정 중" 라벨).
-  // chart=false (기본) 시 factors map 의 키만 (기존 동작 유지).
+  // chart=false (기본) 시 production-active 10 factor 만 (shadow key 는 weight=0 이라도
+  // `key in DEFAULT_WEIGHTS` 로는 안 걸러짐 — ACTIVE_FACTOR_KEYS 로 필터, DetailedFactorAnalysis.tsx 와 동일 패턴).
   const baseEntries = Object.entries(factors).filter(
-    ([key]) => key in DEFAULT_WEIGHTS,
+    ([key]) => ACTIVE_FACTOR_KEYS.includes(key as (typeof ACTIVE_FACTOR_KEYS)[number]),
   );
 
   const shadowEntries: [string, number | null][] = chart

@@ -43,7 +43,7 @@ export function GameAnalysisProse({
     .filter((e) => e.narrative)
     .map((e) => e.narrative);
 
-  const favored = homeWinProb > ELO_NEUTRAL_WIN_PCT ? homeName : awayName;
+  const favored = homeWinProb >= ELO_NEUTRAL_WIN_PCT ? homeName : awayName;
   const marginPp = Math.round(Math.abs(homeWinProb - ELO_NEUTRAL_WIN_PCT) * FACTOR_CONTRIBUTION_SCALE);
   const confidenceLabel =
     marginPp <= OVERVIEW_CLOSE_PP ? '박빙의 접전' : marginPp < OVERVIEW_DOMINANT_PP ? '소폭 우위' : '명확한 우위';
