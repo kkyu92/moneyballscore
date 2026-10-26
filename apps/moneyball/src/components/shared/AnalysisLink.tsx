@@ -8,7 +8,7 @@ interface AnalysisLinkProps {
 
 /**
  * v4-4: 경기 상세 분석 링크 재사용 컴포넌트.
- * PredictionCard, BigMatchDebateCard 등에서 공통 사용.
+ * PredictionCard(subtle), predictions/[date] 페이지(primary)에서 공통 사용.
  *
  * 다크모드 + a11y (focus-visible + 44px 터치) 준수.
  */

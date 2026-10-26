@@ -3,25 +3,10 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 // IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
 //
-// Sitemap wireframe (cycle 2587 갱신 — 로또 컬럼에 /lotto/check 누락 발견 후 추가:
-// cycle 2019(cb21e154)에 신규 배선됐고 /lotto hub 링크 + sitemap.ts(cycle 2250)까지
-// 있었으나 헤더 megamenu + footer sitemap 컬럼 양쪽 빠져있던 gap. cycle 2225(MLB
-// /mlb/matchup) + cycle 2153 과 동일 family — 신규 라우트 추가 시 헤더/footer 동기
-// 누락 반복 패턴, 3번째 재발):
-// ┌──────────────────────────────────────────────────────────────────────────┐
-// │ AI 예측    커뮤니티    팀·선수     리뷰·시즌    도움말     MLB      로또 │
-// │ ────────  ────────  ────────   ─────────  ────────  ────────  ──────── │
-// │ /         /picks    /standings /reviews   /method.. /mlb      /lotto     │
-// │ /analysis /leader.. /teams     /reviews/w /guide    /mlb/st.. /lotto/ch. │
-// │ /accuracy            /players   /reviews/m /glossary /mlb/team /lotto/me. │
-// │ /dashboard           /matchup   /reviews/. /change.. /mlb/accu.. /lotto/ar │
-// │ /insights                        /seasons   /about    /mlb/play..         │
-// │ /predictions                                /search   /mlb/matc..         │
-// │ /calendar                                             /mlb/fact..         │
-// │                                                        /mlb/cale..         │
-// │                                                        /mlb/wc..           │
-// │                                                        /mlb/post..         │
-// └──────────────────────────────────────────────────────────────────────────┘
+// 신규 라우트 추가 시 헤더 megamenu + footer SITEMAP_COLUMNS 양쪽 동기 필수
+// (cycle 2019/2153/2225/2587 과 동일 family — 한쪽만 배선하고 반대쪽 누락 반복
+// 재발 이력). 컬럼별 실제 링크 목록 = 아래 SITEMAP_COLUMNS 배열 직접 참조
+// (ASCII wireframe 중복 유지는 컬럼 추가될 때마다 재drift 유발해 cycle 3644 제거).
 //   Desktop (≥ lg, 1024px) : 5 column grid (always expanded, 7 column wrap to 2 row)
 //   Tablet  (≥ sm, 640px)  : 3 column grid
 //   Mobile  (< sm, 640px)  : 2 column grid + <details> accordion (open by default)

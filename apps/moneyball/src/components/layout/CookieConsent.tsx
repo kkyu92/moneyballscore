@@ -31,8 +31,8 @@ export function CookieConsent({ isEn = false }: { isEn?: boolean }) {
     getVisibleServerSnapshot,
   );
 
-  // 배너가 떠있는 동안 main에 padding-bottom 추가 → 콘텐츠 가림 방지.
-  // body[data-cookie-shown="true"] main 셀렉터를 globals.css 에서 매칭.
+  // 배너가 떠있는 동안 footer 가 가려지지 않도록 body 에 padding-bottom 추가.
+  // body[data-cookie-shown="true"] 셀렉터를 globals.css 에서 매칭.
   useEffect(() => {
     if (visible) {
       document.body.dataset.cookieShown = 'true';

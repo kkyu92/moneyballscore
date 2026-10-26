@@ -118,7 +118,7 @@ const MLB_NAV: NavItem[] = [
     enLabel: "Games & Teams",
     items: [
       { href: "/mlb/analysis", label: "분석 센터", enLabel: "Analysis Hub", description: "오늘의 빅매치·팩터 수렴 픽·전체 예측", enDescription: "Today's big match, factor convergence picks & all predictions", icon: "bar-chart" },
-      { href: "/mlb/standings", label: "AL/NL 순위", enLabel: "AL/NL Standings", description: `${MLB_DIVISION_COUNT} division standings`, icon: "award" },
+      { href: "/mlb/standings", label: "AL/NL 순위", enLabel: "AL/NL Standings", description: `${MLB_DIVISION_COUNT}개 디비전 순위표`, enDescription: `${MLB_DIVISION_COUNT} division standings`, icon: "award" },
       { href: "/mlb/team", label: "팀", enLabel: "Teams", description: `${MLB_TEAM_COUNT}팀 시즌 stat`, enDescription: `${MLB_TEAM_COUNT}-team season stats`, icon: "shield" },
       { href: "/mlb/accuracy", label: "적중 기록", enLabel: "Accuracy Track Record", description: "AI 예측 성과 트래킹", enDescription: "AI prediction performance tracking", icon: "target" },
       { href: "/mlb/insights", label: "AI 인사이트", enLabel: "AI Insights", description: "심판 에이전트 reasoning 아카이브", enDescription: "Judge agent reasoning archive", icon: "database" },
@@ -136,8 +136,8 @@ const MLB_NAV: NavItem[] = [
     label: "포스트시즌",
     enLabel: "Postseason",
     items: [
-      { href: "/mlb/wild-card", label: "Wild Card", description: "AL/NL Wild Card race", icon: "target" },
-      { href: "/mlb/postseason", label: "Postseason", description: "WC / DS / LCS / WS bracket", icon: "award" },
+      { href: "/mlb/wild-card", label: "Wild Card", description: "AL/NL 와일드카드 순위", enDescription: "AL/NL Wild Card race", icon: "target" },
+      { href: "/mlb/postseason", label: "Postseason", description: "WC / DS / LCS / WS 대진표", enDescription: "WC / DS / LCS / WS bracket", icon: "award" },
     ],
   },
 ];
