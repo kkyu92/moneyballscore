@@ -19726,3 +19726,19 @@ cycle 3628 carry-over 추천대로 `packages/kbo-data/src/backtest/` 잔여 11�
 **검증(skill-evolution 등)**: trigger1(chain-evolution 5건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3629%50=29≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3610-3629, 현재 포함) 표본=20(≥10 충족), review-code 3회 발화(0회 아님)로 미충족. marker 미박제. 1차 방어선 — 본 commit 자체. 2차 방어선 — cycle 3628 retro `bb0b192c` 존재 확인 OK.
 
 다음 사이클 추천 = fix-incident(gap1/20)/lotto(gap3/30)/info-arch(gap4/30) 자연 대기 또는 review-code(heavy) 신규 scope(packages/kbo-data/src/pipeline/ 잔여 또는 scrapers/).
+
+## 🟢 SUCCESS — review-code(heavy): KBO lib/reviews behavioral test parity, 237-cycle carry-over 해소 (cycle 3635, 2026-10-26)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3627-3634) distinct=5(fix-incident/review-code/info-arch/operational-analysis/lotto) — 2-chain lock 미충족. gap 전부 낮음(fix-incident 2/20·op-analysis 1/25·info-arch 4/30·lotto 0/30) — 자연 due chain 없음. 구조적 dry spell(KBO 2026시즌 10/4 종료, CREDIT_EXHAUSTED) 지속.
+
+cycle 3398에서 처음 발견돼 이후 매번 "carry-over 잔존"으로만 언급되고 실제 미해결이던 항목 채택 — KBO `lib/reviews/{shared,buildWeeklyReview,buildMonthlyReview,buildMissReport}.ts`는 behavioral test가 0건인데 MLB twin(`mlb-shared`/`buildMlbWeeklyReview`/`buildMlbMonthlyReview`/`buildMlbMissReport`)은 전부 테스트 존재하는 비대칭 확인(`__tests__/` 디렉토리 직접 확인).
+
+**구현**: MLB twin 테스트 패턴(supabase mock + vi.mock) 그대로 KBO 버전에 적용해 4개 테스트 파일 신규 작성(28 tests): `shared.test.ts`(mapRowsToHighlightCandidates/buildTeamStats/buildFactorInsights 순수함수 + fetchPredictionRowsInRange fail-loud 가드), `buildWeeklyReview.test.ts`(hasData/정확도 집계/박빙·고확신·대역전 배지 분기), `buildMonthlyReview.test.ts`(SMALL_SAMPLE_N=5 미만 시 전월 비교 조회 생략 분기 + sortBy=accuracy), `buildMissReport.test.ts`(tossup 제외/status!=final 제외/winnerProb 내림차순/post_game reasoning 병합/limit 옵션).
+
+**검증**: `pnpm --filter moneyball exec vitest run` 전체 610 files/4822 tests pass, `tsc --noEmit` clean. 프로덕션 코드 변경 없음(테스트만 추가). direct main commit(`57f0b5eb`) + push, pre-push lint+type-check+version-sync-guard PASS.
+
+**ship-0 재확인**: 직전10(3626-3635, 본 cycle 포함) 중 success 1건(본 cycle) — PARTIAL_STREAK 끊김, emergency stop 미해당.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3635%50=35≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3616-3635, 현재 포함) 표본=20(≥10 충족), review-code 다수 발화(0회 아님)로 미충족. marker 미박제. 1차 방어선 — 본 commit 자체. 2차 방어선(cycle 3634 retro `35ab476b`) OK.
+
+다음 사이클 추천 = fix-incident(gap3/20)/info-arch(gap5/30)/lotto(gap1/30) 자연 대기 또는 review-code(heavy) 신규 scope 계속.
