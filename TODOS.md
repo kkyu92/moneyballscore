@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 코호트 재측정, n=448 동일(52회 연속 불변) (cycle 3633, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 32` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded/pending_user_step). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=3/10, <8 임계). 직전8(3625-3632) distinct=5(lotto/operational-analysis/fix-incident/review-code/info-architecture-review), 2-chain lock 미충족. gap: operational-analysis 6/25(24%, 최고 비율)·lotto 7/30(23.3%)·fix-incident 0/20(직전 cycle 발화 직후)·info-arch 2/30(6.7%) — operational-analysis(lite) 선택.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행(`.env.local` 로드) — 전체 n=448 (CE n=401 / 비CE n=47) — cycle 3613/3598 수치와 완전 동일. CE 55.9%(224/401, Brier 0.4003) / 비CE 63.8%(30/47, Brier 0.2534) → 격차 8.0pp 그대로. overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 유지, LLM 부가가치 우세 결론 52회 연속 재확인. 원인 = KBO 2026 정규시즌 2026-10-04 종료 지속 + CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 117일+ 경과) 상태 변화 없음. **코드 변경 없음** — retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK 10회 재충족(3623-3632). RC_HEAVY_COUNT=3/10(<8) → EXHAUSTIVE_SWEEP 미충족. NO_NEW_INFO_COUNT(semantic)=10/10(구조적 dry spell — KBO 시즌종료/CREDIT_EXHAUSTED 지속, 전부 "재확인"/"동일"/"drift 0건" 류) + dry-spell marker(cycle 3632 설정, 경과 ~1.0h <24h) → **STRUCTURAL_DRY_SPELL_SUPPRESS 15번째 적용** — hard stop 생략, next_n=31 그대로 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3633%50=33≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음) 미충족. trigger5 — 직전20(3614-3633, 현재 포함) 표본≥10 충족, review-code 다회 발화(0회 아님)로 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3632 " -F` → `ce254be5` 존재 확인 OK.
+
+다음 사이클 추천 = fix-incident(gap1/20)/lotto(gap8/30)/info-arch(gap3/30) gap 자연 대기 또는 review-code(heavy) 신규 스코프(`packages/kbo-data/src/pipeline/` 잔여 또는 `scrapers/`) 계속 — 구조적 dry spell 지속, 변화 신호 없으면 lite chain rotation 자연 유지 권장.
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): gh run list/scheduled workflow/vercel 재확인, 실제 incident 0건 (cycle 3632, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 33` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded/pending_user_step). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=3/10, <8 임계). 직전8(3624-3631) distinct=5(info-architecture-review/lotto/operational-analysis/fix-incident/review-code), 2-chain lock 미충족. gap: fix-incident 5/20(25%, 최고 비율)·lotto 7/30(23%)·operational-analysis 6/25(24%)·info-arch 2/30(6.7%)·review-code 1/10(10%, 직전 cycle 발화 직후) — fix-incident(lite) 선택, review-code dominance(직전8 중 3) 완화 겸.
