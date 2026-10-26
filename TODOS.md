@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — info-architecture-review(lite): breadcrumb 누락 라우트 grep, drift 0건 (cycle 3688, 2026-10-26)
+- page.tsx 111개 중 Breadcrumb 미포함 28개 전수 분류: noindex(login/settings/community)·debug·redirect 전용 index(reviews/mlb/en-mlb monthly·weekly)·홈 = 실제 gap 0. 현 IA 충분
+- 코드 변경 없음. STRUCTURAL_DRY_SPELL_SUPPRESS 적용(marker age 9.3h). 다음 = op-analysis(gap 8/25)/lotto 10/27 cron 자연 대기
+
 ## ⚪ RETRO-ONLY — review-code(heavy): shared/index.ts Elo 파생 상수 spot check, drift 0건 (cycle 3687, 2026-10-26)
 - HOME_ELO_BONUS_WIN_PROB_PCT=3.4 vs 실계산 3.4484 → 반올림 정합(초기 의심 3.5 는 오계산, 정정). 사용처 mlb/factors 2페이지 + 테스트 일치
 - 코드 변경 없음. 다음 = op-analysis(gap 7/25)/info-arch(gap 11/30)/lotto 10/27 cron 자연 대기
