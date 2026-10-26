@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap 격차 전수 재확인, 전부 의도된 제외 확인 (cycle 3618, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 47` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded). review-code(heavy) EXHAUSTIVE_SWEEP cooldown(3612~3621) 활성 제외. 직전8(3610-3617) distinct=5, 2-chain lock 미충족. gap: fix-incident 2/20·lotto 3/30·operational-analysis 1/25·info-arch 4/30(13.3%, 최고 비율) — info-architecture-review 선택.
+
+breadcrumb 전수 대조(111 page.tsx 중 93개 보유, 18개 미보유) — 18개 전부 의도된 제외 확인: debug 도구 9개(내부 전용), login/settings(인증 페이지), reviews/weekly·monthly 4개(redirect-only stub, 308 즉시 이동), 홈 루트(page.tsx), community(출시 전 noindex placeholder). sitemap.ts 89 url entry vs 111 page.tsx 격차도 코드 주석에 명시된 의도적 제외(v2-shadow-monitor noindex / search noindex+robots disallow / reviews 리다이렉트 중복 인덱싱 방지)로 설명됨. MegaMenu.tsx/Footer.tsx 양쪽 존재 확인. 신규 IA drift 0건 — 현재 IA 충분 재확인. 코드 변경 없음, retro-only.
+
+검증: 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3617 " -F` → `10328cb6` 존재 확인 OK.
+
+ship-0 서브체크: PARTIAL_STREAK=10(3609-3618) 재충족. RC_HEAVY_COUNT=3(<8 임계, 3609-3611) → EXHAUSTIVE_SWEEP 면제 불가. NO_NEW_INFO_COUNT=10/10(≥8) + dry-spell marker(cycle 3617 설정) 경과 779초(<24h) → **STRUCTURAL_DRY_SPELL_SUPPRESS 3번째 적용** — hard stop 생략, next_n 그대로 진행(46).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3618%50=18≠0)/trigger4(meta-pattern 없음)/trigger5(window 3599-3618 표본=20, review-code 9회 발화 — 0회 아님) 전부 미충족 — marker 박제 없음.
+
+다음 사이클 추천 = review-code(heavy) cooldown 만료(3621) 후 복귀, 그 전까지 fix-incident(gap0/20)/lotto(gap4/30)/operational-analysis(gap2/25) 자연 대기.
+
 ## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 코호트 재측정 52회 연속 동결 확인, STRUCTURAL_DRY_SPELL_SUPPRESS 적용 (cycle 3617, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 48` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded). review-code(heavy) EXHAUSTIVE_SWEEP cooldown(3612~3621) 활성 제외. 직전8(3610-3617) distinct=6, 2-chain lock 미충족. gap: fix-incident 1/20·lotto 2/30·info-arch 3/30·operational-analysis 4/25(review-code 제외 chain 중 최대) — operational-analysis 선택.
