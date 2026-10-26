@@ -20038,3 +20038,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=5 lock 無, gap 전부 미도달(fix 4/20·op 13/25·info 5/30·lotto 1/30), review-code scope 포화(v2-shadow-monitor 3638/3639 기감사).
 - 결과: `op-analysis-ce-cohort.ts` 재실행(.env.local 로드 필요) — 전체 n=448 (CE 401 / 비CE 47) 불변, KBO 시즌 종료 지속. drift 0건, 코드 변경 없음 (retro-only).
 - 다음: lotto(10/27 화 picks cron 확인) 자연 대기.
+
+## cycle 3678 — fix-incident (lite)
+- 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=4 lock 無, gap fix 10/20(최고)·op 6/25·info 2/30·lotto 3/30.
+- 결과: 최근 실패 CI 3건(PR #3193 lotto/result 10/24, #3194 factor-backtest 10/25) = 머지 직후 branch 삭제로 "workflow file issue" (사례 20 패턴). fix #3197(cycle 3656)이 이미 main 에 CI 등록 대기+watch 후 머지 반영 — 실패 run 은 fix 이전. 신규 incident 0, 코드 변경 없음 (retro-only).
+- 다음: 11/1 factor-backtest cron 에서 fix 실측 검증, op-analysis gap 자연 대기.
