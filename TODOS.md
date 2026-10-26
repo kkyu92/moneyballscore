@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — lotto(lite): cron 정상 확인, count_smoke 유효 7,716,994 (cycle 3694, 2026-10-26)
+- lotto-pick-update cron 10/20 success (10/24 picks 존재), 다음 fire 10/27 화 → 10/31 picks 예정. lotto-result-update 10/24~25 success 3회.
+- count_smoke: 256규칙 유효 7,716,994 / 제거 428,066 (5.26%), delta 0. 코드 변경 없음, 수동 fallback 불필요.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): MLB 팀 페이지 KO/EN twin diff, drift 0건 (cycle 3693, 2026-10-26)
 - 대상: `mlb/team/[code]/page.tsx` vs `en/mlb/team/[code]/page.tsx` (최근 10일 다중 수정)
 - 결과: route/canonical/locale prop/내부 링크(/en 접두) parity 정상, 번역 누락 0건
