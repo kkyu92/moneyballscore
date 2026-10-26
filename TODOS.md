@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy): components/{predictions,dashboard,analysis,accuracy} 61파일 전수감사, 2건 수정 (cycle 3643, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 22` 호출. open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3642 retro `b5b3df6b`) OK. 직전8(3635-3642) distinct=2(review-code+fix-incident) — 2-chain lock 조건 충족이나 rule4 예외(잠긴 2개 중 fix-incident 포함 시 lock 무시) 적용. gap 비율 전부 구조적 trigger 미도달. info-arch(4연속 동일 breadcrumb 체크)/op-analysis(시즌종료+CE 동결)/lotto(직전 cycle cron 정상 재확인) 전부 저정보가치 재확인뿐 — review-code(heavy) 가 cycle 3642 추천 신규 scope 로 계속.
+
+Agent 위임 61파일 전수 read + KBO/MLB twin 교차대조. 확정 버그 2건: (1) `FactorBreakdown.tsx` — `key in DEFAULT_WEIGHTS` 필터가 park_weather/umpire_sz(production weight=0, predictor.ts 가 항상 0.5 기록) 를 못 걸러 chart=false 기본 뷰에서도 매번 12 row(10 아님) 렌더 — 형제 컴포넌트 `DetailedFactorAnalysis.tsx` 가 이미 ACTIVE_FACTOR_KEYS 필터로 수정했던 동일 버그가 전파 안 됨, 동일 패턴 적용 + 회귀테스트 신규 박제. (2) `GameAnalysisProse.tsx`(KBO) homeWinProb===0.5 tie-break 시 strict `>` 로 원정팀 favored — MLB twin + 코드베이스 전역 관례(`>=`) 와 불일치, 정합.
+
+검증: `tsc --noEmit`/`eslint` clean, 전체 `vitest run` 4824/4824 PASS. 직접 main 커밋(`08108efa`)+push, pre-push hook 전부 PASS.
+
+**ship-0 서브체크**: PARTIAL_STREAK(3634-3643)=8/10(3635/3637/3643 success 3건) → 미충족. RC_HEAVY_COUNT(3634-3643)=8/10 이나 drift-0 기준 미충족 → EXHAUSTIVE_SWEEP 미충족.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족. trigger5 — 직전20(3624-3643) 전부 발화 → 미충족. marker 박제 없음.
+
+다음 사이클 추천 = info-architecture-review/operational-analysis/lotto 자연 대기 또는 review-code(heavy) 계속(2-chain lock 재도달 방지 위해 다양성 우선 고려).
+
 ## 🟢 RETRO-ONLY — review-code(heavy): api/{live,kbo-scores,revalidate,snapshot-pitchers,sync-batter-stats,hub-dispatch,leaderboard/sync,leaderboard/mlb-sync} 전수감사, drift 0건 (cycle 3640, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 25` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 archived/completed/pending-user-step류). 2차 방어선(`git log --grep "cycle-retro 3639 " -F`) → `a4baa338` 존재 OK. 직전8(3632-3639) distinct=4(review-code4+fix-incident2+operational-analysis1+lotto1) — 2-chain lock 미충족(distinct>2). gap 전부 낮음(fix-incident 4/20·operational-analysis 7/25·info-arch 10/30·lotto 6/30) — 자연 due chain 없음. 직전 cycle(3639) 이 flag 한 잔여 api route 그룹(`live`/`snapshot-pitchers`/`sync-batter-stats`/`kbo-scores`/`revalidate`) + 미감사 확인된 `hub-dispatch`/`leaderboard/{sync,mlb-sync}` 추가 선정.
