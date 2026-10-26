@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — lotto(lite): count_smoke 재실행 delta=0, cron pick/result 양쪽 건강 (cycle 3625, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 40` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(직전10 1회차). 직전8(3617-3624) distinct=5, 2-chain lock 미충족. gap: lotto 5/30(16.7%, 최고)·operational-analysis 4/25(16%)·fix-incident 2/20(10%)·info-arch 1/30(3.3%) — lotto 선택.
+
+`pnpm tsx scripts/lotto.ts count` 재실행 — 유효조합 7,716,994/8,145,060(256 rules), cycle 3620/3615 와 delta=0. `gh run list --workflow=lotto-pick-update.yml` — 최근 성공 2026-10-20(10/24 draw 용 picks), 10/13 1건 실패는 cycle 3128 에서 이미 fix+수동 fallback 해소된 기존 사건. 다음 run 은 10/31 draw 대비 ~10/27 예정(아직 미도달, stale 아님). `gh run list --workflow=lotto-result-update.yml` — 최근 성공 2026-10-25(1247회 결과 반영), 건강. `apps/moneyball/data/lotto-picks|results` 최신 파일 2026-10-24.md 양쪽, 예상 범위 내. 코드 변경 없음, retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK=10(3616-3625) 재충족. RC_HEAVY_COUNT=1/10(<8 임계) → EXHAUSTIVE_SWEEP 면제 불가. NO_NEW_INFO_COUNT=9/10(≥8) + dry-spell marker(cycle 3622 설정) 경과 ~36분(<24h) → **STRUCTURAL_DRY_SPELL_SUPPRESS 10번째 적용** — hard stop 생략, next_n 그대로 진행(39).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3625%50=25≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(window 3606-3625 review-code 7회 발화 — 0회 아님) 전부 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3624 " -F` → `aba2349f` 존재 확인 OK.
+
+다음 사이클 추천 = operational-analysis(gap4/25)/fix-incident(gap2/20) 자연 대기 또는 review-code(heavy) 신규 스코프 계속 — 구조적 dry spell(KBO 시즌종료/CREDIT_EXHAUSTED) 지속, 변화 신호 없으면 lite chain rotation 자연 유지 권장.
+
 ## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap 격차 재확인, 전부 의도된 제외 확인 (cycle 3624, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 41` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(직전8 distinct=5, 1회차 drift-0). 직전8(3616-3623) distinct=5(fix-incident/operational-analysis/info-arch/lotto/review-code), 2-chain lock 미충족. gap: info-arch 6/30(20%, 최고)·lotto 4/30(13.3%)·operational-analysis 3/25(12%)·fix-incident 1/20(5%) — info-architecture-review 선택.
