@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — review-code(heavy): api/{live,kbo-scores,revalidate,snapshot-pitchers,sync-batter-stats,hub-dispatch,leaderboard/sync,leaderboard/mlb-sync} 전수감사, drift 0건 (cycle 3640, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 25` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 archived/completed/pending-user-step류). 2차 방어선(`git log --grep "cycle-retro 3639 " -F`) → `a4baa338` 존재 OK. 직전8(3632-3639) distinct=4(review-code4+fix-incident2+operational-analysis1+lotto1) — 2-chain lock 미충족(distinct>2). gap 전부 낮음(fix-incident 4/20·operational-analysis 7/25·info-arch 10/30·lotto 6/30) — 자연 due chain 없음. 직전 cycle(3639) 이 flag 한 잔여 api route 그룹(`live`/`snapshot-pitchers`/`sync-batter-stats`/`kbo-scores`/`revalidate`) + 미감사 확인된 `hub-dispatch`/`leaderboard/{sync,mlb-sync}` 추가 선정.
+
+전수 read 결과: `api/live`(CRON_SECRET.trim() 가드, revalidate 실패 격리 패턴 일관 — sync-batter-stats 동일 class 명시 주석) / `api/kbo-scores`(Naver 공개 API, cancel/suspended 구조적 필드 최우선 + 한국어 텍스트 폴백 2-layer mapStatus, DB status enum 'postponed' 단일 source 정합) / `api/revalidate`(CRON_SECRET.trim() + paths whitelist 10개 cap) / `api/snapshot-pitchers`(season bounds 2020~2100 가드, 주석에 cron 이관 이력 cloudflare-worker 명시) / `api/sync-batter-stats`(동일 패턴, revalidate 실패 격리) / `api/hub-dispatch`(HMAC timingSafeEqual, VERCEL_ENV!=production 403 가드, no-relay 태그 재귀 방지 — cycle 3055/Pull(b)D2 정합) / `api/leaderboard/{sync,mlb-sync}`(isOriginAllowed + isValidNickname/DeviceId + MAX_PICKS_PER_SYNC 가드, KBO/MLB 양쪽 DB_CONSTRAINTS 분리 정합 — cycle 2991/2992 lesson 대상이던 leaderboard/sync 이번에 전수 확인 완료). **drift 0건, 코드 변경 없음** — retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK(3631-3640)=8/10(3635/3637 success 2건 존재) → 10 미충족, hard-stop 불발동. RC_HEAVY_COUNT(3631-3640)=6/10(<8) → EXHAUSTIVE_SWEEP 미충족.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3640%50=40≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음) 미충족. trigger5 — 직전20(3621-3640, 현재 포함) review-code/fix-incident/operational-analysis/info-arch/lotto 전부 발화(0회 없음) → 미충족. marker 박제 없음. 1차 방어선 — 본 commit 자체.
+
+다음 사이클 추천 = api 전체 소진(`debug/*` page.tsx 8개 미감사 잔존 또는 `mlb`/`en/mlb` twin page 대량 재확인) review-code(heavy) 계속 또는 fix-incident(gap5/20)/operational-analysis(gap8/25)/info-arch(gap11/30)/lotto(gap7/30) 자연 대기.
+
 ## 🟢 RETRO-ONLY — review-code(heavy): calendar/dashboard page.tsx + api/{health,mlb,picks,pipeline,seo,version} 전수감사, drift 0건 (cycle 3638, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 27` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/pending-step). 2차 방어선(`git log --grep "cycle-retro 3637 " -F`) → `82865b03` 존재 OK. 직전8(3630-3637) distinct=5(info-arch/review-code/fix-incident/operational-analysis/lotto) — 2-chain lock 미충족. gap 전부 낮음(fix-incident 2/20·operational-analysis 5/25·info-arch 8/30·lotto 4/30) — 자연 due chain 없음. 직전 cycle(3637) 추천대로 review-code(heavy) 신규 scope 선정: `app/{calendar,dashboard}/page.tsx` + `app/api/{health,mlb,picks,pipeline,seo,version}` (이전 cycle 이 `app/mlb/page.tsx` 만 다룸, 나머지 미감사).
