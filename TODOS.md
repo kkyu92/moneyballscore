@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap 격차 재확인, 전부 의도된 제외 재확인 (cycle 3630, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 35` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 archived/completed/pending_user_step/superseded). `gh run list` — CI/Vercel Deploy Failure Dispatch 전부 skipped, 실제 incident 부재. review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=3/10, <8 임계). 직전8(3622-3629) distinct=5(fix-incident/lotto/info-architecture-review/operational-analysis/review-code), 2-chain lock 미충족. gap: info-arch 6/30(20%, 최고)·lotto 5/30(16.7%)·operational-analysis 4/25(16%)·fix-incident 3/20(15%) — info-architecture-review(lite) 선택.
+
+`find src/app -name page.tsx -mtime -7` (111개 전부 걸림 — checkout 시 mtime 리셋, 신뢰 불가 신호로 판단) / `grep -L Breadcrumb` 재확인 — `debug/*`(내부 진단 도구, 의도된 제외) / `login`·`settings`·`community`(유틸리티 페이지, 네비게이션 불필요) / `reviews/monthly`·`reviews/weekly`·`en/mlb/reviews/*` index 페이지(`sitemap.ts` 주석 확인 결과 308 redirect — 실컨텐츠는 dynamic block 이 커버) 전부 cycle 3624 와 동일 결론. sitemap.ts URL count(89) vs page.tsx count(111) 격차도 동일 원인(dynamic route 비개별 열거 + 의도된 제외) 재확인. 신규 drift 0건, 코드 변경 없음.
+
+**ship-0 서브체크**: PARTIAL_STREAK 10회 재충족(3621-3630). RC_HEAVY_COUNT=3/10(<8) → EXHAUSTIVE_SWEEP 미충족. NO_NEW_INFO_COUNT(semantic)=10/10(구조적 dry spell — KBO 시즌종료/CREDIT_EXHAUSTED 지속, 전부 "이미 확인"/"재확인"/"의도된 제외" 류) + dry-spell marker(cycle 3622 설정, 경과 ~52분 <24h) → **STRUCTURAL_DRY_SPELL_SUPPRESS 13번째 적용** — hard stop 생략, next_n 그대로 진행(34).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음 — 기존 패턴과 동일 미발화)/trigger2(5연속 fail 없음)/trigger3(3630%50=30≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(window 3611-3630 review-code 4회 발화 — 0회 아님) 전부 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3629 " -F` → `2ce95501` 존재 확인 OK.
+
+다음 사이클 추천 = fix-incident(gap4/20)/lotto(gap6/30)/operational-analysis(gap5/25) 자연 대기 또는 review-code(heavy) 신규 스코프(`packages/kbo-data/src/pipeline/` 잔여) 계속 — 구조적 dry spell(KBO 시즌종료/CREDIT_EXHAUSTED) 지속, 변화 신호 없으면 lite chain rotation 자연 유지 권장.
+
 ## 🟢 RETRO-ONLY — review-code(heavy): engine/features/mlb-form/backtest-loader 전수 read, drift 0건 (cycle 3628, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 37` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded/pending_user_step). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=1/10, <8 임계). 직전8(3620-3627) distinct=5(fix-incident/lotto/info-architecture-review/operational-analysis/review-code), 2-chain lock 미충족. gap: review-code 5/10(50%, 최고)·fix-incident 0/20·info-arch 3/30(10%)·lotto 2/30(6.7%)·operational-analysis 1/25(4%) — review-code(heavy) 선택, cycle 3622 carry-over 추천 스코프(`packages/kbo-data/src/engine` 또는 `features/`) 진행.
