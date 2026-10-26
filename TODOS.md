@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — review-code(heavy): shared/index.ts Elo 파생 상수 spot check, drift 0건 (cycle 3687, 2026-10-26)
+- HOME_ELO_BONUS_WIN_PROB_PCT=3.4 vs 실계산 3.4484 → 반올림 정합(초기 의심 3.5 는 오계산, 정정). 사용처 mlb/factors 2페이지 + 테스트 일치
+- 코드 변경 없음. 다음 = op-analysis(gap 7/25)/info-arch(gap 11/30)/lotto 10/27 cron 자연 대기
+
 ## ⚪ RETRO-ONLY — polish-ui(lite): DESIGN.md token vs 컴포넌트 hex grep, drift 0건 (cycle 3686, 2026-10-26)
 - palette 밖 hex 2건 = ShareButtons Twitter(#1DA1F2)/Facebook(#1877F2) 브랜드색, 의도된 서드파티 — drift 아님
 - 코드 변경 없음. 다음 = op-analysis(gap 6/25)/info-arch(gap 10/30) 자연 대기
