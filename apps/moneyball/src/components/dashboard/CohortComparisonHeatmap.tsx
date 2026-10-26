@@ -10,11 +10,11 @@ interface CohortComparisonHeatmapProps {
 const STRINGS = {
   ko: {
     emptyData: "모델 버전 × 주차 매트릭스 데이터 없음.",
-    emptyCohort: "최근 주차에서 검증된 cohort 가 없습니다.",
+    emptyCohort: "최근 주차에서 검증된 예측이 없습니다.",
     header: "모델 버전",
     smallSample: "참고용",
     legend:
-      "색상 — brand-700 ≥70% / brand-500 ≥60% / brand-300 ≥50% / brand-100 <50% / 회색 3경기 미만(참고용). 최근 4주 cohort 시계열 비교.",
+      "색상 — 진한 녹색 ≥70% / 녹색 ≥60% / 연한 녹색 ≥50% / 아주 연한 녹색 <50% / 회색 3경기 미만(참고용). 모델 버전별 최근 4주 적중률 비교.",
   },
   en: {
     emptyData: "No model-version × week matrix data yet.",
@@ -22,7 +22,7 @@ const STRINGS = {
     header: "Model version",
     smallSample: "small N",
     legend:
-      "Color — brand-700 ≥70% / brand-500 ≥60% / brand-300 ≥50% / brand-100 <50% / gray N<3 small sample. Recent 4-week cohort comparison.",
+      "Color — dark green ≥70% / green ≥60% / light green ≥50% / pale green <50% / gray N<3 small sample. Recent 4-week accuracy by model version.",
   },
 };
 
@@ -34,10 +34,8 @@ function displayWeekLabel(label: string, locale: "ko" | "en"): string {
 
 // silent drift family wave 257 (cycle 1563) — 하드코딩 era 리스트 → SCORING_RULE_HEATMAP_ROWS
 // derive. 'all' aggregate 만 특수 라벨 ("전체"), 나머지는 identity. 신규 prod era 추가 시
-// PRODUCTION_ERA_HISTORY 한 곳만 갱신 → ROW_LABEL 자동 반영.
-const ROW_LABEL: Record<string, string> = Object.fromEntries(
-  SCORING_RULE_HEATMAP_ROWS.map((sr) => [sr, sr === "all" ? "전체" : sr]),
-);
+// PRODUCTION_ERA_HISTORY 한 곳만 갱신 → row 자동 반영.
+const ALL_ROW_LABEL = { ko: "전체", en: "All" } as const;
 
 /**
  * scoring_rule × 주차 (최근 4주) cohort heatmap.
@@ -56,6 +54,7 @@ function cellBgClass(acc: number | null): string {
 
 export function CohortComparisonHeatmap({ data, locale = "ko" }: CohortComparisonHeatmapProps) {
   const s = STRINGS[locale];
+  const rowLabel = (sr: string) => (sr === "all" ? ALL_ROW_LABEL[locale] : sr);
 
   if (data.length === 0) {
     return (
@@ -111,7 +110,7 @@ export function CohortComparisonHeatmap({ data, locale = "ko" }: CohortCompariso
           {activeRows.map((sr) => (
             <tr key={sr}>
               <td className="px-2 py-2 font-mono text-xs text-neutral-700 dark:text-neutral-200 border-r border-neutral-300 dark:border-neutral-700">
-                {ROW_LABEL[sr] ?? sr}
+                {rowLabel(sr)}
               </td>
               {weekStarts.map((wk) => {
                 const cell = cellMap.get(`${sr}__${wk}`);
@@ -135,7 +134,7 @@ export function CohortComparisonHeatmap({ data, locale = "ko" }: CohortCompariso
                   <td
                     key={wk}
                     className={`px-1 py-1 text-center align-middle ${cellBgClass(cell.accuracy)}`}
-                    title={`${ROW_LABEL[sr] ?? sr} × ${displayWeekLabel(weekLabelMap.get(wk) ?? wk, locale)}: ${cell.hits}/${cell.n}`}
+                    title={`${rowLabel(sr)} × ${displayWeekLabel(weekLabelMap.get(wk) ?? wk, locale)}: ${cell.hits}/${cell.n}`}
                   >
                     <div className="text-sm font-semibold">{label}</div>
                     <div className="text-2xs opacity-80">{sub}</div>

@@ -47,4 +47,18 @@ describe("ScoringRuleDayHeatmap", () => {
     expect(rows.length).toBe(2);
     expect(container.textContent).toContain("v1.8");
   });
+  it("n=0 cell 은 'N=0 참고용' 이 아니라 '—' 로 렌더 (자매 CohortComparisonHeatmap parity)", () => {
+    const data: ScoringRuleDayCell[] = [allOnlyCell(1, 5, 3), allOnlyCell(2, 0, 0)];
+    const { container } = render(<ScoringRuleDayHeatmap data={data} />);
+    expect(container.textContent).not.toContain("N=0");
+    expect(container.textContent).toContain("—");
+  });
+
+  it("en locale 은 'all' 행 라벨이 한국어 '전체' 가 아니라 'All'", () => {
+    const { container } = render(
+      <ScoringRuleDayHeatmap data={[allOnlyCell(1, 5, 3)]} locale="en" />,
+    );
+    expect(container.textContent).toContain("All");
+    expect(container.textContent).not.toContain("전체");
+  });
 });

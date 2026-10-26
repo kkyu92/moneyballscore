@@ -21,14 +21,14 @@ const STRINGS = {
     empty: "모델 버전 × 요일 매트릭스 데이터 없음.",
     header: "모델 버전",
     smallSample: "참고용",
-    legend: "색상 — 녹색 ≥60% / 노랑 ≥50% / 빨강 <50% / 회색 3경기 미만(참고용). v1.6 anomaly + Sunday cap 효과 시각화.",
+    legend: "색상 — 녹색 ≥60% / 노랑 ≥50% / 빨강 <50% / 회색 3경기 미만(참고용). 요일별 적중률 차이 확인.",
     dayLabels: WEEKDAY_LABELS_KO_MON_FIRST,
   },
   en: {
     empty: "No model-version × weekday matrix data yet.",
     header: "Model version",
     smallSample: "small N",
-    legend: "Color — green ≥60% / yellow ≥50% / red <50% / gray N<3 small sample. Visualizes v1.6 anomaly + Sunday cap effect.",
+    legend: "Color — green ≥60% / yellow ≥50% / red <50% / gray N<3 small sample. Accuracy by day of week.",
     dayLabels: WEEKDAY_LABELS_EN_MON_FIRST,
   },
 };
@@ -44,14 +44,13 @@ function cellBgClass(acc: number | null): string {
 
 // silent drift family wave 257 (cycle 1563) — 하드코딩 era 리스트 → SCORING_RULE_HEATMAP_ROWS
 // derive. 'all' aggregate 만 특수 라벨 ("전체"), 나머지는 identity. 신규 prod era 추가 시
-// PRODUCTION_ERA_HISTORY 한 곳만 갱신 → ROW_LABEL 자동 반영. CohortComparisonHeatmap 정합.
-const ROW_LABEL: Record<string, string> = Object.fromEntries(
-  SCORING_RULE_HEATMAP_ROWS.map((sr) => [sr, sr === "all" ? "전체" : sr]),
-);
+// PRODUCTION_ERA_HISTORY 한 곳만 갱신 → row 자동 반영. CohortComparisonHeatmap 정합.
+const ALL_ROW_LABEL = { ko: "전체", en: "All" } as const;
 
 export function ScoringRuleDayHeatmap({ data, locale = "ko" }: ScoringRuleDayHeatmapProps) {
   const s = STRINGS[locale];
   const dayLabels = s.dayLabels;
+  const rowLabel = (sr: string) => (sr === "all" ? ALL_ROW_LABEL[locale] : sr);
 
   if (data.length === 0) {
     return (
@@ -107,11 +106,11 @@ export function ScoringRuleDayHeatmap({ data, locale = "ko" }: ScoringRuleDayHea
           {activeRows.map((sr) => (
             <tr key={sr}>
               <td className="px-2 py-2 font-mono text-xs text-neutral-700 dark:text-neutral-200 border-r border-neutral-300 dark:border-neutral-700">
-                {ROW_LABEL[sr] ?? sr}
+                {rowLabel(sr)}
               </td>
               {DAY_ORDER.map((day) => {
                 const cell = cellMap.get(`${sr}__${day}`);
-                if (!cell) {
+                if (!cell || cell.n === 0) {
                   return (
                     <td
                       key={day}
@@ -133,7 +132,7 @@ export function ScoringRuleDayHeatmap({ data, locale = "ko" }: ScoringRuleDayHea
                   <td
                     key={day}
                     className={`px-1 py-1 text-center align-middle ${cellBgClass(cell.accuracy)}`}
-                    title={`${ROW_LABEL[sr] ?? sr} × ${dayLabels[DAY_ORDER.indexOf(day)]}: ${cell.hits}/${cell.n}`}
+                    title={`${rowLabel(sr)} × ${dayLabels[DAY_ORDER.indexOf(day)]}: ${cell.hits}/${cell.n}`}
                   >
                     <div className="text-sm font-semibold">{label}</div>
                     <div className="text-2xs opacity-80">{sub}</div>
