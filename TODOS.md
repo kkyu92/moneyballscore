@@ -1,3 +1,17 @@
+## lotto(lite) — 1247회 cron 건강도 재확인, STRUCTURAL_DRY_SPELL_SUPPRESS 첫 적용 (cycle 3615, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 50` 재호출로 cycle 3614 EMERGENCY-STOP 직후 zero-touch 재개. 직전8(3607-3614) distinct=4(review-code5+fix-incident1+operational-analysis1+info-arch1) 2-chain lock 미충족. review-code EXHAUSTIVE_SWEEP cooldown(3612~3621) 유지 중 제외. open issue 0건, plan 0/21. gap 최고 lotto(12/30) 선택 — 1247회(10/24) 추첨 직후 + 1248회(10/31) picks 생성 전(cron 스케줄상 화요일, 정상) 적기.
+
+cron 양쪽(`lotto-pick-update`/`lotto-result-update`) 최근 실행 전부 success 확인. `pnpm tsx scripts/lotto.ts count` 정상 완료 — 유효조합 7,716,994(+10,681, 1247회 결과 반영 자연 재계산, 신규 rule 아님). 코드 변경 없음, retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK=10(3606-3615) 재충족 + RC_HEAVY_COUNT=6(<8) → EXHAUSTIVE_SWEEP 면제 불가. 그러나 **NO_NEW_INFO_COUNT=10(≥8) + dry-spell marker(cycle 3614 설정) 경과 45초(<24h)** → **STRUCTURAL_DRY_SPELL_SUPPRESS=true 최초 적용** — hard-stop 생략, 사용자 N=50 그대로 진행 (SKILL.md v2 룰 cycle 3614 후속 신설 후 첫 실제 적용 사례).
+
+skill-evolution trigger 평가: trigger5(review-code 11/19 — 0회 아님) 미충족. trigger3(3615%50≠0) 미충족. marker 박제 없음.
+
+next_n=49. 다음 사이클 = review-code(heavy) cooldown(3621 만료까지 잔여 6) 또는 info-arch/fix-incident/op-analysis 자연 gap 대기.
+
+---
+
 ## 🔴 EMERGENCY-STOP — info-architecture-review(lite): 4연속 동일 breadcrumb checkpoint, 10-cycle ship-0 streak 재발동 (cycle 3614, 2026-10-26)
 
 진단: 로컬 checkout origin 대비 2 commit 지연 발견 (cron 산출물 2건: lotto 1247회 결과 + factor-backtest weekly) → `git pull --ff-only` 로 해소, cron 양쪽 정상 작동 확인 (silent drift 아님). open issue 0건, approved+unexpired plan 0/22. 2-chain lock 미충족(직전8(3606-3613) distinct=3: review-code6+fix-incident1+operational-analysis1). review-code EXHAUSTIVE_SWEEP cooldown(3612~3621) 유지 중 제외. gap 비율: lotto 11/30(37%, 최고이나 cron 산출물 양쪽 직접 확인 결과 완전 정상 — lite 확인 불필요 판단)·info-arch 9/30(30%)·fix-incident 2/20(직전 발화)·op-analysis 1/25(직전 발화) — info-arch 선택.
