@@ -1,3 +1,8 @@
+## ⚪ RETRO-ONLY — lotto(lite): cron 정상 확인, drift 0건 (cycle 3675, 2026-10-26)
+- count_smoke valid 7,716,994 / 8,145,060 (제거 5.26%), delta 0
+- results/picks 최신 2026-10-24, 10/27 화 picks cron 대기 정상
+- 코드 변경 없음
+
 ## ⚪ RETRO-ONLY — review-code(heavy): aria-label i18n sibling grep, drift 0건 (cycle 3674, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 23` 호출. open issue 0건, approved plan 0건, CI 실패 0, gap 전부 미도달, 직전8 distinct=5. 3661/3663 i18n·aria leak family 후속으로 aria-label 템플릿 한국어 하드코딩 8건 점검 — 전부 KO-only 컴포넌트/라우트, en 노출 경로 없음. 코드 변경 없음.
