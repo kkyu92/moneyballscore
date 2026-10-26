@@ -6,6 +6,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -43,10 +44,9 @@ export default async function MlbHub() {
     .eq('scoring_rule', MLB_SCORING_RULE)
     .eq('mlb_game_date', today);
 
-  const todayGames = result.error ? null : result.data;
-  if (result.error) {
-    console.warn(`[MlbHub] predictions query failed: ${result.error.message}`);
-  }
+  const todayGames = result.error
+    ? captureFallback(result.error, null, { route: "/mlb", source: "todayGamesCount" })
+    : result.data;
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8">
