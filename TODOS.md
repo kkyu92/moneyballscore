@@ -19913,3 +19913,6 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 진단: open issue 0건, approved plan 0/22, TODOS Next-Up 섹션 부재, DESIGN.md 5일 신선. prev8 distinct=5 lock 미충족. PARTIAL_STREAK 미충족(3643 success). CI main 실패 0건. lotto picks/results 2026-10-24 최신.
 
 **milestone**: cycle 3650 %50==0 → trigger3 충족, `skill-evolution-pending` marker 박제 → 다음 사이클 phase 60 skill-evolution 강제 발화.
+
+## cycle 3651 — skill-evolution (phase 60, 94th)
+- trigger3 milestone. 3601-3650: success 4/50, retro-only 45, retro 중복 2건(3612/3617), PASS_ship 3134. PR #3196 MERGED (ae75b4b6). 다음 milestone cycle 3700.
