@@ -19654,3 +19654,15 @@ scripts/, packages/shared/src, lib/api·standings·utils, components/(0-mention 
 **검증(skill-evolution 등)**: trigger1(chain-evolution 과거 소비, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3610%50=10≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3591-3610, 현재 포함) 표본=19(≥10 충족), review-code 9회 발화(0회 아님)로 미충족. marker 미박제. 1차 방어선 — 본 commit 자체. 2차 방어선 — cycle 3609 retro `56f1b87c` 존재 확인 OK.
 
 다음 사이클 추천 = review-code(heavy) 신규 scope(packages/kbo-data/src/pipeline/ 잔여) 또는 fix-incident(gap12/20)/lotto(gap8/30)/info-arch(gap6/30) gap 자연 대기. components/ 전체 scope 거의 소진 — 다음은 packages/kbo-data 전환 권장.
+
+## 🟢 RETRO-ONLY — review-code(heavy): backtest/ 잔여 11개 파일 전수 감사, drift 0건 (cycle 3629, 2026-10-26)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 직전8(3622-3629) distinct=5(review-code/fix-incident/info-arch/lotto/operational-analysis) — 2-chain lock 미충족. gap 전부 낮음(fix-incident 1/20·op-analysis 2/25·lotto 3/30·info-arch 4/30) — 자연 due chain 없음. 구조적 dry spell(KBO 2026시즌 10/4 종료, CREDIT_EXHAUSTED) 지속 확인.
+
+cycle 3628 carry-over 추천대로 `packages/kbo-data/src/backtest/` 잔여 11개 파일(loader.ts 는 cycle 3628 기감사) 전수 read: logistic.ts(pipeline 5곳 production 사용) vs logistic-regression.ts(plan #16 evidence-pack-only, 자체 vitest만 소비 — 의도된 비배선 확인, dead code 아님) 구분, types.ts/metrics.ts/models.ts 계약 정합, elo-history.ts/wayback-team-stats.ts 파싱 로직 self-documented 정합, runner.ts 더블헤더 batch prior look-ahead bias 차단 정상, walk-forward-helpers.ts CvPattern union 정합(cycle 3094 과거 발견 반영 확인), backtest-v2-helpers.ts 3-way comparison/kill-switch 로직 정합. **drift 0건, 코드 변경 없음** — retro-only.
+
+**STRUCTURAL_DRY_SPELL_SUPPRESS**: NO_NEW_INFO_COUNT(semantic)=10/10(직전10 전부 구조적 블로커 재확인/drift 0건), dry-spell marker(cycle 3621 설정) 경과 <24h → 14번째 적용, hard stop 생략, next_n=35 그대로 진행. EXHAUSTIVE_SWEEP: RC_HEAVY_COUNT=3/10(<8) 미충족.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 5건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3629%50=29≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3610-3629, 현재 포함) 표본=20(≥10 충족), review-code 3회 발화(0회 아님)로 미충족. marker 미박제. 1차 방어선 — 본 commit 자체. 2차 방어선 — cycle 3628 retro `bb0b192c` 존재 확인 OK.
+
+다음 사이클 추천 = fix-incident(gap1/20)/lotto(gap3/30)/info-arch(gap4/30) 자연 대기 또는 review-code(heavy) 신규 scope(packages/kbo-data/src/pipeline/ 잔여 또는 scrapers/).
