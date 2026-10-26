@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 코호트 재측정, n=448 동일(28회 연속 불변) (cycle 3626, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 39` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=1/10, <8 임계). 직전8(3618-3625) distinct=5, 2-chain lock 미충족. gap: operational-analysis 5/25(20%, 최고)·fix-incident 3/20(15%)·info-arch 2/30(6.7%)·lotto 1/30(3.3%) — operational-analysis 선택.
+
+`pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행 — 전체 n=448(CE n=401/비CE n=47), cycle 3598 이후 28회 연속 완전 동일(신규 verified pre_game 0건, KBO 2026 정규시즌 2026-10-04 종료 지속). CE 55.9%(224/401, Brier 0.4003) / 비CE 63.8%(30/47, Brier 0.2534) → 격차 8.0pp 그대로. overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 유지 — LLM 부가가치 우세 결론 53회 연속 재확인. `gh run list` — CI/Vercel Deploy Failure Dispatch 전부 skipped, 실제 incident 부재. `vercel ls` — Building/Ready/Canceled 는 연쇄 push 정상 churn. CREDIT_EXHAUSTED(Anthropic 크레딧) 지속, 비CE 표본 동결(마지막 예측 2026-07-01, 117일+ 경과) 상태 변화 없음. 코드 변경 없음, retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK=10(3617-3626) 재충족. RC_HEAVY_COUNT=1/10(<8 임계) → EXHAUSTIVE_SWEEP 면제 불가. NO_NEW_INFO_COUNT=10/10(≥8) + dry-spell marker(cycle 3622 설정) 경과 ~39분(<24h) → **STRUCTURAL_DRY_SPELL_SUPPRESS 11번째 적용** — hard stop 생략, next_n 그대로 진행(38).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3626%50=26≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(window 3607-3626 review-code 7회 발화 — 0회 아님) 전부 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3625 " -F` → `d2784e42` 존재 확인 OK.
+
+다음 사이클 추천 = fix-incident(gap4/20)/lotto(gap2/30)/info-arch(gap3/30) 자연 대기 또는 review-code(heavy) 신규 스코프 — 구조적 dry spell(KBO 시즌종료/CREDIT_EXHAUSTED) 지속, 변화 신호 없으면 lite chain rotation 자연 유지 권장.
+
 ## 🟢 RETRO-ONLY — lotto(lite): count_smoke 재실행 delta=0, cron pick/result 양쪽 건강 (cycle 3625, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 40` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(직전10 1회차). 직전8(3617-3624) distinct=5, 2-chain lock 미충족. gap: lotto 5/30(16.7%, 최고)·operational-analysis 4/25(16%)·fix-incident 2/20(10%)·info-arch 1/30(3.3%) — lotto 선택.
