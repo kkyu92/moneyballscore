@@ -20001,3 +20001,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=4 lock 無. gap 전부 미도달(fix 1/20·op 10/25·info 2/30·lotto 7/30). review-code dominance 완화로 polish-ui 선택.
 - 결과: components/app hex 하드코딩 grep — HallOfFame `var(--color-*, fallback)` 토큰 정합, ShareButtons 소셜 컬러 의도적 (cycle 3660 동일 결과 재확인). DESIGN.md mtime 5일 신선. drift 0건, 코드 변경 없음 (retro-only).
 - 다음: lotto(10/27 화 picks cron 확인) 자연 대기.
+
+## cycle 3670 — review-code (heavy)
+- 진단: main=origin 클린, open hub-dispatch 0, 직전8 distinct=5 lock 無, gap 전부 미도달(fix 2/20·op 11/25·info 3/30·lotto 8/30).
+- 결과: app/lib/components 사용자 가시 n 하드코딩 grep — 0건(maxDuration 오탐만). drift 0건, 코드 변경 없음 (retro-only).
+- 다음: lotto(10/27 화 picks cron 확인) 자연 대기.
