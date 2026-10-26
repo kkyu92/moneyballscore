@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — lotto(lite): cron 양쪽 건강도 + count_smoke 재확인, delta=0 (cycle 3620, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 45` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded). review-code(heavy) EXHAUSTIVE_SWEEP cooldown(3612~3621) 활성 제외. 직전8(3612-3619) distinct=4(fix-incident/operational-analysis/info-architecture-review/lotto), 2-chain lock 미충족. gap: fix-incident 1/20(5%)·operational-analysis 3/25(12%)·info-arch 2/30(6.7%)·lotto 5/30(16.7%, 최고) — lotto 선택.
+
+`apps/moneyball/data/lotto-picks/` 최신 2026-10-24.md(지난 토 draw) / `lotto-results/` 최신 2026-10-24.md(당일 결과 반영) — 양쪽 cron 정상 작동 확인. 다음 토(10/31) pick 미생성은 과거 cadence(약 4일 전 생성) 기준 오늘(월) 미도달 정상. `pnpm tsx scripts/lotto.ts count` 재실행 — 유효조합 7,716,994 / 제거 428,066(5.26%) — TODOS 기록값과 완전 동일, delta=0. 신규 rule 없음. 코드 변경 없음, retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK=10(3610-3619) 재충족. RC_HEAVY_COUNT=1/9(<8 임계) → EXHAUSTIVE_SWEEP 면제 불가. NO_NEW_INFO_COUNT=10/10(≥8) + dry-spell marker(cycle 3619 설정) 경과 ~19분(<24h) → **STRUCTURAL_DRY_SPELL_SUPPRESS 5번째 적용** — hard stop 생략, next_n 그대로 진행(44).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3620%50=20≠0)/trigger4(meta-pattern 없음)/trigger5(window 3601-3620 표본=20, review-code 8회 발화 — 0회 아님) 전부 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3619 " -F` → `d43423ac` 존재 확인 OK.
+
+다음 사이클 추천 = review-code(heavy) cooldown 만료(3621) 후 복귀, 그 전까지 fix-incident(gap2/20)/info-arch(gap3/30)/operational-analysis(gap4/25) 자연 대기.
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): gh run list + vercel ls + Supabase reachability 재확인, 실제 incident 0건 (cycle 3619, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 46` 호출. open issue 0건, approved+unexpired plan 0/22(전부 completed/archived/superseded). review-code(heavy) EXHAUSTIVE_SWEEP cooldown(3612~3621) 활성 제외. 직전8(3611-3618) distinct=5(review-code/fix-incident/operational-analysis/info-architecture-review/lotto), 2-chain lock 미충족. gap: fix-incident 3/20=15%(최고, last fire 3616)·lotto 4/30=13.3%·operational-analysis 2/25=8%·info-arch 1/30=3.3% — fix-incident 선택.
