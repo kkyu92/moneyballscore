@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — polish-ui(lite): DESIGN.md token vs hex grep drift 0건 (cycle 3696, 2026-10-26)
+
+tsx hex 리터럴은 HallOfFame `var(--color-*, fallback)` 뿐, 토큰 일치. 코드 변경 없음. STRUCTURAL_DRY_SPELL_SUPPRESS 적용(marker age ~9.5h).
+
 ## ⚪ RETRO-ONLY — info-architecture-review(lite): Breadcrumb/sitemap 점검 drift 0건 (cycle 3695, 2026-10-26)
 - page.tsx 111개 중 Breadcrumb 미사용 = redirect(reviews/weekly·monthly, mlb/en 동일) + debug + login/settings + community noindex stub 뿐. 사용자 hub 페이지 전부 보유. sitemap.ts 89 entries, mismatch 없음. 코드 변경 없음.
 
