@@ -1,3 +1,17 @@
+## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 코호트 재측정 52회 연속 동결 확인, STRUCTURAL_DRY_SPELL_SUPPRESS 적용 (cycle 3617, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 48` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded). review-code(heavy) EXHAUSTIVE_SWEEP cooldown(3612~3621) 활성 제외. 직전8(3610-3617) distinct=6, 2-chain lock 미충족. gap: fix-incident 1/20·lotto 2/30·info-arch 3/30·operational-analysis 4/25(review-code 제외 chain 중 최대) — operational-analysis 선택.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행 — n=448(CE 401/비CE 47) 수치 cycle 3433 이후 완전 동결 지속(52회 연속 동일). CE 55.9%(224/401, Brier 0.4003) / 비CE 63.8%(30/47, Brier 0.2534) → 격차 8.0pp 그대로. overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 유지 — LLM 부가가치 우세 결론 52회 연속 재확인. 원인 = KBO 2026 정규시즌 2026-10-04 종료 지속(신규 verified pre_game 0건) + CREDIT_EXHAUSTED(Anthropic 크레딧) 지속(비CE 표본 마지막 예측 2026-07-01, 117일+ 경과). 코드 변경 없음, retro-only.
+
+검증: 1차 방어선(본 commit 자체) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3616 " -F` → `11cdff4f` 존재 확인 OK.
+
+ship-0 서브체크: PARTIAL_STREAK=10(3608-3617) 재충족. RC_HEAVY_COUNT=4(<8 임계, 3608-3611 review-code heavy 4건) → EXHAUSTIVE_SWEEP 면제 불가. NO_NEW_INFO_COUNT=10/10(≥8) + dry-spell marker 확인 결과 cycle 3616 에 약 10분 전 설정(24h 미경과) → **STRUCTURAL_DRY_SPELL_SUPPRESS 적용** — hard stop 생략, next_n 그대로 진행(47).
+
+skill-evolution trigger 평가: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3617%50=17≠0)/trigger4(meta-pattern 없음)/trigger5(window 3598-3617 표본=20≥10, review-code 9회 발화 — 0회 아님) 전부 미충족 — marker 박제 없음.
+
+다음 사이클 추천 = review-code(heavy) cooldown 만료(3621) 후 복귀, 그 전까지 fix-incident(gap1/20)/lotto(gap2/30)/info-arch(gap3/30) 자연 대기.
+
 ## fix-incident(lite) — gh run list + vercel 배포 재확인, 실제 incident 부재, STRUCTURAL_DRY_SPELL_SUPPRESS 2번째 적용 (cycle 3616, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 49` 호출 = cycle 3615 next_rec(49) 과 정확 일치 — 자연 zero-touch 연속. 직전8(3608-3615) distinct=5(review-code4+fix-incident1+operational-analysis1+info-architecture-review1+lotto1) 2-chain lock 미충족. review-code EXHAUSTIVE_SWEEP cooldown(3612~3621) 유지 중 제외. open issue 0건, plan 0/22(10~28 전수 재확인, 전부 completed/archived/superseded — approved 無). explore-idea saturation 11/15(미충족) + 4-source negative(TODOS Next-Up 섹션 부재, DESIGN.md 5일 신선) 유지. gap 비율: fix-incident 4/20(20%, 최고)·op-analysis 3/25(12%)·info-arch 2/30(6.7%)·lotto 1/30(직전 발화) — fix-incident 선택.
