@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — lotto(lite): count_smoke 재확인(delta=0), 화/토 cron 양쪽 정상 (cycle 3634, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 31` 호출. open issue 0건, approved+unexpired plan 0/22. 직전8(3626-3633) distinct=4(operational-analysis/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap: lotto 9/30(30%, 최고 비율)·fix-incident 2/20·info-arch 4/30·operational-analysis 1/25(직전 cycle 발화 직후) — lotto(lite) 선택.
+
+`pnpm tsx scripts/lotto.ts count` 재실행 — 유효 조합 7,716,994/8,145,060(5.26% 제거), delta=0 vs cycle 3625(완전 동일 수치). 화요일 cron(`lotto-pick-update.yml`)은 오늘(월) 기준 내일(10/27) 10/31 draw 용 picks 생성 예정 — 아직 미생성 정상(due 아님). 토요일 cron(`lotto-result-update.yml`)은 2026-10-24.md 결과 파일 정상 생성 확인. **신규 rule 없음, 코드 변경 없음** — retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK 10회 재충족(3624-3633). RC_HEAVY_COUNT=3/10(<8) → EXHAUSTIVE_SWEEP 미충족. NO_NEW_INFO_COUNT(semantic)=10/10(구조적 dry spell 지속, 전부 "재확인"/"동일"/"drift 0건" 류) + dry-spell marker(cycle 3633 설정, 경과 ~1.1h <24h) → **STRUCTURAL_DRY_SPELL_SUPPRESS 16번째 적용** — hard stop 생략, next_n=30 그대로 진행.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3634%50=34≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음) 미충족. trigger5 — 직전20(3615-3634, 현재 포함) 표본=19(≥10 충족), review-code 4회 발화(0회 아님)로 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3633 " -F` → `5ee11ba3` 존재 확인 OK.
+
+다음 사이클 추천 = fix-incident(gap2/20) 또는 info-architecture-review(gap4/30) 자연 대기 또는 review-code(heavy) 신규 scope(packages/kbo-data/src/scrapers/) 계속.
+
 ## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 코호트 재측정, n=448 동일(52회 연속 불변) (cycle 3633, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 32` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded/pending_user_step). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=3/10, <8 임계). 직전8(3625-3632) distinct=5(lotto/operational-analysis/fix-incident/review-code/info-architecture-review), 2-chain lock 미충족. gap: operational-analysis 6/25(24%, 최고 비율)·lotto 7/30(23.3%)·fix-incident 0/20(직전 cycle 발화 직후)·info-arch 2/30(6.7%) — operational-analysis(lite) 선택.
