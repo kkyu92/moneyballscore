@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — review-code(heavy): engine/features/mlb-form/backtest-loader 전수 read, drift 0건 (cycle 3628, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 37` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded/pending_user_step). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=1/10, <8 임계). 직전8(3620-3627) distinct=5(fix-incident/lotto/info-architecture-review/operational-analysis/review-code), 2-chain lock 미충족. gap: review-code 5/10(50%, 최고)·fix-incident 0/20·info-arch 3/30(10%)·lotto 2/30(6.7%)·operational-analysis 1/25(4%) — review-code(heavy) 선택, cycle 3622 carry-over 추천 스코프(`packages/kbo-data/src/engine` 또는 `features/`) 진행.
+
+`engine/predictor.ts`(가중합산 12 factor) + `engine/form.ts`(calculateRecentForm/calculateHeadToHead) + `factors/mlb-form.ts`(MLB 동일 계약) + `features/game-record-features.ts`(bullpenInnings/teamRuns/teamHomeRuns) + `backtest/loader.ts` 호출부 전수 read. 검증: (1) `calculateHeadToHead`/`calculateMlbHeadToHead` 양쪽 호출부 모두 (homeTeamId, awayTeamId) 순서 일치 확인 (2) `teamHomeRunsLastN` 의 "상대 투수진 피홈런 = 자팀 공격 HR" 로직 정합 (3) `features/game-record-features.ts` 는 `backtest/loader.ts`/`backtest-v3-run.ts` 에서만 사용, `daily.ts` 프로덕션 파이프라인 미배선 확인 — park_weather/umpire_sz 와 동일 "의도된 shadow/backtest 전용" 패턴, drift 아님. drift 0건, 코드 변경 없음.
+
+**ship-0 서브체크**: PARTIAL_STREAK=10(3619-3628) 재충족 가능성 있으나 본 cycle outcome=retro-only(review-code 전수 감사, 유효 작업) — RC_HEAVY_COUNT=2/10(<8 임계) → EXHAUSTIVE_SWEEP 미충족. NO_NEW_INFO_COUNT 재측정 필요(아래).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3628%50=28≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(window 3609-3628 review-code 다회 발화 — 0회 아님) 전부 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3627 " -F` → `69fb317c` 존재 확인 OK.
+
+다음 사이클 추천 = fix-incident(gap0/20, 거의 즉시 재평가 가능)/lotto(gap2/30)/info-arch(gap3/30) 자연 대기 또는 review-code(heavy) 신규 스코프(`backtest/` 나머지 또는 `analytics/`) 계속 — 구조적 dry spell(KBO 시즌종료/CREDIT_EXHAUSTED) 지속, 변화 신호 없으면 lite chain rotation 자연 유지 권장.
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): gh run list/vercel 재확인, 실제 incident 0건 (cycle 3627, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 38` 호출. open issue 0건, approved+unexpired plan 0/21(전수 재확인, 전부 completed/archived/superseded/pending_user_step 상태). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(RC_HEAVY_COUNT=1/10, <8 임계). 직전8(3619-3626) distinct=5(fix-incident/lotto/info-architecture-review/operational-analysis/review-code), 2-chain lock 미충족. gap: fix-incident 4/20(20%, 최고)·info-arch 3/30(10%)·lotto 2/30(6.7%)·operational-analysis 1/25(4%) — fix-incident 선택.
