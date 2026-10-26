@@ -19816,3 +19816,19 @@ cycle 3639/3640 추천 계승 — `apps/moneyball/src/components/matchup/` 10개
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3641%50=41≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3622-3641, 현재 포함) 표본=19(≥10 충족), review-code 9회 발화(0회 아님) → 미충족. marker 박제 없음.
 
 다음 사이클 추천 = review-code(heavy) 계속(`components/{accuracy,analysis,dashboard,leaderboard,predictions,reviews,teams}/` 잔여 twin-pair scope) 또는 fix-incident(gap6/20)/lotto(gap8/30)/operational-analysis(gap9/25)/info-arch(gap12/30) 자연 대기.
+
+## ⚪ RETRO-ONLY — review-code(heavy): components/{reviews,teams}/ 15route 전수감사, drift 0건 (cycle 3642, 2026-10-26)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3641 retro `4ec4a64e`) OK. 직전8(3634-3641) distinct=3(lotto/fix-incident/review-code) — 2-chain lock 미충족. gap 전부 낮음(fix-incident 6/20·lotto 8/30·operational-analysis 9/25·info-arch 12/30) — 자연 due chain 없음.
+
+cycle 3639~3641 추천 계승 — `apps/moneyball/src/components/reviews/` 10개 + `components/teams/` 5개(총 1411줄) 전수 read. KBO/MLB twin pair 전부 확인: `HighlightCard`/`MlbHighlightCard`(locale prop + badgeLabel EN 일관), `ConvergenceDayOfWeekBadges`/`ConvergenceHomeAwayBadges`/`ConvergenceStreakBadges`/`ConvergenceTeamStatsBadges`(wave-659 locale prop 패턴 전부 일관), `TeamConvergencePickRecord`/`MlbTeamConvergencePickRecord`(STRINGS record 패턴 일관), `TeamEloChart`/`MlbTeamEloChart`(leagueAvgLabel locale 분기 일관). `MissesSortControl`/`MonthlyTeamStatsSortControl`/`WeeklyGamesSortControl` 3종 sort control 전부 동일 useSyncExternalStore+CSS order var 패턴, locale EN 라벨 일관.
+
+**feature-gap 2건 발견(drift 아님, 신규기능 백로그)**: `ReviewsResultFilter`(KBO `/reviews` 허브 전체/적중/실패 필터)와 `TeamRecentGamesFilter`(KBO `/teams/[code]` 위치+결과 필터) 둘 다 locale prop이 없는데, 확인 결과 둘 다 **KBO 전용 — MLB twin page(`/mlb/reviews`, `/mlb/team/[code]`)에 대응 기능 자체가 없음**(코드 불일치 아니라 기능 미구현). review-code(heavy) scope 밖(새 기능 추가) — explore-idea 또는 info-architecture-review 후보로만 carry-over, 본 cycle 구현 안 함.
+
+**drift 0건, 코드 변경 없음** — retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK(3633-3642, 현재 포함)=8/10(3635/3637 success 2건 제외) → 10 미충족, hard-stop 불발동. RC_HEAVY_COUNT(3633-3642)=7/10(<8) → EXHAUSTIVE_SWEEP 미충족.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3642%50=42≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3623-3642, 현재 포함) review-code 10회 발화(0회 아님) → 미충족. marker 박제 없음.
+
+**다음 사이클 주의**: 2-chain lock 체크(prev8=3635-3642) distinct=2(review-code+fix-incident) 도달 예상 — lock 발동 시 review-code 제외 필요. 다음 사이클 추천 = info-architecture-review(gap13/30)/operational-analysis(gap10/25)/lotto(gap9/30) 자연 대기 또는 review-code(heavy) components/{predictions,dashboard,analysis,accuracy}/ 잔여 scope(단, lock 충족 시 보류).
