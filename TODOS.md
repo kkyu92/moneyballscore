@@ -20053,3 +20053,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=5 lock 無, gap op 8/25(최고)·lotto 5/30·info 4/30·fix 2/20.
 - 결과: `op-analysis-ce-cohort.ts` 재실행 — n=448 (CE 401 / 비CE 47) 불변, KBO 시즌 종료 지속. drift 0건, 코드 변경 없음 (retro-only).
 - 다음: lotto(10/27 화 picks cron 확인) 자연 대기.
+
+## cycle 3681 — lotto (lite)
+- 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=6 lock 無, gap fix 3/20·op 1/25·info 5/30·lotto 6/30, CI Failure Dispatch 전부 skipped.
+- 결과: `lotto.ts count` 유효 7,716,994 / 8,145,060 (제거 5.26%, delta 0). results/picks 10-24 존재, lotto-result cron 10/24-25 3회 success, picks cron 화(10/27) 대기 정상. drift 0건, 코드 변경 없음 (retro-only).
+- 다음: 10/27 picks cron 후 재확인 또는 info-arch/fix-incident gap 자연 대기.
