@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — review-code(heavy): picks poll/submit 4-route twin-parity 직접 read, drift 0건 (cycle 3622, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 43` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인). review-code(heavy) cooldown(3612~3621) 만료 — 본 cycle 부터 재평가 대상 복귀. 직전8(3614-3621) distinct=4(info-arch/lotto/fix-incident/operational-analysis), 2-chain lock 미충족. 다른 lite chain gap 전부 임계 미도달(fix-incident 3/20·operational-analysis 1/25·info-arch 4/30·lotto 2/30) + 구조적 dry spell(KBO 시즌종료/CREDIT_EXHAUSTED)이 lite chain 전부 데이터 동결 지속 — 그 제약과 독립적인 review-code(heavy) 선택.
+
+`apps/moneyball/src/app/api/picks/{poll,mlb-poll,submit,mlb-submit}/route.ts` 4개 route 직접 read 비교 — KBO(int game_id)/MLB(string external_game_id) 타입 차이 외 검증/upsert/에러처리 로직 완전 twin, `DB_CONSTRAINTS.mlbPickPollEvents` 키 실존 확인. `apps/moneyball/src/lib` 대형 파일(convergenceRecord.ts 886줄/buildTeamProfile.ts/buildMatchupProfile.ts) + hooks/ + config/ 는 git history 재확인 결과 이미 수차례 전수 감사(degrade flag/select 컬럼 정리/export-unused) 완료 확인. drift 0건, 코드 변경 없음, retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK=10(3613-3622) 재충족. RC_HEAVY_COUNT=1/10(<8 임계, cooldown 직후 1회차) → EXHAUSTIVE_SWEEP 정상 미충족. NO_NEW_INFO_COUNT=10/10(≥8) + dry-spell marker(cycle 3621 설정) 경과 ~28분(<24h) → **STRUCTURAL_DRY_SPELL_SUPPRESS 7번째 적용** — hard stop 생략, next_n 그대로 진행(42).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3622%50=22≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(window 3603-3622 review-code 8회 발화 — 0회 아님) 전부 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3621 " -F` → 존재 확인 OK.
+
+다음 사이클 추천 = fix-incident(gap4/20)/lotto(gap3/30)/info-arch(gap5/30)/operational-analysis(gap2/25) 자연 대기 또는 review-code(heavy) 신규 스코프 계속(packages/kbo-data/src/engine 또는 features/ 미확인 영역) — review-code 1회차 drift-0 이라 cooldown 재진입(8회+drift-0 7회) 조건 아직 미충족.
+
 ## 🟢 RETRO-ONLY — operational-analysis(lite): CE/비CE 코호트 53회 연속 동결 재확인 (cycle 3621, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 44` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/superseded). review-code(heavy) EXHAUSTIVE_SWEEP cooldown(3612~3621) 활성 — 본 cycle 포함 마지막 적용, 제외. 직전8(3613-3620) distinct=4(operational-analysis/info-architecture-review/lotto/fix-incident), 2-chain lock 미충족. gap: fix-incident 2/20(10%)·operational-analysis 4/25(16%, 최고)·info-arch 3/30(10%)·lotto 1/30(3.3%) — operational-analysis 선택.
