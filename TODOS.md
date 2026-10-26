@@ -20048,3 +20048,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=5 lock 無, gap polish-ui 10 최근접·fix 1/20·op 7/25·info 3/30·lotto 4/30.
 - 결과: components/ + app/ 전 tsx hex 리터럴 vs DESIGN.md 팔레트 diff = off-palette 0건. DESIGN.md 5일 신선, 신규 route 없음. drift 0건, 코드 변경 없음 (retro-only).
 - 다음: op-analysis gap 자연 대기 또는 11/1 factor-backtest cron 확인.
+
+## cycle 3680 — operational-analysis (lite)
+- 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=5 lock 無, gap op 8/25(최고)·lotto 5/30·info 4/30·fix 2/20.
+- 결과: `op-analysis-ce-cohort.ts` 재실행 — n=448 (CE 401 / 비CE 47) 불변, KBO 시즌 종료 지속. drift 0건, 코드 변경 없음 (retro-only).
+- 다음: lotto(10/27 화 picks cron 확인) 자연 대기.
