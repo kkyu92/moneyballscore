@@ -13,18 +13,22 @@ interface Props {
     location: { all: number; home: number; away: number };
     result: { all: number; correct: number; incorrect: number };
   };
+  locale?: 'ko' | 'en';
 }
 
-const LOCATION_LABELS: Record<LocationFilter, string> = {
-  all: '전체',
-  home: '홈',
-  away: '원정',
+const LOCATION_LABELS: Record<'ko' | 'en', Record<LocationFilter, string>> = {
+  ko: { all: '전체', home: '홈', away: '원정' },
+  en: { all: 'All', home: 'Home', away: 'Away' },
 };
 
-const RESULT_LABELS: Record<ResultFilter, string> = {
-  all: '전체',
-  correct: '적중',
-  incorrect: '미적중',
+const RESULT_LABELS: Record<'ko' | 'en', Record<ResultFilter, string>> = {
+  ko: { all: '전체', correct: '적중', incorrect: '미적중' },
+  en: { all: 'All', correct: 'Correct', incorrect: 'Wrong' },
+};
+
+const SECTION_LABELS: Record<'ko' | 'en', { location: string; result: string }> = {
+  ko: { location: '위치', result: '결과' },
+  en: { location: 'Venue', result: 'Result' },
 };
 
 const LOCATION_ORDER: LocationFilter[] = ['all', 'home', 'away'];
@@ -75,7 +79,7 @@ function writeStorage(key: string, value: string): void {
   }
 }
 
-export function TeamRecentGamesFilter({ counts }: Props) {
+export function TeamRecentGamesFilter({ counts, locale = 'ko' }: Props) {
   const location = useSyncExternalStore(
     subscribe,
     readLocation,
@@ -111,7 +115,7 @@ export function TeamRecentGamesFilter({ counts }: Props) {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          위치
+          {SECTION_LABELS[locale].location}
         </span>
         {LOCATION_ORDER.map((key) => {
           const active = location === key;
@@ -129,7 +133,7 @@ export function TeamRecentGamesFilter({ counts }: Props) {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {LOCATION_LABELS[key]}{' '}
+              {LOCATION_LABELS[locale][key]}{' '}
               <span className="opacity-75">({counts.location[key]})</span>
             </button>
           );
@@ -137,7 +141,7 @@ export function TeamRecentGamesFilter({ counts }: Props) {
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          결과
+          {SECTION_LABELS[locale].result}
         </span>
         {RESULT_ORDER.map((key) => {
           const active = result === key;
@@ -155,7 +159,7 @@ export function TeamRecentGamesFilter({ counts }: Props) {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {RESULT_LABELS[key]}{' '}
+              {RESULT_LABELS[locale][key]}{' '}
               <span className="opacity-75">({counts.result[key]})</span>
             </button>
           );
