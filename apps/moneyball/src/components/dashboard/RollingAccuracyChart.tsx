@@ -19,6 +19,7 @@ import {
 import type { RollingAccuracyPoint } from "@/lib/accuracy/buildAccuracyData";
 import { brand, chartCursorTint, neutral } from "@/lib/design-tokens";
 import { ChartTooltip } from "./ChartTooltip";
+import { accuracyYDomain } from "./chart-format";
 
 interface RollingAccuracyChartProps {
   data: RollingAccuracyPoint[];
@@ -63,6 +64,8 @@ export function RollingAccuracyChart({
     );
   }
 
+  const yDomain = accuracyYDomain(data.map((p) => p.windowAccuracy));
+
   const tickFormatter = (label: string, index: number) => {
     return index % 7 === 0 ? label : "";
   };
@@ -87,7 +90,7 @@ export function RollingAccuracyChart({
           interval={0}
         />
         <YAxis
-          domain={[0.3, 0.7]}
+          domain={yDomain}
           tick={{ fontSize: 11, fill: neutral[400] }}
           tickLine={false}
           axisLine={false}
