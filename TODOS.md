@@ -19981,3 +19981,5 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, 직전8 distinct=5 lock 無, gap 전부 미도달(fix-incident 8/20·op-analysis 5/25·info-arch 6/30·lotto 2/30).
 - 결과: components/dashboard 잔여 차트 8종 read — BrierTrendChart Y축 `[0.15,0.35]` 고정이 소표본/CE 구간 Brier(~0.40) 를 plot 밖으로 잘라냄 → `brierYDomain` 헬퍼(데이터 기반 0.05 단위 확장) + 테스트 4건. 커밋 70908ca8 push 완료.
 - 다음: RollingAccuracyChart `[0.3,0.7]` 동형 clip 후보(윈도우 n 큼 → 저우선), lotto(10/31 picks cron) 자연 대기.
+
+- [x] cycle 3665 review-code(heavy): RollingAccuracyChart Y domain 고정 [0.3,0.7] → accuracyYDomain (fb9e8bbc). DailyAccuracy/AccuracyChart 는 [0,100] 이라 무관.
