@@ -19888,3 +19888,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음 — cycle 3645 와 동일)/trigger2(5연속 fail 없음)/trigger3(3646%50=46≠0)/trigger4(meta-pattern 없음, 본 cycle 의 것은 informational EXHAUSTIVE_SWEEP 용으로 "SKILL 갱신 필요" 문구 아님) 미충족. trigger5 — 직전20(3627-3646, 현재 포함) chain 분포: review-code12/fix-incident3/info-arch1/lotto1/op-analysis1/polish-ui1, 평가대상 review-code 12회(0회 아님) → 미충족. marker 박제 없음.
 
 다음 사이클 추천 = review-code cooldown(3646~3655) 유지 중이므로 fix-incident(gap10/20)/operational-analysis(gap13/25)/lotto(gap12/30) 자연 대기 또는 explore-idea 재평가(saturation 유지 시 4-source 재확인) — info-arch 는 5연속 동일 확인으로 당분간 재점검 불필요, 다음 재측정은 신규 라우트 추가 또는 30-cycle gap 자연 도래 시.
+
+## ⚪ RETRO-ONLY — operational-analysis(lite): CE cohort 재측정 53연속 불변 (cycle 3647, 2026-10-26)
+- harness `scripts/op-analysis-ce-cohort.ts` 재실행: n=448 (CE 401 / 비CE 47), CE 55.9% / 비CE 63.8% → 격차 8.0pp 그대로. KBO 2026 정규시즌 종료 + CREDIT_EXHAUSTED 지속. 코드 변경 없음.
+- lotto cron 정상(picks/results 2026-10-24 존재), CI Failure Dispatch 전부 skipped.
+- 다음 = fix-incident/lotto gap 자연 대기, review-code cooldown 3655 만료 후 복귀.
