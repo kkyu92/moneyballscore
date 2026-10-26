@@ -1,3 +1,21 @@
+## ✅ SUCCESS — review-code(heavy): components/{layout,shared} 42파일 전수감사, MLB nav i18n 누수 3건 수정 (cycle 3644, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 21` 호출. open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3643 retro `86d6a53c`) OK. 직전8(3636-3643) distinct=2(review-code+fix-incident) — 2-chain lock 조건 충족이나 rule4 예외(fix-incident 포함) 로 무시. gap 전부 낮음(fix-incident 8/20·op-analysis 11/25·info-arch 14/30·lotto 10/30) — 구조적 trigger 미도달. `components/{layout,shared}` 42파일(마지막 개별 감사 cycle 2917-3025, 700+ cycle 경과) 신선 scope 로 선정.
+
+Agent 위임 42파일 전수 read + KBO/MLB twin 대조 + DESIGN.md 대조. 확정 버그 1건(실피해): `Header.tsx` MLB_NAV 의 `/mlb/standings`·`/mlb/wild-card`·`/mlb/postseason` 3개 항목이 enDescription 없이 영문 단독 description 만 보유 — `localizeNavItems` 가 `isEn=false` 시 raw array 그대로 반환하므로 KO 페이지에도 영문("4 division standings" 등)이 그대로 노출되던 i18n 누수. 3개 전부 Korean description + enDescription 쌍 추가. 신규 회귀 테스트(`Header.test.tsx`)가 blanket invariant 검사로 이 중 2건(wild-card/postseason)을 추가 적발 — 1건(standings)만 보고했던 에이전트 리포트보다 넓게 커버.
+
+stale 주석 2건 정정: `CookieConsent.tsx`(padding-bottom 대상 `main`→실제는 `body`), `Footer.tsx`(ASCII sitemap wireframe 이 MLB 컬럼 10→18개 증가 반영 안 됨 — 다이어그램 제거 + `SITEMAP_COLUMNS` 배열 참조로 전환).
+
+**검증 중요 교훈**: 에이전트가 `AnalysisLink.tsx` `variant='primary'` 를 "사용처 없는 dead code"로 보고해 제거했으나, `tsc --noEmit` 이 즉시 `predictions/[date]/page.tsx:594` 실사용처를 발견(agent 의 grep 이 멀티라인 JSX prop 을 놓침) — false positive 확인 후 원복. fix 적용 전 반드시 타입체크/테스트로 재검증해야 함을 재확인(에이전트 리포트 = 가설, 실행 결과 = 사실).
+
+검증: `tsc --noEmit`/`eslint` clean, 전체 `vitest run` 4826/4826 PASS(신규 2건 포함). 직접 main 커밋(`637052c7`)+push, pre-push hook 전부 PASS.
+
+**ship-0 서브체크**: PARTIAL_STREAK(3635-3644)=4 success(3635/3637/3643/3644) → 10 미충족. RC_HEAVY_COUNT(3634-3643)=8/10, CLEAN_DRIFT_COUNT=5/10(<7) → EXHAUSTIVE_SWEEP 미충족.
+
+**검증(skill-evolution 등)**: trigger1~4 미충족. trigger5 — 직전20(3625-3644, 현재 포함) 전부 다양 chain 발화(review-code/fix-incident/operational-analysis/info-architecture-review/lotto 전부 1회+) → 미충족. marker 박제 없음.
+
+다음 사이클 추천 = operational-analysis/info-architecture-review/lotto 자연 대기(전부 gap 미도달) 또는 review-code(heavy) 계속(`components/{insights,leaderboard,live,search,seasons,share,standings,players,glossary,ui}` 잔여, 다수 cycle 2900대 이후 재감사 없음) — 단 2-chain lock(review-code+fix-incident) 재도달 패턴 반복 중이라 다양성 우선 고려.
+
 ## ✅ SUCCESS — review-code(heavy): components/{predictions,dashboard,analysis,accuracy} 61파일 전수감사, 2건 수정 (cycle 3643, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 22` 호출. open issue 0건, approved+unexpired plan 0/23. 2차 방어선(cycle 3642 retro `b5b3df6b`) OK. 직전8(3635-3642) distinct=2(review-code+fix-incident) — 2-chain lock 조건 충족이나 rule4 예외(잠긴 2개 중 fix-incident 포함 시 lock 무시) 적용. gap 비율 전부 구조적 trigger 미도달. info-arch(4연속 동일 breadcrumb 체크)/op-analysis(시즌종료+CE 동결)/lotto(직전 cycle cron 정상 재확인) 전부 저정보가치 재확인뿐 — review-code(heavy) 가 cycle 3642 추천 신규 scope 로 계속.
