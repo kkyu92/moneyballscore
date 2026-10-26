@@ -1,3 +1,15 @@
+## 🟢 RETRO-ONLY — review-code(heavy): calendar/dashboard page.tsx + api/{health,mlb,picks,pipeline,seo,version} 전수감사, drift 0건 (cycle 3638, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 27` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/pending-step). 2차 방어선(`git log --grep "cycle-retro 3637 " -F`) → `82865b03` 존재 OK. 직전8(3630-3637) distinct=5(info-arch/review-code/fix-incident/operational-analysis/lotto) — 2-chain lock 미충족. gap 전부 낮음(fix-incident 2/20·operational-analysis 5/25·info-arch 8/30·lotto 4/30) — 자연 due chain 없음. 직전 cycle(3637) 추천대로 review-code(heavy) 신규 scope 선정: `app/{calendar,dashboard}/page.tsx` + `app/api/{health,mlb,picks,pipeline,seo,version}` (이전 cycle 이 `app/mlb/page.tsx` 만 다룸, 나머지 미감사).
+
+전수 read 결과: `calendar/page.tsx`(이미 captureFallback 패턴 사용, dbDegraded 배지 정상) / `dashboard/page.tsx`(assertSelectOk fail-loud, line 70 주석에 error.tsx boundary 위임 의도 명시 — captureFallback 아닌 건 의도된 선택) / `api/health/route.ts`+`pipelines/route.ts`(Supabase 402 billing quota downgrade 로직 cycle 2999/2996 evidence 그대로 정합) / `api/mlb/{waitlist,pipeline}/route.ts`(Sentry capture+flush, revalidate 실패 격리 패턴 일관) / `api/pipeline/route.ts`(KBO twin, maxDuration 300 — cycle 3531 발견 반영 확인) / `api/picks/{submit,mlb-poll,mlb-submit,poll,results}/route.ts`(origin 체크 + Sentry capture + assertSelectOk 일관) / `api/seo/indexnow/ping/route.ts`(.trim() 가드 cycle 3217 class 반영 확인) / `api/version/route.ts`(단순 env 노출, 이슈 없음). **drift 0건, 코드 변경 없음** — retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK(현재 포함 3629-3638)=8/10(3635/3637 success 2건 존재) → 10 미충족, hard-stop 불발동. RC_HEAVY_COUNT(3629-3638)=5/10(<8) → EXHAUSTIVE_SWEEP 미충족.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3638%50=38≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음) 미충족. trigger5 — 직전20(3619-3638, 현재 포함) review-code 7회(0회 아님) → 미충족. marker 박제 없음. 1차 방어선 — 본 commit 자체.
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/{about,glossary,guide,methodology,contact,privacy,terms,v2-shadow-monitor}` page.tsx 또는 `app/api/{live,snapshot-pitchers,sync-batter-stats,kbo-scores,revalidate}` route 전수감사 이력 불명확분) 또는 fix-incident(gap3/20)/operational-analysis(gap6/25)/info-arch(gap9/30)/lotto(gap5/30) 자연 대기.
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): gh run list/scheduled workflow 재확인, 실제 incident 0건 (cycle 3636, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 29` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인, 전부 completed/archived/pending-step). 직전8(3628-3635) distinct=5(review-code/info-arch/fix-incident/operational-analysis/lotto) — 2-chain lock 미충족. gap: info-arch 6/30·fix-incident 4/20·operational-analysis 3/25·lotto 2/30·review-code 1/10 — 전부 lite trigger 미도달. review-code(heavy) 범위(lib/components/app-api/scripts/shared/factors/scrapers/agents/context) 대부분 "전수감사 완료"/"시리즈 완결"/"vein 소진" 기박제 상태라 신규 scope 희박 — fix-incident(lite) 다양성 선택.
