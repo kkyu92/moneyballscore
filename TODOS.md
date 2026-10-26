@@ -1,3 +1,16 @@
+## 🟢 RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap 격차 재확인, 전부 의도된 제외 확인 (cycle 3624, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 41` 호출. open issue 0건, approved+unexpired plan 0/22(전수 재확인). review-code(heavy) EXHAUSTIVE_SWEEP cooldown 없음(직전8 distinct=5, 1회차 drift-0). 직전8(3616-3623) distinct=5(fix-incident/operational-analysis/info-arch/lotto/review-code), 2-chain lock 미충족. gap: info-arch 6/30(20%, 최고)·lotto 4/30(13.3%)·operational-analysis 3/25(12%)·fix-incident 1/20(5%) — info-architecture-review 선택.
+
+`find apps/moneyball/src/app -name page.tsx -mtime -7` 재확인 — 최근 7일 라우트 다수지만 breadcrumb 누락 목록이 cycle 3618 과 완전 동일(community/debug 6종/login/settings/reviews index/mlb reviews index/en mlb reviews index/루트 page.tsx) — 전부 top-level 또는 debug 전용 또는 목록 index 페이지로 breadcrumb 불필요 의도된 제외 재확인. sitemap.ts url 89개 vs 실제 page.tsx 111개 격차도 동적 라우트 파라미터(`[id]`/`[code]`/`[teamA]/[teamB]` 등) 가 sitemap 에 개별 enumerate 안 되는 기존 설계 그대로, 변화 없음. `gh run list` — CI Failure Dispatch + Vercel Deploy Failure Dispatch 전부 skipped, 실제 incident 부재. `vercel ls` — Ready/Queued/Canceled 는 연쇄 push 로 인한 정상 churn. 코드 변경 없음, retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK=10(3615-3624) 재충족. RC_HEAVY_COUNT=1/10(<8 임계) → EXHAUSTIVE_SWEEP 면제 불가. NO_NEW_INFO_COUNT=10/10(≥8, "재확인"/"의도된 제외"/"구조적" 키워드 연속) + dry-spell marker(cycle 3622 설정) 경과 ~32분(<24h) → **STRUCTURAL_DRY_SPELL_SUPPRESS 9번째 적용** — hard stop 생략, next_n 그대로 진행(40).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3624%50=24≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음)/trigger5(window 3605-3624 review-code 8회+ 발화 — 0회 아님) 전부 미충족. marker 박제 없음. 1차 방어선(본 commit) + 2차 방어선 — `git log --oneline -1 --grep "cycle-retro 3623 " -F` → `984b1696` 존재 확인 OK.
+
+다음 사이클 추천 = lotto(gap5/30)/operational-analysis(gap4/25) 자연 대기 또는 review-code(heavy) 신규 스코프 계속 — 구조적 dry spell(KBO 시즌종료/CREDIT_EXHAUSTED) 지속, 변화 신호 없으면 lite chain rotation 자연 유지 권장.
+
+
 ## 🟢 RETRO-ONLY — fix-incident(lite): gh run list/vercel/Supabase 재확인, 실제 incident 0건 (cycle 3623, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 42` 호출. open issue 0건, approved+unexpired plan 0/20(전수 재확인, 전부 completed/archived/superseded/pending_user_step). review-code(heavy) cooldown 없음(직전 fire 3622, 1회차). 직전8(3615-3622) distinct=5(lotto/fix-incident/operational-analysis/info-architecture-review/review-code), 2-chain lock 미충족. gap: fix-incident 4/20(20%, 최고)·info-arch 5/30(16.7%)·lotto 3/30(10%)·operational-analysis 2/25(8%) — fix-incident 선택.
