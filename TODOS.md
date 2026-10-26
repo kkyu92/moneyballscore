@@ -1,3 +1,6 @@
+## ⚪ RETRO-ONLY — info-architecture-review(lite): Breadcrumb/sitemap 점검 drift 0건 (cycle 3695, 2026-10-26)
+- page.tsx 111개 중 Breadcrumb 미사용 = redirect(reviews/weekly·monthly, mlb/en 동일) + debug + login/settings + community noindex stub 뿐. 사용자 hub 페이지 전부 보유. sitemap.ts 89 entries, mismatch 없음. 코드 변경 없음.
+
 ## ⚪ RETRO-ONLY — lotto(lite): cron 정상 확인, count_smoke 유효 7,716,994 (cycle 3694, 2026-10-26)
 - lotto-pick-update cron 10/20 success (10/24 picks 존재), 다음 fire 10/27 화 → 10/31 picks 예정. lotto-result-update 10/24~25 success 3회.
 - count_smoke: 256규칙 유효 7,716,994 / 제거 428,066 (5.26%), delta 0. 코드 변경 없음, 수동 fallback 불필요.
