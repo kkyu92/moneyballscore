@@ -19804,3 +19804,15 @@ cycle 3638 추천 계승 — 잔여 미감사 page.tsx(about/glossary/guide/meth
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3639%50=39≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3620-3639, 현재 포함) review-code 8회(0회 아님)·fix-incident 4회·op-analysis 3회·lotto 3회·info-arch 2회 전부 발화 → 미충족. marker 박제 없음.
 
 다음 사이클 추천 = review-code(heavy) 계속(`components/` 또는 `packages/kbo-data` 잔여 scope 전환) 또는 fix-incident(gap4/20)/lotto(gap6/30)/operational-analysis(gap7/25)/info-arch(gap10/30) 자연 대기.
+
+## ⚪ RETRO-ONLY — review-code(heavy): components/matchup/ 10route 전수감사, drift 0건 (cycle 3641, 2026-10-26)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3640 retro `b32568af`) OK. 직전8(3633-3640) distinct=4(review-code/operational-analysis/lotto/fix-incident) — 2-chain lock 미충족. gap 전부 낮음(fix-incident 5/20·lotto 7/30·operational-analysis 8/25·info-arch 11/30) — 자연 due chain 없음.
+
+cycle 3639/3640 추천 계승 — `apps/moneyball/src/components/matchup/` 10개 파일(1417줄) 전수 read. KBO/MLB twin pair 5쌍 전부 확인: `MatchupEloChart`/`MlbMatchupEloChart`(cycle 2582 의도적 위임 유지), `MatchupConvergencePickRecord`/MLB twin(i18n STRINGS 패턴 일관), `MatchupFactorCompare`(8팩터)/`MlbMatchupFactorCompare`(7팩터 — SFR MLB 미구현 placeholder + xFIP/WAR builder-level gap 기존 정정 반영된 상태로 주석 명확), `MatchupRecentForm`/MLB twin(i18n 일관), `MatchupSeasonHeadToHead`/MLB twin(i18n 일관). `MatchupGamesCloseFilter`는 리그 무관 공유 컴포넌트로 KBO+MLB 양쪽 페이지가 그대로 import. **drift 0건, 코드 변경 없음** — retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK(3632-3641, 현재 포함)=8/10(3635/3637 success 2건 제외) → 10 미충족, hard-stop 불발동. RC_HEAVY_COUNT(3632-3641)=6/10(<8) → EXHAUSTIVE_SWEEP 미충족.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3641%50=41≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3622-3641, 현재 포함) 표본=19(≥10 충족), review-code 9회 발화(0회 아님) → 미충족. marker 박제 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/{accuracy,analysis,dashboard,leaderboard,predictions,reviews,teams}/` 잔여 twin-pair scope) 또는 fix-incident(gap6/20)/lotto(gap8/30)/operational-analysis(gap9/25)/info-arch(gap12/30) 자연 대기.
