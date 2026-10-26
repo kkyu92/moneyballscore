@@ -17,6 +17,7 @@ import { BRIER_BASELINE, CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY } from "@m
 import { countBrierTrendWeeks, type BrierTrendPoint } from "@/lib/accuracy/buildAccuracyData";
 import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartTooltip } from "./ChartTooltip";
+import { brierYDomain } from "./chart-format";
 
 interface BrierTrendChartProps {
   data: BrierTrendPoint[];
@@ -86,6 +87,10 @@ export function BrierTrendChart({ data, locale = "ko" }: BrierTrendChartProps) {
     pivotData.some((row) => row[sr] !== undefined && row[sr] !== null),
   );
 
+  const yDomain = brierYDomain(
+    pivotData.flatMap((row) => activeSRs.map((sr) => row[sr] as number | null | undefined)),
+  );
+
   return (
     <ResponsiveContainer width="100%" height={320}>
       <LineChart data={pivotData} margin={{ top: 10, right: 10, left: -10, bottom: 5 }}>
@@ -101,7 +106,7 @@ export function BrierTrendChart({ data, locale = "ko" }: BrierTrendChartProps) {
           axisLine={{ stroke: neutral[200] }}
         />
         <YAxis
-          domain={[0.15, 0.35]}
+          domain={yDomain}
           tick={{ fontSize: 11, fill: neutral[400] }}
           tickLine={false}
           axisLine={false}
