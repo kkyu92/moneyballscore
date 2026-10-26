@@ -1,3 +1,11 @@
+## ⚪ RETRO-ONLY — lotto(lite): cron 정상 + count_smoke 박제, drift 0건 (cycle 3648, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 49` 호출. open issue 0건, approved plan 0/23. 2차 방어선(cycle 3647 retro `e2ce8706`) OK. 직전8 distinct=4 → 2-chain lock 미충족. review-code cooldown(3646~3655) 유지, explore-idea saturation 12/15 이나 4-source negative skip 유지. gap 비율 lotto 14/30 최고 → 선택. 부수 발견: `cycles/3644.json` 부재(retro commit `94fd4d34` 은 존재, JSON layer 만 결손 — 데이터 영향 없음, 소급 안 함).
+
+실측: `lotto-pick-update` 10-20 success / `lotto-result-update` 10-24~25 success / picks·results 최신 파일 2026-10-24. `lotto.ts count` = 유효 7,716,994 / 제거 428,066 (5.26%), delta 0, 신규 rule 0. 수동 fallback 불필요.
+
+다음 사이클 추천 = fix-incident(gap 12/20)/info-arch 자연 대기, review-code cooldown 3655 만료 후 복귀.
+
 ## ✅ SUCCESS — review-code(heavy): components/{layout,shared} 42파일 전수감사, MLB nav i18n 누수 3건 수정 (cycle 3644, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 21` 호출. open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3643 retro `86d6a53c`) OK. 직전8(3636-3643) distinct=2(review-code+fix-incident) — 2-chain lock 조건 충족이나 rule4 예외(fix-incident 포함) 로 무시. gap 전부 낮음(fix-incident 8/20·op-analysis 11/25·info-arch 14/30·lotto 10/30) — 구조적 trigger 미도달. `components/{layout,shared}` 42파일(마지막 개별 감사 cycle 2917-3025, 700+ cycle 경과) 신선 scope 로 선정.
