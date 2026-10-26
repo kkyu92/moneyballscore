@@ -41,6 +41,11 @@ function barColor(rate: number, verified: number): string {
   return semantic.error;
 }
 
+export function weekAriaLabel(w: Pick<WeeklyTrendPoint, "label" | "rate" | "verified">): string {
+  const result = w.verified === 0 ? "데이터 없음" : `${Math.round(w.rate * 100)}%`;
+  return `${w.label} 주간 리뷰 보기 (${result})`;
+}
+
 function CustomTooltip({
   active,
   payload,
@@ -150,7 +155,7 @@ export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
                 stroke={w.isCurrent ? barColor(w.rate, w.verified) : "none"}
                 role="button"
                 tabIndex={0}
-                aria-label={`${w.label} 주간 리뷰 보기 (${Math.round(w.rate * 100)}%)`}
+                aria-label={weekAriaLabel(w)}
                 onKeyDown={(e: KeyboardEvent) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
