@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — review-code(heavy): Elo/FIP 차트 Y-domain sibling sweep, drift 0건 (cycle 3673, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 24` 호출. open issue 0건, 2차 방어선(3672 retro `4d43aa2c`) OK, gap 전부 미도달, CI 실패 0. 3664/3665 Y-domain fix 후속으로 `[yMin,yMax]` 계산 차트 5종(EloTrend/MatchupElo/TeamElo/MlbTeamElo/PitcherFipTrend) 점검 — empty guard 존재, `buildEloTrend` 가 observed team 있을 때만 points 생성 → NaN domain 경로 없음. 코드 변경 없음.
+
 ## ⚪ RETRO-ONLY — fix-incident(lite): incident 부재, drift 0건 (cycle 3668, 2026-10-26)
 
 진단: 사용자 `/develop-cycle 29` 호출. open issue 0건, approved plan 0건, 2차 방어선(3667 retro `7e9622e7`) OK. `gh run list` 최근 60건 failure 0 (CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped), ship-0 아님(직전10 success 4), 2-chain lock 아님(distinct=4). 코드 변경 없음.
