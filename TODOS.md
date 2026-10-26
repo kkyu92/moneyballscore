@@ -19754,3 +19754,17 @@ cycle 3398에서 처음 발견돼 이후 매번 "carry-over 잔존"으로만 언
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3635%50=35≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3616-3635, 현재 포함) 표본=20(≥10 충족), review-code 다수 발화(0회 아님)로 미충족. marker 미박제. 1차 방어선 — 본 commit 자체. 2차 방어선(cycle 3634 retro `35ab476b`) OK.
 
 다음 사이클 추천 = fix-incident(gap3/20)/info-arch(gap5/30)/lotto(gap1/30) 자연 대기 또는 review-code(heavy) 신규 scope 계속.
+
+## 🟢 SUCCESS — review-code(heavy): mlb/page.tsx console.warn → captureFallback Sentry 패턴 통일 (cycle 3637, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 28` 호출. open issue 0건, approved+unexpired plan 0/22. 2차 방어선(`git log --grep "cycle-retro 3636 " -F`) OK. 직전8(3629-3636) distinct=5(review-code/info-arch/fix-incident/operational-analysis/lotto) — 2-chain lock 미충족. gap: fix-incident 1/20·operational-analysis 4/25·info-arch 7/30·lotto 3/30 — 전부 임계 미도달. review-code(heavy) 신규 scope 선정: `apps/moneyball/src/app/{matchup,mlb,changelog}/page.tsx` (CHANGELOG mention 0회, 비자명 로직 보유 3개 route).
+
+전수 read 결과 matchup/page.tsx + changelog/page.tsx + lib/changelog/{parse,renderMarkdown}.tsx + lib/mlb/buildMlbAccuracySummary.ts 는 drift 없음. **mlb/page.tsx 확정 버그**: 오늘 경기 수 조회(`predictions` 쿼리) 실패 시 전체 레포의 15개+ 다른 page.tsx(about/accuracy/analysis/calendar/leaderboard/players/predictions/reviews/search/standings/teams/insights/v2-preview)가 전부 쓰는 `captureFallback()` Sentry 패턴 대신 단독으로 `console.warn` 만 사용 — 쿼리 실패가 production Sentry 에 전혀 안 잡히는 silent 사각지대(CLAUDE.md "Sentry silent" 사례 3/6 family 재발 class).
+
+수정: `captureFallback` import 추가, `console.warn` 분기를 `captureFallback(result.error, null, { route: '/mlb', source: 'todayGamesCount' })` 로 교체(다른 라우트와 동일 컨벤션). `tsc --noEmit`/`pnpm lint` clean. 직접 main 커밋+push(R4, `88f84849`, pre-push lint+type-check+version-sync-guard 전부 PASS).
+
+**ship-0 서브체크**: PARTIAL_STREAK(3628-3637, 현재 success 포함)=9/10(3635 success + 3637 success 2건) → 10 미충족, hard-stop 불발동. RC_HEAVY_COUNT(3628-3636)=4/10(<8) → EXHAUSTIVE_SWEEP 미충족.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3637%50=37≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음) 미충족. trigger5 — 직전20(3618-3637, 현재 포함) review-code/fix-incident/operational-analysis/lotto/info-arch 전부 발화 → 미충족. marker 박제 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속(`app/{calendar,dashboard}` 등 나머지 page.tsx 또는 `app/api/{health,mlb,picks,pipeline,seo,version}` route 전수감사 이력 불명확분) 또는 info-architecture-review(gap8/30)/operational-analysis(gap5/25)/lotto(gap4/30) 자연 대기.
