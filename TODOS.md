@@ -19944,3 +19944,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 ## cycle 3657 — review-code (heavy)
 - #3197 cron CI 대기 guard 5 workflow 감사: job 이름 `check` 일치, bot PR 도 pull_request CI 트리거 확인(기존 run 존재), ci.yml paths 필터 없음 → drift 0건, 코드 변경 없음.
 - 실측 검증은 여전히 다음 cron fire 대기.
+
+## cycle 3658 — info-architecture-review (lite)
+- 진단: main=origin 클린, open hub-dispatch 0, gap 미도달(fix-incident 2/20·op-analysis 11/25·info-arch 12/30·lotto 4/30), 직전8 distinct=6 lock 無, review-code 직전 3/6 dominance 완화 겸 선택.
+- 결과: page.tsx 111개 중 breadcrumb 無 = redirect(reviews/weekly·monthly)·noindex(login/settings/community)·debug·루트 뿐, sitemap 에서 noindex/debug 제외 정합, drift 0건, 코드 변경 없음 (retro-only).
+- 다음: lotto(10/31 picks 10/27 cron 확인) 또는 fix-incident 검증(cron CI 대기 guard 실측) 자연 대기.
