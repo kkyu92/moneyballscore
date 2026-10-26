@@ -19780,3 +19780,15 @@ cycle 3398에서 처음 발견돼 이후 매번 "carry-over 잔존"으로만 언
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3637%50=37≠0)/trigger4(meta-pattern "SKILL 갱신 필요" 없음) 미충족. trigger5 — 직전20(3618-3637, 현재 포함) review-code/fix-incident/operational-analysis/lotto/info-arch 전부 발화 → 미충족. marker 박제 없음.
 
 다음 사이클 추천 = review-code(heavy) 계속(`app/{calendar,dashboard}` 등 나머지 page.tsx 또는 `app/api/{health,mlb,picks,pipeline,seo,version}` route 전수감사 이력 불명확분) 또는 info-architecture-review(gap8/30)/operational-analysis(gap5/25)/lotto(gap4/30) 자연 대기.
+
+## ⚪ RETRO-ONLY — review-code(heavy): about/glossary/guide/methodology/contact/privacy/terms/v2-shadow-monitor page.tsx + api 5route 전수감사, drift 0건 (cycle 3639, 2026-10-26)
+
+진단: open issue 0건, approved+unexpired plan 0/22(전부 만료). 2차 방어선(cycle 3638 retro `3974062c`) OK. 직전8(3631-3638) distinct=4(review-code/fix-incident/operational-analysis/lotto) — 2-chain lock 미충족. gap 전부 낮음(fix-incident 3/20·lotto 5/30·op-analysis 6/25·info-arch 9/30) — 자연 due chain 없음.
+
+cycle 3638 추천 계승 — 잔여 미감사 page.tsx(about/glossary/guide/methodology/contact/privacy/terms/v2-shadow-monitor) 8개 + api route(live/snapshot-pitchers/sync-batter-stats/kbo-scores/revalidate) 5개 전수 read. CRON_SECRET `.trim()` 가드 일관, Sentry captureException/captureMessage partial-failure 패턴 일관(mlb hub 등 다른 route와 동일 컨벤션), MetricRegistry derive 상수(FANCYSTATS_PRODUCTION_LABEL 등) silent drift family wave 68/69 정합, v2-shadow-monitor ERA_COVERAGE_LABEL_PROSE cycle 3267 drift 재발 방지 패턴 유지 확인. **drift 0건, 코드 변경 없음** — retro-only. 이로써 `apps/moneyball/src/app/` page.tsx + api route 사실상 전수감사 완료.
+
+**ship-0 서브체크**: PARTIAL_STREAK(3630-3639, 현재 포함)=8/10(3635/3637 success 2건 제외) → 10 미충족, hard-stop 불발동. RC_HEAVY_COUNT(3630-3639)=5/10(<8) → EXHAUSTIVE_SWEEP 미충족.
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3639%50=39≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3620-3639, 현재 포함) review-code 8회(0회 아님)·fix-incident 4회·op-analysis 3회·lotto 3회·info-arch 2회 전부 발화 → 미충족. marker 박제 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속(`components/` 또는 `packages/kbo-data` 잔여 scope 전환) 또는 fix-incident(gap4/20)/lotto(gap6/30)/operational-analysis(gap7/25)/info-arch(gap10/30) 자연 대기.
