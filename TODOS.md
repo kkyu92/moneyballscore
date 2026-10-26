@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — info-architecture-review(lite): IA 충분, drift 0건 (cycle 3667, 2026-10-26)
+
+진단: 사용자 `/develop-cycle 30` 호출. open issue 0건, approved plan 0건, 2차 방어선(3666 retro `db3d4051`) OK. gap 전부 미도달, review-code(heavy) 직전8 중 5 dominance 완화 선택. page.tsx 111개, breadcrumb 누락 18건 전부 redirect(`reviews/weekly|monthly`)·debug·login/settings/community·홈 의도된 예외. 코드 변경 없음.
+
 ## ✅ SUCCESS — review-code(heavy): WeeklyTrendMini verified=0 주 aria-label 수정 (cycle 3663, 2026-10-26)
 
 3661 carry-over 확인: WeeklyTrendMini 는 홈(ko 전용) 컴포넌트라 i18n 누수 무해. `getRecentWeeksAccuracy` 집계 로직 이상 없음. 시즌 종료로 verified=0 주 rate=0 이 aria-label 에서 '0%' 낭독(툴팁은 '데이터 없음' 처리 — parity 누락) → `weekAriaLabel` helper 분리 + 테스트 2건 (`1cb98bc6`). dashboard vitest 12 PASS, tsc clean, pre-push PASS.
