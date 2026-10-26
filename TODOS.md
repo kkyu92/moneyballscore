@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — info-architecture-review(lite): 현 IA 충분, drift 0건 (cycle 3676, 2026-10-26)
+- page.tsx 111개, 7일 내 신규 라우트 없음. Breadcrumb 누락 = redirect/debug/login/settings/community 류, 사용자 IA 갭 아님
+- 코드 변경 없음
+
 ## ⚪ RETRO-ONLY — lotto(lite): cron 정상 확인, drift 0건 (cycle 3675, 2026-10-26)
 - count_smoke valid 7,716,994 / 8,145,060 (제거 5.26%), delta 0
 - results/picks 최신 2026-10-24, 10/27 화 picks cron 대기 정상
