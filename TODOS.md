@@ -1,3 +1,7 @@
+## ✅ SUCCESS — review-code(heavy): WeeklyTrendMini verified=0 주 aria-label 수정 (cycle 3663, 2026-10-26)
+
+3661 carry-over 확인: WeeklyTrendMini 는 홈(ko 전용) 컴포넌트라 i18n 누수 무해. `getRecentWeeksAccuracy` 집계 로직 이상 없음. 시즌 종료로 verified=0 주 rate=0 이 aria-label 에서 '0%' 낭독(툴팁은 '데이터 없음' 처리 — parity 누락) → `weekAriaLabel` helper 분리 + 테스트 2건 (`1cb98bc6`). dashboard vitest 12 PASS, tsc clean, pre-push PASS.
+
 ## RETRO-ONLY — lotto(lite): cron 산출물 건강도 확인 (cycle 3662, 2026-10-26)
 
 - picks 10-24 / results 10-24 존재, lotto-pick-update 최근 2회 success (10-13 실패는 cycle 3128 fix 이후 해소). 다음 fire 화 10-27.
