@@ -29,6 +29,7 @@ import { MlbTeamEloChart } from "@/components/teams/MlbTeamEloChart";
 import { MlbTeamConvergencePickRecord } from "@/components/teams/MlbTeamConvergencePickRecord";
 import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 import { captureFallback } from "@/lib/observability/captureFallback";
+import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -478,7 +479,16 @@ export default async function MlbTeamPage({ params }: PageProps) {
         </section>
       )}
 
-      {profile.recentGames.length > 0 && (
+      {profile.recentGames.length > 0 && (() => {
+        const homeN = profile.recentGames.filter((r) => r.isHome).length;
+        const awayN = profile.recentGames.length - homeN;
+        const correctN = profile.recentGames.filter((r) => r.isCorrect === true).length;
+        const incorrectN = profile.recentGames.filter((r) => r.isCorrect === false).length;
+        const filterCounts = {
+          location: { all: profile.recentGames.length, home: homeN, away: awayN },
+          result: { all: profile.recentGames.length, correct: correctN, incorrect: incorrectN },
+        };
+        return (
         <section
           aria-labelledby="mlb-team-recent-title"
           className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
@@ -517,6 +527,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
               최근 {profile.recentRecord.sampleSize}경기 {profile.recentRecord.wins}승 {profile.recentRecord.losses}패
             </p>
           )}
+          <TeamRecentGamesFilter counts={filterCounts} />
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
@@ -543,9 +554,14 @@ export default async function MlbTeamPage({ params }: PageProps) {
                   const slugA = r.isHome ? code : (r.opponentCode ?? "?");
                   const slugB = r.isHome ? (r.opponentCode ?? "?") : code;
                   const detailHref = `/mlb/games/${r.gameDate}/${slugA}-vs-${slugB}`;
+                  const locationAttr = r.isHome ? "home" : "away";
+                  const resultAttr =
+                    r.isCorrect == null ? "pending" : r.isCorrect ? "correct" : "incorrect";
                   return (
                     <tr
                       key={r.gameId}
+                      data-team-game-location={locationAttr}
+                      data-team-game-result={resultAttr}
                       className="border-b border-gray-100 dark:border-[var(--color-border)]"
                     >
                       <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
@@ -580,7 +596,8 @@ export default async function MlbTeamPage({ params }: PageProps) {
             </table>
           </div>
         </section>
-      )}
+        );
+      })()}
 
       {profile.predictedGames === 0 && (
         <EmptyState
