@@ -19864,3 +19864,15 @@ cycle 3639~3641 추천 계승 — `apps/moneyball/src/components/reviews/` 10개
 **검증(skill-evolution 등)**: trigger1(chain-evolution 10건 누적, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3642%50=42≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3623-3642, 현재 포함) review-code 10회 발화(0회 아님) → 미충족. marker 박제 없음.
 
 **다음 사이클 주의**: 2-chain lock 체크(prev8=3635-3642) distinct=2(review-code+fix-incident) 도달 예상 — lock 발동 시 review-code 제외 필요. 다음 사이클 추천 = info-architecture-review(gap13/30)/operational-analysis(gap10/25)/lotto(gap9/30) 자연 대기 또는 review-code(heavy) components/{predictions,dashboard,analysis,accuracy}/ 잔여 scope(단, lock 충족 시 보류).
+
+## ⚪ RETRO-ONLY — polish-ui(lite, lock-forced): DESIGN.md 토큰 drift 전체 재검사, drift 0건 (cycle 3645, 2026-10-26)
+
+진단: open issue 0건, approved+unexpired plan 0/22. 2차 방어선(cycle 3644 retro `94fd4d34`) OK. **2-chain lock 탐지**: 직전8(3637-3644) distinct=1(review-code(heavy) 8/8 연속) — 룰 발동, review-code 이번 사이클 후보 제외. 잔여 chain 전부 자체 gap trigger 미도달(fix-incident 9/20·operational-analysis 12/25·lotto 11/30·info-arch 15/30, info-arch 는 cycle 3630 에서 이미 lite recheck 완료). 룰 4단계("어떤 chain 도 trigger 없으면 polish-ui 강제 발화") 적용.
+
+`DESIGN.md` 전체 hex 토큰 목록 추출 후 `apps/moneyball/src/components/` 전수 grep(레이아웃/셰어드는 cycle 3644 에서 이미 감사 완료라 제외). 2개 파일 hit: `HallOfFame.tsx`(금/은/동 메달 색상 전부 `var(--color-accent, #c5a23e)` 등 CSS var + DESIGN.md 동일 fallback hex), `ShareButtons.tsx`(`#1DA1F2`/`#1877F2` — 트위터/페이스북 브랜드 컬러, DESIGN.md 팔레트에 이미 의도적으로 등재된 소셜 브랜드 컬러). 양쪽 다 drift 아님. **drift 0건, 코드 변경 없음** — retro-only.
+
+**ship-0 서브체크**: PARTIAL_STREAK(3636-3645)=success 3건 존재(3637/3643/3644) → 10 미충족, hard-stop 불발동. RC_HEAVY_COUNT(3636-3645)=8/10, CLEAN_DRIFT_COUNT=5/10(<7) → EXHAUSTIVE_SWEEP 미충족(해당없음, 이번 선택 자체가 비-review-code 로 lock 룰이 이미 다양성 확보).
+
+**검증(skill-evolution 등)**: trigger1(chain-evolution 10건, 신규 없음)/trigger2(5연속 fail 없음)/trigger3(3645%50=45≠0)/trigger4(meta-pattern 없음) 미충족. trigger5 — 직전20(3626-3645, 현재 포함) 표본=20, review-code 12회 발화(0회 아님) → 미충족. marker 박제 없음.
+
+다음 사이클 추천 = review-code(heavy) 복귀(2-chain lock cooldown N=1 만료, `components/{insights,leaderboard,live,search,seasons,share,standings,players,glossary,ui}` 잔여 scope) 또는 fix-incident(gap10/20)/operational-analysis(gap13/25)/lotto(gap12/30)/info-arch(gap16/30) 자연 대기. **주의**: review-code 복귀 후 다시 8연속 쌓이면 재-lock — 중간 비-review-code 1회 자연 삽입 권장.
