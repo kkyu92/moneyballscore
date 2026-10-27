@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token 균열 0건 (cycle 3710, 2026-10-27)
+- hex 하드코딩 = HallOfFame `var(--token, fallback)` 뿐, focus 없는 `outline-none` 0건. 코드 변경 0.
+- prod 402 불변(사용자 Vercel 조치 대기). gap: op 6/25, info 4/30, lotto 8/30, fix 10/20.
+
 ## ➖ RETRO-ONLY — review-code(lite): focus-visible 스윕 포화 (cycle 3709, 2026-10-27)
 
 - button 전수 grep: 잔여 0건 (PickButton 1/2 = base 클래스 공유 false positive)
