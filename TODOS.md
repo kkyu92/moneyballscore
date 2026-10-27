@@ -1,3 +1,8 @@
+## ⚪ RETRO-ONLY — fix-incident(lite): prod 402 DEPLOYMENT_DISABLED 불변 재확인 (cycle 3700, 2026-10-27)
+
+- `/api/version` 402 지속, health-alert/deploy-drift-alert failure 는 그 부산물(신규 incident 아님). 사용자 Vercel 결제/한도 조치 대기. 코드 변경 없음.
+- cycle 3700 = 50 배수 milestone → skill-evolution trigger 3 마커 박제, 다음 cycle(3701) skill-evolution 강제 발화.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/{insights,leaderboard,live,search,seasons,share,standings,players,glossary,ui} 27파일 전수감사, drift 0건 (cycle 3699, 2026-10-27)
 
 - cycle 3644 룰("계속" 추천 잔여 scope) 처리 — 10개 subdir 27 파일 전수 read. i18n(ShareButtons locale 완전 커버), aria-label, comment-vs-code, dead code, off-by-one badge 로직, TODO/FIXME 전부 확인. 다수 파일이 과거 silent-drift-cycle-{2609,2616,2620,2621,2622,3230,3417} regression test 보유 — 전부 현재 소스와 여전히 일치(재발 없음).
