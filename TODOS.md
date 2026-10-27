@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — review-code(heavy): pipelineStats.ts 전수 read drift 0건 (cycle 3703, 2026-10-27)
+
+- type-check/lint 클린, prod 402 불변, open issue 0 / approved plan 0. 코드 변경 없음.
+
 ## ⚪ RETRO-ONLY — lotto(lite): cron 정상 확인, count_smoke 유효 7,716,994 (cycle 3702, 2026-10-27)
 
 - picks 2026-10-31.md / results 2026-10-24.md 최신, lotto-pick/result-update cron success. prod 402 불변(사용자 조치 대기). 코드 변경 없음, drift 0건.
