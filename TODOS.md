@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — review-code(heavy): components/layout 5파일 전수 read drift 0건 (cycle 3705, 2026-10-27)
+
+- Header/MegaMenu/MobileNav/CookieConsent/LeagueSelector read, tsc --noEmit 클린, i18n·aria·active 로직 일치. prod 402 불변, open issue 0. 코드 변경 없음. 잔여 = components/shared·predictions.
+
 ## ⚪ RETRO-ONLY — operational-analysis(lite): harness 재실행 n=448 불변 (cycle 3704, 2026-10-27)
 
 - ce-cohort harness: 전체 n=448 (CE 401 / 비CE 47), cycle 3598~3633 수치와 동일(KBO 시즌 종료, CREDIT_EXHAUSTED 지속). prod 402 불변, open issue 0 / approved plan 0. 코드 변경 없음, drift 0건.
