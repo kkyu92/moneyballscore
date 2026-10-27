@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — operational-analysis(lite): harness 재실행 n=448 불변 (cycle 3704, 2026-10-27)
+
+- ce-cohort harness: 전체 n=448 (CE 401 / 비CE 47), cycle 3598~3633 수치와 동일(KBO 시즌 종료, CREDIT_EXHAUSTED 지속). prod 402 불변, open issue 0 / approved plan 0. 코드 변경 없음, drift 0건.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): pipelineStats.ts 전수 read drift 0건 (cycle 3703, 2026-10-27)
 
 - type-check/lint 클린, prod 402 불변, open issue 0 / approved plan 0. 코드 변경 없음.
