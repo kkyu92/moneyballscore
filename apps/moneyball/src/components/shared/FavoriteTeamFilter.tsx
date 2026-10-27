@@ -176,7 +176,7 @@ export function FavoriteTeamFilter({ games }: Props) {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-600 transition-colors min-h-[32px]"
+            className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-600 transition-colors min-h-[32px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             aria-expanded={open}
           >
             {open ? '닫기' : activeFavCount > 0 ? '편집' : '팀 선택'}
@@ -212,7 +212,7 @@ export function FavoriteTeamFilter({ games }: Props) {
             <button
               type="button"
               onClick={clearAll}
-              className="mt-3 text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 underline-offset-2 hover:underline"
+              className="mt-3 text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               전체 해제
             </button>
