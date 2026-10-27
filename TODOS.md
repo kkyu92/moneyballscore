@@ -1,3 +1,11 @@
+## ⚪ RETRO-ONLY — polish-ui(lite): DESIGN.md token vs 컴포넌트 hex grep, drift 0건 (cycle 3686, 2026-10-26)
+- palette 밖 hex 2건 = ShareButtons Twitter(#1DA1F2)/Facebook(#1877F2) 브랜드색, 의도된 서드파티 — drift 아님
+- 코드 변경 없음. 다음 = op-analysis(gap 6/25)/info-arch(gap 10/30) 자연 대기
+
+## ➖ RETRO-ONLY — info-architecture-review(lite): IA drift 0건 (cycle 3717, 2026-10-27)
+- 비-api page.tsx 103개, sitemap url 89 엔트리. breadcrumb 없는 8개 = redirect-only(reviews/weekly·monthly, mlb/en 변형, 2026-05-08 spec 박제) + login/settings/community 유틸. 코드 변경 0. prod 402 불변.
+- gap: op 3/25, info 0/30, lotto 1/30, fix 5/20.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 (cycle 3714, 2026-10-27)
 - ce-cohort harness 재실행: 전체 n=448 / CE 401 / 비CE 47, 3598 이후 동일(KBO 시즌 종료·CREDIT_EXHAUSTED 지속). 코드 변경 0. prod 402 불변.
 - gap: op 0/25, info 8/30, lotto 3/30, fix 2/20.
