@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 picks 10-31/results 10-24 최신 (cycle 3735, 2026-10-27)
+- lotto-pick-update 10-27·lotto-result-update 10-25 success, 수동 개입 불필요. prod 402 불변. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — review-code(lite): type-check/lint green baseline (cycle 3734, 2026-10-27)
 - type-check·lint 통과, prod 402 불변(사용자 Vercel 조치 대기), CI 실패 0. 코드 변경 0.
 
