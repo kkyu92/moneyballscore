@@ -1,3 +1,7 @@
+## ✅ SUCCESS — review-code(heavy): FavoriteTeamFilter focus-visible 누락 (cycle 3708, 2026-10-27)
+
+- 버튼 focus-visible cross-cutting grep → FavoriteTeamFilter 토글/전체해제 2건 누락(3707 감사 미검출). PR #3201 머지(`e1d2c025`, MERGED 실측). CI check pass, Vercel fail = prod 402 무관. 다음 = anchor/Link focus-visible grep.
+
 ## ✅ SUCCESS — review-code(heavy): components/shared 전수 read, EmptyState focus-visible fix (cycle 3707, 2026-10-27)
 
 진단: open issue 0, 2-chain lock 미충족(직전8 distinct=6), gap 전부 미도달. 3706 추천(components/shared 잔여) 선택.
