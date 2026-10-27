@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 DEPLOYMENT_DISABLED 불변 (cycle 3737, 2026-10-27)
+- deploy-drift-alert 최근 실패 4회 전부 HTTP 402 기인, 코드 버그 아님. 사용자 Vercel 결제/한도 조치 대기. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): breadcrumb 누락 18개 전부 의도된 경우 (cycle 3736, 2026-10-27)
 - 111 pages 중 누락은 redirect/debug/noindex/login/settings 뿐, IA 충분. prod 402 불변. 코드 변경 0.
 
