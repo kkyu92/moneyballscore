@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 DEPLOYMENT_DISABLED 지속 재확인 (cycle 3730, 2026-10-27)
+- /api/version HTTP 402, 사용자 Vercel 결제/한도 조치 필요(코드 문제 아님). CI Failure Dispatch skipped only. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 + count_smoke 정상 (cycle 3729, 2026-10-27)
 - picks 2026-10-31 / results 2026-10-24 존재, 유효 조합 7,716,994 (제거 5.26%), 신규 rule 0, 코드 변경 0
 
