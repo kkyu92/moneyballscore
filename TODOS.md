@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — review-code(lite): health baseline 정상 (cycle 3713, 2026-10-27)
+- pnpm test 4/4 success, tsc --noEmit 클린. 코드 변경 0. prod 402 불변(사용자 Vercel 조치 대기). gap: op 9/25, info 7/30, lotto 2/30, fix 1/20.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3711, 2026-10-27)
 - count_smoke: 유효 7,716,994 / 제거 428,066 (5.26%), 규칙 256. picks 10-31 · results 10-24 최신, cron 2종 success. 수동 개입 불필요, 코드 변경 0.
 - prod 402 불변. gap: op 7/25, info 5/30, fix 11/20, lotto 0/30.
