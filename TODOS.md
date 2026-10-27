@@ -20219,3 +20219,5 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - gh run list 40건 실패 0, open issue 0, prod 402 불변. 코드 변경 0.
 
 - cycle 3715 (review-code heavy): WeeklyTrendMini '전체 보기' Link focus-visible 추가, PR #3202 머지. 주의: `gh pr checks --fail-fast` 가 Vercel 402(외부 blocked)로 조기 종료 → check CI 미완료 상태 머지. 다음부터 Vercel 제외 `check` job 만 watch.
+
+- cycle 3721 polish-ui(lite): DESIGN.md hex token vs apps/moneyball tsx off-token 0건. prod 402 불변(사용자 Vercel 결제 조치 필요). 코드 변경 0.
