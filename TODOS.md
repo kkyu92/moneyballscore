@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 불변 재확인 (cycle 3720, 2026-10-27)
+- /api/version = HTTP 402 DEPLOYMENT_DISABLED 불변 (사용자 Vercel 결제/한도 조치 필요). CI Failure Dispatch 전부 skipped, lotto picks 10-31 / results 10-24 정상. 코드 변경 0.
+- gap: fix 0/20 (발화), op 6/25, info 3/30, lotto 4/30.
+
 ## ➖ RETRO-ONLY — review-code(heavy): DEFAULT_WEIGHTS 주석-값 대조 drift 0건 (cycle 3719, 2026-10-27)
 - packages/shared/src/index.ts v1.8 주석(sp_fip 15/xfip 5/woba 15/불펜 10/폼 10/WAR 8/h2h 3/구장 4/Elo 10/SFR 5) = 값 일치, 합계 0.85. 코드 변경 0. prod 402 불변.
 - gap: fix 7/20, op 5/25, info 2/30, lotto 3/30.
