@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(heavy): DEFAULT_WEIGHTS 주석-값 대조 drift 0건 (cycle 3719, 2026-10-27)
+- packages/shared/src/index.ts v1.8 주석(sp_fip 15/xfip 5/woba 15/불펜 10/폼 10/WAR 8/h2h 3/구장 4/Elo 10/SFR 5) = 값 일치, 합계 0.85. 코드 변경 0. prod 402 불변.
+- gap: fix 7/20, op 5/25, info 2/30, lotto 3/30.
+
 ## ➖ RETRO-ONLY — review-code(lite): health baseline clean (cycle 3718, 2026-10-27)
 - type-check 4/4, lint 3/3, test 615 files / 4842 pass. health/deploy-drift/runtime-error alert 실패 = prod 402 에 대한 정상 알림. 코드 변경 0.
 - gap: fix 6/20, op 4/25, info 1/30, lotto 2/30.
