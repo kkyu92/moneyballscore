@@ -20225,3 +20225,4 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - cycle 3723 operational-analysis(lite): harness 재실행 n=448 (CE 401 / 비CE 47) 불변 — KBO 시즌 종료(10/4) + CREDIT_EXHAUSTED 지속, 신규 verified 0건. 코드 변경 0.
 - cycle 3724 review-code(heavy): accuracy/page.tsx TOC_ITEMS 14 id vs 섹션 id 속성 14/14 일치, drift 0건. prod 402 불변. 코드 변경 0.
 - cycle 3725 fix-incident(lite): prod /api/version 402 DEPLOYMENT_DISABLED 불변, health-alert/deploy-drift-alert 실패 지속. 사용자 Vercel 결제/한도 조치 필요 (자율 결제 금지). 코드 변경 0.
+- cycle 3726 info-architecture-review(lite): page.tsx 111, breadcrumb 누락 전부 의도적(debug/login/settings/hub), IA drift 0건. prod 402 불변(사용자 Vercel 조치 대기). 코드 변경 0.
