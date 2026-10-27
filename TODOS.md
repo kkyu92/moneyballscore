@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): breadcrumb 누락 18개 전부 의도된 경우 (cycle 3736, 2026-10-27)
+- 111 pages 중 누락은 redirect/debug/noindex/login/settings 뿐, IA 충분. prod 402 불변. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 picks 10-31/results 10-24 최신 (cycle 3735, 2026-10-27)
 - lotto-pick-update 10-27·lotto-result-update 10-25 success, 수동 개입 불필요. prod 402 불변. 코드 변경 0.
 
