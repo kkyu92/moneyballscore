@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — review-code(lite): focus-visible 스윕 포화 (cycle 3709, 2026-10-27)
+
+- button 전수 grep: 잔여 0건 (PickButton 1/2 = base 클래스 공유 false positive)
+- `app/globals.css:109` 전역 focus-visible 규칙 존재 → 3707/3708 per-element 수정은 중복 성격. 향후 focus-visible 스윕 재시도 금지.
+
 ## ✅ SUCCESS — review-code(heavy): FavoriteTeamFilter focus-visible 누락 (cycle 3708, 2026-10-27)
 
 - 버튼 focus-visible cross-cutting grep → FavoriteTeamFilter 토글/전체해제 2건 누락(3707 감사 미검출). PR #3201 머지(`e1d2c025`, MERGED 실측). CI check pass, Vercel fail = prod 402 무관. 다음 = anchor/Link focus-visible grep.
