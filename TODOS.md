@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 (cycle 3714, 2026-10-27)
+- ce-cohort harness 재실행: 전체 n=448 / CE 401 / 비CE 47, 3598 이후 동일(KBO 시즌 종료·CREDIT_EXHAUSTED 지속). 코드 변경 0. prod 402 불변.
+- gap: op 0/25, info 8/30, lotto 3/30, fix 2/20.
+
 ## ➖ RETRO-ONLY — review-code(lite): health baseline 정상 (cycle 3713, 2026-10-27)
 - pnpm test 4/4 success, tsc --noEmit 클린. 코드 변경 0. prod 402 불변(사용자 Vercel 조치 대기). gap: op 9/25, info 7/30, lotto 2/30, fix 1/20.
 
