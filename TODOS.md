@@ -20122,3 +20122,8 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - 진단: main=origin 클린, open hub-dispatch 0, approved plan 0, 직전8 distinct=6 lock 無, gap fix 3/20·op 1/25·info 5/30·lotto 6/30, CI Failure Dispatch 전부 skipped.
 - 결과: `lotto.ts count` 유효 7,716,994 / 8,145,060 (제거 5.26%, delta 0). results/picks 10-24 존재, lotto-result cron 10/24-25 3회 success, picks cron 화(10/27) 대기 정상. drift 0건, 코드 변경 없음 (retro-only).
 - 다음: 10/27 picks cron 후 재확인 또는 info-arch/fix-incident gap 자연 대기.
+
+## cycle 3697 — fix-incident (lite)
+- 진단: `gh run list` deploy-drift/health/runtime-error alert 연속 failure. production `/api/version` + deployment URL 전부 HTTP 402 `DEPLOYMENT_DISABLED` (Payment required). `vercel ls` 최신 deployment Ready → build 실패 아님, 계정/프로젝트 수준 정지. 마지막 drift-alert success 2026-10-26T12:53Z.
+- 결과: 코드 원인 아님. 자율 결제 금지(비용 가드). 사용자 Vercel dashboard 확인 필요 (usage limit / billing). retro-only.
+- 다음: 사용자 조치 후 `curl -i /api/version` 200 확인 → 사이클 재개.
