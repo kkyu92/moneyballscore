@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 지속·lotto cron 정상·CI 실패 0 재확인 (cycle 3732, 2026-10-27)
+- prod HTTP 402 불변(사용자 Vercel 조치 대기), lotto picks 10-31/results 10-24 정상, CI Failure Dispatch skipped only. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): harness 재실행 n=448 불변 (cycle 3731, 2026-10-27)
 - CE 401 / 비CE 47, 격차 8.0pp 불변. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. prod 402 불변. 코드 변경 0.
 - gap: fix 1/20, op 0/25(발화), info 5/30, lotto 2/30.
