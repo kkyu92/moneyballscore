@@ -1,3 +1,7 @@
+## ⚪ RETRO-ONLY — info-architecture-review(lite): breadcrumb 누락 18건 동일, drift 0건 (cycle 3706, 2026-10-27)
+
+- page.tsx 111개, breadcrumb 누락 목록 cycle 3646 과 동일(root/settings/community/login + debug/* + reviews redirect shim). sitemap.ts 동적 생성 구조 불변, 신규 라우트 0건(mtime -7 = checkout false positive). prod 402 불변, open issue 0. 코드 변경 없음.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): components/layout 5파일 전수 read drift 0건 (cycle 3705, 2026-10-27)
 
 - Header/MegaMenu/MobileNav/CookieConsent/LeagueSelector read, tsc --noEmit 클린, i18n·aria·active 로직 일치. prod 402 불변, open issue 0. 코드 변경 없음. 잔여 = components/shared·predictions.
