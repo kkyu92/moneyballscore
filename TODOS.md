@@ -20222,3 +20222,4 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 
 - cycle 3721 polish-ui(lite): DESIGN.md hex token vs apps/moneyball tsx off-token 0건. prod 402 불변(사용자 Vercel 결제 조치 필요). 코드 변경 0.
 - cycle 3722 lotto(lite): cron 산출물 최신 확인 (lotto-picks 2026-10-31 / lotto-results 2026-10-24), 수동 개입 불필요. 코드 변경 0.
+- cycle 3723 operational-analysis(lite): harness 재실행 n=448 (CE 401 / 비CE 47) 불변 — KBO 시즌 종료(10/4) + CREDIT_EXHAUSTED 지속, 신규 verified 0건. 코드 변경 0.
