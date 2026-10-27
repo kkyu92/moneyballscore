@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3711, 2026-10-27)
+- count_smoke: 유효 7,716,994 / 제거 428,066 (5.26%), 규칙 256. picks 10-31 · results 10-24 최신, cron 2종 success. 수동 개입 불필요, 코드 변경 0.
+- prod 402 불변. gap: op 7/25, info 5/30, fix 11/20, lotto 0/30.
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token 균열 0건 (cycle 3710, 2026-10-27)
 - hex 하드코딩 = HallOfFame `var(--token, fallback)` 뿐, focus 없는 `outline-none` 0건. 코드 변경 0.
 - prod 402 불변(사용자 Vercel 조치 대기). gap: op 6/25, info 4/30, lotto 8/30, fix 10/20.
