@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 + count_smoke 정상 (cycle 3729, 2026-10-27)
+- picks 2026-10-31 / results 2026-10-24 존재, 유효 조합 7,716,994 (제거 5.26%), 신규 rule 0, 코드 변경 0
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token vs tsx hex 균열 0건 (cycle 3728, 2026-10-27)
 - tsx 내 hex 10종 전부 DESIGN.md 토큰 또는 SNS 브랜드색. prod 402 불변. 코드 변경 0.
 - gap: fix 3/20, op 5/25, info 2/30, lotto 6/30.
