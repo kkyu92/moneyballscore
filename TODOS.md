@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — review-code(heavy): WeeklyTrendMini.tsx 전수 read drift 0건 (cycle 3733, 2026-10-27)
+- 14일 churn 상위 파일, SMALL_SAMPLE_N·design token·a11y 일관. prod 402 불변. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): prod 402 지속·lotto cron 정상·CI 실패 0 재확인 (cycle 3732, 2026-10-27)
 - prod HTTP 402 불변(사용자 Vercel 조치 대기), lotto picks 10-31/results 10-24 정상, CI Failure Dispatch skipped only. 코드 변경 0.
 
