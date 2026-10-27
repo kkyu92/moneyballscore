@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — review-code(lite): type-check/lint green baseline (cycle 3734, 2026-10-27)
+- type-check·lint 통과, prod 402 불변(사용자 Vercel 조치 대기), CI 실패 0. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — review-code(heavy): WeeklyTrendMini.tsx 전수 read drift 0건 (cycle 3733, 2026-10-27)
 - 14일 churn 상위 파일, SMALL_SAMPLE_N·design token·a11y 일관. prod 402 불변. 코드 변경 0.
 
