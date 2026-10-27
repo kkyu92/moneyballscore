@@ -1,3 +1,9 @@
+## ⚪ RETRO-ONLY — review-code(heavy): components/{insights,leaderboard,live,search,seasons,share,standings,players,glossary,ui} 27파일 전수감사, drift 0건 (cycle 3699, 2026-10-27)
+
+- cycle 3644 룰("계속" 추천 잔여 scope) 처리 — 10개 subdir 27 파일 전수 read. i18n(ShareButtons locale 완전 커버), aria-label, comment-vs-code, dead code, off-by-one badge 로직, TODO/FIXME 전부 확인. 다수 파일이 과거 silent-drift-cycle-{2609,2616,2620,2621,2622,3230,3417} regression test 보유 — 전부 현재 소스와 여전히 일치(재발 없음).
+- 사소 관찰 1건(TeamAccuracyList `data-accuracy-rank` 미사용 attribute) — 다른 sort mode 와 대칭 패턴이라 의도된 구조로 판단, 미보고.
+- 코드 변경 없음. fix-incident 쪽 prod 402 블록 지속(health-alert/deploy-drift-alert scheduled workflow failure dispatch 계속 발생 — 전부 known Vercel 402 incident 의 부산물, 신규 아님). 다음 = components/{predictions 외 잔여} 또는 op-analysis(gap8/25)/info-arch(gap5/30)/lotto(gap6/30) 자연 대기.
+
 ## ⚪ RETRO-ONLY — polish-ui(lite): DESIGN.md token vs hex grep drift 0건 (cycle 3696, 2026-10-26)
 
 tsx hex 리터럴은 HallOfFame `var(--color-*, fallback)` 뿐, 토큰 일치. 코드 변경 없음. STRUCTURAL_DRY_SPELL_SUPPRESS 적용(marker age ~9.5h).
