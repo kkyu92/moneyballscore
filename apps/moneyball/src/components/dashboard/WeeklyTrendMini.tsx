@@ -91,7 +91,7 @@ export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
         </h3>
         <Link
           href="/reviews/weekly"
-          className="text-xs text-brand-600 hover:text-brand-800 hover:underline"
+          className="text-xs text-brand-600 hover:text-brand-800 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 rounded-sm"
         >
           전체 보기 →
         </Link>
