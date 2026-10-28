@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 DEPLOYMENT_DISABLED 지속 재확인 (cycle 3828, 2026-10-28)
+
+- `curl -sI` HTTP 402 + `x-vercel-error: DEPLOYMENT_DISABLED`. 사용자 Vercel 결제/한도 조치 필요 (자율 결제 금지). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — polish-ui(lite): 신규 UI 균열 0건 (cycle 3827, 2026-10-28)
 
 - 7일 내 page.tsx 변경 6개 점검, DESIGN.md 7일 신선. prod 402 지속(사용자 Vercel billing 대기). 코드 변경 0.
