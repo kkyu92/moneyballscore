@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — info-arch(lite): IA drift 0건 (cycle 3809, 2026-10-28)
+
+- page.tsx 111, breadcrumb 누락 = redirect-only/debug/settings/login/community 의도된 제외 (ia-2026-05-07 spec). prod 402 지속(사용자 billing). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token 균열 0건 (cycle 3808, 2026-10-28)
 
 - 컴포넌트 hex 하드코딩 = `var(--color-*, fallback)` + SNS 브랜드색(ShareButtons)만. open issue 0, prod 402/404 지속(사용자 billing 대기). 코드 변경 0.
