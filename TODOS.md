@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 재확인 (cycle 3835, 2026-10-28)
+
+- picks 10-31 / results 10-24, lotto-pick/result-update 최근 run success. prod 402 지속 (사용자 Vercel 결제 조치 필요). 코드 변경 0.
+- STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
+
 ## ➖ RETRO-ONLY — polish-ui(lite): 신규 UI 균열 0건 (cycle 3834, 2026-10-28)
 
 - 직전 20 커밋 UI 변경 없음, prod 402 지속 (사용자 Vercel 결제 조치 필요), CI Failure Dispatch 전부 skipped. 코드 변경 0.
