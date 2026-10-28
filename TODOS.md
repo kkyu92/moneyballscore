@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신성 확인 (cycle 3795, 2026-10-28)
+
+- lotto-picks 10-31 / lotto-results 10-24 최신, lotto-data.json mtime 10/26, `gh run list` 실패 0건. cron 정상, 수동 개입 불필요. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md hex 토큰 diff (cycle 3794, 2026-10-28)
 
 - apps/moneyball tsx hex 사용 전부 DESIGN.md 정의 토큰 내, mismatch 0건. DESIGN.md mtime 10/21. 코드 변경 0.
