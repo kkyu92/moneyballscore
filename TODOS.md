@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — info-arch(lite): IA drift 0건 (cycle 3836, 2026-10-28)
+
+- page.tsx 111개, 7일 신규 추가 커밋 0건. prod 402 지속 (사용자 Vercel 결제 조치 필요). 코드 변경 0.
+- STRUCTURAL_DRY_SPELL_SUPPRESS (marker 4h <24h)
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 재확인 (cycle 3835, 2026-10-28)
 
 - picks 10-31 / results 10-24, lotto-pick/result-update 최근 run success. prod 402 지속 (사용자 Vercel 결제 조치 필요). 코드 변경 0.
