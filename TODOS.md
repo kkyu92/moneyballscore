@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — skill-evolution: phase 63 milestone (cycle 3801, 2026-10-28)
+
+- 3751-3800 success 1/50(2%), retro 중복·결손 0, PASS_ship 3145. prod 402 지속(curl 재확인). MIGRATION-PATH.md phase 63 append, 신규 룰 0. 다음 milestone 3850.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): CE cohort 재측정 (cycle 3800, 2026-10-28)
 
 - n=448 (CE 401 / 비CE 47) 불변. KBO 2026 정규시즌 10/4 종료 + CREDIT_EXHAUSTED 지속. prod 402 지속. 코드 변경 0. cycle 3800 milestone → skill-evolution marker 박제.
