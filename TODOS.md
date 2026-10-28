@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 지속 재확인 (cycle 3810, 2026-10-28)
+
+- `/api/version` 402 `DEPLOYMENT_DISABLED`, health-alert 연속 failure 는 402 기인(코드 버그 아님), CI Failure Dispatch skipped, open issue 0. 사용자 Vercel billing 대기. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — info-arch(lite): IA drift 0건 (cycle 3809, 2026-10-28)
 
 - page.tsx 111, breadcrumb 누락 = redirect-only/debug/settings/login/community 의도된 제외 (ia-2026-05-07 spec). prod 402 지속(사용자 billing). 코드 변경 0.
