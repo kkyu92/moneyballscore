@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — info-arch(lite): Breadcrumb/sitemap 점검 (cycle 3793, 2026-10-28)
+
+- page.tsx 111개 중 Breadcrumb 미사용 = settings/community/login(유틸) + redirect-only reviews 4종 + debug/* → 의도된 예외, sitemap.ts 제외 사유 주석 일치. 신규 IA 균열 0건. 코드 변경 0.
+
 ## ✅ SUCCESS — review-code(heavy): vercel ignoreCommand fail-open (cycle 3789, 2026-10-28)
 
 - 3a0110cc doc-only skip 가 git diff 실패 시 빈 CHANGED → 실제 배포 silent skip 위험. 비어있지 않을 때만 skip 하도록 수정, PR #3204 MERGED (7235abb6). Vercel check fail = 402 계정 블록(무관). 사용자 조치: Vercel 한도/결제 해소 필요(402 지속).
