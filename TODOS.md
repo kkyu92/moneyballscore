@@ -20287,3 +20287,6 @@ test 4/4 green, drift 0건, prod 402 불변(사용자 Vercel 조치 대기). 코
 - page.tsx 111개, Breadcrumb 미보유 = home/login/settings/debug/*/redirect-only reviews·mlb reviews/community(noindex stub) 전부 의도된 예외. 실질 IA drift 0건
 - prod `moneyballscore.vercel.app` HTTP 402 불변 (사용자 Vercel 조치 대기)
 - STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.8h<24h), N=43 유지. 코드 변경 0
+
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN token drift 0건 (cycle 3746, 2026-10-28)
+DESIGN.md 6일 신선, components hex 하드코딩 기존 예외 2파일 외 신규 0. prod 402 불변(사용자 Vercel 조치 대기). 코드 변경 0.
