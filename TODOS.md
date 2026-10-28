@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md hex 균열 0건 (cycle 3771, 2026-10-28)
+
+- tsx hex 전부 DESIGN.md 박제값 내. prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 재측정 (cycle 3770, 2026-10-28)
 
 - op-analysis-ce-cohort harness: 전체 n=448 (CE 401 / 비CE 47) 직전과 동일(KBO 정규시즌 10/4 종료, CREDIT_EXHAUSTED 지속). open issue 0, prod 402 불변, CI Failure Dispatch skipped. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23.2h<24h). 코드 변경 0.
