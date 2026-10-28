@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 재측정 (cycle 3770, 2026-10-28)
+
+- op-analysis-ce-cohort harness: 전체 n=448 (CE 401 / 비CE 47) 직전과 동일(KBO 정규시즌 10/4 종료, CREDIT_EXHAUSTED 지속). open issue 0, prod 402 불변, CI Failure Dispatch skipped. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23.2h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token grep drift 0건 (cycle 3767, 2026-10-28)
 
 - 코드 변경 0. 하드코딩 hex 는 var() fallback + 브랜드색(Twitter/Facebook)뿐, focus-visible 85 파일 적용. open issue 0, prod 402 불변, CI Failure Dispatch skipped. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23.1h<24h).
