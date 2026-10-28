@@ -20306,3 +20306,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — fix-incident(lite): prod 402 불변 (cycle 3750, 2026-10-28)
 - prod moneyballscore.vercel.app 402 불변, health-alert 실패 = 동일 원인(사용자 Vercel 조치 대기). lotto picks 10-31/results 10-24 정상. 신규 incident 0. 코드 변경 0
 - cycle 3750 milestone → skill-evolution marker 박제 (trigger 3)
+
+## ➖ RETRO-ONLY — skill-evolution (cycle 3751, 2026-10-28)
+- trigger3 milestone(3750). 직전 50 cycle: success 3(6%) / retro-only 47. 3차 방어선 drift 0건, 중복 retro 0건. 신규 룰 X. PASS_ship 3144. MIGRATION-PATH phase 62 append, marker 삭제. 코드 변경 0
+- 원인 = prod Vercel 402 지속 + KBO 종료 + CREDIT_EXHAUSTED 구조적 dry spell. 다음 milestone 3800
