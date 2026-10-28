@@ -20277,3 +20277,8 @@ lotto-picks 2026-10-31 / lotto-results 2026-10-24 존재, count_smoke 유효 7,7
 ## ➖ RETRO-ONLY — review-code(lite): test 4/4 green (cycle 3743, 2026-10-28)
 
 test 4/4 green, drift 0건, prod 402 불변(사용자 Vercel 조치 대기). 코드 변경 0.
+
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 불변, cron 정상 (cycle 3744, 2026-10-28)
+- prod `moneyballscore.vercel.app` HTTP 402 DEPLOYMENT_DISABLED 불변 (사용자 Vercel 조치 대기)
+- lotto-picks 2026-10-31.md 존재, CI 실패 0, 신규 incident 0건. 코드 변경 0
+- STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.7h<24h), N=44 유지
