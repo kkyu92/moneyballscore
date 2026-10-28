@@ -20302,3 +20302,7 @@ DESIGN.md 6일 신선, components hex 하드코딩 기존 예외 2파일 외 신
 ## ➖ RETRO-ONLY — operational-analysis(lite): ce-cohort 불변 (cycle 3747, 2026-10-28)
 ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. prod 402 불변(사용자 Vercel 조치 대기). 코드 변경 0.
 - STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.9h<24h), N=41 유지
+
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 불변 (cycle 3750, 2026-10-28)
+- prod moneyballscore.vercel.app 402 불변, health-alert 실패 = 동일 원인(사용자 Vercel 조치 대기). lotto picks 10-31/results 10-24 정상. 신규 incident 0. 코드 변경 0
+- cycle 3750 milestone → skill-evolution marker 박제 (trigger 3)
