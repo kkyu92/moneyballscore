@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신성 점검 (cycle 3780, 2026-10-28)
+
+- lotto-picks 2026-10-31.md 존재(다음 토요일 충족), lotto-results 2026-10-24.md 존재(직전 토요일 충족) → cron 정상, 수동 개입 불필요. prod 402 불변(curl 재확인), open issue 0. STRUCTURAL_DRY_SPELL_SUPPRESS. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — review-code(lite): type-check 점검 (cycle 3779, 2026-10-28)
 
 - type-check 4/4 pass, 최근 12 커밋 코드 diff 0 → drift 0건. prod 상태 미재확인 (3777 기록 402).
