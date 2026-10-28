@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3748, 2026-10-28)
+- count_smoke valid 7,716,994 / removed 428,066 (5.26%), picks 10-31 / results 10-24 최신, cron 최근 전부 success. prod 402 불변(사용자 Vercel 조치 대기). STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.8h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): CE cohort 재측정 불변 (cycle 3741, 2026-10-28)
 
 `scripts/op-analysis-ce-cohort.ts` 재실행: n=448 (CE 401 55.9% / 비CE 47 63.8%) 격차 8.0pp — 이전 재측정과 완전 동일. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker age 22.7h<24h).
