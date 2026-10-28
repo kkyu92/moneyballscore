@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — info-arch(lite): IA drift 0건 (cycle 3831, 2026-10-28)
+
+- page.tsx 111, breadcrumb 누락 18 불변 (reviews/* = redirect, debug/settings/login 의도적)
+- prod 402 지속 (사용자 Vercel 결제 조치 필요), CI Failure Dispatch 전부 skipped
+- STRUCTURAL_DRY_SPELL_SUPPRESS (marker 4h <24h)
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3830, 2026-10-28)
 
 - count_smoke 유효 7,716,994 / 제거 428,066(5.26%), picks 10-31 / results 10-24 cron success. prod 402 지속. 코드 변경 0.
