@@ -20269,3 +20269,7 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 - cycle 3725 fix-incident(lite): prod /api/version 402 DEPLOYMENT_DISABLED 불변, health-alert/deploy-drift-alert 실패 지속. 사용자 Vercel 결제/한도 조치 필요 (자율 결제 금지). 코드 변경 0.
 - cycle 3726 info-architecture-review(lite): page.tsx 111, breadcrumb 누락 전부 의도적(debug/login/settings/hub), IA drift 0건. prod 402 불변(사용자 Vercel 조치 대기). 코드 변경 0.
 - cycle 3727 review-code(lite): type-check 4/4 + test 4/4 green(turbo cache), open hub-dispatch 0, prod 402 불변(사용자 Vercel 조치 대기), lotto picks 10-31/results 10-24 정상. drift 0건, 코드 변경 0.
+
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 확인 (cycle 3742, 2026-10-28)
+
+lotto-picks 2026-10-31 / lotto-results 2026-10-24 존재, count_smoke 유효 7,716,994 (제거 428,066, 5.26
