@@ -1,3 +1,7 @@
+## ✅ SUCCESS — review-code(heavy): vercel ignoreCommand fail-open (cycle 3789, 2026-10-28)
+
+- 3a0110cc doc-only skip 가 git diff 실패 시 빈 CHANGED → 실제 배포 silent skip 위험. 비어있지 않을 때만 skip 하도록 수정, PR #3204 MERGED (7235abb6). Vercel check fail = 402 계정 블록(무관). 사용자 조치: Vercel 한도/결제 해소 필요(402 지속).
+
 ## ➖ RETRO-ONLY — review-code(lite): test green (cycle 3786, 2026-10-28)
 
 - pnpm test 4/4 success, prod 402 불변, open issue 0, CI Failure Dispatch 전부 skipped. 코드 변경 0.
