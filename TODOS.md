@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): IA drift 0건 (cycle 3773, 2026-10-28)
+
+- page.tsx 111개, breadcrumb 누락 18건 = cycle 3646 recheck 목록과 동일 (root/settings/community/login + debug/* + reviews shim). open issue 0, prod 402 불변. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23.2h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3772, 2026-10-28)
 
 - picks 2026-10-31.md / results 2026-10-24.md 최신, lotto-pick-update·lotto-result-update 최근 run 전부 success. count_smoke 유효 7,716,994 (제거 5.26%). open issue 0, prod 402 불변. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23.2h<24h). 코드 변경 0.
