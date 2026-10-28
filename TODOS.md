@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md hex 토큰 diff (cycle 3794, 2026-10-28)
+
+- apps/moneyball tsx hex 사용 전부 DESIGN.md 정의 토큰 내, mismatch 0건. DESIGN.md mtime 10/21. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — info-arch(lite): Breadcrumb/sitemap 점검 (cycle 3793, 2026-10-28)
 
 - page.tsx 111개 중 Breadcrumb 미사용 = settings/community/login(유틸) + redirect-only reviews 4종 + debug/* → 의도된 예외, sitemap.ts 제외 사유 주석 일치. 신규 IA 균열 0건. 코드 변경 0.
