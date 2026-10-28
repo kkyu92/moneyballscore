@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 정상 (cycle 3812, 2026-10-28)
+
+- picks 10-31 / results 10-24(직전 토요일) 최신, count_smoke 유효 7,716,994 (제거 5.26%), 수동 개입 불필요. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — review-code(lite): type-check/lint 7/7 green (cycle 3811, 2026-10-28)
 
 - turbo type-check+lint 7/7 통과, CI 최근 run 정상(Failure Dispatch skipped), open issue 0, prod 402 지속(사용자 Vercel billing 대기). 코드 변경 0.
