@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): CE cohort 재측정 불변 (cycle 3741, 2026-10-28)
+
+`scripts/op-analysis-ce-cohort.ts` 재실행: n=448 (CE 401 55.9% / 비CE 47 63.8%) 격차 8.0pp — 이전 재측정과 완전 동일. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker age 22.7h<24h).
+
 ## ➖ RETRO-ONLY — review-code(heavy): 대형 lib 파일 스캔 drift 0건 (cycle 3740, 2026-10-28)
 - TODO/FIXME 0건, convergenceRecord/buildAccuracyData 최근 sweep(#3181) 이력. prod 402 불변(사용자 Vercel 조치 대기). 코드 변경 0.
 
