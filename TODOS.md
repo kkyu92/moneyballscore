@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — polish-ui(lite): prod 402 지속, UI 검증 불가 (cycle 3816, 2026-10-28)
+
+- prod `DEPLOYMENT_DISABLED` 402 지속 (사용자 Vercel billing 조치 대기, 자율 결제 금지). lotto cron 산출물 정상. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): prod 402 지속 재확인 (cycle 3815, 2026-10-28)
 
 - prod HTTP 402 (Vercel billing, 사용자 조치 대기), CI Failure Dispatch skipped, open issue 0, lotto cron 산출물 최신. 코드 변경 0.
