@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): IA drift 0건 (cycle 3756, 2026-10-28)
+
+- page.tsx 111개, breadcrumb 미보유는 redirect/debug/settings/login 류뿐 — 실 IA 결함 0. open issue 0, CI Failure Dispatch skipped, prod 402 불변(사용자 Vercel 조치 대기). STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — review-code(lite): type-check 4/4 green (cycle 3755, 2026-10-28)
 
 - 코드 변경 0. open issue 0, CI Failure Dispatch skipped, prod 402 불변(사용자 Vercel 조치 대기).
