@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 재측정 (cycle 3758, 2026-10-28)
+
+- op-analysis-ce-cohort harness: 전체 n=448 (CE 401 / 비CE 47), CE 55.9% / 비CE 63.8% 격차 8.0pp — 직전 측정과 동일(KBO 정규시즌 10/4 종료, CREDIT_EXHAUSTED 지속). open issue 0, CI Failure Dispatch skipped. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): prod 402 불변 재확인 (cycle 3757, 2026-10-28)
 
 - moneyballscore.vercel.app /api/version 402, health-alert 3회 연속 failure — 사용자 Vercel 결제/한도 조치 대기(자율 결제 금지). open issue 0, CI Failure Dispatch skipped. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23h<24h). 코드 변경 0.
