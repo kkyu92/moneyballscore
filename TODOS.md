@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3776, 2026-10-28)
+
+- picks 10-31 / results 10-24 최신, lotto-pick/result-update cron success, count_smoke 유효 7,716,994 (제거 5.26%), open issue 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23.3h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): CE cohort 불변 (cycle 3775, 2026-10-28)
 
 - ce-cohort harness n=448 (CE 401 / 비CE 47) 불변, prod 402 DEPLOYMENT_DISABLED 불변, open issue 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h). 코드 변경 0.
