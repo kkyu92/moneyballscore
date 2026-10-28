@@ -20528,3 +20528,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 3807 (op-analysis lite): ce-cohort harness n=448 불변(CE 401/비CE 47), prod 402 지속(사용자 Vercel 조치 대기), STRUCTURAL_DRY_SPELL_SUPPRESS, 코드 변경 0 RETRO-ONLY
 
 - cycle 3821 (op-analysis lite): harness 재측정 n=448 (CE 401 / 비CE 47) 불변, prod 402 지속, 코드 변경 0
+
+- cycle 3824 (lotto lite): cron 정상(picks 10-31 / results 10-24), prod 402 지속, 코드 변경 0 RETRO-ONLY
