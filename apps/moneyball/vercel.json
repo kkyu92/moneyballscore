@@ -1,3 +1,3 @@
 {
-  "ignoreCommand": "if [ \"$VERCEL_ENV\" = 'preview' ]; then exit 0; fi; cd ../.. && PREV=\"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\"; CHANGED=$(git diff --name-only \"$PREV\" HEAD 2>/dev/null); NON_DOC=$(echo \"$CHANGED\" | grep -vE '^(TODOS\\.md|CHANGELOG\\.md|VERSION)$|^memory/'); if [ -z \"$NON_DOC\" ]; then echo 'doc-only change — skip deploy'; exit 0; fi; cd apps/moneyball && npx turbo-ignore moneyball"
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" = 'preview' ]; then exit 0; fi; cd ../.. && PREV=\"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\"; CHANGED=$(git diff --name-only \"$PREV\" HEAD 2>/dev/null); NON_DOC=$(echo \"$CHANGED\" | grep -vE '^(TODOS\\.md|CHANGELOG\\.md|VERSION)$|^memory/'); if [ -n \"$CHANGED\" ] && [ -z \"$NON_DOC\" ]; then echo 'doc-only change — skip deploy'; exit 0; fi; cd apps/moneyball && npx turbo-ignore moneyball"
 }
