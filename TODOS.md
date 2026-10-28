@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — review-code(lite): type-check 4/4 green (cycle 3755, 2026-10-28)
+
+- 코드 변경 0. open issue 0, CI Failure Dispatch skipped, prod 402 불변(사용자 Vercel 조치 대기).
+- STRUCTURAL_DRY_SPELL_SUPPRESS 적용 (marker 22.9h).
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md 토큰 vs 컴포넌트 hex drift 0건 (cycle 3754, 2026-10-28)
 - components hex 색상 전부 DESIGN.md 토큰 내, 최근 5일 UI 변경 테스트/prose/mlb 페이지뿐. prod 402 불변. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.9h<24h). 코드 변경 0.
 
