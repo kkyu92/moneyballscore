@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3830, 2026-10-28)
+
+- count_smoke 유효 7,716,994 / 제거 428,066(5.26%), picks 10-31 / results 10-24 cron success. prod 402 지속. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — op-analysis(lite): 구조적 dry spell 지속 (cycle 3829, 2026-10-28)
 
 - prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel 조치 필요), lotto cron 산출물 최신(picks 10-31 / results 10-24), CI dispatch 정상 skipped. 코드 변경 0.
