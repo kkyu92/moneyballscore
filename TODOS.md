@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): IA drift 0건 (cycle 3817, 2026-10-28)
+
+- page.tsx 111개, breadcrumb 누락 18개 전부 redirect 6/debug/auth/home 의도적. prod 402 지속(사용자 Vercel billing 대기). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — polish-ui(lite): prod 402 지속, UI 검증 불가 (cycle 3816, 2026-10-28)
 
 - prod `DEPLOYMENT_DISABLED` 402 지속 (사용자 Vercel billing 조치 대기, 자율 결제 금지). lotto cron 산출물 정상. 코드 변경 0.
