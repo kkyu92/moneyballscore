@@ -20272,4 +20272,4 @@ breadcrumb 누락 18건 — cycle 3586/3589/3614 과 완전 동일 목록(root/s
 
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 확인 (cycle 3742, 2026-10-28)
 
-lotto-picks 2026-10-31 / lotto-results 2026-10-24 존재, count_smoke 유효 7,716,994 (제거 428,066, 5.26
+lotto-picks 2026-10-31 / lotto-results 2026-10-24 존재, count_smoke 유효 7,716,994 (제거 428,066, 5.26%) 불변. prod 402 불변. 코드 변경 0.
