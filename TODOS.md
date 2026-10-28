@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 (cycle 3818, 2026-10-28)
+
+- count_smoke 유효 7,716,994 / 제거 428,066 (5.26%) 불변, picks 10-31(1248회)·results 10-24 최신. prod 402 지속(사용자 Vercel billing 대기). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): IA drift 0건 (cycle 3817, 2026-10-28)
 
 - page.tsx 111개, breadcrumb 누락 18개 전부 redirect 6/debug/auth/home 의도적. prod 402 지속(사용자 Vercel billing 대기). 코드 변경 0.
