@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 불변 (cycle 3752, 2026-10-28)
+- deploy-drift-alert 최근 3회 failure 전부 402 기인, open hub-dispatch issue 0, CI Failure Dispatch skipped. 사용자 Vercel 결제/한도 조치 대기. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.9h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — review-code(lite): health green drift 0건 (cycle 3749, 2026-10-28)
 
 - turbo type-check+lint 7/7 green, 14일 신규 src 변경 0, prod 402 불변. 코드 변경 0.
