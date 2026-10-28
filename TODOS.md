@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — review-code(lite): health green drift 0건 (cycle 3749, 2026-10-28)
+
+- turbo type-check+lint 7/7 green, 14일 신규 src 변경 0, prod 402 불변. 코드 변경 0.
+- 다음: cycle 3750 milestone → skill-evolution trigger3 marker 박제.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3748, 2026-10-28)
 - count_smoke valid 7,716,994 / removed 428,066 (5.26%), picks 10-31 / results 10-24 최신, cron 최근 전부 success. prod 402 불변(사용자 Vercel 조치 대기). STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.8h<24h). 코드 변경 0.
 
