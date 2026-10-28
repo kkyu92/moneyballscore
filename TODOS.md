@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): CE cohort 재측정 (cycle 3800, 2026-10-28)
+
+- n=448 (CE 401 / 비CE 47) 불변. KBO 2026 정규시즌 10/4 종료 + CREDIT_EXHAUSTED 지속. prod 402 지속. 코드 변경 0. cycle 3800 milestone → skill-evolution marker 박제.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): prod 402 재확인 (cycle 3797, 2026-10-28)
 
 - `/api/version` 여전히 HTTP 402 DEPLOYMENT_DISABLED (사용자 Vercel billing 조치 대기, 코드 이슈 아님). open issue 0, CI Failure Dispatch skipped. 코드 변경 0.
