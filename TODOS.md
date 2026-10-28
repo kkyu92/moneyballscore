@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token grep drift 0건 (cycle 3767, 2026-10-28)
+
+- 코드 변경 0. 하드코딩 hex 는 var() fallback + 브랜드색(Twitter/Facebook)뿐, focus-visible 85 파일 적용. open issue 0, prod 402 불변, CI Failure Dispatch skipped. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23.1h<24h).
+
 ## ➖ RETRO-ONLY — review-code(lite): pnpm test 4/4 green (cycle 3766, 2026-10-28)
 
 - 코드 변경 0. open issue 0, prod 402 불변(사용자 Vercel 조치 대기), health-alert failure 지속, CI Failure Dispatch skipped. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23h<24h).
