@@ -1,3 +1,6 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 (cycle 3753, 2026-10-28)
+- picks 2026-10-31.md / results 2026-10-24.md 최신, lotto-pick-update 최근 2회 success, count 유효 7,716,994(제거 5.26%). prod 402 불변. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.9h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): prod 402 불변 (cycle 3752, 2026-10-28)
 - deploy-drift-alert 최근 3회 failure 전부 402 기인, open hub-dispatch issue 0, CI Failure Dispatch skipped. 사용자 Vercel 결제/한도 조치 대기. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.9h<24h). 코드 변경 0.
 
