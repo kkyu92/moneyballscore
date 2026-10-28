@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — op-analysis(lite): 구조적 dry spell 지속 (cycle 3829, 2026-10-28)
+
+- prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel 조치 필요), lotto cron 산출물 최신(picks 10-31 / results 10-24), CI dispatch 정상 skipped. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): prod 402 DEPLOYMENT_DISABLED 지속 재확인 (cycle 3828, 2026-10-28)
 
 - `curl -sI` HTTP 402 + `x-vercel-error: DEPLOYMENT_DISABLED`. 사용자 Vercel 결제/한도 조치 필요 (자율 결제 금지). 코드 변경 0.
