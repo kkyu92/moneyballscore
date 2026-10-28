@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — op-analysis(lite): n=448 불변 (cycle 3813, 2026-10-28)
+
+- total 448 / CE 401 / 비CE 47 — cycle 3807 과 동일(KBO 시즌 종료). prod 404/402 지속(사용자 Vercel billing 대기). harness 는 `.env.local` source 필요. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 정상 (cycle 3812, 2026-10-28)
 
 - picks 10-31 / results 10-24(직전 토요일) 최신, count_smoke 유효 7,716,994 (제거 5.26%), 수동 개입 불필요. 코드 변경 0.
