@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3759, 2026-10-28)
+
+- count_smoke 유효 7,716,994 / 제거 428,066 (5.26%), delta 0. picks 2026-10-31.md + results 2026-10-24.md 최신, lotto-pick/result-update cron success. open issue 0, prod 402 불변, CI Failure Dispatch skipped. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 재측정 (cycle 3758, 2026-10-28)
 
 - op-analysis-ce-cohort harness: 전체 n=448 (CE 401 / 비CE 47), CE 55.9% / 비CE 63.8% 격차 8.0pp — 직전 측정과 동일(KBO 정규시즌 10/4 종료, CREDIT_EXHAUSTED 지속). open issue 0, CI Failure Dispatch skipped. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23h<24h). 코드 변경 0.
