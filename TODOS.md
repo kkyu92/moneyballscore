@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3772, 2026-10-28)
+
+- picks 2026-10-31.md / results 2026-10-24.md 최신, lotto-pick-update·lotto-result-update 최근 run 전부 success. count_smoke 유효 7,716,994 (제거 5.26%). open issue 0, prod 402 불변. STRUCTURAL_DRY_SPELL_SUPPRESS (marker 23.2h<24h). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md hex 균열 0건 (cycle 3771, 2026-10-28)
 
 - tsx hex 전부 DESIGN.md 박제값 내. prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0.
