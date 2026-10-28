@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — review-code(lite): test/type-check green baseline (cycle 3832, 2026-10-28)
+
+- pnpm test 4/4, type-check 4/4 pass. prod 402 지속 (사용자 Vercel 결제 조치 필요). 코드 변경 0.
+- STRUCTURAL_DRY_SPELL_SUPPRESS (marker 4h <24h)
+
 ## ➖ RETRO-ONLY — info-arch(lite): IA drift 0건 (cycle 3831, 2026-10-28)
 
 - page.tsx 111, breadcrumb 누락 18 불변 (reviews/* = redirect, debug/settings/login 의도적)
