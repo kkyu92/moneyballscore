@@ -20464,3 +20464,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 3799 — info-architecture-review(lite) 신규 라우트 6/7일 IA 점검, breadcrumb 부재 = noindex/redirect 라우트뿐 drift 0건, 코드 변경 0 RETRO-ONLY.
 
 - cycle 3805 (lotto lite): cron 정상(picks 10-31 / results 10-24), count_smoke valid 7,716,994 (5.26% 제거), 코드 변경 0 RETRO-ONLY
+- cycle 3806 (review-code heavy): pipelineStats.ts + accuracy/page.tsx 하드코딩 수치 grep, drift 0건, STRUCTURAL_DRY_SPELL_SUPPRESS(marker 3.7h), 코드 변경 0 RETRO-ONLY
