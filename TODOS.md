@@ -20282,3 +20282,8 @@ test 4/4 green, drift 0건, prod 402 불변(사용자 Vercel 조치 대기). 코
 - prod `moneyballscore.vercel.app` HTTP 402 DEPLOYMENT_DISABLED 불변 (사용자 Vercel 조치 대기)
 - lotto-picks 2026-10-31.md 존재, CI 실패 0, 신규 incident 0건. 코드 변경 0
 - STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.7h<24h), N=44 유지
+
+## ➖ RETRO-ONLY — info-architecture-review(lite): IA 충분 재확인 (cycle 3745, 2026-10-28)
+- page.tsx 111개, Breadcrumb 미보유 = home/login/settings/debug/*/redirect-only reviews·mlb reviews/community(noindex stub) 전부 의도된 예외. 실질 IA drift 0건
+- prod `moneyballscore.vercel.app` HTTP 402 불변 (사용자 Vercel 조치 대기)
+- STRUCTURAL_DRY_SPELL_SUPPRESS (marker 22.8h<24h), N=43 유지. 코드 변경 0
