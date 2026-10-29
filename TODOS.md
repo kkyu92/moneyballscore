@@ -20594,3 +20594,9 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 3821 (op-analysis lite): harness 재측정 n=448 (CE 401 / 비CE 47) 불변, prod 402 지속, 코드 변경 0
 
 - cycle 3824 (lotto lite): cron 정상(picks 10-31 / results 10-24), prod 402 지속, 코드 변경 0 RETRO-ONLY
+
+## ⛔ EMERGENCY-STOP — fix-incident(lite): prod 402 구조적 블로커, dry-spell 24h 재검출 (cycle 3839, 2026-10-29)
+
+- gh run 5종(health-alert/deploy-drift-alert/heartbeat-stale/runtime-error-alert/indexnow-ping) 전부 동일 root cause(Vercel 402 Payment required) 재확인. 신규 incident 아님, 코드 수정 불가.
+- 직전10 cycle(3830-3839) 전부 retro-only. dry-spell marker 경과 27.4h(≥24h) → STRUCTURAL_DRY_SPELL_NEW 재검출. 하드스톱 발동, next_n=0.
+- 사용자 Vercel 결제 조치 전까지 매 cycle 동일 결과 반복 예상. 사용자 N=40 요청 중단, 결정 대기.
