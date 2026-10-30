@@ -20604,3 +20604,8 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — polish-ui(lite): UI 균열 0건 (cycle 3840, 2026-10-30)
 
 - DESIGN.md 9일 경과(4주 임계 미도달), 최근 20 커밋 UI 변경 0건, type-check green. 신규 MLB 라우트 3개 breadcrumb 존재 + PR #3195 기리뷰 확인. prod 402 지속(사용자 Vercel 결제 조치 필요). 코드 변경 0.
+
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 확인 (cycle 3841, 2026-10-30)
+
+- lotto-picks 2026-10-31.md / lotto-results 2026-10-24.md 존재, prod 402 지속(사용자 Vercel 결제 조치 필요), open issue 0. 코드 변경 0.
+- PARTIAL_STREAK=10 재충족 + dry-spell marker 24.0h 경과 → STRUCTURAL_DRY_SPELL_NEW, 하드스톱 발동, next_n=0.
