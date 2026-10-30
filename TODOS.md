@@ -20600,3 +20600,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - gh run 5종(health-alert/deploy-drift-alert/heartbeat-stale/runtime-error-alert/indexnow-ping) 전부 동일 root cause(Vercel 402 Payment required) 재확인. 신규 incident 아님, 코드 수정 불가.
 - 직전10 cycle(3830-3839) 전부 retro-only. dry-spell marker 경과 27.4h(≥24h) → STRUCTURAL_DRY_SPELL_NEW 재검출. 하드스톱 발동, next_n=0.
 - 사용자 Vercel 결제 조치 전까지 매 cycle 동일 결과 반복 예상. 사용자 N=40 요청 중단, 결정 대기.
+
+## ➖ RETRO-ONLY — polish-ui(lite): UI 균열 0건 (cycle 3840, 2026-10-30)
+
+- DESIGN.md 9일 경과(4주 임계 미도달), 최근 20 커밋 UI 변경 0건, type-check green. 신규 MLB 라우트 3개 breadcrumb 존재 + PR #3195 기리뷰 확인. prod 402 지속(사용자 Vercel 결제 조치 필요). 코드 변경 0.
