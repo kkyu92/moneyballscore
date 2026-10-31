@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(lite): green baseline (cycle 3847, 2026-10-31)
+
+- type-check 4/4, test 4/4 green. prod 402 지속(마지막 deployment 2026-10-26), 사용자 Vercel 조치 대기. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — op-analysis(lite): n=448 불변 재확인 (cycle 3846, 2026-10-31)
 
 - `op-analysis-ce-cohort.ts` 재실행: 전체 n=448 (CE 401 / 비CE 47) 불변, CE 55.9% / 비CE 63.8% 격차 8.0pp. KBO 시즌 종료로 신규 verified 0건. prod 402 지속 (사용자 Vercel 결제 조치 필요). 코드 변경 0.
