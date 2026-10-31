@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(heavy): en/mlb i18n-leak 재점검, drift 0건 (cycle 3842, 2026-10-31)
+
+- gap=36 (last heavy fire 3806). 최근 21일 신규 파일(en/mlb opengraph-image/twitter-image/not-found/loading 다수) 전수 확인 + en/mlb 전체 Korean-char grep 재점검(known drift family: i18n leak, commit 637052c7 계열). 매칭 전부 주석/테스트 설명(`it(...)`) 내부 — 실사용자 노출 텍스트 leak 0건. prod 402 지속(사용자 Vercel 결제 조치 필요). 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker ~24h, 경계 근접 — 다음 cycle 재검출 가능)
+
 ## ➖ RETRO-ONLY — review-code(lite): test/type-check green (cycle 3838, 2026-10-28)
 
 - turbo test 615 files / 4842 tests pass, type-check green. prod 402 지속 (사용자 Vercel 조치 대기). 코드 변경 0.
