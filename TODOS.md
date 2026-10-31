@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — op-analysis(lite): n=448 불변 재확인 (cycle 3846, 2026-10-31)
+
+- `op-analysis-ce-cohort.ts` 재실행: 전체 n=448 (CE 401 / 비CE 47) 불변, CE 55.9% / 비CE 63.8% 격차 8.0pp. KBO 시즌 종료로 신규 verified 0건. prod 402 지속 (사용자 Vercel 결제 조치 필요). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — review-code(heavy): en/mlb i18n-leak 재점검, drift 0건 (cycle 3842, 2026-10-31)
 
 - gap=36 (last heavy fire 3806). 최근 21일 신규 파일(en/mlb opengraph-image/twitter-image/not-found/loading 다수) 전수 확인 + en/mlb 전체 Korean-char grep 재점검(known drift family: i18n leak, commit 637052c7 계열). 매칭 전부 주석/테스트 설명(`it(...)`) 내부 — 실사용자 노출 텍스트 leak 0건. prod 402 지속(사용자 Vercel 결제 조치 필요). 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker ~24h, 경계 근접 — 다음 cycle 재검출 가능)
