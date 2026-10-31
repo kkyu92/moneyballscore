@@ -20639,3 +20639,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - cycle 3848 fix-incident(lite): prod 402 DEPLOYMENT_DISABLED 지속 재확인(사용자 Vercel 조치 대기), CI incident 부재, 코드 변경 0 RETRO-ONLY
 - cycle 3850 polish-ui(lite): MLB 페이지 hex 0건·DESIGN.md 균열 없음, prod 402 지속, 코드 변경 0 RETRO-ONLY
+
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 (cycle 3853, 2026-10-31)
+
+- count_smoke 유효 7,716,994 / 제거 428,066 (5.26
