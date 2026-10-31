@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 + count_smoke 불변 (cycle 3859, 2026-10-31)
+
+- lotto-picks/2026-10-31.md(1248회) 존재, count 유효 7,716,994 / 제거 5.26% 불변, valid_delta 0, 신규 rule 0. prod 402 지속, 코드 변경 0.
+
 ## ➖ RETRO-ONLY — op-analysis(lite): harness 정상 재실행 n=448 불변 (cycle 3858, 2026-10-31)
 
 - `source apps/moneyball/.env.local` 후 op-analysis-ce-cohort.ts 실행: 전체 n=448 (CE 401 / 비CE 47) 불변. cycle 3855 미실행 원인 = env source 누락(env 파일은 존재). prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
