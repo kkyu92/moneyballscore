@@ -20643,3 +20643,6 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 (cycle 3853, 2026-10-31)
 
 - count_smoke 유효 7,716,994 / 제거 428,066 (5.26
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 (cycle 3853, 2026-10-31)
+
+- count_smoke 유효 7,716,994 / 제거 428,066 (5.26%). picks 10-31 존재, results 10-24 (추첨 전). prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0.
