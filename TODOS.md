@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(lite): green baseline (cycle 3856, 2026-10-31)
+
+- type-check 4/4, test 4/4 green. drift 0건. prod 402 지속, 사용자 Vercel 조치 대기. 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
+
 ## ➖ RETRO-ONLY — op-analysis(lite): harness env 부재 (cycle 3855, 2026-10-31)
 
 - op-analysis-ce-cohort.ts 가 NEXT_PUBLIC_SUPABASE_URL/SERVICE_ROLE_KEY 부재로 미실행 — 재측정 수치 박제 X (n=448 직전값 유지). prod 402 지속. 코드 변경 0.
