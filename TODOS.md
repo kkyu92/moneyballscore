@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(lite): green baseline (cycle 3868, 2026-10-31)
+
+- type-check 4/4, test 615 files/4842 tests green. drift 0건. prod 402 지속, 사용자 Vercel 조치 대기. 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 + count_smoke 불변 (cycle 3859, 2026-10-31)
 
 - lotto-picks/2026-10-31.md(1248회) 존재, count 유효 7,716,994 / 제거 5.26% 불변, valid_delta 0, 신규 rule 0. prod 402 지속, 코드 변경 0.
