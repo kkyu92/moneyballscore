@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — op-analysis(lite): harness 정상 재실행 n=448 불변 (cycle 3858, 2026-10-31)
+
+- `source apps/moneyball/.env.local` 후 op-analysis-ce-cohort.ts 실행: 전체 n=448 (CE 401 / 비CE 47) 불변. cycle 3855 미실행 원인 = env source 누락(env 파일은 존재). prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
+
 ## ➖ RETRO-ONLY — review-code(lite): green baseline (cycle 3856, 2026-10-31)
 
 - type-check 4/4, test 4/4 green. drift 0건. prod 402 지속, 사용자 Vercel 조치 대기. 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
