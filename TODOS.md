@@ -20684,3 +20684,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 3867 operational-analysis(lite): ce-cohort harness 재측정 n=448 (CE 401/비CE 47) 불변, 시즌 종료·CREDIT_EXHAUSTED 지속, 코드 변경 0 RETRO-ONLY
 - cycle 3869 lotto(lite): cron 정상(picks 10-31 / results 10-24), count_smoke 유효 7,716,994 불변, 10-31 results 는 추첨 후 cron 대기, prod 402 지속, 코드 변경 0 RETRO-ONLY
 - cycle 3870 fix-incident(lite): prod 402 지속(/ 와 /api/health, 마지막 Ready 배포 10-26, 이후 apps/packages 커밋 11건 미배포), billing 은 사용자 영역, 코드 변경 0 RETRO-ONLY
+- cycle 3871 lotto(lite): 17:35 KST 추첨(21:00) 전이라 results 10-31 미생성 정상, picks 10-31 존재 + result/pick cron 최근 success, prod 402 지속, 코드 변경 0 RETRO-ONLY
