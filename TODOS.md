@@ -20613,3 +20613,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - lotto-picks 2026-10-31.md / lotto-results 2026-10-24.md 존재, prod 402 지속(사용자 Vercel 결제 조치 필요), open issue 0. 코드 변경 0.
 - PARTIAL_STREAK=10 재충족 + dry-spell marker 24.0h 경과 → STRUCTURAL_DRY_SPELL_NEW, 하드스톱 발동, next_n=0.
+
+- cycle 3843 (fix-incident lite): prod 402 재확인 불변, health-alert/deploy-drift-alert 동일 root cause, 사용자 명시적 재호출로 dry-spell NEW 재검출 무시하고 진행, 코드 변경 0 RETRO-ONLY
