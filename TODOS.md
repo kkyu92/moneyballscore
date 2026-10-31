@@ -20670,3 +20670,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — polish-ui(lite): 균열 없음 (cycle 3857, 2026-10-31)
 
 - 최근 7일 신규 mlb page.tsx 3개 hex/px 하드코딩 0, DESIGN.md 토큰 정합. prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0.
+- cycle 3860 fix-incident(lite): prod 402 지속 재확인(사용자 Vercel 조치 대기), CI incident 부재, 코드 변경 0 RETRO-ONLY
