@@ -20677,3 +20677,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 3864 review-code(lite): 2일간 코드 변경 0, lint green, drift 0건, prod 402 지속, 코드 변경 0 RETRO-ONLY
 - cycle 3865 fix-incident(lite): prod 402 지속 재확인(사용자 Vercel 조치 대기), CI incident 부재, 코드 변경 0 RETRO-ONLY
 - cycle 3866 lotto(lite): cron 정상(pick/result 전부 success), count_smoke 유효 7,716,994 불변, 10-31 results 는 추첨 후 cron 대기, 코드 변경 0 RETRO-ONLY
+- cycle 3867 operational-analysis(lite): ce-cohort harness 재측정 n=448 (CE 401/비CE 47) 불변, 시즌 종료·CREDIT_EXHAUSTED 지속, 코드 변경 0 RETRO-ONLY
