@@ -20693,3 +20693,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 3877 lotto(lite): picks 2026-10-31 존재, results 최신 2026-10-24(10-31 추첨 대기) = cron 정상, 수동 개입 불필요, prod 402 지속(사용자 조치 대기), 코드 변경 0 RETRO-ONLY
 - cycle 3878 operational-analysis(lite): gh run 신규 실패 0, KBO 시즌 종료로 n 불변 추정(harness 미재실행), prod 402 지속(사용자 조치 대기), 코드 변경 0 RETRO-ONLY
 - cycle 3879 review-code(heavy): lib/debug/pipelineStats.ts 전수 read drift 0건, prod 402 지속(사용자 조치 대기), 코드 변경 0 RETRO-ONLY
+- cycle 3880 info-arch(lite): Breadcrumb 누락 = top-level/debug 라우트뿐 IA 충분, prod 402 지속(사용자 조치 대기), 코드 변경 0 RETRO-ONLY
