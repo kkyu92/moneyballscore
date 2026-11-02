@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — review-code(heavy): #3223 twin Number() coerce 감사 drift 0건 (cycle 3921, 2026-11-02)
+
+- resolveWinnerProb(buildAccuracyData.ts) hwp 는 extractReasoningHomeWinProb 경유 → 안전
+- rivalry-memory confidence Number(null)=0 이나 downstream 미사용 (도달 불가)
+- 코드 변경 0
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): drift 0건 (cycle 3920, 2026-11-02)
 
 - 진단: HEAD clean, 2차 방어선 OK, open hub-dispatch 0, prod 402 지속(사용자 Vercel 조치 대기). 직전8 review-code7+op-analysis1 2-chain lock → 제외 후 info-arch(gap 20/30) 선택. page.tsx 111, breadcrumb 없는 18개 = 홈/redirect(reviews weekly·monthly)/noindex(community, settings, login)/debug 전부 의도적. lotto picks 11-07·results 10-31 정상. 코드 변경 0.
