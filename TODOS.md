@@ -1,3 +1,7 @@
+## ✅ SUCCESS — fix-incident(lite): combo-check-data 테스트 flake 완화 (cycle 3907, 2026-11-02)
+
+- 진단: main CI run 41414862956 실패 = `combo-check-data.test.ts` 5000ms timeout(suite 320s 부하, 로컬 1.4s). 2 테스트 timeout 30s 로 완화, 8906d3b3 push, CI green 확인. lesson-pending #3206~3208(ci-main) 은 이 flake 와 연결 가능성 미검증 — 잔존. prod 402 지속(사용자 Vercel 조치 대기).
+
 ## ✅ SUCCESS — fix-incident(lite): lesson-pending reminder 4건 처리 (cycle 3906, 2026-11-02)
 
 - 진단: prod 402 지속, `lesson-pending` label reminder 7건 open(3+일 체류) — 기존 진단은 `hub-dispatch` label 만 조회해 누락. #3209~3212 = 402 증상 4 alert workflow(최근 3 run 전부 failure). lesson 636f1ac2 박제 + 4건 close. ci-main #3206~3208 원인 미검증 → 잔존. 코드 변경 0, PR 없음.
