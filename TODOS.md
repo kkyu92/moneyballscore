@@ -1,3 +1,7 @@
+## ✅ SUCCESS — fix-incident(lite): ci-main 3 reminder 원인 확정 (cycle 3910, 2026-11-02)
+
+- 진단: lesson-pending #3206~3208 = hub incident 10-28 CI run 3건, 전부 `combo-check-data.test.ts` 5s timeout (cycle 3907 fix 8906d3b3 와 동일). lesson 3eee2c05 박제(fingerprint 3건 명시) + 3건 close. prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인, count_smoke 불변 (cycle 3909, 2026-11-02)
 
 - 진단: HEAD clean, 2차 방어선 OK, open hub-dispatch 0, prod 402 지속(사용자 Vercel 조치 대기). lotto gap 7. picks 2026-11-07(#3214)·results 1248회(#3205) cron 정상. count_smoke: 유효 7,716,994 / 제거 428,066 (5.26%) / 256 rules, delta 0. 코드 변경 0.
