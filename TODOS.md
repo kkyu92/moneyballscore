@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): drift 0건 (cycle 3920, 2026-11-02)
+
+- 진단: HEAD clean, 2차 방어선 OK, open hub-dispatch 0, prod 402 지속(사용자 Vercel 조치 대기). 직전8 review-code7+op-analysis1 2-chain lock → 제외 후 info-arch(gap 20/30) 선택. page.tsx 111, breadcrumb 없는 18개 = 홈/redirect(reviews weekly·monthly)/noindex(community, settings, login)/debug 전부 의도적. lotto picks 11-07·results 10-31 정상. 코드 변경 0.
+- 다음: fix-incident(gap 10/20) 또는 lock 해제 후 review-code.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 (cycle 3917, 2026-11-02)
 
 - 진단: HEAD clean, 2차 방어선 OK, open hub-dispatch 0, prod 402 지속(사용자 Vercel 조치 대기). review-code(heavy) 6연속 dominance 완화로 op-analysis 선택. `op-analysis-ce-cohort.ts` (apps/moneyball/.env.local 로드 필요): 전체 n=448 (CE 401 / 비CE 47), cycle 3904 대비 동일 — KBO 정규시즌 2026-10-04 종료, 신규 verified 0건. 코드 변경 0.
