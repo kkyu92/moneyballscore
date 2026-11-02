@@ -164,6 +164,8 @@ export async function fetchSavantTeamStatcast(season: number): Promise<SavantTea
       launchAngle: s.launchAngle,
     };
 
+    // 빈 CSV 셀 → parseFloat('')=NaN. NaN 은 아래 범위 비교가 전부 false 라 통과해 NaN 팩터가 영속되므로 선차단.
+    if (![xwoba, barrelPct, hardHitPct, launchAngle].every(Number.isFinite)) continue;
     if (xwoba < 0 || xwoba > 0.5) continue;
     if (barrelPct < 0 || barrelPct > 30) continue;
     if (hardHitPct < 0 || hardHitPct > 100) continue;
