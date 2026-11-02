@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — polish-ui(lite): drift 0건 (cycle 3891, 2026-11-02)
+
+- 7일 변경 컴포넌트 9개 vs DESIGN.md 토큰 대조 — gray/neutral literal = 문서화된 관례, 신규 drift 0. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — info-arch(lite): 신규 라우트 0 (cycle 3890, 2026-11-02)
 
 - page.tsx 111개, 7일 내 신규 0, breadcrumb 미사용 = redirect/debug/login/settings/community 기존 예외만. prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
