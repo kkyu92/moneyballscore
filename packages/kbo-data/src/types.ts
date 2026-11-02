@@ -64,7 +64,11 @@ export function extractReasoningHomeWinProb(
     console.warn(`[homeWinProb] ${label}: no_field → fallback 0.5`);
     return 0.5;
   }
-  const num = typeof raw === 'number' ? raw : Number(raw);
+  // Number('')=0 / Number(' ')=0 / Number(true)=1 — 빈 문자열·boolean 이 유효 확률로 오인되지 않게 number|비공백 string 만 변환.
+  const num =
+    typeof raw === 'number' ? raw
+    : typeof raw === 'string' && raw.trim() !== '' ? Number(raw)
+    : NaN;
   if (!Number.isFinite(num) || num < 0 || num > 1) {
     console.warn(`[homeWinProb] ${label}: invalid_value ${JSON.stringify(raw)} → fallback 0.5`);
     return 0.5;
