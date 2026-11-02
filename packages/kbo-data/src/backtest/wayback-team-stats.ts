@@ -55,10 +55,13 @@ export function parseEloTable(html: string): SeasonStatsMap {
       const teamName = cells[1];
       // elo 컬럼은 행 유효성 검증(숫자 4종 전부 finite)에만 쓰고 출력엔 미포함 —
       // 백테스트 Elo 는 elo-history.ts 의 일별 시계열(getEloAt)이 source of truth.
-      const elo = Number(cells[2]);
-      const woba = Number(cells[3]);
-      const fip = Number(cells[4]);
-      const sfr = Number(cells[5]);
+      // 빈 셀 Number('')=0 은 finite 라 검증 통과 → woba/fip/sfr 0 으로 박제되던 silent drift.
+      // 빈 문자열은 NaN 처리해 행 skip.
+      const num = (c: string) => (c.trim() === '' ? NaN : Number(c));
+      const elo = num(cells[2]);
+      const woba = num(cells[3]);
+      const fip = num(cells[4]);
+      const sfr = num(cells[5]);
       if (![elo, woba, fip, sfr].every(Number.isFinite)) continue;
       const code = resolveTeamCode(teamName);
       if (!code) continue;

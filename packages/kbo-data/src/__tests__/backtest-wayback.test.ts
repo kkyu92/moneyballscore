@@ -27,4 +27,16 @@ describe('parseEloTable', () => {
     const map = parseEloTable(html);
     expect(map.size).toBe(0);
   });
+
+  it('skips rows with empty stat cells (Number("")=0 coerce 금지)', () => {
+    const html = `
+      <table>
+        <tr><td>1</td><td>LG Twins</td><td>1568</td><td></td><td>3.89</td><td>-0.6</td><td>98.4</td></tr>
+        <tr><td>2</td><td>Hanwha Eagles</td><td>1453</td><td>0.298</td><td>4.23</td><td>2.7</td><td>0.0</td></tr>
+      </table>
+    `;
+    const map = parseEloTable(html);
+    expect(map.has('LG')).toBe(false);
+    expect(map.get('HH')).toEqual({ woba: 0.298, fip: 4.23, sfr: 2.7 });
+  });
 });
