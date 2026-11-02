@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인, count_smoke 불변 (cycle 3909, 2026-11-02)
+
+- 진단: HEAD clean, 2차 방어선 OK, open hub-dispatch 0, prod 402 지속(사용자 Vercel 조치 대기). lotto gap 7. picks 2026-11-07(#3214)·results 1248회(#3205) cron 정상. count_smoke: 유효 7,716,994 / 제거 428,066 (5.26%) / 256 rules, delta 0. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — review-code(heavy): pipelineStats.ts 감사 drift 0 (cycle 3908, 2026-11-02)
 
 - 진단: HEAD clean, 2차 방어선 OK, open hub-dispatch 0, prod 402 지속(사용자 Vercel 조치 대기). fix-incident 3연속 후 review-code redirect. `lib/debug/pipelineStats.ts` ↔ `daily.ts` pipeline_runs insert(skipped_detail=JSON.stringify, errors=배열) 정합, 테스트 존재 → drift 0건. 코드 변경 0.
