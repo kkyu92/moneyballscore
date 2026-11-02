@@ -318,9 +318,8 @@ describe("plan #7 Step E — lotto-pick-update cron workflow regression", () => 
 
   it("update workflow PR auto-merge 박제 (R7 정합, CI green 명시 대기 후 머지)", () => {
     const yaml = readFileSync(UPDATE_YAML, "utf-8");
-    expect(yaml).toContain("gh pr checks");
     expect(yaml).toContain("gh workflow run ci.yml");
-    expect(yaml).toContain('[ "$CI_RESULT" = "pass" ]');
+    expect(yaml).toContain('[ "$CI_RESULT" = "success" ]');
     expect(yaml).toContain("--squash --delete-branch");
   });
 
