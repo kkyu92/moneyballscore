@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 (cycle 3917, 2026-11-02)
+
+- 진단: HEAD clean, 2차 방어선 OK, open hub-dispatch 0, prod 402 지속(사용자 Vercel 조치 대기). review-code(heavy) 6연속 dominance 완화로 op-analysis 선택. `op-analysis-ce-cohort.ts` (apps/moneyball/.env.local 로드 필요): 전체 n=448 (CE 401 / 비CE 47), cycle 3904 대비 동일 — KBO 정규시즌 2026-10-04 종료, 신규 verified 0건. 코드 변경 0.
+
 ## ✅ SUCCESS — review-code(heavy): judge/team agent null→0 coerce (cycle 3912, 2026-11-02)
 
 - 진단: cycle 3911 tabpfn twin grep. `judge-agent.parseResponse` `Number(parsed.homeWinProb)` null→0→clampWinnerProb 최소 → 극단 away pick, confidence null→0. team-agent confidence 동일. `agents/parse-number.ts toFiniteNumber` 도입, 테스트 3건, PR #3217 MERGED 6f79244b. 잔여 후보: rivalry-memory.ts:212 `Number(r.confidence)` (DB 컬럼, 저위험), buildAccuracyData.ts:162 (null 가드 이미 있음). prod 402 지속.
