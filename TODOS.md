@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(lite): green baseline (cycle 3895, 2026-11-02)
+
+- type-check 4/4 green, hub-dispatch issue 0, CI Failure Dispatch 전부 skipped, approved plan 0. drift 0건, 코드 변경 0. prod 402 지속(사용자 Vercel 조치 대기). STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
+
 ## ✅ SUCCESS — fix-incident(lite): cron data PR CI 미발화 방치 수정 (cycle 3894, 2026-11-02)
 
 - 원인: GITHUB_TOKEN PR 은 pull_request 미발화 → 'CI check never registered' 머지 skip (#3205 36h, #3203 5일 방치) + gh pr checks 가 Vercel 402 fail 에 막힘. 수정: ci.yml workflow_dispatch + 5 cron 이 dispatch 후 commit check-runs API 폴링. 실측 data-refresh-weekly fire → PR #3215 자동 머지 PASS. 교훈: macOS `sed -i ''` 실패를 && 체인 밖에서 확인 못해 오타 push, 문자열 가드 테스트 선갱신 필요.
