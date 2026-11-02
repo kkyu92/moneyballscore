@@ -85,6 +85,14 @@ describe('fangraphs-mlb.fetchFangraphsMlbTeams', () => {
     expect(teams[0].teamCode).toBe('LAD');
   });
 
+  it('skips teams whose core stat is null/blank (Number(null)=0 coerce 차단)', async () => {
+    vi.mocked(global.fetch as any)
+      .mockResolvedValueOnce({ ok: true, text: async () => nextDataHtml('bat', [batRow('NYY'), { ...batRow('BOS'), wOBA: null }]) })
+      .mockResolvedValueOnce({ ok: true, text: async () => nextDataHtml('pit', [pitRow('NYY'), { ...pitRow('BOS'), FIP: '' }]) });
+    const teams = await fetchFangraphsMlbTeams(2026);
+    expect(teams.map((t) => t.teamCode)).toEqual(['NYY']);
+  });
+
   it('throws on parse fail (__NEXT_DATA__ 구조 변경 detect)', async () => {
     vi.mocked(global.fetch as any).mockResolvedValueOnce({
       ok: true, text: async () => '<html></html>',
