@@ -20801,3 +20801,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ✅ SUCCESS — review-code(heavy): tabpfn-export null→0 coerce fix (cycle 3911, 2026-11-02)
 
 - extractFactors/deriveHomeWinProb 가 `Number(null)===0` 으로 null JSONB 를 유효 0 으로 오인 → toFiniteNumber 가드 + 테스트 2건. PR #3216 MERGED d29b7b79. prod 402 지속(사용자 조치 대기). STRUCTURAL_DRY_SPELL 해당 없음(success).
+
+## ✅ SUCCESS — review-code(heavy): baseball-savant NaN guard (cycle 3914, 2026-11-02)
+
+- 빈 CSV 셀 parseFloat=NaN 이 xwoba/barrel/hardHit/launchAngle 범위 비교 전부 false 로 통과 → NaN 팩터 영속. Number.isFinite 가드 + 테스트. PR #3219 MERGED 1d9d81c1. Vercel check fail = 계정 402(기지), CI check success.
