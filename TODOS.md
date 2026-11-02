@@ -20810,3 +20810,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - 빈 CSV 셀 parseFloat=NaN 이 xwoba/barrel/hardHit/launchAngle 범위 비교 전부 false 로 통과 → NaN 팩터 영속. Number.isFinite 가드 + 테스트. PR #3219 MERGED 1d9d81c1. Vercel check fail = 계정 402(기지), CI check success.
 - cycle 3918: review-code(heavy) kbo-live final 빈 점수 skip, PR #3222 MERGED
+
+- cycle 3919: review-code(heavy) types.ts extractReasoningHomeWinProb ''/boolean coerce 차단 PR #3223. R7 주의: Vercel check 상시 fail(402) → `--fail-fast` 조기 종료, CI `check` job 개별 대기 필요.
