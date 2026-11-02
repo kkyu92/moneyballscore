@@ -12,6 +12,7 @@ import {
   captureJudgeParseFallback,
 } from './validator';
 import { logValidatorEvent } from './validator-logger';
+import { toFiniteNumber } from './parse-number';
 
 const ZERO_WEIGHT_RULE_JUDGE_PREGAME = getZeroWeightRuleJudgePregame();
 
@@ -107,14 +108,14 @@ export function parseResponse(
 
     // `|| DEFAULT` 는 legitimate 0 (LLM 이 "확신 없음"/"50:50 아님" 의도로 0 반환) 을 falsy 로
     // 오인해 DEFAULT(중립값) 로 덮어쓰던 버그 — NaN(파싱 실패/필드 부재) 만 DEFAULT 처리.
-    const rawHomeWinProb = Number(parsed.homeWinProb);
+    const rawHomeWinProb = toFiniteNumber(parsed.homeWinProb);
     const homeWinProb = clampWinnerProb(Number.isFinite(rawHomeWinProb) ? rawHomeWinProb : ELO_NEUTRAL_WIN_PCT);
 
     return {
       homeWinProb,
       confidence: Math.max(
         0,
-        Math.min(1, Number.isFinite(Number(parsed.confidence)) ? Number(parsed.confidence) : AGENT_PARSE_CONFIDENCE_DEFAULT)
+        Math.min(1, Number.isFinite(toFiniteNumber(parsed.confidence)) ? toFiniteNumber(parsed.confidence) : AGENT_PARSE_CONFIDENCE_DEFAULT)
       ),
       homeArgSummary: String(parsed.homeArgSummary || ''),
       awayArgSummary: String(parsed.awayArgSummary || ''),
