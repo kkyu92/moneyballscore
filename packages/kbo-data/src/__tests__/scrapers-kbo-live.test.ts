@@ -132,6 +132,34 @@ describe('fetchLiveGames — status 매핑 회귀 (우천취소 silent drift 차
   });
 });
 
+describe('fetchLiveGames — final 경기 점수 파싱 불가 시 0-0 영속 차단', () => {
+  const finalGame = (scores: Record<string, unknown>) => ({
+    G_ID: '20260520WOSK0',
+    AWAY_ID: 'WO', HOME_ID: 'SK',
+    AWAY_NM: '키움', HOME_NM: 'SSG',
+    GAME_STATE_SC: '3',
+    GAME_RESULT_CK: 1,
+    ...scores,
+  });
+
+  it('final + 빈 문자열 점수 → skip', async () => {
+    mockKboLive({ game: [finalGame({ T_SCORE_CN: '', B_SCORE_CN: '' })] });
+    expect(await fetchLiveGames('2026-05-20')).toHaveLength(0);
+  });
+
+  it('final + 점수 필드 누락 → skip', async () => {
+    mockKboLive({ game: [finalGame({})] });
+    expect(await fetchLiveGames('2026-05-20')).toHaveLength(0);
+  });
+
+  it('final + 실제 0-0 (숫자 0) → 유지', async () => {
+    mockKboLive({ game: [finalGame({ T_SCORE_CN: 0, B_SCORE_CN: 0 })] });
+    const games = await fetchLiveGames('2026-05-20');
+    expect(games).toHaveLength(1);
+    expect(games[0].homeScore).toBe(0);
+  });
+});
+
 describe('fetchLiveGames — KBO empty 시 Naver fallback (5/20 사례 드리프트)', () => {
   beforeEach(() => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
