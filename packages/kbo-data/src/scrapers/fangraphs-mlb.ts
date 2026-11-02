@@ -39,6 +39,8 @@ function extractTeamCode(teamCell: unknown): string | null {
 }
 
 function toNumber(value: unknown): number {
+  // Number(null)=0 / Number('')=0 — 결측 셀이 실측 0 으로 둔갑(fip 0.00 등)하므로 선차단.
+  if (value == null || (typeof value === 'string' && value.trim() === '')) return NaN;
   const n = Number(value);
   return Number.isFinite(n) ? n : NaN;
 }
@@ -123,12 +125,17 @@ export async function fetchFangraphsMlbTeams(season: number): Promise<FangraphsM
     const pit = pitByTeam.get(teamCode);
     if (!pit) continue; // bat/pit 양쪽 매칭 실패 팀은 skip — fip/xfip 없이 저장 시 하위 predictor NaN
 
+    const woba = toNumber(row['wOBA']);
+    const war = toNumber(row['WAR']);
+    // 핵심 4 지표 결측 팀은 skip — NaN 이 mlb_team_stats 로 영속되면 predictor 오염.
+    if (![woba, pit.fip, pit.xfip, war].every(Number.isFinite)) continue;
+
     teams.push({
       teamCode,
-      woba: toNumber(row['wOBA']),
+      woba,
       fip: pit.fip,
       xfip: pit.xfip,
-      war: toNumber(row['WAR']),
+      war,
       ldPct: toNumber(row['LD%']) * 100,
       gbPct: toNumber(row['GB%']) * 100,
       fbPct: toNumber(row['FB%']) * 100,
