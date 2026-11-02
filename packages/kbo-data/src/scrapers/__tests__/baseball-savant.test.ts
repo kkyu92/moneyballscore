@@ -72,6 +72,17 @@ describe('baseball-savant.fetchSavantTeamStatcast', () => {
     expect(teams).toEqual([]);
   });
 
+  it('skips teams with blank statcast cell (NaN must not pass range checks)', async () => {
+    const statcast =
+      '"team","team_id","attempts","avg_hit_angle","anglesweetspotpercent","max_hit_speed","avg_hit_speed","ev50","fbld","gb","max_distance","avg_distance","avg_hr_distance","ev95plus","ev95percent","barrels","brl_percent","brl_pa"\n' +
+      '"Dodgers","LAD","3200","12.3",33.1,"117","89.1","99.5","92.5","86.1","460","165","400","1250",38.5,"210",,5.2\n' +
+      '"Yankees","NYY","3150","11.8",32.4,"116.5","88.7","99.1","92.1","85.8","455","162","398","1220",37.2,"200",9.1,4.9';
+    mockTwoFetches(EXPECTED_CSV, statcast);
+
+    const teams = await fetchSavantTeamStatcast(2026);
+    expect(teams.map((t) => t.teamCode)).toEqual(['NYY']);
+  });
+
   it('throws on expected_statistics CSV format change (missing est_woba/team_id column)', async () => {
     mockTwoFetches('foo,bar\n1,2', STATCAST_CSV);
 
