@@ -20793,3 +20793,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — review-code(lite): baseline 재확인 (cycle 3903, 2026-11-02)
 
 - drift 0건, 코드 변경 0. prod 402 지속(사용자 Vercel 조치 대기). STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
+
+## ✅ SUCCESS — review-code(heavy): tabpfn-export null→0 coerce fix (cycle 3911, 2026-11-02)
+
+- extractFactors/deriveHomeWinProb 가 `Number(null)===0` 으로 null JSONB 를 유효 0 으로 오인 → toFiniteNumber 가드 + 테스트 2건. PR #3216 MERGED d29b7b79. prod 402 지속(사용자 조치 대기). STRUCTURAL_DRY_SPELL 해당 없음(success).
