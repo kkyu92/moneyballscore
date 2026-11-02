@@ -149,7 +149,7 @@ jobs:
             case "$CI_RESULT" in pass|fail|cancel|skipping) break ;; esac
             sleep 5
           done
-          if None[ "$CI_RESULT" = "pass" ]; then
+          if [ "$CI_RESULT" = "pass" ]; then
             gh pr merge "$PR_NUM" --squash --delete-branch
             echo "::notice::PR $PR_URL merged after CI green"
           else
