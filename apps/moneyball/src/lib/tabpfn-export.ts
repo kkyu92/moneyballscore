@@ -70,6 +70,13 @@ type ExtractFactorsResult =
   | { ok: true; factors: Record<string, number> }
   | { ok: false; reason: DropReason };
 
+// Number(null) === 0 / Number('') === 0 — JSONB null·빈 문자열이 유효 0 으로 오인되지 않게 차단.
+function toFiniteNumber(raw: unknown): number {
+  if (typeof raw === 'number') return raw;
+  if (typeof raw === 'string' && raw.trim() !== '') return Number(raw);
+  return NaN;
+}
+
 export function extractFactors(
   factors: Record<string, unknown> | null,
 ): ExtractFactorsResult {
@@ -78,7 +85,7 @@ export function extractFactors(
   for (const key of REQUIRED_FACTORS) {
     if (!(key in factors)) return { ok: false, reason: 'missing_factor_key' };
     const raw = factors[key];
-    const num = typeof raw === 'number' ? raw : Number(raw);
+    const num = toFiniteNumber(raw);
     if (!Number.isFinite(num)) return { ok: false, reason: 'invalid_factor_value' };
     out[key] = num;
   }
@@ -87,7 +94,7 @@ export function extractFactors(
 
 export function deriveHomeWinProb(row: PredictionExportRow): number | null {
   const raw = row.reasoning?.homeWinProb;
-  const fromReasoning = typeof raw === 'number' ? raw : Number(raw);
+  const fromReasoning = toFiniteNumber(raw);
   if (Number.isFinite(fromReasoning) && fromReasoning >= 0 && fromReasoning <= 1) {
     return fromReasoning;
   }
