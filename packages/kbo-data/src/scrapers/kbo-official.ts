@@ -12,6 +12,15 @@ function formatDate(raw: string): string {
   return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
 }
 
+export function parseScore(raw: unknown): number | undefined {
+  if (typeof raw === 'number') return Number.isFinite(raw) ? raw : undefined;
+  if (typeof raw === 'string' && raw.trim() !== '') {
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
 /**
  * KBO 공식 사이트에서 특정 날짜의 경기 목록 가져오기
  * AJAX API: /ws/Main.asmx/GetKboGameList
@@ -83,8 +92,10 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
     }
 
     // 점수 — T_SCORE_CN=원정(Top), B_SCORE_CN=홈(Bottom)
-    const homeScore = raw.B_SCORE_CN != null ? Number(raw.B_SCORE_CN) : undefined;
-    const awayScore = raw.T_SCORE_CN != null ? Number(raw.T_SCORE_CN) : undefined;
+    // Number('')=0 이라 미시작 경기의 빈 문자열 점수가 0-0 으로 영속(daily.ts upsert) 되던
+    // silent drift 차단 — 빈 문자열/비정상 값은 undefined (DB null).
+    const homeScore = parseScore(raw.B_SCORE_CN);
+    const awayScore = parseScore(raw.T_SCORE_CN);
 
     games.push({
       date: formatDate(raw.G_DT),
