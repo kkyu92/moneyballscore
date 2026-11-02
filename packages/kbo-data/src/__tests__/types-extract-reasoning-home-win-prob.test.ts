@@ -76,4 +76,14 @@ describe('extractReasoningHomeWinProb — cycle 199 silent drift family pipeline
     expect(warnSpy.mock.calls[0][0]).toContain('live.runLiveUpdate preGame');
     expect(warnSpy.mock.calls[1][0]).toContain('daily-summary.buildSummaryPredictions');
   });
+  it('빈 문자열/공백/boolean → Number() 0·1 coerce 차단, fallback 0.5 + invalid_value warn', () => {
+    for (const bad of ['', '  ', true, false]) {
+      warnSpy.mockClear();
+      expect(extractReasoningHomeWinProb({ homeWinProb: bad }, 'X')).toBe(0.5);
+      expect(warnSpy).toHaveBeenCalledWith(
+        `[homeWinProb] X: invalid_value ${JSON.stringify(bad)} → fallback 0.5`,
+      );
+    }
+    expect(extractReasoningHomeWinProb({ homeWinProb: '0.62' }, 'X')).toBe(0.62);
+  });
 });
