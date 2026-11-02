@@ -142,6 +142,17 @@ describe('deriveHomeWinProb', () => {
   });
 });
 
+describe('null/empty JSONB coercion (Number(null)===0 guard)', () => {
+  it('extractFactors drops null factor value instead of coercing to 0', () => {
+    const r = extractFactors({ ...Object.fromEntries(REQUIRED_FACTORS.map((k) => [k, 0.5])), elo: null });
+    expect(r).toEqual({ ok: false, reason: 'invalid_factor_value' });
+  });
+  it('deriveHomeWinProb ignores reasoning.homeWinProb=null and falls back to confidence', () => {
+    const row = baseRow({ reasoning: { homeWinProb: null }, confidence: 0.7 });
+    expect(deriveHomeWinProb(row)).not.toBe(0);
+  });
+});
+
 describe('deriveHomeWon', () => {
   it('1 when winner is home team', () => {
     expect(deriveHomeWon(baseRow())).toBe(1);
