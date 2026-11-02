@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { loadAllPicks, loadAllWinners } from "../combo-check-data";
 
+// 실제 파일시스템 동기 read — CI 부하 시 기본 5s 초과 flake (CI run 41414862956), 30s 로 완화
+const FS_TEST_TIMEOUT = 30_000;
+
 describe("combo-check-data (cycle 3061 — 기존 테스트 커버리지 공백 보강)", () => {
   it("loadAllPicks — 실제 lotto-picks 디렉토리에서 6-num key 세트 로드", () => {
     const { keys, picksByFile, totalSets } = loadAllPicks();
@@ -19,7 +22,7 @@ describe("combo-check-data (cycle 3061 — 기존 테스트 커버리지 공백 
       const sorted = nums.slice().sort((a, b) => a - b);
       expect(nums).toEqual(sorted);
     }
-  });
+  }, FS_TEST_TIMEOUT);
 
   it("loadAllWinners — 실제 lotto-data.json 역대 1등 조합 로드, key 가 6-num 정렬 join", () => {
     const { keyToRound } = loadAllWinners();
@@ -32,5 +35,5 @@ describe("combo-check-data (cycle 3061 — 기존 테스트 커버리지 공백 
     const expectedKey = entry.numbers.slice().sort((a, b) => a - b).join(",");
     expect(sampleKey).toBe(expectedKey);
     expect(entry.round).toBeGreaterThan(0);
-  });
+  }, FS_TEST_TIMEOUT);
 });
