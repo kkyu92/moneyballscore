@@ -87,3 +87,32 @@ describe('judge parseResponse — silent fallback Sentry capture (cycle 1402)', 
     expect(vi.mocked(captureJudgeParseFallback).mock.calls[0][0].gameId).toBeNull();
   });
 });
+
+describe('judge parseResponse — null/빈 문자열 필드 0 오인 차단 (cycle 3912)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('homeWinProb null → 0 clamp 극단 pick 이 아니라 중립 DEFAULT', () => {
+    const verdict = parseResponse(
+      '{"homeWinProb": null, "confidence": 0.6, "reasoning": "x"}',
+      'LG',
+      'OB',
+      makeContext(),
+    );
+    expect(verdict.homeWinProb).toBe(0.5);
+    expect(verdict.confidence).toBe(0.6);
+  });
+
+  it('confidence null / 빈 문자열 → 0 이 아니라 DEFAULT', () => {
+    const v1 = parseResponse('{"homeWinProb": 0.6, "confidence": null}', 'LG', 'OB', makeContext());
+    const v2 = parseResponse('{"homeWinProb": 0.6, "confidence": ""}', 'LG', 'OB', makeContext());
+    expect(v1.confidence).toBeGreaterThan(0);
+    expect(v2.confidence).toBe(v1.confidence);
+  });
+
+  it('legitimate 0 confidence 는 유지', () => {
+    const v = parseResponse('{"homeWinProb": 0.6, "confidence": 0}', 'LG', 'OB', makeContext());
+    expect(v.confidence).toBe(0);
+  });
+});

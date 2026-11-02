@@ -11,6 +11,7 @@ import {
   notifyValidationViolations,
 } from './validator';
 import { logValidatorEvent } from './validator-logger';
+import { toFiniteNumber } from './parse-number';
 import { getRivalryBlock } from './rivalry-memory';
 import type { GameContext, TeamArgument, AgentResult } from './types';
 
@@ -89,7 +90,7 @@ export function parseResponse(text: string, team: TeamCode, context?: GameContex
       // DEFAULT(0.5, 중립) 로 덮어쓰던 버그 — NaN(파싱 실패/필드 부재) 만 DEFAULT 처리.
       confidence: Math.max(
         0,
-        Math.min(1, Number.isFinite(Number(parsed.confidence)) ? Number(parsed.confidence) : AGENT_PARSE_CONFIDENCE_DEFAULT)
+        Math.min(1, Number.isFinite(toFiniteNumber(parsed.confidence)) ? toFiniteNumber(parsed.confidence) : AGENT_PARSE_CONFIDENCE_DEFAULT)
       ),
       reasoning: String(parsed.reasoning || '').slice(0, 500),
     };
