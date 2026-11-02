@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): harness n=448 불변 (cycle 3904, 2026-11-02)
+
+- 진단: HEAD clean, open issue 0, approved plan 0, lock 미충족(distinct=5), prod 402 지속(사용자 Vercel 조치 대기). `op-analysis-ce-cohort.ts` n=448 / CE 401 / 비CE 47 불변(시즌 종료, CREDIT_EXHAUSTED). 코드 변경 0. STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신성 확인 (cycle 3902, 2026-11-02)
 
 - 진단: HEAD clean/origin 동기, 2차 방어선 OK(3901 retro 존재), open hub-dispatch 0, prod 402 지속(사용자 Vercel 조치 대기), STRUCTURAL_DRY_SPELL_SUPPRESS(marker age <24h). lotto-picks 최신 2026-11-07 / lotto-results 최신 2026-10-31 = 직전 토요일 반영, cron 정상 → 수동 개입 불필요. 코드 변경 0.
