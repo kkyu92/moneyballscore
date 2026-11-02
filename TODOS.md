@@ -1,3 +1,7 @@
+## ✅ SUCCESS — review-code(heavy): judge/team agent null→0 coerce (cycle 3912, 2026-11-02)
+
+- 진단: cycle 3911 tabpfn twin grep. `judge-agent.parseResponse` `Number(parsed.homeWinProb)` null→0→clampWinnerProb 최소 → 극단 away pick, confidence null→0. team-agent confidence 동일. `agents/parse-number.ts toFiniteNumber` 도입, 테스트 3건, PR #3217 MERGED 6f79244b. 잔여 후보: rivalry-memory.ts:212 `Number(r.confidence)` (DB 컬럼, 저위험), buildAccuracyData.ts:162 (null 가드 이미 있음). prod 402 지속.
+
 ## ✅ SUCCESS — fix-incident(lite): ci-main 3 reminder 원인 확정 (cycle 3910, 2026-11-02)
 
 - 진단: lesson-pending #3206~3208 = hub incident 10-28 CI run 3건, 전부 `combo-check-data.test.ts` 5s timeout (cycle 3907 fix 8906d3b3 와 동일). lesson 3eee2c05 박제(fingerprint 3건 명시) + 3건 close. prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0.
