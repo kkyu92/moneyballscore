@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(heavy): pipelineStats.ts 감사 drift 0 (cycle 3908, 2026-11-02)
+
+- 진단: HEAD clean, 2차 방어선 OK, open hub-dispatch 0, prod 402 지속(사용자 Vercel 조치 대기). fix-incident 3연속 후 review-code redirect. `lib/debug/pipelineStats.ts` ↔ `daily.ts` pipeline_runs insert(skipped_detail=JSON.stringify, errors=배열) 정합, 테스트 존재 → drift 0건. 코드 변경 0.
+
 ## ✅ SUCCESS — fix-incident(lite): combo-check-data 테스트 flake 완화 (cycle 3907, 2026-11-02)
 
 - 진단: main CI run 41414862956 실패 = `combo-check-data.test.ts` 5000ms timeout(suite 320s 부하, 로컬 1.4s). 2 테스트 timeout 30s 로 완화, 8906d3b3 push, CI green 확인. lesson-pending #3206~3208(ci-main) 은 이 flake 와 연결 가능성 미검증 — 잔존. prod 402 지속(사용자 Vercel 조치 대기).
