@@ -33,6 +33,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -130,6 +131,8 @@ jobs:
             --body "plan #7 Step E cron 자동 갱신 — 매주 화요일 multi-fire ('19 0,3,6 * * 2'). idempotent skip. AdSense surface risk 0 (archive 만 갱신, /lotto hub 미박제)." \
             --label "automated,lotto")
           PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+          # GITHUB_TOKEN 으로 만든 PR 은 pull_request 이벤트를 발화하지 않음 → CI 직접 dispatch (cycle 3894)
+          gh workflow run ci.yml --ref "$BRANCH" || echo "::warning::CI dispatch failed for $BRANCH"
           CI_SEEN=false
           for _ in $(seq 1 18); do
             if gh pr checks "$PR_NUM" --json name --jq '.[].name' | grep -qx check; then CI_SEEN=true; break; fi
@@ -140,7 +143,13 @@ jobs:
             exit 0
           fi
 
-          if gh pr checks "$PR_NUM" --watch --fail-fast; then
+          CI_RESULT=""
+          for _ in $(seq 1 144); do
+            CI_RESULT=$(gh pr checks "$PR_NUM" --json name,bucket --jq '[.[] | select(.name=="check") | .bucket] | first // ""')
+            case "$CI_RESULT" in pass|fail|cancel|skipping) break ;; esac
+            sleep 5
+          done
+          if None[ "$CI_RESULT" = "pass" ]; then
             gh pr merge "$PR_NUM" --squash --delete-branch
             echo "::notice::PR $PR_URL merged after CI green"
           else
