@@ -1,6 +1,8 @@
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3896, 2026-11-02)
 
-- count_smoke 유효 7,716,994 / 제거 428,066 (5.26## ➖ RETRO-ONLY — review-code(lite): green baseline (cycle 3895, 2026-11-02)
+- count_smoke 유효 7,716,994 / 제거 428,066 (5.26%), picks 11-07 · results 10-31 최신, valid_delta 0, 수동 개입 불요. 코드 변경 0. prod 402 지속(사용자 Vercel 조치 대기). STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
+
+## ➖ RETRO-ONLY — review-code(lite): green baseline (cycle 3895, 2026-11-02)
 
 - type-check 4/4 green, hub-dispatch issue 0, CI Failure Dispatch 전부 skipped, approved plan 0. drift 0건, 코드 변경 0. prod 402 지속(사용자 Vercel 조치 대기). STRUCTURAL_DRY_SPELL_SUPPRESS (marker <24h)
 
