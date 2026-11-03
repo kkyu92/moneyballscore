@@ -1,3 +1,10 @@
+## ➖ RETRO-ONLY — fix-incident(lite): mlb-schedule-status-backfill 신규 fingerprint 선제 문서화 (cycle 3922, 2026-11-03)
+
+- 진단: gh run list 전수 재확인 — cycle 3906 lesson(636f1ac2) 이 못 묶은 5번째 symptom workflow 발견. `mlb-schedule-status-backfill` 2026-10-26 부터 8회 연속 failure.
+- 실측: `gh run view --log-failed` → `status=402 Payment required / DEPLOYMENT_DISABLED`. 동일 근본원인(Vercel 402), 신규 incident 아님.
+- lesson 21343969 박제 (5번째 fingerprint 선제 cross-reference, 향후 reminder 생성 시 즉시 close 가능하도록). PR #3224(op-analysis weekly cohort cron, n=601) 정상 머지 확인. 코드 변경 0.
+- 다음: 2-chain lock 미충족(직전8 review-code6+op-analysis1+info-arch1, distinct=3). review-code(heavy) dominance 지속 완화 겸 info-arch(gap 2)/lotto(gap 13)/op-analysis(gap 5) 자연 대기 또는 review-code 신규 scope.
+
 ## ➖ RETRO-ONLY — review-code(heavy): #3223 twin Number() coerce 감사 drift 0건 (cycle 3921, 2026-11-02)
 
 - resolveWinnerProb(buildAccuracyData.ts) hwp 는 extractReasoningHomeWinProb 경유 → 안전
