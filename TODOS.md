@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): CE cohort harness 재실행 n=448 불변 (cycle 3927, 2026-11-03)
+
+- 진단: n=448 (CE 401 / 비CE 47) cycle 3917 과 동일, KBO 시즌 종료 지속, hub-dispatch 0, CI Failure Dispatch 전부 skipped. 코드 변경 0.
+- 다음: lotto(gap 4/30)/info-arch(gap 7/30)/fix-incident(gap 2/20) 자연 대기. op-analysis 재측정 ROI 낮음(KBO 2027 개막 전).
+
 ## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0, 402 family 재확인 (cycle 3925, 2026-11-03)
 
 - 진단: prod 402 지속(사용자 Vercel 조치 대기). gh run 최근 40건 실패 전부 기지 402 family. CI 실패 1건 = op-analysis cron 브랜치 머지 직후 삭제(사례 20 기지, log 소실). lotto picks 11-07/results 10-31 정상. drift 0건, 코드 변경 0.
