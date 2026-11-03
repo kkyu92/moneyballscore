@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap 점검 drift 0건 (cycle 3929, 2026-11-03)
+
+- 진단: page.tsx 111, 7일 내 신규 라우트 0, breadcrumb 누락 = redirect 래퍼(reviews weekly/monthly·mlb·en/mlb) + debug/login/settings 뿐 → IA 충분. prod 402 지속, hub-dispatch 0. 코드 변경 0.
+- ship-0: 직전10 PARTIAL 재충족 + 구조적 dry spell 24h 마커 경과(24.2h) → STRUCTURAL_DRY_SPELL_NEW, hard stop(next_n=0) 사용자 재확인 요청.
+
 ## ➖ RETRO-ONLY — review-code(lite): health baseline test 4/4 green, prod 402 지속 (cycle 3928, 2026-11-03)
 
 - 진단: HEAD clean, 2차 방어선 OK, hub-dispatch 0, lotto picks/results 정상, prod 402 지속(사용자 Vercel 조치 대기). 코드 변경 0.
