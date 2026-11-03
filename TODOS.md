@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0, 402 family 재확인 (cycle 3925, 2026-11-03)
+
+- 진단: prod 402 지속(사용자 Vercel 조치 대기). gh run 최근 40건 실패 전부 기지 402 family. CI 실패 1건 = op-analysis cron 브랜치 머지 직후 삭제(사례 20 기지, log 소실). lotto picks 11-07/results 10-31 정상. drift 0건, 코드 변경 0.
+- 다음: op-analysis(gap 8/25)/info-arch(gap 5/30)/lotto(gap 2/30) 자연 대기.
+
 ## ➖ RETRO-ONLY — review-code(heavy): Number() null-coerce twin 전수 grep drift 0건 (cycle 3924, 2026-11-03)
 
 - 진단: HEAD clean, 2차 방어선 OK, open hub-dispatch 0, approved plan 0, CI failure 전부 prod 402 family. apps/packages `Number(x)` 전수 grep: recharts tooltip value(안전) / calibration-agent:153 `||0` neutral(안전) / rivalry-memory:212 기지(downstream 미사용) / 나머지 기감사. 최근 4일 변경 9개 파일 전부 기감사 — fresh scope 소진. 코드 변경 0.
