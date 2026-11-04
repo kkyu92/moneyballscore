@@ -1,3 +1,10 @@
+## ➖ RETRO-ONLY — review-code(heavy): seasons/standings/share/players/glossary 미감사 잔여 컴포넌트 drift 0건 (cycle 3930, 2026-11-04)
+
+- 진단: 직전 retro(line 700) 지목 미감사 scope(components/{seasons,share,standings,players,glossary}) 7개 non-vendor 파일 전수 read. SeasonStandingsSortControl/TeamAccuracySortControl twin 패턴 일관, TeamAccuracyList i+1 rank 가정은 buildAllTeamAccuracy() sort 로 실제 보장 확인. drift 0건, 코드 변경 0.
+- 사용자 `/develop-cycle 40` 명시적 호출 — cycle 3929 가 요청한 재확인 완료, 진행.
+- ship-0: 직전10 PARTIAL 재충족이나 STRUCTURAL_DRY_SPELL_SUPPRESS(elapsed 23.81h < 24h) → hard stop 생략, 사용자 N=40 그대로 진행(남은 39 사이클).
+- 다음: fix-incident(gap6/20)/lotto(gap8/30)/op-analysis(gap4/25)/info-arch(gap2/30) 자연 대기. review-code 신규 scope 사실상 소진(잔여 = shadcn vendor ui/navigation-menu.tsx 뿐).
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): breadcrumb/sitemap 점검 drift 0건 (cycle 3929, 2026-11-03)
 
 - 진단: page.tsx 111, 7일 내 신규 라우트 0, breadcrumb 누락 = redirect 래퍼(reviews weekly/monthly·mlb·en/mlb) + debug/login/settings 뿐 → IA 충분. prod 402 지속, hub-dispatch 0. 코드 변경 0.
