@@ -20873,3 +20873,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인, gap 13/30 최고비율 선택 (cycle 3923, 2026-11-03)
 
 - picks 2026-11-07.md(1249회, 다음 토요일 일치) + results 2026-10-31.md(직전 토요일 일치) 양쪽 cron 정상. countValid 7,716,994 cycle 3909 과 완전 동일(delta=0, drift 없음). 신규 rule 후보 0. 코드 변경 0. prod 402 DEPLOYMENT_DISABLED family(5개 scheduled workflow) 기존 incident 재확인, 사용자 결제 조치 대기 지속.
+
+진단: cycle 3932 lotto(lite) — picks 2026-11-07 / results 2026-10-31(1248회) 최신, count_smoke 유효 7,716,994(제거 428,066, 5.26
