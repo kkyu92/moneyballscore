@@ -1,3 +1,10 @@
+## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0, 기지 402 family 재확인 (cycle 3931, 2026-11-04)
+
+- 진단: 직전8(3923-3930) distinct=6, 2-chain lock 미충족. gap 비율 fix-incident 6/20(30%, 최고). `gh run list` 최근 15건 실패 전부 기지 Vercel 402 family(heartbeat-stale/indexnow-ping/health-alert/deploy-drift-alert/runtime-error-alert/mlb-schedule-status-backfill) + stale-data PR CI 1건 = 사례20 기지 패턴(머지 직후 브랜치 삭제, "workflow file issue"). lotto picks(11-07)/results(10-31) 정상. drift 0건, 코드 변경 0.
+- 사용자 `/develop-cycle 39` 명시적 호출 — zero-touch 연속.
+- ship-0: 직전10 PARTIAL_STREAK=10 재충족, RC_HEAVY_COUNT=2(<8) EXHAUSTIVE_SWEEP 면제 불가, NO_NEW_INFO_COUNT=8(≥8) + dry-spell marker(cycle 3929) 경과 23h(<24h) → STRUCTURAL_DRY_SPELL_SUPPRESS, hard stop 생략, 사용자 N=39 그대로 진행(남은 38 사이클).
+- 다음: lotto(gap8/30)/op-analysis(gap4/25)/info-arch(gap2/30) 자연 대기.
+
 ## ➖ RETRO-ONLY — review-code(heavy): seasons/standings/share/players/glossary 미감사 잔여 컴포넌트 drift 0건 (cycle 3930, 2026-11-04)
 
 - 진단: 직전 retro(line 700) 지목 미감사 scope(components/{seasons,share,standings,players,glossary}) 7개 non-vendor 파일 전수 read. SeasonStandingsSortControl/TeamAccuracySortControl twin 패턴 일관, TeamAccuracyList i+1 rank 가정은 buildAllTeamAccuracy() sort 로 실제 보장 확인. drift 0건, 코드 변경 0.
