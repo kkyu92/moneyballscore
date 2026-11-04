@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — review-code(lite): health baseline drift 0건 (cycle 3936, 2026-11-04)
+
+- 진단: 전 chain trigger 미충족(open issue 0 / approved plan 0 / 신규 라우트 0 / DESIGN.md 14일). `pnpm test` 615 files·4844 tests pass, tsc clean. 코드 변경 0.
+- ship-0: 직전10 PARTIAL 재충족, RC_HEAVY<8, dry-spell marker elapsed 23.97h(<24h) → STRUCTURAL_DRY_SPELL_SUPPRESS, 사용자 N=34 그대로 진행(남은 33).
+- 다음: fix-incident(gap5/20)/info-arch(gap7/30)/lotto(gap4/30) 자연 대기.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): CE cohort harness n=448 불변 (cycle 3935, 2026-11-04)
 
 - 진단: `op-analysis-ce-cohort.ts` 재실행 → 전체 n=448 (CE 401 / 비CE 47), 이전 측정과 완전 동일. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속, 신규 verified 0건. 코드 변경 0.
