@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token vs 컴포넌트 hex grep drift 0건 (cycle 3934, 2026-11-04)
+
+- 진단: src 내 hex 20종 전부 DESIGN.md 토큰과 일치, off-token 4종(#151d18/#0c0e0d/#f8faf9/#e2a55c)은 globals.css 토큰 정의부뿐. 코드 변경 0.
+- ship-0: 직전10 PARTIAL 재충족, RC_HEAVY<8, dry-spell elapsed 23.94h(<24h) → STRUCTURAL_DRY_SPELL_SUPPRESS, 사용자 N=36 그대로 진행(남은 35).
+- 다음: op-analysis(gap7/25) 자연 대기.
+
 ## ➖ RETRO-ONLY — review-code(heavy): components/ui/navigation-menu.tsx 마지막 vendor 파일 drift 0건 (cycle 3933, 2026-11-04)
 
 - 진단: 표준 shadcn 래퍼, MegaMenu 단독 사용, Viewport 정의 순서/exports 정상. review-code 신규 scope 소진 완료. 코드 변경 0.
