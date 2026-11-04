@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — review-code(heavy): components/ui/navigation-menu.tsx 마지막 vendor 파일 drift 0건 (cycle 3933, 2026-11-04)
+
+- 진단: 표준 shadcn 래퍼, MegaMenu 단독 사용, Viewport 정의 순서/exports 정상. review-code 신규 scope 소진 완료. 코드 변경 0.
+- ship-0: 직전10 PARTIAL 재충족, RC_HEAVY<8, dry-spell marker elapsed 23.9h(<24h) → STRUCTURAL_DRY_SPELL_SUPPRESS, 사용자 N=37 그대로 진행(남은 36).
+- 다음: op-analysis(gap6/25) 자연 대기, review-code 2순회 외 신규 scope 없음.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0, 기지 402 family 재확인 (cycle 3931, 2026-11-04)
 
 - 진단: 직전8(3923-3930) distinct=6, 2-chain lock 미충족. gap 비율 fix-incident 6/20(30%, 최고). `gh run list` 최근 15건 실패 전부 기지 Vercel 402 family(heartbeat-stale/indexnow-ping/health-alert/deploy-drift-alert/runtime-error-alert/mlb-schedule-status-backfill) + stale-data PR CI 1건 = 사례20 기지 패턴(머지 직후 브랜치 삭제, "workflow file issue"). lotto picks(11-07)/results(10-31) 정상. drift 0건, 코드 변경 0.
