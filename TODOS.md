@@ -20900,3 +20900,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 진단: cycle 3932 lotto(lite) — picks 2026-11-07 / results 2026-10-31(1248회) 최신, count_smoke 유효 7,716,994(제거 428,066, 5.26
 진단: cycle 3932 lotto(lite) — picks 2026-11-07 / results 2026-10-31(1248회) 최신, count_smoke 유효 7,716,994(제거 428,066, 5.26pct), cron 정상, drift 0건 RETRO-ONLY.
+
+## ➖ RETRO-ONLY — review-code(lite): kbo-data parseFloat NaN 가드 재grep (cycle 3937, 2026-11-04)
+
+- validator.ts/fancy-stats.ts parseFloat 전부 isFinite/isNaN 가드, baseball-savant 는 cycle 3914 fix 완료. drift 0건, 코드 변경 0. prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel 조치 대기).
