@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — fix-incident(lite): alert workflow failure = Vercel 402 파생 재확인 (cycle 3938, 2026-11-05)
+
+- 진단: `moneyballscore.vercel.app` 402 `DEPLOYMENT_DISABLED` 지속. heartbeat-stale/health-alert/runtime-error-alert/deploy-drift-alert 연속 failure 전부 이 건 파생, 신규 incident 0. 사용자 Vercel billing 조치 필요(비용가드 — 자율 결제 금지). 코드 변경 0.
+- ship-0: 직전10 PARTIAL 재충족, dry-spell marker 22.1h(<24h) → STRUCTURAL_DRY_SPELL_SUPPRESS, 사용자 N=50 그대로 진행(남은 49).
+- 다음: 402 해소 전까지 info-arch(gap9/30)/lotto(gap6/30) 자연 대기.
+
 ## ➖ RETRO-ONLY — review-code(lite): health baseline drift 0건 (cycle 3936, 2026-11-04)
 
 - 진단: 전 chain trigger 미충족(open issue 0 / approved plan 0 / 신규 라우트 0 / DESIGN.md 14일). `pnpm test` 615 files·4844 tests pass, tsc clean. 코드 변경 0.
