@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md 토큰 균열 0건, prod 402 지속 (cycle 3954, 2026-11-05)
+
+- components hex 10종 전부 DESIGN.md 토큰 포함(mismatch 0), 신규 라우트 7일 0. 코드 변경 0.
+- ship-0: dry-spell marker 22.4h(<24h) → SUPPRESS, 사용자 N=34 그대로 진행(next_n=33).
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변, 격차 8.0pp, drift 0건 (cycle 3953, 2026-11-05)
 
 - harness 재실행: CE 55.9%(224/401) / 비CE 63.8%(30/47), KBO 시즌 종료 지속. prod 402 지속(사용자 Vercel billing 조치 필요). 코드 변경 0.
