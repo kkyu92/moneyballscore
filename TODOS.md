@@ -21110,3 +21110,6 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료 지속. 코드 변경 0.
 - ship-0: dry-spell marker 23.1h(<24h) → SUPPRESS, 사용자 N=4 그대로 진행(next_n=3).
+
+- cycle 3989 — operational-analysis(lite): n=448 불변(CE 401/비CE 47) 52회 연속, CE 55.9%/비CE 63.8% 격차 8.0pp 그대로, LLM 부가가치 우세 결론 재확인. prod 402 지속(사용자 Vercel 결제 조치 대기). 코드 변경 0, drift 0건.
+- ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=39 그대로 진행(next_n=38).
