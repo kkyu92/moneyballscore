@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신, count_smoke 유효 7,716,994(제거 5.26%), prod 402 지속, drift 0건 (cycle 3986, 2026-11-05)
+
+- picks 11-07 / results 10-31 최신, 256 rules 불변. 코드 변경 0.
+- ship-0: dry-spell marker 22.8h(<24h) → SUPPRESS, 사용자 N=2 그대로 진행(next_n=1).
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN token 균열 0건, prod 402 지속, drift 0건 (cycle 3985, 2026-11-05)
 
 - hex 하드코딩 = ShareButtons 브랜드색 + HallOfFame CSS var fallback 뿐. 코드 변경 0.
