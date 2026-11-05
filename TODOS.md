@@ -21075,3 +21075,8 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 3978 — review-code(lite) pnpm test green, prod 402 지속, drift 0건 RETRO-ONLY
 
 - cycle 3980 — lotto(lite) cron 산출물 정상(picks 11-07 / results 10-31), prod 402 지속, drift 0건 RETRO-ONLY
+
+## ➖ RETRO-ONLY — review-code(lite): test baseline green, prod 402 지속, drift 0건 (cycle 3982, 2026-11-05)
+
+- pnpm test 4/4 green, CI 정상. 코드 변경 0.
+- ship-0: dry-spell marker 22.8h(<24h) → SUPPRESS, 사용자 N=6 그대로 진행(next_n=5).
