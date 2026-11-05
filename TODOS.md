@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변, 격차 8.0pp, drift 0건 (cycle 3953, 2026-11-05)
+
+- harness 재실행: CE 55.9%(224/401) / 비CE 63.8%(30/47), KBO 시즌 종료 지속. prod 402 지속(사용자 Vercel billing 조치 필요). 코드 변경 0.
+- ship-0: dry-spell marker 22.4h(<24h) → SUPPRESS, 사용자 N=35 그대로 진행(next_n=34).
+
 ## ➖ RETRO-ONLY — skill-evolution phase 65 (cycle 3951, 2026-11-05)
 
 - 직전50(3901-3950) success 11/50(22%), retro 중복·결손 0, 신규 룰 X. MIGRATION-PATH.md append + SKILL.md milestone 포인터 → 4000. prod 402 지속. 코드 변경 0.
