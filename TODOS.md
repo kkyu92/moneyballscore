@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): 신규 라우트 0, lotto cron 최신, drift 0건 (cycle 3949, 2026-11-05)
+
+- 진단: page.tsx 7일 내 신규 0, lotto picks 2026-11-07 / results 2026-10-31 최신, open issue 0, approved plan 0. prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel billing 조치 필요). 코드 변경 0.
+- ship-0: dry-spell marker 22.3h(<24h) → SUPPRESS, 사용자 N=39 그대로 진행(next_n=38).
+- 다음: cycle 3950 = skill-evolution milestone(trigger 3).
+
 ## ➖ RETRO-ONLY — polish-ui(lite): 신규 tsx 0, DESIGN.md 15일 신선, drift 0건 (cycle 3947, 2026-11-05)
 
 - 진단: 7일 내 신규 tsx 0, open issue 0, approved plan 0. prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel billing 조치 필요). 코드 변경 0.
