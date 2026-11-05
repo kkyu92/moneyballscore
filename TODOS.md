@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(lite): lint green, 코드 변경 0, prod 402 지속, drift 0건 (cycle 3968, 2026-11-05)
+
+- 최근 3일 변경 = 데이터/테스트 파일뿐. ship-0: dry-spell marker 22.6h(<24h) → SUPPRESS, 사용자 N=20 그대로 진행(next_n=19).
+
 ## ➖ RETRO-ONLY — review-code(lite): pnpm test 615 files/4844 pass, prod 402 지속, drift 0건 (cycle 3963, 2026-11-05)
 
 - moneyball-kappa.vercel.app 200 = 무관 프로젝트(Cashball), prod(moneyballscore.vercel.app) 402 지속. 코드 변경 0.
