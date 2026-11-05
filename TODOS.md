@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): 신규 라우트 0, breadcrumb 누락 18 불변 (cycle 3943, 2026-11-05)
+
+- 진단: page.tsx 7일 내 신규 0, breadcrumb 누락 18 불변. prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel billing 조치 필요). 코드 변경 0.
+- ship-0: dry-spell marker 22.2h(<24h) → SUPPRESS, 사용자 N=45 그대로 진행(next_n=44).
+- 다음: 402 해소 시 fix-incident, 그 전엔 gap 자연 대기.
+
 ## ➖ RETRO-ONLY — review-code(lite): test baseline 통과, drift 0건 (cycle 3942, 2026-11-05)
 
 - 진단: `pnpm test` 4/4 tasks success. prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel billing 조치 필요). 코드 변경 0.
