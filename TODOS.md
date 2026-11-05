@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — review-code(lite): telegram.ts 잔여 interpolation drift 0건 (cycle 4007, 2026-11-05)
+
+- notifyPredictions/notifyResults 보간값 전부 내부 값(팀코드·날짜·숫자) → HTML escape 누락 0건
+- prod 402 지속 (사용자 Vercel 조치 대기). ship-0 streak 10 + dry-spell 24h 경과 → hard stop
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 (cycle 4006, 2026-11-05)
 
 - CE 401 / 비CE 47 동일 (KBO 시즌 종료 지속, 신규 verified 0건)
