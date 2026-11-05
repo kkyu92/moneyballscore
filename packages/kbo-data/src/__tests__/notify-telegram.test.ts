@@ -474,6 +474,15 @@ describe('notifyError (regression)', () => {
     expect(msg).toContain('daily-pipeline GAP');
     expect(msg).toContain('예측 누락 2경기');
   });
+
+  it('HTML 특수문자 이스케이프 + 4096자 이내 (400 silent drop 차단)', async () => {
+    const calls = captureTelegramCalls();
+    await notifyError('ctx', `<html>${'a&b'.repeat(3000)}</html>`);
+    const msg = calls[0].text;
+    expect(msg).not.toContain('<html>');
+    expect(msg).toContain('&lt;html&gt;');
+    expect(msg.length).toBeLessThanOrEqual(4096);
+  });
 });
 
 describe('notifyPipelineStatus (regression)', () => {
