@@ -21031,3 +21031,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - ship-0: dry-spell marker 22.6h(<24h) → SUPPRESS, 사용자 N=23 그대로 진행(next_n=22).
 
 - cycle 3966 info-arch(lite): page.tsx 111 / 7일 신규 0 / breadcrumb 누락 = redirect·debug 의도된 예외, drift 0건. prod 402 지속.
+
+- cycle 3967 — lotto(lite): picks 2026-11-07 / results 2026-10-31 최신, cron 정상, drift 0건
