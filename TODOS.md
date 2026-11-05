@@ -21080,3 +21080,8 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - pnpm test 4/4 green, CI 정상. 코드 변경 0.
 - ship-0: dry-spell marker 22.8h(<24h) → SUPPRESS, 사용자 N=6 그대로 진행(next_n=5).
+
+## ➖ RETRO-ONLY — info-architecture-review(lite): 현 IA 충분, prod 402 지속, drift 0건 (cycle 3983, 2026-11-05)
+
+- page.tsx 111개 / 7일 내 신규 0 / breadcrumb 누락 = 기존 의도 영역. 코드 변경 0.
+- ship-0: dry-spell marker 22.8h(<24h) → SUPPRESS, 사용자 N=5 그대로 진행(next_n=4).
