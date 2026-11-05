@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — polish-ui(lite): 신규 tsx 0, DESIGN.md 15일 신선, drift 0건 (cycle 3947, 2026-11-05)
+
+- 진단: 7일 내 신규 tsx 0, open issue 0, approved plan 0. prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel billing 조치 필요). 코드 변경 0.
+- ship-0: dry-spell marker 22.3h(<24h) → SUPPRESS, 사용자 N=41 그대로 진행(next_n=40).
+- 다음: 402 해소 시 fix-incident, 그 전엔 gap 자연 대기. cycle 3950 = skill-evolution milestone(trigger 3).
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): harness 재실행 n=448 불변 (cycle 3944, 2026-11-05)
 
 - CE 401 / 비CE 47 동일, 시즌 종료 + CREDIT_EXHAUSTED 지속, prod 402 지속, drift 0건
