@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신, count_smoke 정상 (cycle 3940, 2026-11-05)
+
+- 진단: picks 11-07 / results 10-31 최신, count valid 7,716,994 (제거 5.26%), valid_delta 0, 신규 rule 0. prod 402 지속(사용자 billing 조치 필요). 코드 변경 0.
+- ship-0: dry-spell marker 22.1h(<24h) → SUPPRESS, 사용자 N=48 그대로 진행.
+- 다음: 11-07 추첨 후 result cron 확인 또는 402 해소 시 fix-incident.
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): breadcrumb 목록 불변 drift 0건 (cycle 3939, 2026-11-05)
 
 - 진단: breadcrumb 누락 목록 cycle 3646 과 동일, lotto picks(11-07)/results(10-31) 최신, prod 402 지속(사용자 billing 조치 필요). 코드 변경 0.
