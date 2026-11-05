@@ -21024,3 +21024,8 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - `gh run list` CI Failure Dispatch 전부 skipped (실제 incident 부재). picks 11-07 / results 10-31 최신. moneyballscore.vercel.app HTTP 402 지속 (사용자 Vercel 결제 조치 대기).
 - ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=24 그대로 진행(next_n=23).
+
+## ➖ RETRO-ONLY — polish-ui(lite): UI 변경 0, DESIGN.md 균열 0, drift 0건 (cycle 3965, 2026-11-05)
+
+- tsx 7일 신규/변경 0, 컴포넌트 hex 하드코딩 0, prod(moneyballscore.vercel.app) 402 지속(사용자 Vercel 결제 조치 필요). 코드 변경 0.
+- ship-0: dry-spell marker 22.6h(<24h) → SUPPRESS, 사용자 N=23 그대로 진행(next_n=22).
