@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — review-code(lite): type-check/lint green, prod 402 지속, drift 0건 (cycle 3992, 2026-11-05)
+
+- turbo type-check 4/4 + eslint 전부 성공, open issue 0, 신규 incident 0. 코드 변경 0.
+- ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=36 그대로 진행(next_n=35).
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신, prod 402 지속, drift 0건 (cycle 3991, 2026-11-05)
 
 - lotto-picks 최신 2026-11-07 / lotto-results 최신 2026-10-31 → cron 정상, 수동 개입 불필요. 코드 변경 0.
