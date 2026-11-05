@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): IA drift 0건 (cycle 4003, 2026-11-05)
+
+- page.tsx 111개, 7일 내 신규 0. Breadcrumb 미보유 10개 = 전부 redirect/얇은 wrapper → 정상
+- prod 402 지속 (사용자 Vercel 조치 대기)
+
 ## ➖ RETRO-ONLY — review-code(lite): health baseline green (cycle 4002, 2026-11-05)
 
 - tests 전부 pass (shared 218 / kbo-data 1249 / moneyball 4844 / worker 1), tsc clean, drift 0건
