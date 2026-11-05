@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3999, 2026-11-05)
+
+- picks 2026-11-07 / results 2026-10-31 최신, count_smoke 유효 7,716,994 (제거 5.26%) 불변, delta 0
+- lotto-result-update 11-01 failure = 10-31 success 후 중복 run (산출물 정상)
+- prod 402 지속 (사용자 Vercel 조치 대기)
+
 ## ➖ RETRO-ONLY — review-code(heavy): telegram.ts notify* 5/5 감사 완결 (cycle 3998, 2026-11-05)
 
 notifyPredictions/notifyResults = 팀코드·숫자·date 만 보간 → 이스케이프 불요, drift 0건. 3995~3997 fix 로 HTML 이스케이프 family 종결. prod 402 지속.
