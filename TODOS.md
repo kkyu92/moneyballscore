@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — fix-incident(lite): 실패 workflow 전부 prod 402 파생 (cycle 4004, 2026-11-05)
+
+- indexnow-ping/runtime-error-alert/deploy-drift-alert/heartbeat-stale/health-alert 실패 = 전부 DEPLOYMENT_DISABLED 402, 신규 incident 0
+- lotto cron 정상 (picks 11-07 / results 10-31 최신). 사용자 Vercel 조치 대기
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): IA drift 0건 (cycle 4003, 2026-11-05)
 
 - page.tsx 111개, 7일 내 신규 0. Breadcrumb 미보유 10개 = 전부 redirect/얇은 wrapper → 정상
