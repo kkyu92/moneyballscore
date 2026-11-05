@@ -21138,3 +21138,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - cycle 3989 — operational-analysis(lite): n=448 불변(CE 401/비CE 47) 52회 연속, CE 55.9%/비CE 63.8% 격차 8.0pp 그대로, LLM 부가가치 우세 결론 재확인. prod 402 지속(사용자 Vercel 결제 조치 대기). 코드 변경 0, drift 0건.
 - ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=39 그대로 진행(next_n=38).
+
+## ✅ SUCCESS — review-code(heavy): notifyError HTML 이스케이프 + 4096자 cap (cycle 3995, 2026-11-05)
+
+- shared `TELEGRAM_MAX_MESSAGE_LENGTH` dead export 추적 → telegram.ts `notifyError` 가 parse_mode=HTML 에 미이스케이프 `<`/`&` + 무제한 길이 → Telegram 400 → 호출부 `catch {}` 가 삼켜 에러 알림 silent drop. 이스케이프 + cap + 테스트 1건. PR #3226 MERGED (93755bf5). Vercel check fail = 402 계정 차단(기존), CI `check` pass.
