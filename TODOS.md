@@ -21041,3 +21041,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 3966 info-arch(lite): page.tsx 111 / 7일 신규 0 / breadcrumb 누락 = redirect·debug 의도된 예외, drift 0건. prod 402 지속.
 
 - cycle 3967 — lotto(lite): picks 2026-11-07 / results 2026-10-31 최신, cron 정상, drift 0건
+
+- cycle 3970 — fix-incident(lite): prod 402 지속(/api/version 402), health-alert 실패=402 기인, 신규 incident 0, drift 0건. dry-spell SUPPRESS(22.6h<24h).
