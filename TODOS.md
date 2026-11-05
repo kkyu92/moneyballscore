@@ -20944,3 +20944,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — review-code(lite): kbo-data parseFloat NaN 가드 재grep (cycle 3937, 2026-11-04)
 
 - validator.ts/fancy-stats.ts parseFloat 전부 isFinite/isNaN 가드, baseball-savant 는 cycle 3914 fix 완료. drift 0건, 코드 변경 0. prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel 조치 대기).
+
+- cycle 3945 lotto(lite): lotto(lite) count_smoke 유효 7,716,994 / 제거 428,066 불변, picks 11-07·results 10-31 최신, prod 402 지속, drift 0건
