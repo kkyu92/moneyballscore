@@ -21163,3 +21163,8 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - shared `TELEGRAM_MAX_MESSAGE_LENGTH` dead export 추적 → telegram.ts `notifyError` 가 parse_mode=HTML 에 미이스케이프 `<`/`&` + 무제한 길이 → Telegram 400 → 호출부 `catch {}` 가 삼켜 에러 알림 silent drop. 이스케이프 + cap + 테스트 1건. PR #3226 MERGED (93755bf5). Vercel check fail = 402 계정 차단(기존), CI `check` pass.
 
 - cycle 3996 — review-code(heavy) notifyPipelineStatus errors[0] 이스케이프+cap fix PR #3227 MERGED 878657a5
+
+## ➖ RETRO-ONLY — review-code(heavy): telegram class 후속 grep drift 0건 (cycle 4001, 2026-11-05)
+
+- parse_mode 사용처 telegram.ts 단독(기감사). 빈 catch 8건(notifyError 호출부 5 + sync-batter-stats 2 + localStorage 1) 전부 의도된 best-effort. 코드 변경 0. prod 402 지속.
+- ship-0: 직전10 success 3건 → 미충족, 사용자 N=27 그대로 진행(next_n=26).
