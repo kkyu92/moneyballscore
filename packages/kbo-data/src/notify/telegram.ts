@@ -6,6 +6,7 @@ import {
   WINNER_TIER_LABEL,
   winnerProbOf,
   LLM_ACTIVE_VERSIONS,
+  TELEGRAM_MAX_MESSAGE_LENGTH,
 } from '@moneyball/shared';
 import type { ModelVersion, TeamCode } from '@moneyball/shared';
 import type { PipelineResult, ScrapedGame } from '../types';
@@ -181,8 +182,14 @@ export async function notifyResults(
  * 에러 알림
  */
 export async function notifyError(context: string, error: string) {
+  // parse_mode=HTML: '<' '&' 미이스케이프 시 400, 4096자 초과도 400 — 호출부가 catch 로 삼켜 알림 silent drop.
+  const escape = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const errorMax = TELEGRAM_MAX_MESSAGE_LENGTH - 1_000;
+  // 이스케이프 후 길이로 자르고, 잘린 엔티티('&am') 는 제거
+  const escaped = escape(error);
+  const errorText = escaped.length > errorMax ? `${escaped.slice(0, errorMax).replace(/&[a-z]*$/, '')}…` : escaped;
   await sendMessage(
-    `<b>🚨 MoneyBall 에러</b>\n\n<b>Context:</b> ${context}\n<b>Error:</b> <code>${error}</code>`
+    `<b>🚨 MoneyBall 에러</b>\n\n<b>Context:</b> ${escape(context.slice(0, 200))}\n<b>Error:</b> <code>${errorText}</code>`
   );
 }
 
