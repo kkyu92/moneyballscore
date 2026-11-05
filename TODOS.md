@@ -21009,3 +21009,8 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. prod 402 지속.
 - ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=27 그대로 진행(next_n=26).
+
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 정상, drift 0건 (cycle 3962, 2026-11-05)
+
+- count_smoke 제거 조합 428,066 (5.26%). picks 11-07 존재, results 10-31 최신 — cron 정상, 수동 개입 불필요. prod 402 지속.
+- ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=26 그대로 진행(next_n=25).
