@@ -124,6 +124,20 @@ describe('notifyAnnounce', () => {
     expect(msg).not.toContain('예측 알림');
   });
 
+  it('stadium/gameTime/estimatedTime HTML 특수문자 이스케이프 (400 silent drop 차단)', async () => {
+    const calls = captureTelegramCalls();
+    await notifyAnnounce(
+      '2026-04-22',
+      [makeGame({ stadium: 'A&B <구장>', gameTime: '<18:30>' })],
+      '16:00 <KST>',
+    );
+    const msg = calls[0].text;
+    expect(msg).toContain('A&amp;B &lt;구장&gt;');
+    expect(msg).toContain('&lt;18:30&gt;');
+    expect(msg).toContain('16:00 &lt;KST&gt;');
+    expect(msg).not.toContain('<구장>');
+  });
+
   it('TELEGRAM_BOT_TOKEN 없으면 조용히 skip', async () => {
     delete process.env.TELEGRAM_BOT_TOKEN;
     const calls = captureTelegramCalls();
