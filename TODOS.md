@@ -21004,3 +21004,8 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - 실코드 TODO/FIXME 0건, turbo lint 3/3 green, prod 402 지속(사용자 Vercel 조치 대기).
 - ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=29 그대로 진행(next_n=28).
+
+## ➖ RETRO-ONLY — operational-analysis(lite): ce-cohort n=448 불변, drift 0건 (cycle 3961, 2026-11-05)
+
+- ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. prod 402 지속.
+- ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=27 그대로 진행(next_n=26).
