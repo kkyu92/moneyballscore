@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신(picks 11-07/results 10-31), prod 402 지속, drift 0건, milestone 마커 박제 (cycle 3950, 2026-11-05)
+
+- 코드 변경 0. skill-evolution trigger 3 (cycle%50==0) 충족 → 다음 사이클 phase 64 발화.
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): 신규 라우트 0, lotto cron 최신, drift 0건 (cycle 3949, 2026-11-05)
 
 - 진단: page.tsx 7일 내 신규 0, lotto picks 2026-11-07 / results 2026-10-31 최신, open issue 0, approved plan 0. prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel billing 조치 필요). 코드 변경 0.
