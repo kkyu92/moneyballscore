@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — review-code(lite): pnpm test 615 files/4844 pass, prod 402 지속, drift 0건 (cycle 3963, 2026-11-05)
+
+- moneyball-kappa.vercel.app 200 = 무관 프로젝트(Cashball), prod(moneyballscore.vercel.app) 402 지속. 코드 변경 0.
+- ship-0: dry-spell marker 22.5h(<24h) → SUPPRESS, 사용자 N=25 그대로 진행(next_n=24).
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): 현 IA 충분, 신규 라우트 7일 0, drift 0건 (cycle 3957, 2026-11-05)
 
 - page.tsx 111개, breadcrumb 누락 = 기지 debug/hub/reviews 계열 동일. prod 402 지속. 코드 변경 0.
