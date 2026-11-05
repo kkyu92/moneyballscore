@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — skill-evolution phase 65 (cycle 3951, 2026-11-05)
+
+- 직전50(3901-3950) success 11/50(22%), retro 중복·결손 0, 신규 룰 X. MIGRATION-PATH.md append + SKILL.md milestone 포인터 → 4000. prod 402 지속. 코드 변경 0.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신(picks 11-07/results 10-31), prod 402 지속, drift 0건, milestone 마커 박제 (cycle 3950, 2026-11-05)
 
 - 코드 변경 0. skill-evolution trigger 3 (cycle%50==0) 충족 → 다음 사이클 phase 64 발화.
