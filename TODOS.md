@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token 균열 0, prod 402 지속, drift 0건 (cycle 3993, 2026-11-05)
+
+- 하드코딩 hex grep = 전부 `var(--color-*, fallback)` 형태, 신규 page.tsx(7일) 0. 코드 변경 0.
+- ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=35 그대로 진행(next_n=34).
+
 ## ➖ RETRO-ONLY — review-code(lite): type-check/lint green, prod 402 지속, drift 0건 (cycle 3992, 2026-11-05)
 
 - turbo type-check 4/4 + eslint 전부 성공, open issue 0, 신규 incident 0. 코드 변경 0.
