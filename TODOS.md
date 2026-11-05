@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0, prod 402 지속, drift 0건 (cycle 3981, 2026-11-05)
+
+- runtime-error-alert failure = prod 402 파생, lotto picks 11-07 / results 10-31 최신. 코드 변경 0.
+- ship-0: dry-spell marker 22.8h(<24h) → SUPPRESS, 사용자 N=7 그대로 진행(next_n=6).
+
 ## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0, prod 402 지속, drift 0건 (cycle 3979, 2026-11-05)
 
 - gh run 최근 30건 실패 0, lotto picks 11-07 / results 10-31 최신. 코드 변경 0.
