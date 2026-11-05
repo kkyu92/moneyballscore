@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0, prod 402 지속, drift 0건 (cycle 3979, 2026-11-05)
+
+- gh run 최근 30건 실패 0, lotto picks 11-07 / results 10-31 최신. 코드 변경 0.
+- ship-0: dry-spell marker 22h(<24h) → SUPPRESS, 사용자 N=9 그대로 진행(next_n=8).
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): 신규 n 0(시즌 종료), prod 402 지속, drift 0건 (cycle 3976, 2026-11-05)
 
 - lotto picks 11-07 / results 10-31 최신, CI Failure Dispatch skipped. 코드 변경 0.
