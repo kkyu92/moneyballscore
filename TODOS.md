@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — skill-evolution phase 66 milestone (cycle 4000, 2026-11-05)
+
+- 3951-3999 success 6%(3/49), retro 중복·결손 0, PASS_ship 3162, 신규 룰 없음, 다음 milestone 4050
+- prod 402 지속 (사용자 Vercel 조치 대기)
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 확인 (cycle 3999, 2026-11-05)
 
 - picks 2026-11-07 / results 2026-10-31 최신, count_smoke 유효 7,716,994 (제거 5.26%) 불변, delta 0
