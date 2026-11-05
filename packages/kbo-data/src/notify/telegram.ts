@@ -19,6 +19,15 @@ function getConfig() {
   return { token, chatId };
 }
 
+// parse_mode=HTML: '<' '&' 미이스케이프 시 400, 4096자 초과도 400 — 호출부가 catch 로 삼켜 알림 silent drop.
+const escapeHtml = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// 이스케이프 후 길이로 자르고, 잘린 엔티티('&am') 는 제거
+function escapeAndCap(t: string, max: number) {
+  const escaped = escapeHtml(t);
+  return escaped.length > max ? `${escaped.slice(0, max).replace(/&[a-z]*$/, '')}…` : escaped;
+}
+
 async function sendMessage(text: string, parseMode: 'HTML' | 'MarkdownV2' = 'HTML') {
   const { token, chatId } = getConfig();
   if (!token || !chatId) {
@@ -182,14 +191,9 @@ export async function notifyResults(
  * 에러 알림
  */
 export async function notifyError(context: string, error: string) {
-  // parse_mode=HTML: '<' '&' 미이스케이프 시 400, 4096자 초과도 400 — 호출부가 catch 로 삼켜 알림 silent drop.
-  const escape = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const errorMax = TELEGRAM_MAX_MESSAGE_LENGTH - 1_000;
-  // 이스케이프 후 길이로 자르고, 잘린 엔티티('&am') 는 제거
-  const escaped = escape(error);
-  const errorText = escaped.length > errorMax ? `${escaped.slice(0, errorMax).replace(/&[a-z]*$/, '')}…` : escaped;
+  const errorText = escapeAndCap(error, TELEGRAM_MAX_MESSAGE_LENGTH - 1_000);
   await sendMessage(
-    `<b>🚨 MoneyBall 에러</b>\n\n<b>Context:</b> ${escape(context.slice(0, 200))}\n<b>Error:</b> <code>${errorText}</code>`
+    `<b>🚨 MoneyBall 에러</b>\n\n<b>Context:</b> ${escapeHtml(context.slice(0, 200))}\n<b>Error:</b> <code>${errorText}</code>`
   );
 }
 
@@ -258,6 +262,6 @@ export async function notifyPipelineStatus(
     `날짜: ${result.date}\n` +
     `경기: ${result.gamesFound} | 예측: ${result.predictionsGenerated} | 스킵: ${result.gamesSkipped}\n` +
     `소요: ${(durationMs / 1000).toFixed(1)}초` +
-    (result.errors.length > 0 ? `\n에러: ${result.errors[0]}` : '')
+    (result.errors.length > 0 ? `\n에러: ${escapeAndCap(result.errors[0], 1_000)}` : '')
   );
 }
