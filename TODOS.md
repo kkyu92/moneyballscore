@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — review-code(lite): type-check 4/4 통과, prod 402 지속, drift 0건 (cycle 3987, 2026-11-05)
+
+- turbo type-check 전부 성공, 신규 incident 0. 코드 변경 0.
+- ship-0: dry-spell marker 22h(<24h) → SUPPRESS, 사용자 N=1 마지막 cycle(next_n=0).
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신, count_smoke 유효 7,716,994(제거 5.26%), prod 402 지속, drift 0건 (cycle 3986, 2026-11-05)
 
 - picks 11-07 / results 10-31 최신, 256 rules 불변. 코드 변경 0.
