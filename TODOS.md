@@ -1,3 +1,7 @@
+## ✅ SUCCESS — review-code(heavy): notifyAnnounce HTML 이스케이프 PR #3228 (cycle 3997, 2026-11-05)
+
+- stadium/gameTime/estimatedTime escapeHtml + 테스트 (28/28). 머지 a319829a. CI `check` pending 중 Vercel(402 known) fail-fast 로 머지됨 — 사후 확인 필요.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): harness n=448 불변, prod 402 지속, drift 0건 (cycle 3994, 2026-11-05)
 
 - `op-analysis-ce-cohort.ts` 재실행: 전체 n=448 (CE 401 / 비CE 47) 동일. KBO 시즌 종료 + CE 동결 지속. 코드 변경 0.
