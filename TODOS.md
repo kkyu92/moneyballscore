@@ -21019,3 +21019,8 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - count_smoke 제거 조합 428,066 (5.26%). picks 11-07 존재, results 10-31 최신 — cron 정상, 수동 개입 불필요. prod 402 지속.
 - ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=26 그대로 진행(next_n=25).
+
+## ➖ RETRO-ONLY — fix-incident(lite): CI 정상, prod 402 지속, drift 0건 (cycle 3964, 2026-11-05)
+
+- `gh run list` CI Failure Dispatch 전부 skipped (실제 incident 부재). picks 11-07 / results 10-31 최신. moneyballscore.vercel.app HTTP 402 지속 (사용자 Vercel 결제 조치 대기).
+- ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=24 그대로 진행(next_n=23).
