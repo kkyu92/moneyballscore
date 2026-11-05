@@ -21183,3 +21183,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - parse_mode 사용처 telegram.ts 단독(기감사). 빈 catch 8건(notifyError 호출부 5 + sync-batter-stats 2 + localStorage 1) 전부 의도된 best-effort. 코드 변경 0. prod 402 지속.
 - ship-0: 직전10 success 3건 → 미충족, 사용자 N=27 그대로 진행(next_n=26).
+
+- cycle 4005 — polish-ui(lite) 하드코딩 hex 18건 전부 `var(--color-*, fallback)` 형태, DESIGN.md token 균열 drift 0건. 코드 변경 0. prod 402 지속.
