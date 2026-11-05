@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — fix-incident(lite): indexnow-ping 402 재확인, prod 402 지속, drift 0건 (cycle 3988, 2026-11-05)
+
+- `gh run list` 중 indexnow-ping 신규 실패 1건 발견 → 로그 확인 결과 known prod 402 DEPLOYMENT_DISABLED 의 파생(curl 재확인 동일 응답). 코드 수정 불가(사용자 Vercel 결제 조치 필요), 신규 incident 아님. 코드 변경 0.
+- ship-0: dry-spell marker 23h(<24h) → SUPPRESS, 사용자 N=40 그대로 진행(next_n=39).
+
 ## ➖ RETRO-ONLY — review-code(lite): type-check 4/4 통과, prod 402 지속, drift 0건 (cycle 3987, 2026-11-05)
 
 - turbo type-check 전부 성공, 신규 incident 0. 코드 변경 0.
