@@ -21142,3 +21142,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ✅ SUCCESS — review-code(heavy): notifyError HTML 이스케이프 + 4096자 cap (cycle 3995, 2026-11-05)
 
 - shared `TELEGRAM_MAX_MESSAGE_LENGTH` dead export 추적 → telegram.ts `notifyError` 가 parse_mode=HTML 에 미이스케이프 `<`/`&` + 무제한 길이 → Telegram 400 → 호출부 `catch {}` 가 삼켜 에러 알림 silent drop. 이스케이프 + cap + 테스트 1건. PR #3226 MERGED (93755bf5). Vercel check fail = 402 계정 차단(기존), CI `check` pass.
+
+- cycle 3996 — review-code(heavy) notifyPipelineStatus errors[0] 이스케이프+cap fix PR #3227 MERGED 878657a5
