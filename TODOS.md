@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — polish-ui(lite): 하드코딩 hex drift 0건 (cycle 3941, 2026-11-05)
+
+- 진단: hex 사용처 = ShareButtons 브랜드색(Twitter/Facebook, 의도) + HallOfFame var() 폴백뿐. DESIGN.md 15일 신선, 7일 내 신규 tsx 0. prod 402 지속(사용자 billing 조치 필요). 코드 변경 0.
+- ship-0: dry-spell marker 22h(<24h) → SUPPRESS, 사용자 N=47 그대로 진행(next_n=46).
+- 다음: lotto(11-07 추첨 후 result cron 확인) 또는 402 해소 시 fix-incident.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신, count_smoke 정상 (cycle 3940, 2026-11-05)
 
 - 진단: picks 11-07 / results 10-31 최신, count valid 7,716,994 (제거 5.26%), valid_delta 0, 신규 rule 0. prod 402 지속(사용자 billing 조치 필요). 코드 변경 0.
