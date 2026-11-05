@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신, prod 402 지속, drift 0건 (cycle 3991, 2026-11-05)
+
+- lotto-picks 최신 2026-11-07 / lotto-results 최신 2026-10-31 → cron 정상, 수동 개입 불필요. 코드 변경 0.
+- ship-0: dry-spell marker 23.8h(<24h) → SUPPRESS, 사용자 N=37 그대로 진행(next_n=36).
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): 신규 라우트 0, Breadcrumb 누락 의도적 계열, prod 402 지속, drift 0건 (cycle 3990, 2026-11-05)
 
 - page.tsx 111 / 7일 신규 0. 코드 변경 0.
