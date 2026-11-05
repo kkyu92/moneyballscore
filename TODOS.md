@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(heavy): telegram.ts notify* 5/5 감사 완결 (cycle 3998, 2026-11-05)
+
+notifyPredictions/notifyResults = 팀코드·숫자·date 만 보간 → 이스케이프 불요, drift 0건. 3995~3997 fix 로 HTML 이스케이프 family 종결. prod 402 지속.
+
 ## ✅ SUCCESS — review-code(heavy): notifyAnnounce HTML 이스케이프 PR #3228 (cycle 3997, 2026-11-05)
 
 - stadium/gameTime/estimatedTime escapeHtml + 테스트 (28/28). 머지 a319829a. CI `check` pending 중 Vercel(402 known) fail-fast 로 머지됨 — 사후 확인 필요.
