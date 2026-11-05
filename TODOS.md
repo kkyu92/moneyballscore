@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 지속, 신규 incident 0, drift 0건 (cycle 3955, 2026-11-05)
+
+- deploy-drift-alert failure = prod 402 기인(기지). CI Failure Dispatch 전부 skipped, open issue 0. 코드 변경 0.
+- ship-0: dry-spell marker 22.4h(<24h) → SUPPRESS, 사용자 N=33 그대로 진행(next_n=32).
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md 토큰 균열 0건, prod 402 지속 (cycle 3954, 2026-11-05)
 
 - components hex 10종 전부 DESIGN.md 토큰 포함(mismatch 0), 신규 라우트 7일 0. 코드 변경 0.
