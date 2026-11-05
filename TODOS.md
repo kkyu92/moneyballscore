@@ -1,3 +1,9 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): breadcrumb 목록 불변 drift 0건 (cycle 3939, 2026-11-05)
+
+- 진단: breadcrumb 누락 목록 cycle 3646 과 동일, lotto picks(11-07)/results(10-31) 최신, prod 402 지속(사용자 billing 조치 필요). 코드 변경 0.
+- ship-0: dry-spell marker 22.1h(<24h) → SUPPRESS, 사용자 N=49 그대로 진행.
+- 다음: lotto(11-07 추첨 후 result cron 확인) 또는 402 해소 시 fix-incident.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): alert workflow failure = Vercel 402 파생 재확인 (cycle 3938, 2026-11-05)
 
 - 진단: `moneyballscore.vercel.app` 402 `DEPLOYMENT_DISABLED` 지속. heartbeat-stale/health-alert/runtime-error-alert/deploy-drift-alert 연속 failure 전부 이 건 파생, 신규 incident 0. 사용자 Vercel billing 조치 필요(비용가드 — 자율 결제 금지). 코드 변경 0.
