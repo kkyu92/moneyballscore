@@ -20994,3 +20994,8 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 3952 review-code(lite) test/type-check 4/4 green, prod 402 지속(사용자 Vercel 조치 대기), drift 0건
 
 - cycle 3956 — lotto(lite) cron 정상 (picks 11-07, results 10-31), count 7,716,994, 신규 incident 0, retro-only
+
+## ➖ RETRO-ONLY — review-code(lite): lint green, 코드 변경 0, drift 0건 (cycle 3958, 2026-11-05)
+
+- turbo lint 3/3 green, 최근 2일 apps/packages 변경 0(stale-data md 만). prod 402 지속.
+- ship-0: dry-spell marker <24h → SUPPRESS, 사용자 N=30 그대로 진행(next_n=29).
