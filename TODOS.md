@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN token 균열 0건, prod 402 지속, drift 0건 (cycle 3985, 2026-11-05)
+
+- hex 하드코딩 = ShareButtons 브랜드색 + HallOfFame CSS var fallback 뿐. 코드 변경 0.
+- ship-0: dry-spell marker 22h(<24h) → SUPPRESS, 사용자 N=3 그대로 진행(next_n=2).
+
 ## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0, prod 402 지속, drift 0건 (cycle 3981, 2026-11-05)
 
 - runtime-error-alert failure = prod 402 파생, lotto picks 11-07 / results 10-31 최신. 코드 변경 0.
