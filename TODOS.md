@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): 현 IA 충분, 신규 라우트 7일 0, drift 0건 (cycle 3975, 2026-11-05)
+
+- page.tsx 111 불변, prod 402 지속, CI Failure Dispatch skipped. 코드 변경 0.
+- ship-0: dry-spell marker 22.7h(<24h) → SUPPRESS, 사용자 N=13 그대로 진행(next_n=12).
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): 신규 n 0(시즌 종료), prod 402 지속, drift 0건 (cycle 3969, 2026-11-05)
 
 - lotto picks 11-07 / results 10-31 최신. 코드 변경 0. ship-0: dry-spell marker 22.6h(<24h) → SUPPRESS, 사용자 N=19 그대로 진행(next_n=18).
