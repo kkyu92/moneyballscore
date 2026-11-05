@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): harness n=448 불변, prod 402 지속, drift 0건 (cycle 3994, 2026-11-05)
+
+- `op-analysis-ce-cohort.ts` 재실행: 전체 n=448 (CE 401 / 비CE 47) 동일. KBO 시즌 종료 + CE 동결 지속. 코드 변경 0.
+- ship-0: dry-spell marker 23h <24h → SUPPRESS, 사용자 N=34 그대로 진행(next_n=33).
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token 균열 0, prod 402 지속, drift 0건 (cycle 3993, 2026-11-05)
 
 - 하드코딩 hex grep = 전부 `var(--color-*, fallback)` 형태, 신규 page.tsx(7일) 0. 코드 변경 0.
