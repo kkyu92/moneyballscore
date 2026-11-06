@@ -1,6 +1,9 @@
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 정상 (cycle 4010, 2026-11-06)
 
-- count_smoke: 유효 7,716,994 / 제거 428,066 (5.26## ➖ RETRO-ONLY — review-code(heavy): components/dashboard/ 16개 파일 전수 감사 drift 0건 (cycle 4009, 2026-11-06)
+- count_smoke: 유효 7,716,994 / 제거 428,066 (5.26%), delta 0. picks 11-07 / results 10-31 최신, lotto-pick-update 11-03 success
+- prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략
+
+## ➖ RETRO-ONLY — review-code(heavy): components/dashboard/ 16개 파일 전수 감사 drift 0건 (cycle 4009, 2026-11-06)
 
 - AccuracyChart/Summary/BrierTrendChart/CohortComparisonHeatmap/ConfidenceBucketChart/DailyAccuracyChart/EloTrendChart/FactorErrorTable/ModelTuningInsights/RollingAccuracyChart/ScoringRuleDayHeatmap/TeamPerformanceChart/WeeklyTrendMini/WinnerProbBucketChart/ChartTooltip/chart-format 전수 read
 - 임계값(ACCURACY_GOOD_RATE/STRONG_RATE/BASELINE, CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY) 전부 registry 참조, 하드코딩 0건
