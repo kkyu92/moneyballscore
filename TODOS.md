@@ -21235,3 +21235,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - ship-0: NO_NEW_INFO 포화 + dry-spell marker <24h → SUPPRESS, 사용자 N=36 그대로 진행(next_n=35).
 - cycle 4014: review-code(lite) type-check 4/4 PASS, drift 0건, prod 402 지속
 - cycle 4017: review-code(lite) pnpm test PASS, drift 0건, prod 402 지속 (retro-only)
+- cycle 4018: operational-analysis(lite) CE cohort n=448 (CE401/비CE47) 동일, drift 0건, prod 402 지속 (retro-only)
