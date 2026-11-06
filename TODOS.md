@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md 토큰 grep drift 0건 (cycle 4015, 2026-11-06)
+
+- 하드코딩 hex 전부 var(--color-*) fallback, 최근 3일 src 변경 0. prod 402 지속. dry-spell 24h 내 → hard stop 생략
+
 ## ➖ RETRO-ONLY — info-architecture-review(lite): breadcrumb 누락 drift 0건 (cycle 4013, 2026-11-06)
 
 - 111 page.tsx 중 Breadcrumb 미사용 18개 전부 redirect/debug/root/auth — IA 충분
