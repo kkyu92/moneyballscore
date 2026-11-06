@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 지속 신규 incident 0건 (cycle 4019, 2026-11-06)
+
+- curl 헤더 x-vercel-error: DEPLOYMENT_DISABLED 재확인, CI Failure Dispatch 전부 skipped, picks 11-07 최신
+- prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 drift 0건 (cycle 4016, 2026-11-06)
 
 - picks 2026-11-07.md / results 2026-10-31.md 존재, lotto-pick-update 정상. prod 402 지속.
