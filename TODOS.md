@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): 신규 정보 0 (cycle 4025, 2026-11-06)
+
+- 외부 변화 신호 0 (KBO 시즌 종료 / CREDIT_EXHAUSTED / n=448 불변 전제). prod 402 DEPLOYMENT_DISABLED 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신, 11-01 result run 1회 실패 무영향 (cycle 4021, 2026-11-06)
 
 - picks 11-07 / results 10-31 최신. lotto-result-update 11-01 schedule run failure 1건 (10-31 성공 run 다음날 중복 실행, 산출물 정상 존재). prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략
