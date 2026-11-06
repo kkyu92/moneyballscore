@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 (cycle 4011, 2026-11-06)
+
+- CE 401 / 비CE 47 동일 (KBO 시즌 종료 지속, 신규 verified 0건). harness 재실행만, 코드 변경 없음
+- prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 정상 (cycle 4010, 2026-11-06)
 
 - count_smoke: 유효 7,716,994 / 제거 428,066 (5.26%), delta 0. picks 11-07 / results 10-31 최신, lotto-pick-update 11-03 success
