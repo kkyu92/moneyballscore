@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token 균열 0건 (cycle 4029, 2026-11-06)
+
+- hex 하드코딩 tsx 3파일, inline style 1건은 CSS var+fallback(정상), 7일 내 신규 tsx 0. prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략
+
 ## ➖ RETRO-ONLY — fix-incident(lite): prod 402 지속 신규 incident 0건 (cycle 4028, 2026-11-06)
 
 - /api/version 402 x-vercel-error DEPLOYMENT_DISABLED 재확인, CI Failure Dispatch 전부 skipped, open issue 0. 사용자 Vercel 조치 대기. dry-spell 24h 내 → hard stop 생략
