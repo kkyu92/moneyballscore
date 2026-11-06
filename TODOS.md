@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — fix-incident(lite): prod 402 지속 신규 incident 0건 (cycle 4028, 2026-11-06)
+
+- /api/version 402 x-vercel-error DEPLOYMENT_DISABLED 재확인, CI Failure Dispatch 전부 skipped, open issue 0. 사용자 Vercel 조치 대기. dry-spell 24h 내 → hard stop 생략
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): 신규 정보 0 (cycle 4025, 2026-11-06)
 
 - 외부 변화 신호 0 (KBO 시즌 종료 / CREDIT_EXHAUSTED / n=448 불변 전제). prod 402 DEPLOYMENT_DISABLED 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략
