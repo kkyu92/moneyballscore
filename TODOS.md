@@ -1,3 +1,10 @@
+## ➖ RETRO-ONLY — review-code(heavy): components/dashboard/ 16개 파일 전수 감사 drift 0건 (cycle 4009, 2026-11-06)
+
+- AccuracyChart/Summary/BrierTrendChart/CohortComparisonHeatmap/ConfidenceBucketChart/DailyAccuracyChart/EloTrendChart/FactorErrorTable/ModelTuningInsights/RollingAccuracyChart/ScoringRuleDayHeatmap/TeamPerformanceChart/WeeklyTrendMini/WinnerProbBucketChart/ChartTooltip/chart-format 전수 read
+- 임계값(ACCURACY_GOOD_RATE/STRONG_RATE/BASELINE, CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY) 전부 registry 참조, 하드코딩 0건
+- WeeklyTrendMini 의 WINNER_PROB_CONFIDENT/LEAN 재사용은 커밋 8f90dd14(sweep 50)로 의도된 통합 확인 — drift 아님
+- prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략
+
 ## ➖ RETRO-ONLY — review-code(heavy): app/api/ 잔여 13개 route 전수 감사 drift 0건 (cycle 4008, 2026-11-06)
 
 - health×2/mlb×2/picks×5/pipeline/seo/version/sync-batter-stats(~1253줄) 전수 read, drift 0건
