@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): breadcrumb 누락 drift 0건 (cycle 4013, 2026-11-06)
+
+- 111 page.tsx 중 Breadcrumb 미사용 18개 전부 redirect/debug/root/auth — IA 충분
+- prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 (cycle 4011, 2026-11-06)
 
 - CE 401 / 비CE 47 동일 (KBO 시즌 종료 지속, 신규 verified 0건). harness 재실행만, 코드 변경 없음
