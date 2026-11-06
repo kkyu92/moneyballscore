@@ -1,3 +1,8 @@
+## ➖ RETRO-ONLY — review-code(heavy): app/api/ 잔여 13개 route 전수 감사 drift 0건 (cycle 4008, 2026-11-06)
+
+- health×2/mlb×2/picks×5/pipeline/seo/version/sync-batter-stats(~1253줄) 전수 read, drift 0건
+- app/api/ 디렉토리 18개 route 전체 최소 1회 전수 감사 완료. prod 402 지속. dry-spell 24h 내 → hard stop 생략
+
 ## ➖ RETRO-ONLY — review-code(lite): telegram.ts 잔여 interpolation drift 0건 (cycle 4007, 2026-11-05)
 
 - notifyPredictions/notifyResults 보간값 전부 내부 값(팀코드·날짜·숫자) → HTML escape 누락 0건
