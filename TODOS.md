@@ -21286,3 +21286,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 4036 review-code(heavy): telegram.ts 전수 read, notify* 보간값 이스케이프 sibling drift 0건, prod 402 지속 (retro-only)
 - cycle 4038 — lotto(lite) picks 11-07/results 10-31 최신 cron 정상, drift 0건, prod 402 지속 (retro-only)
 - cycle 4040 — polish-ui(lite) 7일 내 UI 변경 0, 신규 라우트 0, hex 리터럴 4파일 기존 유지, drift 0건, prod 402 지속 (retro-only)
+- cycle 4041 — operational-analysis(lite) ce-cohort harness n=448 (CE 401/비CE 47) 불변, KBO 시즌 종료 지속, prod 402 지속, drift 0건 (retro-only)
