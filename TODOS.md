@@ -21413,3 +21413,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 4064: polish-ui(lite) 신규 UI 0건, drift 0건, prod 402 지속 (retro-only)
 - cycle 4065: operational-analysis(lite) 재측정 n=448 (CE 55.9% / 비CE 63.8%, gap 8.0pp) 불변, prod 402 지속, 코드 변경 없음
 - cycle 4066: review-code(lite) type-check 4/4 green, drift 0건, prod 402 지속 (retro-only)
+
+## ➖ RETRO-ONLY — lotto(lite): cron 정상 drift 0건 (cycle 4080, 2026-11-08)
+
+- count_smoke valid 7,716,994 / 제거 428,066 (5.26%), lotto-pick/result cron success, picks·results 11-07 최신, prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략.
