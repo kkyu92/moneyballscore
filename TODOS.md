@@ -21417,3 +21417,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — lotto(lite): cron 정상 drift 0건 (cycle 4080, 2026-11-08)
 
 - count_smoke valid 7,716,994 / 제거 428,066 (5.26%), lotto-pick/result cron success, picks·results 11-07 최신, prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략.
+
+- cycle 4081 — fix-incident(lite) prod 402 DEPLOYMENT_DISABLED 지속(사용자 Vercel 조치 대기), CI·cron 정상, drift 0건 (retro-only)
