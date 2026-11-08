@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 drift 0건 (cycle 4073, 2026-11-08)
+
+- count_smoke 유효 7,716,994 / 제거 428,066 (5.26%), picks/results 2026-11-07 최신, open issue 0, prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략. 사용자 `/develop-cycle 16` 진행.
+
 ## ➖ RETRO-ONLY — review-code(lite): type-check green drift 0건 (cycle 4072, 2026-11-08)
 
 - type-check 4/4 green, lotto picks/results 2026-11-07 최신, open issue 0, prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략. 사용자 `/develop-cycle 17` 진행.
