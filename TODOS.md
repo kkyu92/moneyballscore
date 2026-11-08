@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — polish-ui(lite): DESIGN.md token grep drift 0건 (cycle 4077, 2026-11-08)
+
+- 하드코딩 색상 2건 모두 CSS var 기반, 7일 내 src 변경 0, open issue 0, prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략. 사용자 `/develop-cycle 12` 진행.
+
 ## ➖ RETRO-ONLY — review-code(lite): type-check green drift 0건 (cycle 4076, 2026-11-08)
 
 - type-check 4/4 pass, open issue 0, gh run failure 0, prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략. 사용자 `/develop-cycle 13` 진행.
