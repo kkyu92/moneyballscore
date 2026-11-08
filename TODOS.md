@@ -21359,3 +21359,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 4063: fix-incident(lite) prod 402 지속, drift 0건 (retro-only)
 
 - cycle 4064: polish-ui(lite) 신규 UI 0건, drift 0건, prod 402 지속 (retro-only)
+- cycle 4065: operational-analysis(lite) 재측정 n=448 (CE 55.9% / 비CE 63.8%, gap 8.0pp) 불변, prod 402 지속, 코드 변경 없음
