@@ -21513,3 +21513,6 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - cycle 4106 lotto(lite): count_smoke valid 7,716,994 (picks 11-07 header 일치), cron 4회 연속 success, 수동 개입 불필요. prod 402 지속.
 - cycle 4107 fix-incident: PR #3231 머지(07e4ca67) — IndexNow key 검증 파일 서빙(middleware). prod 402 지속이라 실배포 반영은 Vercel 조치 후.
+
+## cycle 4109 — review-code(heavy) IndexNow fix twin 감사
+- middleware.ts indexNowKeyResponse + matcher 정상, drift 0건. prod 402 지속.
