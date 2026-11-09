@@ -21516,3 +21516,6 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 ## cycle 4109 — review-code(heavy) IndexNow fix twin 감사
 - middleware.ts indexNowKeyResponse + matcher 정상, drift 0건. prod 402 지속.
+
+## cycle 4110 — operational-analysis(lite) ce-cohort 재측정
+- n=448 (CE 401 / 비CE 47) 불변, KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. prod 402 지속.
