@@ -20,6 +20,6 @@
     "typescript-eslint": "^8.71.1",
     "vitest": "^4.1.11"
   },
-  "packageManager": "pnpm@11.25.0",
+  "packageManager": "pnpm@12.18.0",
   "version": "0.5.62.339"
 }
