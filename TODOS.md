@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — fix-incident(lite): heartbeat-stale = prod 402 증상 재확인 (cycle 4094, 2026-11-09)
+
+- heartbeat-stale 30연속 failure 원인 = 마지막 성공 pipeline_run 2026-10-26 (330h), Vercel 402 로 cron 정지. 최신 prod deploy 14d 전. 코드 수정 불가, 사용자 Vercel 결제/한도 조치 대기. open issue 0. dry-spell 24h 내 → hard stop 생략. 사용자 `/develop-cycle 45` 중 잔여 44.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신 drift 0건 prod 402 지속 (cycle 4093, 2026-11-09)
 
 - picks/results 11-07(1249회) 최신, result-update 11/8 success, pick-update 화요일 주기(11/10 대기), count_smoke 256 rules 정상. open issue 0, prod 402 지속 (사용자 Vercel 조치 대기). dry-spell 24h 내 → hard stop 생략. 사용자 `/develop-cycle 46` 진행.
