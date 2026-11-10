@@ -21558,3 +21558,6 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 ## cycle 4120 — fix-incident(lite) pnpm pin drift
 - 5 cron workflow pnpm 11.25.0 pin vs packageManager 12.18.0 충돌(b6f61cc8 여파) → PR #3232 머지(b4f38a43), op-analysis-weekly 수동 fire pnpm/install/measure PASS. prod 402 지속. SUCCESS
+
+## cycle 4121 — lotto(lite)
+- lotto-pick-update 07:16Z 실패 = pnpm pin (4120 fix). workflow_dispatch 재fire PASS → 2026-11-14 picks PR #3234 머지 (e2afe511). workflow Create PR step cancelled 1회 관찰 (watch 대기 중 취소 추정) — 재발 시 조사.
