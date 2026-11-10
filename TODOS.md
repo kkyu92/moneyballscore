@@ -21555,3 +21555,6 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - mlb-historical-bootstrap.ts Number.isFinite 가드 재확인, 변경 불필요
 - 최근 14일 변경 파일(WeeklyTrendMini/EmptyState/FavoriteTeamFilter/tabpfn-export/middleware/judge-agent/parse-number/team-agent/wayback-team-stats/telegram) 전부 기존 전용 PR로 이미 fix 완료 교차확인
 - drift 0건, 코드 변경 0. prod 402 지속. RETRO-ONLY
+
+## cycle 4120 — fix-incident(lite) pnpm pin drift
+- 5 cron workflow pnpm 11.25.0 pin vs packageManager 12.18.0 충돌(b6f61cc8 여파) → PR #3232 머지(b4f38a43), op-analysis-weekly 수동 fire pnpm/install/measure PASS. prod 402 지속. SUCCESS
