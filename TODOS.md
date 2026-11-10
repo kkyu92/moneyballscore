@@ -21544,3 +21544,10 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - picks/results 2026-11-07 최신, pick(화)/result(토) cron 최근 run 전부 success. 수동 개입 불필요. prod 402 지속.
 
 - cycle 4116 polish-ui(lite): hex 18건 전부 var(--token,fallback), DESIGN.md 대조 drift 0건, prod 402 지속. RETRO-ONLY
+- cycle 4117 operational-analysis(lite): n=448 (CE401/비CE47) 불변, KBO 시즌 종료 지속, drift 0건. RETRO-ONLY
+
+## cycle 4118 — review-code(heavy) 신선 scope 재점검
+- kbo-data scrapers Number/parseInt/parseFloat coerce 전수 grep (kbo-pitcher/naver-record/naver-schedule/umpire/weather/statsapi-mlb/mlb-historical-bootstrap/kbo-scraper-alert/fetch-with-retry/fangraphs) — 이미 수정된 kbo-live/kbo-official/baseball-savant/fangraphs-mlb 4건 제외 나머지 unguarded Number('') 패턴 0건
+- mlb-historical-bootstrap.ts Number.isFinite 가드 재확인, 변경 불필요
+- 최근 14일 변경 파일(WeeklyTrendMini/EmptyState/FavoriteTeamFilter/tabpfn-export/middleware/judge-agent/parse-number/team-agent/wayback-team-stats/telegram) 전부 기존 전용 PR로 이미 fix 완료 교차확인
+- drift 0건, 코드 변경 0. prod 402 지속. RETRO-ONLY
