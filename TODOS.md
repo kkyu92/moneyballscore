@@ -21561,3 +21561,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 ## cycle 4121 — lotto(lite)
 - lotto-pick-update 07:16Z 실패 = pnpm pin (4120 fix). workflow_dispatch 재fire PASS → 2026-11-14 picks PR #3234 머지 (e2afe511). workflow Create PR step cancelled 1회 관찰 (watch 대기 중 취소 추정) — 재발 시 조사.
+
+## ➖ RETRO-ONLY — review-code(lite): tsc clean drift 0건 prod 402 지속 (cycle 4122, 2026-11-10)
+
+- PR-event CI 실패 2건(lotto/pick-11-14, op-analysis-11-10) = 머지 직후 branch 삭제 race 기지 패턴(cycle 3292), dispatch/main push 는 success. 코드 변경 0, open issue 0. 사용자 `/develop-cycle 36` 진행.
