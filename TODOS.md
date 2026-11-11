@@ -21606,3 +21606,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - 직전10 전부 retro-only + 구조적 dry spell 24h 경과 → ship-0 hard stop 발동 (사용자 결정 요청). 블로커: prod 402(Vercel), CREDIT_EXHAUSTED, KBO 시즌 종료.
 
 - cycle 4135 — lotto(lite): cron 산출물 최신, 11-10 pick-update 실패는 #3232 기해소, drift 0건
+
+- cycle 4136 — info-architecture-review(lite): page.tsx 111 신규 7일 0, breadcrumb 미보유 전부 redirect/placeholder/debug, drift 0건
