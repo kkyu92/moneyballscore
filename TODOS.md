@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(heavy): n=448 불변 재측정, CE/비CE 격차 8.0pp·overlap 10.8pp 동일 (cycle 4132, 2026-11-11)
+
+- `op-analysis-ce-cohort.ts` 재실행: 전체 56.7%(254/448), CE 55.9%(224/401, Brier 0.4003), 비CE 63.8%(30/47, Brier 0.2534) — 전부 직전 측정과 완전 동일. KBO 2026시즌 종료 + CREDIT_EXHAUSTED 지속으로 신규 verified pre_game 0건. LLM 부가가치 우세 결론 재확인. 코드 변경 0, open issue 0, prod 402 지속(curl 재확인 `/` `/api/health` 둘 다 402, Vercel CLI 배포 16일 전 Ready 상태 그대로). ship-0 서브체크: PARTIAL_STREAK=10(=10) 재충족, RC_HEAVY_COUNT=0(<8) EXHAUSTIVE_SWEEP 미충족, NO_NEW_INFO_COUNT=9/9(≥8) + dry-spell marker 23.3h 경과(<24h, cycle 4131 설정 그대로) → STRUCTURAL_DRY_SPELL_SUPPRESS=true, hard-stop 생략. 사용자 `/develop-cycle 39` 중 잔여 38.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): CI 5건 재실패(indexnow-ping/health-alert/runtime-error-alert/deploy-drift-alert/heartbeat-stale) 전부 동일 근본원인(prod 402 DEPLOYMENT_DISABLED) 재확인, 신규 incident 0 (cycle 4131, 2026-11-11)
 
 - `gh run view` 로그 직접 확인: status=402, body="Payment required / DEPLOYMENT_DISABLED" — cycle 4114/4126 과 동일 원인, 코드 fix 대상 아님. 코드 변경 0, open issue 0, prod 402 지속 (사용자 Vercel 조치 대기). ship-0 서브체크: PARTIAL_STREAK=10(=10) 재충족, RC_HEAVY_COUNT=0(<8) EXHAUSTIVE_SWEEP 미충족, NO_NEW_INFO_COUNT=10/10(≥8) + dry-spell marker 23.3h 경과(<24h) → STRUCTURAL_DRY_SPELL_SUPPRESS=true, hard-stop 생략. 사용자 `/develop-cycle 40` 중 잔여 39.
