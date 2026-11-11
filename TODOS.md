@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — fix-incident(lite): CI 5건 재실패(indexnow-ping/health-alert/runtime-error-alert/deploy-drift-alert/heartbeat-stale) 전부 동일 근본원인(prod 402 DEPLOYMENT_DISABLED) 재확인, 신규 incident 0 (cycle 4131, 2026-11-11)
+
+- `gh run view` 로그 직접 확인: status=402, body="Payment required / DEPLOYMENT_DISABLED" — cycle 4114/4126 과 동일 원인, 코드 fix 대상 아님. 코드 변경 0, open issue 0, prod 402 지속 (사용자 Vercel 조치 대기). ship-0 서브체크: PARTIAL_STREAK=10(=10) 재충족, RC_HEAVY_COUNT=0(<8) EXHAUSTIVE_SWEEP 미충족, NO_NEW_INFO_COUNT=10/10(≥8) + dry-spell marker 23.3h 경과(<24h) → STRUCTURAL_DRY_SPELL_SUPPRESS=true, hard-stop 생략. 사용자 `/develop-cycle 40` 중 잔여 39.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 picks 11/14·results 11/7 최신 drift 0건 prod 402 지속 (cycle 4128, 2026-11-10)
 
 ## ➖ RETRO-ONLY — info-architecture-review(lite): page.tsx 111 신규 0 drift 0건 prod 402 지속 (cycle 4127, 2026-11-10)
