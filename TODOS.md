@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): 실패 workflow 3종 전부 prod 402 기인 drift 0건 (cycle 4178, 2026-11-15)
+
+- 코드 변경 0, open issue 0. indexnow-ping/runtime-error-alert/heartbeat-stale 전부 prod URL 의존 → 402 파생. lotto-pick cron 다음 fire 화 11-17. ship-0 서브체크: PARTIAL_STREAK=10/10, dry-spell marker <24h → SUPPRESS, 사용자 N 진행. next_n=38.
+
 ## ➖ RETRO-ONLY — polish-ui(lite): DESIGN token grep drift 0건 (156건 전부 정당 — 토큰정의/var fallback/OG inline/외부브랜드색) prod 402 지속 (cycle 4177, 2026-11-15)
 
 - 코드 변경 0, open issue 0. vercel inspect 로 402 재확인 — deployment status Ready(build 정상), 그러나 account-level billing 차단(custom alias + direct URL 둘 다 402). 신규 라우트 0(7일), UI 커밋 0(7일). ship-0 서브체크: PARTIAL_STREAK=10/10(4168-4177), EXHAUSTIVE_SWEEP 미충족(RC_HEAVY_COUNT=0<8). STRUCTURAL_DRY_SPELL: NO_NEW_INFO_COUNT=10/10, dry-spell marker 23.95h(<24h) → SUPPRESS 적용(재알림 생략), 사용자 N 그대로 진행. next_n=39.
