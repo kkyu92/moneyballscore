@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — fix-incident(lite): heartbeat-stale(498.5h)/indexnow-ping 전부 prod 402 기인 신규 incident 0 (cycle 4182, 2026-11-16)
+
+- 코드 변경 0, open issue 0. curl prod=402. STRUCTURAL_DRY_SPELL_NEW(marker 24.02h≥24h) → hard stop, 사용자 Vercel 결제 조치 필요. next_n=0.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron picks/results 11-14 정상, 다음 picks 화 11-17 예정, count 7,716,994 drift 0건 prod 402 지속 (cycle 4181, 2026-11-16)
 ## ➖ RETRO-ONLY — info-architecture-review(lite): page.tsx 111 신규 0, breadcrumb 미포함 18 기지 패턴 불변 prod 402 지속 (cycle 4180, 2026-11-16)
 
