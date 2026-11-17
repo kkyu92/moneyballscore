@@ -21754,3 +21754,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — review-code(lite): pnpm test green drift 0건 (cycle 4184, 2026-11-17)
 
 - 코드 변경 0, open issue 0, prod 402 지속. 사용자 Vercel 결제/한도 조치 대기.
+
+## ➖ RETRO-ONLY — fix-incident(lite): lotto PR CI failure 기지 race 확인 (cycle 4185, 2026-11-17)
+
+- 코드 변경 0, open issue 0, prod 지속 미복구. lotto picks/results 최신. 사용자 Vercel 조치 대기.
