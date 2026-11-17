@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 정상(picks 11-21, results 11-14), 코드 변경 0 prod 402 지속 (cycle 4187, 2026-11-17)
+
+- open issue 0. ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족, NO_NEW_INFO≥8, dry-spell marker 24.005h 경과 → STRUCTURAL_DRY_SPELL_NEW → **hard stop next_n=0**. 사용자 재개 승인 대기 (블로커: KBO 시즌 종료, CREDIT_EXHAUSTED, Vercel prod 402 결제).
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): weekly cohort split 11-17 cron 정상(n=601, 55.2%), drift 0건 prod 402 지속 (cycle 4186, 2026-11-17)
 
 - 코드 변경 0, open issue 0. vercel inspect: deployment Ready, account billing 402. ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족, dry-spell marker 23.998h(<24h) → SUPPRESS, 사용자 N 진행. 다음 cycle marker 24h 경과 예상 → NEW hard stop. next_n=36.
