@@ -21779,3 +21779,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - 코드 변경 0, open issue 0, prod 지속 미복구. lotto picks/results 최신. 사용자 Vercel 조치 대기.
 - cycle 4191: lotto(lite) picks 11-21 존재 results 11-14 최신 cron 정상 prod 402 지속 신규 incident 0건 drift 0건 dry-spell SUPPRESS
+
+- cycle 4192 — op-analysis(lite) 재측정 n=448 (CE 401 / 비CE 47) 불변, drift 0건, prod 402 지속
