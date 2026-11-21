@@ -21815,3 +21815,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 
 - cycle 4202: fix-incident(lite) indexnow-ping 6일 연속 fail = HTTP 402 DEPLOYMENT_DISABLED (known prod 402), 코드 변경 0 retro-only. dry-spell 23.9h SUPPRESS.
 - cycle 4203: review-code(lite) prod 402 지속 drift 0건 retro-only. ship-0 10/10 + dry-spell marker 24h 경과 → STRUCTURAL_DRY_SPELL_NEW hard stop next_n=0, 사용자 결정 대기 (Vercel 결제 조치).
+- cycle 4204: polish-ui(lite) — DESIGN.md mtime 750.8h(31.3일, 4주 임박), 신규 route 7일 0건, hex color grep drift 0건(미문서 색상 0건, 8개 파일 소셜브랜드색상 전부 DESIGN.md 기 등재), pnpm test 4848/4848 green. prod 402 지속. 사용자 명시적 `/develop-cycle 40` 재호출(cycle 4203 hard-stop 이후) — zero-touch 재개. ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족(RC_HEAVY=0), dry-spell marker age 23.92h(<24h) → SUPPRESS, 사용자 N=40 그대로 진행. next_n=39.
