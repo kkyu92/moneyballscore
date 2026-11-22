@@ -21846,3 +21846,4 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - 코드 변경 0, open issue 0. prod 402 지속(시각 검증 불가). PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족, dry-spell SUPPRESS. next_n=37.
 
 - cycle 4211 — lotto(lite) retro-only: cron 산출물(picks/results 2026-11-21) 정상, drift 0건, prod 402 지속.
+- cycle 4213 review-code(lite) retro-only — drift 0, prod 402 지속, 24h dry-spell 재알림 hard stop
