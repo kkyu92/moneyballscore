@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — info-architecture-review(lite): IA drift 0건 (cycle 4210, 2026-11-22)
+
+page.tsx 111개, 7일 신규 0. Breadcrumb 미포함 = redirect/debug/login/settings/홈/community 뿐 (정상). prod 402 지속, heartbeat-stale·indexnow-ping 실패는 402 파생.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변 재확인 (cycle 4209, 2026-11-22)
 
 - 코드 변경 0, open issue 0. op-analysis-ce-cohort harness: 전체 n=448 (CE 401 / 비CE 47) 동일, KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. prod curl=402 지속(사용자 Vercel 결제 조치 필요). lotto cron 정상(picks/results 11-21 존재). ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족, dry-spell 23.97h(<24h) → SUPPRESS, next_n=38.
