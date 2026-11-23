@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0건, drift 0건 (cycle 4217, 2026-11-23)
+
+- gh run 실패 = deploy-drift/runtime-error/heartbeat/health alert 전부 prod 402 파생 + cron PR CI failure 2건(브랜치 삭제 후 jobs=[], 기지 패턴·main push CI 정상). open issue 0. prod curl=402 지속(사용자 Vercel 결제 조치 필요). ship-0: PARTIAL_STREAK=10/10, dry-spell marker 23.98h(<24h) → SUPPRESS, 사용자 N=37 그대로 진행. next_n=36.
+
 ## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신성 확인, 정상 (cycle 4216, 2026-11-23)
 
 - lotto-pick-update 11-17 success(picks 11-21 박제), lotto-result-update 11-22 success(results 11-21). 수동 개입 불필요, 다음 picks cron 화 11-24. prod curl=402 지속(사용자 Vercel 결제 조치 필요). ship-0: PARTIAL_STREAK=10/10, dry-spell marker <24h → SUPPRESS, 사용자 N=38 그대로 진행. next_n=37.
