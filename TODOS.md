@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — lotto(lite): cron 산출물 최신성 확인, 정상 (cycle 4216, 2026-11-23)
+
+- lotto-pick-update 11-17 success(picks 11-21 박제), lotto-result-update 11-22 success(results 11-21). 수동 개입 불필요, 다음 picks cron 화 11-24. prod curl=402 지속(사용자 Vercel 결제 조치 필요). ship-0: PARTIAL_STREAK=10/10, dry-spell marker <24h → SUPPRESS, 사용자 N=38 그대로 진행. next_n=37.
+
 ## ➖ RETRO-ONLY — design-system(lite): DESIGN.md 33일 경과 토큰 drift 점검, drift 0건 (cycle 4215, 2026-11-23)
 
 - DESIGN.md mtime 33일(>=4주 trigger) + 최근15 chain 분포 상 design-system 1회뿐 → 토큰 점검. components 내 hex 22건 전수 확인 — 전부 브랜드 램프 var() fallback(c5a23e/e2c96b/0a1f12/8dcea0/5aad70/2d6b3f/245232) 또는 소셜 브랜드 컬러(Twitter #1DA1F2/Facebook #1877F2) 의도적 사용. drift 0건. prod curl=402 지속(사용자 Vercel 결제 조치 필요). ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족(RC_HEAVY=1/10), dry-spell marker 23h(<24h) → SUPPRESS, 사용자 N=39 그대로 진행. next_n=38.
