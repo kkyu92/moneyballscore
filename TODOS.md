@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — design-system(lite): DESIGN.md 33일 경과 토큰 drift 점검, drift 0건 (cycle 4215, 2026-11-23)
+
+- DESIGN.md mtime 33일(>=4주 trigger) + 최근15 chain 분포 상 design-system 1회뿐 → 토큰 점검. components 내 hex 22건 전수 확인 — 전부 브랜드 램프 var() fallback(c5a23e/e2c96b/0a1f12/8dcea0/5aad70/2d6b3f/245232) 또는 소셜 브랜드 컬러(Twitter #1DA1F2/Facebook #1877F2) 의도적 사용. drift 0건. prod curl=402 지속(사용자 Vercel 결제 조치 필요). ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족(RC_HEAVY=1/10), dry-spell marker 23h(<24h) → SUPPRESS, 사용자 N=39 그대로 진행. next_n=38.
+
 ## ➖ RETRO-ONLY — review-code(heavy): lib/{calendar,stats,changelog,hub-dispatch} 신규 영역 전수감사, drift 0건 (cycle 4214, 2026-11-23)
 
 - app/api 13 route 전수감사(cycle 4208) 후속 — 과거 review-code 이력 0건인 소규모 lib 디렉토리 4개(calendar/monthGrid, stats/pearson, changelog/parse+render, hub-dispatch.ts) 전수 read. KST 월그리드 UTC 순수연산, 피어슨 가드, CHANGELOG 파서 fallback, Sentry→허브 PII 2중 스크럽(uuid→hex 순서 정합) 전부 정상. drift 0건. prod curl=402 지속(사용자 Vercel 결제 조치 필요). ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족(RC_HEAVY=1/10), dry-spell 23h(<24h) → SUPPRESS, 사용자 N=40 그대로 진행. next_n=39.
