@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(heavy): lib/{calendar,stats,changelog,hub-dispatch} 신규 영역 전수감사, drift 0건 (cycle 4214, 2026-11-23)
+
+- app/api 13 route 전수감사(cycle 4208) 후속 — 과거 review-code 이력 0건인 소규모 lib 디렉토리 4개(calendar/monthGrid, stats/pearson, changelog/parse+render, hub-dispatch.ts) 전수 read. KST 월그리드 UTC 순수연산, 피어슨 가드, CHANGELOG 파서 fallback, Sentry→허브 PII 2중 스크럽(uuid→hex 순서 정합) 전부 정상. drift 0건. prod curl=402 지속(사용자 Vercel 결제 조치 필요). ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족(RC_HEAVY=1/10), dry-spell 23h(<24h) → SUPPRESS, 사용자 N=40 그대로 진행. next_n=39.
+
 ## ➖ RETRO-ONLY — polish-ui(lite): UI 7일 변경 0, drift 0건 (cycle 4212, 2026-11-22)
 
 - 코드 변경 0, open issue 0. DESIGN.md 32일 경과(design-system trigger 충족이나 4206 직전 retro-only, UI 변경 0이라 보류). prod 402 지속(사용자 Vercel 결제 조치 필요). ship-0: PARTIAL_STREAK=10/10, dry-spell 23.99h(<24h) → SUPPRESS, next_n=35.
