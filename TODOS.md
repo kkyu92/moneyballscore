@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변, drift 0건 (cycle 4218, 2026-11-23)
+
+CE harness(`op-analysis-ce-cohort.ts`, .env.local 필요) 재실행: 전체 n=448 (CE 401 / 비CE 47), cycle 3294 이후 완전 동일. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속, prod 402 지속(사용자 Vercel 조치 필요). 코드 변경 없음.
+
 ## ➖ RETRO-ONLY — fix-incident(lite): 신규 incident 0건, drift 0건 (cycle 4217, 2026-11-23)
 
 - gh run 실패 = deploy-drift/runtime-error/heartbeat/health alert 전부 prod 402 파생 + cron PR CI failure 2건(브랜치 삭제 후 jobs=[], 기지 패턴·main push CI 정상). open issue 0. prod curl=402 지속(사용자 Vercel 결제 조치 필요). ship-0: PARTIAL_STREAK=10/10, dry-spell marker 23.98h(<24h) → SUPPRESS, 사용자 N=37 그대로 진행. next_n=36.
