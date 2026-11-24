@@ -21889,3 +21889,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## RETRO-ONLY — review-code(lite): health baseline clean (cycle 4225, 2026-11-24)
 
 - type-check/lint 7/7 pass, 616 test files / 4848 tests pass. 코드 변경 0. open issue 0. next_n=34.
+
+## RETRO-ONLY — operational-analysis(lite): n=448 불변 (cycle 4227, 2026-11-24)
+
+- `op-analysis-ce-cohort.ts` 재실행: 전체 n=448 / CE 401 / 비CE 47 동일. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. prod 402 지속, open issue 0. 코드 변경 0. next_n=32.
