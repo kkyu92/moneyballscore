@@ -21909,3 +21909,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - [x] cycle 4234 — lotto(lite) cron 정상 count_smoke 7,716,994 RETRO-ONLY
 
 - [x] cycle 4235 — review-code(lite) test/type-check green, prod 402 지속 RETRO-ONLY
+
+- [x] cycle 4236 — operational-analysis(lite) ce-cohort n=448 불변(CE 401/비CE 47), 시즌 종료·CE 지속 RETRO-ONLY
