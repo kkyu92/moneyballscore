@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(heavy): packages/shared 소형 8파일+weights 전수감사, drift 0건 (cycle 4223, 2026-11-24)
+
+- db-error/feature-flags/model-version-labels/review-badge-labels/rivalries/site/korean/mlb-teams 전수 read + DEFAULT_WEIGHTS·V2_1_B 합계 0.85 산술 검증, shared test 218 pass. drift 0건. index.ts(3475줄) 미감사 잔여. prod 402 지속(사용자 Vercel 조치 필요). ship-0: 직전10 success 2건(4221/4222) → 미충족. next_n=36.
+
 ## ✅ SUCCESS — lotto(lite): cron 미발화 → workflow_dispatch fallback (cycle 4221, 2026-11-24)
 
 - 화 cron(`19 0,3,6 * * 2`) 08:05Z 까지 미발화, 11-28 picks 부재 → `gh workflow run lotto-pick-update.yml` → PR #3248 MERGED(08:15Z), `2026-11-28.md` 박제 확인. count_smoke valid 7,716,994 / removed 428,066 (5.26%), delta 0. prod 402 지속(사용자 Vercel 조치 필요). next_n=38.
