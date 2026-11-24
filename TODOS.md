@@ -21877,3 +21877,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## ➖ RETRO-ONLY — review-code(heavy): lib/standings + lib/v2-shadow-monitor 전수감사, drift 0건 (cycle 4220, 2026-11-24)
 
 - 최저 CHANGELOG grep-count 디렉토리 2개(standings=2, v2-shadow-monitor=4) 선정 전수 read. cohort 분리(v1.8 vs PRODUCTION_COHORT_RULES) 정합 확인, #1338 family 재발 없음. v2-shadow-monitor cron 산출물 경로/archive 설명 정확. drift 0건. prod 402 지속(사용자 Vercel 조치 대기). ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족(RC_HEAVY=1/10), dry-spell marker 23.87h(<24h) → SUPPRESS, 사용자 N=40 그대로 진행. next_n=39.
+
+## ✅ SUCCESS — design-system(lite): DESIGN.md Away Light #e2a55c 문서화 (cycle 4222, 2026-11-24)
+
+- DESIGN.md 34d, 코드 hex 25종 중 미기재 1건 → docs 1줄 보강 push. prod 402 지속, open issue 0. next_n=37.
