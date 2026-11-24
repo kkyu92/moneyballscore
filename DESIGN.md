@@ -49,6 +49,7 @@
 - **Accent:** #c5a23e (골드) — 빅매치 뱃지, 승률 하이라이트, 프리미엄 강조
 - **Accent Light:** #e2c96b
 - **Away:** #c5872a (오렌지) — 원정팀 색상, 다크 그린과 대비
+- **Away Light:** #e2a55c — 원정팀 밝은 tier (CSS 토큰 `--color-away-light`, globals.css v4-4 토큰, cycle 4222 문서화)
 - **Factor Neutral:** #9ca3af (light, Tailwind gray-400) / #4b5563 (dark, gray-600) — factor 편향 없음 (비슷) 표시. CSS 토큰 `--color-factor-neutral`
 - **Muted text 2-tier (gray, cycle 2619 문서화):** 라이트/다크 모드 간 명도를 역전시켜 두 tier의 대비감을 동일하게 유지
   - Tier 1 (primary muted, 라벨/캡션): `text-gray-500 dark:text-gray-400`
