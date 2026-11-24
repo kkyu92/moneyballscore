@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(heavy): shared/index.ts 700-1400 상수·ISR 정합, drift 0건 (cycle 4232, 2026-11-24)
+
+- 임계 상수 대소 순서·ISR 초 파생·app revalidate 리터럴 20+곳 대조, shared test 218 pass. drift 0건. index.ts 1400-3475 잔여. prod 402 지속(사용자 Vercel 조치 필요). next_n=27.
+
 ## ➖ RETRO-ONLY — review-code(heavy): packages/shared 소형 8파일+weights 전수감사, drift 0건 (cycle 4223, 2026-11-24)
 
 - db-error/feature-flags/model-version-labels/review-badge-labels/rivalries/site/korean/mlb-teams 전수 read + DEFAULT_WEIGHTS·V2_1_B 합계 0.85 산술 검증, shared test 218 pass. drift 0건. index.ts(3475줄) 미감사 잔여. prod 402 지속(사용자 Vercel 조치 필요). ship-0: 직전10 success 2건(4221/4222) → 미충족. next_n=36.
