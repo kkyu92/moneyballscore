@@ -21869,3 +21869,7 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 - cycle 4213 review-code(lite) retro-only — drift 0, prod 402 지속, 24h dry-spell 재알림 hard stop
 
 - cycle 4219 — info-architecture-review(lite) retro-only: breadcrumb 누락 18개 전부 redirect-only/debug/루트 의도, IA 충분, drift 0건, prod 402 지속. 구조적 dry-spell 24h 경과 → hard stop(next_n=0), 사용자 결정 대기.
+
+## ➖ RETRO-ONLY — review-code(heavy): lib/standings + lib/v2-shadow-monitor 전수감사, drift 0건 (cycle 4220, 2026-11-24)
+
+- 최저 CHANGELOG grep-count 디렉토리 2개(standings=2, v2-shadow-monitor=4) 선정 전수 read. cohort 분리(v1.8 vs PRODUCTION_COHORT_RULES) 정합 확인, #1338 family 재발 없음. v2-shadow-monitor cron 산출물 경로/archive 설명 정확. drift 0건. prod 402 지속(사용자 Vercel 조치 대기). ship-0: PARTIAL_STREAK=10/10, EXHAUSTIVE_SWEEP 미충족(RC_HEAVY=1/10), dry-spell marker 23.87h(<24h) → SUPPRESS, 사용자 N=40 그대로 진행. next_n=39.
