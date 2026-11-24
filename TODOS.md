@@ -21893,3 +21893,5 @@ ce-cohort harness 재실행: n=448 (CE 401 / 비CE 47) 불변. KBO 시즌 종료
 ## RETRO-ONLY — operational-analysis(lite): n=448 불변 (cycle 4227, 2026-11-24)
 
 - `op-analysis-ce-cohort.ts` 재실행: 전체 n=448 / CE 401 / 비CE 47 동일. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속. prod 402 지속, open issue 0. 코드 변경 0. next_n=32.
+
+- cycle 4229 info-arch(lite): 111 routes, 신규 0, breadcrumb 누락 기지 목록 동일 — 현 IA 충분 retro-only
