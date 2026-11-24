@@ -1,3 +1,7 @@
+## ➖ RETRO-ONLY — review-code(heavy): shared/index.ts 1400-1850 상수·사용처 정합, drift 0건 (cycle 4241, 2026-11-24)
+
+- LLM_RETRY_BACKOFF_MS(.length+1)·LOTTO_FETCH_TIMEOUT_*·COPY_FEEDBACK_RESET_MS·LOTTO_RULE_COUNT(=rules_total 256)·ISR 리터럴 대조, drift 0건. index.ts 1850-3475 잔여. prod 402 지속(사용자 Vercel 조치 필요). **ship-0 PARTIAL_STREAK=10 + dry-spell 24h 경과(STRUCTURAL_DRY_SPELL_NEW) → hard stop, next_n=0. 사용자 재개 결정 대기.**
+
 ## ➖ RETRO-ONLY — review-code(heavy): shared/index.ts 700-1400 상수·ISR 정합, drift 0건 (cycle 4232, 2026-11-24)
 
 - 임계 상수 대소 순서·ISR 초 파생·app revalidate 리터럴 20+곳 대조, shared test 218 pass. drift 0건. index.ts 1400-3475 잔여. prod 402 지속(사용자 Vercel 조치 필요). next_n=27.
