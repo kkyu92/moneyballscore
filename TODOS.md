@@ -1,3 +1,7 @@
+## ✅ SUCCESS — lotto(lite): cron 미발화 → workflow_dispatch fallback (cycle 4221, 2026-11-24)
+
+- 화 cron(`19 0,3,6 * * 2`) 08:05Z 까지 미발화, 11-28 picks 부재 → `gh workflow run lotto-pick-update.yml` → PR #3248 MERGED(08:15Z), `2026-11-28.md` 박제 확인. count_smoke valid 7,716,994 / removed 428,066 (5.26%), delta 0. prod 402 지속(사용자 Vercel 조치 필요). next_n=38.
+
 ## ➖ RETRO-ONLY — operational-analysis(lite): n=448 불변, drift 0건 (cycle 4218, 2026-11-23)
 
 CE harness(`op-analysis-ce-cohort.ts`, .env.local 필요) 재실행: 전체 n=448 (CE 401 / 비CE 47), cycle 3294 이후 완전 동일. KBO 시즌 종료 + CREDIT_EXHAUSTED 지속, prod 402 지속(사용자 Vercel 조치 필요). 코드 변경 없음.
